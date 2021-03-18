@@ -1,0 +1,10 @@
+click
+click_help_colors
+click_params
+click_spinner
+nox
+pytest
+pytest-cov
+pytest-mock
+requests
+virtualenv

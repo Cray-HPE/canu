@@ -1,0 +1,43 @@
+# Build artifacts
+*.py[cod]
+*.egg
+*.egg-info
+*.rpm
+.bash*
+.config
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+__pycache__
+cray.spec
+build_version
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.nox
+.tox
+.cache
+.pytest_cache
+htmlcov
+
+# IDEs
+*.sublime-workspace
+.vscode
+
+# Mac
+.DS_Store
+
+# Built documentation
+docs/build
+
+# Make sure a generated file isn't accidentally committed.
+pylintrc
+pylintrc.test
