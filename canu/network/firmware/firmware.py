@@ -45,7 +45,8 @@ def firmware(ctx, ips, username, password):
     Pass in a file of IP addresses with one address per line
     There are three different statuses found in the report.\n
     🛶 Pass: Indicates that the switch passed the firmware verification.\n
-    ❌ Fail: Indicates that the switch failed the firmware verification, in the generated table, a list of expected firmware versions for that switch is displayed.\n
+    ❌ Fail: Indicates that the switch failed the firmware verification, in the generated table, a
+    list of expected firmware versions for that switch is displayed.\n
     🔺 Error: Indicates that there was an error connecting to the switch, check the Errors table for the specific error.
     """
     if ctx.obj["shasta"]:
