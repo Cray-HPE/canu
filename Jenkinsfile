@@ -47,9 +47,9 @@ pipeline {
                     env.VERSION = sh(returnStdout: true, script: "cat .version").trim()
                     if (env.GIT_BRANCH != "master") {
                         env.VERSION = "${env.VERSION}-${env.GIT_COMMIT[0..6]}"
-                        env.ARTIFACTORY_REPO = "http://car.dev.cray.com/artifactory/csm/MTL/sle15_sp2_ncn/x86_64/${env.GIT_BRANCH}/metal-team/"
+                        env.ARTIFACTORY_REPO = "csm/MTL/sle15_sp2_ncn/x86_64/${env.GIT_BRANCH}/metal-team/"
                     } else {
-                        env.ARTIFACTORY_REPO = "http://car.dev.cray.com/artifactory/csm/MTL/sle15_sp2_ncn/x86_64/dev/master/metal-team/"
+                        env.ARTIFACTORY_REPO = "csm/MTL/sle15_sp2_ncn/x86_64/dev/master/metal-team/"
                     }
                 }
             }
@@ -89,15 +89,8 @@ pipeline {
                       ls -lh dist/*
                     """
 
-                    rtServer (
-                        id: 'ARTI_DOCKER_REGISTRY',
-                        url: "https://${ARTI_DOCKER_REGISTRY}/artifactory",
-                        credentialsId: 'artifact-server',
-                        deploymentThreads: 10
-                    )
-
                     rtUpload (
-                        serverId: 'ARTI_DOCKER_REGISTRY',
+                        serverId: 'ARTIFACTORY_CAR',
                         failNoOp: true,
                         spec: """{
                             "files": [
@@ -114,8 +107,8 @@ pipeline {
     }
     post {
         cleanup {
+            // Own files so jenkins can clean them up later
             sh "sudo chown -R jenkins *"
-            cleanWs()
         }
     }
 }
