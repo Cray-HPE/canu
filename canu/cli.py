@@ -12,7 +12,7 @@ yaml = ruamel.yaml.YAML()
 
 
 # To get the canu.yaml file in the parrent directory
-if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     parent_directory = sys._MEIPASS
 else:
     prog = __file__
@@ -57,5 +57,5 @@ def cli(ctx, shasta):
 cli.add_command(switch.switch)
 cli.add_command(network.network)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()

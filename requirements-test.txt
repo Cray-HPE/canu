@@ -7,4 +7,5 @@ pytest
 pytest-cov
 pytest-mock
 requests
+requests_mock
 virtualenv
