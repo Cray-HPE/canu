@@ -68,16 +68,7 @@ pipeline {
                         "RELEASE_VERSION=${env.RELEASE_VERSION}"
                     ]
                     withEnv(env) {
-                        sh '''
-                            docker run --rm -v $(pwd):/workspace python:3.9-slim bash -c '
-                              cd /workspace
-                              apt update
-                              apt install -y libc-bin binutils
-                              pip install pyinstaller
-
-                              pyinstaller --clean -y canu.spec
-                            '
-                        '''
+                        sh "docker run --rm -v $(pwd):/src cdrx/pyinstaller-linux:python3"
                     }
                 }
             }
@@ -85,9 +76,7 @@ pipeline {
         stage('Publish ') {
             steps {
                 script {
-                    sh """
-                      ls -lh dist/*
-                    """
+                    sh "ls -lhR dist"
 
                     rtUpload (
                         serverId: 'ARTIFACTORY_CAR',
@@ -95,7 +84,7 @@ pipeline {
                         spec: """{
                             "files": [
                                 {
-                                "pattern": "dist/canu",
+                                "pattern": "dist/linux/canu",
                                 "target": "${env.ARTIFACTORY_REPO}/canu-${env.VERSION}"
                                 }
                             ]
