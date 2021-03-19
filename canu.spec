@@ -3,7 +3,7 @@
 block_cipher = None
 
 
-a = Analysis(['/usr/local/bin/canu'],
+a = Analysis(['canu/cli.py'],
              pathex=['canu', '/workspace'],
              binaries=[],
              datas=[('.version', '.'), ('canu.yaml', '.')],
