@@ -36,10 +36,6 @@ pipeline {
         timestamps()
     }
 
-    environment {
-        RELEASE_NAME = 'canu'
-    }
-
     stages {
         stage('Set Version') {
             steps {
@@ -56,20 +52,14 @@ pipeline {
         }
         stage('Record Environment') {
             steps {
-                sh '''
-                   env
-                '''
+                sh "env"
             }
         }
         stage('Build') {
             steps {
                 script {
-                    def env = [
-                        "RELEASE_VERSION=${env.RELEASE_VERSION}"
-                    ]
-                    withEnv(env) {
-                        sh "docker run --rm -v \$(pwd):/src cdrx/pyinstaller-linux:python3"
-                    }
+                    sh "docker run --rm -v \$(pwd):/src cdrx/pyinstaller-linux:python3"
+
                 }
             }
         }
