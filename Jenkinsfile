@@ -68,7 +68,7 @@ pipeline {
                         "RELEASE_VERSION=${env.RELEASE_VERSION}"
                     ]
                     withEnv(env) {
-                        sh "docker run --rm -v $(pwd):/src cdrx/pyinstaller-linux:python3"
+                        sh "docker run --rm -v \$(pwd):/src cdrx/pyinstaller-linux:python3"
                     }
                 }
             }
