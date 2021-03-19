@@ -142,7 +142,7 @@ def firmware(ctx, ips, username, password):
                     errors.append(
                         [str(ip), "RequestException Error. Error connecting to switch."]
                     )
-                except Exception:
+                except Exception:  # pragma: no cover
                     data.append(
                         [
                             error_emoji,

@@ -14,6 +14,12 @@ To install the development build of CANU type:
 python3 setup.py develop --user
 ```
 
+If that doesn't work, try:
+
+```bash
+pip3 install --editable .
+```
+
 ## Usage
 
 To run, just type `canu`, it should run and display help. To see a list of commands and arguments, just append `--help`.
@@ -83,6 +89,14 @@ then run:
 $ nox
 ```
 
-# Versions
+# Changelog
 
-v0.0.1 - This version
+## [0.0.1] - 2021-03-19
+
+### Added
+
+- Initial release!
+- Ability for CANU to get the firmware of a single or multiple Aruba switches
+- Standardized the canu.yaml file to show currently supported switch firmware versions.
+
+[0.0.1]: https://stash.us.cray.com/projects/CSM/repos/canu/
