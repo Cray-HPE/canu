@@ -47,6 +47,9 @@ pipeline {
                     env.VERSION = sh(returnStdout: true, script: "cat .version").trim()
                     if (env.GIT_BRANCH != "master") {
                         env.VERSION = "${env.VERSION}-${env.GIT_COMMIT[0..6]}"
+                        env.ARTIFACTORY_REPO = "http://car.dev.cray.com/artifactory/csm/MTL/sle15_sp2_ncn/x86_64/${env.GIT_BRANCH}/metal-team/"
+                    } else {
+                        env.ARTIFACTORY_REPO = "http://car.dev.cray.com/artifactory/csm/MTL/sle15_sp2_ncn/x86_64/dev/master/metal-team/"
                     }
                 }
             }
@@ -100,7 +103,7 @@ pipeline {
                             "files": [
                                 {
                                 "pattern": "dist/canu",
-                                "target": "csm/CLOUD/sle15_sp2_cn/x86_64/dev/master/cloud-team/canu-${env.VERSION}"
+                                "target": "${env.ARTIFACTORY_REPO}/canu-${env.VERSION}"
                                 }
                             ]
                         }""",
