@@ -9,7 +9,7 @@ setup(
     author_email="brooks.vinyard@broadwing.io",
     description="CSM Automatic Network Utility",
     long_description="CANU will float through a new Shasta network and make setup a breeze.",
-    version="0.0.1",
+    version=open(".version").readline().strip(),
     py_modules=["canu"],
     install_requires=REQUIREMENTS,
     entry_points="""
