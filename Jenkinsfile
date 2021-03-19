@@ -112,4 +112,10 @@ pipeline {
             }
         }
     }
+    post {
+        cleanup {
+            sh "sudo chown -R jenkins *"
+            cleanWs()
+        }
+    }
 }
