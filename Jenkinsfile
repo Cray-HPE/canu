@@ -40,13 +40,15 @@ pipeline {
         stage('Set Version') {
             steps {
                 script {
-                    env.VERSION = sh(returnStdout: true, script: "cat .version").trim()
-                    if (env.GIT_BRANCH != "master") {
-                        env.VERSION = "${env.VERSION}-${env.GIT_COMMIT[0..6]}"
-                        env.ARTIFACTORY_REPO = "csm/MTL/sle15_sp2_ncn/x86_64/${env.GIT_BRANCH}/metal-team/"
+
+                    if (env.TAG_NAME != "") {
+                        env.VERSION = "${env.TAG_NAME}"
                     } else {
-                        env.ARTIFACTORY_REPO = "csm/MTL/sle15_sp2_ncn/x86_64/dev/master/metal-team/"
+                        env.VERSION = "${env.BRANC_NAME}-${env.GIT_COMMIT[0..6]}"
                     }
+
+                    sh "cat '${env.VERSION}' > .version"
+                    echo "Buildling for ${env.VERSION}"
                 }
             }
         }
@@ -64,10 +66,11 @@ pipeline {
             }
         }
         stage('Publish ') {
+            when { tag "*" }
             steps {
                 script {
                     sh "ls -lhR dist"
-
+                    env.ARTIFACTORY_REPO = "csm/MTL/sle15_sp2_ncn/x86_64/dev/master/metal-team/"
                     rtUpload (
                         serverId: 'ARTIFACTORY_CAR',
                         failNoOp: true,
