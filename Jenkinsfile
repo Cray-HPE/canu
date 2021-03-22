@@ -47,7 +47,7 @@ pipeline {
                         env.VERSION = "${env.BRANC_NAME}-${env.GIT_COMMIT[0..6]}"
                     }
 
-                    sh "cat '${env.VERSION}' > .version"
+                    sh "echo '${env.VERSION}' > .version"
                     echo "Buildling for ${env.VERSION}"
                 }
             }
