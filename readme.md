@@ -81,15 +81,19 @@ Future versions will allow CANU to check switch configurations and network wirin
 
 # Testing
 
-To test CANU first export the password for the switch that canu will be tested against with
-`export TEST_SWITCH_PASSWORD='password'`
-then run:
+To test CANU run:
 
 ```bash
 $ nox
 ```
 
 # Changelog
+
+## [Unreleased]
+
+### Added
+
+- Full coverage testing
 
 ## [0.0.1] - 2021-03-19
 
@@ -99,4 +103,4 @@ $ nox
 - Ability for CANU to get the firmware of a single or multiple Aruba switches
 - Standardized the canu.yaml file to show currently supported switch firmware versions.
 
-[0.0.1]: https://stash.us.cray.com/projects/CSM/repos/canu/
+[0.0.1]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.1
