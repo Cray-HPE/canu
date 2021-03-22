@@ -40,11 +40,10 @@ pipeline {
         stage('Set Version') {
             steps {
                 script {
-
                     if (env.TAG_NAME != "") {
                         env.VERSION = "${env.TAG_NAME}"
                     } else {
-                        env.VERSION = "${env.BRANC_NAME}-${env.GIT_COMMIT[0..6]}"
+                        env.VERSION = "${env.BRANCH_NAME}-${env.GIT_COMMIT[0..6]}"
                     }
 
                     sh "echo '${env.VERSION}' > .version"
