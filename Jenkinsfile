@@ -40,7 +40,7 @@ pipeline {
         stage('Set Version') {
             steps {
                 script {
-                    if (env.TAG_NAME != "") {
+                    if (env.TAG_NAME != null) {
                         env.VERSION = "${env.TAG_NAME}"
                     } else {
                         env.VERSION = "${env.BRANCH_NAME}-${env.GIT_COMMIT[0..6]}"
