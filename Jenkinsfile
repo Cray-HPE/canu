@@ -56,11 +56,17 @@ pipeline {
                 sh "env"
             }
         }
+        stage('Test') {
+            steps {
+                script {
+                    sh "docker run --rm -v \$(pwd):/src cdrx/pyinstaller-linux:python3 nox"
+                }
+            }
+        }
         stage('Build') {
             steps {
                 script {
                     sh "docker run --rm -v \$(pwd):/src cdrx/pyinstaller-linux:python3"
-
                 }
             }
         }
