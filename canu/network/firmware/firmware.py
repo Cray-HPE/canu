@@ -30,10 +30,13 @@ from canu.switch.firmware.firmware import get_firmware
     confirmation_prompt=False,
     help="Switch password",
 )
+@click.option(
+    "--out", help="Output results to a file", type=click.File("w"), default="-"
+)
 # @click.option("--json", is_flag=True, help="Output JSON")
 # @click.option("--verbose", "-v", is_flag=True, help="Verbose mode")
 @click.pass_context
-def firmware(ctx, ips, username, password):
+def firmware(ctx, ips, username, password, out):
     """
     The network FIRMWARE command will report the firmware versions of all
     Aruba switches using API v10.04 on the network.
@@ -155,45 +158,44 @@ def firmware(ctx, ips, username, password):
                     )
                     errors.append([str(ip), "Unknown error connecting to switch."])
 
-        firmware_table(data)
+        firmware_table(data, out)
         dash = "-" * 66
         if len(errors) > 0:
-            click.echo("\n")
-            click.secho(
-                "Errors",
-                fg="red",
-            )
-            click.echo(dash)
+            click.echo("\n", file=out)
+            click.secho("Errors", fg="red", file=out)
+            click.echo(dash, file=out)
             for error in errors:
-                click.echo("{:<15s} - {}".format(error[0], error[1]))
-        summary_table(data)
+                click.echo("{:<15s} - {}".format(error[0], error[1]), file=out)
+        summary_table(data, out)
 
 
-def firmware_table(data):
+def firmware_table(data, out="-"):
     dash = "-" * 66
     heading = ["", "STATUS", "IP", "HOSTNAME", "FIRMWARE", ""]
 
-    click.echo(dash)
+    click.echo(dash, file=out)
     click.echo(
         "{:^4s}{:<8s}{:<16s}{:<20s}{:<20s}{}".format(
             heading[0], heading[1], heading[2], heading[3], heading[4], heading[5]
-        )
+        ),
+        file=out,
     )
-    click.echo(dash)
+    click.echo(dash, file=out)
 
     for i in range(len(data)):
         click.echo(
             "{:^3s}{:<8s}{:<16s}{:<20s}{:20s}{}".format(
                 data[i][0], data[i][1], data[i][2], data[i][3], data[i][4], data[i][5]
-            )
+            ),
+            file=out,
         )
 
 
-def summary_table(data):
+def summary_table(data, out="-"):
     dash = "-" * 66
 
-    click.echo("\nSummary")
-    click.echo(dash)
+    click.echo("\nSummary", file=out)
+    click.echo(dash, file=out)
 
     firmware_versions = defaultdict(int)
     network_summary = defaultdict(int)
@@ -211,7 +213,7 @@ def summary_table(data):
         elif status == "Pass":
             status_emoji = emoji.emojize(":canoe:")
 
-        click.echo(f"{status_emoji} {status} - {number} switches")
+        click.echo(f"{status_emoji} {status} - {number} switches", file=out)
 
     for version, number in firmware_versions.items():
-        click.echo(f"{version} - {number} switches")
+        click.echo(f"{version} - {number} switches", file=out)
