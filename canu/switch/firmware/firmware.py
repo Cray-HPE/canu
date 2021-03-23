@@ -25,8 +25,11 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 )
 @click.option("--json", is_flag=True, help="Output JSON")
 @click.option("--verbose", "-v", is_flag=True, help="Verbose mode")
+@click.option(
+    "--out", help="Output results to a file", type=click.File("w"), default="-"
+)
 @click.pass_context
-def firmware(ctx, username, ip, password, json, verbose):
+def firmware(ctx, username, ip, password, json, verbose, out):
     """
     The switch FIRMWARE command will report the firmware of
     an Aruba switch using API v10.04 on the network
@@ -58,40 +61,46 @@ def firmware(ctx, username, ip, password, json, verbose):
     # If the JSON flag is enabled
     if json:
         if verbose:
-            click.echo(switch_firmware)
+            click.echo(switch_firmware, file=out)
             return switch_firmware
         else:
-            click.echo(switch_firmware["current_version"])
+            click.echo(switch_firmware["current_version"], file=out)
             return switch_firmware["current_version"]
 
     if verbose:
         if firmware_match is True:
             click.secho(
                 f"{match_emoji} - Pass - IP: {ip} Hostname:{switch_info['hostname']}",
+                file=out,
             )
         else:
             click.secho(
                 f"{match_emoji} - Fail - IP: {ip} Hostname:{switch_info['hostname']}",
+                file=out,
             )
-            click.secho(f"Firmware should be in: {firmware_range}", fg="red")
+            click.secho(f"Firmware should be in: {firmware_range}", fg="red", file=out)
 
-        click.echo(f"Current Version: {switch_firmware['current_version']}")
-        click.echo(f"Primary Version: {switch_firmware['primary_version']}")
-        click.echo(f"Secondary Version: {switch_firmware['secondary_version']}")
-        click.echo(f"Default Image: {switch_firmware['default_image']}")
-        click.echo(f"Booted Image: {switch_firmware['booted_image']}")
+        click.echo(f"Current Version: {switch_firmware['current_version']}", file=out)
+        click.echo(f"Primary Version: {switch_firmware['primary_version']}", file=out)
+        click.echo(
+            f"Secondary Version: {switch_firmware['secondary_version']}", file=out
+        )
+        click.echo(f"Default Image: {switch_firmware['default_image']}", file=out)
+        click.echo(f"Booted Image: {switch_firmware['booted_image']}", file=out)
     else:
         if firmware_match is True:
             click.echo(
                 f"{match_emoji} - Pass - IP: {ip} Hostname:{switch_info['hostname']}"
                 + f" Firmware: {switch_firmware['current_version']}",
+                file=out,
             )
         if firmware_match is False:
             click.echo(
                 f"{match_emoji} - Fail - IP: {ip} Hostname:{switch_info['hostname']}"
                 + f" Firmware: {switch_firmware['current_version']}",
+                file=out,
             )
-            click.secho(f"Firmware should be in: {firmware_range}", fg="red")
+            click.secho(f"Firmware should be in: {firmware_range}", fg="red", file=out)
 
 
 def get_firmware(ip, credentials, return_error=False):
