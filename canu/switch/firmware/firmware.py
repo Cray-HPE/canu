@@ -1,3 +1,5 @@
+import json
+
 import click
 from click_help_colors import HelpColorsCommand
 import emoji
@@ -23,13 +25,13 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     confirmation_prompt=False,
     help="Switch password",
 )
-@click.option("--json", is_flag=True, help="Output JSON")
+@click.option("--json", "json_", is_flag=True, help="Output JSON")
 @click.option("--verbose", "-v", is_flag=True, help="Verbose mode")
 @click.option(
     "--out", help="Output results to a file", type=click.File("w"), default="-"
 )
 @click.pass_context
-def firmware(ctx, username, ip, password, json, verbose, out):
+def firmware(ctx, username, ip, password, json_, verbose, out):
     """
     The switch FIRMWARE command will report the firmware of
     an Aruba switch using API v10.04 on the network
@@ -53,22 +55,39 @@ def firmware(ctx, username, ip, password, json, verbose, out):
 
     if switch_firmware["current_version"] in firmware_range:
         match_emoji = emoji.emojize(":canoe:")
-        firmware_match = True
+        firmware_match = "Pass"
     else:
         match_emoji = emoji.emojize(":cross_mark:")
-        firmware_match = False
+        firmware_match = "Fail"
 
     # If the JSON flag is enabled
-    if json:
+    if json_:
         if verbose:
-            click.echo(switch_firmware, file=out)
-            return switch_firmware
+
+            json_formatted = json.dumps(
+                {
+                    "status": firmware_match,
+                    "hostname": switch_info["hostname"],
+                    "platform_name": switch_info["platform_name"],
+                    "firmware": switch_firmware,
+                },
+                indent=2,
+            )
+            click.echo(json_formatted, file=out)
+            return json_formatted
         else:
-            click.echo(switch_firmware["current_version"], file=out)
+            json_formatted = json.dumps(
+                {
+                    "status": firmware_match,
+                    "firmware": switch_firmware["current_version"],
+                },
+                indent=2,
+            )
+            click.echo(json_formatted, file=out)
             return switch_firmware["current_version"]
 
     if verbose:
-        if firmware_match is True:
+        if firmware_match == "Pass":
             click.secho(
                 f"{match_emoji} - Pass - IP: {ip} Hostname:{switch_info['hostname']}",
                 file=out,
@@ -88,13 +107,13 @@ def firmware(ctx, username, ip, password, json, verbose, out):
         click.echo(f"Default Image: {switch_firmware['default_image']}", file=out)
         click.echo(f"Booted Image: {switch_firmware['booted_image']}", file=out)
     else:
-        if firmware_match is True:
+        if firmware_match == "Pass":
             click.echo(
                 f"{match_emoji} - Pass - IP: {ip} Hostname:{switch_info['hostname']}"
                 + f" Firmware: {switch_firmware['current_version']}",
                 file=out,
             )
-        if firmware_match is False:
+        if firmware_match == "Fail":
             click.echo(
                 f"{match_emoji} - Fail - IP: {ip} Hostname:{switch_info['hostname']}"
                 + f" Firmware: {switch_firmware['current_version']}",

@@ -46,6 +46,7 @@ CONTEXT_SETTING = dict(
     help="Shasta network version",
     required=True,
 )
+@click.version_option()
 @click.pass_context
 def cli(ctx, shasta):
     """The CSM Automatic Network Utility will float through a new Shasta network and make setup a breeze."""
