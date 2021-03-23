@@ -1,8 +1,11 @@
 from collections import defaultdict
+import ipaddress
+import json
 
 import click
 from click_help_colors import HelpColorsCommand
-from click_params import Ipv4AddressListParamType
+from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
+from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
 import emoji
 import requests
@@ -16,11 +19,19 @@ from canu.switch.firmware.firmware import get_firmware
     help_headers_color="yellow",
     help_options_color="blue",
 )
-@click.option(
+@optgroup.group(
+    "Switch IPv4 input sources",
+    cls=RequiredMutuallyExclusiveOptionGroup,
+)
+@optgroup.option(
     "--ips",
-    required=True,
-    help="Comma separated list of IP addresses of switches",
+    help="Comma separated list of IPv4 addresses of switches",
     type=Ipv4AddressListParamType(),
+)
+@optgroup.option(
+    "--ips-file",
+    help="File with one IPv4 address per line",
+    type=click.File("r"),
 )
 @click.option("--username", default="admin", show_default=True, help="Switch username")
 @click.option(
@@ -33,10 +44,10 @@ from canu.switch.firmware.firmware import get_firmware
 @click.option(
     "--out", help="Output results to a file", type=click.File("w"), default="-"
 )
-# @click.option("--json", is_flag=True, help="Output JSON")
+@click.option("--json", "json_", is_flag=True, help="Output JSON")
 # @click.option("--verbose", "-v", is_flag=True, help="Verbose mode")
 @click.pass_context
-def firmware(ctx, ips, username, password, out):
+def firmware(ctx, ips, ips_file, username, password, out, json_):
     """
     The network FIRMWARE command will report the firmware versions of all
     Aruba switches using API v10.04 on the network.
@@ -56,9 +67,15 @@ def firmware(ctx, ips, username, password, out):
         shasta = ctx.obj["shasta"]
         config = ctx.obj["config"]
 
+    if ips_file:
+        ips = []
+        lines = [line.strip().replace(",", "") for line in ips_file]
+        ips.extend([ipaddress.ip_address(line) for line in lines if IPV4_ADDRESS(line)])
+
     credentials = {"username": username, "password": password}
     data = []
     errors = []
+    switch_json = {}
     ips_length = len(ips)
     if ips:
         with click_spinner.spinner():
@@ -82,7 +99,12 @@ def firmware(ctx, ips, username, password, out):
                         match_emoji = emoji.emojize(":cross_mark:")
                         firmware_match = "Fail"
                         firmware_error = f"Firmware should be in range {firmware_range}"
-
+                    switch_json[str(ip)] = {
+                        "status": firmware_match,
+                        "hostname": switch_info["hostname"],
+                        "platform_name": switch_info["platform_name"],
+                        "firmware": switch_firmware,
+                    }
                     data.append(
                         [
                             match_emoji,
@@ -95,6 +117,9 @@ def firmware(ctx, ips, username, password, out):
                     )
 
                 except requests.exceptions.HTTPError:
+                    switch_json[str(ip)] = {
+                        "status": "Error",
+                    }
                     error_emoji = emoji.emojize(":red_triangle_pointed_up:")
                     data.append(
                         [
@@ -113,6 +138,9 @@ def firmware(ctx, ips, username, password, out):
                         ]
                     )
                 except requests.exceptions.ConnectionError:
+                    switch_json[str(ip)] = {
+                        "status": "Error",
+                    }
                     error_emoji = emoji.emojize(":red_triangle_pointed_up:")
                     data.append(
                         [
@@ -131,6 +159,9 @@ def firmware(ctx, ips, username, password, out):
                         ]
                     )
                 except requests.exceptions.RequestException:  # pragma: no cover
+                    switch_json[str(ip)] = {
+                        "status": "Error",
+                    }
                     error_emoji = emoji.emojize(":red_triangle_pointed_up:")
                     data.append(
                         [
@@ -146,6 +177,9 @@ def firmware(ctx, ips, username, password, out):
                         [str(ip), "RequestException Error. Error connecting to switch."]
                     )
                 except Exception:  # pragma: no cover
+                    switch_json[str(ip)] = {
+                        "status": "Error",
+                    }
                     data.append(
                         [
                             error_emoji,
@@ -158,6 +192,10 @@ def firmware(ctx, ips, username, password, out):
                     )
                     errors.append([str(ip), "Unknown error connecting to switch."])
 
+        if json_:
+            json_formatted = json.dumps(switch_json, indent=2)
+            click.echo(json_formatted, file=out)
+            return json_formatted
         firmware_table(data, out)
         dash = "-" * 66
         if len(errors) > 0:

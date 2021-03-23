@@ -94,6 +94,10 @@ $ nox
 ### Added
 
 - Full coverage testing
+- Added the --out flag to the switch firmware and network firmware commands to output to a file.
+- Added ability for the network firmware command to read IPv4 address from a file using the --ips-file flag
+- Added --version flag
+- Added the --json output to the network firmware command
 
 ## [0.0.1] - 2021-03-19
 

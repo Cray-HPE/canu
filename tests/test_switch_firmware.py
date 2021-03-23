@@ -1,6 +1,8 @@
 """
 Test CANU.
 """
+import json
+
 import click.testing
 import pytest
 import requests
@@ -396,9 +398,10 @@ def test_switch_firmware_json_verbose():
         ],
     )
     assert result.exit_code == 0
-    assert "'current_version': 'Virtual.10.06.0001', 'primary_version': '', " in str(
-        result.output
-    )
+
+    result_json = json.loads(result.output)
+    assert result_json["firmware"]["current_version"] == "Virtual.10.06.0001"
+    assert result_json["status"] == "Pass"
 
 
 @responses.activate
