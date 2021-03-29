@@ -1,3 +1,4 @@
+"""CANU commands that report the firmware of the entire Shasta network."""
 from collections import defaultdict
 import ipaddress
 import json
@@ -48,9 +49,7 @@ from canu.switch.firmware.firmware import get_firmware
 # @click.option("--verbose", "-v", is_flag=True, help="Verbose mode")
 @click.pass_context
 def firmware(ctx, ips, ips_file, username, password, out, json_):
-    """
-    The network FIRMWARE command will report the firmware versions of all
-    Aruba switches using API v10.04 on the network.
+    r"""Report the firmware versions of all Aruba switches (API v10.04) on the network.
 
     Pass in either a comma separated list of IP addresses using the --ips option
     \n
@@ -194,6 +193,7 @@ def firmware(ctx, ips, ips_file, username, password, out, json_):
 
         if json_:
             json_formatted = json.dumps(switch_json, indent=2)
+            click.echo("\n")
             click.echo(json_formatted, file=out)
             return json_formatted
         firmware_table(data, out)
@@ -208,6 +208,13 @@ def firmware(ctx, ips, ips_file, username, password, out, json_):
 
 
 def firmware_table(data, out="-"):
+    """Print a table with switch information.
+
+    :param data: An array of switch information to be printed
+        [Status emoji, Status text, Switch IP, Switch Hostname, Current firmware, Error]
+
+    :param out: Defaults to stdout, but will print to the file name passed in
+    """
     dash = "-" * 66
     heading = ["", "STATUS", "IP", "HOSTNAME", "FIRMWARE", ""]
 
@@ -230,6 +237,13 @@ def firmware_table(data, out="-"):
 
 
 def summary_table(data, out="-"):
+    """Print summary of the switch data.
+
+    :param data: An array of switch information to be printed
+        [Status emoji, Status text, Switch IP, Switch Hostname, Current firmware, Error]
+
+    :param out: Defaults to stdout, but will print to the file name passed in
+    """
     dash = "-" * 66
 
     click.echo("\nSummary", file=out)

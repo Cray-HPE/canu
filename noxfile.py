@@ -1,6 +1,4 @@
-"""
-Nox definitions for tests, docs, and linting
-"""
+"""Nox definitions for tests, docs, and linting."""
 
 import nox
 
@@ -14,6 +12,7 @@ nox.options.sessions = "tests", "lint", "cover"
 @nox.session(python="3")
 def tests(session):
     """Default unit test session.
+
     This is meant to be run against any python version intended to be used.
     """
     # Install all test dependencies, then install this package in-place.
@@ -40,14 +39,13 @@ def tests(session):
 
 @nox.session(python="3")
 def lint(session):
-    """
-    Run flake8 linter and plugins.
-    """
+    """Run flake8 linter and plugins."""
     args = session.posargs or locations
     session.install(
         "flake8",
         "flake8-black",
         "flake8-bugbear",
+        "flake8-docstrings",
         "flake8-import-order",
     )
     session.run("flake8", *args)
@@ -55,9 +53,7 @@ def lint(session):
 
 @nox.session(python="3")
 def black(session):
-    """
-    Run Black, the uncompromising Python code formatter.
-    """
+    """Run Black, the uncompromising Python code formatter."""
     args = session.posargs or locations
     # exclude = "(/bin, /lib)"
     exclude = """
@@ -74,9 +70,7 @@ def black(session):
 
 @nox.session(python="3")
 def cover(session):
-    """
-    Run the final coverage report.
-    """
+    """Run the final coverage report."""
     session.install("coverage", "pytest-cov")
     session.run(
         "coverage", "report", "--show-missing", "--fail-under={}".format(COVERAGE_FAIL)

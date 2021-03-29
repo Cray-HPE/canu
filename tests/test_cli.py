@@ -1,21 +1,26 @@
-"""
-Test CANU cli
-"""
+"""Test CANU cli."""
 
 import click.testing
+import requests
+import responses
 
 from canu.cli import cli
 
 
-def test_cli():
-    shasta = "1.4"
-    runner = click.testing.CliRunner()
+shasta = "1.4"
+fileout = "fileout.txt"
+sls_address = "api-gw-service-nmn.local"
+runner = click.testing.CliRunner()
 
-    # Run canu with no errors
+
+def test_cli():
+    """Run canu with no errors."""
     result = runner.invoke(cli)
     assert result.exit_code == 0
 
-    # Error on Shasta flag required
+
+def test_cli_missing_shasta():
+    """Error on Shasta flag required."""
     result = runner.invoke(
         cli,
         [
@@ -25,13 +30,185 @@ def test_cli():
     assert result.exit_code == 2
     assert "Error: Missing option '--shasta' / '-s'" in str(result.output)
 
-    # Run with no errors
+
+def test_cli_init_missing_out():
+    """Error canu init on no --out flag."""
     result = runner.invoke(
         cli,
         [
             "--shasta",
             shasta,
-            "switch",
+            "init",
+        ],
+    )
+    assert result.exit_code == 2
+    assert "Error: Missing option '--out'." in str(result.output)
+
+
+def test_cli_init_csi_good():
+    """Run canu init CSI with no errors."""
+    with runner.isolated_filesystem():
+        with open("NMN.yaml", "w") as f:
+            f.write("full_name: Node Management Network\n")
+            f.write("subnets:\n")
+            f.write("- full_name: NMN Management Network Infrastructure\n")
+            f.write("  ip_reservations:\n")
+            f.write("  - ip_address: 10.252.0.2\n")
+            f.write("    name: sw-spine-001\n")
+            f.write("  - ip_address: 10.252.0.3\n")
+            f.write("    name: sw-spine-002\n")
+
+        result = runner.invoke(
+            cli,
+            ["--shasta", shasta, "init", "--out", fileout, "--csi-folder", "."],
+        )
+        assert result.exit_code == 0
+        assert "2 IP addresses saved to fileout.txt" in str(result.output)
+
+
+def test_cli_init_csi_file_missing():
+    """Error canu init CSI on NMN file missing."""
+    result = runner.invoke(
+        cli,
+        ["--shasta", shasta, "init", "--out", fileout, "--csi-folder", "."],
+    )
+    assert result.exit_code == 0
+    assert (
+        "The file NMN.yaml was not found, check that this is the correct CSI directory"
+        in str(result.output)
+    )
+
+
+@responses.activate
+def test_cli_init_sls_good():
+    """Run canu init SLS with no errors."""
+    with runner.isolated_filesystem():
+        responses.add(
+            responses.GET,
+            f"https://{sls_address}/apis/sls/v1/networks",
+            json=[
+                {
+                    "Name": "NMN",
+                    "ExtraProperties": {
+                        "Subnets": [
+                            {
+                                "IPReservations": [
+                                    {
+                                        "IPAddress": "192.168.1.2",
+                                        "Name": "sw-spine-001",
+                                    },
+                                    {
+                                        "IPAddress": "192.168.1.3",
+                                        "Name": "sw-spine-002",
+                                    },
+                                ],
+                            }
+                        ],
+                    },
+                }
+            ],
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--shasta",
+                shasta,
+                "init",
+                "--out",
+                fileout,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "2 IP addresses saved to fileout.txt" in str(result.output)
+
+
+def test_cli_init_sls_token_flag_missing():
+    """Error canu init SLS with token flag missing."""
+    result = runner.invoke(
+        cli,
+        [
+            "--shasta",
+            shasta,
+            "init",
+            "--out",
+            fileout,
+            "--auth-token",
+        ],
+    )
+    assert result.exit_code == 2
+    assert "--auth-token option requires an argument" in str(result.output)
+
+
+@responses.activate
+def test_cli_init_sls_token_bad():
+    """Error canu init SLS with bad token."""
+    bad_token = "bad_token.token"
+    with runner.isolated_filesystem():
+        with open(bad_token, "w") as f:
+            f.write('{"access_token": "123"}')
+
+        responses.add(
+            responses.GET,
+            f"https://{sls_address}/apis/sls/v1/networks",
+            body=requests.exceptions.HTTPError(
+                "503 Server Error: Service Unavailable for url"
+            ),
+        )
+
+        result = runner.invoke(
+            cli,
+            ["--shasta", shasta, "init", "--out", fileout, "--auth-token", bad_token],
+        )
+        assert result.exit_code == 0
+        assert (
+            "Error connecting SLS api-gw-service-nmn.local, check that the token is valid, or generate a new one"
+            in str(result.output)
+        )
+
+
+@responses.activate
+def test_cli_init_sls_token_missing():
+    """Error canu init SLS with no token file."""
+    bad_token = "no_token.token"
+
+    result = runner.invoke(
+        cli,
+        ["--shasta", shasta, "init", "--out", fileout, "--auth-token", bad_token],
+    )
+    assert result.exit_code == 0
+    assert "Invalid token file, generate another token or try again." in str(
+        result.output
+    )
+
+
+@responses.activate
+def test_cli_init_sls_address_bad():
+    """Error canu init SLS with bad SLS address."""
+    bad_sls_address = "192.168.254.254"
+
+    responses.add(
+        responses.GET,
+        f"https://{bad_sls_address}/apis/sls/v1/networks",
+        body=requests.exceptions.ConnectionError(
+            "Failed to establish a new connection: [Errno 51] Network is unreachable"
+        ),
+    )
+
+    result = runner.invoke(
+        cli,
+        [
+            "--shasta",
+            shasta,
+            "init",
+            "--out",
+            fileout,
+            "--sls-address",
+            bad_sls_address,
         ],
     )
     assert result.exit_code == 0
+    assert (
+        "Error connecting to SLS 192.168.254.254, check the address or pass in a new address using --sls-address."
+        in str(result.output)
+    )
