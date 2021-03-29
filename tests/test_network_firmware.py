@@ -1,6 +1,4 @@
-"""
-Test CANU.
-"""
+"""Test CANU network firmware commands."""
 import click.testing
 import requests
 import responses
@@ -17,7 +15,7 @@ runner = click.testing.CliRunner()
 
 
 def test_network_cli():
-
+    """Test that the `canu network` command runs."""
     result = runner.invoke(
         cli,
         [
@@ -31,7 +29,7 @@ def test_network_cli():
 
 @responses.activate
 def test_network_firmware():
-
+    """Test that the `canu network firmware` command runs and returns valid firmware."""
     responses.add(
         responses.POST,
         f"https://{ip}/rest/v10.04/login",
@@ -78,6 +76,7 @@ def test_network_firmware():
 
 @responses.activate
 def test_network_firmware_file():
+    """Test that the `canu network firmware` command runs from a file input and returns valid firmware."""
     with runner.isolated_filesystem():
         with open("test.txt", "w") as f:
             f.write("192.168.1.1")
@@ -128,7 +127,7 @@ def test_network_firmware_file():
 
 @responses.activate
 def test_network_firmware_json():
-
+    """Test that the `canu network firmware` command runs and returns JSON."""
     responses.add(
         responses.POST,
         f"https://{ip}/rest/v10.04/login",
@@ -177,7 +176,7 @@ def test_network_firmware_json():
 
 
 def test_network_firmware_missing_ips():
-
+    """Test that the `canu network firmware` command errors on missing IPs."""
     result = runner.invoke(
         cli,
         [
@@ -199,7 +198,7 @@ def test_network_firmware_missing_ips():
 
 
 def test_network_firmware_mutually_exclusive_ips_and_file():
-
+    """Test that the `canu network firmware` command only accepts IPs from command line OR file input, not both."""
     result = runner.invoke(
         cli,
         [
@@ -225,7 +224,7 @@ def test_network_firmware_mutually_exclusive_ips_and_file():
 
 
 def test_network_firmware_invalid_ip():
-
+    """Test that the `canu network firmware` command errors on invalid IPs."""
     invalid_ip = "999.999.999.999"
 
     result = runner.invoke(
@@ -248,7 +247,7 @@ def test_network_firmware_invalid_ip():
 
 
 def test_network_firmware_invalid_ip_file():
-
+    """Test that the `canu network firmware` command errors on invalid IPs from a file."""
     invalid_ip = "999.999.999.999"
 
     with runner.isolated_filesystem():
@@ -276,7 +275,7 @@ def test_network_firmware_invalid_ip_file():
 
 @responses.activate
 def test_network_firmware_bad_ip():
-
+    """Test that the `canu network firmware` command errors on a bad IP."""
     bad_ip = "192.168.1.99"
 
     responses.add(
@@ -308,7 +307,7 @@ def test_network_firmware_bad_ip():
 
 @responses.activate
 def test_network_firmware_bad_ip_file():
-
+    """Test that the `canu network firmware` command errors on a bad IP from a file."""
     bad_ip = "192.168.1.99"
 
     with runner.isolated_filesystem():
@@ -344,7 +343,7 @@ def test_network_firmware_bad_ip_file():
 
 @responses.activate
 def test_network_firmware_bad_password():
-
+    """Test that the `canu network firmware` command errors on bad credentials."""
     responses.add(
         responses.POST,
         f"https://{ip}/rest/v10.04/login",
@@ -373,7 +372,7 @@ def test_network_firmware_bad_password():
 
 @responses.activate
 def test_network_firmware_mismatch():
-
+    """Test that the `canu network firmware` command reports that a switch failed firmware check."""
     responses.add(
         responses.POST,
         f"https://{ip}/rest/v10.04/login",

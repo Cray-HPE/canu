@@ -1,6 +1,4 @@
-"""
-Test CANU.
-"""
+"""Test CANU switch firmware commands."""
 import json
 
 import click.testing
@@ -21,7 +19,7 @@ runner = click.testing.CliRunner()
 
 
 def test_switch_cli():
-
+    """Test that the `canu switch` command runs."""
     result = runner.invoke(
         cli,
         [
@@ -35,7 +33,7 @@ def test_switch_cli():
 
 @responses.activate
 def test_get_firmware_function():
-
+    """Test the `get_firmware` function returns valid switch information."""
     responses.add(
         responses.POST,
         f"https://{ip}/rest/v10.04/login",
@@ -70,6 +68,7 @@ def test_get_firmware_function():
 
 @responses.activate
 def test_get_firmware_function_bad_ip():
+    """Test that the `canu switch firmware` command errors on a bad IP."""
     bad_ip = "192.168.1.99"
 
     responses.add(
@@ -90,6 +89,7 @@ def test_get_firmware_function_bad_ip():
 
 @responses.activate
 def test_get_firmware_function_bad_credentials():
+    """Test that the `canu switch firmware` command errors on bad credentials."""
     responses.add(
         responses.POST,
         f"https://{ip}/rest/v10.04/login",
@@ -107,7 +107,7 @@ def test_get_firmware_function_bad_credentials():
 
 @responses.activate
 def test_switch_firmware():
-
+    """Test that the `canu switch firmware` command runs and returns valid firmware."""
     responses.add(
         responses.POST,
         f"https://{ip}/rest/v10.04/login",
@@ -154,7 +154,7 @@ def test_switch_firmware():
 
 @responses.activate
 def test_switch_firmware_verbose():
-
+    """Test that the `canu switch firmware` command runs and returns valid firmware in verbose mode."""
     responses.add(
         responses.POST,
         f"https://{ip}/rest/v10.04/login",
@@ -202,7 +202,7 @@ def test_switch_firmware_verbose():
 
 
 def test_switch_firmware_missing_ip():
-
+    """Test that the `canu switch firmware` command errors on missing IP address."""
     result = runner.invoke(
         cli,
         [
@@ -221,7 +221,7 @@ def test_switch_firmware_missing_ip():
 
 
 def test_switch_firmware_invalid_ip():
-
+    """Test that the `canu switch firmware` command errors on invalid IP address."""
     invalid_ip = "999.999.999.999"
     result = runner.invoke(
         cli,
@@ -245,6 +245,7 @@ def test_switch_firmware_invalid_ip():
 
 @responses.activate
 def test_switch_firmware_bad_ip():
+    """Test that the `canu switch firmware` command errors on bad IP address."""
     bad_ip = "192.168.1.99"
 
     responses.add(
@@ -277,6 +278,7 @@ def test_switch_firmware_bad_ip():
 
 @responses.activate
 def test_switch_firmware_bad_password():
+    """Test that the `canu switch firmware` command errors on bad credentials."""
     responses.add(
         responses.POST,
         f"https://{ip}/rest/v10.04/login",
@@ -306,7 +308,7 @@ def test_switch_firmware_bad_password():
 
 @responses.activate
 def test_switch_firmware_json():
-
+    """Test that the `canu switch firmware` command runs and returns JSON."""
     responses.add(
         responses.POST,
         f"https://{ip}/rest/v10.04/login",
@@ -354,7 +356,7 @@ def test_switch_firmware_json():
 
 @responses.activate
 def test_switch_firmware_json_verbose():
-
+    """Test that the `canu switch firmware` command runs and returns JSON in verbose mode."""
     responses.add(
         responses.POST,
         f"https://{ip}/rest/v10.04/login",
@@ -406,7 +408,7 @@ def test_switch_firmware_json_verbose():
 
 @responses.activate
 def test_switch_firmware_mismatch():
-
+    """Test that the `canu switch firmware` command reports that a switch failed firmware check."""
     responses.add(
         responses.POST,
         f"https://{ip}/rest/v10.04/login",
@@ -453,7 +455,7 @@ def test_switch_firmware_mismatch():
 
 @responses.activate
 def test_switch_firmware_mismatch_verbose():
-
+    """Test that the `canu switch firmware` command reports that a switch failed firmware check in verbose mode."""
     responses.add(
         responses.POST,
         f"https://{ip}/rest/v10.04/login",

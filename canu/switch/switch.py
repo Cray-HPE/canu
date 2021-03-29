@@ -1,3 +1,4 @@
+"""CANU commands for an individual switch."""
 import click
 from click_help_colors import HelpColorsGroup
 
@@ -11,7 +12,7 @@ from .firmware import firmware
 )
 @click.pass_context
 def switch(ctx):  # pylint: disable=unused-argument
-    """The SWITCH command will help troubleshoot, update, or validate an individual switch"""
+    """Troubleshoot, update, or validate an individual switch."""
     pass
 
 

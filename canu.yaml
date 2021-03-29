@@ -25,13 +25,25 @@ shasta:
         - 3.9.1014
   "1.5":
     aruba: # The switch platform_name will contain a list of acceptable firmware
-      6300:
+      "6300":
+        - FL.10.06.0010
+      "8320":
         - GL.10.06.0010
-      8320:
+      "8325":
         - GL.10.06.0010
-      8325:
-        - GL.10.06.0010
-      8360:
+      "8360":
         - GL.10.06.0010
       X86-64:
         - Virtual.10.06.0001
+    dell: # Not sure how Dell will be formatted yet
+      S3048-ON:
+        - 10.5.1.4
+      S4148F-ON:
+        - 10.5.1.4
+      S4148T-ON:
+        - 10.5.1.4
+    mellanox: # Not sure how Mellanox will be formatted yet
+      MSN2100:
+        - 3.9.1014
+      MSN2700:
+        - 3.9.1014

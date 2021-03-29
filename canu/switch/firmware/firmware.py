@@ -1,3 +1,4 @@
+"""CANU commands that report the firmware of an individual switch."""
 import json
 
 import click
@@ -32,9 +33,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 )
 @click.pass_context
 def firmware(ctx, username, ip, password, json_, verbose, out):
-    """
-    The switch FIRMWARE command will report the firmware of
-    an Aruba switch using API v10.04 on the network
+    r"""Report the firmware of an Aruba switch (API v10.04) on the network.
 
     There are two different statuses that might be indicated.\n
     🛶 - Pass: Indicates that the switch passed the firmware verification.\n
@@ -123,11 +122,13 @@ def firmware(ctx, username, ip, password, json_, verbose, out):
 
 
 def get_firmware(ip, credentials, return_error=False):
-    """
-    Get the firmware of an Aruba switch using v10.04 API
+    """Get the firmware of an Aruba switch using v10.04 API.
+
     :param ip: IPv4 address of the switch
     :param credentials: Dictionary with username and password of the switch
-    :return: Dictionary with a switches firmware
+    :param return_error: If True, raises requests exceptions, if False prints error and returns None
+
+    :return: Dictionary with a switches firmware and dictionary with platform_name and hostname
     """
     session = requests.Session()
     try:

@@ -1,3 +1,4 @@
+"""CANU Commands that work with the entire Shasta switch network."""
 import click
 from click_help_colors import HelpColorsGroup
 
@@ -11,7 +12,7 @@ from .firmware import firmware
 )
 @click.pass_context
 def network(ctx):
-    """Check out the entire network"""
+    """Commands that work on the entire network."""
     pass
 
 
