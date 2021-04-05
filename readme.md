@@ -154,6 +154,12 @@ $ nox
 
 # Changelog
 
+## [unreleased]
+
+### Added
+
+- Cache firmware API calls to canu_cache.yaml file.
+
 ## [0.0.2] - 2021-03-29
 
 ### Added

@@ -1,4 +1,5 @@
 """CANU commands that report the firmware of an individual switch."""
+import datetime
 import json
 
 import click
@@ -7,6 +8,7 @@ import emoji
 import requests
 import urllib3
 
+from canu.cache import cache_switch, cached_recently, get_switch_from_cache
 
 # To disable warnings about unsecured HTTPS requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -27,7 +29,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     help="Switch password",
 )
 @click.option("--json", "json_", is_flag=True, help="Output JSON")
-@click.option("--verbose", "-v", is_flag=True, help="Verbose mode")
+@click.option("--verbose", is_flag=True, help="Verbose mode")
 @click.option(
     "--out", help="Output results to a file", type=click.File("w"), default="-"
 )
@@ -42,9 +44,12 @@ def firmware(ctx, username, ip, password, json_, verbose, out):
     if ctx.obj["shasta"]:
         shasta = ctx.obj["shasta"]
         config = ctx.obj["config"]
+        cache_minutes = ctx.obj["cache_minutes"]
 
     credentials = {"username": username, "password": password}
-    switch_firmware, switch_info = get_firmware(ip, credentials)
+    switch_firmware, switch_info = get_firmware(
+        ip, credentials, False, cache_minutes=cache_minutes
+    )
 
     if switch_firmware is None:
         return
@@ -65,10 +70,12 @@ def firmware(ctx, username, ip, password, json_, verbose, out):
 
             json_formatted = json.dumps(
                 {
+                    "ip_address": ip,
                     "status": firmware_match,
                     "hostname": switch_info["hostname"],
                     "platform_name": switch_info["platform_name"],
                     "firmware": switch_firmware,
+                    "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 },
                 indent=2,
             )
@@ -77,8 +84,10 @@ def firmware(ctx, username, ip, password, json_, verbose, out):
         else:
             json_formatted = json.dumps(
                 {
+                    "ip_address": ip,
                     "status": firmware_match,
                     "firmware": switch_firmware["current_version"],
+                    "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 },
                 indent=2,
             )
@@ -121,7 +130,7 @@ def firmware(ctx, username, ip, password, json_, verbose, out):
             click.secho(f"Firmware should be in: {firmware_range}", fg="red", file=out)
 
 
-def get_firmware(ip, credentials, return_error=False):
+def get_firmware(ip, credentials, return_error=False, cache_minutes=10):
     """Get the firmware of an Aruba switch using v10.04 API.
 
     :param ip: IPv4 address of the switch
@@ -130,73 +139,94 @@ def get_firmware(ip, credentials, return_error=False):
 
     :return: Dictionary with a switches firmware and dictionary with platform_name and hostname
     """
-    session = requests.Session()
-    try:
-        # Login
-        login = session.post(
-            f"https://{ip}/rest/v10.04/login", data=credentials, verify=False
-        )
-        login.raise_for_status()
+    if cached_recently(ip, cache_minutes):
+        cached_switch = get_switch_from_cache(ip)
 
-    except requests.exceptions.HTTPError as http_error:
-        if return_error:
-            raise http_error
-        else:
-            click.secho(
-                f"Error connecting to switch {ip}, check that this IP is an Aruba switch, or check the username or password",
-                fg="white",
-                bg="red",
+        switch_info = {
+            "platform_name": cached_switch["platform_name"],
+            "hostname": cached_switch["hostname"],
+        }
+
+        return cached_switch["firmware"], switch_info
+
+    else:
+        session = requests.Session()
+        try:
+            # Login
+            login = session.post(
+                f"https://{ip}/rest/v10.04/login", data=credentials, verify=False
             )
-            return None, None
-    except requests.exceptions.ConnectionError as connection_error:
-        if return_error:
-            raise connection_error
-        else:
-            click.secho(
-                f"Error connecting to switch {ip}, check the IP address and try again",
-                fg="white",
-                bg="red",
+            login.raise_for_status()
+
+        except requests.exceptions.HTTPError as http_error:
+            if return_error:
+                raise http_error
+            else:
+                click.secho(
+                    f"Error connecting to switch {ip}, check that this IP is an Aruba switch, or check the username or password",
+                    fg="white",
+                    bg="red",
+                )
+                return None, None
+        except requests.exceptions.ConnectionError as connection_error:
+            if return_error:
+                raise connection_error
+            else:
+                click.secho(
+                    f"Error connecting to switch {ip}, check the IP address and try again",
+                    fg="white",
+                    bg="red",
+                )
+                return None, None
+        except requests.exceptions.RequestException as error:  # pragma: no cover
+            if return_error:
+                raise error
+            else:
+                click.secho(
+                    f"Error connecting to switch  {ip}.",
+                    fg="white",
+                    bg="red",
+                )
+                return None, None
+
+        try:
+            # GET firmware version
+            response = session.get(f"https://{ip}/rest/v10.04/firmware", verify=False)
+            response.raise_for_status()
+
+            switch_firmware = response.json()
+
+            # GET switch platform
+            response = session.get(
+                f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
+                verify=False,
             )
-            return None, None
-    except requests.exceptions.RequestException as error:  # pragma: no cover
-        if return_error:
-            raise error
-        else:
-            click.secho(
-                f"Error connecting to switch  {ip}.",
-                fg="white",
-                bg="red",
-            )
-            return None, None
+            response.raise_for_status()
 
-    try:
-        # GET firmware version
-        response = session.get(f"https://{ip}/rest/v10.04/firmware", verify=False)
-        response.raise_for_status()
+            switch_info = response.json()
 
-        switch_firmware = response.json()
+            # Logout
+            session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
 
-        # GET switch platform
-        response = session.get(
-            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
-            verify=False,
-        )
-        response.raise_for_status()
+            # Cache switch values
+            switch_json = {
+                "ip_address": ip,
+                "hostname": switch_info["hostname"],
+                "platform_name": switch_info["platform_name"],
+                "firmware": switch_firmware,
+                "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            }
+            cache_switch(switch_json)
 
-        switch_info = response.json()
+            return switch_firmware, switch_info
 
-        # Logout
-        session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
-
-        return switch_firmware, switch_info
-
-    except requests.exceptions.RequestException as error:  # pragma: no cover
-        if return_error:
-            raise error
-        else:
-            click.secho(
-                f"Error getting firmware version from switch {ip}",
-                fg="white",
-                bg="red",
-            )
-            return None, None
+        except requests.exceptions.RequestException as error:  # pragma: no cover
+            if return_error:
+                raise error
+            else:
+                click.secho(
+                    f"Error getting firmware version from switch {ip}",
+                    fg="white",
+                    bg="red",
+                )
+                return None, None
