@@ -1,5 +1,6 @@
 """CANU commands that report the firmware of the entire Shasta network."""
 from collections import defaultdict
+import datetime
 import ipaddress
 import json
 
@@ -12,6 +13,7 @@ import emoji
 import requests
 
 
+from canu.cache import cache_switch
 from canu.switch.firmware.firmware import get_firmware
 
 
@@ -65,6 +67,7 @@ def firmware(ctx, ips, ips_file, username, password, out, json_):
     if ctx.obj["shasta"]:
         shasta = ctx.obj["shasta"]
         config = ctx.obj["config"]
+        cache_minutes = ctx.obj["cache_minutes"]
 
     if ips_file:
         ips = []
@@ -85,7 +88,7 @@ def firmware(ctx, ips, ips_file, username, password, out, json_):
                 )
                 try:
                     switch_firmware, switch_info = get_firmware(
-                        str(ip), credentials, True
+                        str(ip), credentials, True, cache_minutes
                     )
                     firmware_range = config["shasta"][shasta]["aruba"][
                         switch_info["platform_name"]
@@ -99,10 +102,14 @@ def firmware(ctx, ips, ips_file, username, password, out, json_):
                         firmware_match = "Fail"
                         firmware_error = f"Firmware should be in range {firmware_range}"
                     switch_json[str(ip)] = {
+                        "ip_address": str(ip),
                         "status": firmware_match,
                         "hostname": switch_info["hostname"],
                         "platform_name": switch_info["platform_name"],
                         "firmware": switch_firmware,
+                        "updated_at": datetime.datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
                     }
                     data.append(
                         [
@@ -114,10 +121,15 @@ def firmware(ctx, ips, ips_file, username, password, out, json_):
                             firmware_error,
                         ]
                     )
+                    cache_switch(switch_json[str(ip)])
 
                 except requests.exceptions.HTTPError:
                     switch_json[str(ip)] = {
+                        "ip_address": str(ip),
                         "status": "Error",
+                        "updated_at": datetime.datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
                     }
                     error_emoji = emoji.emojize(":red_triangle_pointed_up:")
                     data.append(
@@ -138,7 +150,11 @@ def firmware(ctx, ips, ips_file, username, password, out, json_):
                     )
                 except requests.exceptions.ConnectionError:
                     switch_json[str(ip)] = {
+                        "ip_address": str(ip),
                         "status": "Error",
+                        "updated_at": datetime.datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
                     }
                     error_emoji = emoji.emojize(":red_triangle_pointed_up:")
                     data.append(
@@ -159,7 +175,11 @@ def firmware(ctx, ips, ips_file, username, password, out, json_):
                     )
                 except requests.exceptions.RequestException:  # pragma: no cover
                     switch_json[str(ip)] = {
+                        "ip_address": str(ip),
                         "status": "Error",
+                        "updated_at": datetime.datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
                     }
                     error_emoji = emoji.emojize(":red_triangle_pointed_up:")
                     data.append(
@@ -173,11 +193,18 @@ def firmware(ctx, ips, ips_file, username, password, out, json_):
                         ]
                     )
                     errors.append(
-                        [str(ip), "RequestException Error. Error connecting to switch."]
+                        [
+                            str(ip),
+                            "RequestException Error. Error connecting to switch.",
+                        ]
                     )
                 except Exception:  # pragma: no cover
                     switch_json[str(ip)] = {
+                        "ip_address": str(ip),
                         "status": "Error",
+                        "updated_at": datetime.datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
                     }
                     data.append(
                         [

@@ -20,7 +20,7 @@ yaml = ruamel.yaml.YAML()
 # To disable warnings about unsecured HTTPS requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# To get the canu.yaml file in the parrent directory
+# To get the canu.yaml file in the parent directory
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
     parent_directory = sys._MEIPASS
 else:
@@ -55,13 +55,21 @@ CONTEXT_SETTING = dict(
     help="Shasta network version",
     required=True,
 )
+@click.option(
+    "--cache",
+    "cache_minutes",
+    default=10,
+    show_default=True,
+    help="Max age in minutes of existing cache before making new API call.",
+)
 @click.version_option()
 @click.pass_context
-def cli(ctx, shasta):
+def cli(ctx, shasta, cache_minutes):
     """CANU (CSM Automatic Network Utility) floats through a new Shasta network and makes setup a breeze."""
     ctx.ensure_object(dict)
 
     ctx.obj["shasta"] = shasta
+    ctx.obj["cache_minutes"] = cache_minutes
 
 
 cli.add_command(switch.switch)
