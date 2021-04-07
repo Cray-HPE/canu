@@ -55,7 +55,7 @@ def cache_switch(switch):
         yaml.dump(updated_cache, f)
 
 
-def cached_recently(ip, max_cache_time=10):
+def firmware_cached_recently(ip, max_cache_time=10):
     """Check if a switch has recently been cached and return True or False.
 
     :param ip: The IPv4 address to check in the cache.
@@ -75,7 +75,10 @@ def cached_recently(ip, max_cache_time=10):
         time_difference = time_now - cache_time
         time_difference_minutes = time_difference.total_seconds() / 60
 
-        if time_difference_minutes < max_cache_time:
+        # If cached recently the firmware, platform_name, and hostname keys exist
+        if time_difference_minutes < max_cache_time and canu_cache["switches"][
+            index
+        ].keys() >= {"firmware", "platform_name", "hostname"}:
             return True
 
     return False
@@ -108,7 +111,7 @@ def update_switch_in_cache(cache, switch):
         switch["ip_address"]
     )
     for attribute in switch:
-        cache["switches"][index][attribute] = switch[attribute]
+        cache["switches"][index].update({attribute: switch[attribute]})
 
     return cache
 
