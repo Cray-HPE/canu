@@ -8,7 +8,7 @@ import emoji
 import requests
 import urllib3
 
-from canu.cache import cache_switch, cached_recently, get_switch_from_cache
+from canu.cache import cache_switch, firmware_cached_recently, get_switch_from_cache
 
 # To disable warnings about unsecured HTTPS requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -139,7 +139,7 @@ def get_firmware(ip, credentials, return_error=False, cache_minutes=10):
 
     :return: Dictionary with a switches firmware and dictionary with platform_name and hostname
     """
-    if cached_recently(ip, cache_minutes):
+    if firmware_cached_recently(ip, cache_minutes):
         cached_switch = get_switch_from_cache(ip)
 
         switch_info = {
@@ -213,6 +213,7 @@ def get_firmware(ip, credentials, return_error=False, cache_minutes=10):
                 "ip_address": ip,
                 "hostname": switch_info["hostname"],
                 "platform_name": switch_info["platform_name"],
+                "vendor": "aruba",
                 "firmware": switch_firmware,
                 "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             }

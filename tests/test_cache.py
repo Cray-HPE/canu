@@ -5,7 +5,11 @@ import click.testing
 import pytest
 import responses
 
-from canu.cache import cached_recently, get_switch_from_cache, remove_switch_from_cache
+from canu.cache import (
+    firmware_cached_recently,
+    get_switch_from_cache,
+    remove_switch_from_cache,
+)
 from canu.cli import cli
 
 
@@ -109,12 +113,12 @@ def test_get_switch_from_cache_exception():
     assert "IP address 999.999.999.999 not in cache." in str(error.value)
 
 
-def test_cached_recently():
-    """Test the cached_recently function."""
+def test_firmware_cached_recently():
+    """Test the firmware_cached_recently function."""
     # Cached less than 999 minutes ago?
-    assert cached_recently(ip, 999) is True
+    assert firmware_cached_recently(ip, 999) is True
     # Cached less than 0 minutes ago?
-    assert cached_recently(ip, 0) is False
+    assert firmware_cached_recently(ip, 0) is False
 
     # Remove test switch from cache
     remove_switch_from_cache(ip)
