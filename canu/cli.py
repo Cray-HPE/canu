@@ -204,14 +204,12 @@ def parse_sls_json_for_ips(shasta):
     switch_addresses = []
     for sls_network in shasta:
         if sls_network["Name"] == "NMN":
-            print("if")
             switch_addresses = [
                 ip.get("IPAddress", None)
                 for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {})
                 for ip in subnets.get("IPReservations", {})
                 # Only get the IP addresses if the name starts with "sw-"
                 if ip.get("Name", "").startswith("sw-")
-                and "-cdu-" not in ip.get("Name", "")
             ]
 
     return switch_addresses
