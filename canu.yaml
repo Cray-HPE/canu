@@ -8,7 +8,7 @@ shasta:
       "8325":
         - GL.10.06.0010
       "8360":
-        - GL.10.06.0010
+        - LL.10.06.0010
       X86-64:
         - Virtual.10.06.0001
     dell: # Not sure how Dell will be formatted yet
@@ -32,7 +32,7 @@ shasta:
       "8325":
         - GL.10.06.0010
       "8360":
-        - GL.10.06.0010
+        - LL.10.06.0010
       X86-64:
         - Virtual.10.06.0001
     dell: # Not sure how Dell will be formatted yet

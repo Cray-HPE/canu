@@ -49,11 +49,14 @@ def cabling(ctx, username, ip, password, out):
     credentials = {"username": username, "password": password}
     switch_info, switch_dict, arp = get_lldp(ip, credentials)
 
+    if switch_info is None:
+        return
+
     cache_lldp(switch_info, switch_dict, arp)
     print_lldp(switch_info, switch_dict, arp, out)
 
 
-def get_lldp(ip, credentials):
+def get_lldp(ip, credentials, return_error=False):
     """Get lldp of an Aruba switch using v10.04 API.
 
     :param ip: IPv4 address of the switch
@@ -64,70 +67,112 @@ def get_lldp(ip, credentials):
     :return arp: ARP dictionary
     """
     session = requests.Session()
-    # try:
-    # Login
-    session.post(f"https://{ip}/rest/v10.04/login", data=credentials, verify=False)
-    # login.raise_for_status()
+    try:
+        # Login
+        login = session.post(
+            f"https://{ip}/rest/v10.04/login", data=credentials, verify=False
+        )
+        login.raise_for_status()
 
-    # try:
+    except requests.exceptions.HTTPError as http_error:
+        if return_error:
+            raise http_error
+        else:
+            click.secho(
+                f"Error connecting to switch {ip}, check that this IP is an Aruba switch, or check the username or password",
+                fg="white",
+                bg="red",
+            )
+            return None, None, None
+    except requests.exceptions.ConnectionError as connection_error:
+        if return_error:
+            raise connection_error
+        else:
+            click.secho(
+                f"Error connecting to switch {ip}, check the IP address and try again",
+                fg="white",
+                bg="red",
+            )
+            return None, None, None
+    except requests.exceptions.RequestException as error:  # pragma: no cover
+        if return_error:
+            raise error
+        else:
+            click.secho(
+                f"Error connecting to switch  {ip}.",
+                fg="white",
+                bg="red",
+            )
+            return None, None, None
 
-    # GET switch info
-    switch_info_response = session.get(
-        f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
-        verify=False,
-    )
-    # switch_info_response.raise_for_status()
-    switch_info = switch_info_response.json()
-    switch_info["ip"] = ip
+    try:
+        # GET switch info
+        switch_info_response = session.get(
+            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
+            verify=False,
+        )
+        switch_info_response.raise_for_status()
+        switch_info = switch_info_response.json()
+        switch_info["ip"] = ip
 
-    # GET LLDP neighbors
-    neighbors = session.get(
-        f"https://{ip}/rest/v10.04/system/interfaces/*/lldp_neighbors?depth=2",
-        verify=False,
-    )
-    # neighbors.raise_for_status()
-    neighbors_dict = neighbors.json()
+        # GET LLDP neighbors
+        neighbors = session.get(
+            f"https://{ip}/rest/v10.04/system/interfaces/*/lldp_neighbors?depth=2",
+            verify=False,
+        )
+        neighbors.raise_for_status()
+        neighbors_dict = neighbors.json()
 
-    arp_response = session.get(
-        f"https://{ip}/rest/v10.04/system/vrfs/default/neighbors?depth=2",
-        verify=False,
-    )
-    # arp_response.raise_for_status()
-    arp = arp_response.json()
+        arp_response = session.get(
+            f"https://{ip}/rest/v10.04/system/vrfs/default/neighbors?depth=2",
+            verify=False,
+        )
+        arp_response.raise_for_status()
+        arp = arp_response.json()
 
-    # interfaces = []
-    lldp_dict = defaultdict(list)
-    for port in neighbors_dict:
-        interface = unquote(port)
+        lldp_dict = defaultdict(list)
+        for port in neighbors_dict:
+            interface = unquote(port)
 
-        for x in neighbors_dict[port]:
-            neighbor = {
-                "chassis_id": neighbors_dict[port][x]["chassis_id"],
-                "mac_addr": neighbors_dict[port][x]["mac_addr"],
-                "chassis_description": neighbors_dict[port][x]["neighbor_info"][
-                    "chassis_description"
-                ],
-                "chassis_name": neighbors_dict[port][x]["neighbor_info"][
-                    "chassis_name"
-                ],
-                "port_description": neighbors_dict[port][x]["neighbor_info"][
-                    "port_description"
-                ],
-                "port_id_subtype": neighbors_dict[port][x]["neighbor_info"][
-                    "port_id_subtype"
-                ],
-                "port_id": neighbors_dict[port][x]["port_id"],
-            }
+            for x in neighbors_dict[port]:
+                neighbor = {
+                    "chassis_id": neighbors_dict[port][x]["chassis_id"],
+                    "mac_addr": neighbors_dict[port][x]["mac_addr"],
+                    "chassis_description": neighbors_dict[port][x]["neighbor_info"][
+                        "chassis_description"
+                    ],
+                    "chassis_name": neighbors_dict[port][x]["neighbor_info"][
+                        "chassis_name"
+                    ],
+                    "port_description": neighbors_dict[port][x]["neighbor_info"][
+                        "port_description"
+                    ],
+                    "port_id_subtype": neighbors_dict[port][x]["neighbor_info"][
+                        "port_id_subtype"
+                    ],
+                    "port_id": neighbors_dict[port][x]["port_id"],
+                }
 
-            lldp_dict[interface].append(neighbor)
+                lldp_dict[interface].append(neighbor)
 
-    # Logout
-    session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
+        # Logout
+        session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
 
-    # Order the ports in natural order
-    lldp_dict = OrderedDict(natsort.natsorted(lldp_dict.items()))
+        # Order the ports in natural order
+        lldp_dict = OrderedDict(natsort.natsorted(lldp_dict.items()))
 
-    return switch_info, lldp_dict, arp
+        return switch_info, lldp_dict, arp
+
+    except requests.exceptions.RequestException as error:  # pragma: no cover
+        if return_error:
+            raise error
+        else:
+            click.secho(
+                f"Error getting cabling information from switch {ip}",
+                fg="white",
+                bg="red",
+            )
+            return None, None, None
 
 
 def cache_lldp(switch_info, lldp_dict, arp):

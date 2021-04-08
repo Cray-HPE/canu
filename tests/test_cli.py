@@ -48,15 +48,13 @@ def test_cli_init_missing_out():
 def test_cli_init_csi_good():
     """Run canu init CSI with no errors."""
     with runner.isolated_filesystem():
-        with open("NMN.yaml", "w") as f:
-            f.write("full_name: Node Management Network\n")
-            f.write("subnets:\n")
-            f.write("- full_name: NMN Management Network Infrastructure\n")
-            f.write("  ip_reservations:\n")
-            f.write("  - ip_address: 10.252.0.2\n")
-            f.write("    name: sw-spine-001\n")
-            f.write("  - ip_address: 10.252.0.3\n")
-            f.write("    name: sw-spine-002\n")
+        with open("sls_input_file.json", "w") as f:
+            f.write(
+                '{"Networks": {"NMN": {"Name": "NMN", "ExtraProperties": { "Subnets": [{"IPReservations":'
+            )
+            f.write(
+                '[{"IPAddress": "192.168.1.2","Name": "sw-spine-001"},{"IPAddress": "192.168.1.3","Name": "sw-spine-002"}]}]}}}}'
+            )
 
         result = runner.invoke(
             cli,
@@ -67,14 +65,14 @@ def test_cli_init_csi_good():
 
 
 def test_cli_init_csi_file_missing():
-    """Error canu init CSI on NMN file missing."""
+    """Error canu init CSI on sls_input_file.json file missing."""
     result = runner.invoke(
         cli,
         ["--shasta", shasta, "init", "--out", fileout, "--csi-folder", "."],
     )
     assert result.exit_code == 0
     assert (
-        "The file NMN.yaml was not found, check that this is the correct CSI directory"
+        "The file sls_input_file.json was not found, check that this is the correct CSI directory"
         in str(result.output)
     )
 
