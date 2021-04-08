@@ -102,14 +102,38 @@ def init(ctx, csi_folder, auth_token, sls_address, out):
     Tokens are typically stored in ~./config/cray/tokens/
     Instead of passing in a token file, the environmental variable SLS_TOKEN can be used.
 
-    To initialize using CSI, pass in the CSI folder containing the NMN.yaml file using the --csi-folder flag
+    To initialize using CSI, pass in the CSI folder containing the sls_input_file.json file using the --csi-folder flag
+
+    The sls_input_file.json file is generally stored in one of two places
+    depending on how far the system is in the install process.
+
+
+     - Early in the install process, when running off of the LiveCD the
+     sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/config/SYSTEMNAME/`
+
+     - Later in the install process, the sls_input_file.json file is
+     generally in `/mnt/pitdata/prep/SYSTEMNAME/`
     """
     switch_addresses = []
 
-    # Parse NMN.yaml file from CSI and append them to a file with IPs
+    # Parse sls_input_file.json file from CSI and filter "Node Management Network" IP addresses
     if csi_folder:
-        nmn_ips = parse_yaml_for_ips(csi_folder, "NMN.yaml")
-        switch_addresses.extend(nmn_ips)
+        try:
+            with open(os.path.join(csi_folder, "sls_input_file.json"), "r") as f:
+                input_json = json.load(f)
+
+                # Format the input to be like the SLS JSON
+                input_json_networks = [input_json["Networks"]["NMN"]]
+
+                switch_addresses = parse_sls_json_for_ips(input_json_networks)
+
+        except FileNotFoundError:
+            click.secho(
+                "The file sls_input_file.json was not found, check that this is the correct CSI directory.",
+                fg="red",
+            )
+            return
+
     else:
         token = os.environ.get("SLS_TOKEN")
 
@@ -142,18 +166,7 @@ def init(ctx, csi_folder, auth_token, sls_address, out):
 
             shasta_networks = response.json()
 
-            for sls_network in shasta_networks:
-                if sls_network["Name"] == "NMN":
-                    switch_addresses = [
-                        ip.get("IPAddress", None)
-                        for subnets in sls_network.get("ExtraProperties", {}).get(
-                            "Subnets", {}
-                        )
-                        for ip in subnets.get("IPReservations", {})
-                        # Only get the IP addresses if the name starts with "sw-"
-                        if ip.get("Name", "").startswith("sw-")
-                        and "-cdu-" not in ip.get("Name", "")
-                    ]
+            switch_addresses = parse_sls_json_for_ips(shasta_networks)
 
         except requests.exceptions.ConnectionError:
             return click.secho(
@@ -181,39 +194,27 @@ def init(ctx, csi_folder, auth_token, sls_address, out):
     )
 
 
-def parse_yaml_for_ips(folder, file):
-    """Parse CSI YAML files and return IPv4 addresses.
+def parse_sls_json_for_ips(shasta):
+    """Parse SLS JSON and return NMN IPv4 addresses.
 
-    :param folder: The folder containing the YAML file to be parsed.
-
-    :param file: The name of the YAML file to be parsed.
+    :param shasta: The SLS JSON to be parsed.
 
     :return: A list of switch IPs.
     """
-    switch_ips = []
+    switch_addresses = []
+    for sls_network in shasta:
+        if sls_network["Name"] == "NMN":
+            print("if")
+            switch_addresses = [
+                ip.get("IPAddress", None)
+                for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {})
+                for ip in subnets.get("IPReservations", {})
+                # Only get the IP addresses if the name starts with "sw-"
+                if ip.get("Name", "").startswith("sw-")
+                and "-cdu-" not in ip.get("Name", "")
+            ]
 
-    try:
-        with open(os.path.join(folder, file), "r") as f:
-            f_yaml = yaml.load(f)
-
-            for subnet in f_yaml["subnets"]:
-                if subnet["full_name"] == "NMN Management Network Infrastructure":
-                    switch_ips = [
-                        ip.get("ip_address", None)
-                        for ip in subnet.get("ip_reservations", {})
-                        # Only get the IP addresses if the name starts with "sw-"
-                        if ip.get("name", "").startswith("sw-")
-                        and "-cdu-" not in ip.get("name", "")
-                    ]
-
-    except FileNotFoundError:
-        click.secho(
-            f"The file {file} was not found, check that this is the correct CSI directory.",
-            fg="red",
-        )
-        return []
-
-    return switch_ips
+    return switch_addresses
 
 
 if __name__ == "__main__":  # pragma: no cover
