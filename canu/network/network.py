@@ -2,6 +2,7 @@
 import click
 from click_help_colors import HelpColorsGroup
 
+from .cabling import cabling
 from .firmware import firmware
 
 
@@ -16,4 +17,5 @@ def network(ctx):
     pass
 
 
+network.add_command(cabling.cabling)
 network.add_command(firmware.firmware)

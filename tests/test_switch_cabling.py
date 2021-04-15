@@ -42,8 +42,12 @@ def test_get_lldp_function():
         )
         responses.add(
             responses.GET,
-            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
-            json={"hostname": "test-switch", "platform_name": "X86-64"},
+            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname,system_mac",
+            json={
+                "hostname": "test-switch",
+                "platform_name": "X86-64",
+                "system_mac": "aa:aa:aa:aa:aa:aa",
+            },
         )
         responses.add(
             responses.GET,
@@ -122,8 +126,12 @@ def test_switch_cabling():
         )
         responses.add(
             responses.GET,
-            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
-            json={"hostname": "test-switch", "platform_name": "X86-64"},
+            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname,system_mac",
+            json={
+                "hostname": "test-switch",
+                "platform_name": "X86-64",
+                "system_mac": "aa:aa:aa:aa:aa:aa",
+            },
         )
         responses.add(
             responses.GET,

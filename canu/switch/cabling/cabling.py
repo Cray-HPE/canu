@@ -52,7 +52,6 @@ def cabling(ctx, username, ip, password, out):
     if switch_info is None:
         return
 
-    cache_lldp(switch_info, switch_dict, arp)
     print_lldp(switch_info, switch_dict, arp, out)
 
 
@@ -79,7 +78,7 @@ def get_lldp(ip, credentials, return_error=False):
             raise http_error
         else:
             click.secho(
-                f"Error connecting to switch {ip}, check that this IP is an Aruba switch, or check the username or password",
+                f"Error connecting to switch {ip}, check that this IP is an Aruba switch, or check the username or password.",
                 fg="white",
                 bg="red",
             )
@@ -89,7 +88,7 @@ def get_lldp(ip, credentials, return_error=False):
             raise connection_error
         else:
             click.secho(
-                f"Error connecting to switch {ip}, check the IP address and try again",
+                f"Error connecting to switch {ip}, check the IP address and try again.",
                 fg="white",
                 bg="red",
             )
@@ -99,7 +98,7 @@ def get_lldp(ip, credentials, return_error=False):
             raise error
         else:
             click.secho(
-                f"Error connecting to switch  {ip}.",
+                f"Error connecting to switch {ip}.",
                 fg="white",
                 bg="red",
             )
@@ -108,7 +107,7 @@ def get_lldp(ip, credentials, return_error=False):
     try:
         # GET switch info
         switch_info_response = session.get(
-            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
+            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname,system_mac",
             verify=False,
         )
         switch_info_response.raise_for_status()
@@ -161,6 +160,8 @@ def get_lldp(ip, credentials, return_error=False):
         # Order the ports in natural order
         lldp_dict = OrderedDict(natsort.natsorted(lldp_dict.items()))
 
+        cache_lldp(switch_info, lldp_dict, arp)
+
         return switch_info, lldp_dict, arp
 
     except requests.exceptions.RequestException as error:  # pragma: no cover
@@ -206,6 +207,7 @@ def cache_lldp(switch_info, lldp_dict, arp):
                     "",
                     lldp_dict[port][entry]["port_description"],
                 ),
+                "neighbor_chassis_id": lldp_dict[port][entry]["chassis_id"],
             }
 
             switch["cabling"][port].append(port_info)
@@ -276,7 +278,7 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
             )
 
     click.secho(
-        f"Switch: {switch_info['hostname']} ({switch_info['ip']})",
+        f"Switch: {switch_info['hostname']} ({switch_info['ip']})                       ",
         fg="bright_white",
         file=out,
     )
@@ -317,3 +319,4 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
             fg=text_color,
             file=out,
         )
+    print("\n")
