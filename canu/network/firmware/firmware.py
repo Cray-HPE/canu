@@ -51,17 +51,20 @@ from canu.switch.firmware.firmware import get_firmware
 # @click.option("--verbose", "-v", is_flag=True, help="Verbose mode")
 @click.pass_context
 def firmware(ctx, ips, ips_file, username, password, out, json_):
-    r"""Report the firmware versions of all Aruba switches (API v10.04) on the network.
+    """Report the firmware versions of all Aruba switches (API v10.04) on the network.
 
     Pass in either a comma separated list of IP addresses using the --ips option
-    \n
+
     OR
-    \n
+
     Pass in a file of IP addresses with one address per line
-    There are three different statuses found in the report.\n
-    🛶 Pass: Indicates that the switch passed the firmware verification.\n
+    There are three different statuses found in the report.
+
+    🛶 Pass: Indicates that the switch passed the firmware verification.
+
     ❌ Fail: Indicates that the switch failed the firmware verification, in the generated table, a
-    list of expected firmware versions for that switch is displayed.\n
+    list of expected firmware versions for that switch is displayed.
+
     🔺 Error: Indicates that there was an error connecting to the switch, check the Errors table for the specific error.
     """
     if ctx.obj["shasta"]:

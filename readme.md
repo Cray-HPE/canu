@@ -12,7 +12,8 @@ CANU reads switch version information from the _canu.yaml_ file in the root dire
 **[Check Firmware of Multiple Switches](#check-firmware-of-multiple-switches)**<br>
 **[Output to a File](#output-to-a-file)**<br>
 **[JSON](#json)**<br>
-**[Cabling](#cabling)**<br>
+**[Check Single Switch Cabling](#check-single-switch-cabling)**<br>
+**[Check Cabling of Multiple Switches](#check-cabling-of-multiple-switches)**<br>
 **[Uninstallation](#uninstallation)**<br>
 **[Road Map](#road-map)**<br>
 **[Testing](#testing)**<br>
@@ -149,7 +150,7 @@ $ canu --shasta 1.4 network firmware --ips 192.168.1.1,192.168.1.2 --username US
 
 ```
 
-### Cabling
+### Check Single Switch Cabling
 
 CANU can also use LLDP to check the cabling status of a switch. To check the cabling of a single switch run: `canu --shasta 1.4 switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD`
 
@@ -172,6 +173,49 @@ PORT        NEIGHBOR       NEIGHBOR PORT      PORT DESCRIPTION                  
 Sometimes when checking cabling using LLDP, the neighbor does not return any information except a MAC address. When that is the case, CANU looks up the MAC in the ARP table and displays the IP addresses and vlan information associated with the MAC.
 
 Entries in the table will be colored based on what they are. Neighbors that have _ncn_ in their name will be colored blue. Neighbors that have a port labeled (not a MAC address), are generally switches and are labeled green. Ports that are duplicated, will be bright white.
+
+### Check Cabling of Multiple Switches
+
+The cabling of multiple Aruba switches on a network can be checked at the same time using LLDP. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
+
+An example of checking the cabling of multiple switches: `canu --shasta 1.4 network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
+
+There are two different `--view` options, **switch** and **equipment**.
+
+1. The `--view switch` option displays a table for every switch IP address passed in showing connections. This is the same view as shown in the above example of checking single switch cabling.
+
+2. The `--view equipment` option displays a table for each mac address connection. This means that servers and switches will both display incoming and outgoing connections.
+
+An example of checking the cabling of multiple switches and displaying with the equipment view: `canu --shasta 1.4 network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --view equipment`
+
+```bash
+$ canu --shasta 1.4 network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --view equipment
+
+sw-spine01 Aruba JL635A  GL.10.06.0010
+aa:aa:aa:aa:aa:aa
+----------------------------------------------------------------------------------------------------
+1/1/1                     <==> sw-spine02      1/1/1  Aruba JL635A  GL.10.06.0010
+1/1/3                     ===>                 00:00:00:00:00:00 mgmt1
+1/1/4                     ===> ncn-test        bb:bb:bb:bb:bb:bb mgmt1 Linux ncn-test
+
+
+sw-spine02 Aruba JL635A  GL.10.06.0010
+bb:bb:bb:bb:bb:bb
+----------------------------------------------------------------------------------------------------
+1/1/1                     <==> sw-spine01      1/1/1  Aruba JL635A  GL.10.06.0010
+
+
+00:00:00:00:00:00
+192.168.2.2:vlan3, 192.168.1.2:vlan1
+----------------------------------------------------------------------------------------------------
+00:00:00:00:00:00 mgmt1   <=== sw-spine01      1/1/3
+
+
+ncn-test Linux ncn-test2
+bb:bb:bb:bb:bb:bb
+----------------------------------------------------------------------------------------------------
+bb:bb:bb:bb:bb:bb mgmt1   <=== sw-spine01      1/1/4
+```
 
 ## Uninstallation
 
@@ -205,6 +249,7 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 - Able to check cabling with LLDP on a switch using the `canu switch cabling` command.
 - Cache cabling information to canu_cache.yaml file.
 - For the `canu init` command the CSI input now comes from the _sls_input_file.json_ instead of the _NMN.yaml_ file.
+- Able to check cabling with LLDP on the whole network using the `canu network cabling` command.
 
 ## [0.0.2] - 2021-03-29
 

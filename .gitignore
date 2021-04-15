@@ -1,3 +1,6 @@
+# CANU Files
+canu_cache.yaml
+
 # Build artifacts
 *.py[cod]
 *.egg
