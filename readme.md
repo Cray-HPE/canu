@@ -1,4 +1,4 @@
-# 🛶 CANU v0.0.2
+# 🛶 CANU v0.0.3
 
 CANU (CSM Automatic Network Utility) will float through a new Shasta network and make setup a breeze. Use CANU to check if Aruba switches on a Shasta network meet the firmware version requirements and check their cabling status using LLDP.
 
@@ -243,6 +243,8 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 
 ## [unreleased]
 
+## [0.0.3] - 2021-04-16
+
 ### Added
 
 - Cache firmware API calls to canu_cache.yaml file.
@@ -271,6 +273,7 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 - Ability for CANU to get the firmware of a single or multiple Aruba switches
 - Standardized the canu.yaml file to show currently supported switch firmware versions.
 
-[unreleased]: https://stash.us.cray.com/projects/CSM/repos/canu/compare/commits?targetBranch=refs%2Ftags%2F0.0.2&sourceBranch=refs%2Fheads%2Fmaster&targetRepoId=12732
+[unreleased]: https://stash.us.cray.com/projects/CSM/repos/canu/compare/commits?targetBranch=refs%2Ftags%2F0.0.3&sourceBranch=refs%2Fheads%2Fmaster&targetRepoId=12732
+[0.0.3]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.3
 [0.0.2]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.2
 [0.0.1]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.1
