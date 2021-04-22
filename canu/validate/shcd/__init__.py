@@ -1,0 +1,1 @@
+"""CANU validate shcd commands."""
