@@ -1,0 +1,34 @@
+network_v1: include('v1_architecture_profile', required=False)
+network_v2: include('v2_architecture_profile')
+network_v2_tds: include('v2_architecture_profile')
+---
+v1_architecture_profile:
+  name: str(min=1)
+  description: str(min=1, max=256)
+  version: int(min=1)
+  components: list(include('component'))
+  deprecated: bool(required=True)
+
+v2_architecture_profile:
+  name: str(min=1)
+  description: str(min=1, max=256)
+  version: int(min=1)
+  components: list(include('component'))
+#    constraints: list(include('constraint'))
+
+component:
+  name: str(min=1, exclude=' ')
+  description: str(required=False)
+  model: str(min=1, exclude=' ')
+  connections: list(include('connection'))
+
+constraint:
+  name: str(min=1, exclude=' ')
+  description: str(required=False)
+  model: str(required=False)
+  connections: list(include('connection'), required=False)
+
+connection:
+  name: str()
+  speed: int()
+  number: int(required=False)

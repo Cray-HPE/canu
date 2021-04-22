@@ -1,0 +1,182 @@
+--- # Definition of network components: model, size, speeds, etc...
+# NOTE:  Only specify upward/north connections and east/west (MLAG).
+#        1. compute/ncn specify connections to leafs
+#        2. leafs specify connections to spines
+#        3. spines specify connections to superspines
+network_v2:
+  name: "Version 2"
+  description: "Aruba Hardware"
+  version: 2
+  components:
+    - name: "superspine"
+      model: "8325_JL627A"
+      connections:
+        # Superspine is top of the hierarchy but
+        # needs to have a port speed available from hardware definition
+        # but the northbound connection should be "none"
+        - name: "none"
+          speed: 100
+    - name: "spine"
+      model: "8325_JL627A"
+      connections:
+        - name: "superspine"
+          speed: 100
+        - name: "spine"
+          speed: 100
+    - name: "mountain_compute_leaf"
+      model: "8320_JL581A"
+      connections:
+        - name: "spine"
+          speed: 40
+          number: 2
+    - name: "river_compute_leaf"
+      model: "6300M_JL762A"
+      connections:
+        - name: "spine"
+          speed: 25
+          number: 2
+    - name: "river_ncn_leaf"
+      model: "8325_JL625A"
+      connections:
+        - name: "spine"
+          speed: 100
+          number: 2
+        - name: "river_ncn_leaf"
+          speed: 25
+          number: 2
+    - name: "river_bmc_leaf"
+      model: "6300M_JL762A"
+      connections:
+        # LUMI
+        - name: "river_ncn_leaf"
+          speed: 25
+        - name: "spine"
+          speed: 100
+    - name: "river_ncn_node_2_port"
+      model: "river_ncn_node_2_port"
+      connections:
+        - name: "river_ncn_leaf"
+          speed: 25
+        - name: "river_bmc_leaf"
+          speed: 1
+    - name: "river_ncn_node_4_port"
+      model: "river_ncn_node_4_port"
+      connections:
+        - name: "river_ncn_leaf"
+          speed: 25
+        - name: "river_bmc_leaf"
+          speed: 1
+    - name: "river_ncn_node"
+      model: "river_ncn_node"
+      connections:
+        - name: "river_ncn_leaf"
+          speed: 25
+    - name: "river_compute_node"
+      model: "river_compute_node"
+      connections:
+        - name: "river_compute_leaf"
+          speed: 1
+    - name: "mountain_compute_cabinet"
+      model: "mountain_compute_cabinet"
+      connections:
+        - name: "mountain_compute_leaf"
+          speed: 10
+    - name: "customer_edge_router"
+      model: "customer_edge_router"
+      connections:
+        - name: "spine"
+          speed: 100
+# TODO add BMC connections
+# As noted at top, only specify upward/northbound connections.
+network_v2_tds:
+  name: "Version 2 TDS"
+  description: "Aruba Hardware"
+  version: 2
+  components:
+    - name: "spine"
+      model: "8325_JL625A"
+      connections:
+        - name: "none"
+          speed: 100
+        - name: "spine"
+          speed: 100
+    - name: "mountain_compute_leaf"
+      model: "8320_JL581A"
+      connections:
+        - name: "spine"
+          speed: 40
+          number: 2
+    - name: "river_bmc_leaf"
+      model: "6300M_JL762A"
+      connections:
+        - name: "spine"
+          speed: 10
+          number: 2
+    - name: "river_ncn_node_2_port"
+      model: "river_ncn_node_2_port"
+      connections:
+        - name: "spine"
+          speed: 25
+        - name: "river_bmc_leaf"
+          speed: 1
+    - name: "river_ncn_node_4_port"
+      model: "river_ncn_node_4_port"
+      connections:
+        - name: "spine"
+          speed: 25
+        - name: "river_bmc_leaf"
+          speed: 1
+    - name: "customer_edge_router"
+      model: "customer_edge_router"
+      connections:
+        - name: "spine"
+          speed: 100
+    - name: "river_compute_node"
+      model: "river_compute_node"
+      connections:
+        - name: "river_compute_leaf"
+          speed: 1
+    - name: "mountain_compute_cabinet"
+      model: "mountain_compute_cabinet"
+      connections:
+        - name: "mountain_compute_leaf"
+          speed: 10
+# TODO add BMC connections
+# As noted at top, only specify upward/northbound connections.
+network_v1:
+  name: "Dell and Mellanox Architecture"
+  description: "Dell and Mellanox Hardware"
+  version: 1
+  deprecated: True
+  components:
+    - name: "spine"
+      model: "SN2700"
+      connections:
+        - name: "none"
+          speed: 100
+        - name: "spine"
+          speed: 100
+    - name: "river_bmc_leaf"
+      model: "S3048-ON"
+      connections:
+        - name: "spine"
+          speed: 40
+    - name: "river_ncn_node_2_port_gigabyte"
+      model: "river_ncn_node_2_port_gigabyte"
+      connections:
+        - name: "spine"
+          speed: 40
+        - name: "river_bmc_leaf"
+          speed: 1
+    - name: "river_ncn_node_4_port_gigabyte"
+      model: "river_ncn_node_4_port_gigabyte"
+      connections:
+        - name: "spine"
+          speed: 40
+        - name: "river_bmc_leaf"
+          speed: 1
+    - name: "customer_edge_router"
+      model: "customer_edge_router"
+      connections:
+        - name: "spine"
+          speed: 100

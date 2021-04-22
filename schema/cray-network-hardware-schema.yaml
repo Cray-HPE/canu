@@ -1,0 +1,13 @@
+network_hardware: list(include('general_hardware_profile'))
+---
+general_hardware_profile:
+    name: str(min=1)
+    vendor: str(min=1, exclude=' ')
+    model: str(min=1, exclude=' ')
+    type: str(min=1, exclude=' ')
+    ports: list(include('port'))
+    deprecated: bool(required=False)
+
+port:
+    count: int(min=1)
+    speed: any(int(min=1), list(int(min=1), min=1))

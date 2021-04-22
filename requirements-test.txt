@@ -5,8 +5,11 @@ click_params
 click_spinner
 natsort
 nox
+openpyxl
 pytest
 pytest-cov
 requests
+requests_toolbelt
 responses
 virtualenv
+yamale
