@@ -5,7 +5,7 @@ import nox
 
 COVERAGE_FAIL = 90
 ERROR_ON_GENERATE = True
-locations = "canu", "tests", "noxfile.py"
+locations = "canu", "tests", "noxfile.py", "network_modeling"
 nox.options.sessions = "tests", "lint", "cover"
 
 

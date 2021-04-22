@@ -1,4 +1,5 @@
 """CANU commands that validate the shcd."""
+from collections import defaultdict
 import logging
 import os
 from pathlib import Path
@@ -29,32 +30,6 @@ architecture_spec_file = os.path.join(
     project_root, "network_models", "cray-network-architecture.yaml"
 )
 
-names_mapper = {}
-
-names_mapper["network_v2"] = [
-    ("mn", "ncn-m", "river_ncn_node_2_port"),
-    ("wn", "ncn-w", "river_ncn_node_2_port"),
-    ("sn", "ncn-s", "river_ncn_node_4_port"),
-    ("uan", "uan", "river_ncn_node_4_port"),
-    ("Ln", "ln", "river_ncn_node_4_port"),
-    ("sw-cdu", "sw-cdu", "mountain_compute_leaf"),
-    ("sw-smn", "sw-leaf-bmc", "river_bmc_leaf"),
-    ("sw-25g", "sw-leaf", "river_ncn_leaf"),
-    ("sw-100g", "sw-spine", "spine"),
-    ("sw-edge", "sw-edge", "customer_edge_router"),
-]
-names_mapper["network_v2_tds"] = [
-    ("mn", "ncn-m", "river_ncn_node_2_port"),
-    ("wn", "ncn-w", "river_ncn_node_2_port"),
-    ("sn", "ncn-s", "river_ncn_node_4_port"),
-    ("uan", "uan", "river_ncn_node_4_port"),
-    ("sw-cdu", "sw-cdu", "mountain_compute_leaf"),
-    ("sw-smn", "sw-leaf-bmc", "river_bmc_leaf"),
-    ("sw-25g", "sw-spine", "spine"),
-    ("sw-100g", "sw-edge", "customer_edge_router"),
-]
-
-
 log = logging.getLogger("validate_shcd")
 
 
@@ -66,9 +41,10 @@ log = logging.getLogger("validate_shcd")
 @click.option(
     "--architecture",
     "-a",
-    type=click.Choice(["network_v1", "network_v2", "network_v2_tds", "small"]),
+    type=click.Choice(["Full", "TDS"], case_sensitive=False),
     help="Shasta architecture",
     required=True,
+    prompt="Architecture type",
 )
 @click.option(
     "--shcd",
@@ -78,7 +54,7 @@ log = logging.getLogger("validate_shcd")
 )
 @click.option(
     "--tabs",
-    help="The tabs on the SHCD file to check.",
+    help="The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.",
     required=True,
 )
 @click.option(
@@ -98,6 +74,11 @@ log = logging.getLogger("validate_shcd")
 def shcd(ctx, architecture, shcd, tabs, corners, log_):
     """Report the firmware of an Aruba switch (API v10.04) on the network."""
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
+
+    if architecture.lower() == "full":
+        architecture = "network_v2"
+    elif architecture.lower() == "tds":
+        architecture = "network_v2_tds"
 
     sheets = []
 
@@ -125,8 +106,8 @@ def shcd(ctx, architecture, shcd, tabs, corners, log_):
             sheets.append(
                 (
                     tabs.split(",")[i],
-                    corners.split(",")[i * 2],
-                    corners.split(",")[i * 2 + 1],
+                    corners.split(",")[i * 2].strip(),
+                    corners.split(",")[i * 2 + 1].strip(),
                 )
             )
     else:
@@ -150,11 +131,13 @@ def shcd(ctx, architecture, shcd, tabs, corners, log_):
         architecture_version=architecture,
     )
 
-    node_list = node_model_from_shcd(
+    node_list, warnings = node_model_from_shcd(
         factory=factory, spreadsheet=shcd, sheets=sheets, architecture=architecture
     )
 
     print_node_list(node_list)
+
+    node_list_warnings(node_list, warnings)
 
 
 def get_node_common_name(name, mapper):
@@ -208,6 +191,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets, architecture):
     # Generated nodes
     node_list = []
     node_name_list = []
+    warnings = defaultdict(list)
 
     wb = load_workbook(spreadsheet, read_only=True)
 
@@ -257,15 +241,15 @@ def node_model_from_shcd(factory, spreadsheet, sheets, architecture):
         expected_columns = len(required_header)
 
         for row in block:
-            # if len(row) != expected_columns:
-            #     log.error("")
-            #     click.secho(f"Bad range of cells entered for tab {sheet}.", fg="red")
-            #     click.secho(f"{range_start}:{range_end}\n", fg="red")
-            #     click.secho(
-            #         f"Ensure the range entered contains the {expected_columns} header columns from 'Source' to 'Port'.",
-            #         fg="red",
-            #     )
-            #     sys.exit(1)
+            if len(row) == 0 or len(row) < expected_columns:
+                log.error("")
+                click.secho(f"Bad range of cells entered for tab {sheet}.", fg="red")
+                click.secho(f"{range_start}:{range_end}\n", fg="red")
+                click.secho(
+                    "Ensure that the upper left corner (Labeled 'Source'), and the lower right corner of the table is entered.",
+                    fg="red",
+                )
+                sys.exit(1)
 
             if row[0].value == required_header[0]:
                 log.debug(f"Expecting header with {expected_columns} columns")
@@ -315,9 +299,9 @@ def node_model_from_shcd(factory, spreadsheet, sheets, architecture):
             src_slot = row[3].value
             src_port = row[5].value
             log.debug(f"Source Data:  {src_name} {src_slot} {src_port}")
-            node_name = get_node_common_name(src_name, names_mapper[architecture])
+            node_name = get_node_common_name(src_name, factory.shcd_mapper())
             log.debug(f"Source Name Lookup:  {node_name}")
-            node_type = get_node_type(src_name, names_mapper[architecture])
+            node_type = get_node_type(src_name, factory.shcd_mapper())
             log.debug(f"Source Node Type Lookup:  {node_type}")
 
             #
@@ -343,6 +327,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets, architecture):
 
                 src_index = node_name_list.index(node_name)
             else:
+                warnings["node_type"].append(src_name)
                 log.warning(
                     f"Node type for {src_name} cannot be determined by node type ({node_type}) or node name ({node_name})"
                 )
@@ -355,9 +340,9 @@ def node_model_from_shcd(factory, spreadsheet, sheets, architecture):
             dst_port = row[10].value
 
             log.debug(f"Destination Data:  {dst_name} {dst_port}")
-            node_name = get_node_common_name(dst_name, names_mapper[architecture])
+            node_name = get_node_common_name(dst_name, factory.shcd_mapper())
             log.debug(f"Destination Name Lookup:  {node_name}")
-            node_type = get_node_type(dst_name, names_mapper[architecture])
+            node_type = get_node_type(dst_name, factory.shcd_mapper())
             log.debug(f"Destination Node Type Lookup:  {node_type}")
 
             #
@@ -384,6 +369,8 @@ def node_model_from_shcd(factory, spreadsheet, sheets, architecture):
                 dst_index = node_name_list.index(node_name)
 
             else:
+                warnings["node_type"].append(dst_name)
+
                 log.warning(
                     f"Node type for {dst_name} cannot be determined by node type ({node_type}) or node name ({node_name})"
                 )
@@ -402,7 +389,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets, architecture):
                     log.error("")
                     click.secho(
                         f"Failed to connect {node_list[src_index].common_name()}"
-                        + " to {node_list[dst_index].common_name()} bi-directionally",
+                        + f" to {node_list[dst_index].common_name()} bi-directionally",
                         fg="red",
                     )
                     for node in node_list:
@@ -415,7 +402,41 @@ def node_model_from_shcd(factory, spreadsheet, sheets, architecture):
                         + f"to {node_list[dst_index].common_name()} bi-directionally"
                     )
                     sys.exit(1)  # TODO: this should probably be an exception
-    return node_list
+    return node_list, warnings
+
+
+def node_list_warnings(node_list, warnings):
+    """Print the warnings found while validating the SHCD.
+
+    :param node_list: A list of nodes
+    :param node_list: A dictionary of warnings
+    """
+    dash = "-" * 50
+    # Generate warnings
+    for node in node_list:
+        if len(node.edges()) == 0:
+            warnings["zero_connections"].append(node.common_name())
+
+    # Print Warnings
+    if warnings:
+        click.secho("\nWarnings", fg="red")
+        if warnings["node_type"]:
+            click.secho(
+                "\nNode type could not be determined for the following",
+                fg="red",
+            )
+            click.secho(dash)
+            nodes = set(warnings["node_type"])
+            for node in nodes:
+                click.secho(node, fg="bright_white")
+        if warnings["zero_connections"]:
+            click.secho(
+                "\nThe following nodes have zero connections",
+                fg="red",
+            )
+            click.secho(dash)
+            for node in warnings["zero_connections"]:
+                click.secho(node, fg="bright_white")
 
 
 def print_node_list(node_list):
@@ -423,8 +444,12 @@ def print_node_list(node_list):
 
     :param node_list: A list of nodes
     """
-    print("\n")
+    dash = "-" * 50
+    click.echo("\n")
+    click.secho("SHCD Node Connections", fg="bright_white")
+    click.echo(dash)
+
     for node in node_list:
-        print(
+        click.echo(
             f"{node.id()}: {node.common_name()} connects to {len(node.edges())} nodes: {node.edges()}"
         )

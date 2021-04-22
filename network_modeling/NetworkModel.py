@@ -1,14 +1,19 @@
+import click
+
+
 class NetworkModel:
     def __init__(self, nodes=None, factory=None):
         if factory:
             self.__factory = factory.get_factory()
         else:
-            raise Exception("A NetworkNodeFactory is required")
+            raise Exception(click.secho("A NetworkNodeFactory is required", fg="red"))
 
         if isinstance(nodes, list):
             self.__nodes = nodes
         else:
-            raise Exception("A list of NetworkNode(s) is required")
+            raise Exception(
+                click.secho("A list of NetworkNode(s) is required", fg="red")
+            )
 
         self.__leafs = []
         self.__spines = []
@@ -105,8 +110,6 @@ class NetworkModel:
                         )
                 else:
                     break  # A device to connect to has already been found above.
-            print("DEEEEEBUUUGGG: Search old device connections line 25")
-        print("DEEEEEBUUUGGG: Search old devices line 24")
         return new_nodes
 
     def create_topology(self, nodes):
