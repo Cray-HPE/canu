@@ -1,6 +1,8 @@
 import copy
 import logging
 
+import click
+
 log = logging.getLogger(__name__)
 
 
@@ -42,7 +44,9 @@ class NetworkNode:
     # will be fewer ports of higher port speed.
     def __port_select(self, speed=None):
         if not isinstance(speed, int):
-            raise Exception(f"{__name__}: Port speed must be an integer")
+            raise Exception(
+                click.secho(f"{__name__}: Port speed must be an integer", fg="red")
+            )
         port = None
         current = None
         speed_cost = 0
@@ -71,7 +75,7 @@ class NetworkNode:
             msg += f"not found for {self.common_name()} "
             msg += f'of type {self.__arch["name"]} and '
             msg += f'model {self.__arch["model"]}'
-            raise Exception(msg)
+            raise Exception(click.secho(msg, fg="red"))
 
         # TODO: Do we need to check count?  Probably not since it's required in schema
         # if 'count' not in available:
@@ -87,12 +91,18 @@ class NetworkNode:
         # print(port)
         if port is None:
             raise Exception(
-                f"{__name__}: Port with speed {speed} not available in hardware"
+                click.secho(
+                    f"{__name__}: Port with speed {speed} not available in hardware",
+                    fg="red",
+                )
             )
 
         if port["count"] <= 0:
             raise Exception(
-                f"{__name__}: Port count with speed {speed} cannot be below zero"
+                click.secho(
+                    f"{__name__}: Port count with speed {speed} cannot be below zero",
+                    fg="red",
+                )
             )
 
         port["count"] -= count
@@ -130,12 +140,10 @@ class NetworkNode:
             msg = "No architectural definition found to allow connection between "
             msg += f"{self.common_name()} ({self.arch_type()}) "
             msg += f"and {node.common_name()} ({node.arch_type()}). "
-            msg += "Check architectural definition."
-            raise (Exception(msg))
+            msg += "\nCheck that the correct architectural was selected."
+            raise Exception(click.secho(msg, fg="red"))
 
         if match_count != 1:
-            msg = "Multiple architectural definition found to allow connection between "
-            msg += f"{self.common_name()} ({self.arch_type()}) "
             msg = "Multiple architectural connection matches found between "
             msg += f"{self.common_name()} ({self.arch_type()}) "
             msg += f"and {node.common_name()} ({node.arch_type()}). "
@@ -147,14 +155,14 @@ class NetworkNode:
             msg += f"{self.common_name()} ({self.arch_type()}) "
             msg += f"and {node.common_name()} ({node.arch_type()}).  "
             msg += "Check architectural definition."
-            raise Exception(msg)
+            raise Exception(click.secho(msg, fg="red"))
 
         if connection_speed is None:
             msg = "Connection not architecturally allowed between "
             msg += f"{self.common_name()} ({self.arch_type()}) "
             msg += f"and {node.common_name()} ({node.arch_type()}) at any speed. "
             msg += "Check architectural definition."
-            raise Exception(msg)
+            raise Exception(click.secho(msg, fg="red"))
 
         log.debug(
             f"Connection from {south_node.arch_type()} to {north_node.arch_type()} allowed at speed {connection_speed}"
@@ -195,7 +203,7 @@ class NetworkNode:
 
         # Defensively check input node type.
         if not isinstance(node, NetworkNode):
-            raise Exception("Node needs to be type NetworkNode")
+            raise Exception(click.secho("Node needs to be type NetworkNode", fg="red"))
 
         # Implicit defensive check whether this connection is allowed
         connection_speed = self.__connection_allowed(node)
@@ -234,7 +242,7 @@ class NetworkNode:
     def disconnect(self, node):
         # Defensively check input node type.
         if not isinstance(node, NetworkNode):
-            raise Exception("Node needs to be type NetworkNode")
+            raise Exception(click.secho("Node needs to be type NetworkNode", fg="red"))
 
         # TODO:  this for real
         return False

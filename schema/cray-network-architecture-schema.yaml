@@ -8,12 +8,14 @@ v1_architecture_profile:
   version: int(min=1)
   components: list(include('component'))
   deprecated: bool(required=True)
+  shcd_mapper: list(include('shcd_map'))
 
 v2_architecture_profile:
   name: str(min=1)
   description: str(min=1, max=256)
   version: int(min=1)
   components: list(include('component'))
+  shcd_mapper: list(include('shcd_map'))
 #    constraints: list(include('constraint'))
 
 component:
@@ -32,3 +34,8 @@ connection:
   name: str()
   speed: int()
   number: int(required=False)
+
+shcd_map:
+  shcd_name: str(min=1, exclude=' ')
+  shasta_name: str(min=1, exclude=' ')
+  architecture_type: str(min=1, exclude=' ')
