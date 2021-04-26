@@ -1,12 +1,13 @@
+# Skip Testing this page, not currently used in CANU
 # This creates network diagram image files.
 # TODO: requires much work!
 # import matplotlib.image as pltimg
-import matplotlib.pyplot as plt
-import networkx as nx
+import matplotlib.pyplot as plt  # pragma: no cover
+import networkx as nx  # pragma: no cover
 
 
 # Por reference: https://plotly.com/python/network-graphs/
-class NetworkDrawing:
+class NetworkDrawing:  # pragma: no cover
     def __init__(self, nodes, prune_nodes=False, image_type="svg", image_size=500):
         self.__image_type = image_type
         self.__image_size = image_size

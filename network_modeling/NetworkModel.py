@@ -1,7 +1,8 @@
-import click
+# Skip Testing this page, not currently used in CANU
+import click  # pragma: no cover
 
 
-class NetworkModel:
+class NetworkModel:  # pragma: no cover
     def __init__(self, nodes=None, factory=None):
         if factory:
             self.__factory = factory.get_factory()

@@ -279,7 +279,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets, architecture):
                     )
                     sys.exit(1)
 
-                continue  # Skip this row - prevent from further processing
+                # continue  # Skip this row - prevent from further processing
 
             #
             # Cable source
