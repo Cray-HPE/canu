@@ -13,6 +13,7 @@ colorlog==4.7.2
 decorator==4.4.2
 distlib==0.3.1
 emoji==1.2.0
+et-xmlfile==1.0.1
 filelock==3.0.12
 flake8==3.8.4
 idna==2.10
@@ -22,13 +23,16 @@ mccabe==0.6.1
 mypy-extensions==0.4.3
 natsort==7.1.1
 nox==2020.12.31
+openpyxl==3.0.7
 pathspec==0.8.1
 py==1.10.0
 pycodestyle==2.6.0
 pyflakes==2.2.0
 pylint==2.7.2
+PyYAML==5.4.1
 regex==2020.11.13
 requests==2.25.1
+requests-toolbelt==0.9.1
 rope==0.18.0
 ruamel.yaml==0.16.13
 ruamel.yaml.clib==0.2.2
@@ -40,3 +44,4 @@ urllib3==1.26.3
 validators==0.14.2
 virtualenv==20.4.2
 wrapt==1.12.1
+yamale==3.0.4

@@ -29,6 +29,7 @@ def tests(session):
         "--quiet",
         "--cov=canu",
         "--cov=tests",
+        "--cov=network_modeling",
         "--cov-append",
         "--cov-report=",
         "--cov-fail-under={}".format(COVERAGE_FAIL),
