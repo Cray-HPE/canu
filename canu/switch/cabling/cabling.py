@@ -182,6 +182,9 @@ def cache_lldp(switch_info, lldp_dict, arp):
         "ip_address": switch_info["ip"],
         "cabling": defaultdict(list),
         "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "hostname": switch_info["hostname"],
+        "platform_name": switch_info["platform_name"],
+        "vendor": "aruba",
     }
 
     for port in lldp_dict:

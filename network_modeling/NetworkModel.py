@@ -1,9 +1,38 @@
+"""NetworkModel to create a new network."""
+
 # Skip Testing this page, not currently used in CANU
 import click  # pragma: no cover
 
 
 class NetworkModel:  # pragma: no cover
+    """A class representing a network model.
+
+    Attributes
+    ----------
+    nodes : list
+        A list of network nodes
+    factory :
+
+    Methods
+    -------
+    create_layer(old_nodes, reserve_ports=0):
+        Creates a new layer in the hierarchy.
+    create_topology(nodes):
+        Not implemented
+    assign_ports():
+        Not implemented
+    """
+
     def __init__(self, nodes=None, factory=None):
+        """
+        Construct the necessary attributes for the network model object.
+
+        Parameters
+        ----------
+        nodes : list
+            A list of network nodes
+        factory :
+        """
         if factory:
             self.__factory = factory.get_factory()
         else:
@@ -21,9 +50,17 @@ class NetworkModel:  # pragma: no cover
         self.__superspines = []
 
     def create_layer(self, old_nodes, reserve_ports=0):
-        # Creates a new layer in the hierarchy given the "southbound" list of devices
-        # E.g. Creates leafs given servers and cabinets, creates spines given leafs.
-        # In this case "old_nodes" is the list of the devices to create the new layer on.
+        """Create a new layer in the hierarchy.
+
+        Creates a new layer in the hierarchy given the "southbound" list of devices
+        E.g. Creates leafs given servers and cabinets, creates spines given leafs.
+        In this case "old_nodes" is the list of the devices to create the new layer on.
+
+        :param old_nodes:
+        :param reserve_ports:
+
+        :return new_nodes:
+        """
         new_nodes = []
         for old in old_nodes:
             for connection in old.device_connections():
@@ -114,7 +151,9 @@ class NetworkModel:  # pragma: no cover
         return new_nodes
 
     def create_topology(self, nodes):
+        """Not implemented."""
         pass
 
     def assign_ports(self):
+        """Not implemented."""
         pass

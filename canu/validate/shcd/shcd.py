@@ -72,7 +72,11 @@ log = logging.getLogger("validate_shcd")
 )
 @click.pass_context
 def shcd(ctx, architecture, shcd, tabs, corners, log_):
-    """Report the firmware of an Aruba switch (API v10.04) on the network."""
+    """Validate a SHCD file.
+
+    Pass in a SHCD file to validate that it works architecturally. The validation will ensure that spine switches,
+    leaf switches, edge switches, and nodes all are connected properly.
+    """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
     if architecture.lower() == "full":
@@ -98,6 +102,8 @@ def shcd(ctx, architecture, shcd, tabs, corners, log_):
                 fg="red",
             )
             return
+
+        # Each tab should have 2 corners entered in comma separated
         for i in range(len(tabs.split(","))):
             # 0 -> 0,1
             # 1 -> 2,3
@@ -132,7 +138,7 @@ def shcd(ctx, architecture, shcd, tabs, corners, log_):
     )
 
     node_list, warnings = node_model_from_shcd(
-        factory=factory, spreadsheet=shcd, sheets=sheets, architecture=architecture
+        factory=factory, spreadsheet=shcd, sheets=sheets
     )
 
     print_node_list(node_list)
@@ -146,7 +152,7 @@ def get_node_common_name(name, mapper):
     :param name: A string from SHCD representing the device name
     :param mapper: An array of tuples (SHCD name, hostname, device type)
 
-    :param out: A string of the hostname
+    :return common_name: A string of the hostname
     """
     common_name = None
     for node in mapper:
@@ -169,7 +175,7 @@ def get_node_type(name, mapper):
     :param name: A string from SHCD representing the device name
     :param mapper: An array of tuples (SHCD name, hostname, device type)
 
-    :param out: A string with the device type
+    :return node_type: A string with the device type
     """
     node_type = None
     for node in mapper:
@@ -178,15 +184,15 @@ def get_node_type(name, mapper):
     return node_type
 
 
-def node_model_from_shcd(factory, spreadsheet, sheets, architecture):
+def node_model_from_shcd(factory, spreadsheet, sheets):
     """Create a list of nodes from SHCD.
 
     :param factory: Node factory object
     :param spreadsheet: The SHCD spreadsheet
     :param sheets: An array of tabs and their corners on the spreadsheet
-    :param architecture: The architecture version of the system
 
-    :param out: A list of created nodes
+    :return node_list: A list of created nodes
+    :return warnings: A list of warnings
     """
     # Generated nodes
     node_list = []
@@ -279,11 +285,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets, architecture):
                     )
                     sys.exit(1)
 
-                # continue  # Skip this row - prevent from further processing
-
-            #
             # Cable source
-            #
             try:
                 src_name = row[0].value.strip()
             except AttributeError:
@@ -304,12 +306,10 @@ def node_model_from_shcd(factory, spreadsheet, sheets, architecture):
             node_type = get_node_type(src_name, factory.shcd_mapper())
             log.debug(f"Source Node Type Lookup:  {node_type}")
 
-            #
-            # Created src node if possible and required
-            #
+            # Create src_node if it does not exist
             src_node = None
             src_index = None
-            if node_type and node_name:
+            if node_type is not None and node_name is not None:
                 if node_name not in node_name_list:
                     log.info(f"Creating new node {node_name} of type {node_type}")
                     try:
@@ -332,9 +332,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets, architecture):
                     f"Node type for {src_name} cannot be determined by node type ({node_type}) or node name ({node_name})"
                 )
 
-            #
             # Cable destination
-            #
             dst_name = row[6].value.strip()
             # dst_xname = row[7].value + row[8].value
             dst_port = row[10].value
@@ -345,12 +343,10 @@ def node_model_from_shcd(factory, spreadsheet, sheets, architecture):
             node_type = get_node_type(dst_name, factory.shcd_mapper())
             log.debug(f"Destination Node Type Lookup:  {node_type}")
 
-            #
-            # Created destination node if possible and required
-            #
+            # Create dst_node if it does not exist
             dst_node = None
             dst_index = None
-            if node_type and node_name:
+            if node_type is not None and node_name is not None:
                 if node_name not in node_name_list:
                     log.info(f"Creating new node {node_name} of type {node_type}")
                     try:
@@ -375,11 +371,8 @@ def node_model_from_shcd(factory, spreadsheet, sheets, architecture):
                     f"Node type for {dst_name} cannot be determined by node type ({node_type}) or node name ({node_name})"
                 )
 
-            #
-            # Connect the nodes if possible
-            #
-            # use the lists
-            if src_index and dst_index:
+            # Connect src_node and dst_node if possible
+            if src_index is not None and dst_index is not None:
                 connected = node_list[src_index].connect(node_list[dst_index])
                 if connected:
                     log.info(
@@ -413,6 +406,7 @@ def node_list_warnings(node_list, warnings):
     """
     dash = "-" * 50
     # Generate warnings
+    # Additional warnings about the data will be entered here
     for node in node_list:
         if len(node.edges()) == 0:
             warnings["zero_connections"].append(node.common_name())

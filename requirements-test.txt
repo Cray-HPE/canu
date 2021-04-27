@@ -8,6 +8,7 @@ nox
 openpyxl
 pytest
 pytest-cov
+pytest-sugar
 requests
 requests_toolbelt
 responses

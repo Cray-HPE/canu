@@ -1,3 +1,4 @@
+"""NetworkNode to create a new node."""
 import copy
 import logging
 
@@ -7,7 +8,50 @@ log = logging.getLogger(__name__)
 
 
 class NetworkNode:
+    """A class representing a network node.
+
+    Attributes
+    ----------
+    id : integer
+        The id of the network node
+    hardware :
+    architecture :
+
+    Methods
+    -------
+    available_ports(speed=None):
+        Return number of available ports
+    get_hw():
+        Return hardware
+    get_arch():
+        Return architecture
+    id():
+        Return unique node ID
+    arch_type():
+        Return architecture type
+    common_name(name=None):
+        Get/Set node common name
+    device_connections():
+        Returns a list of architecturally allowed connections.
+    connect(node, bidirectional=True):
+        Connect one device to another, from a mathematical node-edge perspective, not physical ports
+    disconnect(node):
+        Disconnect one device from another.
+    edges():
+        Return a list of all connections.
+    """
+
     def __init__(self, id=None, hardware=None, architecture=None):
+        """
+        Construct the necessary attributes for the network node object.
+
+        Parameters
+        ----------
+        id : integer
+            The id of the network node
+        hardware :
+        architecture :
+        """
         self.__hw = hardware
         self.__arch = architecture
 
@@ -68,6 +112,7 @@ class NetworkNode:
         return port
 
     def available_ports(self, speed=None):
+        """Return number of available ports."""
         available = self.__port_select(speed=speed)
 
         if available is None:
@@ -172,35 +217,41 @@ class NetworkNode:
 
     # TODO:  Get rid of these
     def get_hw(self):
+        """Return hardware."""
         return self.__hw
 
     def get_arch(self):
+        """Return architecture."""
         return self.__arch
 
     # Unique node ID
     def id(self):
+        """Return unique node ID."""
         return self.__id
 
     def arch_type(self):
+        """Return architecture type."""
         return self.__arch["name"]
 
     # Get/Set node common name
     # TODO: This is a quick hack.  Could enforce naming standards via arch yaml and/or have
     #       name specified via constructor.
     def common_name(self, name=None):
+        """Get/Set node common name."""
         if name is not None:
             self.__common_name = name
         return self.__common_name
 
     # Architecturally allowed connections.
     def device_connections(self):
+        """Return a list of architecturally allowed connections."""
         # Returns list
         return self.__arch["connections"]
 
     # Connect one device to another.
     # From a mathematical node-edge perspective, not physical ports
     def connect(self, node, bidirectional=True):
-
+        """Connect one device to another, from a mathematical node-edge perspective, not physical ports."""
         # Defensively check input node type.
         if not isinstance(node, NetworkNode):
             raise Exception(click.secho("Node needs to be type NetworkNode", fg="red"))
@@ -238,8 +289,8 @@ class NetworkNode:
             )
         return True
 
-    # Disconnect one device from another.
     def disconnect(self, node):
+        """Disconnect one device from another."""
         # Defensively check input node type.
         if not isinstance(node, NetworkNode):
             raise Exception(click.secho("Node needs to be type NetworkNode", fg="red"))
@@ -247,6 +298,6 @@ class NetworkNode:
         # TODO:  this for real
         return False
 
-    # Return a list of all connections.
     def edges(self):
+        """Return a list of all connections."""
         return self.__edge_connections

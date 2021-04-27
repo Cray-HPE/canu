@@ -1,3 +1,4 @@
+"""NetworkNodeFactory to create a new network."""
 import logging
 
 import click
@@ -13,6 +14,31 @@ log = logging.getLogger(__name__)
 
 
 class NetworkNodeFactory:
+    """A class to create a new network.
+
+    Attributes
+    ----------
+    hardware_schema :
+
+    hardware_data :
+
+    architecture_schema :
+
+    architecture_data :
+
+    architecture_version :
+
+
+    Methods
+    -------
+    get_factory():
+        Get the factory.
+    generate_node(node_type):
+        Generate a new network node.
+    shcd_mapper():
+        Convert architecture yaml data to tuple.
+    """
+
     __class_singleton = None
 
     def __init__(
@@ -23,6 +49,21 @@ class NetworkNodeFactory:
         architecture_data,
         architecture_version,
     ):
+        """
+        Construct the necessary attributes for the network factory object.
+
+        Parameters
+        ----------
+        hardware_schema :
+
+        hardware_data :
+
+        architecture_schema :
+
+        architecture_data :
+
+        architecture_version :
+        """
         if NetworkNodeFactory.__class_singleton is None:
             NetworkNodeFactory.__class_singleton = self
 
@@ -74,7 +115,7 @@ class NetworkNodeFactory:
             )
 
     # For convenience to users the yamale schema allows port speeds as int or list.
-    # Convert ints to lists here for consistency.
+    # Convert integers to lists here for consistency.
     def __cleanup_hardware_port_speeds(self):
         for component in self.__hardware_data:
             for port in component["ports"]:
@@ -202,11 +243,13 @@ class NetworkNodeFactory:
 
     @staticmethod
     def get_factory(**kwargs):
+        """Get the factory."""
         if not NetworkNodeFactory.__class_singleton:
             NetworkNodeFactory(**kwargs)
         return NetworkNodeFactory.__class_singleton
 
     def generate_node(self, node_type):
+        """Generate a new network node."""
         version_name = self.__architecture_version
 
         # Start by finding the architectural definition
@@ -260,6 +303,7 @@ class NetworkNodeFactory:
     # In the future SHCD device names should match Shasta naming, but for now
     # there is a map required.  Convert architecture yaml data to tuple.
     def shcd_mapper(self):
+        """Convert architecture yaml data to tuple."""
         shcd_mapper = self.__architecture_data[self.__architecture_version][
             "shcd_mapper"
         ]
