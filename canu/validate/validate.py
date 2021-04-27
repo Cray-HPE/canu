@@ -2,6 +2,7 @@
 import click
 from click_help_colors import HelpColorsGroup
 
+from .cabling import cabling
 from .shcd import shcd
 
 
@@ -16,4 +17,5 @@ def validate(ctx):
     pass
 
 
+validate.add_command(cabling.cabling)
 validate.add_command(shcd.shcd)

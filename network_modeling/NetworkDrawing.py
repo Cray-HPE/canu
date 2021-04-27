@@ -1,3 +1,5 @@
+"""NetworkDrawing creates network diagram image files."""
+
 # Skip Testing this page, not currently used in CANU
 # This creates network diagram image files.
 # TODO: requires much work!
@@ -8,13 +10,50 @@ import networkx as nx  # pragma: no cover
 
 # Por reference: https://plotly.com/python/network-graphs/
 class NetworkDrawing:  # pragma: no cover
+    """A class to create network diagram image files.
+
+    Attributes
+    ----------
+    nodes :
+
+    prune_nodes :
+
+    image_type :
+
+    image_size :
+
+
+
+    Methods
+    -------
+    draw():
+        Create a network diagram image.
+    create_topology(nodes):
+        Not implemented
+    assign_ports():
+        Not implemented
+    """
+
     def __init__(self, nodes, prune_nodes=False, image_type="svg", image_size=500):
+        """Construct the necessary attributes for the network diagram.
+
+        Parameters
+        ----------
+        nodes :
+
+        prune_nodes :
+
+        image_type :
+
+        image_size :
+        """
         self.__image_type = image_type
         self.__image_size = image_size
         self.__nodes = nodes
         self.__prune = prune_nodes  # Don't show server/cabinet devices
 
     def draw(self):
+        """Create a network diagram image."""
         #
         # Convert the generated to a graph
         #    MultiGraph allows multiple edges (cables) between nodes.
