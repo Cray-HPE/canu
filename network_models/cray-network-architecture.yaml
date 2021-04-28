@@ -47,11 +47,8 @@ network_v2:
     - name: "river_bmc_leaf"
       model: "6300M_JL762A"
       connections:
-        # LUMI
         - name: "river_ncn_leaf"
           speed: 25
-        - name: "spine"
-          speed: 100
     - name: "river_ncn_node_2_port"
       model: "river_ncn_node_2_port"
       connections:
