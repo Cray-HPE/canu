@@ -34,12 +34,24 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     "--out", help="Output results to a file", type=click.File("w"), default="-"
 )
 @click.pass_context
-def firmware(ctx, username, ip, password, json_, verbose, out):
+def firmware(ctx, ip, username, password, json_, verbose, out):
     r"""Report the firmware of an Aruba switch (API v10.04) on the network.
 
     There are two different statuses that might be indicated.\n
     🛶 - Pass: Indicates that the switch passed the firmware verification.\n
     ❌ - Fail: Indicates that the switch failed the firmware verification. A list of expected firmware versions will be displayed.\n
+
+    \f
+    # noqa: D301
+
+    Args:
+        ctx: CANU context settings
+        ip: Switch IPv4 address
+        username: Switch username
+        password: Switch password
+        json_: Bool indicating json output
+        verbose: Bool indicating verbose output
+        out: Name of the output file
     """
     if ctx.obj["shasta"]:
         shasta = ctx.obj["shasta"]
@@ -117,13 +129,13 @@ def firmware(ctx, username, ip, password, json_, verbose, out):
     else:
         if firmware_match == "Pass":
             click.echo(
-                f"{match_emoji} - Pass - IP: {ip} Hostname:{switch_info['hostname']}"
+                f"{match_emoji} - Pass - IP: {ip} Hostname: {switch_info['hostname']}"
                 + f" Firmware: {switch_firmware['current_version']}",
                 file=out,
             )
         if firmware_match == "Fail":
             click.echo(
-                f"{match_emoji} - Fail - IP: {ip} Hostname:{switch_info['hostname']}"
+                f"{match_emoji} - Fail - IP: {ip} Hostname: {switch_info['hostname']}"
                 + f" Firmware: {switch_firmware['current_version']}",
                 file=out,
             )
@@ -133,11 +145,20 @@ def firmware(ctx, username, ip, password, json_, verbose, out):
 def get_firmware(ip, credentials, return_error=False, cache_minutes=10):
     """Get the firmware of an Aruba switch using v10.04 API.
 
-    :param ip: IPv4 address of the switch
-    :param credentials: Dictionary with username and password of the switch
-    :param return_error: If True, raises requests exceptions, if False prints error and returns None
+    Args:
+        ip: IPv4 address of the switch
+        credentials: Dictionary with username and password of the switch
+        return_error: If True, raises requests exceptions, if False prints error and returns None
+        cache_minutes: Age in minutes of cache before requesting new values
 
-    :return: Dictionary with a switches firmware and dictionary with platform_name and hostname
+    Returns:
+        Dictionary with a switches firmware and dictionary with platform_name and hostname
+
+    Raises:
+        http_error: IP not Aruba switch, or credentials bad.
+        connection_error: Bad ip address.
+        request_exception: Error
+        error: Error
     """
     if firmware_cached_recently(ip, cache_minutes):
         cached_switch = get_switch_from_cache(ip)
@@ -178,9 +199,9 @@ def get_firmware(ip, credentials, return_error=False, cache_minutes=10):
                     bg="red",
                 )
                 return None, None
-        except requests.exceptions.RequestException as error:  # pragma: no cover
+        except requests.exceptions.RequestException as request_exception:  # pragma: no cover
             if return_error:
-                raise error
+                raise request_exception
             else:
                 click.secho(
                     f"Error connecting to switch  {ip}.",

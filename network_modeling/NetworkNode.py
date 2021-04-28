@@ -45,12 +45,10 @@ class NetworkNode:
         """
         Construct the necessary attributes for the network node object.
 
-        Parameters
-        ----------
-        id : integer
-            The id of the network node
-        hardware :
-        architecture :
+        Args:
+            id: The id of the network node
+            hardware: hardware
+            architecture: architecture
         """
         self.__hw = hardware
         self.__arch = architecture

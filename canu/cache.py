@@ -42,7 +42,8 @@ def cache_switch(switch):
 
     The switch that is passed in will either be added to the cache, or updated in the cache, depending on if it existed before.
 
-    :param switch: The JSON switch object to be added to the cache.
+    Args:
+        switch: The JSON switch object to be added to the cache.
 
     The updated cache is immediately written to a file.
     """
@@ -58,11 +59,12 @@ def cache_switch(switch):
 def firmware_cached_recently(ip, max_cache_time=10):
     """Check if a switch has recently been cached and return True or False.
 
-    :param ip: The IPv4 address to check in the cache.
+    Args:
+        ip: The IPv4 address to check in the cache.
+        max_cache_time: Optional parameter (defaults to 10) to determine the maximum cache time in minutes.
 
-    :param max_cache_time: Optional parameter (defaults to 10) to determine the maximum cache time in minutes.
-
-    :return: True or False depending on if the IP address has been cached less than the max_cache_time parameter.
+    Returns:
+        True or False depending on if the IP address has been cached less than the max_cache_time parameter.
     """
     if ip_exists_in_cache(ip):
         index = list(map(itemgetter("ip_address"), canu_cache["switches"])).index(ip)
@@ -87,9 +89,14 @@ def firmware_cached_recently(ip, max_cache_time=10):
 def get_switch_from_cache(ip):
     """Return an existing switch from the cache by IP lookup.
 
-    :param ip: The IPv4 address of the switch to be retrieved from the cache.
+    Args:
+        ip: The IPv4 address of the switch to be retrieved from the cache.
 
-    :return: The JSON switch from the cache.
+    Returns:
+        The JSON switch from the cache.
+
+    Raises:
+        Exception: If ip address not in cache.
     """
     if ip_exists_in_cache(ip):
         index = list(map(itemgetter("ip_address"), canu_cache["switches"])).index(ip)
@@ -101,11 +108,12 @@ def get_switch_from_cache(ip):
 def update_switch_in_cache(cache, switch):
     """Update an existing switch in the cache.
 
-    :param cache: The JSON representation of the current YAML cache file.
+    Args:
+        cache: The JSON representation of the current YAML cache file.
+        switch: The JSON switch object to be added to the cache.
 
-    :param switch: The JSON switch object to be added to the cache.
-
-    :return: The updated JSON cache with the switch updated.
+    Returns:
+        The updated JSON cache with the switch updated.
     """
     index = list(map(itemgetter("ip_address"), cache["switches"])).index(
         switch["ip_address"]
@@ -119,11 +127,12 @@ def update_switch_in_cache(cache, switch):
 def add_switch_to_cache(cache, switch):
     """Add a switch to the cache.
 
-    :param cache: The JSON representation of the current YAML cache file.
+    Args:
+        cache: The JSON representation of the current YAML cache file.
+        switch: The JSON switch object to be added to the cache.
 
-    :param switch: The JSON switch object to be added to the cache.
-
-    :return: The updated JSON cache with the switch appended
+    Returns:
+        The updated JSON cache with the switch appended
     """
     # If there are no switches yet in the cache
     if cache["switches"] is None:  # pragma: no cover
@@ -139,11 +148,11 @@ def remove_switch_from_cache(ip):
 
     This function is useful for removing a test switch from the cache.
 
-    :param cache: The JSON representation of the current YAML cache file.
+    Args:
+        ip: The IPv4 address to remove from the cache.
 
-    :param switch: The JSON switch object to be added to the cache.
-
-    :return: The updated JSON cache with the switch appended
+    Returns:
+        The updated JSON cache with the switch appended
     """
     index = list(map(itemgetter("ip_address"), canu_cache["switches"])).index(ip)
 
@@ -159,9 +168,11 @@ def remove_switch_from_cache(ip):
 def ip_exists_in_cache(ip):
     """Check if a switch already exists in the cache.
 
-    :param ip: The IPv4 address to check.
+    Args:
+        ip: The IPv4 address to check.
 
-    :return: True or False depending on if the IP address is in the cache.
+    Returns:
+        True or False depending on if the IP address is in the cache.
     """
     if canu_cache["switches"] is not None and ip in map(
         itemgetter("ip_address"), canu_cache["switches"]

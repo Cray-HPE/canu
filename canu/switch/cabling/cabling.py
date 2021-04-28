@@ -34,7 +34,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     "--out", help="Output results to a file", type=click.File("w"), default="-"
 )
 @click.pass_context
-def cabling(ctx, username, ip, password, out):
+def cabling(ctx, ip, username, password, out):
     """Report the cabling of an Aruba switch (API v10.04) on the network by using LLDP.
 
     If the neighbor name is not in LLDP, the IP and vlan information are displayed
@@ -45,6 +45,16 @@ def cabling(ctx, username, ip, password, out):
     Ports highlighted in blue contain the string "ncn" in the hostname.
 
     Ports are highlighted in green when the port name is set with the interface name.
+
+    \f
+    # noqa: D301
+
+    Args:
+        ctx: CANU context settings
+        ip: Switch IPv4 address
+        username: Switch username
+        password: Switch password
+        out: Name of the output file
     """
     credentials = {"username": username, "password": password}
     switch_info, switch_dict, arp = get_lldp(ip, credentials)
@@ -58,12 +68,20 @@ def cabling(ctx, username, ip, password, out):
 def get_lldp(ip, credentials, return_error=False):
     """Get lldp of an Aruba switch using v10.04 API.
 
-    :param ip: IPv4 address of the switch
-    :param credentials: Dictionary with username and password of the switch
+    Args:
+        ip: IPv4 address of the switch
+        credentials: Dictionary with username and password of the switch
+        return_error: Bool if the error show be printed or returned
 
-    :return switch_info: Dictionary with switch platform_name, hostname and IP address
-    :return lldp_dict: Dictionary with LLDP information
-    :return arp: ARP dictionary
+    Returns:
+        switch_info: Dictionary with switch platform_name, hostname and IP address
+        lldp_dict: Dictionary with LLDP information
+        arp: ARP dictionary
+
+    Raises:
+        http_error: IP not Aruba switch, or credentials bad.
+        connection_error: Bad ip address.
+        error: Error
     """
     session = requests.Session()
     try:
@@ -177,7 +195,13 @@ def get_lldp(ip, credentials, return_error=False):
 
 
 def cache_lldp(switch_info, lldp_dict, arp):
-    """Format LLDP info and cache it."""
+    """Format LLDP info and cache it.
+
+    Args:
+        switch_info: Dictionary with switch platform_name, hostname and IP address
+        lldp_dict: Dictionary with LLDP information
+        arp: ARP dictionary
+    """
     switch = {
         "ip_address": switch_info["ip"],
         "cabling": defaultdict(list),
@@ -221,10 +245,11 @@ def cache_lldp(switch_info, lldp_dict, arp):
 def print_lldp(switch_info, lldp_dict, arp, out="-"):
     """Print summary of the switch LLDP data.
 
-    :param switch_info: Dictionary with switch platform_name, hostname and IP address
-    :param lldp_dict: Dictionary with LLDP information
-    :param arp: ARP dictionary
-    :param out: Defaults to stdout, but will print to the file name passed in
+    Args:
+        switch_info: Dictionary with switch platform_name, hostname and IP address
+        lldp_dict: Dictionary with LLDP information
+        arp: ARP dictionary
+        out: Defaults to stdout, but will print to the file name passed in
     """
     dash = "-" * 150
     heading = [

@@ -52,7 +52,7 @@ from canu.switch.cabling.cabling import get_lldp, print_lldp
 )
 @click.pass_context
 def cabling(ctx, ips, ips_file, username, password, out, view):
-    """Report the cabling of an Aruba switch (API v10.04) on the network by using LLDP.
+    """Report the cabling of all Aruba switches (API v10.04) on the network by using LLDP.
 
     Pass in either a comma separated list of IP addresses using the --ips option
 
@@ -84,6 +84,18 @@ def cabling(ctx, ips, ips_file, username, password, out, view):
     Ports highlighted in blue contain the string "ncn" in the hostname.
 
     Ports are highlighted in green when the port name is set with the interface name.
+
+    \f
+    # noqa: D301
+
+    Args:
+        ctx: CANU context settings
+        ips: Comma separated list of IPv4 addresses of switches
+        ips_file: File with one IPv4 address per line
+        username: Switch username
+        password: Switch password
+        out: Name of the output file
+        view: View of the cabling results.
     """
     if ips_file:
         ips = []
@@ -152,12 +164,14 @@ def cabling(ctx, ips, ips_file, username, password, out, view):
 def equipment_table(switch_data):
     """Generate a dictionary of MAC addresses and what each address is connected to.
 
-    :param switch_data: A dictionary containing data for each equipment.
-        switch_data[i][0] -> Dictionary with switch platform_name, hostname and IP address
-        switch_data[i][1] -> Dictionary with LLDP information
-        switch_data[i][2] -> ARP dictionary
+    Args:
+        switch_data: A dictionary containing data for each equipment.
+            switch_data[i][0] -> Dictionary with switch platform_name, hostname and IP address
+            switch_data[i][1] -> Dictionary with LLDP information
+            switch_data[i][2] -> ARP dictionary
 
-    :return equipment_json: Dictionary with mac addresses as keys.
+    Returns:
+        equipment_json: Dictionary with mac addresses as keys.
     """
     equipment_json = defaultdict(lambda: defaultdict(dict))
 
@@ -234,9 +248,9 @@ def equipment_table(switch_data):
 def print_equipment(equipment_json, out="-"):
     """Print a table for each mac address.
 
-    :param equipment_json: A dictionary containing data for each equipment.
-
-    :param out: Defaults to stdout, but will print to the file name passed in
+    Args:
+        equipment_json: A dictionary containing data for each equipment.
+        out: Defaults to stdout, but will print to the file name passed in
     """
     dash = "-" * 100
 
@@ -357,12 +371,12 @@ def print_equipment(equipment_json, out="-"):
 def switch_table(switch_data, out="-"):
     """Print a table for each switch.
 
-    :param switch_data: A list containing data for each switch.
-        switch_data[i][0] -> Dictionary with switch platform_name, hostname and IP address
-        switch_data[i][1] -> Dictionary with LLDP information
-        switch_data[i][2] -> ARP dictionary
-
-    :param out: Defaults to stdout, but will print to the file name passed in
+    Args:
+        switch_data: A list containing data for each switch.
+            switch_data[i][0] -> Dictionary with switch platform_name, hostname and IP address
+            switch_data[i][1] -> Dictionary with LLDP information
+            switch_data[i][2] -> ARP dictionary
+        out: Defaults to stdout, but will print to the file name passed in
     """
     for i in range(len(switch_data)):
         print_lldp(switch_data[i][0], switch_data[i][1], switch_data[i][2], out)

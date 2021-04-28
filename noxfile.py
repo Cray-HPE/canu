@@ -11,10 +11,7 @@ nox.options.sessions = "tests", "lint", "cover"
 
 @nox.session(python="3")
 def tests(session):
-    """Default unit test session.
-
-    This is meant to be run against any python version intended to be used.
-    """
+    """Default unit test session."""
     # Install all test dependencies, then install this package in-place.
     path = "tests"
     session.install("-r", "requirements-test.txt")
@@ -48,6 +45,7 @@ def lint(session):
         "flake8-bugbear",
         "flake8-docstrings",
         "flake8-import-order",
+        "darglint",
     )
     session.run("flake8", *args)
 

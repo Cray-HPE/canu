@@ -37,15 +37,11 @@ class NetworkDrawing:  # pragma: no cover
     def __init__(self, nodes, prune_nodes=False, image_type="svg", image_size=500):
         """Construct the necessary attributes for the network diagram.
 
-        Parameters
-        ----------
-        nodes :
-
-        prune_nodes :
-
-        image_type :
-
-        image_size :
+        Args:
+            nodes: nodes
+            prune_nodes: prune_nodes
+            image_type: image_type
+            image_size: image_size
         """
         self.__image_type = image_type
         self.__image_size = image_size

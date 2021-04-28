@@ -44,13 +44,13 @@ from canu.switch.firmware.firmware import get_firmware
     confirmation_prompt=False,
     help="Switch password",
 )
+@click.option("--json", "json_", is_flag=True, help="Output JSON")
 @click.option(
     "--out", help="Output results to a file", type=click.File("w"), default="-"
 )
-@click.option("--json", "json_", is_flag=True, help="Output JSON")
 # @click.option("--verbose", "-v", is_flag=True, help="Verbose mode")
 @click.pass_context
-def firmware(ctx, ips, ips_file, username, password, out, json_):
+def firmware(ctx, ips, ips_file, username, password, json_, out):
     """Report the firmware versions of all Aruba switches (API v10.04) on the network.
 
     Pass in either a comma separated list of IP addresses using the --ips option
@@ -66,6 +66,21 @@ def firmware(ctx, ips, ips_file, username, password, out, json_):
     list of expected firmware versions for that switch is displayed.
 
     🔺 Error: Indicates that there was an error connecting to the switch, check the Errors table for the specific error.
+
+    \f
+    # noqa: D301
+
+    Args:
+        ctx: CANU context settings
+        ips: Comma separated list of IPv4 addresses of switches
+        ips_file: File with one IPv4 address per line
+        username: Switch username
+        password: Switch password
+        json_: Bool indicating json output
+        out: Name of the output file
+
+    Returns:
+        json_formatted: If JSON is selected, returns output
     """
     if ctx.obj["shasta"]:
         shasta = ctx.obj["shasta"]
@@ -240,10 +255,10 @@ def firmware(ctx, ips, ips_file, username, password, out, json_):
 def firmware_table(data, out="-"):
     """Print a table with switch information.
 
-    :param data: An array of switch information to be printed
-        [Status emoji, Status text, Switch IP, Switch Hostname, Current firmware, Error]
-
-    :param out: Defaults to stdout, but will print to the file name passed in
+    Args:
+        data: An array of switch information to be printed
+            [Status emoji, Status text, Switch IP, Switch Hostname, Current firmware, Error]
+        out: Defaults to stdout, but will print to the file name passed in
     """
     dash = "-" * 66
     heading = ["", "STATUS", "IP", "HOSTNAME", "FIRMWARE", ""]
@@ -269,10 +284,10 @@ def firmware_table(data, out="-"):
 def summary_table(data, out="-"):
     """Print summary of the switch data.
 
-    :param data: An array of switch information to be printed
-        [Status emoji, Status text, Switch IP, Switch Hostname, Current firmware, Error]
-
-    :param out: Defaults to stdout, but will print to the file name passed in
+    Args:
+        data: An array of switch information to be printed
+            [Status emoji, Status text, Switch IP, Switch Hostname, Current firmware, Error]
+        out: Defaults to stdout, but will print to the file name passed in
     """
     dash = "-" * 66
 
