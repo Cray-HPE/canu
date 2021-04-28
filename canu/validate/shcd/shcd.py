@@ -301,6 +301,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                         fg="red",
                     )
                     sys.exit(1)
+                continue
 
             # Cable source
             try:
