@@ -43,6 +43,8 @@ When running CANU, the Shasta version is required, you can pass it in with eithe
 
 ### Initialization
 
+**[Details](/docs/init.md)**<br>
+
 To help make switch setup a breeze. CANU can automatically parse CSI output or the Shasta SLS API for switch IPv4 addresses. In order to parse CSI output, use the `--csi-folder FOLDER` flag to pass in the folder where the _sls_input_file.json_ file is located. To parse the Shasta SLS API for IP addresses, ensure that you have a valid token. The token file can either be passed in with the `--auth-token TOKEN_FILE` flag, or it can be automatically read if the environmental variable **SLS_TOKEN** is set. The SLS address is default set to _api-gw-service-nmn.local_, if you are operating on a system with a different address, you can set it with the `--sls-address SLS_ADDRESS` flag.
 
 The _sls_input_file.json_ file is generally stored in one of two places depending on how far the system is in the install process.
@@ -68,6 +70,8 @@ $ canu -s 1.4 init --auth-token ~./config/cray/tokens/ --sls-address 1.2.3.4 --o
 
 ### Check Single Switch Firmware
 
+**[Details](/docs/switch_firmware.md)**<br>
+
 To check the firmware of a single switch run: `canu --shasta 1.4 switch firmware --ip 192.168.1.1 --username USERNAME --password PASSWORD`
 
 ```bash
@@ -76,6 +80,8 @@ $ canu --shasta 1.4 switch firmware --ip 192.168.1.1 --username USERNAME --passw
 ```
 
 ### Check Firmware of Multiple Switches
+
+**[Details](/docs/network_firmware.md)**<br>
 
 Multiple Aruba switches on a network can be checked for their firmware versions. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
 
@@ -152,6 +158,7 @@ $ canu --shasta 1.4 network firmware --ips 192.168.1.1,192.168.1.2 --username US
 
 ### Check Single Switch Cabling
 
+**[Details](/docs/switch_cabling.md)**<br>
 CANU can also use LLDP to check the cabling status of a switch. To check the cabling of a single switch run: `canu --shasta 1.4 switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD`
 
 ```bash
@@ -175,6 +182,8 @@ Sometimes when checking cabling using LLDP, the neighbor does not return any inf
 Entries in the table will be colored based on what they are. Neighbors that have _ncn_ in their name will be colored blue. Neighbors that have a port labeled (not a MAC address), are generally switches and are labeled green. Ports that are duplicated, will be bright white.
 
 ### Check Cabling of Multiple Switches
+
+**[Details](/docs/network_cabling.md)**<br>
 
 The cabling of multiple Aruba switches on a network can be checked at the same time using LLDP. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
 
@@ -242,6 +251,10 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 # Changelog
 
 ## [unreleased]
+
+- Added `verify shcd` command to allow verification of SHCD spreadsheets
+- Added `verify cabling` command to run verifications on network IPs
+- Added additional documentation for each command, added docstring checks to lint tests, and updated testing feedback
 
 ## [0.0.3] - 2021-04-16
 

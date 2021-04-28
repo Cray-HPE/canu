@@ -52,17 +52,15 @@ class NetworkNodeFactory:
         """
         Construct the necessary attributes for the network factory object.
 
-        Parameters
-        ----------
-        hardware_schema :
+        Args:
+            hardware_schema : hardware_schema
+            hardware_data : hardware_data
+            architecture_schema : architecture_schema
+            architecture_data : architecture_data
+            architecture_version : architecture_version
 
-        hardware_data :
-
-        architecture_schema :
-
-        architecture_data :
-
-        architecture_version :
+        Raises:
+            Exception: Cannot create more than one singleton NetworkNodeFactory
         """
         if NetworkNodeFactory.__class_singleton is None:
             NetworkNodeFactory.__class_singleton = self

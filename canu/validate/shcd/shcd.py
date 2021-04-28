@@ -76,6 +76,17 @@ def shcd(ctx, architecture, shcd, tabs, corners, log_):
 
     Pass in a SHCD file to validate that it works architecturally. The validation will ensure that spine switches,
     leaf switches, edge switches, and nodes all are connected properly.
+
+    \f
+    # noqa: D301
+
+    Args:
+        ctx: CANU context settings
+        architecture: Shasta architecture
+        shcd: SHCD file
+        tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
+        corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
+        log_: Level of logging.
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
@@ -149,10 +160,12 @@ def shcd(ctx, architecture, shcd, tabs, corners, log_):
 def get_node_common_name(name, mapper):
     """Map SHCD device names to hostname.
 
-    :param name: A string from SHCD representing the device name
-    :param mapper: An array of tuples (SHCD name, hostname, device type)
+    Args:
+        name: A string from SHCD representing the device name
+        mapper: An array of tuples (SHCD name, hostname, device type)
 
-    :return common_name: A string of the hostname
+    Returns:
+        common_name: A string of the hostname
     """
     common_name = None
     for node in mapper:
@@ -172,10 +185,12 @@ def get_node_common_name(name, mapper):
 def get_node_type(name, mapper):
     """Map SHCD device name to device type.
 
-    :param name: A string from SHCD representing the device name
-    :param mapper: An array of tuples (SHCD name, hostname, device type)
+    Args:
+        name: A string from SHCD representing the device name
+        mapper: An array of tuples (SHCD name, hostname, device type)
 
-    :return node_type: A string with the device type
+    Returns:
+        node_type: A string with the device type
     """
     node_type = None
     for node in mapper:
@@ -187,12 +202,14 @@ def get_node_type(name, mapper):
 def node_model_from_shcd(factory, spreadsheet, sheets):
     """Create a list of nodes from SHCD.
 
-    :param factory: Node factory object
-    :param spreadsheet: The SHCD spreadsheet
-    :param sheets: An array of tabs and their corners on the spreadsheet
+    Args:
+        factory: Node factory object
+        spreadsheet: The SHCD spreadsheet
+        sheets: An array of tabs and their corners on the spreadsheet
 
-    :return node_list: A list of created nodes
-    :return warnings: A list of warnings
+    Returns:
+        node_list: A list of created nodes
+        warnings: A list of warnings
     """
     # Generated nodes
     node_list = []
@@ -401,8 +418,9 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
 def node_list_warnings(node_list, warnings):
     """Print the warnings found while validating the SHCD.
 
-    :param node_list: A list of nodes
-    :param node_list: A dictionary of warnings
+    Args:
+        node_list: A list of nodes
+        warnings: A dictionary of warnings
     """
     dash = "-" * 50
     # Generate warnings
@@ -436,7 +454,8 @@ def node_list_warnings(node_list, warnings):
 def print_node_list(node_list):
     """Print the nodes found in the SHCD.
 
-    :param node_list: A list of nodes
+    Args:
+        node_list: A list of nodes
     """
     dash = "-" * 50
     click.echo("\n")

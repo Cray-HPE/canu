@@ -574,18 +574,18 @@ lldp_neighbors_json1 = {
             "neighbor_info": {
                 "chassis_description": "Test switch description",
                 "chassis_name": "sw-test02",
-                "port_description": "",
+                "port_description": "1/1/1",
                 "port_id_subtype": "if_name",
             },
             "port_id": "1/1/1",
         }
     },
     "1%2F1%2F2": {
-        "aa:bb:cc:88:00:00,1/1/2": {
-            "chassis_id": "aa:bb:cc:88:00:00",
-            "mac_addr": "aa:bb:cc:88:00:03",
+        "bb:bb:bb:bb:bb:cc,1/1/2": {
+            "chassis_id": "bb:bb:bb:bb:bb:bb",
+            "mac_addr": "bb:bb:bb:bb:bb:cc",
             "neighbor_info": {
-                "chassis_description": "Test switch2 description",
+                "chassis_description": "Test switch description",
                 "chassis_name": "sw-test02",
                 "port_description": "1/1/2",
                 "port_id_subtype": "if_name",
@@ -618,16 +618,16 @@ lldp_neighbors_json1 = {
         },
     },
     "1%2F1%2F4": {
-        "aa:aa:aa:aa:aa:aa,aa:aa:aa:aa:aa:aa": {
-            "chassis_id": "aa:aa:aa:aa:aa:aa",
-            "mac_addr": "aa:aa:aa:aa:aa:aa",
+        "cc:cc:cc:cc:cc:cc,cc:cc:cc:cc:cc:cc": {
+            "chassis_id": "cc:cc:cc:cc:cc:cc",
+            "mac_addr": "cc:cc:cc:cc:cc:cc",
             "neighbor_info": {
                 "chassis_description": "NCN description",
                 "chassis_name": "ncn-test",
                 "port_description": "mgmt1",
                 "port_id_subtype": "link_local_addr",
             },
-            "port_id": "aa:aa:aa:aa:aa:aa",
+            "port_id": "cc:cc:cc:cc:cc:cc",
         }
     },
 }
@@ -661,7 +661,7 @@ lldp_neighbors_json2 = {
     "1%2F1%2F1": {
         "aa:aa:aa:aa:aa:aa,1/1/1": {
             "chassis_id": "aa:aa:aa:aa:aa:aa",
-            "mac_addr": "aa:aa:aa:aa:aa:bb",
+            "mac_addr": "aa:aa:aa:aa:aa:aa",
             "neighbor_info": {
                 "chassis_description": "Test switch description",
                 "chassis_name": "sw-test01",
@@ -670,7 +670,20 @@ lldp_neighbors_json2 = {
             },
             "port_id": "1/1/1",
         }
-    }
+    },
+    "1%2F1%2F2": {
+        "aa:aa:aa:aa:aa:bb,1/1/2": {
+            "chassis_id": "aa:aa:aa:aa:aa:aa",
+            "mac_addr": "aa:aa:aa:aa:aa:bb",
+            "neighbor_info": {
+                "chassis_description": "Test switch description",
+                "chassis_name": "sw-test01",
+                "port_description": "",
+                "port_id_subtype": "if_name",
+            },
+            "port_id": "1/1/2",
+        }
+    },
 }
 
 arp_neighbors_json2 = {

@@ -83,7 +83,7 @@ cli.add_command(validate.validate)
     help_headers_color="yellow",
     help_options_color="blue",
 )
-@click.option("--csi-folder", help="Directory containing the CSI yaml files")
+@click.option("--csi-folder", help="Directory containing the CSI json file")
 @click.option(
     "--auth-token",
     envvar="SLS_TOKEN",
@@ -115,6 +115,16 @@ def init(ctx, csi_folder, auth_token, sls_address, out):
 
      - Later in the install process, the sls_input_file.json file is
      generally in `/mnt/pitdata/prep/SYSTEMNAME/`
+
+    \f
+    # noqa: D301
+
+    Args:
+        ctx: CANU context settings
+        csi_folder: Directory containing the CSI json file
+        auth_token: Token for SLS authentication
+        sls_address: The address of SLS
+        out: Name of the output file
     """
     switch_addresses = []
 
@@ -199,9 +209,11 @@ def init(ctx, csi_folder, auth_token, sls_address, out):
 def parse_sls_json_for_ips(shasta):
     """Parse SLS JSON and return NMN IPv4 addresses.
 
-    :param shasta: The SLS JSON to be parsed.
+    Args:
+        shasta: The SLS JSON to be parsed.
 
-    :return: A list of switch IPs.
+    Returns:
+        A list of switch IPs.
     """
     switch_addresses = []
     for sls_network in shasta:

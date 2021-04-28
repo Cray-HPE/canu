@@ -27,11 +27,12 @@ class NetworkModel:  # pragma: no cover
         """
         Construct the necessary attributes for the network model object.
 
-        Parameters
-        ----------
-        nodes : list
-            A list of network nodes
-        factory :
+        Args:
+            nodes: A list of network nodes
+            factory: factory
+
+        Raises:
+            Exception: A list of NetworkNode(s) is required
         """
         if factory:
             self.__factory = factory.get_factory()
@@ -56,10 +57,12 @@ class NetworkModel:  # pragma: no cover
         E.g. Creates leafs given servers and cabinets, creates spines given leafs.
         In this case "old_nodes" is the list of the devices to create the new layer on.
 
-        :param old_nodes:
-        :param reserve_ports:
+        Args:
+            old_nodes: the list of the devices to create the new layer on
+            reserve_ports: Number of ports to reserve
 
-        :return new_nodes:
+        Returns:
+            new_nodes
         """
         new_nodes = []
         for old in old_nodes:

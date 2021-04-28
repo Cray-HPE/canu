@@ -95,6 +95,18 @@ def cabling(ctx, architecture, ips, ips_file, username, password, log_):
     This command will use LLDP to determine the neighbors of the IP addresses passed in to validate that the network
     is properly connected architecturally. The validation will ensure that spine switches, leaf switches,
     edge switches, and nodes all are connected properly.
+
+    \f
+    # noqa: D301
+
+    Args:
+        ctx: CANU context settings
+        architecture: Shasta architecture
+        ips: Comma separated list of IPv4 addresses of switches
+        ips_file: File with one IPv4 address per line
+        username: Switch username
+        password: Switch password
+        log_: Level of logging.
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
@@ -179,10 +191,12 @@ def cabling(ctx, architecture, ips, ips_file, username, password, log_):
 def get_node_type_yaml(name, mapper):
     """Map SHCD device name to device type.
 
-    :param name: A string from SHCD representing the device name
-    :param mapper: An array of tuples (SHCD name, hostname, device type)
+    Args:
+        name: A string from SHCD representing the device name
+        mapper: An array of tuples (SHCD name, hostname, device type)
 
-    :return node_type: A string with the device type
+    Returns:
+        node_type: A string with the device type
     """
     node_type = None
     for node in mapper:
@@ -194,12 +208,14 @@ def get_node_type_yaml(name, mapper):
 def node_model_from_canu(factory, canu_cache, ips):
     """Create a list of nodes from CANU cache.
 
-    :param factory: Node factory object
-    :param canu_cache: CANU cache file
-    :param ips: List of ips to check
+    Args:
+        factory: Node factory object
+        canu_cache: CANU cache file
+        ips: List of ips to check
 
-    :return node_list: A list of created nodes
-    :return warnings: A list of warnings
+    Returns:
+        node_list: A list of created nodes
+        warnings: A list of warnings
     """
     # Generated nodes
     node_list = []
