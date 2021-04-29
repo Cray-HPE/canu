@@ -1,0 +1,369 @@
+"""CANU commands that validate the shcd against the current network cabling."""
+from collections import defaultdict
+import ipaddress
+import logging
+import os
+from pathlib import Path
+import re
+import sys
+
+import click
+from click_help_colors import HelpColorsCommand
+from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
+from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
+import click_spinner
+from network_modeling.NetworkNodeFactory import NetworkNodeFactory
+from openpyxl import load_workbook
+import requests
+import ruamel.yaml
+
+from canu.switch.cabling.cabling import get_lldp
+from canu.validate.shcd.shcd import (
+    node_list_warnings,
+    print_node_list,
+    get_node_common_name,
+    node_model_from_shcd,
+    get_node_type,
+)
+from canu.validate.cabling.cabling import get_node_type_yaml, node_model_from_canu
+
+yaml = ruamel.yaml.YAML()
+
+# Get project root directory
+prog = __file__
+project_root = Path(__file__).resolve().parent.parent.parent.parent
+
+# Schema and Data files
+hardware_schema_file = os.path.join(
+    project_root, "schema", "cray-network-hardware-schema.yaml"
+)
+hardware_spec_file = os.path.join(
+    project_root, "network_models", "cray-network-hardware.yaml"
+)
+architecture_schema_file = os.path.join(
+    project_root, "schema", "cray-network-architecture-schema.yaml"
+)
+architecture_spec_file = os.path.join(
+    project_root, "network_models", "cray-network-architecture.yaml"
+)
+
+canu_cache_file = os.path.join(project_root, "canu_cache.yaml")
+
+
+log = logging.getLogger("validate_shcd")
+
+
+@click.command(
+    cls=HelpColorsCommand,
+    help_headers_color="yellow",
+    help_options_color="blue",
+)
+@click.option(
+    "--architecture",
+    "-a",
+    type=click.Choice(["Full", "TDS"], case_sensitive=False),
+    help="Shasta architecture",
+    required=True,
+    prompt="Architecture type",
+)
+@click.option(
+    "--shcd",
+    help="SHCD file",
+    type=click.File("rb"),
+    required=True,
+)
+@click.option(
+    "--tabs",
+    help="The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.",
+    required=True,
+)
+@click.option(
+    "--corners",
+    help="The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.",
+    # required=True,
+)
+@optgroup.group(
+    "Network cabling IPv4 input sources",
+    cls=RequiredMutuallyExclusiveOptionGroup,
+)
+@optgroup.option(
+    "--ips",
+    help="Comma separated list of IPv4 addresses of switches",
+    type=Ipv4AddressListParamType(),
+)
+@optgroup.option(
+    "--ips-file",
+    help="File with one IPv4 address per line",
+    type=click.File("r"),
+)
+@click.option("--username", default="admin", show_default=True, help="Switch username")
+@click.option(
+    "--password",
+    prompt=True,
+    hide_input=True,
+    confirmation_prompt=False,
+    help="Switch password",
+)
+@click.option(
+    "--log",
+    "log_",
+    help="Level of logging.",
+    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
+    # required=True,
+    default="ERROR",
+)
+@click.pass_context
+def shcd_cabling(
+    ctx, architecture, shcd, tabs, corners, ips, ips_file, username, password, log_
+):
+    """Validate a SHCD file against the current network cabling .
+
+    Pass in a SHCD file to validate that it works architecturally.
+
+    This command will also use LLDP to determine the neighbors of the IP addresses passed in to validate that the network
+    is properly connected architecturally.
+
+    The validation will ensure that spine switches, leaf switches,
+    edge switches, and nodes all are connected properly.
+
+    \f
+    # noqa: D301
+
+    Args:
+        ctx: CANU context settings
+        architecture: Shasta architecture
+        shcd: SHCD file
+        tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
+        corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
+        ips: Comma separated list of IPv4 addresses of switches
+        ips_file: File with one IPv4 address per line
+        username: Switch username
+        password: Switch password
+        log_: Level of logging.
+    """
+    logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
+
+    if architecture.lower() == "full":
+        architecture = "network_v2"
+    elif architecture.lower() == "tds":
+        architecture = "network_v2_tds"
+
+    # SHCD Parsing
+    sheets = []
+
+    if corners:
+        if len(tabs.split(",")) * 2 != len(corners.split(",")):
+            log.error("")
+            click.secho("Not enough corners.\n", fg="red")
+            click.secho(
+                f"Make sure each tab: {tabs.split(',')} has 2 corners.\n", fg="red"
+            )
+            click.secho(
+                f"There were {len(corners.split(','))} corners entered, but there should be {len(tabs.split(',')) * 2}.",
+                fg="red",
+            )
+            click.secho(
+                f"{corners}\n",
+                fg="red",
+            )
+            return
+
+        # Each tab should have 2 corners entered in comma separated
+        for i in range(len(tabs.split(","))):
+            # 0 -> 0,1
+            # 1 -> 2,3
+            # 2 -> 4,5
+
+            sheets.append(
+                (
+                    tabs.split(",")[i],
+                    corners.split(",")[i * 2].strip(),
+                    corners.split(",")[i * 2 + 1].strip(),
+                )
+            )
+    else:
+        for tab in tabs.split(","):
+            click.secho(f"\nFor the Sheet {tab}", fg="green")
+            range_start = click.prompt(
+                "Enter the cell of the upper left corner (Labeled 'Source')",
+                type=str,
+            )
+            range_end = click.prompt(
+                "Enter the cell of the lower right corner", type=str
+            )
+            sheets.append((tab, range_start, range_end))
+
+    # IP Address / LLDP Parsing
+    if ips_file:
+        ips = []
+        lines = [line.strip().replace(",", "") for line in ips_file]
+        ips.extend([ipaddress.ip_address(line) for line in lines if IPV4_ADDRESS(line)])
+
+    credentials = {"username": username, "password": password}
+
+    errors = []
+    ips_length = len(ips)
+
+    if ips:
+        with click_spinner.spinner():
+            for i, ip in enumerate(ips, start=1):
+                print(
+                    f"  Connecting to {ip} - Switch {i} of {ips_length}        ",
+                    end="\r",
+                )
+                try:
+                    # Get LLDP info (stored in cache)
+                    get_lldp(str(ip), credentials, True)
+
+                except requests.exceptions.HTTPError:
+                    errors.append(
+                        [
+                            str(ip),
+                            f"Error connecting to switch {ip}, "
+                            + "check that this IP is an Aruba switch, or check the username or password.",
+                        ]
+                    )
+                except requests.exceptions.ConnectionError:
+                    errors.append(
+                        [
+                            str(ip),
+                            f"Error connecting to switch {ip},"
+                            + " check the IP address and try again.",
+                        ]
+                    )
+                except requests.exceptions.RequestException:  # pragma: no cover
+                    errors.append(
+                        [
+                            str(ip),
+                            f"Error connecting to switch {ip}.",
+                        ]
+                    )
+
+    # Create SHCD Node factory
+    shcd_factory = NetworkNodeFactory.get_factory(
+        hardware_schema=hardware_schema_file,
+        hardware_data=hardware_spec_file,
+        architecture_schema=architecture_schema_file,
+        architecture_data=architecture_spec_file,
+        architecture_version=architecture,
+    )
+
+    shcd_node_list, shcd_warnings = node_model_from_shcd(
+        factory=shcd_factory, spreadsheet=shcd, sheets=sheets
+    )
+
+    print_node_list(shcd_node_list, "SHCD")
+
+    node_list_warnings(shcd_node_list, shcd_warnings)
+
+    # Create Cabling Node factory
+    cabling_factory = NetworkNodeFactory.get_factory(
+        hardware_schema=hardware_schema_file,
+        hardware_data=hardware_spec_file,
+        architecture_schema=architecture_schema_file,
+        architecture_data=architecture_spec_file,
+        architecture_version=architecture,
+    )
+
+    # Open the updated cache to model nodes
+    with open(canu_cache_file, "r+") as file:
+        canu_cache = yaml.load(file)
+
+    cabling_node_list, cabling_warnings = node_model_from_canu(
+        cabling_factory, canu_cache, ips
+    )
+
+    print_node_list(cabling_node_list, "Cabling")
+
+    node_list_warnings(cabling_node_list, cabling_warnings)
+
+    compare_shcd_cabling(shcd_node_list, cabling_node_list)
+
+    dash = "-" * 100
+    if len(errors) > 0:
+        click.echo("\n")
+        click.secho("Errors", fg="red")
+        click.echo(dash)
+        for error in errors:
+            click.echo("{:<15s} - {}".format(error[0], error[1]))
+
+
+def compare_shcd_cabling(shcd_node_list, cabling_node_list):
+    dash = "-" * 60
+
+    shcd_dict = node_list_to_dict(shcd_node_list)
+    cabling_dict = node_list_to_dict(cabling_node_list)
+
+    click.secho(
+        f"\nSHCD / Cabling Comparison",
+        fg="bright_white",
+    )
+    click.secho(dash)
+
+    for node in shcd_dict:
+
+        if node in cabling_dict.keys():
+
+            shcd_missing_edges = []
+
+            for edge in shcd_dict[node]["edges"]:
+                if edge not in cabling_dict[node]["edges"]:
+                    shcd_missing_edges.append(edge)
+
+            if len(shcd_missing_edges) > 0:
+                click.secho(
+                    f"SHCD: {node} missing the following connections on the network",
+                    fg="green",
+                )
+
+                click.secho(str(shcd_missing_edges))
+
+        else:
+            click.secho(
+                f"SHCD: {node} not found on the network.",
+                fg="blue",
+            )
+    print("--------")
+    for node in cabling_dict:
+
+        if node in shcd_dict.keys():
+
+            cabling_missing_edges = []
+
+            for edge in cabling_dict[node]["edges"]:
+                if edge not in shcd_dict[node]["edges"]:
+                    cabling_missing_edges.append(edge)
+
+            if len(cabling_missing_edges) > 0:
+                click.secho(
+                    f"SHCD: {node} missing the following connections on the network",
+                    fg="red",
+                )
+
+                click.secho(str(cabling_missing_edges))
+
+        if node not in shcd_dict.keys():
+            click.secho(
+                f"Cabling: {node} not found in SHCD.",
+                fg="blue",
+            )
+
+
+def node_list_to_dict(node_list):
+    node_dict = defaultdict()
+    node_id_dict = defaultdict()
+
+    for node in node_list:
+        node_id_dict[node.id()] = node.common_name()
+
+    for node in node_list:
+        edge_names = []
+        for edge in node.edges():
+            edge_names.append(node_id_dict[edge])
+
+        node_dict[node.common_name()] = {
+            "id": node.id(),
+            "edges": edge_names,
+        }
+
+    return node_dict

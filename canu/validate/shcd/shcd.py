@@ -152,7 +152,7 @@ def shcd(ctx, architecture, shcd, tabs, corners, log_):
         factory=factory, spreadsheet=shcd, sheets=sheets
     )
 
-    print_node_list(node_list)
+    print_node_list(node_list, "SHCD")
 
     node_list_warnings(node_list, warnings)
 
@@ -169,16 +169,17 @@ def get_node_common_name(name, mapper):
     """
     common_name = None
     for node in mapper:
-        if re.match("^{}".format(node[0].strip()), name):
-            # One naming convention for switches, another for else.
-            tmp_name = None
-            if node[1].find("sw-") != -1:
-                tmp_name = node[1] + "-"
-            else:
-                tmp_name = node[1]
-            tmp_id = re.sub("^({})0*([1-9]*)".format(node[0]), r"\2", name)
-            common_name = "{}{:0>3}".format(tmp_name, tmp_id)
-            break
+        for lookup_name in node[0]:
+            if re.match("^{}".format(lookup_name.strip()), name):
+                # One naming convention for switches, another for else.
+                tmp_name = None
+                if node[1].find("sw-") != -1:
+                    tmp_name = node[1]  "-"
+                else:
+                    tmp_name = node[1]
+                tmp_id = re.sub("^({})0*([1-9]*)".format(lookup_name), r"\2", name)
+                common_name = "{}{:0>3}".format(tmp_name, tmp_id)
+                return common_name
     return common_name
 
 
@@ -194,8 +195,10 @@ def get_node_type(name, mapper):
     """
     node_type = None
     for node in mapper:
-        if re.match("^{}".format(node[0].strip()), name):
-            node_type = node[2]
+        for lookup_name in node[0]:
+            if re.match("^{}".format(lookup_name.strip()), name):
+                node_type = node[2]
+                return node_type
     return node_type
 
 
@@ -301,6 +304,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                         fg="red",
                     )
                     sys.exit(1)
+                continue
 
             # Cable source
             try:
@@ -318,9 +322,9 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             src_slot = row[3].value
             src_port = row[5].value
             log.debug(f"Source Data:  {src_name} {src_slot} {src_port}")
-            node_name = get_node_common_name(src_name, factory.shcd_mapper())
+            node_name = get_node_common_name(src_name, factory.lookup_mapper())
             log.debug(f"Source Name Lookup:  {node_name}")
-            node_type = get_node_type(src_name, factory.shcd_mapper())
+            node_type = get_node_type(src_name, factory.lookup_mapper())
             log.debug(f"Source Node Type Lookup:  {node_type}")
 
             # Create src_node if it does not exist
@@ -355,9 +359,9 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             dst_port = row[10].value
 
             log.debug(f"Destination Data:  {dst_name} {dst_port}")
-            node_name = get_node_common_name(dst_name, factory.shcd_mapper())
+            node_name = get_node_common_name(dst_name, factory.lookup_mapper())
             log.debug(f"Destination Name Lookup:  {node_name}")
-            node_type = get_node_type(dst_name, factory.shcd_mapper())
+            node_type = get_node_type(dst_name, factory.lookup_mapper())
             log.debug(f"Destination Node Type Lookup:  {node_type}")
 
             # Create dst_node if it does not exist
@@ -422,7 +426,7 @@ def node_list_warnings(node_list, warnings):
         node_list: A list of nodes
         warnings: A dictionary of warnings
     """
-    dash = "-" * 50
+    dash = "-" * 60
     # Generate warnings
     # Additional warnings about the data will be entered here
     for node in node_list:
@@ -451,15 +455,16 @@ def node_list_warnings(node_list, warnings):
                 click.secho(node, fg="bright_white")
 
 
-def print_node_list(node_list):
+def print_node_list(node_list, title):
     """Print the nodes found in the SHCD.
 
     Args:
         node_list: A list of nodes
+        title: Title to be printed
     """
-    dash = "-" * 50
+    dash = "-" * 60
     click.echo("\n")
-    click.secho("SHCD Node Connections", fg="bright_white")
+    click.secho(f"{title} Node Connections", fg="bright_white")
     click.echo(dash)
 
     for node in node_list:
