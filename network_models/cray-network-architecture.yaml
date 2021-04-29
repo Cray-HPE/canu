@@ -83,35 +83,38 @@ network_v2:
       connections:
         - name: "spine"
           speed: 100
-  shcd_mapper:
-    - shcd_name: "mn"
+  lookup_mapper:
+    - lookup_name: ["mn"]
       shasta_name: "ncn-m"
       architecture_type: "river_ncn_node_2_port"
-    - shcd_name: "wn"
+    - lookup_name: ["wn"]
       shasta_name: "ncn-w"
       architecture_type: "river_ncn_node_2_port"
-    - shcd_name: "sn"
+    - lookup_name: ["sn"]
       shasta_name: "ncn-s"
       architecture_type: "river_ncn_node_4_port"
-    - shcd_name: "uan"
+    - lookup_name: ["uan"]
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port"
-    - shcd_name: "Ln"
+    - lookup_name: ["Ln", "ln"]
       shasta_name: "ln"
       architecture_type: "river_ncn_node_4_port"
-    - shcd_name: "sw-cdu"
+    - lookup_name: ["viz"]
+      shasta_name: "viz"
+      architecture_type: "river_ncn_node_4_port"
+    - lookup_name: ["cdu"]
       shasta_name: "sw-cdu"
       architecture_type: "mountain_compute_leaf"
-    - shcd_name: "sw-smn"
+    - lookup_name: ["sw-smn"]
       shasta_name: "sw-leaf-bmc"
       architecture_type: "river_bmc_leaf"
-    - shcd_name: "sw-25g"
+    - lookup_name: ["sw-25g"]
       shasta_name: "sw-leaf"
       architecture_type: "river_ncn_leaf"
-    - shcd_name: "sw-100g"
+    - lookup_name: ["sw-100g"]
       shasta_name: "sw-spine"
       architecture_type: "spine"
-    - shcd_name: "sw-edge"
+    - lookup_name: ["sw-edge"]
       shasta_name: "sw-edge"
       architecture_type: "customer_edge_router"
 network_v2_tds:
@@ -167,29 +170,37 @@ network_v2_tds:
       connections:
         - name: "mountain_compute_leaf"
           speed: 10
-  shcd_mapper:
-    - shcd_name: "mn"
+  lookup_mapper:
+    - lookup_name:
+       - "mn"
       shasta_name: "ncn-m"
       architecture_type: "river_ncn_node_2_port"
-    - shcd_name: "wn"
+    - lookup_name:
+       - "wn"
       shasta_name: "ncn-w"
       architecture_type: "river_ncn_node_2_port"
-    - shcd_name: "sn"
+    - lookup_name:
+       - "sn"
       shasta_name: "ncn-s"
       architecture_type: "river_ncn_node_4_port"
-    - shcd_name: "uan"
+    - lookup_name:
+       - "uan"
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port"
-    - shcd_name: "sw-cdu"
+    - lookup_name:
+       - "cdu"
       shasta_name: "sw-cdu"
       architecture_type: "mountain_compute_leaf"
-    - shcd_name: "sw-smn"
+    - lookup_name:
+       - "sw-smn"
       shasta_name: "sw-leaf-bmc"
       architecture_type: "river_bmc_leaf"
-    - shcd_name: "sw-25g"
+    - lookup_name:
+       - "sw-25g"
       shasta_name: "sw-spine"
       architecture_type: "spine"
-    - shcd_name: "sw-100g"
+    - lookup_name:
+       - "sw-100g"
       shasta_name: "sw-edge"
       architecture_type: "customer_edge_router"
 network_v1:
@@ -229,31 +240,40 @@ network_v1:
       connections:
         - name: "spine"
           speed: 100
-  shcd_mapper:
-    - shcd_name: "mn"
+  lookup_mapper:
+    - lookup_name:
+       - "mn"
       shasta_name: "ncn-m"
       architecture_type: "river_ncn_node_2_port_gigabyte"
-    - shcd_name: "wn"
+    - lookup_name:
+       - "wn"
       shasta_name: "ncn-w"
       architecture_type: "river_ncn_node_2_port_gigabyte"
-    - shcd_name: "sn"
+    - lookup_name:
+       - "sn"
       shasta_name: "ncn-s"
       architecture_type: "river_ncn_node_2_port_gigabyte"
-    - shcd_name: "uan"
+    - lookup_name:
+       - "uan"
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port_gigabyte"
-    - shcd_name: "Ln"
+    - lookup_name:
+       - "Ln"
       shasta_name: "ln"
       architecture_type: "river_ncn_node_4_port_gigabyte"
-    - shcd_name: "gn"
+    - lookup_name:
+       - "gn"
       shasta_name: "gn"
       architecture_type: "river_ncn_node_2_port_gigabyte"
-    - shcd_name: "sw-smn"
+    - lookup_name:
+       - "sw-smn"
       shasta_name: "sw-leaf-bmc"
       architecture_type: "river_bmc_leaf"
-    - shcd_name: "sw-40g"
+    - lookup_name:
+       - "sw-40g"
       shasta_name: "sw-spine"
       architecture_type: "spine"
-    - shcd_name: "sw-edge"
+    - lookup_name:
+       - "sw-edge"
       shasta_name: "sw-edge"
       architecture_type: "customer_edge_router"
