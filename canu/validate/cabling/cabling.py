@@ -175,7 +175,7 @@ def cabling(ctx, architecture, ips, ips_file, username, password, log_):
 
     node_list, warnings = node_model_from_canu(factory, canu_cache, ips)
 
-    print_node_list(node_list)
+    print_node_list(node_list, "Cabling")
 
     node_list_warnings(node_list, warnings)
 
@@ -230,7 +230,12 @@ def node_model_from_canu(factory, canu_cache, ips):
 
                 # src_port = port
                 log.debug(f"Source Data: {src_name}")
+                # If starts with 'sw-' then add an extra '-' before the number, and convert to 3 digit
                 node_name = src_name
+                if node_name.startswith("sw-"):
+                    split_name = re.findall(r"(\w+?)(\d+)", node_name)[0]
+                    node_name = "sw-{}-{:03d}".format(split_name[0], int(split_name[1]))
+
                 log.debug(f"Source Name Lookup: {node_name}")
                 node_type = get_node_type_yaml(src_name, factory.shcd_mapper())
                 log.debug(f"Source Node Type Lookup: {node_type}")
@@ -264,7 +269,11 @@ def node_model_from_canu(factory, canu_cache, ips):
                 # Cable destination
                 dst = switch["cabling"][port][0]
 
+                # If starts with 'sw-' then add an extra '-' before the number, and convert to 3 digit
                 dst_name = dst["neighbor"]
+                if dst_name.startswith("sw-"):
+                    split_name = re.findall(r"(\w+?)(\d+)", dst_name)[0]
+                    dst_name = "sw-{}-{:03d}".format(split_name[0], int(split_name[1]))
                 # dst_port = dst["neighbor_port"]
 
                 log.debug(f"Destination Data: {dst_name}")

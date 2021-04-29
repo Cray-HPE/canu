@@ -4,6 +4,7 @@ from click_help_colors import HelpColorsGroup
 
 from .cabling import cabling
 from .shcd import shcd
+from .shcd_cabling import shcd_cabling
 
 
 @click.group(
@@ -19,3 +20,4 @@ def validate(ctx):
 
 validate.add_command(cabling.cabling)
 validate.add_command(shcd.shcd)
+validate.add_command(shcd_cabling.shcd_cabling)
