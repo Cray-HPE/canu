@@ -174,7 +174,7 @@ def get_node_common_name(name, mapper):
                 # One naming convention for switches, another for else.
                 tmp_name = None
                 if node[1].find("sw-") != -1:
-                    tmp_name = node[1]  "-"
+                    tmp_name = node[1] + "-"
                 else:
                     tmp_name = node[1]
                 tmp_id = re.sub("^({})0*([1-9]*)".format(lookup_name), r"\2", name)

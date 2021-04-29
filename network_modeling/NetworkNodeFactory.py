@@ -35,7 +35,7 @@ class NetworkNodeFactory:
         Get the factory.
     generate_node(node_type):
         Generate a new network node.
-    shcd_mapper():
+    lookup_mapper():
         Convert architecture yaml data to tuple.
     """
 
@@ -90,7 +90,7 @@ class NetworkNodeFactory:
             self.__validate_architecture_version()
             self.__validate_model_definition()
             self.__validate_port_definitions()
-            self.__validate_shcd_mapper()
+            self.__validate_lookup_mapper()
 
             self.__warn_architecture_deprecation()
         else:
@@ -204,28 +204,28 @@ class NetworkNodeFactory:
                     f"Validated {arch_model} architecture against hardware for speeds"
                 )
 
-    def __validate_shcd_mapper(self):
+    def __validate_lookup_mapper(self):
         version = self.__architecture_version
         components = self.__architecture_data[version]["components"]
-        shcd_mapper = self.__architecture_data[version]["shcd_mapper"]
+        lookup_mapper = self.__architecture_data[version]["lookup_mapper"]
         # Ensure that all mapped devices actually have an architectural component definition
-        for shcd_map in shcd_mapper:
-            shcd_name = shcd_map["architecture_type"]
+        for lookup in lookup_mapper:
+            lookup_name = lookup["architecture_type"]
             found = False
             for component in components:
-                if component["name"] != shcd_name:
+                if component["name"] != lookup_name:
                     continue
                 found = True
                 break
             if not found:
                 raise Exception(
                     click.secho(
-                        f"Device {shcd_name} in shcd_mapper not found in architecture components",
+                        f"Device {lookup_name} in lookup_mapper not found in architecture components",
                         fg="red",
                     )
                 )
             log.debug(
-                f"Validated shcd_mapper device {shcd_name} in architecture definition"
+                f"Validated lookup_mapper device {lookup_name} in architecture definition"
             )
 
     def __warn_architecture_deprecation(self):
@@ -298,20 +298,20 @@ class NetworkNodeFactory:
 
         return node
 
-    # In the future SHCD device names should match Shasta naming, but for now
+    # In the future SHCD and device names should match Shasta naming, but for now
     # there is a map required.  Convert architecture yaml data to tuple.
-    def shcd_mapper(self):
+    def lookup_mapper(self):
         """Convert architecture yaml data to tuple."""
-        shcd_mapper = self.__architecture_data[self.__architecture_version][
-            "shcd_mapper"
+        lookup_mapper = self.__architecture_data[self.__architecture_version][
+            "lookup_mapper"
         ]
-        shcd_mapper_as_tuple = []
-        for shcd_map in shcd_mapper:
-            shcd_mapper_as_tuple.append(
+        lookup_mapper_as_tuple = []
+        for lookup in lookup_mapper:
+            lookup_mapper_as_tuple.append(
                 (
-                    shcd_map["shcd_name"],
-                    shcd_map["shasta_name"],
-                    shcd_map["architecture_type"],
+                    lookup["lookup_name"] + [lookup["shasta_name"]],
+                    lookup["shasta_name"],
+                    lookup["architecture_type"],
                 )
             )
-        return shcd_mapper_as_tuple
+        return lookup_mapper_as_tuple

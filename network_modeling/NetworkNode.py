@@ -186,6 +186,12 @@ class NetworkNode:
             msg += "\nCheck that the correct architectural was selected."
             raise Exception(click.secho(msg, fg="red"))
 
+        # Allow east-west connections (MLAG connections require this)
+        # This is a bit of a trick since match_count will equal 2 when
+        # arch_types are same.
+        if self.arch_type() == node.arch_type():
+            match_count -= 1
+
         if match_count != 1:
             msg = "Multiple architectural connection matches found between "
             msg += f"{self.common_name()} ({self.arch_type()}) "
