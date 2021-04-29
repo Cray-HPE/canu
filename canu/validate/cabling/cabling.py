@@ -200,8 +200,10 @@ def get_node_type_yaml(name, mapper):
     """
     node_type = None
     for node in mapper:
-        if re.match("^{}".format(node[1].strip()), name):
-            node_type = node[2]
+        for lookup_name in node[0]:
+            if re.match("^{}".format(lookup_name.strip()), name):
+                node_type = node[2]
+                return node_type
     return node_type
 
 
@@ -237,7 +239,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                     node_name = "sw-{}-{:03d}".format(split_name[0], int(split_name[1]))
 
                 log.debug(f"Source Name Lookup: {node_name}")
-                node_type = get_node_type_yaml(src_name, factory.shcd_mapper())
+                node_type = get_node_type_yaml(src_name, factory.lookup_mapper())
                 log.debug(f"Source Node Type Lookup: {node_type}")
 
                 # Create src_node if it does not exist
@@ -279,7 +281,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                 log.debug(f"Destination Data: {dst_name}")
                 node_name = dst_name
                 log.debug(f"Destination Name Lookup:  {node_name}")
-                node_type = get_node_type_yaml(dst_name, factory.shcd_mapper())
+                node_type = get_node_type_yaml(dst_name, factory.lookup_mapper())
                 log.debug(f"Destination Node Type Lookup:  {node_type}")
 
                 # Create dst_node if it does not exist
