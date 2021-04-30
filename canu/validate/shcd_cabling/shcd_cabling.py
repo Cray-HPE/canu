@@ -4,7 +4,6 @@ import ipaddress
 import logging
 import os
 from pathlib import Path
-import re
 import sys
 
 import click
@@ -251,7 +250,15 @@ def shcd_cabling(
     shcd_node_list, shcd_warnings = node_model_from_shcd(
         factory=shcd_factory, spreadsheet=shcd, sheets=sheets
     )
-
+    dash = "-" * 100
+    double_dash = "=" * 100
+    # SHCD
+    click.echo(double_dash)
+    click.secho(
+        "SHCD                                                              ",
+        fg="bright_white",
+    )
+    click.echo(double_dash)
     print_node_list(shcd_node_list, "SHCD")
 
     node_list_warnings(shcd_node_list, shcd_warnings)
@@ -273,13 +280,21 @@ def shcd_cabling(
         cabling_factory, canu_cache, ips
     )
 
+    click.echo("\n")
+    click.echo(double_dash)
+    click.secho("Cabling", fg="bright_white")
+    click.echo(double_dash)
+
     print_node_list(cabling_node_list, "Cabling")
 
     node_list_warnings(cabling_node_list, cabling_warnings)
 
+    click.echo("\n")
+    click.echo(double_dash)
+    click.secho("SHCD vs Cabling", fg="bright_white")
+    click.echo(double_dash)
     compare_shcd_cabling(shcd_node_list, cabling_node_list)
 
-    dash = "-" * 100
     if len(errors) > 0:
         click.echo("\n")
         click.secho("Errors", fg="red")
@@ -312,15 +327,15 @@ def compare_shcd_cabling(shcd_node_list, cabling_node_list):
 
             if len(shcd_missing_edges) > 0:
                 click.secho(
-                    f"SHCD: {node} missing the following connections on the network",
+                    f"{node : <16}: Found in SHCD and on the network, but missing the following connections on the network that were found in the SHCD:",
                     fg="green",
                 )
 
-                click.secho(str(shcd_missing_edges))
+                click.secho(f"                {str(shcd_missing_edges)}")
 
         else:
             click.secho(
-                f"SHCD: {node} not found on the network.",
+                f"{node : <16}: Found in SHCD but not found on the network.",
                 fg="blue",
             )
     print("--------")
@@ -336,15 +351,15 @@ def compare_shcd_cabling(shcd_node_list, cabling_node_list):
 
             if len(cabling_missing_edges) > 0:
                 click.secho(
-                    f"SHCD: {node} missing the following connections on the network",
-                    fg="red",
+                    f"{node : <16}: Found on the network and in the SHCD, but missing the following connections in the SHCD that were found on the network:",
+                    fg="green",
                 )
 
                 click.secho(str(cabling_missing_edges))
 
         if node not in shcd_dict.keys():
             click.secho(
-                f"Cabling: {node} not found in SHCD.",
+                f"{node : <16}: Found on the network but not found in the SHCD.",
                 fg="blue",
             )
 

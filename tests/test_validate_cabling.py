@@ -67,7 +67,7 @@ def test_validate_cabling():
             ],
         )
         assert result.exit_code == 0
-        assert "sw-spine01 connects to 2 nodes:" in str(result.output)
+        assert "sw-spine-001 connects to 2 nodes:" in str(result.output)
 
 
 @responses.activate
@@ -120,7 +120,7 @@ def test_validate_cabling_full_architecture():
             ],
         )
         assert result.exit_code == 0
-        assert "sw-spine01 connects to 2 nodes:" in str(result.output)
+        assert "sw-spine-001 connects to 2 nodes:" in str(result.output)
 
 
 @responses.activate
@@ -175,7 +175,7 @@ def test_validate_cabling_file():
             ],
         )
         assert result.exit_code == 0
-        assert "sw-spine01 connects to 2 nodes:" in str(result.output)
+        assert "sw-spine-001 connects to 2 nodes:" in str(result.output)
 
 
 def test_validate_cabling_missing_ips():
@@ -409,6 +409,58 @@ def test_validate_cabling_bad_password():
         assert result.exit_code == 0
         assert "check the username or password" in str(result.output)
 
+
+@responses.activate
+def test_validate_cabling_rename():
+    """Test that the `canu validate cabling` command runs and finds bad naming."""
+    with runner.isolated_filesystem():
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/login",
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname,system_mac",
+            json=switch_info1,
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system/interfaces/*/lldp_neighbors?depth=2",
+            json=lldp_neighbors_json1,
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system/vrfs/default/neighbors?depth=2",
+            json=arp_neighbors_json1,
+        )
+
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/logout",
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--shasta",
+                shasta,
+                "--cache",
+                cache_minutes,
+                "validate",
+                "cabling",
+                "--architecture",
+                architecture,
+                "--ips",
+                ips,
+                "--username",
+                username,
+                "--password",
+                password,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "sw-leaf-bmc99 should be renamed sw-leaf-bmc-099" in str(result.output)
+        assert "sw-spine01 should be renamed sw-spine-001" in str(result.output)
 
 # Switch 1
 switch_info1 = {
