@@ -8,6 +8,7 @@ import sys
 
 import click
 from click_help_colors import HelpColorsCommand
+import natsort
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from openpyxl import load_workbook
 
@@ -443,16 +444,35 @@ def node_list_warnings(node_list, warnings):
             )
             click.secho(dash)
             nodes = set(warnings["node_type"])
+            nodes = natsort.natsorted(nodes)
             for node in nodes:
                 click.secho(node, fg="bright_white")
+            click.secho("Nodes that show up as MAC addresses might need to have LLDP enabled.")
         if warnings["zero_connections"]:
             click.secho(
                 "\nThe following nodes have zero connections",
                 fg="red",
             )
             click.secho(dash)
-            for node in warnings["zero_connections"]:
+            nodes = set(warnings["zero_connections"])
+            nodes = natsort.natsorted(nodes)
+            for node in nodes:
                 click.secho(node, fg="bright_white")
+        if warnings["rename"]:
+            click.secho(
+                "\nThe following nodes should be renamed",
+                fg="red",
+            )
+            click.secho(dash)
+            nodes = set()
+            for x in warnings["rename"]:
+                new_name = x[1]
+                if new_name == '':
+                    new_name = "(could not identify node)"
+                nodes.add((x[0], new_name))
+            nodes = natsort.natsorted(nodes)
+            for node in nodes:
+                click.secho(f"{node[0]} should be renamed {node[1]}", fg="bright_white")
 
 
 def print_node_list(node_list, title):

@@ -172,35 +172,35 @@ network_v2_tds:
           speed: 10
   lookup_mapper:
     - lookup_name:
-       - "mn"
+        - "mn"
       shasta_name: "ncn-m"
       architecture_type: "river_ncn_node_2_port"
     - lookup_name:
-       - "wn"
+        - "wn"
       shasta_name: "ncn-w"
       architecture_type: "river_ncn_node_2_port"
     - lookup_name:
-       - "sn"
+        - "sn"
       shasta_name: "ncn-s"
       architecture_type: "river_ncn_node_4_port"
     - lookup_name:
-       - "uan"
+        - "uan"
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port"
     - lookup_name:
-       - "cdu"
+        - "cdu"
       shasta_name: "sw-cdu"
       architecture_type: "mountain_compute_leaf"
     - lookup_name:
-       - "sw-smn"
+        - "sw-smn"
       shasta_name: "sw-leaf-bmc"
       architecture_type: "river_bmc_leaf"
     - lookup_name:
-       - "sw-25g"
+        - "sw-25g"
       shasta_name: "sw-spine"
       architecture_type: "spine"
     - lookup_name:
-       - "sw-100g"
+        - "sw-100g"
       shasta_name: "sw-edge"
       architecture_type: "customer_edge_router"
 network_v1:
@@ -242,38 +242,38 @@ network_v1:
           speed: 100
   lookup_mapper:
     - lookup_name:
-       - "mn"
+        - "mn"
       shasta_name: "ncn-m"
       architecture_type: "river_ncn_node_2_port_gigabyte"
     - lookup_name:
-       - "wn"
+        - "wn"
       shasta_name: "ncn-w"
       architecture_type: "river_ncn_node_2_port_gigabyte"
     - lookup_name:
-       - "sn"
+        - "sn"
       shasta_name: "ncn-s"
       architecture_type: "river_ncn_node_2_port_gigabyte"
     - lookup_name:
-       - "uan"
+        - "uan"
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port_gigabyte"
     - lookup_name:
-       - "Ln"
+        - "Ln"
       shasta_name: "ln"
       architecture_type: "river_ncn_node_4_port_gigabyte"
     - lookup_name:
-       - "gn"
+        - "gn"
       shasta_name: "gn"
       architecture_type: "river_ncn_node_2_port_gigabyte"
     - lookup_name:
-       - "sw-smn"
+        - "sw-smn"
       shasta_name: "sw-leaf-bmc"
       architecture_type: "river_bmc_leaf"
     - lookup_name:
-       - "sw-40g"
+        - "sw-40g"
       shasta_name: "sw-spine"
       architecture_type: "spine"
     - lookup_name:
-       - "sw-edge"
+        - "sw-edge"
       shasta_name: "sw-edge"
       architecture_type: "customer_edge_router"

@@ -232,16 +232,33 @@ def node_model_from_canu(factory, canu_cache, ips):
 
                 # src_port = port
                 log.debug(f"Source Data: {src_name}")
-                # If starts with 'sw-' then add an extra '-' before the number, and convert to 3 digit
+                # If starts with 'sw-' then add an extra '-' before the number, and convert to 3 digit. 
+                # Needs to work for these combinations:
+                # sw-spine01
+                # sw-spine-002
+                # sw-leaf-bmc99
+                # sw-leaf-bmc-098
                 node_name = src_name
                 if node_name.startswith("sw-"):
-                    split_name = re.findall(r"(\w+?)(\d+)", node_name)[0]
-                    node_name = "sw-{}-{:03d}".format(split_name[0], int(split_name[1]))
+                    start = 'sw-'
+                    middle = re.findall(r"(?:sw-)([a-z-]+)", node_name)[0]
+                    digits = re.findall(r"(\d+)", node_name)[0]
+                    node_name = f"{start}{middle.rstrip('-')}-{int(digits) :03d}"
 
                 log.debug(f"Source Name Lookup: {node_name}")
                 node_type = get_node_type_yaml(src_name, factory.lookup_mapper())
                 log.debug(f"Source Node Type Lookup: {node_type}")
 
+                # If the hostname is not the Shasta name, it needs to be renamed
+                if src_name != node_name:
+                    old_name = node_name
+                    # If type can't be determined, we do not know what to rename the switch
+                    if node_type is None:
+                        old_name = ''
+                    warnings["rename"].append([src_name, old_name])
+                    log.warning(
+                        f"Node {src_name} should be renamed to {node_name}"
+                    )
                 # Create src_node if it does not exist
                 src_node = None
                 src_index = None
@@ -263,9 +280,9 @@ def node_model_from_canu(factory, canu_cache, ips):
 
                     src_index = node_name_list.index(node_name)
                 else:
-                    warnings["node_type"].append(src_name)
+                    warnings["node_type"].append(node_name)
                     log.warning(
-                        f"Node type for {src_name} cannot be determined by node type ({node_type}) or node name ({node_name})"
+                        f"Node type for {node_name} cannot be determined by node type ({node_type}) or node name ({node_name})"
                     )
 
                 # Cable destination
@@ -273,40 +290,58 @@ def node_model_from_canu(factory, canu_cache, ips):
 
                 # If starts with 'sw-' then add an extra '-' before the number, and convert to 3 digit
                 dst_name = dst["neighbor"]
+
                 if dst_name.startswith("sw-"):
-                    split_name = re.findall(r"(\w+?)(\d+)", dst_name)[0]
-                    dst_name = "sw-{}-{:03d}".format(split_name[0], int(split_name[1]))
-                # dst_port = dst["neighbor_port"]
+                    dst_start = 'sw-'
+                    dst_middle = re.findall(r"(?:sw-)([a-z-]+)", dst_name)[0]
+                    dst_digits = re.findall(r"(\d+)", dst_name)[0]
+                    dst_name = f"{dst_start}{dst_middle.rstrip('-')}-{int(dst_digits) :03d}"
 
                 log.debug(f"Destination Data: {dst_name}")
-                node_name = dst_name
-                log.debug(f"Destination Name Lookup:  {node_name}")
+                dst_node_name = dst_name
+                log.debug(f"Destination Name Lookup:  {dst_node_name}")
                 node_type = get_node_type_yaml(dst_name, factory.lookup_mapper())
                 log.debug(f"Destination Node Type Lookup:  {node_type}")
 
+                if dst_name != dst["neighbor"] and dst_name is not None:
+                    old_dst_name = dst_name
+                    # If type can't be determined, we do not know what to rename the switch
+                    if node_type is None:
+                        old_dst_name = ''
+                    warnings["rename"].append([dst["neighbor"], old_dst_name])
+                    log.warning(
+                        f"Node {dst['neighbor']} should be renamed {old_dst_name}"
+                    )
                 # Create dst_node if it does not exist
                 dst_node = None
                 dst_index = None
-                if node_type is not None and node_name is not None:
-                    if node_name not in node_name_list:
-                        log.info(f"Creating new node {node_name} of type {node_type}")
+                if node_type is not None and dst_node_name is not None:
+                    if dst_node_name not in node_name_list:
+                        log.info(
+                            f"Creating new node {dst_node_name} of type {node_type}"
+                        )
                         try:
                             dst_node = factory.generate_node(node_type)
                         except Exception as e:
                             print(e)
                             sys.exit(1)
 
-                        dst_node.common_name(node_name)
+                        dst_node.common_name(dst_node_name)
 
                         node_list.append(dst_node)
-                        node_name_list.append(node_name)
+                        node_name_list.append(dst_node_name)
                     else:
-                        log.debug(f"Node {node_name} already exists, skipping...")
+                        log.debug(f"Node {dst_node_name} already exists, skipping...")
 
-                    dst_index = node_name_list.index(node_name)
+                    dst_index = node_name_list.index(dst_node_name)
 
                 else:
-                    warnings["node_type"].append(dst_name)
+                    warn_name = dst_name
+                    warn_descrip = switch["cabling"][port][0]["neighbor_description"]
+                    warn_port = switch["cabling"][port][0]["neighbor_port"]
+                    dst_name_warning = f"{node_name : <16} {port : <9} ===> {warn_port} {warn_name} {warn_descrip}"
+
+                    warnings["node_type"].append(dst_name_warning)
 
                     log.warning(
                         f"Node type for {dst_name} cannot be determined by node type ({node_type}) or node name ({node_name})"
