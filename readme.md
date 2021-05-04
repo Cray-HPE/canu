@@ -10,16 +10,21 @@ CANU reads switch version information from the _canu.yaml_ file in the root dire
 **[CANU Initialization](#initialization)**<br>
 **[Check Single Switch Firmware](#check-single-switch-firmware)**<br>
 **[Check Firmware of Multiple Switches](#check-firmware-of-multiple-switches)**<br>
-**[Output to a File](#output-to-a-file)**<br>
-**[JSON](#json)**<br>
 **[Check Single Switch Cabling](#check-single-switch-cabling)**<br>
 **[Check Cabling of Multiple Switches](#check-cabling-of-multiple-switches)**<br>
+**[Validate SHCD](#validate-shcd)**<br>
+**[Validate Cabling](#validate-cabling)**<br>
+**[Validate SHCD and Cabling](#validate-shcd-and-cabling)**<br>
 **[Uninstallation](#uninstallation)**<br>
 **[Road Map](#road-map)**<br>
 **[Testing](#testing)**<br>
 **[Changelog](#changelog)**<br>
 
 # Installation and Usage
+
+## Prerequisites
+
+In order to run CANU, both python3 and pip3 need to be installed.
 
 ## Installation
 
@@ -43,7 +48,7 @@ When running CANU, the Shasta version is required, you can pass it in with eithe
 
 ### Initialization
 
-**[Details](/docs/init.md)**<br>
+**[Details](docs/init.md)**<br>
 
 To help make switch setup a breeze. CANU can automatically parse CSI output or the Shasta SLS API for switch IPv4 addresses. In order to parse CSI output, use the `--csi-folder FOLDER` flag to pass in the folder where the _sls_input_file.json_ file is located. To parse the Shasta SLS API for IP addresses, ensure that you have a valid token. The token file can either be passed in with the `--auth-token TOKEN_FILE` flag, or it can be automatically read if the environmental variable **SLS_TOKEN** is set. The SLS address is default set to _api-gw-service-nmn.local_, if you are operating on a system with a different address, you can set it with the `--sls-address SLS_ADDRESS` flag.
 
@@ -70,7 +75,7 @@ $ canu -s 1.4 init --auth-token ~./config/cray/tokens/ --sls-address 1.2.3.4 --o
 
 ### Check Single Switch Firmware
 
-**[Details](/docs/switch_firmware.md)**<br>
+**[Details](docs/switch_firmware.md)**<br>
 
 To check the firmware of a single switch run: `canu --shasta 1.4 switch firmware --ip 192.168.1.1 --username USERNAME --password PASSWORD`
 
@@ -81,7 +86,7 @@ $ canu --shasta 1.4 switch firmware --ip 192.168.1.1 --username USERNAME --passw
 
 ### Check Firmware of Multiple Switches
 
-**[Details](/docs/network_firmware.md)**<br>
+**[Details](docs/network_firmware.md)**<br>
 
 Multiple Aruba switches on a network can be checked for their firmware versions. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
 
@@ -158,7 +163,7 @@ $ canu --shasta 1.4 network firmware --ips 192.168.1.1,192.168.1.2 --username US
 
 ### Check Single Switch Cabling
 
-**[Details](/docs/switch_cabling.md)**<br>
+**[Details](docs/switch_cabling.md)**<br>
 CANU can also use LLDP to check the cabling status of a switch. To check the cabling of a single switch run: `canu --shasta 1.4 switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD`
 
 ```bash
@@ -183,7 +188,7 @@ Entries in the table will be colored based on what they are. Neighbors that have
 
 ### Check Cabling of Multiple Switches
 
-**[Details](/docs/network_cabling.md)**<br>
+**[Details](docs/network_cabling.md)**<br>
 
 The cabling of multiple Aruba switches on a network can be checked at the same time using LLDP. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
 
@@ -226,6 +231,159 @@ bb:bb:bb:bb:bb:bb
 bb:bb:bb:bb:bb:bb mgmt1   <=== sw-spine01      1/1/4
 ```
 
+### Validate SHCD
+
+CANU can be used to validate that an SHCD (SHasta Cabling Diagram) passes basic validation checks.
+
+- The `--architecture / -a` flag is used to set the architecture of the system, either **TDS**, or **Full**.
+- Use the `--tabs` flag to select which tabs on the spreadsheet will be included.
+- The `--corners` flag is used to input the upper left and lower right corners of the table on each tab of the worksheet. The table should contain the 11 headers: **Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port**. If the corners are not specified, you will be prompted to enter them for each tab.
+
+To check an SHCD run: `canu -s 1.4 validate shcd -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN,HMN --corners I14,S25,I16,S22,J20,T39`
+
+```bash
+$ canu -s 1.4 validate shcd -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN,HMN --corners I14,S25,I16,S22,J20,T39
+
+SHCD Node Connections
+------------------------------------------------------------
+0: sw-spine-001 connects to 6 nodes: [1, 2, 3, 4, 5, 6]
+1: sw-spine-002 connects to 6 nodes: [0, 2, 3, 4, 5, 6]
+2: sw-leaf-bmc-001 connects to 2 nodes: [0, 1]
+3: uan001 connects to 2 nodes: [0, 1]
+4: ncn-s001 connects to 2 nodes: [0, 1]
+5: ncn-w001 connects to 2 nodes: [0, 1]
+6: ncn-m001 connects to 2 nodes: [0, 1]
+
+Warnings
+
+Node type could not be determined for the following
+------------------------------------------------------------
+CAN switch
+```
+
+### Validate Cabling
+
+CANU can be used to validate that network cabling passes basic validation checks.
+
+- The `--architecture / -a` flag is used to set the architecture of the system, either **TDS**, or **Full**.
+- To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
+
+To validate the cabling run: `canu -s 1.4 validate cabling -a tds --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
+
+```bash
+$ canu -s 1.4 validate cabling -a tds --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
+
+Cabling Node Connections
+------------------------------------------------------------
+0: sw-spine-001 connects to 10 nodes: [1, 2, 3, 4]
+1: ncn-m001 connects to 2 nodes: [0, 4]
+2: ncn-w001 connects to 2 nodes: [0, 4]
+3: ncn-s001 connects to 2 nodes: [0, 4]
+4: sw-spine-002 connects to 10 nodes: [0, 1, 2, 3 ]
+
+Warnings
+
+Node type could not be determined for the following
+------------------------------------------------------------
+sw-leaf-001
+sw-spine-001     1/1/1     ===> aa:aa:aa:aa:aa:aa
+sw-spine-001     1/1/2     ===> 1/1/1 CFCANB4S1 Aruba JL479A  TL.10.03.0081
+sw-spine-001     1/1/3     ===> 1/1/3 sw-leaf-001 Aruba JL663A  FL.10.06.0010
+sw-spine-002     1/1/4     ===> bb:bb:bb:bb:bb:bb
+sw-spine-002     1/1/5     ===> 1/1/2 CFCANB4S1 Aruba JL479A  TL.10.03.0081
+sw-spine-002     1/1/6     ===> 1/1/6 sw-leaf-001 Aruba JL663A  FL.10.06.0010
+Nodes that show up as MAC addresses might need to have LLDP enabled.
+
+The following nodes should be renamed
+------------------------------------------------------------
+sw-leaf01 should be renamed (could not identify node)
+sw-spine01 should be renamed sw-spine-001
+sw-spine02 should be renamed sw-spine-002
+```
+
+If there are any nodes that cannot be determined or should be renamed, there will be warning tables that show the details.
+
+### Validate SHCD and Cabling
+
+CANU can be used to validate an SHCD against the current network cabling.
+
+- The `--architecture / -a` flag is used to set the architecture of the system, either **TDS**, or **Full**.
+- Use the `--tabs` flag to select which tabs on the spreadsheet will be included.
+- The `--corners` flag is used to input the upper left and lower right corners of the table on each tab of the worksheet. The table should contain the 11 headers: **Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port**. If the corners are not specified, you will be prompted to enter them for each tab.
+- To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
+
+To validate an SHCD against the cabling run: `canu -s 1.4 validate shcd-cabling -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN --corners I14,S49,I16,S22 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
+
+```bash
+$ canu -s 1.4 validate shcd-cabling -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN --corners I14,S49,I16,S22 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
+
+====================================================================================================
+SHCD
+====================================================================================================
+
+SHCD Node Connections
+------------------------------------------------------------
+0: sw-spine-001 connects to 6 nodes: [1, 2, 3, 4, 5, 6]
+1: sw-spine-002 connects to 6 nodes: [0, 2, 3, 4, 5, 6]
+2: sw-leaf-bmc-001 connects to 2 nodes: [0, 1]
+3: uan001 connects to 2 nodes: [0, 1]
+4: ncn-s001 connects to 2 nodes: [0, 1]
+5: ncn-w001 connects to 2 nodes: [0, 1]
+6: ncn-m001 connects to 2 nodes: [0, 1]
+
+Warnings
+
+Node type could not be determined for the following
+------------------------------------------------------------
+CAN switch
+
+====================================================================================================
+Cabling
+====================================================================================================
+
+Cabling Node Connections
+------------------------------------------------------------
+0: sw-spine-001 connects to 10 nodes: [1, 2, 3, 4]
+1: ncn-m001 connects to 2 nodes: [0, 4]
+2: ncn-w001 connects to 2 nodes: [0, 4]
+3: ncn-s001 connects to 2 nodes: [0, 4]
+4: sw-spine-002 connects to 10 nodes: [0, 1, 2, 3 ]
+
+Warnings
+
+Node type could not be determined for the following
+------------------------------------------------------------
+sw-leaf-001
+sw-spine-001     1/1/1     ===> aa:aa:aa:aa:aa:aa
+sw-spine-001     1/1/2     ===> 1/1/1 CFCANB4S1 Aruba JL479A  TL.10.03.0081
+sw-spine-001     1/1/3     ===> 1/1/3 sw-leaf-001 Aruba JL663A  FL.10.06.0010
+sw-spine-002     1/1/4     ===> bb:bb:bb:bb:bb:bb
+sw-spine-002     1/1/5     ===> 1/1/2 CFCANB4S1 Aruba JL479A  TL.10.03.0081
+sw-spine-002     1/1/6     ===> 1/1/6 sw-leaf-001 Aruba JL663A  FL.10.06.0010
+Nodes that show up as MAC addresses might need to have LLDP enabled.
+
+The following nodes should be renamed
+------------------------------------------------------------
+sw-leaf01 should be renamed (could not identify node)
+sw-spine01 should be renamed sw-spine-001
+sw-spine02 should be renamed sw-spine-002
+
+====================================================================================================
+SHCD vs Cabling
+====================================================================================================
+
+SHCD / Cabling Comparison
+------------------------------------------------------------
+sw-spine-001    : Found in SHCD and on the network, but missing the following connections on the network that were found in the SHCD:
+                ['sw-leaf-bmc-001', 'uan001']
+sw-spine-002    : Found in SHCD and on the network, but missing the following connections on the network that were found in the SHCD:
+                ['sw-leaf-bmc-001', 'uan001']
+sw-leaf-bmc-001 : Found in SHCD but not found on the network.
+uan001          : Found in SHCD but not found on the network.
+```
+
+The output of the `validate shcd-cabling` command will show the results for `validate shcd`, `validate cabling`, and then a comparison of the two results. If there are nodes found on the SHCD, or on the network that are not found in the other one, it will be displayed in _blue_. If a node is found on both the network and in the SHCD, but the connections are not the same, it will be shown in _green_, and the missing connections will be shown.
+
 ## Uninstallation
 
 `pip3 uninstall canu`
@@ -255,6 +413,7 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 - Added `verify shcd` command to allow verification of SHCD spreadsheets
 - Added `verify cabling` command to run verifications on network IPs
 - Added additional documentation for each command, added docstring checks to lint tests, and updated testing feedback
+- Added `verify shcd-cabling` command to run verifications of SHCD spreadsheets against network IPs
 
 ## [0.0.3] - 2021-04-16
 

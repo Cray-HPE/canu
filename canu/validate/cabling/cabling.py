@@ -232,7 +232,7 @@ def node_model_from_canu(factory, canu_cache, ips):
 
                 # src_port = port
                 log.debug(f"Source Data: {src_name}")
-                # If starts with 'sw-' then add an extra '-' before the number, and convert to 3 digit. 
+                # If starts with 'sw-' then add an extra '-' before the number, and convert to 3 digit.
                 # Needs to work for these combinations:
                 # sw-spine01
                 # sw-spine-002
@@ -240,7 +240,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                 # sw-leaf-bmc-098
                 node_name = src_name
                 if node_name.startswith("sw-"):
-                    start = 'sw-'
+                    start = "sw-"
                     middle = re.findall(r"(?:sw-)([a-z-]+)", node_name)[0]
                     digits = re.findall(r"(\d+)", node_name)[0]
                     node_name = f"{start}{middle.rstrip('-')}-{int(digits) :03d}"
@@ -254,11 +254,9 @@ def node_model_from_canu(factory, canu_cache, ips):
                     old_name = node_name
                     # If type can't be determined, we do not know what to rename the switch
                     if node_type is None:
-                        old_name = ''
+                        old_name = ""
                     warnings["rename"].append([src_name, old_name])
-                    log.warning(
-                        f"Node {src_name} should be renamed to {node_name}"
-                    )
+                    log.warning(f"Node {src_name} should be renamed to {node_name}")
                 # Create src_node if it does not exist
                 src_node = None
                 src_index = None
@@ -292,10 +290,12 @@ def node_model_from_canu(factory, canu_cache, ips):
                 dst_name = dst["neighbor"]
 
                 if dst_name.startswith("sw-"):
-                    dst_start = 'sw-'
+                    dst_start = "sw-"
                     dst_middle = re.findall(r"(?:sw-)([a-z-]+)", dst_name)[0]
                     dst_digits = re.findall(r"(\d+)", dst_name)[0]
-                    dst_name = f"{dst_start}{dst_middle.rstrip('-')}-{int(dst_digits) :03d}"
+                    dst_name = (
+                        f"{dst_start}{dst_middle.rstrip('-')}-{int(dst_digits) :03d}"
+                    )
 
                 log.debug(f"Destination Data: {dst_name}")
                 dst_node_name = dst_name
@@ -307,7 +307,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                     old_dst_name = dst_name
                     # If type can't be determined, we do not know what to rename the switch
                     if node_type is None:
-                        old_dst_name = ''
+                        old_dst_name = ""
                     warnings["rename"].append([dst["neighbor"], old_dst_name])
                     log.warning(
                         f"Node {dst['neighbor']} should be renamed {old_dst_name}"

@@ -343,7 +343,7 @@ def print_equipment(equipment_json, out="-"):
                 if (
                     "ncn"
                     in equipment_json[equipment]["connections_from"][port]["hostname"]
-                ):
+                ):  # pragma: no cover
                     text_color = "blue"
                 if (
                     "sw-"

@@ -447,7 +447,9 @@ def node_list_warnings(node_list, warnings):
             nodes = natsort.natsorted(nodes)
             for node in nodes:
                 click.secho(node, fg="bright_white")
-            click.secho("Nodes that show up as MAC addresses might need to have LLDP enabled.")
+            click.secho(
+                "Nodes that show up as MAC addresses might need to have LLDP enabled."
+            )
         if warnings["zero_connections"]:
             click.secho(
                 "\nThe following nodes have zero connections",
@@ -467,7 +469,7 @@ def node_list_warnings(node_list, warnings):
             nodes = set()
             for x in warnings["rename"]:
                 new_name = x[1]
-                if new_name == '':
+                if new_name == "":
                     new_name = "(could not identify node)"
                 nodes.add((x[0], new_name))
             nodes = natsort.natsorted(nodes)
