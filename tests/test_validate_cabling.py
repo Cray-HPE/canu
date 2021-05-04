@@ -462,6 +462,7 @@ def test_validate_cabling_rename():
         assert "sw-leaf-bmc99 should be renamed sw-leaf-bmc-099" in str(result.output)
         assert "sw-spine01 should be renamed sw-spine-001" in str(result.output)
 
+
 # Switch 1
 switch_info1 = {
     "hostname": "sw-spine01",
