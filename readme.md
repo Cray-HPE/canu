@@ -233,6 +233,8 @@ bb:bb:bb:bb:bb:bb mgmt1   <=== sw-spine01      1/1/4
 
 ### Validate SHCD
 
+**[Details](docs/validate_shcd.md)**<br>
+
 CANU can be used to validate that an SHCD (SHasta Cabling Diagram) passes basic validation checks.
 
 - The `--architecture / -a` flag is used to set the architecture of the system, either **TDS**, or **Full**.
@@ -262,6 +264,8 @@ CAN switch
 ```
 
 ### Validate Cabling
+
+**[Details](docs/validate_cabling.md)**<br>
 
 CANU can be used to validate that network cabling passes basic validation checks.
 
@@ -304,6 +308,8 @@ sw-spine02 should be renamed sw-spine-002
 If there are any nodes that cannot be determined or should be renamed, there will be warning tables that show the details.
 
 ### Validate SHCD and Cabling
+
+**[Details](docs/validate_shcd_cabling.md)**<br>
 
 CANU can be used to validate an SHCD against the current network cabling.
 

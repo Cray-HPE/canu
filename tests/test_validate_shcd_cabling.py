@@ -1041,103 +1041,134 @@ def test_validate_shcd_cabling_bad_architectural_definition():
         )
 
 
-# def test_validate_shcd_cabling_multiple_connections():
-#     """Test that the `canu validate shcd cabling` command runs and returns valid cabling."""
-#     multiple_connections_tab = "More_connections"
-#     multiple_connections_corners = "I14,S20"
-#     with runner.isolated_filesystem():
-#         generate_test_file(test_file)
-#         result = runner.invoke(
-#             cli,
-#             [
-#                 "--shasta",
-#                 shasta,
-#                 "--cache",
-#                 cache_minutes,
-#                 "validate",
-#                 "shcd-cabling",
-#                 "--architecture",
-#                 architecture,
-#                 "--ips",
-#                 ips,
-#                 "--username",
-#                 username,
-#                 "--password",
-#                 password,
-#                 "--shcd",
-#                 test_file,
-#                 "--tabs",
-#                 multiple_connections_tab,
-#                 "--corners",
-#                 multiple_connections_corners,
-#             ],
-#         )
-#         assert result.exit_code == 1
-#         assert "No architectural definition found to allow connection between" in str(
-#             result.output
-#         )
+@responses.activate
+def test_validate_shcd_cabling_rename():
+    """Test that the `canu validate shcd cabling` command runs and finds bad naming."""
+    with runner.isolated_filesystem():
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/login",
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname,system_mac",
+            json=switch_info1,
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system/interfaces/*/lldp_neighbors?depth=2",
+            json=lldp_neighbors_json1,
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system/vrfs/default/neighbors?depth=2",
+            json=arp_neighbors_json1,
+        )
+
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/logout",
+        )
+        generate_test_file(test_file)
+        result = runner.invoke(
+            cli,
+            [
+                "--shasta",
+                shasta,
+                "--cache",
+                cache_minutes,
+                "validate",
+                "shcd-cabling",
+                "--architecture",
+                architecture,
+                "--ips",
+                ips,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--shcd",
+                test_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "sw-leaf-bmc99 should be renamed sw-leaf-bmc-099" in str(result.output)
+        assert "sw-spine01 should be renamed sw-spine-001" in str(result.output)
 
 
-# ####################
+@responses.activate
+def test_validate_shcd_missing_connections():
+    """Test that the `canu validate shcd cabling` command runs and finds missing connections."""
+    with runner.isolated_filesystem():
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/login",
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname,system_mac",
+            json=switch_info1,
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system/interfaces/*/lldp_neighbors?depth=2",
+            json=lldp_neighbors_json1,
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system/vrfs/default/neighbors?depth=2",
+            json=arp_neighbors_json1,
+        )
 
-
-# @responses.activate
-# def test_validate_shcd_cabling_rename():
-#     """Test that the `canu validate shcd cabling` command runs and finds bad naming."""
-#     with runner.isolated_filesystem():
-#         responses.add(
-#             responses.POST,
-#             f"https://{ip}/rest/v10.04/login",
-#         )
-#         responses.add(
-#             responses.GET,
-#             f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname,system_mac",
-#             json=switch_info1,
-#         )
-#         responses.add(
-#             responses.GET,
-#             f"https://{ip}/rest/v10.04/system/interfaces/*/lldp_neighbors?depth=2",
-#             json=lldp_neighbors_json1,
-#         )
-#         responses.add(
-#             responses.GET,
-#             f"https://{ip}/rest/v10.04/system/vrfs/default/neighbors?depth=2",
-#             json=arp_neighbors_json1,
-#         )
-
-#         responses.add(
-#             responses.POST,
-#             f"https://{ip}/rest/v10.04/logout",
-#         )
-
-#         result = runner.invoke(
-#             cli,
-#             [
-#                 "--shasta",
-#                 shasta,
-#                 "--cache",
-#                 cache_minutes,
-#                 "validate",
-#                 "shcd-cabling",
-#                 "--architecture",
-#                 architecture,
-#                 "--ips",
-#                 ips,
-#                 "--username",
-#                 username,
-#                 "--password",
-#                 password,
-#                 "--shcd",
-#                 test_file,
-#                 "--tabs",
-#                 tabs,
-#                 "--corners",
-#                 corners,
-#             ],
-#         )
-#         assert result.exit_code == 0
-#         assert "sw-leaf-bmc99 should be renamed sw-leaf-bmc-099" in str(result.output)
-#         assert "sw-spine01 should be renamed sw-spine-001" in str(result.output)
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/logout",
+        )
+        generate_test_file(test_file)
+        result = runner.invoke(
+            cli,
+            [
+                "--shasta",
+                shasta,
+                "--cache",
+                cache_minutes,
+                "validate",
+                "shcd-cabling",
+                "--architecture",
+                architecture,
+                "--ips",
+                ips,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--shcd",
+                test_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "Found in SHCD and on the network, but missing the following connections on the network"
+            in str(result.output)
+        )
+        assert "['sw-leaf-bmc-001', 'uan001', 'ncn-s003', 'ncn-w003']" in str(
+            result.output
+        )
+        assert "uan001          : Found in SHCD but not found on the network." in str(
+            result.output
+        )
+        assert (
+            "ncn-m88         : Found on the network but not found in the SHCD."
+            in str(result.output)
+        )
 
 
 # Switch 1
