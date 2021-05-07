@@ -66,15 +66,25 @@ def test_cli_init_csi_good():
 
 def test_cli_init_csi_file_missing():
     """Error canu init CSI on sls_input_file.json file missing."""
-    result = runner.invoke(
-        cli,
-        ["--shasta", shasta, "init", "--out", fileout, "--csi-folder", "."],
-    )
-    assert result.exit_code == 0
-    assert (
-        "The file sls_input_file.json was not found, check that this is the correct CSI directory"
-        in str(result.output)
-    )
+    bad_csi_folder = "/bad_folder"
+    with runner.isolated_filesystem():
+        result = runner.invoke(
+            cli,
+            [
+                "--shasta",
+                shasta,
+                "init",
+                "--out",
+                fileout,
+                "--csi-folder",
+                bad_csi_folder,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "The file sls_input_file.json was not found, check that this is the correct CSI directory"
+            in str(result.output)
+        )
 
 
 @responses.activate

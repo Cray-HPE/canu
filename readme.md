@@ -1,4 +1,4 @@
-# 🛶 CANU v0.0.3
+# 🛶 CANU v0.0.4
 
 CANU (CSM Automatic Network Utility) will float through a new Shasta network and make setup a breeze. Use CANU to check if Aruba switches on a Shasta network meet the firmware version requirements and check their cabling status using LLDP.
 
@@ -15,6 +15,7 @@ CANU reads switch version information from the _canu.yaml_ file in the root dire
 **[Validate SHCD](#validate-shcd)**<br>
 **[Validate Cabling](#validate-cabling)**<br>
 **[Validate SHCD and Cabling](#validate-shcd-and-cabling)**<br>
+**[Validate BGP](#validate-bgp)**<br>
 **[Uninstallation](#uninstallation)**<br>
 **[Road Map](#road-map)**<br>
 **[Testing](#testing)**<br>
@@ -390,6 +391,32 @@ uan001          : Found in SHCD but not found on the network.
 
 The output of the `validate shcd-cabling` command will show the results for `validate shcd`, `validate cabling`, and then a comparison of the two results. If there are nodes found on the SHCD, or on the network that are not found in the other one, it will be displayed in _blue_. If a node is found on both the network and in the SHCD, but the connections are not the same, it will be shown in _green_, and the missing connections will be shown.
 
+### Validate BGP
+
+**[Details](docs/validate_bgp.md)**<br>
+
+CANU can be used to validate BGP neighbors. All neighbors of a switch must return status **Established** or the verification will fail.
+
+- To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
+- The default **asn** is set to _65533_ if it needs to be changed, use the flag `--asn NEW_ASN_NUMBER` to set the new number
+
+If you want to see the individual status of all the neighbors of a switch, use the `--verbose` flag.
+
+To validate BGP run: `canu -s 1.4 validate bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
+
+```bash
+$ canu -s 1.4 validate bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
+
+BGP Neighbors Established
+--------------------------------------------------
+PASS - IP: 192.168.1.1 Hostname: sw-spine01 
+PASS - IP: 192.168.1.2 Hostname: sw-spine01 
+```
+
+If any of the spine switch neighbors for a connection other than **Established**, the switch will **FAIL** validation.
+
+If a switch that is not a **spine** switch is tested, it will show in the results table as **SKIP**.
+
 ## Uninstallation
 
 `pip3 uninstall canu`
@@ -414,12 +441,13 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 
 # Changelog
 
-## [unreleased]
+## [0.0.4] - 2021-05-07
 
 - Added `verify shcd` command to allow verification of SHCD spreadsheets
 - Added `verify cabling` command to run verifications on network IPs
 - Added additional documentation for each command, added docstring checks to lint tests, and updated testing feedback
 - Added `verify shcd-cabling` command to run verifications of SHCD spreadsheets against network IPs
+- Added `validate bgp` command to validate spine switch neighbors
 
 ## [0.0.3] - 2021-04-16
 
