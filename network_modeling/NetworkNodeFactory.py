@@ -31,15 +31,11 @@ class NetworkNodeFactory:
 
     Methods
     -------
-    get_factory():
-        Get the factory.
     generate_node(node_type):
         Generate a new network node.
     lookup_mapper():
         Convert architecture yaml data to tuple.
     """
-
-    __class_singleton = None
 
     def __init__(
         self,
@@ -58,47 +54,36 @@ class NetworkNodeFactory:
             architecture_schema : architecture_schema
             architecture_data : architecture_data
             architecture_version : architecture_version
-
-        Raises:
-            Exception: Cannot create more than one singleton NetworkNodeFactory
         """
-        if NetworkNodeFactory.__class_singleton is None:
-            NetworkNodeFactory.__class_singleton = self
 
-            # Validate JSON data against the schema
-            self.__yaml_validate(hardware_schema, hardware_data)
-            self.__yaml_validate(architecture_schema, architecture_data)
+        # Validate JSON data against the schema
+        self.__yaml_validate(hardware_schema, hardware_data)
+        self.__yaml_validate(architecture_schema, architecture_data)
 
-            # Load yaml data as JSON
-            with open(hardware_data) as file:
-                self.__hardware_data = yaml.load(file)
-                self.__hardware_data = self.__hardware_data[
-                    "network_hardware"
-                ]  # TODO ?
-            with open(architecture_data) as file:
-                self.__architecture_data = yaml.load(file)
+        # Load yaml data as JSON
+        with open(hardware_data) as file:
+            self.__hardware_data = yaml.load(file)
+            self.__hardware_data = self.__hardware_data[
+                "network_hardware"
+            ]  # TODO ?
+        with open(architecture_data) as file:
+            self.__architecture_data = yaml.load(file)
 
-            # Perform any cleanup required
-            self.__cleanup_hardware_port_speeds()
+        # Perform any cleanup required
+        self.__cleanup_hardware_port_speeds()
 
-            # Initialize
-            self.__architecture_version = architecture_version
-            self.__node_id = -1
+        # Initialize
+        self.__architecture_version = architecture_version
+        self.__node_id = -1
 
-            # Defensively validate data for architecture/hardware mismatches
-            # NOTE: Arguably this should be done more lazily outside of __init__
-            self.__validate_architecture_version()
-            self.__validate_model_definition()
-            self.__validate_port_definitions()
-            self.__validate_lookup_mapper()
+        # Defensively validate data for architecture/hardware mismatches
+        # NOTE: Arguably this should be done more lazily outside of __init__
+        self.__validate_architecture_version()
+        self.__validate_model_definition()
+        self.__validate_port_definitions()
+        self.__validate_lookup_mapper()
 
-            self.__warn_architecture_deprecation()
-        else:
-            raise Exception(
-                click.secho(
-                    "Cannot create more than one singleton NetworkNodeFactory", fg="red"
-                )
-            )
+        self.__warn_architecture_deprecation()
 
     def __yaml_validate(self, schema_file, data_file):
         try:
@@ -238,13 +223,6 @@ class NetworkNodeFactory:
     def __generate_node_id(self):
         self.__node_id += 1
         return self.__node_id
-
-    @staticmethod
-    def get_factory(**kwargs):
-        """Get the factory."""
-        if not NetworkNodeFactory.__class_singleton:
-            NetworkNodeFactory(**kwargs)
-        return NetworkNodeFactory.__class_singleton
 
     def generate_node(self, node_type):
         """Generate a new network node."""
