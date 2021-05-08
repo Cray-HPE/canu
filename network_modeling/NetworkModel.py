@@ -35,7 +35,7 @@ class NetworkModel:  # pragma: no cover
             Exception: A list of NetworkNode(s) is required
         """
         if factory:
-            self.__factory = factory.get_factory()
+            self.__factory = factory
         else:
             raise Exception(click.secho("A NetworkNodeFactory is required", fg="red"))
 

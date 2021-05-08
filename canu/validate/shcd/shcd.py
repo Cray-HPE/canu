@@ -141,7 +141,7 @@ def shcd(ctx, architecture, shcd, tabs, corners, log_):
             sheets.append((tab, range_start, range_end))
 
     # Create Node factory
-    factory = NetworkNodeFactory.get_factory(
+    factory = NetworkNodeFactory(
         hardware_schema=hardware_schema_file,
         hardware_data=hardware_spec_file,
         architecture_schema=architecture_schema_file,

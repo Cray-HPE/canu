@@ -235,7 +235,7 @@ def shcd_cabling(
                     )
 
     # Create SHCD Node factory
-    shcd_factory = NetworkNodeFactory.get_factory(
+    shcd_factory = NetworkNodeFactory(
         hardware_schema=hardware_schema_file,
         hardware_data=hardware_spec_file,
         architecture_schema=architecture_schema_file,
@@ -260,7 +260,7 @@ def shcd_cabling(
     node_list_warnings(shcd_node_list, shcd_warnings)
 
     # Create Cabling Node factory
-    cabling_factory = NetworkNodeFactory.get_factory(
+    cabling_factory = NetworkNodeFactory(
         hardware_schema=hardware_schema_file,
         hardware_data=hardware_spec_file,
         architecture_schema=architecture_schema_file,
