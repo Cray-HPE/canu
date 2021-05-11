@@ -21,13 +21,12 @@ yaml = ruamel.yaml.YAML()
 # To disable warnings about unsecured HTTPS requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# To get the canu.yaml file in the parent directory
+# To get the canu.yaml file
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
     parent_directory = sys._MEIPASS
 else:
     prog = __file__
-    current_directory = os.path.dirname(os.path.abspath(prog))
-    parent_directory = os.path.split(current_directory)[0]
+    parent_directory = os.path.dirname(os.path.abspath(prog))
 
 canu_config_file = os.path.join(parent_directory, "canu.yaml")
 

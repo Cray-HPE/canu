@@ -441,6 +441,8 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 
 # Changelog
 
+## [unreleased]
+
 ## [0.0.4] - 2021-05-07
 
 - Added `verify shcd` command to allow verification of SHCD spreadsheets
@@ -479,7 +481,8 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 - Ability for CANU to get the firmware of a single or multiple Aruba switches
 - Standardized the canu.yaml file to show currently supported switch firmware versions.
 
-[unreleased]: https://stash.us.cray.com/projects/CSM/repos/canu/compare/commits?targetBranch=refs%2Ftags%2F0.0.3&sourceBranch=refs%2Fheads%2Fmaster&targetRepoId=12732
+[unreleased]: https://stash.us.cray.com/projects/CSM/repos/canu/compare/commits?targetBranch=refs%2Ftags%2F0.0.4&sourceBranch=refs%2Fheads%2Fmaster&targetRepoId=12732
+[0.0.4]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.4
 [0.0.3]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.3
 [0.0.2]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.2
 [0.0.1]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.1

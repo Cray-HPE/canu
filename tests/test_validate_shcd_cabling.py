@@ -96,17 +96,17 @@ def test_validate_shcd_cabling_full_architecture():
         responses.add(
             responses.GET,
             f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname,system_mac",
-            json=switch_info1,
+            json=switch_info2,
         )
         responses.add(
             responses.GET,
             f"https://{ip}/rest/v10.04/system/interfaces/*/lldp_neighbors?depth=2",
-            json=lldp_neighbors_json1,
+            json=lldp_neighbors_json2,
         )
         responses.add(
             responses.GET,
             f"https://{ip}/rest/v10.04/system/vrfs/default/neighbors?depth=2",
-            json=arp_neighbors_json1,
+            json=arp_neighbors_json2,
         )
 
         responses.add(
@@ -140,9 +140,12 @@ def test_validate_shcd_cabling_full_architecture():
             ],
         )
         assert result.exit_code == 0
-        assert "['sw-leaf-bmc-001', 'uan001', 'ncn-s003', 'ncn-w003']" in str(
-            result.output
+        assert (
+            "['sw-leaf-bmc-099', 'sw-leaf-bmc-001', 'uan001', 'ncn-s003', 'ncn-w003']"
+            in str(result.output)
         )
+        assert "sw-leaf-002 connects to 1 nodes" in str(result.output)
+        assert "sw-leaf-001 connects to 6 nodes" in str(result.output)
 
 
 @responses.activate
@@ -1277,7 +1280,7 @@ arp_neighbors_json1 = {
 
 # Switch 2
 switch_info2 = {
-    "hostname": "sw-spine02",
+    "hostname": "sw-leaf02",
     "platform_name": "X86-64",
     "system_mac": "bb:bb:bb:bb:bb:bb",
 }
@@ -1289,7 +1292,7 @@ lldp_neighbors_json2 = {
             "mac_addr": "aa:aa:aa:aa:aa:bb",
             "neighbor_info": {
                 "chassis_description": "Test switch description",
-                "chassis_name": "sw-spine01",
+                "chassis_name": "sw-leaf01",
                 "port_description": "",
                 "port_id_subtype": "if_name",
             },
