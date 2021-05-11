@@ -82,17 +82,17 @@ def test_validate_cabling_full_architecture():
         responses.add(
             responses.GET,
             f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname,system_mac",
-            json=switch_info1,
+            json=switch_info2,
         )
         responses.add(
             responses.GET,
             f"https://{ip}/rest/v10.04/system/interfaces/*/lldp_neighbors?depth=2",
-            json=lldp_neighbors_json1,
+            json=lldp_neighbors_json2,
         )
         responses.add(
             responses.GET,
             f"https://{ip}/rest/v10.04/system/vrfs/default/neighbors?depth=2",
-            json=arp_neighbors_json1,
+            json=arp_neighbors_json2,
         )
 
         responses.add(
@@ -119,8 +119,9 @@ def test_validate_cabling_full_architecture():
                 password,
             ],
         )
+        print(result.output)
         assert result.exit_code == 0
-        assert "sw-spine-001 connects to 2 nodes:" in str(result.output)
+        assert "sw-spine-001 connects to 1 nodes:" in str(result.output)
 
 
 @responses.activate

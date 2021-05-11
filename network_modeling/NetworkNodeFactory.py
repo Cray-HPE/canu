@@ -55,7 +55,6 @@ class NetworkNodeFactory:
             architecture_data : architecture_data
             architecture_version : architecture_version
         """
-
         # Validate JSON data against the schema
         self.__yaml_validate(hardware_schema, hardware_data)
         self.__yaml_validate(architecture_schema, architecture_data)
@@ -63,9 +62,7 @@ class NetworkNodeFactory:
         # Load yaml data as JSON
         with open(hardware_data) as file:
             self.__hardware_data = yaml.load(file)
-            self.__hardware_data = self.__hardware_data[
-                "network_hardware"
-            ]  # TODO ?
+            self.__hardware_data = self.__hardware_data["network_hardware"]  # TODO ?
         with open(architecture_data) as file:
             self.__architecture_data = yaml.load(file)
 

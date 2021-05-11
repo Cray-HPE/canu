@@ -67,7 +67,7 @@ def test_validate_shcd_full():
             ],
         )
         assert result.exit_code == 0
-        assert "sw-spine-002 connects to 12 nodes:" in str(result.output)
+        assert "sw-leaf-002 connects to 12 nodes:" in str(result.output)
 
 
 def test_validate_shcd_missing_file():

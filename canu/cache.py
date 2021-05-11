@@ -11,13 +11,12 @@ import ruamel.yaml
 
 yaml = ruamel.yaml.YAML()
 
-# To get the canu_cache.yaml file in the parent directory
+# To get the canu_cache.yaml file
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
     parent_directory = sys._MEIPASS
 else:
     prog = __file__
-    current_directory = os.path.dirname(os.path.abspath(prog))
-    parent_directory = os.path.split(current_directory)[0]
+    parent_directory = os.path.dirname(os.path.abspath(prog))
 
 canu_cache_file = os.path.join(parent_directory, "canu_cache.yaml")
 
