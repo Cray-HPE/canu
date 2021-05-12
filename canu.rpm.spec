@@ -25,7 +25,7 @@ cp %{_sourcedir}/LICENSE %{buildroot}%{_datadir}/licenses/%{name}-%{version}/LIC
 install -m 755  %{_sourcedir}/dist/linux/canu %{buildroot}%{_bindir}/canu
 
 %files
-%license LICENSE
+%{_datadir}/licenses/%{name}-%{version}/LICENSE
 %{_bindir}/canu
 
 
