@@ -108,7 +108,7 @@ pipeline {
     post {
         cleanup {
             // Own files so jenkins can clean them up later
-            sh "sudo chown -R jenkins ${workspace}"
+            sh "sudo chown -R jenkins ${env.WORKSPACE}"
         }
     }
 }
