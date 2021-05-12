@@ -44,6 +44,3 @@ docs/build
 # Make sure a generated file isn't accidentally committed.
 pylintrc
 pylintrc.test
-
-# Generated .version file
-.version

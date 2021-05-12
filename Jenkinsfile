@@ -40,10 +40,13 @@ pipeline {
         stage('Set Version') {
             steps {
                 script {
+                    // If building from tag use that as version
+                    // otherwise append branch name to version
                     if (env.TAG_NAME != null) {
-                        env.VERSION = "${env.TAG_NAME}"
+                        env.VERSION = env.TAG_NAME
                     } else {
-                        env.VERSION = "${env.BRANCH_NAME}-${env.GIT_COMMIT[0..6]}"
+                        env.VERSION=readFile(file: '.version')
+                        env.VERSION+="~" + env.BRANCH_NAME.replace("/","_")
                     }
 
                     sh "echo '${env.VERSION}' > .version"
@@ -72,11 +75,20 @@ pipeline {
             }
         }
         stage('Publish ') {
-            when { tag "*" }
+
             steps {
                 script {
                     sh "ls -lhR dist"
-                    env.ARTIFACTORY_REPO = "csm/MTL/sle15_sp2_ncn/x86_64/dev/master/metal-team/"
+
+                    if (env.BRANCH_NAME == "master") {
+                        env.ARTIFACTORY_PATH="dev/master"
+                    } else if(!env.BRANCH_NAME.contains("/")) {
+                        env.ARTIFACTORY_PATH="predev"
+                    } else {
+                        env.ARTIFACTORY_PATH=env.BRANCH_NAME
+                    }
+
+                    env.ARTIFACTORY_REPO = "csm/MTL/sle15_sp2_ncn/x86_64/${env.ARTIFACTORY_PATH}/metal-team/"
                     rtUpload (
                         serverId: 'ARTIFACTORY_CAR',
                         failNoOp: true,
