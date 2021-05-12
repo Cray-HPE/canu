@@ -45,7 +45,7 @@ pipeline {
                     if (env.TAG_NAME != null) {
                         env.VERSION = env.TAG_NAME
                     } else {
-                        env.VERSION=readFile(file: '.version')
+                        env.VERSION=readFile(file: '.version').trim()
                         env.VERSION+="~" + env.BRANCH_NAME.replace("/","_")
                     }
 
