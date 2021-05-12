@@ -66,7 +66,8 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    sh "docker run --rm -v \$(pwd):/src cdrx/pyinstaller-linux:python3"
+                    sh "docker run --rm -v \$(pwd):/src cdrx/pyinstaller-linux:python3 pyinstaller --clean -y --dist ./dist/linux --workpath /tmp canu.pyinstall.spec"
+                    sh "rpmbuild -bb canu.rpm.spec"
                 }
             }
         }
@@ -82,7 +83,7 @@ pipeline {
                         spec: """{
                             "files": [
                                 {
-                                "pattern": "dist/linux/canu",
+                                "pattern": "dist/linux/x86_64/canu-${env.VERSION}-1.x86_64.rpm",
                                 "target": "${env.ARTIFACTORY_REPO}/canu-${env.VERSION}"
                                 }
                             ]
