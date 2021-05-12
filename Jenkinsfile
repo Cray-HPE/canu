@@ -66,7 +66,7 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    sh "docker run --rm -v \$(pwd):/src cdrx/pyinstaller-linux:python3 pyinstaller --clean -y --dist ./dist/linux --workpath /tmp canu.pyinstall.spec"
+                    sh "docker run --rm -v \$(pwd):/src cdrx/pyinstaller-linux:python3 ./pyinstaller.sh"
                     sh "rpmbuild -bb canu.rpm.spec"
                 }
             }
