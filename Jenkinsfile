@@ -75,7 +75,7 @@ pipeline {
         stage('Publish ') {
           steps {
             script {
-              env.ARTIFACTORY_REPO = "csm-rpm-stable-local/canu/x86_64"
+              env.ARTIFACTORY_REPO = "csm-rpm-stable-local/hpe/x86_64/canu"
               rtUpload (
                 serverId: 'ARTIFACTORY_ARTI',
                 failNoOp: true,
