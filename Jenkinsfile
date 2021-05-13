@@ -40,53 +40,55 @@ pipeline {
     // Build on branch commits not tags
     stage('Build') {
       when { not { buildingTag() } }
-      stage('Set Version') {
-        steps {
-          script {
-            env.VERSION=readFile(file: '.version').trim()
-            env.VERSION+= "~" + env.BRANCH_NAME.replace("/","_") + "." + env.GIT_COMMIT[0..6]
-            sh "echo '${env.VERSION}' > .version"
-            echo "Buildling for ${env.VERSION}"
+      stages {
+        stage('Set Version') {
+          steps {
+            script {
+              env.VERSION=readFile(file: '.version').trim()
+              env.VERSION+= "~" + env.BRANCH_NAME.replace("/","_") + "." + env.GIT_COMMIT[0..6]
+              sh "echo '${env.VERSION}' > .version"
+              echo "Buildling for ${env.VERSION}"
+            }
           }
         }
-      }
-      stage('Record Environment') {
-        steps {
-          sh "env"
-        }
-      }
-      stage('Test') {
-        steps {
-          script {
-            sh "docker run --rm -v \$(pwd):/src cdrx/pyinstaller-linux:python3 nox"
+        stage('Record Environment') {
+          steps {
+            sh "env"
           }
         }
-      }
-      stage('Build') {
-        steps {
-          script {
-            sh "docker run --rm -v \$(pwd):/src cdrx/pyinstaller-linux:python3 ./pyinstaller.sh"
-            sh "rpmbuild -bb canu.rpm.spec"
-            sh "ls -lhR dist"
+        stage('Test') {
+          steps {
+            script {
+              sh "docker run --rm -v \$(pwd):/src cdrx/pyinstaller-linux:python3 nox"
+            }
           }
         }
-      }
-      stage('Publish ') {
-        steps {
-          script {
-            env.ARTIFACTORY_REPO = "csm-rpm-unstable-local/canu/x86_64"
-            rtUpload (
-              serverId: 'ARTIFACTORY_ARTI',
-              failNoOp: true,
-              spec: """{
-                  "files": [
-                      {
-                      "pattern": "dist/linux/x86_64/canu-${env.VERSION}-1.x86_64.rpm",
-                      "target": "${env.ARTIFACTORY_REPO}/canu-${env.VERSION}.rpm"
-                      }
-                  ]
-              }""",
-            )
+        stage('Build') {
+          steps {
+            script {
+              sh "docker run --rm -v \$(pwd):/src cdrx/pyinstaller-linux:python3 ./pyinstaller.sh"
+              sh "rpmbuild -bb canu.rpm.spec"
+              sh "ls -lhR dist"
+            }
+          }
+        }
+        stage('Publish ') {
+          steps {
+            script {
+              env.ARTIFACTORY_REPO = "csm-rpm-unstable-local/canu/x86_64"
+              rtUpload (
+                serverId: 'ARTIFACTORY_ARTI',
+                failNoOp: true,
+                spec: """{
+                    "files": [
+                        {
+                        "pattern": "dist/linux/x86_64/canu-${env.VERSION}-1.x86_64.rpm",
+                        "target": "${env.ARTIFACTORY_REPO}/canu-${env.VERSION}.rpm"
+                        }
+                    ]
+                }""",
+              )
+            }
           }
         }
       }
