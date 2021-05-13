@@ -83,7 +83,7 @@ pipeline {
                     "files": [
                         {
                         "pattern": "dist/linux/x86_64/canu-${env.VERSION}-1.x86_64.rpm",
-                        "target": "${env.ARTIFACTORY_REPO}/canu-${env.VERSION}.rpm"
+                        "target": "${env.ARTIFACTORY_REPO}/canu-${env.VERSION}.x86_64.rpm"
                         }
                     ]
                 }""",
