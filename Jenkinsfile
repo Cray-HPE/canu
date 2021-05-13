@@ -21,94 +21,81 @@
 @Library('csm-shared-library') _
 
 pipeline {
-    agent {
-        node { label 'metal-gcp-builder' }
+  agent {
+    node { label 'metal-gcp-builder' }
+  }
+
+  // Configuration options applicable to the entire job
+  options {
+    // This build should not take long, fail the build if it appears stuck
+    timeout(time: 30, unit: 'MINUTES')
+
+    // Don't fill up the build server with unnecessary cruft
+    buildDiscarder(logRotator(numToKeepStr: '5'))
+
+    timestamps()
+  }
+
+  stages {
+    // Build on branch commits not tags
+    stage('Build') {
+      when { not { buildingTag() } }
+      stage('Set Version') {
+        steps {
+          script {
+            env.VERSION=readFile(file: '.version').trim()
+            env.VERSION+= "~" + env.BRANCH_NAME.replace("/","_") + "." + env.GIT_COMMIT[0..6]
+            sh "echo '${env.VERSION}' > .version"
+            echo "Buildling for ${env.VERSION}"
+          }
+        }
+      }
+      stage('Record Environment') {
+        steps {
+          sh "env"
+        }
+      }
+      stage('Test') {
+        steps {
+          script {
+            sh "docker run --rm -v \$(pwd):/src cdrx/pyinstaller-linux:python3 nox"
+          }
+        }
+      }
+      stage('Build') {
+        steps {
+          script {
+            sh "docker run --rm -v \$(pwd):/src cdrx/pyinstaller-linux:python3 ./pyinstaller.sh"
+            sh "rpmbuild -bb canu.rpm.spec"
+            sh "ls -lhR dist"
+          }
+        }
+      }
+      stage('Publish ') {
+        steps {
+          script {
+            env.ARTIFACTORY_REPO = "csm-rpm-unstable-local/canu/x86_64"
+            rtUpload (
+              serverId: 'ARTIFACTORY_ARTI',
+              failNoOp: true,
+              spec: """{
+                  "files": [
+                      {
+                      "pattern": "dist/linux/x86_64/canu-${env.VERSION}-1.x86_64.rpm",
+                      "target": "${env.ARTIFACTORY_REPO}/canu-${env.VERSION}.rpm"
+                      }
+                  ]
+              }""",
+            )
+          }
+        }
+      }
     }
-
-    // Configuration options applicable to the entire job
-    options {
-        // This build should not take long, fail the build if it appears stuck
-        timeout(time: 30, unit: 'MINUTES')
-
-        // Don't fill up the build server with unnecessary cruft
-        buildDiscarder(logRotator(numToKeepStr: '5'))
-
-        timestamps()
+  }
+  post {
+    cleanup {
+      // Own files so jenkins can clean them up later
+      sh "sudo chown -R jenkins ${env.WORKSPACE}"
     }
-
-    stages {
-        stage('Set Version') {
-            steps {
-                script {
-                    // If building from tag use that as version
-                    // otherwise append branch name to version
-                    if (env.TAG_NAME != null) {
-                        env.VERSION = env.TAG_NAME
-                    } else {
-                        env.VERSION=readFile(file: '.version').trim()
-                        env.VERSION+="~" + env.BRANCH_NAME.replace("/","_")
-                    }
-
-                    sh "echo '${env.VERSION}' > .version"
-                    echo "Buildling for ${env.VERSION}"
-                }
-            }
-        }
-        stage('Record Environment') {
-            steps {
-                sh "env"
-            }
-        }
-        stage('Test') {
-            steps {
-                script {
-                    sh "docker run --rm -v \$(pwd):/src cdrx/pyinstaller-linux:python3 nox"
-                }
-            }
-        }
-        stage('Build') {
-            steps {
-                script {
-                    sh "docker run --rm -v \$(pwd):/src cdrx/pyinstaller-linux:python3 ./pyinstaller.sh"
-                    sh "rpmbuild -bb canu.rpm.spec"
-                }
-            }
-        }
-        stage('Publish ') {
-
-            steps {
-                script {
-                    sh "ls -lhR dist"
-
-                    if (env.BRANCH_NAME == "master") {
-                        env.ARTIFACTORY_PATH="dev/master"
-                    } else if(!env.BRANCH_NAME.contains("/")) {
-                        env.ARTIFACTORY_PATH="predev"
-                    } else {
-                        env.ARTIFACTORY_PATH=env.BRANCH_NAME
-                    }
-
-                    env.ARTIFACTORY_REPO = "csm/MTL/sle15_sp2_ncn/x86_64/${env.ARTIFACTORY_PATH}/metal-team/"
-                    rtUpload (
-                        serverId: 'ARTIFACTORY_CAR',
-                        failNoOp: true,
-                        spec: """{
-                            "files": [
-                                {
-                                "pattern": "dist/linux/x86_64/canu-${env.VERSION}-1.x86_64.rpm",
-                                "target": "${env.ARTIFACTORY_REPO}/canu-${env.VERSION}.rpm"
-                                }
-                            ]
-                        }""",
-                    )
-                }
-            }
-        }
-    }
-    post {
-        cleanup {
-            // Own files so jenkins can clean them up later
-            sh "sudo chown -R jenkins ${env.WORKSPACE}"
-        }
-    }
+  }
 }
