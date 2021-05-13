@@ -34,6 +34,7 @@ shasta:
         - GL.10.06.0010
       "8360":
         - LL.10.06.0010
+        - LL.10.06.0110
       X86-64:
         - Virtual.10.06.0001
     dell: # Not sure how Dell will be formatted yet
