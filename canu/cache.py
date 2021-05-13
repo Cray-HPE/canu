@@ -5,7 +5,6 @@ from operator import itemgetter
 import os.path
 import sys
 
-import pkg_resources
 import ruamel.yaml
 
 
@@ -15,10 +14,10 @@ yaml = ruamel.yaml.YAML()
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
     parent_directory = sys._MEIPASS
 else:
-    prog = __file__
-    parent_directory = os.path.dirname(os.path.abspath(prog))
+    parent_directory = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
-canu_cache_file = os.path.join(parent_directory, "canu_cache.yaml")
+canu_cache_file = os.path.join(parent_directory, "canu", "canu_cache.yaml")
+canu_version_file = os.path.join(parent_directory, ".version")
 
 file_exists = os.path.isfile(canu_cache_file)
 
@@ -27,7 +26,9 @@ if file_exists:  # pragma: no cover
     with open(canu_cache_file, "r+") as file:
         canu_cache = yaml.load(file)
 else:  # pragma: no cover
-    version = pkg_resources.require("canu")[0].version
+    with open(canu_version_file, "r") as version_file:
+        version = version_file.read().replace("\n", "")
+
     with open(canu_cache_file, "w+") as f:
         f.write(f"version: {version}\n")
         f.write("switches:\n")

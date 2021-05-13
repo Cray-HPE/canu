@@ -26,11 +26,13 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
     parent_directory = sys._MEIPASS
 else:
-    prog = __file__
-    parent_directory = os.path.dirname(os.path.abspath(prog))
+    parent_directory = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
-canu_config_file = os.path.join(parent_directory, "canu.yaml")
+canu_config_file = os.path.join(parent_directory, "canu", "canu.yaml")
+canu_version_file = os.path.join(parent_directory, ".version")
 
+with open(canu_version_file, "r") as version_file:
+    version = version_file.read().replace("\n", "")
 
 with open(canu_config_file, "r") as file:
     canu_config = yaml.load(file)
@@ -63,7 +65,7 @@ CONTEXT_SETTING = dict(
     show_default=True,
     help="Max age in minutes of existing cache before making new API call.",
 )
-@click.version_option()
+@click.version_option(version)
 @click.pass_context
 def cli(ctx, shasta, cache_minutes):
     """CANU (CSM Automatic Network Utility) floats through a new Shasta network and makes setup a breeze."""
