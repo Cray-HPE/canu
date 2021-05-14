@@ -55,15 +55,24 @@ class NetworkNode:
 
         self.__id = id
         self.__common_name = None
-        self.__total_ports = copy.deepcopy(
-            hardware["ports"]
-        )  # TODO: Do we need this as deepcopy?
-        self.__available_ports_by_speed = copy.deepcopy(
+        self.__ports = copy.deepcopy(
             hardware["ports"]
         )  # TODO: Do we need this as deepcopy?
         self.__edge_connections = []  # A mathematical edge, not a port
 
+        self.__initialize_port_usage_mapping()
         self.__calculate_port_costs()
+
+    # Use the base port/speed structure mapping and extend to track
+    # ports used and track per-port data (NetworkPort)
+    def __initialize_port_usage_mapping(self):
+        for port in self.__ports:
+            # Track per port objects
+            port["ports"] = [None] * port["count"]
+            # Track total port counts
+            port["total"] = port["count"]
+            # port['count'] used to track remaining ports as
+            # as they are used.
 
     # Annotate port information with inherent costs of using this port.
     # TODO:  Replace simple logic in __port_select with this metadata
@@ -92,7 +101,7 @@ class NetworkNode:
         port = None
         current = None
         speed_cost = 0
-        for entry in self.__available_ports_by_speed:
+        for entry in self.__ports:
             if speed not in entry["speed"]:
                 continue
 
@@ -129,9 +138,6 @@ class NetworkNode:
     def __decrement_available_ports(self, speed=None, count=1):
         port = self.__port_select(speed=speed)
 
-        # print(self.__hw)
-        # print(self.__available_ports_by_speed)
-        # print(port)
         if port is None:
             raise Exception(
                 click.secho(
@@ -150,7 +156,7 @@ class NetworkNode:
 
         port["count"] -= count
 
-        return self.__available_ports_by_speed
+        return self.__ports
 
     # Determine if a connection is allowed between components.
     #   Returns:  >0 speed of allowed connection if connection is allowed.
