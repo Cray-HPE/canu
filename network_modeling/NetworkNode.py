@@ -57,7 +57,7 @@ class NetworkNode:
         self.__common_name = None
         self.__ports = copy.deepcopy(
             hardware["ports"]
-        )  # TODO: Do we need this as deepcopy?
+        )
         self.__edge_connections = []  # A mathematical edge, not a port
 
         self.__initialize_port_usage_mapping()
@@ -224,15 +224,6 @@ class NetworkNode:
         )
 
         return connection_speed
-
-    # TODO:  Get rid of these
-    def get_hw(self):
-        """Return hardware."""
-        return self.__hw
-
-    def get_arch(self):
-        """Return architecture."""
-        return self.__arch
 
     # Unique node ID
     def id(self):
