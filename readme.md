@@ -441,7 +441,12 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 
 # Changelog
 
-## [unreleased]
+## [0.0.5-alpha] - 2021-5-14
+- Made a license fix
+- Made internal build improvements 
+- Added arch to filename
+- Updated the plan-of-record firmware for the 8360 in Shasta 1.5/CSM-1.0
+- Added BGP config
 
 ## [0.0.4] - 2021-05-07
 
