@@ -524,7 +524,12 @@ def add_bgp_asn_router_id(ip, session, asn):
         session: Switch login session
         asn: Switch ASN
     """
-    bgp_data = {"asn": int(asn), "router_id": ip, "maximum_paths": 8, "ibgp_distance": 70}
+    bgp_data = {
+        "asn": int(asn),
+        "router_id": ip,
+        "maximum_paths": 8,
+        "ibgp_distance": 70,
+    }
     session.post(
         f"https://{ip}/rest/v10.04/system/vrfs/default/bgp_routers",
         json=bgp_data,
