@@ -95,57 +95,84 @@ def bgp(
 
     errors = []
     ips_length = len(ips)
+    if ips_length != 2:
+        click.secho(
+            "Incorrect number of IP addresses entered, there should be exactly 2 IPs.",
+            fg="white",
+            bg="red",
+        )
+        return
 
-    # Get SLS config
-    token = os.environ.get("SLS_TOKEN")
-
-    # Token file takes precedence over the environmental variable
-    if auth_token != token:
+    # Parse sls_input_file.json file from CSI
+    if csi_folder:
         try:
-            with open(auth_token) as f:
-                data = json.load(f)
-                token = data["access_token"]
+            with open(os.path.join(csi_folder, "sls_input_file.json"), "r") as f:
+                input_json = json.load(f)
 
-        except Exception:
+                # Format the input to be like the SLS JSON
+                sls_json = [
+                    network[x]
+                    for network in [input_json.get("Networks", {})]
+                    for x in network
+                ]
+
+        except FileNotFoundError:
             click.secho(
-                "Invalid token file, generate another token or try again.",
+                "The file sls_input_file.json was not found, check that this is the correct CSI directory.",
+                fg="red",
+            )
+            return
+    else:
+        # Get SLS config
+        token = os.environ.get("SLS_TOKEN")
+
+        # Token file takes precedence over the environmental variable
+        if auth_token != token:
+            try:
+                with open(auth_token) as f:
+                    data = json.load(f)
+                    token = data["access_token"]
+
+            except Exception:
+                click.secho(
+                    "Invalid token file, generate another token or try again.",
+                    fg="white",
+                    bg="red",
+                )
+                return
+
+        # SLS
+        url = "https://" + sls_address + "/apis/sls/v1/networks"
+        try:
+            response = requests.get(
+                url,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {token}",
+                },
+                verify=False,
+            )
+            response.raise_for_status()
+
+            sls_json = response.json()
+
+        except requests.exceptions.ConnectionError:
+            return click.secho(
+                f"Error connecting to SLS {sls_address}, check the address or pass in a new address using --sls-address.",
                 fg="white",
                 bg="red",
             )
-            return
-
-    # SLS
-    url = "https://" + sls_address + "/apis/sls/v1/networks"
-    try:
-        response = requests.get(
-            url,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {token}",
-            },
-            verify=False,
-        )
-        response.raise_for_status()
-
-        sls_json = response.json()
-
-    except requests.exceptions.ConnectionError:
-        return click.secho(
-            f"Error connecting to SLS {sls_address}, check the address or pass in a new address using --sls-address.",
-            fg="white",
-            bg="red",
-        )
-    except requests.exceptions.HTTPError:
-        bad_token_reason = (
-            "environmental variable 'SLS_TOKEN' is correct."
-            if auth_token == token
-            else "token is valid, or generate a new one."
-        )
-        return click.secho(
-            f"Error connecting SLS {sls_address}, check that the {bad_token_reason}",
-            fg="white",
-            bg="red",
-        )
+        except requests.exceptions.HTTPError:
+            bad_token_reason = (
+                "environmental variable 'SLS_TOKEN' is correct."
+                if auth_token == token
+                else "token is valid, or generate a new one."
+            )
+            return click.secho(
+                f"Error connecting SLS {sls_address}, check that the {bad_token_reason}",
+                fg="white",
+                bg="red",
+            )
 
     # Parse SLS
     prefix, ncn = parse_sls(sls_json)
@@ -524,7 +551,12 @@ def add_bgp_asn_router_id(ip, session, asn):
         session: Switch login session
         asn: Switch ASN
     """
-    bgp_data = {"asn": int(asn), "router_id": ip, "maximum_paths": 8, "ibgp_distance": 70}
+    bgp_data = {
+        "asn": int(asn),
+        "router_id": ip,
+        "maximum_paths": 8,
+        "ibgp_distance": 70,
+    }
     session.post(
         f"https://{ip}/rest/v10.04/system/vrfs/default/bgp_routers",
         json=bgp_data,
