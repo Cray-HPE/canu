@@ -59,15 +59,14 @@ pipeline {
         stage('Test') {
           steps {
             script {
-              sh "docker run --rm -v \$(pwd):/src cdrx/pyinstaller-linux:python3 nox"
+              sh "make test"
             }
           }
         }
         stage('Build') {
           steps {
             script {
-              sh "docker run --rm -v \$(pwd):/src cdrx/pyinstaller-linux:python3 ./pyinstaller.sh"
-              sh "rpmbuild -bb canu.rpm.spec"
+              sh "make build"
               sh "ls -lhR dist"
             }
           }
