@@ -23,8 +23,11 @@ yaml = ruamel.yaml.YAML()
 
 
 # Get project root directory
-prog = __file__
-project_root = Path(__file__).resolve().parent.parent.parent.parent
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
+    project_root = sys._MEIPASS
+else:
+    prog = __file__
+    project_root = Path(__file__).resolve().parent.parent.parent.parent
 
 # Schema and Data files
 hardware_schema_file = os.path.join(
