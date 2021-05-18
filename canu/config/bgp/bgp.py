@@ -203,6 +203,7 @@ def bgp(
                             + "username or password.",
                         ]
                     )
+                    continue
 
                 except requests.exceptions.ConnectionError:
                     errors.append(
@@ -211,6 +212,7 @@ def bgp(
                             f"Error connecting to switch {ip}, check the IP address and try again.",
                         ]
                     )
+                    continue
 
                 except requests.exceptions.RequestException:  # pragma: no cover
                     errors.append(
@@ -219,6 +221,7 @@ def bgp(
                             f"Error connecting to switch {ip}.",
                         ]
                     )
+                    continue
 
                 # Remove: BGP, Prefix Lists, Route Maps
                 remove_config(ip, session, asn)
