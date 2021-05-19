@@ -353,6 +353,170 @@ def test_config_bgp_file():
         assert "192.168.1.2" in str(result.output)
 
 
+@responses.activate
+def test_config_bgp_verbose():
+    """Test that the `canu config bgp` command runs with verbose output."""
+    with runner.isolated_filesystem():
+        responses.add(
+            responses.GET,
+            f"https://{sls_address}/apis/sls/v1/networks",
+            json=sls_networks,
+        )
+
+        for ip in ips.split(","):
+            # Login
+            responses.add(
+                responses.POST,
+                f"https://{ip}/rest/v10.04/login",
+            )
+
+            # Delete
+            responses.add(
+                responses.DELETE,
+                f"https://{ip}/rest/v10.04/system/vrfs/default/bgp_routers/{asn}",
+            )
+            responses.add(
+                responses.DELETE,
+                f"https://{ip}/rest/v10.04/system/prefix_lists/*",
+            )
+            responses.add(
+                responses.DELETE,
+                f"https://{ip}/rest/v10.04/system/route_maps/*",
+            )
+
+            # Prefix Lists
+            responses.add(
+                responses.POST,
+                f"https://{ip}/rest/v10.04/system/prefix_lists",
+            )
+            responses.add(
+                responses.POST,
+                f"https://{ip}/rest/v10.04/system/prefix_lists/pl-can/prefix_list_entries",
+            )
+            responses.add(
+                responses.POST,
+                f"https://{ip}/rest/v10.04/system/prefix_lists/pl-hmn/prefix_list_entries",
+            )
+            responses.add(
+                responses.POST,
+                f"https://{ip}/rest/v10.04/system/prefix_lists/pl-nmn/prefix_list_entries",
+            )
+            responses.add(
+                responses.POST,
+                f"https://{ip}/rest/v10.04/system/prefix_lists/tftp/prefix_list_entries",
+            )
+
+            # Route Maps
+            # ncn_names = ['ncn-w001', 'ncn-w002', 'ncn-w003', 'ncn-w004', 'ncn-w005']
+            responses.add(
+                responses.POST,
+                f"https://{ip}/rest/v10.04/system/route_maps",
+            )
+            responses.add(
+                responses.POST,
+                f"https://{ip}/rest/v10.04/system/route_maps/ncn-w001/route_map_entries",
+            )
+            responses.add(
+                responses.POST,
+                f"https://{ip}/rest/v10.04/system/route_maps/ncn-w002/route_map_entries",
+            )
+            responses.add(
+                responses.POST,
+                f"https://{ip}/rest/v10.04/system/route_maps/ncn-w003/route_map_entries",
+            )
+            responses.add(
+                responses.POST,
+                f"https://{ip}/rest/v10.04/system/route_maps/ncn-w004/route_map_entries",
+            )
+            responses.add(
+                responses.POST,
+                f"https://{ip}/rest/v10.04/system/route_maps/ncn-w005/route_map_entries",
+            )
+
+            # Route Entry, multiple responses
+            responses.add(
+                responses.GET,
+                f"https://{ip}/rest/v10.04/system/route_maps/ncn-w001/route_map_entries",
+                json={
+                    "10": "/rest/v10.04/system/route_maps/ncn-w001/route_map_entries/10",
+                    "20": "/rest/v10.04/system/route_maps/ncn-w001/route_map_entries/20",
+                    "30": "/rest/v10.04/system/route_maps/ncn-w001/route_map_entries/30",
+                },
+            )
+            responses.add(
+                responses.GET,
+                f"https://{ip}/rest/v10.04/system/route_maps/ncn-w001/route_map_entries",
+                json={
+                    "10": "/rest/v10.04/system/route_maps/ncn-w001/route_map_entries/10",
+                    "20": "/rest/v10.04/system/route_maps/ncn-w001/route_map_entries/20",
+                    "30": "/rest/v10.04/system/route_maps/ncn-w001/route_map_entries/30",
+                    "40": "/rest/v10.04/system/route_maps/ncn-w001/route_map_entries/40",
+                },
+            )
+            responses.add(
+                responses.GET,
+                f"https://{ip}/rest/v10.04/system/route_maps/ncn-w001/route_map_entries",
+                json={
+                    "10": "/rest/v10.04/system/route_maps/ncn-w001/route_map_entries/10",
+                    "20": "/rest/v10.04/system/route_maps/ncn-w001/route_map_entries/20",
+                    "30": "/rest/v10.04/system/route_maps/ncn-w001/route_map_entries/30",
+                    "40": "/rest/v10.04/system/route_maps/ncn-w001/route_map_entries/40",
+                    "50": "/rest/v10.04/system/route_maps/ncn-w001/route_map_entries/50",
+                },
+            )
+
+            # BGP Router ID
+            responses.add(
+                responses.POST,
+                f"https://{ip}/rest/v10.04/system/vrfs/default/bgp_routers",
+            )
+
+            # BGP Neighbors
+            responses.add(
+                responses.POST,
+                f"https://{ip}/rest/v10.04/system/vrfs/default/bgp_routers/{asn}/bgp_neighbors",
+            )
+
+            # Write Memory
+            responses.add(
+                responses.PUT,
+                f"https://{ip}/rest/v10.04/fullconfigs/startup-config?from=/rest/v10.04/fullconfigs/running-config",
+            )
+
+            # Logout
+            responses.add(
+                responses.POST,
+                f"https://{ip}/rest/v10.04/logout",
+            )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--shasta",
+                shasta,
+                "--cache",
+                cache_minutes,
+                "config",
+                "bgp",
+                "--username",
+                username,
+                "--password",
+                password,
+                "--ips",
+                ips,
+                "--verbose",
+            ],
+        )
+        assert result.exit_code == 0
+        assert "BGP Updated" in str(result.output)
+        assert "192.168.1.1" in str(result.output)
+        assert "192.168.1.2" in str(result.output)
+        assert "CAN Prefix: 192.168.5.0/23" in str(result.output)
+        assert "HMN Prefix: 192.168.6.0/24" in str(result.output)
+        assert "NMN Prefix: 192.168.7.0/24" in str(result.output)
+        assert "TFTP Prefix: 192.168.7.60/32" in str(result.output)
+
+
 def test_config_bgp_missing_ips():
     """Test that the `canu config bgp` command errors on missing IPs."""
     with runner.isolated_filesystem():

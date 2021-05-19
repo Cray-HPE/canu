@@ -16,6 +16,7 @@ CANU reads switch version information from the _canu.yaml_ file in the root dire
 **[Validate Cabling](#validate-cabling)**<br>
 **[Validate SHCD and Cabling](#validate-shcd-and-cabling)**<br>
 **[Validate BGP](#validate-bgp)**<br>
+**[Config BGP](#config-bgp)**<br>
 **[Uninstallation](#uninstallation)**<br>
 **[Road Map](#road-map)**<br>
 **[Testing](#testing)**<br>
@@ -417,6 +418,43 @@ If any of the spine switch neighbors for a connection other than **Established**
 
 If a switch that is not a **spine** switch is tested, it will show in the results table as **SKIP**.
 
+### Config BGP
+
+**[Details](docs/config_bgp.md)**<br>
+
+CANU can be used to configure BGP for a pair of switches.
+
+This command will remove previous configuration (BGP, Prefix Lists, Route Maps), then add prefix lists, create
+route maps, and update BGP neighbors, then write it all to the switch memory.
+
+The network and NCN data can be read from one of two sources, the SLS API, or using CSI.
+
+To access SLS, a token must be passed in using the `--auth-token` flag.
+Tokens are typically stored in ~./config/cray/tokens/
+Instead of passing in a token file, the environmental variable SLS_TOKEN can be used.
+
+To get the network data using CSI, pass in the CSI folder containing the sls_input_file.json file using the `--csi-folder` flag
+
+The sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.
+
+- Early in the install process, when running off of the LiveCD the sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/config/SYSTEMNAME/`
+
+- Later in the install process, the sls_input_file.json file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
+
+To configure BGP run: `canu -s 1.4 config bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
+
+```bash
+$ canu -s 1.4 config bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
+
+BGP Updated
+--------------------------------------------------
+192.168.1.1
+192.168.1.2
+
+```
+
+To print extra details (prefixes, NCN names, IPs), add the `--verbose` flag
+
 ## Uninstallation
 
 `pip3 uninstall canu`
@@ -442,11 +480,10 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 # Changelog
 
 ## [0.0.5~alpha] - 2021-5-14
-- Made a license fix
-- Made internal build improvements 
-- Added arch to filename
-- Updated the plan-of-record firmware for the 8360 in Shasta 1.5/CSM-1.0
-- Added BGP config
+
+- Updated license
+- Updated the plan-of-record firmware for the 8360 in Shasta 1.4 and 1.5
+- Added `config bgp` command to update bgp configuration for a pair of switches.
 
 ## [0.0.4] - 2021-05-07
 
