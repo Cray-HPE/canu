@@ -67,9 +67,28 @@ def bgp(
 ):
     """Configure BGP for a pair of switches.
 
-    This script updates the BGP neighbors on the management switches to match the IPs of what CSI generated.
-       - It Queries SLS for network and NCN data.
+    This command will remove previous configuration (BGP, Prefix Lists, Route Maps), then add prefix lists, create
+    route maps, and update BGP neighbors, then write it all to the switch memory.
 
+    The network and NCN data can be read from one of two sources, the SLS API, or using CSI.
+
+    To access SLS, a token must be passed in using the `--auth-token` flag.
+    Tokens are typically stored in ~./config/cray/tokens/
+    Instead of passing in a token file, the environmental variable SLS_TOKEN can be used.
+
+    To get the network data using CSI, pass in the CSI folder containing the sls_input_file.json file using the `--csi-folder` flag
+
+    The sls_input_file.json file is generally stored in one of two places
+    depending on how far the system is in the install process.
+
+
+        - Early in the install process, when running off of the LiveCD the
+        sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/config/SYSTEMNAME/`
+
+        - Later in the install process, the sls_input_file.json file is
+        generally in `/mnt/pitdata/prep/SYSTEMNAME/`
+
+    To print extra details (prefixes, NCN names, IPs), add the `--verbose` flag
 
     \f
     # noqa: D301
@@ -254,6 +273,19 @@ def bgp(
     click.echo(dash)
     for ip in ips:
         click.echo(ip)
+
+    if verbose:
+        click.echo("\n")
+        click.secho("Details", fg="bright_white")
+        click.echo(dash)
+        click.echo(f"CAN Prefix: {prefix['can']}")
+        click.echo(f"HMN Prefix: {prefix['hmn']}")
+        click.echo(f"NMN Prefix: {prefix['nmn']}")
+        click.echo(f"TFTP Prefix: {prefix['tftp']}")
+        click.echo(f"NCN Names: {ncn['names']}")
+        click.echo(f"NCN CAN IPs: {ncn['can']}")
+        click.echo(f"NCN NMN IPs: {ncn['nmn']}")
+        click.echo(f"NCN HMN IPs: {ncn['hmn']}")
 
     if len(errors) > 0:
         click.echo("\n")
