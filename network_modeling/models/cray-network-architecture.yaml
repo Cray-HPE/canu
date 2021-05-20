@@ -114,6 +114,9 @@ network_v2:
     - lookup_name: ["sw-100g"]
       shasta_name: "sw-spine"
       architecture_type: "spine"
+    - lookup_name: ["superspine"]
+      shasta_name: "sw-superspine"
+      architecture_type: "superspine"
     - lookup_name: ["sw-edge"]
       shasta_name: "sw-edge"
       architecture_type: "customer_edge_router"
