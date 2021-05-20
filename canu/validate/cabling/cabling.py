@@ -242,14 +242,14 @@ def node_model_from_canu(factory, canu_cache, ips):
                 # sw-leaf-bmc99
                 # sw-leaf-bmc-098
                 node_name = src_name
-                if node_name.startswith("sw-"):
+                if str(node_name).startswith("sw-"):
                     start = "sw-"
                     middle = re.findall(r"(?:sw-)([a-z-]+)", node_name)[0]
                     digits = re.findall(r"(\d+)", node_name)[0]
                     node_name = f"{start}{middle.rstrip('-')}-{int(digits) :03d}"
 
                 log.debug(f"Source Name Lookup: {node_name}")
-                node_type = get_node_type_yaml(src_name, factory.lookup_mapper())
+                node_type = get_node_type_yaml(str(src_name), factory.lookup_mapper())
                 log.debug(f"Source Node Type Lookup: {node_type}")
 
                 # If the hostname is not the Shasta name, it needs to be renamed
@@ -342,7 +342,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                     warn_name = dst_name
                     warn_descrip = switch["cabling"][port][0]["neighbor_description"]
                     warn_port = switch["cabling"][port][0]["neighbor_port"]
-                    dst_name_warning = f"{node_name : <16} {port : <9} ===> {warn_port} {warn_name} {warn_descrip}"
+                    dst_name_warning = f"{str(node_name) : <16} {port : <9} ===> {warn_port} {warn_name} {warn_descrip}"
 
                     warnings["node_type"].append(dst_name_warning)
 

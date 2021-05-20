@@ -102,7 +102,7 @@ def bgp(ctx, ips, ips_file, username, password, asn, verbose):
         ip = switch
         hostname = data[switch]["hostname"]
 
-        if "spine" not in hostname:
+        if "spine" not in str(hostname):
             errors.append(
                 [
                     str(ip),
@@ -141,7 +141,7 @@ def bgp(ctx, ips, ips_file, username, password, asn, verbose):
         hostname = data[switch]["hostname"]
         status = data[switch]["status"]
 
-        if "spine" not in hostname:
+        if "spine" not in str(hostname):
             click.echo(f"SKIP - IP: {ip} Hostname: {hostname} is not a spine switch.")
             continue
 
