@@ -448,11 +448,16 @@ def node_list_warnings(node_list, warnings):
             click.secho(dash)
             nodes = set(warnings["node_type"])
             nodes = natsort.natsorted(nodes)
+            has_mac = False
             for node in nodes:
+                # If the string has a mac address in it, set to True
+                if bool(re.search(r"(?:[0-9a-fA-F]:?){12}", node)):
+                    has_mac = True
                 click.secho(node, fg="bright_white")
-            click.secho(
-                "Nodes that show up as MAC addresses might need to have LLDP enabled."
-            )
+            if has_mac is True:
+                click.secho(
+                    "Nodes that show up as MAC addresses might need to have LLDP enabled."
+                )
         if warnings["zero_connections"]:
             click.secho(
                 "\nThe following nodes have zero connections",
@@ -472,7 +477,7 @@ def node_list_warnings(node_list, warnings):
             nodes = set()
             for x in warnings["rename"]:
                 new_name = x[1]
-                if new_name == "":
+                if new_name == "":  # pragma: no cover
                     new_name = "(could not identify node)"
                 nodes.add((x[0], new_name))
             nodes = natsort.natsorted(nodes)
