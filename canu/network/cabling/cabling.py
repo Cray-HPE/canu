@@ -340,14 +340,12 @@ def print_equipment(equipment_json, out="-"):
                 if port_description == port:
                     port_description = ""
                 text_color = ""
-                if (
-                    "ncn"
-                    in equipment_json[equipment]["connections_from"][port]["hostname"]
+                if "ncn" in str(
+                    equipment_json[equipment]["connections_from"][port]["hostname"]
                 ):  # pragma: no cover
                     text_color = "blue"
-                if (
-                    "sw-"
-                    in equipment_json[equipment]["connections_from"][port]["hostname"]
+                if "sw-" in str(
+                    equipment_json[equipment]["connections_from"][port]["hostname"]
                 ):
                     text_color = "green"
 
@@ -358,7 +356,11 @@ def print_equipment(equipment_json, out="-"):
                     "{:<25s}{:^6s}{:<15s} {} {}".format(
                         port + " " + port_description,
                         arrow,
-                        equipment_json[equipment]["connections_from"][port]["hostname"],
+                        str(
+                            equipment_json[equipment]["connections_from"][port][
+                                "hostname"
+                            ]
+                        ),
                         equipment_json[equipment]["connections_from"][port]["port"],
                         description,
                     ),
