@@ -1,8 +1,9 @@
-"""NetworkNode to create a new node."""
+"""NetworkNode to create a new node - switch, router or end device."""
 import copy
 import logging
-
 import click
+
+from .NetworkPort import NetworkPort
 
 log = logging.getLogger(__name__)
 
@@ -289,6 +290,14 @@ class NetworkNode:
                 f"  Successfully connected {node.common_name()} to {self.common_name()} at speed {connection_speed}"
             )
         return True
+
+    def assign_port(self, port=None):
+        """Connect an edge connection to a physical port."""
+        # Defensively check input node type.
+        if not isinstance(port, NetworkPort):
+            raise Exception(click.secho("Node needs to be type NetworkPort", fg="red"))
+
+        log.debug(f"Assigning Port {port.port()} in slot {port.slot()}")
 
     def disconnect(self, node):
         """Disconnect one device from another."""
