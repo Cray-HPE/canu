@@ -451,7 +451,7 @@ def node_list_warnings(node_list, warnings):
             has_mac = False
             for node in nodes:
                 # If the string has a mac address in it, set to True
-                if bool(re.search(r"(?:[0-9a-fA-F]:?){12}", node)):
+                if bool(re.search(r"(?:[0-9a-fA-F]:?){12}", str(node))):
                     has_mac = True
                 click.secho(node, fg="bright_white")
             if has_mac is True:
