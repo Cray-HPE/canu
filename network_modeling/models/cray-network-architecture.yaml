@@ -24,11 +24,13 @@ network_v2:
         - name: "spine"
           speed: 100
     - name: "mountain_compute_leaf"
-      model: "8320_JL581A"
+      model: "8360_JL706A"
       connections:
         - name: "spine"
-          speed: 40
+          speed: 100
           number: 2
+        - name: "mountain_compute_leaf"
+          speed: 100
     - name: "river_compute_leaf"
       model: "6300M_JL762A"
       connections:
@@ -108,7 +110,7 @@ network_v2:
     - lookup_name: ["sw-smn"]
       shasta_name: "sw-leaf-bmc"
       architecture_type: "river_bmc_leaf"
-    - lookup_name: ["sw-25g"]
+    - lookup_name: ["sw-25g", "sw-agg"]
       shasta_name: "sw-leaf"
       architecture_type: "river_ncn_leaf"
     - lookup_name: ["sw-100g"]
@@ -133,11 +135,13 @@ network_v2_tds:
         - name: "spine"
           speed: 100
     - name: "mountain_compute_leaf"
-      model: "8320_JL581A"
+      model: "8360_JL706A"
       connections:
         - name: "spine"
-          speed: 40
+          speed: 100
           number: 2
+        - name: "mountain_compute_leaf"
+          speed: 100
     - name: "river_bmc_leaf"
       model: "6300M_JL762A"
       connections:
