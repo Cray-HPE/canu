@@ -10,6 +10,7 @@ import click
 from click_help_colors import HelpColorsCommand
 import natsort
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
+from network_modeling.NetworkPort import NetworkPort
 from openpyxl import load_workbook
 
 
@@ -323,8 +324,10 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 )
                 sys.exit(1)
             # src_xname = row[1].value + row[2].value
+            # Create the source port for the node
             src_slot = row[3].value
             src_port = row[5].value
+            src_node_port = NetworkPort(number=src_port, slot=src_slot)
             log.debug(f"Source Data:  {src_name} {src_slot} {src_port}")
             node_name = get_node_common_name(src_name, factory.lookup_mapper())
             log.debug(f"Source Name Lookup:  {node_name}")
@@ -360,7 +363,9 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             # Cable destination
             dst_name = row[6].value.strip()
             # dst_xname = row[7].value + row[8].value
+            # Create the destination port for the node
             dst_port = row[10].value
+            dst_node_port = NetworkPort(number=src_port, slot=src_slot)
 
             log.debug(f"Destination Data:  {dst_name} {dst_port}")
             node_name = get_node_common_name(dst_name, factory.lookup_mapper())
@@ -398,10 +403,22 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
 
             # Connect src_node and dst_node if possible
             if src_index is not None and dst_index is not None:
-                connected = node_list[src_index].connect(node_list[dst_index])
+                src_node = node_list[src_index]
+                dst_node = node_list[dst_index]
+                connected = src_node.connect(dst_node)
                 if connected:
                     log.info(
                         f"Connected {node_list[src_index].common_name()} to {node_list[dst_index].common_name()} bi-directionally"
+                    )
+
+                    # Assign ports to the connection not that connections are allowed and completed
+                    src_node.assign_port(src_node_port)
+                    log.info(
+                        f"Assigned Port {src_node_port.port()} in slot {src_node_port.slot()} on {src_node.common_name()}"
+                    )
+                    dst_node.assign_port(dst_node_port)
+                    log.info(
+                        f"Assigned Port {dst_node_port.port()} in slot {dst_node_port.slot()} on {src_node.common_name()}"
                     )
                 else:
                     log.error("")
@@ -420,6 +437,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                         + f"to {node_list[dst_index].common_name()} bi-directionally"
                     )
                     sys.exit(1)  # TODO: this should probably be an exception
+
     return node_list, warnings
 
 
