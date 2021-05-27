@@ -51,9 +51,7 @@ spanning-tree
 spanning-tree priority 5
 spanning-tree max-age 6
 spanning-tree config-name MST0
-spanning-tree instance 1 vlan 2-100
-spanning-tree instance 2 vlan 101-200
-spanning-tree vlan 1,2,4,7,10
+spanning-tree config-revision 1
 interface mgmt
     no shutdown
     ip static 10.20.1.48/24
@@ -266,22 +264,27 @@ interface 1/1/24
     vlan trunk allowed 1777
 interface 1/1/25
     no shutdown
+    mtu 9198
     no routing
     vlan access 1
 interface 1/1/26
     no shutdown
+    mtu 9198
     no routing
     vlan access 1
 interface 1/1/27
     no shutdown
+    mtu 9198
     no routing
     vlan access 1
 interface 1/1/28
     no shutdown
+    mtu 9198
     no routing
     vlan access 1
 interface 1/1/29
     no shutdown
+    mtu 9198
     no routing
     vlan access 1
 interface 1/1/30
@@ -1031,6 +1034,8 @@ route-map ncn-w026 permit seq 30
 router ospf 2 vrf CAN
     redistribute connected route-map CAN
     area 0.0.0.210 nssa no-summary
+router ospfv3 vrf CAN
+    area 0.0.0.210
 router ospf 1
     router-id 10.252.0.2
     redistribute bgp
@@ -1264,3 +1269,4 @@ router bgp 65533
 !
 https-server vrf default
 https-server vrf mgmt
+https-server vrf CAN
