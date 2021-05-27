@@ -45,8 +45,7 @@ spanning-tree
 spanning-tree priority 15
 spanning-tree max-age 6
 spanning-tree config-name MST0
-spanning-tree instance 1 vlan 1-100
-spanning-tree vlan 1,2,4,7,10
+spanning-tree config-revision 1
 interface mgmt
     no shutdown
     ip static 10.20.1.50/24
@@ -376,18 +375,22 @@ interface 1/1/46
 interface 1/1/47
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/48
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/49
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/50
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/51
     no shutdown
@@ -406,9 +409,7 @@ interface loopback 0
     ipv6 ospfv3 1 area 0.0.0.0
 interface vlan 1
     ip mtu 9198
-        ! ip dhcp is ignored when static ip is configured
     ip address 10.1.0.10/17
-    ip dhcp
     ipv6 address autoconfig
     ip helper-address 10.92.100.222
     ipv6 ospfv3 1 area 0.0.0.0
