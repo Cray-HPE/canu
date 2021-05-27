@@ -1,0 +1,1260 @@
+Current configuration:
+!
+!Version ArubaOS-CX GL.10.06.0010
+!export-password: default
+hostname sw-spine-002
+user admin group administrators password ciphertext AQBapT2+ry5gq9glytwl6xM/vPKmj8KsJpYEuUrCruZ5CCl7YgAAAPDBWVVVXZ67KQMwu8tWCHikTKPr9qO1eVIT2ylP/9LcCyeJAb4f0Zn2M2H8u3r4jq/Q5t/sNsjpv8HsU91PokyilUdwASZR10ZTzYKNu86XrOH4/C278iyNeaoSCRBKihOF
+bfd
+no ip icmp redirect
+vrf CAN
+vrf keepalive
+ntp server 128.55.136.12
+ntp server 128.55.136.13
+ntp server 128.55.210.14
+ntp server 128.55.210.15
+ntp enable
+!
+!
+!
+logging 10.20.1.71 tcp 601 severity debug vrf mgmt
+ssh server vrf default
+ssh server vrf mgmt
+access-list ip nmn-hmn
+    10 deny any 10.252.0.0/255.255.128.0 10.254.0.0/255.255.128.0
+    20 deny any 10.252.0.0/255.255.128.0 10.104.0.0/255.252.0.0
+    30 deny any 10.254.0.0/255.255.128.0 10.252.0.0/255.255.128.0
+    40 deny any 10.254.0.0/255.255.128.0 10.100.0.0/255.252.0.0
+    50 deny any 10.100.0.0/255.252.0.0 10.254.0.0/255.255.128.0
+    60 deny any 10.100.0.0/255.252.0.0 10.104.0.0/255.252.0.0
+    70 deny any 10.104.0.0/255.252.0.0 10.252.0.0/255.255.128.0
+    80 deny any 10.104.0.0/255.252.0.0 10.100.0.0/255.252.0.0
+    90 permit any any any
+vlan 1
+vlan 2
+    name NMN
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
+vlan 4
+    name HMN
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
+vlan 7
+    name CAN
+vlan 10
+    name SUN
+vlan 1773
+    description perlmutter-rtr1-perlmutter-spine-sw02-p2p
+vlan 1778
+    description perlmutter-rtr2-perlmutter-spine-sw02-p2p
+vlan 3913-3914,4013-4014
+spanning-tree
+spanning-tree priority 5
+spanning-tree max-age 6
+spanning-tree config-name MST0
+spanning-tree instance 1 vlan 2-100
+spanning-tree instance 2 vlan 101-200
+spanning-tree vlan 1,2,4,7,10
+interface mgmt
+    no shutdown
+    ip static 10.20.1.49/24
+interface lag 7 multi-chassis
+    no shutdown
+    description sw-agg-00[1-2] lag 49
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed all
+    lacp mode active
+    spanning-tree root-guard
+interface lag 9 multi-chassis
+    no shutdown
+    description sw-agg-00[3-4] lag 49
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed all
+    lacp mode active
+    spanning-tree root-guard
+interface lag 11 multi-chassis
+    no shutdown
+    description sw-agg-00[5-6] lag 49
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed all
+    lacp mode active
+interface lag 13 multi-chassis
+    no shutdown
+    description sw-agg-00[7-8] lag 49
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed all
+    lacp mode active
+interface lag 15 multi-chassis
+    no shutdown
+    description sw-cdu-00[7-8] lag 49
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed all
+    lacp mode active
+interface lag 17 multi-chassis
+    no shutdown
+    description sw-cdu-00[9-10] lag 49
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed all
+    lacp mode active
+interface lag 19 multi-chassis
+    no shutdown
+    description sw-cdu-00[11-12] lag 49
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed all
+    lacp mode active
+interface lag 21 multi-chassis
+    no shutdown
+    description sw-cdu-00[13-14] lag 49
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed all
+    lacp mode active
+interface lag 99
+    no shutdown
+    description ISL link
+    no routing
+    vlan trunk native 1 tag
+    vlan trunk allowed all
+    lacp mode active
+interface 1/1/1
+    no shutdown
+    mtu 9198
+    description sw-cdu-001 j50
+    ip address 10.2.0.3/31
+    ip ospf 1 area 0.0.0.0
+    ip ospf network point-to-point
+    ip ospf bfd
+interface 1/1/2
+    no shutdown
+    mtu 9198
+    description sw-cdu-002 j50
+    ip address 10.2.0.7/31
+    ip ospf 1 area 0.0.0.0
+    ip ospf network point-to-point
+    ip ospf bfd
+interface 1/1/3
+    no shutdown
+    mtu 9198
+    description sw-cdu-003 j50
+    ip address 10.2.0.11/31
+    ip ospf 1 area 0.0.0.0
+    ip ospf network point-to-point
+    ip ospf bfd
+interface 1/1/4
+    no shutdown
+    mtu 9198
+    description sw-cdu-004 j50
+    ip address 10.2.0.15/31
+    ip ospf 1 area 0.0.0.0
+    ip ospf network point-to-point
+    ip ospf bfd
+interface 1/1/5
+    no shutdown
+    mtu 9198
+    description sw-cdu-005 j50
+    ip address 10.2.0.19/31
+    ip ospf 1 area 0.0.0.0
+    ip ospf network point-to-point
+    ip ospf bfd
+interface 1/1/6
+    no shutdown
+    mtu 9198
+    description sw-cdu-006 j50
+    ip address 10.2.0.23/31
+    ip ospf 1 area 0.0.0.0
+    ip ospf network point-to-point
+    ip ospf bfd
+interface 1/1/7
+    no shutdown
+    mtu 9198
+    description sw-agg-001 50
+    lag 7
+interface 1/1/8
+    no shutdown
+    mtu 9198
+    description sw-agg-002 50
+    lag 7
+interface 1/1/9
+    no shutdown
+    mtu 9198
+    description sw-agg-003 50
+    lag 9
+interface 1/1/10
+    no shutdown
+    mtu 9198
+    description sw-agg-004 50
+    lag 9
+interface 1/1/11
+    no shutdown
+    mtu 9198
+    description sw-agg-005 50
+    lag 11
+interface 1/1/12
+    no shutdown
+    mtu 9198
+    description sw-agg-006 50
+    lag 11
+interface 1/1/13
+    no shutdown
+    mtu 9198
+    description sw-agg-007 50
+    lag 13
+interface 1/1/14
+    no shutdown
+    mtu 9198
+    description sw-agg-008 50
+    lag 13
+interface 1/1/15
+    no shutdown
+    mtu 9198
+    description sw-cdu-007 j50
+    lag 15
+interface 1/1/16
+    no shutdown
+    mtu 9198
+    description sw-cdu-008 j50
+    lag 15
+interface 1/1/17
+    no shutdown
+    mtu 9198
+    description sw-cdu-009 j50
+    lag 17
+interface 1/1/18
+    no shutdown
+    mtu 9198
+    description sw-cdu-010 j50
+    lag 17
+interface 1/1/19
+    no shutdown
+    mtu 9198
+    description sw-cdu-011 j50
+    lag 19
+interface 1/1/20
+    no shutdown
+    mtu 9198
+    description sw-cdu-012 j50
+    lag 19
+interface 1/1/21
+    no shutdown
+    mtu 9198
+    description sw-cdu-013 j50
+    lag 21
+interface 1/1/22
+    no shutdown
+    mtu 9198
+    description sw-cdu-014 j50
+    lag 21
+interface 1/1/23
+    no shutdown
+    mtu 9198
+    description perlmutter-rtr1 3/15/1
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1773
+interface 1/1/24
+    no shutdown
+    mtu 9198
+    description perlmutter-rtr2 3/14/1
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1778
+interface 1/1/25
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/26
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/27
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/28
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/29
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/30
+    no shutdown
+    vrf attach keepalive
+    description vsx ka sw-spine-001 30
+    ip address 192.168.255.3/31
+interface 1/1/31
+    no shutdown
+    mtu 9198
+    description vsx isl sw-spine-001 31
+    lag 99
+interface 1/1/32
+    no shutdown
+    mtu 9198
+    description vsx isl sw-spine-001 32
+    lag 99
+interface loopback 0
+    ip address 10.3.0.3/32
+    ipv6 address fd01::6c/64
+    ip ospf 1 area 0.0.0.0
+    ipv6 ospfv3 1 area 0.0.0.0
+interface vlan 1
+    vsx-sync active-gateways
+    ip mtu 9198
+    ip address 10.1.0.3/17
+    active-gateway ip mac 12:00:00:00:6b:00
+    active-gateway ip 10.1.0.1
+    ipv6 address autoconfig
+    ip helper-address 10.92.100.222
+    ipv6 ospfv3 1 area 0.0.0.0
+interface vlan 2
+    vsx-sync active-gateways
+    description NMN
+    ip mtu 9198
+    ip address 10.252.0.3/17
+    active-gateway ip mac 12:00:00:00:6b:00
+    active-gateway ip 10.252.0.1
+    ip helper-address 10.92.100.222
+    ip ospf 1 area 0.0.0.0
+interface vlan 4
+    vsx-sync active-gateways
+    description HMN
+    ip mtu 9198
+    ip address 10.254.0.3/17
+    active-gateway ip mac 12:00:00:00:6b:00
+    active-gateway ip 10.254.0.1
+    ip helper-address 10.94.100.222
+    ip ospf 1 area 0.0.0.0
+interface vlan 7
+    vsx-sync active-gateways
+    vrf attach CAN
+    description CAN
+    ip mtu 9198
+    ip address 128.55.176.3/23
+    active-gateway ip mac 12:00:00:00:6b:00
+    active-gateway ip 128.55.176.1
+    ip ospf 2 area 0.0.0.210
+interface vlan 1773
+    vrf attach CAN
+    description perlmutter-rtr1-perlmutter-spine-sw02-p2p
+    ip mtu 9198
+    ip address 128.55.192.242/30
+    ip ospf 2 area 0.0.0.210
+    ip ospf network point-to-point
+    ip ospf authentication-key ciphertext AQBapdj/j75Nlhno66KbLeZz/4FooPWaAZenLUAcZYHADdB1CAAAAFC1qGv/RM3I
+interface vlan 1778
+    vrf attach CAN
+    description perlmutter-rtr1-perlmutter-spine-sw02-p2p
+    ip mtu 9198
+    ip address 128.55.192.106/30
+    ip ospf 2 area 0.0.0.210
+    ip ospf network point-to-point
+    ip ospf authentication-key ciphertext AQBapdj/j75Nlhno66KbLeZz/4FooPWaAZenLUAcZYHADdB1CAAAAFC1qGv/RM3I
+vsx
+    system-mac 02:00:00:00:6b:00
+    inter-switch-link lag 99
+    role secondary
+    keepalive peer 192.168.255.2 source 192.168.255.3 vrf keepalive
+    linkup-delay-timer 600
+    vsx-sync vsx-global
+ip route 0.0.0.0/0 128.55.192.241
+ip prefix-list CAN seq 10 permit 128.55.176.0/23 ge 24 
+ip prefix-list pl-can seq 10 permit 128.55.176.0/23 ge 24 
+ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24 
+ip prefix-list pl-nmn seq 30 permit 10.92.100.0/24 ge 24 
+ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32 
+!
+!
+!
+!
+route-map CAN permit seq 10
+     match interface vlan7
+route-map CAN-NCN permit seq 10
+     match ip address prefix-list CAN
+route-map ncn-w001 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w001 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w001 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w001 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w001 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.24
+route-map ncn-w001 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.44
+route-map ncn-w001 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.25
+route-map ncn-w002 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w002 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w002 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w002 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w002 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.25
+route-map ncn-w002 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.46
+route-map ncn-w002 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.26
+route-map ncn-w003 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w003 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w003 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w003 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w003 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.26
+route-map ncn-w003 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.48
+route-map ncn-w003 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.27
+route-map ncn-w004 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w004 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w004 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w004 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w004 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.27
+route-map ncn-w004 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.50
+route-map ncn-w004 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.28
+route-map ncn-w005 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w005 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w005 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w005 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w005 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.30
+route-map ncn-w005 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.56
+route-map ncn-w005 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.31
+route-map ncn-w006 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w006 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w006 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w006 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w006 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.31
+route-map ncn-w006 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.58
+route-map ncn-w006 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.32
+route-map ncn-w007 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w007 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w007 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w007 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w007 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.32
+route-map ncn-w007 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.60
+route-map ncn-w007 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.33
+route-map ncn-w008 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w008 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w008 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w008 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w008 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.33
+route-map ncn-w008 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.62
+route-map ncn-w008 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.34
+route-map ncn-w009 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w009 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w009 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w009 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w009 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.34
+route-map ncn-w009 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.64
+route-map ncn-w009 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.35
+route-map ncn-w010 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w010 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w010 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w010 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w010 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.35
+route-map ncn-w010 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.66
+route-map ncn-w010 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.36
+route-map ncn-w011 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w011 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w011 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w011 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w011 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.36
+route-map ncn-w011 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.68
+route-map ncn-w011 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.37
+route-map ncn-w012 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w012 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w012 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w012 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w012 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.37
+route-map ncn-w012 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.70
+route-map ncn-w012 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.38
+route-map ncn-w013 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w013 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w013 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w013 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w013 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.38
+route-map ncn-w013 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.72
+route-map ncn-w013 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.39
+route-map ncn-w014 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w014 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w014 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w014 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w014 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.39
+route-map ncn-w014 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.74
+route-map ncn-w014 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.40
+route-map ncn-w015 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w015 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w015 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w015 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w015 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.40
+route-map ncn-w015 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.76
+route-map ncn-w015 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.41
+route-map ncn-w016 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w016 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w016 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w016 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w016 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.41
+route-map ncn-w016 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.78
+route-map ncn-w016 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.42
+route-map ncn-w017 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w017 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w017 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w017 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w017 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.42
+route-map ncn-w017 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.80
+route-map ncn-w017 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.43
+route-map ncn-w018 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w018 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w018 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w018 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w018 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.43
+route-map ncn-w018 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.82
+route-map ncn-w018 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.44
+route-map ncn-w019 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w019 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w019 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w019 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w019 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.44
+route-map ncn-w019 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.84
+route-map ncn-w019 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.45
+route-map ncn-w020 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w020 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w020 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w020 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w020 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.45
+route-map ncn-w020 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.86
+route-map ncn-w020 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.46
+route-map ncn-w021 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w021 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w021 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w021 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w021 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.46
+route-map ncn-w021 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.88
+route-map ncn-w021 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.47
+route-map ncn-w022 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w022 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w022 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w022 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w022 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.47
+route-map ncn-w022 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.90
+route-map ncn-w022 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.48
+route-map ncn-w023 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w023 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w023 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w023 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w023 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.48
+route-map ncn-w023 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.92
+route-map ncn-w023 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.49
+route-map ncn-w024 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w024 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w024 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w024 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w024 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.49
+route-map ncn-w024 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.94
+route-map ncn-w024 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.50
+route-map ncn-w025 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w025 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w025 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w025 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w025 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.28
+route-map ncn-w025 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.52
+route-map ncn-w025 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.29
+route-map ncn-w026 permit seq 5
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.24
+     set local-preference 1000
+route-map ncn-w026 permit seq 6
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.25
+     set local-preference 1100
+route-map ncn-w026 permit seq 7
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.39
+     set local-preference 1200
+route-map ncn-w026 permit seq 8
+     match ip address prefix-list tftp
+     match ip next-hop 10.252.1.45
+     set local-preference 1300
+route-map ncn-w026 permit seq 10
+     match ip address prefix-list pl-nmn
+     set ip next-hop 10.252.1.29
+route-map ncn-w026 permit seq 20
+     match ip address prefix-list pl-hmn
+     set ip next-hop 10.254.1.54
+route-map ncn-w026 permit seq 30
+     match ip address prefix-list pl-can
+     set ip next-hop 128.55.176.30
+!
+router ospf 2 vrf CAN
+    redistribute connected route-map CAN
+    area 0.0.0.210 nssa no-summary
+router ospf 1
+    router-id 10.252.0.3
+    redistribute bgp
+    area 0.0.0.0
+router ospfv3 1
+    router-id 10.1.0.3
+    area 0.0.0.0
+router bgp 65533
+    bgp router-id 10.252.0.3
+    maximum-paths 8
+    distance bgp 85 70
+    neighbor 10.252.0.2 remote-as 65533
+    neighbor 10.252.1.24 remote-as 65533
+    neighbor 10.252.1.25 remote-as 65533
+    neighbor 10.252.1.26 remote-as 65533
+    neighbor 10.252.1.27 remote-as 65533
+    neighbor 10.252.1.28 remote-as 65533
+    neighbor 10.252.1.28 passive
+    neighbor 10.252.1.29 remote-as 65533
+    neighbor 10.252.1.29 passive
+    neighbor 10.252.1.30 remote-as 65533
+    neighbor 10.252.1.31 remote-as 65533
+    neighbor 10.252.1.31 passive
+    neighbor 10.252.1.32 remote-as 65533
+    neighbor 10.252.1.32 passive
+    neighbor 10.252.1.33 remote-as 65533
+    neighbor 10.252.1.33 passive
+    neighbor 10.252.1.34 remote-as 65533
+    neighbor 10.252.1.34 passive
+    neighbor 10.252.1.35 remote-as 65533
+    neighbor 10.252.1.35 passive
+    neighbor 10.252.1.36 remote-as 65533
+    neighbor 10.252.1.36 passive
+    neighbor 10.252.1.37 remote-as 65533
+    neighbor 10.252.1.37 passive
+    neighbor 10.252.1.38 remote-as 65533
+    neighbor 10.252.1.38 passive
+    neighbor 10.252.1.39 remote-as 65533
+    neighbor 10.252.1.39 passive
+    neighbor 10.252.1.40 remote-as 65533
+    neighbor 10.252.1.40 passive
+    neighbor 10.252.1.41 remote-as 65533
+    neighbor 10.252.1.41 passive
+    neighbor 10.252.1.42 remote-as 65533
+    neighbor 10.252.1.42 passive
+    neighbor 10.252.1.43 remote-as 65533
+    neighbor 10.252.1.43 passive
+    neighbor 10.252.1.44 remote-as 65533
+    neighbor 10.252.1.44 passive
+    neighbor 10.252.1.45 remote-as 65533
+    neighbor 10.252.1.45 passive
+    neighbor 10.252.1.46 remote-as 65533
+    neighbor 10.252.1.46 passive
+    neighbor 10.252.1.47 remote-as 65533
+    neighbor 10.252.1.47 passive
+    neighbor 10.252.1.48 remote-as 65533
+    neighbor 10.252.1.48 passive
+    neighbor 10.252.1.49 remote-as 65533
+    neighbor 10.252.1.49 passive
+    address-family ipv4 unicast
+        neighbor 10.252.0.2 activate
+        neighbor 10.252.1.24 activate
+        neighbor 10.252.1.24 route-map ncn-w001 in
+        neighbor 10.252.1.25 activate
+        neighbor 10.252.1.25 route-map ncn-w002 in
+        neighbor 10.252.1.26 activate
+        neighbor 10.252.1.26 route-map ncn-w003 in
+        neighbor 10.252.1.27 activate
+        neighbor 10.252.1.27 route-map ncn-w004 in
+        neighbor 10.252.1.28 activate
+        neighbor 10.252.1.28 route-map ncn-w025 in
+        neighbor 10.252.1.29 activate
+        neighbor 10.252.1.29 route-map ncn-w026 in
+        neighbor 10.252.1.30 activate
+        neighbor 10.252.1.30 route-map ncn-w015 in
+        neighbor 10.252.1.31 activate
+        neighbor 10.252.1.31 route-map ncn-w006 in
+        neighbor 10.252.1.32 activate
+        neighbor 10.252.1.32 route-map ncn-w007 in
+        neighbor 10.252.1.33 activate
+        neighbor 10.252.1.33 route-map ncn-w008 in
+        neighbor 10.252.1.34 activate
+        neighbor 10.252.1.34 route-map ncn-w009 in
+        neighbor 10.252.1.35 activate
+        neighbor 10.252.1.35 route-map ncn-w010 in
+        neighbor 10.252.1.36 activate
+        neighbor 10.252.1.36 route-map ncn-w011 in
+        neighbor 10.252.1.37 activate
+        neighbor 10.252.1.37 route-map ncn-w012 in
+        neighbor 10.252.1.38 activate
+        neighbor 10.252.1.38 route-map ncn-w013 in
+        neighbor 10.252.1.39 activate
+        neighbor 10.252.1.39 route-map ncn-w014 in
+        neighbor 10.252.1.40 activate
+        neighbor 10.252.1.41 activate
+        neighbor 10.252.1.41 route-map ncn-w016 in
+        neighbor 10.252.1.42 activate
+        neighbor 10.252.1.42 route-map ncn-w017 in
+        neighbor 10.252.1.43 activate
+        neighbor 10.252.1.43 route-map ncn-w018 in
+        neighbor 10.252.1.44 activate
+        neighbor 10.252.1.44 route-map ncn-w019 in
+        neighbor 10.252.1.45 activate
+        neighbor 10.252.1.45 route-map ncn-w020 in
+        neighbor 10.252.1.46 activate
+        neighbor 10.252.1.46 route-map ncn-w021 in
+        neighbor 10.252.1.47 activate
+        neighbor 10.252.1.47 route-map ncn-w022 in
+        neighbor 10.252.1.48 activate
+        neighbor 10.252.1.48 route-map ncn-w023 in
+        neighbor 10.252.1.49 activate
+        neighbor 10.252.1.49 route-map ncn-w024 in
+    exit-address-family
+!
+    vrf CAN
+        maximum-paths 8
+        neighbor 128.55.176.2 remote-as 65533
+        neighbor 128.55.176.25 remote-as 65534
+        neighbor 128.55.176.25 passive
+        neighbor 128.55.176.26 remote-as 65534
+        neighbor 128.55.176.26 passive
+        neighbor 128.55.176.27 remote-as 65534
+        neighbor 128.55.176.27 passive
+        neighbor 128.55.176.28 remote-as 65534
+        neighbor 128.55.176.28 passive
+        neighbor 128.55.176.29 remote-as 65534
+        neighbor 128.55.176.29 passive
+        neighbor 128.55.176.30 remote-as 65534
+        neighbor 128.55.176.30 passive
+        neighbor 128.55.176.31 remote-as 65534
+        neighbor 128.55.176.31 passive
+        neighbor 128.55.176.32 remote-as 65534
+        neighbor 128.55.176.32 passive
+        neighbor 128.55.176.33 remote-as 65534
+        neighbor 128.55.176.33 passive
+        neighbor 128.55.176.34 remote-as 65534
+        neighbor 128.55.176.34 passive
+        neighbor 128.55.176.35 remote-as 65534
+        neighbor 128.55.176.35 passive
+        neighbor 128.55.176.36 remote-as 65534
+        neighbor 128.55.176.36 passive
+        neighbor 128.55.176.37 remote-as 65534
+        neighbor 128.55.176.37 passive
+        neighbor 128.55.176.38 remote-as 65534
+        neighbor 128.55.176.38 passive
+        neighbor 128.55.176.39 remote-as 65534
+        neighbor 128.55.176.39 passive
+        neighbor 128.55.176.40 remote-as 65534
+        neighbor 128.55.176.40 passive
+        neighbor 128.55.176.41 remote-as 65534
+        neighbor 128.55.176.41 passive
+        neighbor 128.55.176.42 remote-as 65534
+        neighbor 128.55.176.42 passive
+        neighbor 128.55.176.43 remote-as 65534
+        neighbor 128.55.176.43 passive
+        neighbor 128.55.176.44 remote-as 65534
+        neighbor 128.55.176.44 passive
+        neighbor 128.55.176.45 remote-as 65534
+        neighbor 128.55.176.45 passive
+        neighbor 128.55.176.46 remote-as 65534
+        neighbor 128.55.176.46 passive
+        neighbor 128.55.176.47 remote-as 65534
+        neighbor 128.55.176.47 passive
+        neighbor 128.55.176.48 remote-as 65534
+        neighbor 128.55.176.48 passive
+        neighbor 128.55.176.49 remote-as 65534
+        neighbor 128.55.176.49 passive
+        neighbor 128.55.176.50 remote-as 65534
+        neighbor 128.55.176.50 passive
+        address-family ipv4 unicast
+            neighbor 128.55.176.2 activate
+            neighbor 128.55.176.25 activate
+            neighbor 128.55.176.25 route-map CAN-NCN in
+            neighbor 128.55.176.26 activate
+            neighbor 128.55.176.26 route-map CAN-NCN in
+            neighbor 128.55.176.27 activate
+            neighbor 128.55.176.27 route-map CAN-NCN in
+            neighbor 128.55.176.28 activate
+            neighbor 128.55.176.28 route-map CAN-NCN in
+            neighbor 128.55.176.29 activate
+            neighbor 128.55.176.29 route-map CAN-NCN in
+            neighbor 128.55.176.30 activate
+            neighbor 128.55.176.30 route-map CAN-NCN in
+            neighbor 128.55.176.31 activate
+            neighbor 128.55.176.31 route-map CAN-NCN in
+            neighbor 128.55.176.32 activate
+            neighbor 128.55.176.32 route-map CAN-NCN in
+            neighbor 128.55.176.33 activate
+            neighbor 128.55.176.33 route-map CAN-NCN in
+            neighbor 128.55.176.34 activate
+            neighbor 128.55.176.34 route-map CAN-NCN in
+            neighbor 128.55.176.35 activate
+            neighbor 128.55.176.35 route-map CAN-NCN in
+            neighbor 128.55.176.36 activate
+            neighbor 128.55.176.36 route-map CAN-NCN in
+            neighbor 128.55.176.37 activate
+            neighbor 128.55.176.37 route-map CAN-NCN in
+            neighbor 128.55.176.38 activate
+            neighbor 128.55.176.38 route-map CAN-NCN in
+            neighbor 128.55.176.39 activate
+            neighbor 128.55.176.39 route-map CAN-NCN in
+            neighbor 128.55.176.40 activate
+            neighbor 128.55.176.40 route-map CAN-NCN in
+            neighbor 128.55.176.41 activate
+            neighbor 128.55.176.41 route-map CAN-NCN in
+            neighbor 128.55.176.42 activate
+            neighbor 128.55.176.42 route-map CAN-NCN in
+            neighbor 128.55.176.43 activate
+            neighbor 128.55.176.43 route-map CAN-NCN in
+            neighbor 128.55.176.44 activate
+            neighbor 128.55.176.44 route-map CAN-NCN in
+            neighbor 128.55.176.45 activate
+            neighbor 128.55.176.45 route-map CAN-NCN in
+            neighbor 128.55.176.46 activate
+            neighbor 128.55.176.46 route-map CAN-NCN in
+            neighbor 128.55.176.47 activate
+            neighbor 128.55.176.47 route-map CAN-NCN in
+            neighbor 128.55.176.48 activate
+            neighbor 128.55.176.48 route-map CAN-NCN in
+            neighbor 128.55.176.49 activate
+            neighbor 128.55.176.49 route-map CAN-NCN in
+            neighbor 128.55.176.50 activate
+            neighbor 128.55.176.50 route-map CAN-NCN in
+        exit-address-family
+!
+https-server vrf default
+https-server vrf mgmt
