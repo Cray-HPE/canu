@@ -264,28 +264,28 @@ interface 1/1/24
     vlan trunk allowed 1777
 interface 1/1/25
     no shutdown
-    no routing
     mtu 9198
+    no routing
     vlan access 1
 interface 1/1/26
     no shutdown
-    no routing
     mtu 9198
+    no routing
     vlan access 1
 interface 1/1/27
     no shutdown
-    no routing
     mtu 9198
+    no routing
     vlan access 1
 interface 1/1/28
     no shutdown
-    no routing
     mtu 9198
+    no routing
     vlan access 1
 interface 1/1/29
     no shutdown
-    no routing
     mtu 9198
+    no routing
     vlan access 1
 interface 1/1/30
     no shutdown
@@ -1034,7 +1034,7 @@ route-map ncn-w026 permit seq 30
 router ospf 2 vrf CAN
     redistribute connected route-map CAN
     area 0.0.0.210 nssa no-summary
-router ospfv3 vrf CAN
+router ospfv3 2 vrf CAN
     area 0.0.0.210
 router ospf 1
     router-id 10.252.0.2
