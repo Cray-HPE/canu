@@ -648,6 +648,7 @@ interface vlan 1
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
     ipv6 ospfv3 1 area 0.0.0.0
+    ip igmp enable
 interface vlan 2
     shutdown
     description NMN
@@ -655,6 +656,7 @@ interface vlan 2
     ip address 10.252.0.17/17
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
+    ip igmp enable
 interface vlan 4
     shutdown
     description HMN
@@ -662,6 +664,7 @@ interface vlan 4
     ip address 10.254.0.17/17
     ip helper-address 10.94.100.222
     ip ospf 1 area 0.0.0.0
+    ip igmp enable
 interface vlan 2000
     vsx-sync active-gateways
     description x1000 nmn
@@ -671,6 +674,7 @@ interface vlan 2000
     active-gateway ip 10.100.0.1
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
+    ip igmp enable
 interface vlan 2001
     vsx-sync active-gateways
     description x1001 nmn
@@ -680,6 +684,7 @@ interface vlan 2001
     active-gateway ip 10.100.4.1
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
+    ip igmp enable
 interface vlan 2002
     vsx-sync active-gateways
     description x1002 nmn
@@ -689,6 +694,7 @@ interface vlan 2002
     active-gateway ip 10.100.8.1
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
+    ip igmp enable
 interface vlan 2003
     vsx-sync active-gateways
     description x1003 nmn
@@ -698,6 +704,7 @@ interface vlan 2003
     active-gateway ip 10.100.12.1
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
+    ip igmp enable
 interface vlan 3000
     vsx-sync active-gateways
     description x1000 hmn
@@ -708,6 +715,7 @@ interface vlan 3000
     ipv6 address autoconfig
     ip helper-address 10.94.100.222
     ip ospf 1 area 0.0.0.0
+    ip igmp enable
 interface vlan 3001
     vsx-sync active-gateways
     description x1001 hmn
@@ -718,6 +726,7 @@ interface vlan 3001
     ipv6 address autoconfig
     ip helper-address 10.94.100.222
     ip ospf 1 area 0.0.0.0
+    ip igmp enable
 interface vlan 3002
     vsx-sync active-gateways
     description x1002 hmn
@@ -728,6 +737,7 @@ interface vlan 3002
     ipv6 address autoconfig
     ip helper-address 10.94.100.222
     ip ospf 1 area 0.0.0.0
+    ip igmp enable
 interface vlan 3003
     vsx-sync active-gateways
     description x1003 hmn
@@ -738,6 +748,7 @@ interface vlan 3003
     ipv6 address autoconfig
     ip helper-address 10.94.100.222
     ip ospf 1 area 0.0.0.0
+    ip igmp enable
 snmp-server system-description Aruba Networks JL720A 8360-48XT4C switch
 snmp-server community default-community
 vsx
