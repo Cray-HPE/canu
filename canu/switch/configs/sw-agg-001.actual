@@ -662,17 +662,20 @@ interface vlan 1
     ipv6 address autoconfig
     ip helper-address 10.92.100.222
     ipv6 ospfv3 1 area 0.0.0.0
+    ip igmp enable
 interface vlan 2
     description NMN
     ip mtu 9198
     ip address 10.252.0.4/17
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
+    ip igmp enable
 interface vlan 4
     description HMN
     ip mtu 9198
     ip address 10.254.0.4/17
     ip ospf 1 area 0.0.0.0
+    ip igmp enable
 vsx
     system-mac 02:00:00:00:65:00
     inter-switch-link lag 256
