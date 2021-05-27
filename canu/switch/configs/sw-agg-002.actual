@@ -1,0 +1,682 @@
+Current configuration:
+!
+!Version ArubaOS-CX GL.10.06.0010
+!export-password: default
+hostname sw-agg-002
+user admin group administrators password ciphertext AQBapT2+ry5gq9glytwl6xM/vPKmj8KsJpYEuUrCruZ5CCl7YgAAAPDBWVVVXZ67KQMwu8tWCHikTKPr9qO1eVIT2ylP/9LcCyeJAb4f0Zn2M2H8u3r4jq/Q5t/sNsjpv8HsU91PokyilUdwASZR10ZTzYKNu86XrOH4/C278iyNeaoSCRBKihOF
+no ip icmp redirect
+vrf keepalive
+ntp server 10.252.1.24
+ntp server 10.252.1.25
+ntp server 10.252.1.26
+ntp enable
+!
+!
+!
+logging 10.20.1.71 tcp 601 severity debug vrf mgmt
+ssh server vrf default
+ssh server vrf mgmt
+access-list ip nmn-hmn
+    10 deny any 10.252.0.0/255.255.128.0 10.254.0.0/255.255.128.0
+    20 deny any 10.252.0.0/255.255.128.0 10.104.0.0/255.252.0.0
+    30 deny any 10.254.0.0/255.255.128.0 10.252.0.0/255.255.128.0
+    40 deny any 10.254.0.0/255.255.128.0 10.100.0.0/255.252.0.0
+    50 deny any 10.100.0.0/255.252.0.0 10.254.0.0/255.255.128.0
+    60 deny any 10.100.0.0/255.252.0.0 10.104.0.0/255.252.0.0
+    70 deny any 10.104.0.0/255.252.0.0 10.252.0.0/255.255.128.0
+    80 deny any 10.104.0.0/255.252.0.0 10.100.0.0/255.252.0.0
+    90 permit any any any
+vlan 1
+vlan 2
+    name NMN
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
+vlan 4
+    name HMN
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
+vlan 7
+    name CAN
+vlan 10
+    name SUN
+vlan 4000
+spanning-tree
+spanning-tree priority 10
+spanning-tree max-age 6
+spanning-tree config-name MST0
+spanning-tree instance 1 vlan 1-100
+spanning-tree instance 2 vlan 101-200
+spanning-tree vlan 1,2,4,7,10
+interface mgmt
+    no shutdown
+    ip static 10.20.1.43/24
+interface lag 1 multi-chassis
+    no shutdown
+    description sn01
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 2 multi-chassis
+    no shutdown
+    description sn02
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 3 multi-chassis
+    no shutdown
+    description sn03
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 4 multi-chassis
+    no shutdown
+    description sn04
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 5 multi-chassis
+    no shutdown
+    description sn05
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 6 multi-chassis
+    no shutdown
+    description sn06
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 7 multi-chassis
+    no shutdown
+    description sn07
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 8 multi-chassis
+    no shutdown
+    description sn08
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 9 multi-chassis
+    no shutdown
+    description sn09
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 10 multi-chassis
+    no shutdown
+    description sn10
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 11 multi-chassis
+    no shutdown
+    description sn11
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 12 multi-chassis
+    no shutdown
+    description sn12
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 13 multi-chassis
+    no shutdown
+    description sn13
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 14 multi-chassis
+    no shutdown
+    description sn14
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 15 multi-chassis
+    no shutdown
+    description sn15
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 16 multi-chassis
+    no shutdown
+    description sn16
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 17 multi-chassis
+    no shutdown
+    description sn17
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 18 multi-chassis
+    no shutdown
+    description mn01
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 19 multi-chassis
+    no shutdown
+    description mn03
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 20 multi-chassis
+    no shutdown
+    description wn02
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 21 multi-chassis
+    no shutdown
+    description wn04
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 22 multi-chassis
+    no shutdown
+    description wn26
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 23 multi-chassis
+    no shutdown
+    description wn06
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 24 multi-chassis
+    no shutdown
+    description wn08
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 25 multi-chassis
+    no shutdown
+    description wn10
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 26 multi-chassis
+    no shutdown
+    description wn12
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 27 multi-chassis
+    no shutdown
+    description wn14
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 28 multi-chassis
+    no shutdown
+    description wn16
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 29 multi-chassis
+    no shutdown
+    description wn18
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 30 multi-chassis
+    no shutdown
+    description wn20
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 31 multi-chassis
+    no shutdown
+    description wn22
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 32 multi-chassis
+    no shutdown
+    description wn24
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+    lacp fallback
+    spanning-tree port-type admin-edge
+interface lag 33 multi-chassis
+    no shutdown
+    description sw-leaf-002 lag 51
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed all
+    lacp mode active
+interface lag 34 multi-chassis
+    no shutdown
+    description sw-leaf-004 lag 51
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed all
+    lacp mode active
+interface lag 35 multi-chassis
+    no shutdown
+    description sw-leaf-006 lag 51
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed all
+    lacp mode active
+interface lag 49 multi-chassis
+    no shutdown
+    description sw-spine-00[1-2] lag 7
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed all
+    lacp mode active
+interface lag 256
+    no shutdown
+    description ISL link
+    no routing
+    vlan trunk native 1 tag
+    vlan trunk allowed all
+    lacp mode active
+interface 1/1/1
+    no shutdown
+    mtu 9198
+    description sn01 j02
+    lag 1
+interface 1/1/2
+    no shutdown
+    mtu 9198
+    description sn02 j02
+    lag 2
+interface 1/1/3
+    no shutdown
+    mtu 9198
+    description sn03 j02
+    lag 3
+interface 1/1/4
+    no shutdown
+    mtu 9198
+    description sn04 j02
+    lag 4
+interface 1/1/5
+    no shutdown
+    mtu 9198
+    description sn05 j02
+    lag 5
+interface 1/1/6
+    no shutdown
+    mtu 9198
+    description sn06 j02
+    lag 6
+interface 1/1/7
+    no shutdown
+    mtu 9198
+    description sn07 j02
+    lag 7
+interface 1/1/8
+    no shutdown
+    mtu 9198
+    description sn08 j02
+    lag 8
+interface 1/1/9
+    no shutdown
+    mtu 9198
+    description sn09 j02
+    lag 9
+interface 1/1/10
+    no shutdown
+    mtu 9198
+    description sn10 j02
+    lag 10
+interface 1/1/11
+    no shutdown
+    mtu 9198
+    description sn11 j02
+    lag 11
+interface 1/1/12
+    no shutdown
+    mtu 9198
+    description sn12 j02
+    lag 12
+interface 1/1/13
+    no shutdown
+    mtu 9198
+    description sn13 j02
+    lag 13
+interface 1/1/14
+    no shutdown
+    mtu 9198
+    description sn14 j02
+    lag 14
+interface 1/1/15
+    no shutdown
+    mtu 9198
+    description sn15 j02
+    lag 15
+interface 1/1/16
+    no shutdown
+    mtu 9198
+    description sn16 j02
+    lag 16
+interface 1/1/17
+    no shutdown
+    mtu 9198
+    description sn17 j02
+    lag 17
+interface 1/1/18
+    no shutdown
+    mtu 9198
+    description mn01 oj01
+    lag 18
+interface 1/1/19
+    no shutdown
+    mtu 9198
+    description mn03 oj01
+    lag 19
+interface 1/1/20
+    no shutdown
+    mtu 9198
+    description wn02 oj02
+    lag 20
+interface 1/1/21
+    no shutdown
+    mtu 9198
+    description wn04 oj02
+    lag 21
+interface 1/1/22
+    no shutdown
+    mtu 9198
+    description wn26 oj02
+    lag 22
+interface 1/1/23
+    no shutdown
+    mtu 9198
+    description wn06 oj02
+    lag 23
+interface 1/1/24
+    no shutdown
+    mtu 9198
+    description wn08 oj02
+    lag 24
+interface 1/1/25
+    no shutdown
+    mtu 9198
+    description wn10 oj02
+    lag 25
+interface 1/1/26
+    no shutdown
+    mtu 9198
+    description wn12 oj02
+    lag 26
+interface 1/1/27
+    no shutdown
+    mtu 9198
+    description wn14 oj02
+    lag 27
+interface 1/1/28
+    no shutdown
+    mtu 9198
+    description wn16 oj02
+    lag 28
+interface 1/1/29
+    no shutdown
+    mtu 9198
+    description wn18 oj02
+    lag 29
+interface 1/1/30
+    no shutdown
+    mtu 9198
+    description wn20 oj02
+    lag 30
+interface 1/1/31
+    no shutdown
+    mtu 9198
+    description wn22 oj02
+    lag 31
+interface 1/1/32
+    no shutdown
+    mtu 9198
+    description wn24 oj02
+    lag 32
+interface 1/1/33
+    no shutdown
+    mtu 9198
+    description sw-leaf-002 j52
+    lag 33
+interface 1/1/34
+    no shutdown
+    mtu 9198
+    description sw-leaf-004 j52
+    lag 34
+interface 1/1/35
+    no shutdown
+    mtu 9198
+    description sw-leaf-006 j52
+    lag 35
+interface 1/1/36
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/37
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/38
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/39
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/40
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/41
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/42
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/43
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/44
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/45
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/46
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/47
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/48
+    no shutdown
+    vrf attach keepalive
+    description vsx ka sw-agg-001 48
+    ip address 192.168.255.1/31
+interface 1/1/49
+    no shutdown
+    mtu 9198
+    description sw-spine-001 08
+    lag 49
+interface 1/1/50
+    no shutdown
+    mtu 9198
+    description sw-spine-002 08
+    lag 49
+interface 1/1/51
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/52
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/53
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/54
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/55
+    no shutdown
+    mtu 9198
+    description vsx isl sw-agg-001 55
+    lag 256
+interface 1/1/56
+    no shutdown
+    mtu 9198
+    description vsx isl sw-agg-001 56
+    lag 256
+interface loopback 0
+    ip address 10.3.0.5/32
+    ipv6 address fd01::66/64
+    ip ospf 1 area 0.0.0.0
+    ipv6 ospfv3 1 area 0.0.0.0
+interface vlan 1
+    ip mtu 9198
+    ip address 10.1.0.5/17
+    ipv6 address autoconfig
+    ip helper-address 10.92.100.222
+    ipv6 ospfv3 1 area 0.0.0.0
+interface vlan 2
+    description NMN
+    ip mtu 9198
+    ip address 10.252.0.5/17
+    ip helper-address 10.92.100.222
+    ip ospf 1 area 0.0.0.0
+interface vlan 4
+    description HMN
+    ip mtu 9198
+    ip address 10.254.0.5/17
+    ip helper-address 10.94.100.222
+    ip ospf 1 area 0.0.0.0
+vsx
+    system-mac 02:00:00:00:65:00
+    inter-switch-link lag 256
+    role secondary
+    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive
+    linkup-delay-timer 600
+    vsx-sync vsx-global
+!
+!
+!
+!
+!
+router ospf 1
+    router-id 10.252.0.5
+    area 0.0.0.0
+router ospfv3 1
+    router-id 10.1.0.5
+    area 0.0.0.0
+https-server vrf default
+https-server vrf mgmt
