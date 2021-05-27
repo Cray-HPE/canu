@@ -264,28 +264,28 @@ interface 1/1/24
     vlan trunk allowed 1777
 interface 1/1/25
     no shutdown
-    mtu 9198
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/26
     no shutdown
-    mtu 9198
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/27
     no shutdown
-    mtu 9198
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/28
     no shutdown
-    mtu 9198
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/29
     no shutdown
-    mtu 9198
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/30
     no shutdown
