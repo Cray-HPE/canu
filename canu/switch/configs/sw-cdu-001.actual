@@ -78,8 +78,7 @@ spanning-tree
 spanning-tree priority 5
 spanning-tree max-age 6
 spanning-tree config-name MST0
-spanning-tree instance 1 vlan 1,2000-4000
-spanning-tree vlan 1,2,4,10,2000-2003,3000-3003
+spanning-tree config-revision 1
 interface mgmt
     no shutdown
     ip static 10.20.1.81/24
@@ -388,10 +387,12 @@ interface 1/1/8
 interface 1/1/9
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/10
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/11
     no shutdown
@@ -436,10 +437,12 @@ interface 1/1/18
 interface 1/1/19
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/20
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/21
     no shutdown
@@ -484,10 +487,12 @@ interface 1/1/28
 interface 1/1/29
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/30
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/31
     no shutdown
@@ -532,6 +537,7 @@ interface 1/1/38
 interface 1/1/39
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/40
     no shutdown
