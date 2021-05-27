@@ -424,18 +424,21 @@ interface vlan 1
     ipv6 address autoconfig
     ip helper-address 10.92.100.222
     ipv6 ospfv3 1 area 0.0.0.0
+    ip igmp enable
 interface vlan 2
     description NMN
     ip mtu 9198
     ip address 10.252.0.10/17
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
+    ip igmp enable
 interface vlan 4
     description HMN
     ip mtu 9198
     ip address 10.254.0.10/17
     ip helper-address 10.94.100.222
     ip ospf 1 area 0.0.0.0
+    ip igmp enable
 snmp-server vrf default
 snmp-server system-contact "Contact Cray Global Technical Services (C.G.T.S.)"
 snmpv3 user testuser auth md5 auth-pass ciphertext AQBapXO+VhmRy785C6YOZrVEEgedyK1XGo5kmwHh50O8+12rCAAAALDFE4ECznh+ priv des priv-pass ciphertext AQBapXO+VhmRy785C6YOZrVEEgedyK1XGo5kmwHh50O8+12rCAAAALDFE4ECznh+
