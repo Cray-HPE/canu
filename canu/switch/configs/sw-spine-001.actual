@@ -316,6 +316,7 @@ interface vlan 1
     ipv6 address autoconfig
     ip helper-address 10.92.100.222
     ipv6 ospfv3 1 area 0.0.0.0
+    ip igmp enable
 interface vlan 2
     vsx-sync active-gateways
     description NMN
@@ -325,6 +326,7 @@ interface vlan 2
     active-gateway ip 10.252.0.1
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
+    ip igmp enable
 interface vlan 4
     vsx-sync active-gateways
     description HMN
@@ -334,6 +336,7 @@ interface vlan 4
     active-gateway ip 10.254.0.1
     ip helper-address 10.94.100.222
     ip ospf 1 area 0.0.0.0
+    ip igmp enable
 interface vlan 7
     vsx-sync active-gateways
     vrf attach CAN
@@ -343,6 +346,7 @@ interface vlan 7
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip 128.55.176.1
     ip ospf 2 area 0.0.0.210
+    ip igmp enable
 interface vlan 1772
     vrf attach CAN
     description perlmutter-rtr1-perlmutter-spine-sw01-p2p
@@ -351,6 +355,7 @@ interface vlan 1772
     ip ospf 2 area 0.0.0.210
     ip ospf network point-to-point
     ip ospf authentication-key ciphertext AQBapdj/j75Nlhno66KbLeZz/4FooPWaAZenLUAcZYHADdB1CAAAAFC1qGv/RM3I
+    ip igmp enable
 interface vlan 1777
     vrf attach CAN
     description perlmutter-rtr2-perlmutter-spine-sw01-p2p
@@ -359,6 +364,7 @@ interface vlan 1777
     ip ospf 2 area 0.0.0.210
     ip ospf network point-to-point
     ip ospf authentication-key ciphertext AQBapdj/j75Nlhno66KbLeZz/4FooPWaAZenLUAcZYHADdB1CAAAAFC1qGv/RM3I
+    ip igmp enable
 vsx
     system-mac 02:00:00:00:6b:00
     inter-switch-link lag 99
