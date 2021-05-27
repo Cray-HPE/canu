@@ -59,46 +59,57 @@ interface lag 51
 interface 1/1/1
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/2
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/3
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/4
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/5
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/6
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/7
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/8
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/9
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/10
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/11
     no shutdown
     no routing
+    mtu 9198
     vlan access 1
 interface 1/1/12
     no shutdown
