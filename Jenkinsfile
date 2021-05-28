@@ -32,8 +32,8 @@ pipeline {
 
     environment {
         SPEC_FILE = "canu.spec"
-        BUILD_METADATA = getRpmRevision()
-        IS_STABLE = getRpmIsStable()
+        IS_STABLE = getBuildIsStable()
+        BUILD_METADATA = getRpmRevision(isStable: env.IS_STABLE)
     }
 
     stages {
