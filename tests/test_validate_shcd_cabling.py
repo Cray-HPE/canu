@@ -1540,7 +1540,7 @@ def generate_test_file(file_name):
             "",
             "",
             "-",
-            "port 9",
+            "9",
             "sw-25g01",
             "x3000",
             "u12",
