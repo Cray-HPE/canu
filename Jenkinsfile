@@ -72,7 +72,7 @@ pipeline {
         stage('Publish ') {
             steps {
                 script {
-                    uploadCsmRpms(component: "canu", pattern: "dist/rpmbuild/RPMS/noarch/*.rpm", arch: "noarch", isStable: env.IS_STABLE)
+                    uploadCsmRpms(component: "canu", pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", arch: "x86_64", isStable: env.IS_STABLE)
                     uploadCsmRpms(component: "canu", pattern: "dist/rpmbuild/SRPMS/*.rpm", arch: "src", isStable: env.IS_STABLE)
                 }
             }
