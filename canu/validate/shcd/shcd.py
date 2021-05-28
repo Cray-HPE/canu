@@ -207,6 +207,46 @@ def get_node_type(name, mapper):
     return node_type
 
 
+def validate_shcd_port_data(cell):
+    """Ensure that a port from the SHCD is a proper integer.
+
+    Args:
+        cell: Cell object of a port from the SHCD spreadsheet
+
+    Returns:
+        port: A cleaned up integer value from the cell
+    """
+    location = cell.coordinate
+    port = cell.value
+    if isinstance(port, str):
+        port = port.strip()
+        if not port:
+            log.error(
+                "A port number must be specified. "
+                f"Please correct the SHCD for {location} with an empty value"
+            )
+            exit(1)
+        if port[0] == "j":
+            log.warning(
+                'Prepending the character "j" to a port will not be allowed in the future. '
+                f"Please correct cell {location} in the SHCD with value {port}"
+            )
+            port = port[1:]
+        if re.search(r"\D", port) is not None:
+            log.error(
+                "Port numbers must be integers. "
+                f'Please correct in the SHCD for cell {location} with value "{port}"'
+            )
+            sys.exit(1)
+    if port is None:
+        log.error(
+            "A port number must be specified. "
+            f"Please correct the SHCD for {location} with an empty value"
+        )
+        exit(1)
+    return int(port)
+
+
 def node_model_from_shcd(factory, spreadsheet, sheets):
     """Create a list of nodes from SHCD.
 
@@ -323,11 +363,8 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     fg="red",
                 )
                 sys.exit(1)
-            # src_xname = row[1].value + row[2].value
-            # Create the source port for the node
             src_slot = row[3].value
-            src_port = row[5].value
-            src_node_port = NetworkPort(number=src_port, slot=src_slot)
+            src_port = validate_shcd_port_data(row[5])
             log.debug(f"Source Data:  {src_name} {src_slot} {src_port}")
             node_name = get_node_common_name(src_name, factory.lookup_mapper())
             log.debug(f"Source Name Lookup:  {node_name}")
@@ -360,13 +397,16 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     f"Node type for {src_name} cannot be determined by node type ({node_type}) or node name ({node_name})"
                 )
 
+            # src_xname = row[1].value + row[2].value
+            # Create the source port for the node
+            src_node_port = NetworkPort(number=src_port, slot=src_slot)
+
             # Cable destination
             dst_name = row[6].value.strip()
             # dst_xname = row[7].value + row[8].value
             # Create the destination port for the node
-            dst_port = row[10].value
-            dst_node_port = NetworkPort(number=src_port, slot=src_slot)
-
+            dst_slot = None  # There is no spreadsheet data for this
+            dst_port = validate_shcd_port_data(row[10])
             log.debug(f"Destination Data:  {dst_name} {dst_port}")
             node_name = get_node_common_name(dst_name, factory.lookup_mapper())
             log.debug(f"Destination Name Lookup:  {node_name}")
@@ -401,6 +441,9 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     f"Node type for {dst_name} cannot be determined by node type ({node_type}) or node name ({node_name})"
                 )
 
+            # Create the destination port
+            dst_node_port = NetworkPort(number=dst_port, slot=dst_slot)
+
             # Connect src_node and dst_node if possible
             if src_index is not None and dst_index is not None:
                 src_node = node_list[src_index]
@@ -408,17 +451,17 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 connected = src_node.connect(dst_node)
                 if connected:
                     log.info(
-                        f"Connected {node_list[src_index].common_name()} to {node_list[dst_index].common_name()} bi-directionally"
+                        f"Connected {src_node.common_name()} to {dst_node.common_name()} bi-directionally"
                     )
 
-                    # Assign ports to the connection not that connections are allowed and completed
-                    src_node.assign_port(src_node_port)
+                    # Assign ports to the connection now that connections are allowed and completed
+                    src_node.assign_port(port=src_node_port, destination_node=dst_node)
                     log.info(
                         f"Assigned Port {src_node_port.port()} in slot {src_node_port.slot()} on {src_node.common_name()}"
                     )
-                    dst_node.assign_port(dst_node_port)
+                    dst_node.assign_port(port=dst_node_port, destination_node=src_node)
                     log.info(
-                        f"Assigned Port {dst_node_port.port()} in slot {dst_node_port.slot()} on {src_node.common_name()}"
+                        f"Assigned Port {dst_node_port.port()} in slot {dst_node_port.slot()} on {dst_node.common_name()}"
                     )
                 else:
                     log.error("")

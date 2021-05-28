@@ -1,6 +1,7 @@
 """NetworkNode to create a new node - switch, router or end device."""
 import copy
 import logging
+
 import click
 
 from .NetworkPort import NetworkPort
@@ -56,9 +57,7 @@ class NetworkNode:
 
         self.__id = id
         self.__common_name = None
-        self.__ports = copy.deepcopy(
-            hardware["ports"]
-        )
+        self.__ports = copy.deepcopy(hardware["ports"])
         self.__edge_connections = []  # A mathematical edge, not a port
 
         self.__initialize_port_usage_mapping()
@@ -291,13 +290,17 @@ class NetworkNode:
             )
         return True
 
-    def assign_port(self, port=None):
+    def assign_port(self, port=None, destination_node=None):
         """Connect an edge connection to a physical port."""
         # Defensively check input node type.
         if not isinstance(port, NetworkPort):
-            raise Exception(click.secho("Node needs to be type NetworkPort", fg="red"))
+            raise Exception(click.secho("Port needs to be type NetworkPort", fg="red"))
+        if not isinstance(destination_node, NetworkNode):
+            raise Exception(click.secho("Node needs to be type NetworkNode", fg="red"))
 
         log.debug(f"Assigning Port {port.port()} in slot {port.slot()}")
+        log.debug(f"Destination Node {destination_node.id()}")
+        port.speed(self.__connection_allowed(destination_node))
 
     def disconnect(self, node):
         """Disconnect one device from another."""
