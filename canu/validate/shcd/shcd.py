@@ -207,11 +207,13 @@ def get_node_type(name, mapper):
     return node_type
 
 
-def validate_shcd_port_data(cell):
+def validate_shcd_port_data(cell, sheet, warnings):
     """Ensure that a port from the SHCD is a proper integer.
 
     Args:
         cell: Cell object of a port from the SHCD spreadsheet
+        sheet: SHCD spreadsheet sheet/tab name
+        warnings: Existing list of warnings to post to
 
     Returns:
         port: A cleaned up integer value from the cell
@@ -223,25 +225,26 @@ def validate_shcd_port_data(cell):
         if not port:
             log.error(
                 "A port number must be specified. "
-                f"Please correct the SHCD for {location} with an empty value"
+                f"Please correct the SHCD for {sheet}:{location} with an empty value"
             )
             exit(1)
         if port[0] == "j":
+            warnings["schd_port_data"].append(sheet + ":" + location)
             log.warning(
                 'Prepending the character "j" to a port will not be allowed in the future. '
-                f"Please correct cell {location} in the SHCD with value {port}"
+                f"Please correct cell {sheet}:{location} in the SHCD with value {port}"
             )
             port = port[1:]
         if re.search(r"\D", port) is not None:
             log.error(
                 "Port numbers must be integers. "
-                f'Please correct in the SHCD for cell {location} with value "{port}"'
+                f'Please correct in the SHCD for cell {sheet}:{location} with value "{port}"'
             )
             sys.exit(1)
     if port is None:
         log.error(
             "A port number must be specified. "
-            f"Please correct the SHCD for {location} with an empty value"
+            f"Please correct the SHCD for {sheet}:{location} with an empty value"
         )
         exit(1)
     return int(port)
@@ -364,7 +367,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 )
                 sys.exit(1)
             src_slot = row[3].value
-            src_port = validate_shcd_port_data(row[5])
+            src_port = validate_shcd_port_data(row[5], sheet, warnings)
             log.debug(f"Source Data:  {src_name} {src_slot} {src_port}")
             node_name = get_node_common_name(src_name, factory.lookup_mapper())
             log.debug(f"Source Name Lookup:  {node_name}")
@@ -406,7 +409,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             # dst_xname = row[7].value + row[8].value
             # Create the destination port for the node
             dst_slot = None  # There is no spreadsheet data for this
-            dst_port = validate_shcd_port_data(row[10])
+            dst_port = validate_shcd_port_data(row[10], sheet, warnings)
             log.debug(f"Destination Data:  {dst_name} {dst_port}")
             node_name = get_node_common_name(dst_name, factory.lookup_mapper())
             log.debug(f"Destination Name Lookup:  {node_name}")
@@ -544,6 +547,21 @@ def node_list_warnings(node_list, warnings):
             nodes = natsort.natsorted(nodes)
             for node in nodes:
                 click.secho(f"{node[0]} should be renamed {node[1]}", fg="bright_white")
+        if warnings["schd_port_data"]:
+            click.secho(
+                '\nSHCD port definitions using a deprecated "j" prefix',
+                fg="red",
+            )
+            click.secho(dash)
+            port_warnings = {}
+            for x in warnings["schd_port_data"]:
+                sheet = x.split(":")[0]
+                cell = x.split(":")[1]
+                if sheet not in port_warnings:
+                    port_warnings[sheet] = []
+                port_warnings[sheet].append(cell)
+            for entry in port_warnings:
+                click.secho(f"{entry}:{port_warnings[entry]}", fg="bright_white")
 
 
 def print_node_list(node_list, title):
