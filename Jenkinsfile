@@ -32,7 +32,7 @@ pipeline {
 
     environment {
         SPEC_FILE = "canu.spec"
-        IS_STABLE = getBuildIsStable()
+        IS_STABLE = "${getBuildIsStable()}"
         BUILD_METADATA = getRpmRevision(isStable: env.IS_STABLE)
     }
 
