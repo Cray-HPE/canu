@@ -1,15 +1,19 @@
-# Canu Jinja config template for sw-leaf-002
-#
-# Version 0.3
-#
-# Name	    |	Abbreviation
-# --------------------------
-# Master	|	mn
-# Worker	|	wn
-# Storage	| 	sn
-# Others	|	o
+{# 
+ Canu Jinja config template for sw-leaf-002
 
-#Master
+ Version 0.4
+
+ Name	    |	Abbreviation
+ --------------------------
+ Master	|	mn
+ Worker	|	wn
+ Storage	| 	sn
+ Others	|	o
+#}
+
+{#
+Master
+#}
 
 {% for master in node.devices %}
 interface lag {{ master.lag_number }} multi-chassis
@@ -28,9 +32,13 @@ description {{ master.description }}
 lag {{ master.lag_number }}
 {% endfor %}
 
-#end-master
+{#
+end-master
+#}
 
-#Worker
+{#
+Worker
+#}
 
 {% for worker in node.devices %}
 interface lag {{ worker.lag_number }} multi-chassis
@@ -49,9 +57,13 @@ description {{ worker.description }}
 lag {{ worker.lag_number }}
 {% endfor %}
 
-#end-worker
+{#
+end-worker
+#}
 
-#Storage
+{#
+Storage
+#}
 
 {% for storage in node.devices %}
 interface lag {{ storage.lag_number }} multi-chassis
@@ -70,9 +82,13 @@ description {{ storage.description }}
 lag {{ storage.lag_number }}
 {% endfor %}
 
-#end-storage
+{#
+end-storage
+#}
 
-#Others
+{#
+Others
+#}
 
 {% for others in node.devices %}
 interface lag {{ others.lag_numbebr }} multi-chassis
@@ -91,4 +107,6 @@ description {{ others.description }}
 lag {{ others.lag_number }}
 {% endfor %}
 
-#end-others
+{#
+end-others
+#}
