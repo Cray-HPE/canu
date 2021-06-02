@@ -1,0 +1,468 @@
+hostname sw-leaf-005
+user admin group administrators password ciphertext AQBapT2+ry5gq9glytwl6xM/vPKmj8KsJpYEuUrCruZ5CCl7YgAAAPDBWVVVXZ67KQMwu8tWCHikTKPr9qO1eVIT2ylP/9LcCyeJAb4f0Zn2M2H8u3r4jq/Q5t/sNsjpv8HsU91PokyilUdwASZR10ZTzYKNu86XrOH4/C278iyNeaoSCRBKihOF
+no ip icmp redirect
+ntp server 10.252.1.24
+ntp server 10.252.1.25
+ntp server 10.252.1.26
+ntp enable
+!
+!
+!
+!
+logging 10.20.1.71 tcp 601 severity debug vrf mgmt
+ssh server vrf default
+ssh server vrf mgmt
+vsf member 1 
+    type jl762a
+access-list ip nmn-hmn
+    10 deny any 10.252.0.0/255.255.128.0 10.254.0.0/255.255.128.0
+    20 deny any 10.252.0.0/255.255.128.0 10.104.0.0/255.252.0.0
+    30 deny any 10.254.0.0/255.255.128.0 10.252.0.0/255.255.128.0
+    40 deny any 10.254.0.0/255.255.128.0 10.100.0.0/255.252.0.0
+    50 deny any 10.100.0.0/255.252.0.0 10.254.0.0/255.255.128.0
+    60 deny any 10.100.0.0/255.252.0.0 10.104.0.0/255.252.0.0
+    70 deny any 10.104.0.0/255.252.0.0 10.252.0.0/255.255.128.0
+    80 deny any 10.104.0.0/255.252.0.0 10.100.0.0/255.252.0.0
+    90 permit any any any
+vlan 1
+vlan 2
+    name NMN
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
+vlan 4
+    name HMN
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
+vlan 10
+    name SUN
+spanning-tree
+spanning-tree priority 15
+spanning-tree max-age 6
+spanning-tree config-name MST0
+spanning-tree config-revision 1
+interface mgmt
+    no shutdown
+    ip static 10.20.1.54/24
+interface lag 51
+    no shutdown
+    description sw-agg-00[3-4] lag 34
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed all
+    lacp mode active
+interface 1/1/1
+    no shutdown
+    mtu 9198
+    no routing
+    vlan access 2
+    spanning-tree port-type admin-edge
+interface 1/1/2
+    no shutdown
+    mtu 9198
+    no routing
+    vlan access 2
+    spanning-tree port-type admin-edge
+interface 1/1/3
+    no shutdown
+    mtu 9198
+    no routing
+    vlan access 2
+    spanning-tree port-type admin-edge
+interface 1/1/4
+    no shutdown
+    mtu 9198
+    no routing
+    vlan access 2
+    spanning-tree port-type admin-edge
+interface 1/1/5
+    no shutdown
+    mtu 9198
+    no routing
+    vlan access 2
+    spanning-tree port-type admin-edge
+interface 1/1/6
+    no shutdown
+    mtu 9198
+    no routing
+    vlan access 2
+    spanning-tree port-type admin-edge
+interface 1/1/7
+    no shutdown
+    mtu 9198
+    description wn20 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/8
+    no shutdown
+    mtu 9198
+    description wn21 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/9
+    no shutdown
+    mtu 9198
+    description wn22 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/10
+    no shutdown
+    mtu 9198
+    description wn23 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/11
+    no shutdown
+    mtu 9198
+    description wn24 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/12
+    no shutdown
+    mtu 9198
+    description login31 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/13
+    no shutdown
+    mtu 9198
+    description login32 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/14
+    no shutdown
+    mtu 9198
+    description login33 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/15
+    no shutdown
+    mtu 9198
+    description login34 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/16
+    no shutdown
+    mtu 9198
+    description login35 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/17
+    no shutdown
+    mtu 9198
+    description login36 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/18
+    no shutdown
+    mtu 9198
+    description login37 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/19
+    no shutdown
+    mtu 9198
+    description login38 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/20
+    no shutdown
+    mtu 9198
+    description login39 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/21
+    no shutdown
+    mtu 9198
+    description login40 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/22
+    no shutdown
+    mtu 9198
+    description lmem04 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/23
+    no shutdown
+    mtu 9198
+    description sw-hsn13-x3116 mgmt
+    no routing
+    vlan access 4
+    spanning-tree port-type admin-edge
+interface 1/1/24
+    no shutdown
+    mtu 9198
+    description sw-hsn14-x3116 mgmt
+    no routing
+    vlan access 4
+    spanning-tree port-type admin-edge
+interface 1/1/25
+    no shutdown
+    mtu 9198
+    description sw-hsn15-x3116 mgmt
+    no routing
+    vlan access 4
+    spanning-tree port-type admin-edge
+interface 1/1/26
+    no shutdown
+    mtu 9198
+    description sw-hsn16-x3116 mgmt
+    no routing
+    vlan access 4
+    spanning-tree port-type admin-edge
+interface 1/1/27
+    no shutdown
+    mtu 9198
+    description pdu0-x3116 mgmt
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/28
+    no shutdown
+    mtu 9198
+    description pdu2-x3116 mgmt
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/29
+    no shutdown
+    mtu 9198
+    description sw-hsn03-x3004 mgmt
+    no routing
+    vlan access 4
+    spanning-tree port-type admin-edge
+interface 1/1/30
+    no shutdown
+    mtu 9198
+    description sw-hsn04-x3004 mgmt
+    no routing
+    vlan access 4
+    spanning-tree port-type admin-edge
+interface 1/1/31
+    no shutdown
+    mtu 9198
+    description service07 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/32
+    no shutdown
+    mtu 9198
+    description service08 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/33
+    no shutdown
+    mtu 9198
+    description sw-hsn05-x3005 mgmt
+    no routing
+    vlan access 4
+    spanning-tree port-type admin-edge
+interface 1/1/34
+    no shutdown
+    mtu 9198
+    description sw-hsn06-x3005 mgmt
+    no routing
+    vlan access 4
+    spanning-tree port-type admin-edge
+interface 1/1/35
+    no shutdown
+    mtu 9198
+    description sw-hsn07-x3005 mgmt
+    no routing
+    vlan access 4
+    spanning-tree port-type admin-edge
+interface 1/1/36
+    no shutdown
+    mtu 9198
+    description sw-hsn08-x3005 mgmt
+    no routing
+    vlan access 4
+    spanning-tree port-type admin-edge
+interface 1/1/37
+    no shutdown
+    mtu 9198
+    description service09 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/38
+    no shutdown
+    mtu 9198
+    description sw-hsn09-x3006 mgmt
+    no routing
+    vlan access 4
+    spanning-tree port-type admin-edge
+interface 1/1/39
+    no shutdown
+    mtu 9198
+    description sw-hsn10-x3006 mgmt
+    no routing
+    vlan access 4
+    spanning-tree port-type admin-edge
+interface 1/1/40
+    no shutdown
+    mtu 9198
+    description sw-hsn11-x3006 mgmt
+    no routing
+    vlan access 4
+    spanning-tree port-type admin-edge
+interface 1/1/41
+    no shutdown
+    mtu 9198
+    description sw-hsn12-x3006 mgmt
+    no routing
+    vlan access 4
+    spanning-tree port-type admin-edge
+interface 1/1/42
+    no shutdown
+    mtu 9198
+    description service10 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/43
+    no shutdown
+    mtu 9198
+    description sw-hsn13-x3007 mgmt
+    no routing
+    vlan access 4
+    spanning-tree port-type admin-edge
+interface 1/1/44
+    no shutdown
+    mtu 9198
+    description sw-hsn14-x3007 mgmt
+    no routing
+    vlan access 4
+    spanning-tree port-type admin-edge
+interface 1/1/45
+    no shutdown
+    mtu 9198
+    description sw-hsn15-x3007 mgmt
+    no routing
+    vlan access 4
+    spanning-tree port-type admin-edge
+interface 1/1/46
+    no shutdown
+    mtu 9198
+    description sw-hsn16-x3007 mgmt
+    no routing
+    vlan access 4
+    spanning-tree port-type admin-edge
+interface 1/1/47
+    no shutdown
+    mtu 9198
+    description service11 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/48
+    no shutdown
+    mtu 9198
+    description service12 iLo
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+interface 1/1/49
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/50
+    no shutdown
+    no routing
+    vlan access 1
+interface 1/1/51
+    no shutdown
+    mtu 9198
+    description sw-agg-003 34
+    lag 51
+interface 1/1/52
+    no shutdown
+    mtu 9198
+    description sw-agg-004 34
+    lag 51
+interface loopback 0
+    ip address 10.3.0.14/32
+    ipv6 address fd01::71/64
+    ip ospf 1 area 0.0.0.0
+    ipv6 ospfv3 1 area 0.0.0.0
+interface vlan 1
+    ip mtu 9198
+    ip address 10.1.0.14/17
+    ipv6 address autoconfig
+    ip helper-address 10.92.100.222
+    ipv6 ospfv3 1 area 0.0.0.0
+    ip igmp enable
+interface vlan 2
+    description NMN
+    ip mtu 9198
+    ip address 10.252.0.14/17
+    ip helper-address 10.92.100.222
+    ip ospf 1 area 0.0.0.2
+    ip igmp enable
+interface vlan 4
+    description HMN
+    ip mtu 9198
+    ip address 10.254.0.14/17
+    ip helper-address 10.94.100.222
+    ip ospf 1 area 0.0.0.4
+    ip igmp enable
+snmp-server vrf default
+snmp-server system-contact "Contact Cray Global Technical Services (C.G.T.S.)"
+snmpv3 user testuser auth md5 auth-pass ciphertext AQBapXO+VhmRy785C6YOZrVEEgedyK1XGo5kmwHh50O8+12rCAAAALDFE4ECznh+ priv des priv-pass ciphertext AQBapXO+VhmRy785C6YOZrVEEgedyK1XGo5kmwHh50O8+12rCAAAALDFE4ECznh+
+!
+!
+!
+!
+!
+router ospf 1
+    router-id 10.252.0.14
+    area 0.0.0.0
+    area 0.0.0.2
+    area 0.0.0.4
+router ospfv3 1
+    router-id 10.1.0.14
+    area 0.0.0.0
+https-server vrf default
+https-server vrf mgmt
