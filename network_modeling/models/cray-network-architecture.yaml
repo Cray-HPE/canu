@@ -88,7 +88,7 @@ network_v2:
   lookup_mapper:
     - lookup_name: ["mn"]
       shasta_name: "ncn-m"
-      architecture_type: "river_ncn_node_2_port"
+      architecture_type: "river_ncn_node_4_port"
     - lookup_name: ["wn"]
       shasta_name: "ncn-w"
       architecture_type: "river_ncn_node_2_port"
@@ -181,7 +181,7 @@ network_v2_tds:
     - lookup_name:
         - "mn"
       shasta_name: "ncn-m"
-      architecture_type: "river_ncn_node_2_port"
+      architecture_type: "river_ncn_node_4_port"
     - lookup_name:
         - "wn"
       shasta_name: "ncn-w"
@@ -251,7 +251,7 @@ network_v1:
     - lookup_name:
         - "mn"
       shasta_name: "ncn-m"
-      architecture_type: "river_ncn_node_2_port_gigabyte"
+      architecture_type: "river_ncn_node_4_port_gigabyte"
     - lookup_name:
         - "wn"
       shasta_name: "ncn-w"
