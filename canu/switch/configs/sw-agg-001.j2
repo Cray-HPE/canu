@@ -1,6 +1,6 @@
 # Canu Jinja config template for sw-agg-001
 #
-# Version 0.2
+# Version 0.3
 #
 # Name	    |	Abbreviation
 # --------------------------
@@ -12,20 +12,20 @@
 #Master
 
 {% for master in node.devices %}
-    interface lag {{ master.lag_number }} multi-chassis
-    no shutdown
-    description {{ master.description }}
-    no routing
-    vlan trunk native 1
-    vlan trunk allowed 1-2,4,7,10
-    lacp mode active
-    lacp fallback
-    spanning-tree port-type admin-edge
-    interface {{ master.interface_number }}
-    no shutdown
-    mtu 9198
-    description {{ master.description }}    
-    lag {{ master.lag_number }}
+interface lag {{ master.lag_number }} multi-chassis
+no shutdown
+description {{ master.description }}
+no routing
+vlan trunk native 1
+vlan trunk allowed 1-2,4,7,10
+lacp mode active
+lacp fallback
+spanning-tree port-type admin-edge
+interface {{ master.interface_number }}
+no shutdown
+mtu 9198
+description {{ master.description }}    
+lag {{ master.lag_number }}
 {% endfor %}
 
 #end-master
@@ -33,20 +33,20 @@
 #Worker
 
 {% for worker in node.devices %}
-    interface lag {{ worker.lag_number }} multi-chassis
-    no shutdown
-    description {{ worker.description }}
-    no routing
-    vlan trunk native 1
-    vlan trunk allowed 1-2,4,7,10
-    lacp mode active
-    lacp fallback
-    spanning-tree port-type admin-edge
-    interface {{ worker.interface_number }}
-    no shutdown
-    mtu 9198
-    description {{ worker.description }}    
-    lag {{ worker.lag_number }}
+interface lag {{ worker.lag_number }} multi-chassis
+no shutdown
+description {{ worker.description }}
+no routing
+vlan trunk native 1
+vlan trunk allowed 1-2,4,7,10
+lacp mode active
+lacp fallback
+spanning-tree port-type admin-edge
+interface {{ worker.interface_number }}
+no shutdown
+mtu 9198
+description {{ worker.description }}    
+lag {{ worker.lag_number }}
 {% endfor %}
 
 #end-worker
@@ -54,20 +54,20 @@
 #Storage
 
 {% for storage in node.devices %}
-    interface lag {{ storage.lag_number }} multi-chassis
-    no shutdown
-    description {{ storage.description }}
-    no routing
-    vlan trunk native 1
-    vlan trunk allowed 1-2,4,7,10
-    lacp mode active
-    lacp fallback
-    spanning-tree port-type admin-edge
-    interface {{ storage.interface_number }}
-    no shutdown
-    mtu 9198
-    description {{ storage.description }}    
-    lag {{ storage.lag_number }}
+interface lag {{ storage.lag_number }} multi-chassis
+no shutdown
+description {{ storage.description }}
+no routing
+vlan trunk native 1
+vlan trunk allowed 1-2,4,7,10
+lacp mode active
+lacp fallback
+spanning-tree port-type admin-edge
+interface {{ storage.interface_number }}
+no shutdown
+mtu 9198
+description {{ storage.description }}    
+lag {{ storage.lag_number }}
 {% endfor %}
 
 #end-storage
@@ -75,20 +75,20 @@
 #Others
 
 {% for others in node.devices %}
-    interface lag {{ others.lag_numbebr }} multi-chassis
-    no shutdown
-    description {{ others.description }}
-    no routing
-    vlan trunk native 1
-    vlan trunk allowed 1-2,4,7,10
-    lacp mode active
-    lacp fallback
-    spanning-tree port-type admin-edge
-    interface {{ others.interface_number }}
-    no shutdown
-    mtu 9198
-    description {{ others.description }}    
-    lag {{ others.lag_number }}
+interface lag {{ others.lag_numbebr }} multi-chassis
+no shutdown
+description {{ others.description }}
+no routing
+vlan trunk native 1
+vlan trunk allowed 1-2,4,7,10
+lacp mode active
+lacp fallback
+spanning-tree port-type admin-edge
+interface {{ others.interface_number }}
+no shutdown
+mtu 9198
+description {{ others.description }}    
+lag {{ others.lag_number }}
 {% endfor %}
 
 #end-others
