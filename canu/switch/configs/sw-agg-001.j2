@@ -15,7 +15,7 @@
 Master
 #}
 
-{% for master in node.devices %}
+{% for master in devices %}
 interface lag {{ master.lag_number }} multi-chassis
 no shutdown
 description {{ master.description }}
@@ -40,7 +40,7 @@ end-master
 Worker
 #}
 
-{% for worker in node.devices %}
+{% for worker in devices %}
 interface lag {{ worker.lag_number }} multi-chassis
 no shutdown
 description {{ worker.description }}
@@ -65,7 +65,7 @@ end-worker
 Storage
 #}
 
-{% for storage in node.devices %}
+{% for storage in devices %}
 interface lag {{ storage.lag_number }} multi-chassis
 no shutdown
 description {{ storage.description }}
@@ -90,7 +90,7 @@ end-storage
 Others
 #}
 
-{% for others in node.devices %}
+{% for others in devices %}
 interface lag {{ others.lag_numbebr }} multi-chassis
 no shutdown
 description {{ others.description }}
