@@ -5,10 +5,10 @@
 
  Name	    |	Abbreviation
  --------------------------
- Master	|	mn
- Worker	|	wn
+ Master	    |	mn
+ Worker	    |	wn
  Storage	| 	sn
- Others	|	o
+ Others	    |	o
 #}
 
 {#
@@ -26,7 +26,7 @@ lacp mode active
 lacp fallback
 spanning-tree port-type admin-edge
 interface {{ master.interface_number }}
-no shutdown
+no shutdow
 mtu 9198
 description {{ master.description }}    
 lag {{ master.lag_number }}
