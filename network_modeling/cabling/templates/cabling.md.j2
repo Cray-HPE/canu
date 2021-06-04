@@ -1,0 +1,31 @@
+# {{ cabling.hardware_type | upper }} Cabling Standards and Descriptions- Shasta v{{ cabling.version }}
+
+Hardware Type: {{ cabling.hardware_type | upper }}
+
+Software Version: Shasta v{{ cabling.version }}
+
+{% for node in cabling.nodes %}
+
+## {{ node.type | upper }} - {{ node.subtype | replace("_", " ") | upper }}
+
+![{{ node.subtype }}](images/{{ cabling.hardware_type }}_{{ node.subtype }}.png)
+
+| Device | Port | Speed | Destination Network Port | Use / Configuration |
+|:-------|------|-------|:-------------------------|:--------------------|
+{% for device in node.devices %}
+{% for port in device.ports %}
+| {{ device.name | upper }} | {{ loop.index }} | {{ port.speed }} | {{ port.destination_description }} | VLANS: {{ port.destination_use }} |
+{% endfor %}{# end ports loop #}
+{% endfor %}{# end devices loop #}{# leave the following blank line for markdown formatting #}
+
+{% if node.notes %}
+<br>
+NOTES:
+
+{% for note in node.notes %}
+* {{ note }}
+{% endfor %}{# end notes loop #}
+{% endif %}{# leave the following break tags for markdown formatting #}
+<br>
+<br>
+{% endfor %}{# end nodes loop #}
