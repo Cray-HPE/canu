@@ -2,109 +2,29 @@
 specs:
   version: "1.4"
   hardware_type: "hpe"
-definitions:
-  - ports: &bmc
-      - destination_description: 'HMN Leaf'
-        destination_use: "HMN"
-        speed: 1
-  - ports: &site-bmc
-      - destination_description: "Master 001 connection to site, others HMN Leaf (see notes)"
-        destination_use: "HMN"
-        speed: 1
-  - ports: &mlag-cross-card-1
-      - destination_description: "MLAG switch pair: switch 1 of 2"
-        destination_use: "HMN, NMN, CAN (e.g. bond0)"
-        speed: 25
-      - destination_description: "Switch pair: switch 1 of 2"
-        destination_use: "NONE"
-        speed: 25
-  - ports: &mlag-cross-card-2
-      - destination_description: "MLAG switch pair: switch 2 of 2"
-        destination_use: "HMN, NMN, CAN (e.g. bond0)"
-        speed: 25
-      - destination_description: "Switch pair: switch 2 of 2"
-        destination_use: "NONE"
-        speed: 25
-  - ports: &mlag-same-card
-      - destination_description: "MLAG switch pair: switch 1 of 2"
-        destination_use: "HMN, NMN, CAN (e.g. bond0)"
-        speed: 25
-      - destination_description: "MLAG switch pair: switch 2 of 2"
-        destination_use: "HMN, NMN, CAN (e.g. bond0)"
-        speed: 25
-  - ports: &master-mlag-cross-card-1
-      - destination_description: "MLAG switch pair: switch 1 of 2"
-        destination_use: "HMN, NMN, CAN (e.g. bond0)"
-        speed: 25
-      - destination_description: "Switch pair: switch 1 of 2"
-        destination_use: "Manager 001 to site, otherwise NONE (see notes)"
-        speed: 25
-  - ports: &master-mlag-cross-card-2
-      - destination_description: "MLAG switch pair: switch 2 of 2"
-        destination_use: "HMN, NMN, CAN (e.g. bond0)"
-        speed: 25
-      - destination_description: "Switch pair: switch 2 of 2"
-        destination_use: "NONE"
-        speed: 25
-  - ports: &worker-mlag-cross-card-1
-      - destination_description: "MLAG switch pair: switch 1 of 2"
-        destination_use: "HMN, NMN, CAN (e.g. bond0)"
-        speed: 25
-      - destination_description: "NONE"
-        destination_use: "NONE"
-        speed: 25
-  - ports: &worker-mlag-cross-card-2
-      - destination_description: "MLAG switch pair: switch 2 of 2"
-        destination_use: "HMN, NMN, CAN (e.g. bond0)"
-        speed: 25
-      - destination_description: "NONE"
-        destination_use: "NONE"
-        speed: 25
-  - ports: &storage-mlag-cross-card-1
-      - destination_description: "MLAG switch pair: switch 1 of 2"
-        destination_use: "HMN, NMN, CAN (e.g. bond0)"
-        speed: 25
-      - destination_description: "MLAG switch pair: switch 1 of 2"
-        destination_use: "SUN (cabled but not configured)"
-        speed: 25
-  - ports: &storage-mlag-cross-card-2
-      - destination_description: "MLAG switch pair: switch 2 of 2"
-        destination_use: "HMN, NMN, CAN (e.g. bond0)"
-        speed: 25
-      - destination_description: "MLAG switch pair: switch 2 of 2"
-        destination_use: "SUN (cabled but not configured)"
-        speed: 25
-  - ports: &uan-cross-card-1
-      - destination_description: "switch pair: switch 1 of 2"
-        destination_use: "NMN"
-        speed: 25
-      - destination_description: "MLAG switch pair: switch 1 of 2"
-        destination_use: "CAN"
-        speed: 25
-  - ports: &uan-cross-card-2
-      - destination_description: "switch pair: switch 1 of 2"
-        destination_use: "NONE"
-        speed: 25
-      - destination_description: "MLAG switch pair: switch 1 of 2"
-        destination_use: "CAN"
-        speed: 25
-  - ports: &mountain-static-lag
-      - destination_description: "Static LAG: CDU switch 1 of 2"
-        destination_use: "Per cabinet NMN and HMN"
-        speed: 10
-      - destination_description: "Static LAG: CDU switch 2 of 2"
-        destination_use: "Per cabinet NMN and HMN"
-        speed: 10
 nodes:
   - type: "ncn"
     subtype: "master"
     devices:
       - name: "ocp"
-        ports: *master-mlag-cross-card-1
+        ports: 
+        - destination: "primary"
+          vlan_name: ["HMN, NMN, CAN"]
+          name: "mgmt0"
+          lag: "mlag-lacp"
+        - destination: "site"
+          vlan_name: 
+          name: "Manager 001 to site, otherwise NONE (see notes)"
       - name: "pcie-slot1"
-        ports: *master-mlag-cross-card-2
+        ports: 
+        - destination: "secondary"
+          vlan_name: ["HMN, NMN, CAN"]
+          name: "mgmt1"
+          lag: "mlag-lacp"
+        - destination: 
       - name: "ilo"
-        ports: *site-bmc
+        ports: 
+        - destination: "Master 001 connection to site, others HMN Leaf (see notes)"
     notes:
       - "REQUIRED:  Master 001 (ncn-m001) is required to have a site connection on OCP Port 2 for installation and maintenance."
       - "RECOMMENDED: Masters 002 and 003 may optionally have a site connection on OCP Port 2 for emergency system access."
@@ -113,31 +33,68 @@ nodes:
     subtype: "worker"
     devices:
       - name: "ocp"
-        ports: *mlag-same-card
+        ports: 
+        - destination: "primary"
+          vlan_name: ["HMN, NMN, CAN"]
+          name: "mgmt0"
+          lag: "mlag-lacp"
+        - destination: "secondary"
+          vlan_name: ["HMN, NMN, CAN"]
+          name: "mgmt1"
+          lag: "mlag-lacp"
       - name: "ilo"
-        ports: *bmc
+        ports:
+        - destination: 'HMN Leaf'
     notes:
       - "A single OCP card is the default worker configuration."
   - type: "ncn"
     subtype: "worker_two_card_(option)"
     devices:
       - name: "ocp"
-        ports: *worker-mlag-cross-card-1
+        ports: 
+        - destination: "primary"
+          vlan_name: ["HMN, NMN, CAN"]
+          name: "mgmt0"
+          lag: "mlag-lacp"
+        - destination: 
       - name: "pcie-slot1"
-        ports: *worker-mlag-cross-card-2
+        ports: 
+        - destination: "secondary"
+          vlan_name: ["HMN, NMN, CAN"]
+          name: "mgmt0"
+          lag: "mlag-lacp"
+        - destination: 
       - name: "ilo"
-        ports: *bmc
+        ports: 
+        - destination: 'HMN Leaf'
     notes:
       - "A single OCP card and a second PCIE card in Slot 1 is an optional worker configuration when more resiliency is desired."
   - type: "ncn"
     subtype: "storage"
     devices:
       - name: "ocp"
-        ports: *storage-mlag-cross-card-1
+        ports:
+        - destination: "primary"
+          vlan_name: ["HMN, NMN, CAN"]
+          name: "mgmt0"
+          lag: "mlag-lacp"
+        - destination: "primary"
+          vlan_name: ["SUN"]
+          name: "mgmt1"
+          lag: "mlag-lacp"
       - name: "pcie-slot1"
-        ports: *storage-mlag-cross-card-2
+        ports:
+        - destination: "secondary"
+          vlan_name: ["HMN, NMN, CAN"]
+          name: "mgmt2"
+          lag: "mlag-lacp"
+        - destination: "secondary"
+          vlan_name: ["SUN"]
+          name: "mgmt3"
+          lag: "mlag-lacp"
       - name: "ilo"
-        ports: *bmc
+        ports: 
+        - destination: 'HMN Leaf'
     notes:
       - "All ports are cabled."
       - "OCP Port 1 and PCIE Slot 1 Port 1 (first ports) are bonded for the NMN, HMN and CAN."
@@ -146,11 +103,21 @@ nodes:
     subtype: "uan"
     devices:
       - name: "ocp"
-        ports: *uan-cross-card-1
+        ports: 
+        - destination: "primary"
+          vlan_name: ["NMN"]
+        - destination: "primary"
+          vlan_name: ["CAN"]
+          lag: "mlag-lacp"
       - name: "pcie-slot1"
-        ports: *uan-cross-card-2
+        ports:
+        - destination: "secondary"
+        - destination: "secondary"
+          vlan_name: ["CAN"]
+          lag: "mlag-lacp"
       - name: "ilo"
-        ports: *bmc
+        ports: 
+        - destination: 'HMN Leaf'
     notes:
       - "All ports are cabled."
       - "The OCP Port 1 connects to the NMN in a non-bonded configuration."
@@ -160,19 +127,28 @@ nodes:
     subtype: "login"
     devices:
       - name: "ocp"
-        ports: *mlag-same-card
-      - name: "ilo"
-        ports: *bmc
+        ports: 
+        - destination: "primary"
+          lag: "mlag-lacp"
+        - destination: "secondary"
+          lag: "mlag-lacp"
+        ports: 
+        - destination: 'HMN Leaf'
   - type: "mountain"
     subtype: "cmm"
     devices:
       - name: "cmm"
-        ports: *mountain-static-lag
+        ports: 
+        - destination: "cmmj1"
+          vlan_name: ["MTN_HMN, MTN_NMN"]
+          lag: "mlag-static"
+        - destination: "cmmj2"
+          vlan_name: ["MTN_HMN, MTN_NMN"]
+          lag: "mlag-static"
   - type: "mountain"
     subtype: "cec"
-    devices:
+    devices: 
       - name: "cec"
         ports:
-          - destination_description: "CDU switch access port"
-            destination_use: "per cabinet HMN?"
-            speed: 0.1
+          - destination: "CDU switch access port"
+            vlan_name: ["MTN_HMN"]

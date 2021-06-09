@@ -1,18 +1,16 @@
 specs: (include('specs'))
-definitions: list(include('defs'))
+#definitions: list(include('defs'))
 nodes: list(include('nodes'))
 ---
 specs: 
   version: str(min=1, max=256)
   hardware_type: str(min=1, max=256)
 
-defs:
-  ports: list(include('ports', required=False))
-
 ports:
-  destination_description: str(min=1, max=256)
-  destination_use: str(min=1, max=256)
-  speed: subset(int(min=1, max=1), int(min=10, max=10), int(min=25, max=25), int(min=100, max=100))
+  destination: str(min=1, max=256)
+  vlan_name: list(required=False)
+  name: str(required=False)
+  lag: str(required=False)
 
 nodes:
   type: str(min=1, max=256)
@@ -23,11 +21,3 @@ nodes:
 devices:
   name: str(min=1, max=256)
   ports: any([str(min=1, max=256), list(include('ports'))])
-
-
-
-
-
-
-
-
