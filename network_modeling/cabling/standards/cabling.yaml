@@ -129,10 +129,10 @@ nodes:
     devices:
       - name: "cmm"
         ports: 
-        - destination: "cmmj0"
+        - destination: "cmm port 1"
           vlan_name: "MTN_HMN, MTN_NMN"
           lag: "mlag-static"
-        - destination: "cmmj1"
+        - destination: "cmm port 2"
           vlan_name: "MTN_HMN, MTN_NMN"
           lag: "mlag-static"
   - type: "mountain"

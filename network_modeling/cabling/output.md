@@ -107,8 +107,8 @@ NOTES:
 
 | Device | Port | Destination | Name | VLAN | LAG |
 |:-------|------|:-------------------------|:--------------|:--------------------|:-----|
-| CMM | 1 | cmmj0 |  | MTN_HMN, MTN_NMN | MLAG-STATIC
-| CMM | 2 | cmmj1 |  | MTN_HMN, MTN_NMN | MLAG-STATIC
+| CMM | 1 | cmm port 1 |  | MTN_HMN, MTN_NMN | MLAG-STATIC
+| CMM | 2 | cmm port 2 |  | MTN_HMN, MTN_NMN | MLAG-STATIC
 
 <br>
 <br>
