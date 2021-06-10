@@ -38,5 +38,7 @@ env = Environment(
 template = env.get_template(template_file)  # Defaults to templates/<file>
 output = template.render(cabling=cabling)
 
-print(output, file=open("../models/output.md", "a"))
+# print(output, file=open("../models/output.md", "a"))
+with open("output.md", "w") as file:
+    file.write(output)
 

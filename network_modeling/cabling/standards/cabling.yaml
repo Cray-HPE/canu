@@ -1,30 +1,30 @@
 --- # cabling standards
-specs:
-  version: "1.4"
-  hardware_type: "hpe"
+
+version: "1.4"
+hardware_type: "hpe"
 nodes:
   - type: "ncn"
     subtype: "master"
     devices:
       - name: "ocp"
         ports: 
-        - destination: "primary"
-          vlan_name: ["HMN, NMN, CAN"]
+        - destination: "primary (first switch in MLAG pair)"
+          vlan_name: "HMN, NMN, CAN"
           name: "mgmt0"
           lag: "mlag-lacp"
         - destination: "site"
-          vlan_name: 
           name: "Manager 001 to site, otherwise NONE (see notes)"
       - name: "pcie-slot1"
         ports: 
-        - destination: "secondary"
-          vlan_name: ["HMN, NMN, CAN"]
+        - destination: "secondary (second switch in MLAG pair)"
+          vlan_name: "HMN, NMN, CAN"
           name: "mgmt1"
           lag: "mlag-lacp"
         - destination: 
       - name: "ilo"
-        ports: 
-        - destination: "Master 001 connection to site, others HMN Leaf (see notes)"
+        ports:
+        - destination: 'HMN Leaf'
+          vlan_name: "HMN"
     notes:
       - "REQUIRED:  Master 001 (ncn-m001) is required to have a site connection on OCP Port 2 for installation and maintenance."
       - "RECOMMENDED: Masters 002 and 003 may optionally have a site connection on OCP Port 2 for emergency system access."
@@ -34,67 +34,47 @@ nodes:
     devices:
       - name: "ocp"
         ports: 
-        - destination: "primary"
-          vlan_name: ["HMN, NMN, CAN"]
+        - destination: "primary (first switch in MLAG pair)"
+          vlan_name: "HMN, NMN, CAN"
           name: "mgmt0"
           lag: "mlag-lacp"
-        - destination: "secondary"
-          vlan_name: ["HMN, NMN, CAN"]
+        - destination: "secondary (second switch in MLAG pair)"
+          vlan_name: "HMN, NMN, CAN"
           name: "mgmt1"
           lag: "mlag-lacp"
       - name: "ilo"
         ports:
         - destination: 'HMN Leaf'
+          vlan_name: "HMN"
     notes:
       - "A single OCP card is the default worker configuration."
-  - type: "ncn"
-    subtype: "worker_two_card_(option)"
-    devices:
-      - name: "ocp"
-        ports: 
-        - destination: "primary"
-          vlan_name: ["HMN, NMN, CAN"]
-          name: "mgmt0"
-          lag: "mlag-lacp"
-        - destination: 
-      - name: "pcie-slot1"
-        ports: 
-        - destination: "secondary"
-          vlan_name: ["HMN, NMN, CAN"]
-          name: "mgmt0"
-          lag: "mlag-lacp"
-        - destination: 
-      - name: "ilo"
-        ports: 
-        - destination: 'HMN Leaf'
-    notes:
-      - "A single OCP card and a second PCIE card in Slot 1 is an optional worker configuration when more resiliency is desired."
   - type: "ncn"
     subtype: "storage"
     devices:
       - name: "ocp"
         ports:
-        - destination: "primary"
-          vlan_name: ["HMN, NMN, CAN"]
+        - destination: "primary (first switch in MLAG pair)"
+          vlan_name: "HMN, NMN, CAN"
           name: "mgmt0"
           lag: "mlag-lacp"
-        - destination: "primary"
-          vlan_name: ["SUN"]
+        - destination: "primary (first switch in MLAG pair)"
+          vlan_name: "SUN"
           name: "mgmt1"
           lag: "mlag-lacp"
       - name: "pcie-slot1"
         ports:
-        - destination: "secondary"
-          vlan_name: ["HMN, NMN, CAN"]
+        - destination: "secondary (second switch in MLAG pair)"
+          vlan_name: "HMN, NMN, CAN"
           name: "mgmt2"
           lag: "mlag-lacp"
-        - destination: "secondary"
-          vlan_name: ["SUN"]
+        - destination: "secondary (second switch in MLAG pair)"
+          vlan_name: "SUN"
           name: "mgmt3"
           lag: "mlag-lacp"
       - name: "ilo"
         ports: 
         - destination: 'HMN Leaf'
+          vlan_name: "HMN"
     notes:
       - "All ports are cabled."
       - "OCP Port 1 and PCIE Slot 1 Port 1 (first ports) are bonded for the NMN, HMN and CAN."
@@ -104,20 +84,21 @@ nodes:
     devices:
       - name: "ocp"
         ports: 
-        - destination: "primary"
-          vlan_name: ["NMN"]
-        - destination: "primary"
-          vlan_name: ["CAN"]
+        - destination: "primary (first switch in MLAG pair)"
+          vlan_name: "NMN"
+        - destination: "primary (first switch in MLAG pair)"
+          vlan_name: "CAN"
           lag: "mlag-lacp"
       - name: "pcie-slot1"
         ports:
-        - destination: "secondary"
-        - destination: "secondary"
-          vlan_name: ["CAN"]
+        - destination: "secondary (second switch in MLAG pair)"
+        - destination: "secondary (second switch in MLAG pair)"
+          vlan_name: "CAN"
           lag: "mlag-lacp"
       - name: "ilo"
         ports: 
         - destination: 'HMN Leaf'
+          vlan_name: "HMN"
     notes:
       - "All ports are cabled."
       - "The OCP Port 1 connects to the NMN in a non-bonded configuration."
@@ -128,22 +109,31 @@ nodes:
     devices:
       - name: "ocp"
         ports: 
-        - destination: "primary"
+        - destination: "primary (first switch in MLAG pair)"
+          vlan_name: "NMN"
+        - destination: "primary (first switch in MLAG pair)"
+          vlan_name: "CAN"
           lag: "mlag-lacp"
-        - destination: "secondary"
+      - name: "pcie-slot1"
+        ports:
+        - destination: "secondary (second switch in MLAG pair)"
+        - destination: "secondary (second switch in MLAG pair)"
+          vlan_name: "CAN"
           lag: "mlag-lacp"
+      - name: "ilo"
         ports: 
         - destination: 'HMN Leaf'
+          vlan_name: "HMN"
   - type: "mountain"
     subtype: "cmm"
     devices:
       - name: "cmm"
         ports: 
-        - destination: "cmmj1"
-          vlan_name: ["MTN_HMN, MTN_NMN"]
+        - destination: "cmmj0"
+          vlan_name: "MTN_HMN, MTN_NMN"
           lag: "mlag-static"
-        - destination: "cmmj2"
-          vlan_name: ["MTN_HMN, MTN_NMN"]
+        - destination: "cmmj1"
+          vlan_name: "MTN_HMN, MTN_NMN"
           lag: "mlag-static"
   - type: "mountain"
     subtype: "cec"
@@ -151,4 +141,4 @@ nodes:
       - name: "cec"
         ports:
           - destination: "CDU switch access port"
-            vlan_name: ["MTN_HMN"]
+            vlan_name: "MTN_HMN"
