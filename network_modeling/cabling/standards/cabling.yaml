@@ -1,6 +1,6 @@
 --- # cabling standards
 
-version: "1.4"
+version: "1.0"
 hardware_type: "hpe"
 nodes:
   - type: "ncn"
