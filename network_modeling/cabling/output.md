@@ -11,11 +11,11 @@ Software Version: CSM v1.0
 
 | Device | Port | Destination | Name | VLAN | LAG |
 |:-------|------|:-------------------------|:--------------|:--------------------|:-----|
-| OCP | 1 | primary (first switch in MLAG pair) | mgmt0 | HMN, NMN, CAN | MLAG-LACP
-| OCP | 2 | site | Manager 001 to site, otherwise NONE (see notes) |  | 
-| PCIE-SLOT1 | 1 | secondary (second switch in MLAG pair) | mgmt1 | HMN, NMN, CAN | MLAG-LACP
-| PCIE-SLOT1 | 2 | None |  |  | 
-| ILO | 1 | HMN Leaf |  | HMN | 
+| OCP | 1 | primary (first switch in MLAG pair) |  mgmt0 |  HMN, NMN, CAN  |  MLAG-LACP |
+| OCP | 2 | site |  Manager 001 to site, otherwise NONE (see notes) |  N/A  |  N/A |
+| PCIE-SLOT1 | 1 | secondary (second switch in MLAG pair) |  mgmt1 |  HMN, NMN, CAN  |  MLAG-LACP |
+| PCIE-SLOT1 | 2 | None |  N/A |  N/A  |  N/A |
+| ILO | 1 | HMN Leaf |  N/A |  HMN  |  N/A |
 
 <br>
 NOTES:
@@ -32,9 +32,9 @@ NOTES:
 
 | Device | Port | Destination | Name | VLAN | LAG |
 |:-------|------|:-------------------------|:--------------|:--------------------|:-----|
-| OCP | 1 | primary (first switch in MLAG pair) | mgmt0 | HMN, NMN, CAN | MLAG-LACP
-| OCP | 2 | secondary (second switch in MLAG pair) | mgmt1 | HMN, NMN, CAN | MLAG-LACP
-| ILO | 1 | HMN Leaf |  | HMN | 
+| OCP | 1 | primary (first switch in MLAG pair) |  mgmt0 |  HMN, NMN, CAN  |  MLAG-LACP |
+| OCP | 2 | secondary (second switch in MLAG pair) |  mgmt1 |  HMN, NMN, CAN  |  MLAG-LACP |
+| ILO | 1 | HMN Leaf |  N/A |  HMN  |  N/A |
 
 <br>
 NOTES:
@@ -49,11 +49,11 @@ NOTES:
 
 | Device | Port | Destination | Name | VLAN | LAG |
 |:-------|------|:-------------------------|:--------------|:--------------------|:-----|
-| OCP | 1 | primary (first switch in MLAG pair) | mgmt0 | HMN, NMN, CAN | MLAG-LACP
-| OCP | 2 | primary (first switch in MLAG pair) | mgmt1 | SUN | MLAG-LACP
-| PCIE-SLOT1 | 1 | secondary (second switch in MLAG pair) | mgmt2 | HMN, NMN, CAN | MLAG-LACP
-| PCIE-SLOT1 | 2 | secondary (second switch in MLAG pair) | mgmt3 | SUN | MLAG-LACP
-| ILO | 1 | HMN Leaf |  | HMN | 
+| OCP | 1 | primary (first switch in MLAG pair) |  mgmt0 |  HMN, NMN, CAN  |  MLAG-LACP |
+| OCP | 2 | primary (first switch in MLAG pair) |  mgmt1 |  SUN  |  MLAG-LACP |
+| PCIE-SLOT1 | 1 | secondary (second switch in MLAG pair) |  mgmt2 |  HMN, NMN, CAN  |  MLAG-LACP |
+| PCIE-SLOT1 | 2 | secondary (second switch in MLAG pair) |  mgmt3 |  SUN  |  MLAG-LACP |
+| ILO | 1 | HMN Leaf |  N/A |  HMN  |  N/A |
 
 <br>
 NOTES:
@@ -70,11 +70,11 @@ NOTES:
 
 | Device | Port | Destination | Name | VLAN | LAG |
 |:-------|------|:-------------------------|:--------------|:--------------------|:-----|
-| OCP | 1 | primary (first switch in MLAG pair) |  | NMN | 
-| OCP | 2 | primary (first switch in MLAG pair) |  | CAN | MLAG-LACP
-| PCIE-SLOT1 | 1 | secondary (second switch in MLAG pair) |  |  | 
-| PCIE-SLOT1 | 2 | secondary (second switch in MLAG pair) |  | CAN | MLAG-LACP
-| ILO | 1 | HMN Leaf |  | HMN | 
+| OCP | 1 | primary (first switch in MLAG pair) |  N/A |  NMN  |  N/A |
+| OCP | 2 | primary (first switch in MLAG pair) |  N/A |  CAN  |  MLAG-LACP |
+| PCIE-SLOT1 | 1 | secondary (second switch in MLAG pair) |  N/A |  N/A  |  N/A |
+| PCIE-SLOT1 | 2 | secondary (second switch in MLAG pair) |  N/A |  CAN  |  MLAG-LACP |
+| ILO | 1 | HMN Leaf |  N/A |  HMN  |  N/A |
 
 <br>
 NOTES:
@@ -92,11 +92,9 @@ NOTES:
 
 | Device | Port | Destination | Name | VLAN | LAG |
 |:-------|------|:-------------------------|:--------------|:--------------------|:-----|
-| OCP | 1 | primary (first switch in MLAG pair) |  | NMN | 
-| OCP | 2 | primary (first switch in MLAG pair) |  | CAN | MLAG-LACP
-| PCIE-SLOT1 | 1 | secondary (second switch in MLAG pair) |  |  | 
-| PCIE-SLOT1 | 2 | secondary (second switch in MLAG pair) |  | CAN | MLAG-LACP
-| ILO | 1 | HMN Leaf |  | HMN | 
+| OCP | 1 | primary (first switch in MLAG pair) |  N/A |  HMN, NMN, CAN  |  MLAG-LACP |
+| OCP | 2 | secondary (second switch in MLAG pair) |  N/A |  HMN, NMN, CAN  |  MLAG-LACP |
+| ILO | 1 | HMN Leaf |  N/A |  HMN  |  N/A |
 
 <br>
 <br>
@@ -107,8 +105,8 @@ NOTES:
 
 | Device | Port | Destination | Name | VLAN | LAG |
 |:-------|------|:-------------------------|:--------------|:--------------------|:-----|
-| CMM | 1 | cmm port 1 |  | MTN_HMN, MTN_NMN | MLAG-STATIC
-| CMM | 2 | cmm port 2 |  | MTN_HMN, MTN_NMN | MLAG-STATIC
+| CMM | 1 | primary (first switch in MLAG pair) |  N/A |  MTN_HMN, MTN_NMN  |  MLAG-STATIC |
+| CMM | 2 | secondary (second switch in MLAG pair) |  N/A |  MTN_HMN, MTN_NMN  |  MLAG-STATIC |
 
 <br>
 <br>
@@ -119,7 +117,7 @@ NOTES:
 
 | Device | Port | Destination | Name | VLAN | LAG |
 |:-------|------|:-------------------------|:--------------|:--------------------|:-----|
-| CEC | 1 | CDU switch access port |  | MTN_HMN | 
+| CEC | 1 | CDU switch access port |  N/A |  MTN_HMN  |  N/A |
 
 <br>
 <br>

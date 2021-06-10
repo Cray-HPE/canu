@@ -14,7 +14,7 @@ Software Version: CSM v{{ cabling.version }}
 |:-------|------|:-------------------------|:--------------|:--------------------|:-----|
 {% for device in node.devices %}
 {% for port in device.ports %}
-| {{ device.name | upper }} | {{ loop.index }} | {{ port.destination }} | {{port.name }} | {{ port.vlan_name }} | {{port.lag | upper}}
+| {{ device.name | upper }} | {{ loop.index }} | {{ port.destination }} | {% if port.name|length %} {{ port.name }} {% else %} N/A {% endif %}| {% if port.vlan_name|length %} {{ port.vlan_name }} {% else %} N/A {% endif %} | {% if port.lag|length %} {{port.lag | upper}} {% else %} N/A {% endif %}|
 {% endfor %}{# end ports loop #}
 {% endfor %}{# end devices loop #}{# leave the following blank line for markdown formatting #}
 

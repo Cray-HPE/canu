@@ -8,7 +8,7 @@ nodes:
     devices:
       - name: "ocp"
         ports: 
-        - destination: "primary (first switch in MLAG pair)"
+        - destination: "Primary (first switch in MLAG pair)"
           vlan_name: "HMN, NMN, CAN"
           name: "mgmt0"
           lag: "mlag-lacp"
@@ -16,7 +16,7 @@ nodes:
           name: "Manager 001 to site, otherwise NONE (see notes)"
       - name: "pcie-slot1"
         ports: 
-        - destination: "secondary (second switch in MLAG pair)"
+        - destination: "Secondary (second switch in MLAG pair)"
           vlan_name: "HMN, NMN, CAN"
           name: "mgmt1"
           lag: "mlag-lacp"
@@ -34,11 +34,11 @@ nodes:
     devices:
       - name: "ocp"
         ports: 
-        - destination: "primary (first switch in MLAG pair)"
+        - destination: "Primary (first switch in MLAG pair)"
           vlan_name: "HMN, NMN, CAN"
           name: "mgmt0"
           lag: "mlag-lacp"
-        - destination: "secondary (second switch in MLAG pair)"
+        - destination: "Secondary (second switch in MLAG pair)"
           vlan_name: "HMN, NMN, CAN"
           name: "mgmt1"
           lag: "mlag-lacp"
@@ -53,21 +53,21 @@ nodes:
     devices:
       - name: "ocp"
         ports:
-        - destination: "primary (first switch in MLAG pair)"
+        - destination: "Primary (first switch in MLAG pair)"
           vlan_name: "HMN, NMN, CAN"
           name: "mgmt0"
           lag: "mlag-lacp"
-        - destination: "primary (first switch in MLAG pair)"
+        - destination: "Primary (first switch in MLAG pair)"
           vlan_name: "SUN"
           name: "mgmt1"
           lag: "mlag-lacp"
       - name: "pcie-slot1"
         ports:
-        - destination: "secondary (second switch in MLAG pair)"
+        - destination: "Secondary (second switch in MLAG pair)"
           vlan_name: "HMN, NMN, CAN"
           name: "mgmt2"
           lag: "mlag-lacp"
-        - destination: "secondary (second switch in MLAG pair)"
+        - destination: "Secondary (second switch in MLAG pair)"
           vlan_name: "SUN"
           name: "mgmt3"
           lag: "mlag-lacp"
@@ -84,15 +84,15 @@ nodes:
     devices:
       - name: "ocp"
         ports: 
-        - destination: "primary (first switch in MLAG pair)"
+        - destination: "Primary (first switch in MLAG pair)"
           vlan_name: "NMN"
-        - destination: "primary (first switch in MLAG pair)"
+        - destination: "Primary (first switch in MLAG pair)"
           vlan_name: "CAN"
           lag: "mlag-lacp"
       - name: "pcie-slot1"
         ports:
-        - destination: "secondary (second switch in MLAG pair)"
-        - destination: "secondary (second switch in MLAG pair)"
+        - destination: "Secondary (second switch in MLAG pair)"
+        - destination: "Secondary (second switch in MLAG pair)"
           vlan_name: "CAN"
           lag: "mlag-lacp"
       - name: "ilo"
@@ -109,16 +109,12 @@ nodes:
     devices:
       - name: "ocp"
         ports: 
-        - destination: "primary (first switch in MLAG pair)"
-          vlan_name: "NMN"
-        - destination: "primary (first switch in MLAG pair)"
-          vlan_name: "CAN"
+        - destination: "Primary (first switch in MLAG pair)"
+          vlan_name: "HMN, NMN, CAN"
           lag: "mlag-lacp"
-      - name: "pcie-slot1"
-        ports:
-        - destination: "secondary (second switch in MLAG pair)"
-        - destination: "secondary (second switch in MLAG pair)"
-          vlan_name: "CAN"
+        - destination: "Secondary (second switch in MLAG pair)"
+          vlan_name: "HMN, NMN, CAN"
+          lag: "mlag-lacp"
           lag: "mlag-lacp"
       - name: "ilo"
         ports: 
@@ -129,10 +125,10 @@ nodes:
     devices:
       - name: "cmm"
         ports: 
-        - destination: "cmm port 1"
+        - destination: "Primary (first switch in MLAG pair)"
           vlan_name: "MTN_HMN, MTN_NMN"
           lag: "mlag-static"
-        - destination: "cmm port 2"
+        - destination: "Secondary (second switch in MLAG pair)"
           vlan_name: "MTN_HMN, MTN_NMN"
           lag: "mlag-static"
   - type: "mountain"
