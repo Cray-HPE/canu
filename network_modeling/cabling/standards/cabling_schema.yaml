@@ -1,6 +1,6 @@
 #specs: (include('specs'))
-version: str(required=False)
-hardware_type: str(required=False)
+version: str(min=1, max=256)
+hardware_type: str(min=1, max=256)
 nodes: list(include('nodes'))
 ---
 
