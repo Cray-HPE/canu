@@ -1,8 +1,8 @@
-# HPE Cabling Standards and Descriptions- Shasta v1.4
+# HPE Cabling Standards and Descriptions- CSM v1.0
 
 Hardware Type: HPE
 
-Software Version: Shasta v1.4
+Software Version: CSM v1.0
 
 
 ## NCN - MASTER
