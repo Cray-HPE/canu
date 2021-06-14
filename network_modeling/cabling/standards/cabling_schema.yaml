@@ -13,7 +13,7 @@ ports:
 nodes:
   type: str(min=1, max=256)
   subtype: str(min=1, max=256)
-  shasta_name: str(min=1, max=256, required=False)
+  shasta-name: str(min=1, max=256, required=False)
   devices: list(include('devices'))
   notes: list(required=False)
 

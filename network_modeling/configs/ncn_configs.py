@@ -47,6 +47,7 @@ for node in cabling["nodes"]:
             "interface": "1/1/3",
         }
 
+pprint.pprint(cabling["nodes"])
 # Load template and process
 
 file_loader = FileSystemLoader("templates")
@@ -55,8 +56,9 @@ env = Environment(
 )  # Trim blocks removes trailing newline
 template = env.get_template(template_file)  # Defaults to templates/<file>
 output = template.render(cabling=cabling)
+print(output)
 
 # print(output, file=open("../models/output.md", "a"))
-with open("cabling_output.md", "w") as file:
+with open("port_configs.md", "w") as file:
     file.write(output)
 
