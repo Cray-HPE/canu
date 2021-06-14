@@ -1,23 +1,24 @@
 {#
-Storage
+storage
 #}
 
-{% for storage in nodes %}
-{% if storage.subtype == "storage" %}
-interface lag {{ storage.lag_number }} multi-chassis
+{% for node in cabling.nodes %}
+{% if node.subtype == "storage" %}
+interface lag {{ node.config.lag_number }} multi-chassis
 no shutdown
-description {{ storage.description }}
+description {{ node.config.description }}
 no routing
 vlan trunk native 1
 vlan trunk allowed 1-2,4,7,10
 lacp mode active
 lacp fallback
 spanning-tree port-type admin-edge
-interface {{ storage.interface_number }}
+
+interface {{ node.config.interface}}
 no shutdown
 mtu 9198
-description {{ storage.description }}    
-lag {{ storage.lag_number }}
+description {{ node.config.description }}    
+lag {{ node.config.lag_number }}
 {% endif %}
 {% endfor %}
 {#
