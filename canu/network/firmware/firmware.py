@@ -14,7 +14,7 @@ import requests
 
 
 from canu.cache import cache_switch
-from canu.switch.firmware.firmware import get_firmware
+from canu.switch.firmware.status.status import get_firmware
 
 
 @click.command(
