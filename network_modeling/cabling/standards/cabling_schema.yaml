@@ -7,12 +7,13 @@ nodes: list(include('nodes'))
 ports:
   destination: str(min=1, max=256)
   vlan_name: list()
-  name: str(required=False)
+  device_name: str(required=False)
   lag: str(required=False)
 
 nodes:
   type: str(min=1, max=256)
   subtype: str(min=1, max=256)
+  shasta_name: str(min=1, max=256, required=False)
   devices: list(include('devices'))
   notes: list(required=False)
 
