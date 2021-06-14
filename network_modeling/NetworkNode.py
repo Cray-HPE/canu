@@ -123,11 +123,15 @@ class NetworkNode:
         available = self.__port_select(speed=speed)
 
         if available is None:
-            msg = f"{__name__}: Available port at speed {speed} "
-            msg += f"not found for {self.common_name()} "
-            msg += f'of type {self.__arch["name"]} and '
-            msg += f'model {self.__arch["model"]}'
-            raise Exception(click.secho(msg, fg="red"))
+            raise Exception(
+                click.secho(
+                    f"{__name__}: Available port at speed {speed} "
+                    f"not found for {self.common_name()} "
+                    f'of type {self.__arch["name"]} and '
+                    f'model {self.__arch["model"]}',
+                    fg="red",
+                )
+            )
 
         # TODO: Do we need to check count?  Probably not since it's required in schema
         # if 'count' not in available:
@@ -186,11 +190,15 @@ class NetworkNode:
                 connection_speed = connection["speed"]
 
         if match_count == 0:
-            msg = "No architectural definition found to allow connection between "
-            msg += f"{self.common_name()} ({self.arch_type()}) "
-            msg += f"and {node.common_name()} ({node.arch_type()}). "
-            msg += "\nCheck that the correct architectural was selected."
-            raise Exception(click.secho(msg, fg="red"))
+            raise Exception(
+                click.secho(
+                    "No architectural definition found to allow connection between "
+                    f"{self.common_name()} ({self.arch_type()}) "
+                    f"and {node.common_name()} ({node.arch_type()}). "
+                    "\nCheck that the correct architectural was selected.",
+                    fg="red",
+                )
+            )
 
         # Allow east-west connections (MLAG connections require this)
         # This is a bit of a trick since match_count will equal 2 when
@@ -199,25 +207,34 @@ class NetworkNode:
             match_count -= 1
 
         if match_count != 1:
-            msg = "Multiple architectural connection matches found between "
-            msg += f"{self.common_name()} ({self.arch_type()}) "
-            msg += f"and {node.common_name()} ({node.arch_type()}). "
-            msg += "Check architectural definition."
-            log.warning(msg)
+            log.warning(
+                "Multiple architectural connection matches found between "
+                f"{self.common_name()} ({self.arch_type()}) "
+                f"and {node.common_name()} ({node.arch_type()}). "
+                "Check architectural definition."
+            )
 
         if south_node is None or north_node is None:
-            msg = "Cannot determine architectural direction between "
-            msg += f"{self.common_name()} ({self.arch_type()}) "
-            msg += f"and {node.common_name()} ({node.arch_type()}).  "
-            msg += "Check architectural definition."
-            raise Exception(click.secho(msg, fg="red"))
+            raise Exception(
+                click.secho(
+                    "Cannot determine architectural direction between "
+                    f"{self.common_name()} ({self.arch_type()}) "
+                    f"and {node.common_name()} ({node.arch_type()}).  "
+                    "Check architectural definition.",
+                    fg="red",
+                )
+            )
 
         if connection_speed is None:
-            msg = "Connection not architecturally allowed between "
-            msg += f"{self.common_name()} ({self.arch_type()}) "
-            msg += f"and {node.common_name()} ({node.arch_type()}) at any speed. "
-            msg += "Check architectural definition."
-            raise Exception(click.secho(msg, fg="red"))
+            raise Exception(
+                click.secho(
+                    "Connection not architecturally allowed between "
+                    f"{self.common_name()} ({self.arch_type()}) "
+                    f"and {node.common_name()} ({node.arch_type()}) at any speed. "
+                    "Check architectural definition.",
+                    fg="red",
+                )
+            )
 
         log.debug(
             f"Connection from {south_node.arch_type()} to {north_node.arch_type()} allowed at speed {connection_speed}"
