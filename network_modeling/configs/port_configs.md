@@ -6,7 +6,6 @@ Software Version: CSM v1.0
 
 # NCN-Master port config
 ```
-
 interface lag 1 multi-chassis
 no shutdown
 description ncn-m001 port mgmt0
@@ -27,7 +26,6 @@ interface lag 1
 
 # NCN-Worker port config
 ```
-
 interface lag 2 multi-chassis
 no shutdown
 description ncn-w001 port mgmt0
@@ -47,7 +45,6 @@ lag 2
 
 # NCN-Storage port config
 ```
-
 interface lag 3 multi-chassis
 no shutdown
 description ncn-s001 port mgmt0

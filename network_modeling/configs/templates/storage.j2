@@ -1,7 +1,6 @@
 {#
 storage
 #}
-
 {% for node in cabling.nodes %}
 {% if node.subtype == "storage" %}
 interface lag {{ node.config.lag_number }} multi-chassis
