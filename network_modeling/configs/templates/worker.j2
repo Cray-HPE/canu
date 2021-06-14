@@ -1,0 +1,25 @@
+{#
+Worker
+#}
+
+{% for worker in nodes %}
+{% if worker.subtype == "worker" %}
+interface lag {{ worker.lag_number }} multi-chassis
+no shutdown
+description {{ worker.description }}
+no routing
+vlan trunk native 1
+vlan trunk allowed 1-2,4,7,10
+lacp mode active
+lacp fallback
+spanning-tree port-type admin-edge
+interface {{ worker.interface_number }}
+no shutdown
+mtu 9198
+description {{ worker.description }}    
+lag {{ worker.lag_number }}
+{% endif %}
+{% endfor %}
+{#
+end-worker
+#}

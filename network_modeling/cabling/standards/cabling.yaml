@@ -10,15 +10,15 @@ nodes:
         ports: 
         - destination: "Primary (first switch in MLAG pair)"
           vlan_name: "HMN, NMN, CAN"
-          name: "mgmt0"
+          device_name: "mgmt0"
           lag: "mlag-lacp"
         - destination: "site"
-          name: "Manager 001 to site, otherwise NONE (see notes)"
+        device_name: "Manager 001 to site, otherwise NONE (see notes)"
       - name: "pcie-slot1"
         ports: 
         - destination: "Secondary (second switch in MLAG pair)"
           vlan_name: "HMN, NMN, CAN"
-          name: "mgmt1"
+        device_name: "mgmt1"
           lag: "mlag-lacp"
         - destination: 
       - name: "ilo"
@@ -36,11 +36,11 @@ nodes:
         ports: 
         - destination: "Primary (first switch in MLAG pair)"
           vlan_name: "HMN, NMN, CAN"
-          name: "mgmt0"
+        device_name: "mgmt0"
           lag: "mlag-lacp"
         - destination: "Secondary (second switch in MLAG pair)"
           vlan_name: "HMN, NMN, CAN"
-          name: "mgmt1"
+        device_name: "mgmt1"
           lag: "mlag-lacp"
       - name: "ilo"
         ports:
@@ -55,21 +55,21 @@ nodes:
         ports:
         - destination: "Primary (first switch in MLAG pair)"
           vlan_name: "HMN, NMN, CAN"
-          name: "mgmt0"
+        device_name: "mgmt0"
           lag: "mlag-lacp"
         - destination: "Primary (first switch in MLAG pair)"
           vlan_name: "SUN"
-          name: "mgmt1"
+        device_name: "mgmt1"
           lag: "mlag-lacp"
       - name: "pcie-slot1"
         ports:
         - destination: "Secondary (second switch in MLAG pair)"
           vlan_name: "HMN, NMN, CAN"
-          name: "mgmt2"
+        device_name: "mgmt2"
           lag: "mlag-lacp"
         - destination: "Secondary (second switch in MLAG pair)"
           vlan_name: "SUN"
-          name: "mgmt3"
+        device_name: "mgmt3"
           lag: "mlag-lacp"
       - name: "ilo"
         ports: 
