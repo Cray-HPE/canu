@@ -1,0 +1,25 @@
+{#
+Storage
+#}
+
+{% for storage in nodes %}
+{% if storage.subtype == "storage" %}
+interface lag {{ storage.lag_number }} multi-chassis
+no shutdown
+description {{ storage.description }}
+no routing
+vlan trunk native 1
+vlan trunk allowed 1-2,4,7,10
+lacp mode active
+lacp fallback
+spanning-tree port-type admin-edge
+interface {{ storage.interface_number }}
+no shutdown
+mtu 9198
+description {{ storage.description }}    
+lag {{ storage.lag_number }}
+{% endif %}
+{% endfor %}
+{#
+end-storage
+#}
