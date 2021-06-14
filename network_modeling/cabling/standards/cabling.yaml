@@ -5,7 +5,7 @@ hardware_type: "hpe"
 nodes:
   - type: "ncn"
     subtype: "master"
-    shasta_name: "ncn_m"
+    shasta-name: "ncn-m"
     devices:
       - name: "ocp"
         ports: 
@@ -34,7 +34,7 @@ nodes:
       - "REQUIRED:  Master 001 (ncn-m001) is required to have it's BMC/iLO connected to the site."
   - type: "ncn"
     subtype: "worker"
-    shasta_name: "ncn_w"
+    shasta-name: "ncn-w"
     devices:
       - name: "ocp"
         ports: 
@@ -56,7 +56,7 @@ nodes:
       - "A single OCP card is the default worker configuration."
   - type: "ncn"
     subtype: "storage"
-    shasta_name: "ncn_s"
+    shasta-name: "ncn-s"
     devices:
       - name: "ocp"
         ports:
@@ -92,7 +92,7 @@ nodes:
       - "OCP Port 2 and PCIE Slot 1 Port 2 (second ports) cabled but not configured in this release."
   - type: "application"
     subtype: "uan"
-    shasta_name: "uan"
+    shasta-name: "uan"
     devices:
       - name: "ocp"
         ports: 
@@ -122,7 +122,7 @@ nodes:
       - "OCP Port 2 and PCIE Slot 1 Port 2 (second ports) are bonded for the CAN."
   - type: "application"
     subtype: "login"
-    shasta_name: "ln"
+    shasta-name: "ln"
     devices:
       - name: "ocp"
         ports: 
