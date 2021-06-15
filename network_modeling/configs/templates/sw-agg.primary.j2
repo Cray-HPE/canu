@@ -1,0 +1,127 @@
+hostname {{ hostname }}
+user admin group administrators password plaintext {{ password }}
+no ip icmp redirect
+vrf keepalive
+ntp server {{% ncn-w001 %}}
+ntp server {{% ncn-w002 %}}
+ntp server {{% ncn-w003 %}}
+ntp enable
+!
+!
+!
+ssh server vrf default
+ssh server vrf mgmt
+access-list ip nmn-hmn
+    10 deny any {{NMN}} {{HMN}}
+    20 deny any {{NMN}} {{MTN_HMN}}
+    30 deny any {{HMN}} {{NMN}}
+    40 deny any {{HMN}} {{MTN_NMN}}
+    50 deny any {{MTN_NMN}} {{HMN}}
+    60 deny any {{MTN_NMN}} {{MTN_HMN}}
+    70 deny any {{MTN_HMN}} {{NMN}}
+    80 deny any {{MTN_HMN}} {{MTN_NMN}}
+    90 permit any any any
+vlan 1
+vlan 2
+    name NMN
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
+vlan 4
+    name HMN
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
+vlan 7
+    name CAN
+vlan 10
+    name SUN
+vlan 4000
+spanning-tree
+spanning-tree priority 10
+spanning-tree max-age 6
+spanning-tree config-name MST0
+spanning-tree config-revision 1
+interface mgmt
+shutdown
+
+{% include "ncn-m.lag.j2 %}
+
+{% include "ncn-w.lag.j2 %}
+
+{% include 'ncn-s.lag.j2' %}
+
+{% include 'sw-leaf-bmc.lag.j2' %}
+
+{% include 'sw-spine.primary.lag.j2' %}
+
+{% include 'sw-spine.secondary.lag.j2' %}
+
+{% include 'sw-agg.secondary.lag.j2' %}
+
+interface 1/1/48
+    no shutdown
+    vrf attach keepalive
+    description vsx vsx keepalive
+    ip address 192.168.255.0/31
+
+interface 1/1/55
+    no shutdown
+    mtu 9198
+    description vsx isl 
+    lag 256
+interface 1/1/56
+    no shutdown
+    mtu 9198
+    description vsx isl 
+    lag 256
+interface loopback 0
+    ip address {{% Loopback_IP %}}
+    ipv6 address fd01::65/64
+    ip ospf 1 area 0.0.0.0
+    ipv6 ospfv3 1 area 0.0.0.0
+interface vlan 1
+    ip mtu 9198
+    ip address {{% MTL_IP %}}
+    ipv6 address autoconfig
+    ip helper-address 10.92.100.222
+    ipv6 ospfv3 1 area 0.0.0.0
+    ip igmp enable
+interface vlan 2
+    description NMN
+    ip mtu 9198
+    ip address {{% NMN_IP %}}
+    ip helper-address 10.92.100.222
+    ip ospf 1 area 0.0.0.0
+    ip igmp enable
+interface vlan 4
+    description HMN
+    ip mtu 9198
+    ip address {{% HMN_IP %}}
+    ip helper-address 10.94.100.222
+    ip ospf 1 area 0.0.0.0
+    ip igmp enable
+interface vlan 7
+    description CAN
+    ip mtu 9198
+    ip address {{% CAN_IP %}}
+    ip ospf 1 area 0.0.0.0
+    ip igmp enable
+vsx
+    system-mac 02:00:00:00:65:00
+    inter-switch-link lag 256
+    role primary
+    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive
+    linkup-delay-timer 600
+    vsx-sync vsx-global
+!
+!
+!
+!
+!
+router ospf 1
+    router-id {{% Loopback_IP %}}
+    area 0.0.0.0
+router ospfv3 1
+    router-id {{% Loopback_IP %}}
+    area 0.0.0.0
+https-server vrf default
+https-server vrf mgmt
