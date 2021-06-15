@@ -1,8 +1,8 @@
 {#
-worker
+uan
 #}
 {% for node in cabling.nodes %}
-{% if node.subtype == "worker" %}
+{% if node.subtype == "uan" %}
 interface lag {{ node.config.lag_number }} multi-chassis
 no shutdown
 description {{ node.config.description }}
@@ -17,9 +17,18 @@ interface {{ node.config.interface_lag}}
 no shutdown
 mtu 9198
 description {{ node.config.description }}    
-lag {{ node.config.lag_number }}
+interface lag {{ node.config.lag_number }}
+
+interface {{ node.config.interface_nmn }}
+no shutdown
+mtu 9198
+no routing
+vlan access 2
+description {{ node.config.description }}
+spanning-tree bpdu-guard
+spanning-tree port-type admin-edge
 {% endif %}
 {% endfor %}
 {#
-end-worker
+end-uan
 #}

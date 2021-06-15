@@ -1,0 +1,18 @@
+{#
+cec
+#}
+{% for node in cabling.nodes %}
+{% if node.subtype == "cec" %}
+interface {{ node.config.interface_lag}}
+no shutdown
+mtu 9198
+description {{ node.config.description }}    
+no routing
+vlan access 3000
+spanning-tree bpdu-guard
+spanning-tree port-type admin-edge
+{% endif %}
+{% endfor %}
+{#
+end-cec
+#}
