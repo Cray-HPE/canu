@@ -1,0 +1,107 @@
+hostname {{ hostname }}
+user admin group administrators password plaintext {{ password }}
+bfd
+no ip icmp redirect
+vrf keepalive
+ntp server {{% ncn-w001 %}}
+ntp server {{% ncn-w002 %}}
+ntp server {{% ncn-w003 %}}
+ntp enable
+
+ssh server vrf default
+ssh server vrf mgmt
+access-list ip nmn-hmn
+    10 deny any {{NMN}} {{HMN}}
+    20 deny any {{NMN}} {{MTN_HMN}}
+    30 deny any {{HMN}} {{NMN}}
+    40 deny any {{HMN}} {{MTN_NMN}}
+    50 deny any {{MTN_NMN}} {{HMN}}
+    60 deny any {{MTN_NMN}} {{MTN_HMN}}
+    70 deny any {{MTN_HMN}} {{NMN}}
+    80 deny any {{MTN_HMN}} {{MTN_NMN}}
+    90 permit any any any
+
+{% include 'MTN_HMN_VLAN.j2' %}
+{% include 'MTN_NMN_VLAN.j2' %}
+
+spanning-tree
+spanning-tree priority 5
+spanning-tree max-age 6
+spanning-tree config-name MST0
+spanning-tree config-revision 1
+interface mgmt
+shutdown
+
+{{% include 'cmm.j2' %}}
+{{% include 'cec.j2' %}}
+
+interface lag 99
+    no shutdown
+    description ISL link
+    no routing
+    vlan trunk native 1 tag
+    vlan trunk allowed all
+    lacp mode active
+
+interface 1/1/40
+    no shutdown
+    mtu 9198
+    vrf attach keepalive
+    description vsx keepalive
+    ip address 192.168.255.0/31
+
+interface 1/1/49
+    no shutdown
+    mtu 9198
+    ip address {{% pt-to-pt-IP %}}
+    ip ospf 1 area 0.0.0.0
+    ip ospf network point-to-point
+    ip ospf bfd
+interface 1/1/50
+    no shutdown
+    mtu 9198
+    ip address {{% pt-to-pt-IP %}}
+    ip ospf 1 area 0.0.0.0
+    ip ospf network point-to-point
+    ip ospf bfd
+interface 1/1/51
+    no shutdown
+    mtu 9198
+    description vsx isl
+    lag 99
+interface 1/1/52
+    no shutdown
+    mtu 9198
+    description vsx isl
+    lag 99
+interface loopback 0
+    ip address {{% Loopback_IP %}}
+    ipv6 address {{% IPV6_IP %}}
+    ip ospf 1 area 0.0.0.0
+    ipv6 ospfv3 1 area 0.0.0.0
+interface vlan 1
+    shutdown
+
+{% include 'MTN_HMN_VLAN_INTERFACE.j2' %}
+{% include 'MTN_NMN_VLAN_INTERFACE.j2' %}
+
+vsx
+    system-mac 02:00:00:00:73:00
+    inter-switch-link lag 99
+    role primary
+    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive
+    linkup-delay-timer 600
+    vsx-sync vsx-global
+!
+!
+!
+!
+!
+router ospf 1
+    router-id {{% Loopback_IP %}}
+    area 0.0.0.0
+router ospfv3 1
+    router-id {{% Loopback_IP %}}
+    area 0.0.0.0
+https-server vrf default
+https-server vrf mgmt
