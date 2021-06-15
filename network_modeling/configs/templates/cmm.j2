@@ -1,17 +1,15 @@
 {#
-Master
+cmm
 #}
 {% for node in cabling.nodes %}
-{% if node.subtype == "master" %}
-interface lag {{ node.config.lag_number }} multi-chassis
+{% if node.subtype == "cmm" %}
+interface lag {{ node.config.lag_number }} static
 no shutdown
 description {{ node.config.description }}
 no routing
-vlan trunk native 1
-vlan trunk allowed 1-2,4,7
-lacp mode active
-lacp fallback
-spanning-tree port-type admin-edge
+vlan trunk native 2000
+vlan trunk allowed 2000,3000,4091
+spanning-tree root-guard
 
 interface {{ node.config.interface_lag}}
 no shutdown
@@ -21,5 +19,5 @@ interface lag {{ node.config.lag_number }}
 {% endif %}
 {% endfor %}
 {#
-end-master
+end-cmm
 #}

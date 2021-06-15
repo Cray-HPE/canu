@@ -1,8 +1,8 @@
 {#
-worker
+login
 #}
 {% for node in cabling.nodes %}
-{% if node.subtype == "worker" %}
+{% if node.subtype == "login" %}
 interface lag {{ node.config.lag_number }} multi-chassis
 no shutdown
 description {{ node.config.description }}
@@ -17,9 +17,9 @@ interface {{ node.config.interface_lag}}
 no shutdown
 mtu 9198
 description {{ node.config.description }}    
-lag {{ node.config.lag_number }}
+interface lag {{ node.config.lag_number }}
 {% endif %}
 {% endfor %}
 {#
-end-worker
+end-login
 #}
