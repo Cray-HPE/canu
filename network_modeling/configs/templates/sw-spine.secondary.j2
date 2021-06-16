@@ -4,9 +4,9 @@ bfd
 no ip icmp redirect
 vrf CAN
 vrf keepalive
-ntp server {{% ncn-w001 %}}
-ntp server {{% ncn-w002 %}}
-ntp server {{% ncn-w003 %}}
+ntp server {{ ncn-w001 }}
+ntp server {{ ncn-w002 }}
+ntp server {{ ncn-w003 }}
 ntp enable
 !
 !
@@ -69,42 +69,42 @@ interface {{ vsx-isl-port2 }}
     description vsx isl
     lag 99
 interface loopback 0
-    ip address {{% Loopback_IP %}}
-    ipv6 address {{% IPV6_IP %}}
+    ip address {{ Loopback_IP }}
+    ipv6 address {{ IPV6_IP }}
     ip ospf 1 area 0.0.0.0
     ipv6 ospfv3 1 area 0.0.0.0
 interface vlan 1
     ip mtu 9198
-    ip address {{% MTL_IP %}}
+    ip address {{ MTL_IP }}
     active-gateway ip mac 12:00:00:00:6b:00
-    active-gateway ip {{% MTL_IP_Gateway %}}
+    active-gateway ip {{ MTL_IP_Gateway }}
     ipv6 address autoconfig
     ip helper-address 10.92.100.222
     ipv6 ospfv3 1 area 0.0.0.0
     ip igmp enable
 interface vlan 2
     ip mtu 9198
-    ip address {{% NMN_IP %}}
+    ip address {{ NMN_IP }}
     active-gateway ip mac 12:00:00:00:6b:00
-    active-gateway ip {{% NMN_IP_Gateway %}}
+    active-gateway ip {{ NMN_IP_Gateway }}
     ipv6 address autoconfig
     ip helper-address 10.92.100.222
     ipv6 ospfv3 1 area 0.0.0.0
     ip igmp enable
 interface vlan 4
     ip mtu 9198
-    ip address {{% HMN_IP %}}
+    ip address {{ HMN_IP }}
     active-gateway ip mac 12:00:00:00:6b:00
-    active-gateway ip {{% HMN_IP_Gateway %}}
+    active-gateway ip {{ HMN_IP_Gateway }}
     ipv6 address autoconfig
     ip helper-address 10.92.100.222
     ipv6 ospfv3 1 area 0.0.0.0
     ip igmp enable
 interface vlan 7
     ip mtu 9198
-    ip address {{% CAN_IP %}}
+    ip address {{ CAN_IP }}
     active-gateway ip mac 12:00:00:00:6b:00
-    active-gateway ip {{% CAN_IP_Gateway %}}
+    active-gateway ip {{ CAN_IP_Gateway }}
     ipv6 address autoconfig
     ip helper-address 10.92.100.222
     ipv6 ospfv3 1 area 0.0.0.0

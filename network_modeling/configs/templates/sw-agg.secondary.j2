@@ -2,9 +2,9 @@ hostname {{ hostname }}
 user admin group administrators password plaintext {{ password }}
 no ip icmp redirect
 vrf keepalive
-ntp server {{% ncn-w001 %}}
-ntp server {{% ncn-w002 %}}
-ntp server {{% ncn-w003 %}}
+ntp server {{ ncn-w001 }}
+ntp server {{ ncn-w002 }}
+ntp server {{ ncn-w003 }}
 ntp enable
 !
 !
@@ -75,13 +75,13 @@ iinterface {{ vsx-isl-port2 }}
     description vsx isl
     lag 99
 interface loopback 0
-    ip address {{% hostname.Loopback_IP %}}
+    ip address {{ hostname.Loopback_IP }}
     ipv6 address fd01::65/64
     ip ospf 1 area 0.0.0.0
     ipv6 ospfv3 1 area 0.0.0.0
 interface vlan 1
     ip mtu 9198
-    ip address {{% hostname.MTL_IP %}}
+    ip address {{ hostname.MTL_IP }}
     ipv6 address autoconfig
     ip helper-address 10.92.100.222
     ipv6 ospfv3 1 area 0.0.0.0
@@ -89,14 +89,14 @@ interface vlan 1
 interface vlan 2
     description NMN
     ip mtu 9198
-    ip address {{% hostname.NMN_IP %}}
+    ip address {{ hostname.NMN_IP }}
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
     ip igmp enable
 interface vlan 4
     description HMN
     ip mtu 9198
-    ip address {{% hostname.HMN_IP %}}
+    ip address {{ hostname.HMN_IP }}
     ip helper-address 10.94.100.222
     ip ospf 1 area 0.0.0.0
     ip igmp enable
@@ -113,10 +113,10 @@ vsx
 !
 !
 router ospf 1
-    router-id {{% hostname.Loopback_IP %}}
+    router-id {{ hostname.Loopback_IP }}
     area 0.0.0.0
 router ospfv3 1
-    router-id {{% hostname.Loopback_IP %}}
+    router-id {{ hostname.Loopback_IP }}
     area 0.0.0.0
 https-server vrf default
 https-server vrf mgmt
