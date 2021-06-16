@@ -1,0 +1,12 @@
+interface lag {{ lag_number }}
+no shutdown
+description 
+no routing
+vlan trunk native 1
+vlan trunk allowed 2,4,7,10
+lacp mode active
+
+interface {{  interface_number }}
+no shutdown
+mtu 9198
+lag {{ lag_number }}
