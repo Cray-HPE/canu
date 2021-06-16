@@ -44,9 +44,8 @@ spanning-tree config-revision 1
 interface mgmt
 shutdown
 
-{% include 'sw-agg.lag.j2' %}
-
-{% include 'sw-cdu.lag.j2' %}
+{% include 'spine-to-agg.lag.j2' %}
+{% include 'spine-to-cdu.j2' %}
 
 interface lag 99
     no shutdown
@@ -55,32 +54,16 @@ interface lag 99
     vlan trunk native 1 tag
     vlan trunk allowed all
     lacp mode active
-
-interface 1/1/1
-    no shutdown
-    mtu 9198
-    ip address {{% pt-to-pt-IP %}}
-    ip ospf 1 area 0.0.0.0
-    ip ospf network point-to-point
-    ip ospf bfd
-interface 1/1/2
-    no shutdown
-    mtu 9198
-    ip address {{% pt-to-pt-IP %}}
-    ip ospf 1 area 0.0.0.0
-    ip ospf network point-to-point
-    ip ospf bfd
-
-interface 1/1/30
+interface {{ vsx-keepalive }}
     no shutdown
     vrf attach keepalive
     ip address 192.168.255.0/31
-interface 1/1/31
+interface {{ vsx-isl-port1 }}
     no shutdown
     mtu 9198
     description vsx isl
     lag 99
-interface 1/1/32
+interface {{ vsx-isl-port2 }}
     no shutdown
     mtu 9198
     description vsx isl

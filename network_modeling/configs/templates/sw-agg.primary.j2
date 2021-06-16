@@ -34,7 +34,6 @@ vlan 7
     name CAN
 vlan 10
     name SUN
-vlan 4000
 spanning-tree
 spanning-tree priority 10
 spanning-tree max-age 6
@@ -49,30 +48,32 @@ shutdown
 
 {% include 'ncn-s.lag.j2' %}
 
-{% include 'sw-leaf-bmc.lag.j2' %}
+{% include 'agg-to-leaf.lag.j2' %}
 
-{% include 'sw-spine.primary.lag.j2' %}
+{% include 'agg-to-spine.lag.j2' %}
 
-{% include 'sw-spine.secondary.lag.j2' %}
-
-{% include 'sw-agg.secondary.lag.j2' %}
-
-interface 1/1/48
+interface lag 99
+    no shutdown
+    description ISL link
+    no routing
+    vlan trunk native 1 tag
+    vlan trunk allowed all
+    lacp mode active
+interface {{ vsx-keepalive }}
     no shutdown
     vrf attach keepalive
     description vsx vsx keepalive
     ip address 192.168.255.0/31
-
-interface 1/1/55
+interface {{ vsx-isl-port1 }}
     no shutdown
     mtu 9198
     description vsx isl 
-    lag 256
-interface 1/1/56
+    lag 99
+interface {{ vsx-isl-port2 }}
     no shutdown
     mtu 9198
     description vsx isl 
-    lag 256
+    lag 99
 interface loopback 0
     ip address {{% Loopback_IP %}}
     ipv6 address fd01::65/64
@@ -107,7 +108,7 @@ interface vlan 7
     ip igmp enable
 vsx
     system-mac 02:00:00:00:65:00
-    inter-switch-link lag 256
+    inter-switch-link lag 99
     role primary
     keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive
     linkup-delay-timer 600

@@ -1,0 +1,13 @@
+interface lag 99
+no shutdown
+no routing
+vlan trunk native 1
+vlan trunk allowed all
+lacp mode active
+exit
+
+interface {{ leaf_uplink_port }}
+no shutdown
+mtu 9198
+lag 99
+exit
