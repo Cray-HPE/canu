@@ -12,7 +12,7 @@ ntp enable
 ssh server vrf default
 ssh server vrf mgmt
 access-list ip nmn-hmn
-    10 deny any {{NMN}} {{HMN}}
+    10 deny any {{NMN%}} {{HMN}}
     20 deny any {{NMN}} {{MTN_HMN}}
     30 deny any {{HMN}} {{NMN}}
     40 deny any {{HMN}} {{MTN_NMN}}
