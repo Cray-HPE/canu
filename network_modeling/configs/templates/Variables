@@ -1,0 +1,8 @@
+Variables
+
+NMN = sls networks/NMN/ExtraProperties/CIDR
+HMN = sls networks/HMN/ExtraProperties/CIDR
+NMN_MTN = sls networks/NMN_MTN/ExtraProperties/CIDR
+HMN_MTN = sls networks/HMN_MTN/ExtraProperties/CIDR
+NMN_IP_Gateway = sls networks/HMN/ExtraProperties/Subnets/0/NMN_IP_Gateway
+HMN_IP_Gateway = sls networks/HMN/ExtraProperties/Subnets/0/HMN_IP_Gateway
