@@ -207,13 +207,68 @@ def get_node_type(name, mapper):
     return node_type
 
 
-def validate_shcd_port_data(cell, sheet, warnings):
+def validate_shcd_slot_data(cell, sheet, warnings, is_src_slot=False):
+    """Ensure that a slot from the SHCD is a proper string.
+
+    Args:
+        cell: Cell object of a port from the SHCD spreadsheet
+        sheet: SHCD spreadsheet sheet/tab name
+        warnings: Existing list of warnings to post to
+        is_src_slot: Boolean hack to work around SHCD inconsistencies.
+
+    Returns:
+        slot: A cleaned up string value from the cell
+    """
+    valid_slot_names = ["ocp", "pcie-slot1", "bmc", "mgmt", "onboard", "s", "pci", None]
+    location = cell.coordinate
+    slot = cell.value
+    if isinstance(slot, str):
+        slot = slot.strip()
+        if slot and slot[0] == "s":
+            warnings["shcd_slot_data"].append(sheet + ":" + location)
+            log.warning(
+                'Prepending the character "s" to a slot will not be allowed in the future. '
+                f"Please correct cell {sheet}:{location} in the SHCD with value {slot} and prefer pcie-slot1."
+            )
+            slot = "pcie-slot" + slot[1:]
+        if slot and slot == "pci":
+            warnings["shcd_slot_data"].append(sheet + ":" + location)
+            log.warning(
+                "The name pcie alone as a slot will not be allowed in the future"
+                f"Please correct cell {sheet}:{location} in the SHCD with value {slot} and prefer pcie-slot1."
+            )
+            slot = "pcie-slot1"
+        if slot not in valid_slot_names:
+            warnings["shcd_slot_data"].append(sheet + ":" + location)
+            log.error(
+                f"Slots must be named from the following list {valid_slot_names}."
+                f"Please correct cell {sheet}:{location} in the SHCD with value {slot}."
+            )
+        if not slot:
+            slot = None
+    # Awful hack around the convention that src slot can be blank and a bmc
+    # is noted by port 3 when there is physically one port.
+    # NOTE: This is required for the port to get fixed.
+    if is_src_slot:
+        if sheet == "HMN" and slot is None:
+            warnings["shcd_slot_data"].append(sheet + ":" + location)
+            log.warning(
+                'A source slot of type "bmc" for servers or "mgmt" for switches must be specified in the HMN tab. '
+                f"Please correct the SHCD for {sheet}:{location} with an empty value."
+            )
+            slot = "bmc"
+
+    return slot
+
+
+def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False):
     """Ensure that a port from the SHCD is a proper integer.
 
     Args:
         cell: Cell object of a port from the SHCD spreadsheet
         sheet: SHCD spreadsheet sheet/tab name
         warnings: Existing list of warnings to post to
+        is_src_port: (optional) Boolean triggers a hack to work around SHCD inconsistencies
 
     Returns:
         port: A cleaned up integer value from the cell
@@ -223,30 +278,43 @@ def validate_shcd_port_data(cell, sheet, warnings):
     if isinstance(port, str):
         port = port.strip()
         if not port:
-            log.error(
+            log.fatal(
                 "A port number must be specified. "
                 f"Please correct the SHCD for {sheet}:{location} with an empty value"
             )
             exit(1)
         if port[0] == "j":
-            warnings["schd_port_data"].append(sheet + ":" + location)
+            warnings["shcd_port_data"].append(sheet + ":" + location)
             log.warning(
                 'Prepending the character "j" to a port will not be allowed in the future. '
                 f"Please correct cell {sheet}:{location} in the SHCD with value {port}"
             )
             port = port[1:]
         if re.search(r"\D", port) is not None:
-            log.error(
+            log.fatal(
                 "Port numbers must be integers. "
                 f'Please correct in the SHCD for cell {sheet}:{location} with value "{port}"'
             )
             sys.exit(1)
+        if is_src_port:
+            # Awful hack around the convention that src slot can be blank and a bmc
+            # is noted by port 3 when there is physically one port.
+            # NOTE: This assumes that the slot has already been corrected to "bmc"
+            if sheet == "HMN" and int(port) == 3:
+                warnings["shcd_port_conventions"].append(sheet + ":" + location)
+                log.warning(
+                    f'Bad slot/port convention for port "j{port}" in location {sheet}:{location}.'
+                    f'This should be slot "bmc" for servers and "mgmt" for switches, and port "1".'
+                )
+                port = 1
+
     if port is None:
-        log.error(
+        log.fatal(
             "A port number must be specified. "
             f"Please correct the SHCD for {sheet}:{location} with an empty value"
         )
         exit(1)
+
     return int(port)
 
 
@@ -281,7 +349,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
         log.info("")
 
         if sheet not in wb.sheetnames:
-            log.error("")
+            log.fatal("")
             click.secho(f"Tab {sheet} not found in {spreadsheet.name}\n", fg="red")
             click.secho(f"Available tabs: {wb.sheetnames}", fg="red")
             sys.exit(1)
@@ -316,7 +384,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
 
         for row in block:
             if len(row) == 0 or len(row) < expected_columns:
-                log.error("")
+                log.fatal("")
                 click.secho(f"Bad range of cells entered for tab {sheet}.", fg="red")
                 click.secho(f"{range_start}:{range_end}\n", fg="red")
                 click.secho(
@@ -327,7 +395,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
 
             if row[0].value == required_header[0]:
                 log.debug(f"Expecting header with {expected_columns} columns")
-                log.debug(f"Header found with {len(row)} columns")
+                log.debug(f"Found header with {len(row)} columns")
                 error = False
                 for i in range(expected_columns):
                     if row[i].value != required_header[i]:
@@ -341,7 +409,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                         log.debug(f"Header column {required_header[i]} found")
 
                 if error:
-                    log.error("")
+                    log.fatal("")
                     click.secho(
                         f"On tab {sheet}, the header is formatted incorrectly.\n",
                         fg="red",
@@ -357,8 +425,10 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             # Cable source
             try:
                 src_name = row[0].value.strip()
+                current_row = row[0].row
+                log.debug(f"---- Working in sheet {sheet} on row {current_row} ----")
             except AttributeError:
-                log.error("")
+                log.fatal("")
                 click.secho(f"Bad range of cells entered for tab {sheet}.", fg="red")
                 click.secho(f"{range_start}:{range_end}\n", fg="red")
                 click.secho(
@@ -366,8 +436,15 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     fg="red",
                 )
                 sys.exit(1)
-            src_slot = row[3].value
-            src_port = validate_shcd_port_data(row[5], sheet, warnings)
+
+            tmp_slot = row[3]
+            tmp_port = row[5]
+            src_slot = validate_shcd_slot_data(
+                tmp_slot, sheet, warnings, is_src_slot=True
+            )
+            src_port = validate_shcd_port_data(
+                tmp_port, sheet, warnings, is_src_port=True
+            )
             log.debug(f"Source Data:  {src_name} {src_slot} {src_port}")
             node_name = get_node_common_name(src_name, factory.lookup_mapper())
             log.debug(f"Source Name Lookup:  {node_name}")
@@ -403,14 +480,15 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             # src_xname = row[1].value + row[2].value
             # Create the source port for the node
             src_node_port = NetworkPort(number=src_port, slot=src_slot)
+            # src_node_port = None
 
             # Cable destination
             dst_name = row[6].value.strip()
             # dst_xname = row[7].value + row[8].value
-            # Create the destination port for the node
-            dst_slot = None  # There is no spreadsheet data for this
+            # Create the destination slot and port for the node
+            dst_slot = None  # There is no spreadsheet data and dst is always a switch
             dst_port = validate_shcd_port_data(row[10], sheet, warnings)
-            log.debug(f"Destination Data:  {dst_name} {dst_port}")
+            log.debug(f"Destination Data:  {dst_name} {dst_slot} {dst_port}")
             node_name = get_node_common_name(dst_name, factory.lookup_mapper())
             log.debug(f"Destination Name Lookup:  {node_name}")
             node_type = get_node_type(dst_name, factory.lookup_mapper())
@@ -446,41 +524,47 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
 
             # Create the destination port
             dst_node_port = NetworkPort(number=dst_port, slot=dst_slot)
+            # dst_node_port = None
 
             # Connect src_node and dst_node if possible
             if src_index is not None and dst_index is not None:
                 src_node = node_list[src_index]
                 dst_node = node_list[dst_index]
-                connected = src_node.connect(dst_node)
+                # connected = src_node.connect(dst_node)
+                try:
+                    connected = src_node.connect(
+                        dst_node, src_port=src_node_port, dst_port=dst_node_port
+                    )
+                except Exception:
+                    log.fatal(
+                        click.secho(
+                            f"Failed to connect {src_node.common_name()} "
+                            f"to {dst_node.common_name()} bi-directionally "
+                            f"while working on sheet {sheet}, row {current_row}.",
+                            fg="red",
+                        )
+                    )
+                    exit(1)
+
                 if connected:
                     log.info(
                         f"Connected {src_node.common_name()} to {dst_node.common_name()} bi-directionally"
                     )
-
-                    # Assign ports to the connection now that connections are allowed and completed
-                    src_node.assign_port(port=src_node_port, destination_node=dst_node)
-                    log.info(
-                        f"Assigned Port {src_node_port.port()} in slot {src_node_port.slot()} on {src_node.common_name()}"
-                    )
-                    dst_node.assign_port(port=dst_node_port, destination_node=src_node)
-                    log.info(
-                        f"Assigned Port {dst_node_port.port()} in slot {dst_node_port.slot()} on {dst_node.common_name()}"
-                    )
                 else:
                     log.error("")
                     click.secho(
-                        f"Failed to connect {node_list[src_index].common_name()}"
-                        + f" to {node_list[dst_index].common_name()} bi-directionally",
+                        f"Failed to connect {src_node.common_name()}"
+                        f" to {dst_node.common_name()} bi-directionally",
                         fg="red",
                     )
                     for node in node_list:
                         click.secho(
                             f"Node {node.id()} named {node.common_name()} connects "
-                            + f"to {len(node.edges())} ports on nodes: {node.edges()}"
+                            f"to {len(node.edges())} ports on nodes: {node.edges()}"
                         )
                     log.fatal(
-                        f"Failed to connect {node_list[src_index].common_name()} "
-                        + f"to {node_list[dst_index].common_name()} bi-directionally"
+                        f"Failed to connect {src_node.common_name()} "
+                        f"to {dst_node.common_name()} bi-directionally"
                     )
                     sys.exit(1)  # TODO: this should probably be an exception
 
@@ -506,7 +590,9 @@ def node_list_warnings(node_list, warnings):
         click.secho("\nWarnings", fg="red")
         if warnings["node_type"]:
             click.secho(
-                "\nNode type could not be determined for the following",
+                "\nNode type could not be determined for the following."
+                "\nThese nodes are not currently included in the model."
+                "\n(This may be a missing architectural definition/lookup or a spelling error)",
                 fg="red",
             )
             click.secho(dash)
@@ -524,7 +610,8 @@ def node_list_warnings(node_list, warnings):
                 )
         if warnings["zero_connections"]:
             click.secho(
-                "\nThe following nodes have zero connections",
+                "\nThe following nodes have zero connections"
+                "\n(The node type may not have been found or no connections are present)",
                 fg="red",
             )
             click.secho(dash)
@@ -547,14 +634,15 @@ def node_list_warnings(node_list, warnings):
             nodes = natsort.natsorted(nodes)
             for node in nodes:
                 click.secho(f"{node[0]} should be renamed {node[1]}", fg="bright_white")
-        if warnings["schd_port_data"]:
+        if warnings["shcd_port_data"]:
             click.secho(
-                '\nSHCD port definitions using a deprecated "j" prefix',
+                '\nSHCD port definitions are using a deprecated "j" prefix'
+                '\n(Remove the prepended "j" in each cell to correct)',
                 fg="red",
             )
             click.secho(dash)
             port_warnings = {}
-            for x in warnings["schd_port_data"]:
+            for x in warnings["shcd_port_data"]:
                 sheet = x.split(":")[0]
                 cell = x.split(":")[1]
                 if sheet not in port_warnings:
@@ -562,6 +650,42 @@ def node_list_warnings(node_list, warnings):
                 port_warnings[sheet].append(cell)
             for entry in port_warnings:
                 click.secho(f"{entry}:{port_warnings[entry]}", fg="bright_white")
+                click.secho("")
+        if warnings["shcd_port_conventions"]:
+            click.secho(
+                "\nSHCD port convention in the HMN tab is to use port 3 to represent BMCs."
+                '\n(Correct the values in the following cells to use a Slot of "bmc" and a port of "1" for servers)'
+                '\n(Correct the values in the following cells to use a Slot of "mgmt" and a port of "1" for switches)',
+                fg="red",
+            )
+            click.secho(dash)
+            slot_warnings = {}
+            for x in warnings["shcd_port_conventions"]:
+                sheet = x.split(":")[0]
+                cell = x.split(":")[1]
+                if sheet not in slot_warnings:
+                    slot_warnings[sheet] = []
+                slot_warnings[sheet].append(cell)
+            for entry in slot_warnings:
+                click.secho(f"{entry}:{slot_warnings[entry]}", fg="bright_white")
+                click.secho("")
+        if warnings["shcd_slot_data"]:
+            click.secho(
+                "\nSHCD slot definitions used are either deprecated, missing or incorrect."
+                '\n(Correct values in the following cells to be appropriate values of ["bmc", "ocp", "pcie-slot1, "mgmt", None]',
+                fg="red",
+            )
+            click.secho(dash)
+            slot_warnings = {}
+            for x in warnings["shcd_slot_data"]:
+                sheet = x.split(":")[0]
+                cell = x.split(":")[1]
+                if sheet not in slot_warnings:
+                    slot_warnings[sheet] = []
+                slot_warnings[sheet].append(cell)
+            for entry in slot_warnings:
+                click.secho(f"{entry}:{slot_warnings[entry]}", fg="bright_white")
+                click.secho("")
 
 
 def print_node_list(node_list, title):

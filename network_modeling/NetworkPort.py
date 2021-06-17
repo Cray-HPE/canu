@@ -30,14 +30,15 @@ class NetworkPort:
         Reset all port attributes to default (None) values
     """
 
-    def __init__(self, number=None, slot=None, speed=None):
+    def __init__(self, number=None, slot=None, speed=None, dst_node_id=None):
         """
         Construct the port object.
 
         Args:
             number: The physical port number on the device
-            speed: The speed of the port in Gbps
             slot: (optional) Device slot that the port exists on
+            speed: The speed of the port in Gbps
+            dst_node_id: The destination node id (remote edge)
 
         Raises:
             Exception: When constructor port is not an integer
@@ -54,8 +55,8 @@ class NetworkPort:
                 click.secho(f"Port speed {speed} must be an integer", fg="red")
             )
         self.__speed = speed
-
         self.__slot = slot
+        self.__dst_node_id = dst_node_id
 
     def port(self, number=None):
         """Get or set the physical port number."""
@@ -83,8 +84,15 @@ class NetworkPort:
             self.__slot = slot
         return self.__slot
 
+    def dst_node_id(self, id=None):
+        """Set the destination Node (edge) id for this port."""
+        if id is not None:
+            self.__dst_node_id = id
+        return self.__dst_node_id
+
     def reset(self):
         """Reset all port attributes to default (None)."""
         self.__number = None
         self.__speed = None
         self.__slot = None
+        self.__dst_node_id = None
