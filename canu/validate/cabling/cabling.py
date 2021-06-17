@@ -313,7 +313,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                         old_dst_name = ""
                     warnings["rename"].append([dst["neighbor"], old_dst_name])
                     log.warning(
-                        f"Node {dst['neighbor']} should be renamed {old_dst_name}"
+                        f"Node {dst['neighbor']} should be renamed to {old_dst_name}"
                     )
                 # Create dst_node if it does not exist
                 dst_node = None
