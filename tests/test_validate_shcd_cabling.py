@@ -75,10 +75,17 @@ def test_validate_shcd_cabling():
                 tabs,
                 "--corners",
                 corners,
+                "--log",
+                "DEBUG",
             ],
         )
         assert result.exit_code == 0
-        assert "['sw-leaf-bmc-001', 'uan001', 'ncn-s003', 'ncn-w003']" in str(
+        # sw-spine-001:  Found in SHCD, but missing network connections:
+        assert "['ncn-w003', 'ncn-s003', 'uan001', 'uan001', 'sw-leaf-bmc-001']" in str(
+            result.output
+        )
+        # sw-spine-001:  Found in SHCD, but missing network connections:
+        assert "['ncn-w003', 'uan001', 'uan001', 'sw-leaf-bmc-001']" in str(
             result.output
         )
 
@@ -140,12 +147,17 @@ def test_validate_shcd_cabling_full_architecture():
             ],
         )
         assert result.exit_code == 0
+        # sw-leaf-001: Found in SHCD but not on the network
         assert (
-            "['sw-leaf-bmc-099', 'sw-leaf-bmc-001', 'uan001', 'ncn-s003', 'ncn-w003']"
+            "['sw-leaf-bmc-099', 'ncn-w003', 'ncn-s003', 'uan001', 'uan001', 'sw-leaf-bmc-001']"
             in str(result.output)
         )
-        assert "sw-leaf-002 connects to 1 nodes" in str(result.output)
-        assert "sw-leaf-001 connects to 6 nodes" in str(result.output)
+        # sw-leaf-002: Found in SHCD but not on the network
+        assert "['ncn-w003', 'uan001', 'uan001', 'sw-leaf-bmc-001']" in str(
+            result.output
+        )
+        assert "sw-leaf-001 connects to 9 nodes" in str(result.output)
+        assert "sw-leaf-002 connects to 7 nodes" in str(result.output)
 
 
 @responses.activate
@@ -207,7 +219,12 @@ def test_validate_shcd_cabling_file():
             ],
         )
         assert result.exit_code == 0
-        assert "['sw-leaf-bmc-001', 'uan001', 'ncn-s003', 'ncn-w003']" in str(
+        # sw-spine-001: Found in SHCD but not on the network
+        assert "['ncn-w003', 'ncn-s003', 'uan001', 'uan001', 'sw-leaf-bmc-001']" in str(
+            result.output
+        )
+        # sw-spine-002: Found in SHCD but not on the network
+        assert "['ncn-w003', 'uan001', 'uan001', 'sw-leaf-bmc-001']" in str(
             result.output
         )
 
@@ -676,7 +693,12 @@ def test_validate_shcd_cabling_corner_prompt():
             input="I16\nS30",
         )
         assert result.exit_code == 0
-        assert "['sw-leaf-bmc-001', 'uan001', 'ncn-s003', 'ncn-w003']" in str(
+        # sw-spine-001: Found in SHCD but not on the network
+        assert "['ncn-w003', 'ncn-s003', 'uan001', 'uan001', 'sw-leaf-bmc-001']" in str(
+            result.output
+        )
+        # sw-spine-002: Found in SHCD but not on the network
+        assert "['ncn-w003', 'uan001', 'uan001', 'sw-leaf-bmc-001']" in str(
             result.output
         )
 
@@ -1157,12 +1179,21 @@ def test_validate_shcd_missing_connections():
                 corners,
             ],
         )
+        print(result.output)
+        print(result.exception)
+        print(result.exc_info)
+        print(result.stdout)
         assert result.exit_code == 0
         assert (
             "Found in SHCD and on the network, but missing the following connections on the network"
             in str(result.output)
         )
-        assert "['sw-leaf-bmc-001', 'uan001', 'ncn-s003', 'ncn-w003']" in str(
+        # sw-spine-001: Found in SHCD but not on the network
+        assert "['ncn-w003', 'ncn-s003', 'uan001', 'uan001', 'sw-leaf-bmc-001']" in str(
+            result.output
+        )
+        # sw-spine-002: Found in SHCD but not on the network
+        assert "['ncn-w003', 'uan001', 'uan001', 'sw-leaf-bmc-001']" in str(
             result.output
         )
         assert "uan001          : Found in SHCD but not found on the network." in str(
@@ -1463,7 +1494,7 @@ def generate_test_file(file_name):
             "ocp",
             "-",
             "j2",
-            "sw-25g02",
+            "sw-25g01",
             "x3000",
             "u12",
             "-",
@@ -1476,7 +1507,7 @@ def generate_test_file(file_name):
             "s1",
             "-",
             "j1",
-            "sw-25g01",
+            "sw-25g02",
             "x3000",
             "u13",
             "-",
@@ -1718,3 +1749,6 @@ def generate_test_file(file_name):
             ws3.cell(column=col + 9, row=row + 15, value=f"{test_data3[row][col]}")
 
     wb.save(filename=test_file)
+
+
+generate_test_file(test_file)
