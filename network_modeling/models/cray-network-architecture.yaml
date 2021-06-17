@@ -44,7 +44,7 @@ network_v2:
           speed: 100
           number: 2
         - name: "river_ncn_leaf"
-          speed: 25
+          speed: 100
           number: 2
     - name: "river_bmc_leaf"
       model: "6300M_JL762A"
@@ -65,11 +65,6 @@ network_v2:
           speed: 25
         - name: "river_bmc_leaf"
           speed: 1
-    - name: "river_ncn_node"
-      model: "river_ncn_node"
-      connections:
-        - name: "river_ncn_leaf"
-          speed: 25
     - name: "river_compute_node"
       model: "river_compute_node"
       connections:
