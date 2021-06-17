@@ -11,3 +11,4 @@ general_hardware_profile:
 port:
     count: int(min=1)
     speed: any(int(min=1), list(int(min=1), min=1))
+    slot: str(min=1, exclude=' ', required=False)
