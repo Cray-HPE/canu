@@ -64,10 +64,12 @@ def test_validate_cabling():
                 username,
                 "--password",
                 password,
+                "--log",
+                "DEBUG",
             ],
         )
         assert result.exit_code == 0
-        assert "sw-spine-001 connects to 2 nodes:" in str(result.output)
+        assert "sw-spine-001 connects to 3 nodes:" in str(result.output)
 
 
 @responses.activate
@@ -119,7 +121,6 @@ def test_validate_cabling_full_architecture():
                 password,
             ],
         )
-        print(result.output)
         assert result.exit_code == 0
         assert "sw-spine-001 connects to 1 nodes:" in str(result.output)
 
@@ -176,7 +177,7 @@ def test_validate_cabling_file():
             ],
         )
         assert result.exit_code == 0
-        assert "sw-spine-001 connects to 2 nodes:" in str(result.output)
+        assert "sw-spine-001 connects to 3 nodes:" in str(result.output)
 
 
 def test_validate_cabling_missing_ips():
