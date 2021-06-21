@@ -21,8 +21,30 @@ access-list ip nmn-hmn
     80 deny any {{MTN_HMN}} {{MTN_NMN}}
     90 permit any any any
 
-{% include 'MTN_HMN_VLAN.j2' %}
-{% include 'MTN_NMN_VLAN.j2' %}
+vlan 2000
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
+vlan 2001
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
+vlan 2002
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
+vlan 2003
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
+vlan 3000
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
+vlan 3001
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
+vlan 3002
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
+vlan 3003
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
 
 spanning-tree
 spanning-tree priority 5
@@ -68,9 +90,46 @@ interface loopback 0
     ipv6 ospfv3 1 area 0.0.0.0
 interface vlan 1
     shutdown
+    
+vlan2000
+interface vlan 2000
+ip mtu 9198
+ip address 10.100.0.2/22
+active-gateway ip mac 12:00:00:00:73:00
+active-gateway ip 10.100.0.1
+ip helper-address 10.92.100.222
+ip ospf 1 area 0.0.0.0
+ip igmp enable
 
-{% include 'MTN_HMN_VLAN_INTERFACE.j2' %}
-{% include 'MTN_NMN_VLAN_INTERFACE.j2' %}
+vlan2001
+interface vlan 2001
+ip mtu 9198
+ip address 10.100.4.2/22
+active-gateway ip mac 12:00:00:00:73:00
+active-gateway ip 10.100.4.1
+ip helper-address 10.92.100.222
+ip ospf 1 area 0.0.0.0
+ip igmp enable
+
+vlan2002
+interface vlan 2002
+ip mtu 9198
+ip address 10.100.8.2/22
+active-gateway ip mac 12:00:00:00:73:00
+active-gateway ip 10.100.8.1
+ip helper-address 10.92.100.222
+ip ospf 1 area 0.0.0.0
+ip igmp enable
+
+vlan2003
+interface vlan 2003
+ip mtu 9198
+ip address 10.100.12.2/22
+active-gateway ip mac 12:00:00:00:73:00
+active-gateway ip 10.100.12.1
+ip helper-address 10.92.100.222
+ip ospf 1 area 0.0.0.0
+ip igmp enable
 
 vsx
     system-mac 02:00:00:00:73:00
