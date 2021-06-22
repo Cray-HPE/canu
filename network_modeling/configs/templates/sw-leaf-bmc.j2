@@ -1,4 +1,4 @@
-hostname {{ hostname }}
+hostname {{ HOSTNAME }}
 user admin group administrators password plaintext {{ password }}
 no ip icmp redirect
 ntp server {{ ncn-w001 }}
@@ -70,7 +70,7 @@ interface vlan 4
     ip ospf 1 area 0.0.0.0
     ip igmp enable
 snmp-server vrf default
-snmpv3 user {{% snmp_user %}} auth md5 auth-pass plaintext {{% snmp_auth %}} priv des priv-pass ciphertext {{ snmp_cipher }}
+snmpv3 user testuser auth md5 auth-pass plaintext testpass1 priv des priv-pass ciphertext testpass2
 
 router ospf 1
     router-id {{ Loopback_IP }}

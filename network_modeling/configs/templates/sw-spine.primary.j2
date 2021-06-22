@@ -44,8 +44,11 @@ spanning-tree config-revision 1
 interface mgmt
 shutdown
 
-{% include 'spine-to-agg.lag.j2' %}
+{% include 'spine-to-leaf.lag.j2' %}
+
 {% include 'spine-to-cdu.j2' %}
+
+{% include 'uan.j2' %}
 
 interface lag 99
     no shutdown
@@ -102,7 +105,7 @@ interface vlan 4
     ip igmp enable
 interface vlan 7
     ip mtu 9198
-    ip address {{ CAN_IP }}
+    ip address {{ CAN_IP_PRIMARY }}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ CAN_IP_Gateway }}
     ipv6 address autoconfig

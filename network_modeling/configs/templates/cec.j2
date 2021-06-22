@@ -1,12 +1,12 @@
 {#
 cec
 #}
-{% for node in cabling.nodes %}
-{% if node.subtype == "cec" %}
-interface {{ node.config.interface_lag}}
+{% for node in CABLING.NODES %}
+{% if NODE.SUBTYPE == "cec" %}
+interface {{ NODE.CONFIG.INTERFACE_LAG }}
 no shutdown
 mtu 9198
-description {{ node.config.description }}    
+description {{ NODE.CONFIG.DESCRIPTION }}    
 no routing
 vlan access 3000
 spanning-tree bpdu-guard

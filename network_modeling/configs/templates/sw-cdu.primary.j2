@@ -1,5 +1,5 @@
-hostname {{ hostname }}
-user admin group administrators password plaintext {{ password }}
+hostname {{ HOSTNAME }}
+user admin group administrators password plaintext {{ PASSWORD }}
 bfd
 no ip icmp redirect
 vrf keepalive
@@ -56,7 +56,7 @@ shutdown
 
 {{% include 'cmm.j2' %}}
 {{% include 'cec.j2' %}}
-{% include 'cdu-to-spine.j2' %}
+{{% include 'cdu-to-spine.j2' %}}
 
 interface lag 99
     no shutdown

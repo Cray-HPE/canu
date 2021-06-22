@@ -12,14 +12,14 @@ ntp enable
 ssh server vrf default
 ssh server vrf mgmt
 access-list ip nmn-hmn
-    10 deny any {{ NMN }} {{ HMN }}
-    20 deny any {{ NMN }} {{ MTN_HMN }}
-    30 deny any {{ HMN }} {{ NMN }}
-    40 deny any {{ HMN }} {{ MTN_NMN }}
-    50 deny any {{ MTN_NMN }} {{ HMN }}
-    60 deny any {{ MTN_NMN }} {{ MTN_HMN }}
-    70 deny any {{ MTN_HMN }} {{ NMN }}
-    80 deny any {{ MTN_HMN }} {{ MTN_NMN}}
+    10 deny any {{NMN}} {{HMN}}
+    20 deny any {{NMN}} {{MTN_HMN}}
+    30 deny any {{HMN}} {{NMN}}
+    40 deny any {{HMN}} {{MTN_NMN}}
+    50 deny any {{MTN_NMN}} {{HMN}}
+    60 deny any {{MTN_NMN}} {{MTN_HMN}}
+    70 deny any {{MTN_HMN}} {{NMN}}
+    80 deny any {{MTN_HMN}} {{MTN_NMN}}
     90 permit any any any
 vlan 1
 vlan 2
@@ -42,15 +42,19 @@ spanning-tree config-revision 1
 interface mgmt
 shutdown
 
-{% include "ncn-m.lag.j2 %}
+{% include "ncn-m.lag.j2 %}}
 
 {% include "ncn-w.lag.j2 %}
 
 {% include 'ncn-s.lag.j2' %}
 
-{% include 'agg-to-leaf.lag.j2' %}
+{% include 'uan.j2' %}
 
-{% include 'agg-to-spine.lag.j2' %}
+{% include 'leaf-to-leaf-bmc.lag.j2' %}
+
+{% include 'leaf-to-spine.lag.j2' %}
+
+
 
 interface lag 99
     no shutdown
@@ -62,20 +66,20 @@ interface lag 99
 interface {{ vsx-keepalive }}
     no shutdown
     vrf attach keepalive
-    description vsx keepalive
-    ip address 192.168.255.1/31
+    description vsx vsx keepalive
+    ip address 192.168.255.0/31
 interface {{ vsx-isl-port1 }}
     no shutdown
     mtu 9198
-    description vsx isl
+    description vsx isl 
     lag 99
-iinterface {{ vsx-isl-port2 }}
+interface {{ vsx-isl-port2 }}
     no shutdown
     mtu 9198
-    description vsx isl
+    description vsx isl 
     lag 99
 interface loopback 0
-    ip address {{ loopback_ip }}
+    ip address {{ Loopback_IP }}
     ipv6 address fd01::65/64
     ip ospf 1 area 0.0.0.0
     ipv6 ospfv3 1 area 0.0.0.0
@@ -100,11 +104,15 @@ interface vlan 4
     ip helper-address 10.94.100.222
     ip ospf 1 area 0.0.0.0
     ip igmp enable
+interface vlan 7
+    description CAN
+    ip mtu 9198
+    ip igmp enable
 vsx
     system-mac 02:00:00:00:65:00
     inter-switch-link lag 99
-    role secondary
-    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive
+    role primary
+    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive
     linkup-delay-timer 600
     vsx-sync vsx-global
 !
@@ -113,10 +121,10 @@ vsx
 !
 !
 router ospf 1
-    router-id {{ loopback_IP }}
+    router-id {{ Loopback_IP }}
     area 0.0.0.0
 router ospfv3 1
-    router-id {{ loopback_IP }}
+    router-id {{ Loopback_IP }}
     area 0.0.0.0
 https-server vrf default
 https-server vrf mgmt
