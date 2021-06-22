@@ -2,7 +2,7 @@
 uan
 #}
 {% for node in CABLING.NODES %}
-{% if NODE.SUBTYPE == "UAN" %}
+{% if NODE.SUBTYPE == "uan" %}
 INTERFACE LAG {{ NODE.CONFIG.LAG_NUMBER }} multi-chassis
 no shutdown
 description {{ NODE.CONFIG.DESCRIPTION }}
