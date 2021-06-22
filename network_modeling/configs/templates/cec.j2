@@ -3,7 +3,7 @@ cec
 #}
 {% for node in CABLING.NODES %}
 {% if NODE.SUBTYPE == "cec" %}
-interface {{ NODE.CONFIG.INTERFACE_LAG }}
+interface {{ NODE.CONFIG.INTERFACE_NUMBER }}
 no shutdown
 mtu 9198
 description {{ NODE.CONFIG.DESCRIPTION }}    

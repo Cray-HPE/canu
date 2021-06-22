@@ -1,12 +1,12 @@
-hostname {{ hostname }}
-user admin group administrators password plaintext {{ password }}
+hostname {{ HOSTNAME }}
+user admin group administrators password plaintext {{ PASSWORD }}
 bfd
 no ip icmp redirect
 vrf CAN
 vrf keepalive
-ntp server {{ ncn-w001 }}
-ntp server {{ ncn-w002 }}
-ntp server {{ ncn-w003 }}
+ntp server {{ NCN-W001 }}
+ntp server {{ NCN-W002 }}
+ntp server {{ NCN-W003 }}
 ntp enable
 !
 !
@@ -14,15 +14,16 @@ ntp enable
 ssh server vrf default
 ssh server vrf mgmt
 access-list ip nmn-hmn
-    10 deny any {{NMN}} {{HMN}}
-    20 deny any {{NMN}} {{MTN_HMN}}
-    30 deny any {{HMN}} {{NMN}}
-    40 deny any {{HMN}} {{MTN_NMN}}
-    50 deny any {{MTN_NMN}} {{HMN}}
-    60 deny any {{MTN_NMN}} {{MTN_HMN}}
-    70 deny any {{MTN_HMN}} {{NMN}}
-    80 deny any {{MTN_HMN}} {{MTN_NMN}}
+    10 deny any {{ NMN }} {{ HMN }}
+    20 deny any {{ NMN }} {{ MTN_HMN }}
+    30 deny any {{ HMN}} {{ NMN }}
+    40 deny any {{ HMN }} {{ MTN_NMN }}
+    50 deny any {{ MTN_NMN }} {{ HMN }}
+    60 deny any {{ MTN_NMN }} {{ MTN_HMN }}
+    70 deny any {{ MTN_HMN }} {{ NMN }}
+    80 deny any {{ MTN_HMN }} {{ MTN_NMN }}
     90 permit any any any
+    
 vlan 1
 vlan 2
     name NMN
@@ -45,9 +46,7 @@ interface mgmt
 shutdown
 
 {% include 'spine-to-leaf.lag.j2' %}
-
 {% include 'spine-to-cdu.j2' %}
-
 {% include 'uan.j2' %}
 
 interface lag 99
