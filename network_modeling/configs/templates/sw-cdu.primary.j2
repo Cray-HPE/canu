@@ -3,22 +3,22 @@ user admin group administrators password plaintext {{ PASSWORD }}
 bfd
 no ip icmp redirect
 vrf keepalive
-ntp server {{ ncn-w001 }}
-ntp server {{ ncn-w002 }}
-ntp server {{ ncn-w003 }}
+ntp server {{ NCN-W001 }}
+ntp server {{ NCN-W002 }}
+ntp server {{ NCN-W003 }}
 ntp enable
 
 ssh server vrf default
 ssh server vrf mgmt
 access-list ip nmn-hmn
-    10 deny any {{NMN}} {{HMN}}
-    20 deny any {{NMN}} {{MTN_HMN}}
-    30 deny any {{HMN}} {{NMN}}
-    40 deny any {{HMN}} {{MTN_NMN}}
-    50 deny any {{MTN_NMN}} {{HMN}}
-    60 deny any {{MTN_NMN}} {{MTN_HMN}}
-    70 deny any {{MTN_HMN}} {{NMN}}
-    80 deny any {{MTN_HMN}} {{MTN_NMN}}
+    10 deny any {{ NMN }} {{ HMN }}
+    20 deny any {{ NMN }} {{ MTN_HMN }}
+    30 deny any {{ HMN}} {{ NMN }}
+    40 deny any {{ HMN }} {{ MTN_NMN }}
+    50 deny any {{ MTN_NMN }} {{ HMN }}
+    60 deny any {{ MTN_NMN }} {{ MTN_HMN }}
+    70 deny any {{ MTN_HMN }} {{ NMN }}
+    80 deny any {{ MTN_HMN }} {{ MTN_NMN }}
     90 permit any any any
 
 vlan 2000
@@ -66,25 +66,25 @@ interface lag 99
     vlan trunk allowed all
     lacp mode active
 
-interface {{ vsx-keepalive }}
+interface {{ VSX-KEEPALIVE }}
     no shutdown
     mtu 9198
     vrf attach keepalive
     description vsx keepalive
     ip address 192.168.255.0/31
 
-interface {{ vsx-isl-port1 }}
+interface {{ VSX-ISL-PORT1 }}
     no shutdown
     mtu 9198
     description vsx isl
     lag 99
-interface {{ vsx-isl-port2 }}
+interface {{ VSX-ISL-PORT2 }}
     no shutdown
     mtu 9198
     description vsx isl
     lag 99
 interface loopback 0
-    ip address {{% Loopback_IP %}}
+    ip address {{% LOOPBACK_IP %}}
     ipv6 address {{% IPV6_IP %}}
     ip ospf 1 area 0.0.0.0
     ipv6 ospfv3 1 area 0.0.0.0
@@ -138,11 +138,7 @@ vsx
     keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive
     linkup-delay-timer 600
     vsx-sync vsx-global
-!
-!
-!
-!
-!
+
 router ospf 1
     router-id {{ Loopback_IP }}
     area 0.0.0.0

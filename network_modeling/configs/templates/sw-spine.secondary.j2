@@ -1,12 +1,12 @@
-hostname {{ hostname }}
-user admin group administrators password plaintext {{ password }}
+hostname {{ HOSTNAME }}
+user admin group administrators password plaintext {{ PASSWORD }}
 bfd
 no ip icmp redirect
 vrf CAN
 vrf keepalive
-ntp server {{ ncn-w001 }}
-ntp server {{ ncn-w002 }}
-ntp server {{ ncn-w003 }}
+ntp server {{ NCN-W001 }}
+ntp server {{ NCN-W002 }}
+ntp server {{ NCN-W003 }}
 ntp enable
 !
 !
@@ -14,15 +14,16 @@ ntp enable
 ssh server vrf default
 ssh server vrf mgmt
 access-list ip nmn-hmn
-    10 deny any {{NMN}} {{HMN}}
-    20 deny any {{NMN}} {{MTN_HMN}}
-    30 deny any {{HMN}} {{NMN}}
-    40 deny any {{HMN}} {{MTN_NMN}}
-    50 deny any {{MTN_NMN}} {{HMN}}
-    60 deny any {{MTN_NMN}} {{MTN_HMN}}
-    70 deny any {{MTN_HMN}} {{NMN}}
-    80 deny any {{MTN_HMN}} {{MTN_NMN}}
+    10 deny any {{ NMN }} {{ HMN }}
+    20 deny any {{ NMN }} {{ MTN_HMN }}
+    30 deny any {{ HMN}} {{ NMN }}
+    40 deny any {{ HMN }} {{ MTN_NMN }}
+    50 deny any {{ MTN_NMN }} {{ HMN }}
+    60 deny any {{ MTN_NMN }} {{ MTN_HMN }}
+    70 deny any {{ MTN_HMN }} {{ NMN }}
+    80 deny any {{ MTN_HMN }} {{ MTN_NMN }}
     90 permit any any any
+
 vlan 1
 vlan 2
     name NMN
@@ -44,8 +45,9 @@ spanning-tree config-revision 1
 interface mgmt
 shutdown
 
-{% include 'spine-to-leaf.lag.j2' %}
-{% include 'spine-to-cdu.j2' %}
+{{% include 'spine-to-leaf.lag.j2' %}}
+{{% include 'spine-to-cdu.j2' %}}
+{{% include 'uan.j2' %}}
 
 interface lag 99
     no shutdown
@@ -54,22 +56,22 @@ interface lag 99
     vlan trunk native 1 tag
     vlan trunk allowed all
     lacp mode active
-interface {{ vsx-keepalive }}
+interface {{ VSX-KEEPALIVE }}
     no shutdown
     vrf attach keepalive
     ip address 192.168.255.1/31
-interface {{ vsx-isl-port1 }}
+interface {{ VSX-ISL-PORT1 }}
     no shutdown
     mtu 9198
     description vsx isl
     lag 99
-interface {{ vsx-isl-port2 }}
+interface {{ VSX-ISL-PORT2 }}
     no shutdown
     mtu 9198
     description vsx isl
     lag 99
 interface loopback 0
-    ip address {{ Loopback_IP }}
+    ip address {{ LOOPBACK_IP }}
     ipv6 address {{ IPV6_IP }}
     ip ospf 1 area 0.0.0.0
     ipv6 ospfv3 1 area 0.0.0.0
@@ -77,7 +79,7 @@ interface vlan 1
     ip mtu 9198
     ip address {{ MTL_IP }}
     active-gateway ip mac 12:00:00:00:6b:00
-    active-gateway ip {{ MTL_IP_Gateway }}
+    active-gateway ip {{ MTL_IP_GATEWAY }}
     ipv6 address autoconfig
     ip helper-address 10.92.100.222
     ipv6 ospfv3 1 area 0.0.0.0
@@ -86,7 +88,7 @@ interface vlan 2
     ip mtu 9198
     ip address {{ NMN_IP }}
     active-gateway ip mac 12:00:00:00:6b:00
-    active-gateway ip {{ NMN_IP_Gateway }}
+    active-gateway ip {{ NMN_IP_GATEWAY }}
     ipv6 address autoconfig
     ip helper-address 10.92.100.222
     ipv6 ospfv3 1 area 0.0.0.0
@@ -95,7 +97,7 @@ interface vlan 4
     ip mtu 9198
     ip address {{ HMN_IP }}
     active-gateway ip mac 12:00:00:00:6b:00
-    active-gateway ip {{ HMN_IP_Gateway }}
+    active-gateway ip {{ HMN_IP_GATEWAY }}
     ipv6 address autoconfig
     ip helper-address 10.92.100.222
     ipv6 ospfv3 1 area 0.0.0.0
@@ -104,7 +106,7 @@ interface vlan 7
     ip mtu 9198
     ip address {{ CAN_IP_SECONDARY }}
     active-gateway ip mac 12:00:00:00:6b:00
-    active-gateway ip {{ CAN_IP_Gateway }}
+    active-gateway ip {{ CAN_IP_GATEWAY }}
     ipv6 address autoconfig
     ip helper-address 10.92.100.222
     ipv6 ospfv3 1 area 0.0.0.0
