@@ -6,7 +6,13 @@ vlan trunk allowed all
 lacp mode active
 exit
 
-interface {{ leaf_uplink_port }}
+interface {{ LEAF_BMC_UPLINK_PORT_PRIMARY }}
+no shutdown
+mtu 9198
+lag 99
+exit
+
+interface {{ LEAF_BMC_UPLINK_PORT_SECONDARY }}
 no shutdown
 mtu 9198
 lag 99
