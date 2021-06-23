@@ -434,7 +434,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                         connected = src_node.connect(
                             dst_node, src_port=src_node_port, dst_port=dst_node_port
                         )
-                    except Exception as e:
+                    except Exception:
                         log.fatal(
                             click.secho(
                                 f"Failed to connect {src_node.common_name()} "
