@@ -403,10 +403,19 @@ def test_validate_shcd_port_reuse():
                 multiple_connections_tab,
                 "--corners",
                 multiple_connections_corners,
+                "--log",
+                "DEBUG",
             ],
         )
+        print(result.output)
         assert result.exit_code == 1
-        assert "Port 51 in slot None already in use for sw-spine-002" in str(
+        # assert "Node 1: port 51 in slot None already connected to Node 0: port 52 in slot None" in str(
+        #     result.output
+        # )
+        # assert "Node 0: port 52 in slot None already connected to Node 1: port 51 in slot None" in str(
+        #     result.output
+        # )
+        assert "Failed to connect sw-spine-001 to sw-spine-002 bi-directionally" in str(
             result.output
         )
 

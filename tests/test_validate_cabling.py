@@ -524,16 +524,16 @@ lldp_neighbors_json1 = {
         },
     },
     "1%2F1%2F4": {
-        "aa:aa:aa:aa:aa:aa,aa:aa:aa:aa:aa:aa": {
+        "aa:aa:aa:aa:aa:aa,1/1/4": {
             "chassis_id": "aa:aa:aa:aa:aa:aa",
             "mac_addr": "aa:aa:aa:aa:aa:aa",
             "neighbor_info": {
-                "chassis_description": "NCN description",
+                "chassis_description": "sw-leaf-bmc99",
                 "chassis_name": "sw-leaf-bmc99",
-                "port_description": "mgmt1",
-                "port_id_subtype": "link_local_addr",
+                "port_description": "1/1/4",
+                "port_id_subtype": "if_name",
             },
-            "port_id": "aa:aa:aa:aa:aa:aa",
+            "port_id": "1/1/4",
         }
     },
     "1%2F1%2F5": {
