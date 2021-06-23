@@ -1269,7 +1269,7 @@ lldp_neighbors_json1 = {
             "mac_addr": "aa:aa:aa:aa:aa:aa",
             "neighbor_info": {
                 "chassis_description": "NCN description",
-                "chassis_name": "sw-leaf-bmc99",
+                "chassis_name": "ncn-m88",
                 "port_description": "mgmt1",
                 "port_id_subtype": "link_local_addr",
             },
@@ -1281,8 +1281,8 @@ lldp_neighbors_json1 = {
             "chassis_id": "99:99:99:99:99:99",
             "mac_addr": "99:99:99:99:99:99",
             "neighbor_info": {
-                "chassis_description": "ncn-m88",
-                "chassis_name": "ncn-m88",
+                "chassis_description": "sw-leaf-bmc-99",
+                "chassis_name": "sw-leaf-bmc99",
                 "port_description": "1/1/5",
                 "port_id_subtype": "if_name",
             },
