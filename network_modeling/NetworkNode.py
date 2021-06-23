@@ -105,11 +105,6 @@ class NetworkNode:
     # port speed available and the number of ports.  We explicitly prefer matching
     # slot types/names, but accept None.
     def __select_port_block(self, speed=None, slot=None):
-        if not isinstance(speed, int):
-            raise Exception(
-                click.secho(f"{__name__}: Port speed must be an integer", fg="red")
-            )
-
         # Only ports with required speed and remaining ports
         # print("ZZZZZZ", port_block)
         port_block = [
@@ -117,13 +112,13 @@ class NetworkNode:
             for x in self.__ports_block_metadata
             if speed in x["speed"] and x["count"] > 0
         ]
-        # print("ZZZZZZ", port_block)
+        # print("ZZZZZZ speed and count", port_block)
         # Prefer more total ports in a block
         port_block.sort(key=lambda k: (-k["total"]))
-        # print("ZZZZZZ", port_block)
+        # print("ZZZZZZ sort totals", port_block)
         # Prefer an exact match for slot
         tmp_block = [x for x in port_block if x["slot"] == slot]
-        # print("ZZZZZZ", tmp_block)
+        # print("ZZZZZZ slot match tmp", tmp_block)
         # If no exact slot match exists pick the first available.
         # TODO: Replace this with cabling standards.
         if tmp_block:
@@ -132,16 +127,15 @@ class NetworkNode:
                     "Multiple possible port blocks were found.  Using the first one."
                 )
             port_block = tmp_block[0]
-            # print("ZZZZZZ exact")
-        else:
+            # print("ZZZZZZ exact match tmp")
+        elif port_block:
             if len(port_block) > 1:
                 log.warning(
                     "Multiple possible port blocks were found.  Using the first one."
                 )
             port_block = port_block[0]
-            # print("ZZZZZZ first")
-
-        if not port_block:
+            # print("ZZZZZZ match block")
+        else:
             raise Exception(
                 click.secho(
                     f"{__name__}: No available ports found for slot {slot} and speed {speed} "
@@ -155,20 +149,6 @@ class NetworkNode:
         )
         # print("ZZZZZZ final", port_block)
         return port_block
-
-    def available_ports(self, speed=None, slot=None):
-        """Return number of available ports."""
-        available = self.__select_port_block(speed=speed, slot=slot)
-
-        if available is None:
-            raise Exception(
-                click.secho(
-                    f"{__name__}: Available port at speed {speed} not found for {self.common_name()} "
-                    f'of type {self.__arch["name"]} and model {self.__arch["model"]}',
-                    fg="red",
-                )
-            )
-        return available["count"]
 
     def __decrement_available_ports(self, speed=None, slot=None, count=1):
         port = self.__select_port_block(speed=speed, slot=slot)
@@ -297,9 +277,25 @@ class NetworkNode:
         # Returns list
         return self.__arch["connections"]
 
+    def available_ports(self, speed=None, slot=None):
+        """Return number of available ports."""
+        available = self.__select_port_block(speed=speed, slot=slot)
+
+        if available is None:
+            raise Exception(
+                click.secho(
+                    f"{__name__}: Available port at speed {speed} not found for {self.common_name()} "
+                    f'of type {self.__arch["name"]} and model {self.__arch["model"]}',
+                    fg="red",
+                )
+            )
+        return available["count"]
+
     # Connect one device to another.
     # From a mathematical node-edge perspective, not physical ports
-    def connect(self, dst_node, src_port=None, dst_port=None, bidirectional=True):
+    def connect(
+        self, dst_node, src_port=None, dst_port=None, strict=False, bidirectional=True
+    ):
         """Connect one device to another."""
         # Defensively check input node type.
         if not isinstance(dst_node, NetworkNode):
@@ -339,7 +335,7 @@ class NetworkNode:
         selected_ports = self.__select_port_block(
             speed=connection_speed, slot=src_port.slot()
         )
-        if selected_ports is None or selected_ports["count"] < 1:
+        if selected_ports is None:
             log.error(f"No ports available at speed {connection_speed}")
             return False
         log.debug(
@@ -377,19 +373,33 @@ class NetworkNode:
             if index > len(self.__ports) - 1:
                 raise Exception(
                     click.secho(
-                        f"{__name__} Index {index} out of range {len(self.__ports)-1}",
+                        f"{__name__} Index {index} out of range {len(self.__ports)-1} "
+                        f"for {self.__id}:{self.__common_name} with requested port {src_port.port()}. "
+                        "This is usually a mismatch between port input data and available ports.",
                         fg="red",
                     )
                 )
 
             if self.__ports[index] is not None:
-                raise Exception(
-                    click.secho(
-                        f"{__name__} Port {src_port.port()} in slot {src_port.slot()} "
-                        f"already in use for {self.common_name()}.",
-                        fg="red",
+                existing_port = self.__ports[index]
+                if existing_port.dst_node_id() == dst_node.id():
+                    log.warning(
+                        f"Node {self.__id}: port {src_port.port()} in slot {src_port.slot()} "
+                        f"already connected to Node {dst_node.id()}: port {dst_port.port()} "
+                        f"in slot {dst_port.slot()}"
                     )
-                )
+                    if strict:
+                        return False
+                    return True
+                else:
+                    raise Exception(
+                        click.secho(
+                            f"{__name__} Port {src_port.port()} in slot {src_port.slot()} "
+                            f"already in use for {self.common_name()} connected to a different "
+                            f"node {existing_port.dst_node_id()}.  Cannot repurpose ports.",
+                            fg="red",
+                        )
+                    )
 
             src_port.dst_node_id(dst_node.id())
             self.__ports[index] = src_port
@@ -404,8 +414,7 @@ class NetworkNode:
                 next_free_port_index = index
                 break
 
-            # print("YYYYYYY", next_free_port_index)
-            src_port.port(number=next_free_port_index + 1)  # NOTE: index based on 1
+            src_port.port(number=next_free_port_index + 1)
             self.__ports[next_free_port_index] = src_port
             self.__decrement_available_ports(speed=connection_speed)
             log.debug(

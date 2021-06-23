@@ -182,8 +182,18 @@ def get_node_common_name(name, mapper):
                     tmp_name = node[1] + "-"
                 else:
                     tmp_name = node[1]
-                tmp_id = re.sub("^({})0*([1-9]*)".format(lookup_name), r"\2", name)
-                common_name = "{}{:0>3}".format(tmp_name, tmp_id)
+                if tmp_name == "sw-cdu-" and not name.startswith("sw-cdu"):
+                    # cdu0sw1 --> sw-cdu-001
+                    # cdu0sw2 --> sw-cdu-002
+                    # cdu1sw1 --> sw-cdu-003
+                    # cdu1sw2 --> sw-cdu-004
+                    # cdu2sw1 --> sw-cdu-005
+                    # cdu2sw2 --> sw-cdu-006
+                    digits = re.findall(r"\d+", name)
+                    tmp_id = int(digits[0]) * 2 + int(digits[1])
+                else:
+                    tmp_id = re.sub("^({})0*([1-9]*)".format(lookup_name), r"\2", name)
+                common_name = f"{tmp_name}{tmp_id:0>3}"
                 return common_name
     return common_name
 
@@ -530,10 +540,12 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             if src_index is not None and dst_index is not None:
                 src_node = node_list[src_index]
                 dst_node = node_list[dst_index]
-                # connected = src_node.connect(dst_node)
                 try:
                     connected = src_node.connect(
-                        dst_node, src_port=src_node_port, dst_port=dst_node_port
+                        dst_node,
+                        src_port=src_node_port,
+                        dst_port=dst_node_port,
+                        strict=True,
                     )
                 except Exception:
                     log.fatal(
@@ -551,11 +563,12 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                         f"Connected {src_node.common_name()} to {dst_node.common_name()} bi-directionally"
                     )
                 else:
-                    log.error("")
-                    click.secho(
-                        f"Failed to connect {src_node.common_name()}"
-                        f" to {dst_node.common_name()} bi-directionally",
-                        fg="red",
+                    log.error(
+                        click.secho(
+                            f"Failed to connect {src_node.common_name()}"
+                            f" to {dst_node.common_name()} bi-directionally",
+                            fg="red",
+                        )
                     )
                     for node in node_list:
                         click.secho(
