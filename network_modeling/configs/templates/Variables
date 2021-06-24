@@ -4,8 +4,8 @@ NMN = sls networks/NMN/ExtraProperties/CIDR
 HMN = sls networks/HMN/ExtraProperties/CIDR
 CAN = sls networks/CAN/ExtraProperties/CIDR
 MTL = sls networks/MTL/ExtraProperties/CIDR
-NMN_MTN = sls networks/NMN_MTN/ExtraProperties/CIDR
-HMN_MTN = sls networks/HMN_MTN/ExtraProperties/CIDR
+MTN_NMN = sls networks/NMN_MTN/ExtraProperties/CIDR
+MTN_HMN = sls networks/HMN_MTN/ExtraProperties/CIDR
 
 CAN_IP_Gateway = sls networks/CAN/ExtraProperties/Subnets/Gateway
 MTL_IP_Gateway = sls networks/MTL/ExtraProperties/Subnets/Gateway
