@@ -9,6 +9,9 @@ network_hardware:
         speed: [1, 10, 25]
       - count: 8
         speed: [100, 40]
+      - count: 1
+        speed: 1
+        slot: "mgmt"
   - name: "Aruba 8325-32C JL627A"
     vendor: "aruba"
     type: "switch"
@@ -16,6 +19,9 @@ network_hardware:
     ports:
       - count: 32
         speed: [100, 40]
+      - count: 1
+        speed: 1
+        slot: "mgmt"
   - name: "Aruba 8360 JL706A"
     vendor: "aruba"
     type: "switch"
@@ -25,6 +31,9 @@ network_hardware:
         speed: [10, 1]
       - count: 4
         speed: [100, 40]
+      - count: 1
+        speed: 1
+        slot: "mgmt"
   - name: "Aruba 8360 JL707A"
     vendor: "aruba"
     type: "switch"
@@ -34,6 +43,9 @@ network_hardware:
         speed: [10, 1]
       - count: 4
         speed: [100, 40]
+      - count: 1
+        speed: 1
+        slot: "mgmt"
   - name: "Aruba 6300M JL762A"
     vendor: "aruba"
     type: "switch"
@@ -43,6 +55,9 @@ network_hardware:
         speed: 1
       - count: 4
         speed: [50, 25, 10, 1]
+      - count: 1
+        speed: 1
+        slot: "mgmt"
   - name: "Aruba 8320 JL581A"
     vendor: "aruba"
     type: "switch"
@@ -52,31 +67,34 @@ network_hardware:
         speed: [10, 1]
       - count: 6
         speed: 40
-  - name: "River NCN Node - HPE"
-    vendor: "hpe"
-    type: "server"
-    model: "river_ncn_node"
-    ports:
-      - count: 2
-        speed: 25
-  - name: "River NCN Node - generic 2 port stub"
+      - count: 1
+        speed: 1
+        slot: "mgmt"
+  - name: "River NCN Node - Generic 2 port HPE Server"
     vendor: "hpe"
     type: "server"
     model: "river_ncn_node_2_port"
     ports:
       - count: 2
         speed: 25
+        slot: ocp
       - count: 1
         speed: 1
-  - name: "River NCN Node - generic 4 port stub"
+        slot: "bmc"
+  - name: "River NCN Node - Generic 4 port HPE Server"
     vendor: "hpe"
     type: "server"
     model: "river_ncn_node_4_port"
     ports:
-      - count: 4
+      - count: 2
         speed: 25
+        slot: "ocp"
+      - count: 2
+        speed: 25
+        slot: "pcie-slot1"
       - count: 1
         speed: 1
+        slot: "bmc"
   - name: "River Compute Node - generic stub"
     vendor: "none"
     type: "node"
@@ -138,21 +156,29 @@ network_hardware:
   #       speed: 1
   #     - count: 4
   #       speed: 40
-  - name: "River NCN Node - generic 2 port stub Gigabyte"
+  - name: "River NCN Node - Generic 2 port stub Gigabyte"
     vendor: "gigabyte"
     type: "server"
     model: "river_ncn_node_2_port_gigabyte"
     ports:
       - count: 2
         speed: 40
-      - count: 2
+      - count: 1
         speed: 1
-  - name: "River NCN Node - generic 4 port stub Gigabyte"
+        slot: "onboard"
+      - count: 1
+        speed: 1
+        slot: "bmc"
+  - name: "River NCN Node - Generic 4 port stub Gigabyte"
     vendor: "gigabyte"
     type: "server"
     model: "river_ncn_node_4_port_gigabyte"
     ports:
       - count: 4
         speed: 40
-      - count: 2
+      - count: 1
         speed: 1
+        slot: "onboard"
+      - count: 1
+        speed: 1
+        slot: bmc
