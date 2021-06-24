@@ -1,12 +1,13 @@
+{# sw-spine.secondary #}
 hostname {{ HOSTNAME }}
 user admin group administrators password plaintext {{ PASSWORD }}
 bfd
 no ip icmp redirect
 vrf CAN
 vrf keepalive
-ntp server {{ NCN-W001 }}
-ntp server {{ NCN-W002 }}
-ntp server {{ NCN-W003 }}
+ntp server {{ NCN_W001 }}
+ntp server {{ NCN_W002 }}
+ntp server {{ NCN_W003 }}
 ntp enable
 !
 !
@@ -15,13 +16,13 @@ ssh server vrf default
 ssh server vrf mgmt
 access-list ip nmn-hmn
     10 deny any {{ NMN }} {{ HMN }}
-    20 deny any {{ NMN }} {{ MTN_HMN }}
+    20 deny any {{ NMN }} {{ HMN_MTN }}
     30 deny any {{ HMN}} {{ NMN }}
-    40 deny any {{ HMN }} {{ MTN_NMN }}
-    50 deny any {{ MTN_NMN }} {{ HMN }}
-    60 deny any {{ MTN_NMN }} {{ MTN_HMN }}
-    70 deny any {{ MTN_HMN }} {{ NMN }}
-    80 deny any {{ MTN_HMN }} {{ MTN_NMN }}
+    40 deny any {{ HMN }} {{ NMN_MTN }}
+    50 deny any {{ NMN_MTN }} {{ HMN }}
+    60 deny any {{ NMN_MTN }} {{ HMN_MTN }}
+    70 deny any {{ HMN_MTN }} {{ NMN }}
+    80 deny any {{ HMN_MTN }} {{ NMN_MTN }}
     90 permit any any any
 
 vlan 1
@@ -45,9 +46,9 @@ spanning-tree config-revision 1
 interface mgmt
 shutdown
 
-{{% include 'spine-to-leaf.lag.j2' %}}
-{{% include 'spine-to-cdu.j2' %}}
-{{% include 'uan.j2' %}}
+{% include 'spine-to-leaf.lag.j2' %}
+{% include 'spine-to-cdu.j2' %}
+{% include 'uan.j2' %}
 
 interface lag 99
     no shutdown
@@ -56,16 +57,16 @@ interface lag 99
     vlan trunk native 1 tag
     vlan trunk allowed all
     lacp mode active
-interface {{ VSX-KEEPALIVE }}
+interface {{ VSX_KEEPALIVE }}
     no shutdown
     vrf attach keepalive
     ip address 192.168.255.1/31
-interface {{ VSX-ISL-PORT1 }}
+interface {{ VSX_ISL_PORT1 }}
     no shutdown
     mtu 9198
     description vsx isl
     lag 99
-interface {{ VSX-ISL-PORT2 }}
+interface {{ VSX_ISL_PORT2 }}
     no shutdown
     mtu 9198
     description vsx isl
@@ -122,3 +123,4 @@ vsx
 https-server vrf default
 https-server vrf mgmt
 https-server vrf CAN
+{# end sw-spine.secondary #}

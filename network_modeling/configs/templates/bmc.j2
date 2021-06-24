@@ -1,18 +1,14 @@
-{#
-bmc
-#}
-{% for node in CABLING.NODES %}
-{% if NODE.SUBTYPE == "bmc" %}
-interface {{ NODE.CONFIG.INTERFACE }}
+{# bmc #}
+{% for node in cabling.nodes %}
+{% if node.subtype == "bmc" %}
+interface {{ node.config.INTERFACE }}
 no shutdown
 mtu 9198
-description {{ NODE.CONFIG.DESCRIPTION }}    
+description {{ node.config.DESCRIPTION }}    
 no routing
 vlan access 4
 spanning-tree bpdu-guard
 spanning-tree port-type admin-edge
 {% endif %}
 {% endfor %}
-{#
-end-bmc
-#}
+{# end bmc #}
