@@ -1,10 +1,12 @@
-#!/usr/bin/env python3
+"""Generate the port_configs.md file."""
+# !/usr/bin/env python3
 
-import sys
 import pprint
-import yaml
+import sys
+
 from jinja2 import Environment, FileSystemLoader
 import yamale
+import yaml
 
 
 cabling_file = "../cabling/standards/cabling.yaml"
@@ -14,7 +16,8 @@ template_file = "edge_port_config.j2"
 schema = yamale.make_schema(yamale_schema)
 data = yamale.make_data(cabling_file)
 yamale.validate(
-    schema, data,
+    schema,
+    data,
 )
 
 #
@@ -90,4 +93,3 @@ print(output)
 # print(output, file=open("../models/output.md", "a"))
 with open("port_configs.md", "w") as file:
     file.write(output)
-
