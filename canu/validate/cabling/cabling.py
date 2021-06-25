@@ -13,6 +13,7 @@ from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
+from network_modeling.NetworkPort import NetworkPort
 import requests
 import ruamel.yaml
 
@@ -210,6 +211,71 @@ def get_node_type_yaml(name, mapper):
     return node_type
 
 
+def validate_cabling_slot_data(lldp_info, warnings):
+    """Ensure LLDP data is parsed properly into a slot.
+
+    Args:
+        lldp_info: String representing port and slot info from LLDP.
+        warnings: Existing list of warnings to post to.
+
+    Returns:
+        slot: A cleaned up string value from initial LLDP data.
+    """
+    # TODO:  Integrate with cabling standards and remove this hack.
+    # NCN slot case
+    port_result = re.search(
+        r"([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}", lldp_info["neighbor_port"]
+    )
+    port_description_result = re.search(
+        r"mgmt(\d)", lldp_info["neighbor_port_description"]
+    )
+    if port_result is not None and port_description_result is not None:
+        port_number = int(port_description_result.group(1))
+        if port_number in [0, 1]:
+            return "ocp"
+        elif port_number in [2, 3]:
+            return "pcie-slot1"
+
+    return None
+
+
+def validate_cabling_port_data(lldp_info, warnings):
+    """Ensure LLDP data is parsed properly into a port.
+
+    Args:
+        lldp_info: String representing port and slot info from LLDP.
+        warnings: Existing list of warnings to post to
+
+    Returns:
+        port: A cleaned up string value from initial LLDP data
+    """
+    # TODO:  Integrate with cabling standards and remove this hack.
+
+    # Switch port case
+    port_result = re.search(r"1/1/(\d+)$", lldp_info["neighbor_port"])
+    if port_result is not None:
+        return int(port_result.group(1))
+
+    # NCN port case
+    port_result = re.search(
+        r"([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}", lldp_info["neighbor_port"]
+    )
+    port_description_result = re.search(
+        r"mgmt(\d)", lldp_info["neighbor_port_description"]
+    )
+    if port_result is not None and port_description_result is not None:
+        print("PORT STUFF port", port_description_result.group(1))
+        port_number = int(port_description_result.group(1))
+        if port_number in [0, 1]:
+            # OCP slot, keep ports same but convert to one's based
+            return int(port_number) + 1
+        elif port_number in [2, 3]:
+            # PCIE-Slot1 slot, levelset ports to 1, 2 one's based
+            return int(port_number) - 1
+
+    return None
+
+
 def node_model_from_canu(factory, canu_cache, ips):
     """Create a list of nodes from CANU cache.
 
@@ -233,8 +299,10 @@ def node_model_from_canu(factory, canu_cache, ips):
 
             for port in switch["cabling"]:
 
-                # src_port = port
-                log.debug(f"Source Data: {src_name}")
+                src_slot = None  # Always local switch
+                src_lldp = {"neighbor_port": port, "neighbor_port_description": None}
+                src_port = validate_cabling_port_data(src_lldp, warnings)
+                log.debug(f"Source Data:  {src_name} {src_slot} {src_port}")
                 # If starts with 'sw-' then add an extra '-' before the number, and convert to 3 digit.
                 # Needs to work for these combinations:
                 # sw-spine01
@@ -286,11 +354,16 @@ def node_model_from_canu(factory, canu_cache, ips):
                         f"Node type for {node_name} cannot be determined by node type ({node_type}) or node name ({node_name})"
                     )
 
+                # Create the source port for the node
+                src_node_port = NetworkPort(number=src_port, slot=src_slot)
+
                 # Cable destination
-                dst = switch["cabling"][port][0]
+                dst_lldp = switch["cabling"][port][0]
 
                 # If starts with 'sw-' then add an extra '-' before the number, and convert to 3 digit
-                dst_name = dst["neighbor"]
+                dst_name = dst_lldp["neighbor"]
+                dst_slot = validate_cabling_slot_data(dst_lldp, warnings)
+                dst_port = validate_cabling_port_data(dst_lldp, warnings)
 
                 if dst_name.startswith("sw-"):
                     dst_start = "sw-"
@@ -300,20 +373,20 @@ def node_model_from_canu(factory, canu_cache, ips):
                         f"{dst_start}{dst_middle.rstrip('-')}-{int(dst_digits) :03d}"
                     )
 
-                log.debug(f"Destination Data: {dst_name}")
+                log.debug(f"Destination Data: {dst_name} {dst_slot} {dst_port}")
                 dst_node_name = dst_name
                 log.debug(f"Destination Name Lookup:  {dst_node_name}")
                 node_type = get_node_type_yaml(dst_name, factory.lookup_mapper())
                 log.debug(f"Destination Node Type Lookup:  {node_type}")
 
-                if dst_name != dst["neighbor"] and dst_name is not None:
+                if dst_name != dst_lldp["neighbor"] and dst_name is not None:
                     old_dst_name = dst_name
                     # If type can't be determined, we do not know what to rename the switch
                     if node_type is None:
                         old_dst_name = ""
-                    warnings["rename"].append([dst["neighbor"], old_dst_name])
+                    warnings["rename"].append([dst_lldp["neighbor"], old_dst_name])
                     log.warning(
-                        f"Node {dst['neighbor']} should be renamed {old_dst_name}"
+                        f"Node {dst_lldp['neighbor']} should be renamed to {old_dst_name}"
                     )
                 # Create dst_node if it does not exist
                 dst_node = None
@@ -350,19 +423,36 @@ def node_model_from_canu(factory, canu_cache, ips):
                         f"Node type for {dst_name} cannot be determined by node type ({node_type}) or node name ({node_name})"
                     )
 
+                # Create the destination
+                dst_node_port = NetworkPort(number=dst_port, slot=dst_slot)
+
                 # Connect src_node and dst_node if possible
                 if src_index is not None and dst_index is not None:
-                    connected = node_list[src_index].connect(node_list[dst_index])
+                    src_node = node_list[src_index]
+                    dst_node = node_list[dst_index]
+                    try:
+                        connected = src_node.connect(
+                            dst_node, src_port=src_node_port, dst_port=dst_node_port
+                        )
+                    except Exception:
+                        log.fatal(
+                            click.secho(
+                                f"Failed to connect {src_node.common_name()} "
+                                + f"to {dst_node.common_name()} bi-directionally ",
+                                fg="red",
+                            )
+                        )
+                        exit(1)
                     if connected:
                         log.info(
-                            f"Connected {node_list[src_index].common_name()} to"
-                            + f" {node_list[dst_index].common_name()} bi-directionally"
+                            f"Connected {src_node.common_name()} to"
+                            + f" {dst_node.common_name()} bi-directionally"
                         )
                     else:
                         log.error("")
                         click.secho(
-                            f"Failed to connect {node_list[src_index].common_name()}"
-                            + f" to {node_list[dst_index].common_name()} bi-directionally",
+                            f"Failed to connect {src_node.common_name()}"
+                            + f" to {dst_node.common_name()} bi-directionally",
                             fg="red",
                         )
                         for node in node_list:
@@ -371,8 +461,8 @@ def node_model_from_canu(factory, canu_cache, ips):
                                 + f"to {len(node.edges())} ports on nodes: {node.edges()}"
                             )
                         log.fatal(
-                            f"Failed to connect {node_list[src_index].common_name()} "
-                            + f"to {node_list[dst_index].common_name()} bi-directionally"
+                            f"Failed to connect {src_node.common_name()} "
+                            + f"to {dst_node.common_name()} bi-directionally"
                         )
                         sys.exit(1)  # TODO: this should probably be an exception
     return node_list, warnings
