@@ -39,7 +39,7 @@ def test_validate_shcd():
             ],
         )
         assert result.exit_code == 0
-        assert "sw-spine-002 connects to 12 nodes:" in str(result.output)
+        assert "sw-spine-002 connects to 18 nodes:" in str(result.output)
 
 
 def test_validate_shcd_full():
@@ -67,7 +67,7 @@ def test_validate_shcd_full():
             ],
         )
         assert result.exit_code == 0
-        assert "sw-leaf-002 connects to 12 nodes:" in str(result.output)
+        assert "sw-leaf-002 connects to 18 nodes:" in str(result.output)
 
 
 def test_validate_shcd_missing_file():
@@ -197,10 +197,10 @@ def test_validate_shcd_corner_prompt():
                 "--tabs",
                 tabs,
             ],
-            input="I16\nS49",
+            input="I14\nS48",
         )
         assert result.exit_code == 0
-        assert "sw-spine-002 connects to 12 nodes:" in str(result.output)
+        assert "sw-spine-002 connects to 18 nodes:" in str(result.output)
 
 
 def test_validate_shcd_corners_too_narrow():
@@ -380,8 +380,8 @@ def test_validate_shcd_bad_architectural_definition():
         )
 
 
-def test_validate_shcd_multiple_connections():
-    """Test that the `canu validate shcd` command runs and returns valid cabling."""
+def test_validate_shcd_port_reuse():
+    """Test that the `canu validate shcd` command fails when a port is used multiple times."""
     multiple_connections_tab = "More_connections"
     multiple_connections_corners = "I14,S20"
     with runner.isolated_filesystem():
@@ -403,10 +403,19 @@ def test_validate_shcd_multiple_connections():
                 multiple_connections_tab,
                 "--corners",
                 multiple_connections_corners,
+                "--log",
+                "DEBUG",
             ],
         )
+        print(result.output)
         assert result.exit_code == 1
-        assert "No architectural definition found to allow connection between" in str(
+        # assert "Node 1: port 51 in slot None already connected to Node 0: port 52 in slot None" in str(
+        #     result.output
+        # )
+        # assert "Node 0: port 52 in slot None already connected to Node 1: port 51 in slot None" in str(
+        #     result.output
+        # )
+        assert "Failed to connect sw-spine-001 to sw-spine-002 bi-directionally" in str(
             result.output
         )
 
@@ -515,7 +524,7 @@ def generate_test_file(file_name):
             "ocp",
             "-",
             "j2",
-            "sw-25g02",
+            "sw-25g01",
             "x3000",
             "u12",
             "-",
@@ -528,7 +537,7 @@ def generate_test_file(file_name):
             "s1",
             "-",
             "j1",
-            "sw-25g01",
+            "sw-25g02",
             "x3000",
             "u13",
             "-",
@@ -865,7 +874,7 @@ def generate_test_file(file_name):
             "",
             "",
             "-",
-            "port 9",
+            "9",
             "sw-25g01",
             "x3000",
             "u12",
@@ -878,7 +887,7 @@ def generate_test_file(file_name):
             "",
             "",
             "-",
-            "port 11",
+            "11",
             "sw-25g02",
             "x3000",
             "u13",
