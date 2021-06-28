@@ -1,0 +1,43 @@
+# {{ cabling.hardware_type | upper }} Port configurations and standards - CSM v{{ cabling.version }}
+
+Hardware Type: {{ cabling.hardware_type | upper }}
+
+Software Version: CSM v{{ cabling.version }}
+
+# NCN-Master port config
+```
+{% include 'ncn-m.lag.j2' %}
+```
+
+# NCN-Worker port config
+```
+{% include 'ncn-w.lag.j2' %}
+```
+
+# NCN-Storage port config
+```
+{% include 'ncn-s.lag.j2' %}
+```
+
+# UAN port config
+```
+{% include 'uan.j2' %}
+```
+
+# Login node port config
+```
+{% include 'login.j2' %}
+```
+
+# CMM port config
+```
+{% include 'cmm.j2' %}
+```
+# CEC port config
+```
+{% include 'cec.j2' %}
+```
+# BMC port config
+```
+{% include 'bmc.j2' %}
+```

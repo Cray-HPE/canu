@@ -1,0 +1,19 @@
+{# cmm #}
+{% for node in cabling.nodes %}
+{% if node.subtype == "cmm" %}
+interface lag {{ node.config.LAG_NUMBER }} static
+no shutdown
+description {{ node.config.DESCRIPTION }}
+no routing
+vlan trunk native 2000
+vlan trunk allowed 2000,3000,4091
+spanning-tree root-guard
+
+interface {{ node.config.INTERFACE_LAG }}
+no shutdown
+mtu 9198
+description {{ node.config.DESCRIPTION }}    
+interface lag {{ node.config.LAG_NUMBER }}
+{% endif %}
+{% endfor %}
+{# end cmm #}

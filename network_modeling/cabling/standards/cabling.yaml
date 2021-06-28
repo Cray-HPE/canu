@@ -1,0 +1,161 @@
+--- # cabling standards
+
+version: "1.0"
+hardware_type: "hpe"
+nodes:
+  - type: "ncn"
+    subtype: "master"
+    shasta_name: "ncn-m"
+    devices:
+      - name: "ocp"
+        ports: 
+        - destination: "primary"
+          description: "first switch in MLAG pair"
+          vlan_name: "HMN, NMN, CAN"
+          device_name: "mgmt0"
+          lag: "mlag-lacp"
+        - destination: "site"
+          device_name: "Manager 001 to site, otherwise NONE (see notes)"
+      - name: "pcie-slot1"
+        ports: 
+        - destination: "secondary"
+          description: "second switch in MLAG pair"
+          vlan_name: "HMN, NMN, CAN"
+          device_name: "mgmt1"
+          lag: "mlag-lacp"
+        - destination: 
+      - name: "ilo"
+        ports:
+        - destination: 'HMN Leaf'
+          vlan_name: "HMN"
+    notes:
+      - "REQUIRED:  Master 001 (ncn-m001) is required to have a site connection on OCP Port 2 for installation and maintenance."
+      - "RECOMMENDED: Masters 002 and 003 may optionally have a site connection on OCP Port 2 for emergency system access."
+      - "REQUIRED:  Master 001 (ncn-m001) is required to have it's BMC/iLO connected to the site."
+  - type: "ncn"
+    subtype: "worker"
+    shasta_name: "ncn-w"
+    devices:
+      - name: "ocp"
+        ports: 
+        - destination: "primary"
+          description: "first switch in MLAG pair"
+          vlan_name: "HMN, NMN, CAN"
+          device_name: "mgmt0"
+          lag: "mlag-lacp"
+        - destination: "secondary"
+          description: "second switch in MLAG pair"
+          vlan_name: "HMN, NMN, CAN"
+          device_name: "mgmt1"
+          lag: "mlag-lacp"
+      - name: "ilo"
+        ports:
+        - destination: 'HMN Leaf'
+          vlan_name: "HMN"
+    notes:
+      - "A single OCP card is the default worker configuration."
+  - type: "ncn"
+    subtype: "storage"
+    shasta_name: "ncn-s"
+    devices:
+      - name: "ocp"
+        ports:
+        - destination: "primary"
+          description: "first switch in MLAG pair"
+          vlan_name: "HMN, NMN, CAN"
+          device_name: "mgmt0"
+          lag: "mlag-lacp"
+        - destination: "primary"
+          description: "first switch in MLAG pair"
+          vlan_name: "SUN"
+          device_name: "mgmt1"
+          lag: "mlag-lacp"
+      - name: "pcie-slot1"
+        ports:
+        - destination: "secondary"
+          description: "second switch in MLAG pair"
+          vlan_name: "HMN, NMN, CAN"
+          device_name: "mgmt2"
+          lag: "mlag-lacp"
+        - destination: "secondary"
+          description: "second switch in MLAG pair"
+          vlan_name: "SUN"
+          device_name: "mgmt3"
+          lag: "mlag-lacp"
+      - name: "ilo"
+        ports: 
+        - destination: 'HMN Leaf'
+          vlan_name: "HMN"
+    notes:
+      - "All ports are cabled."
+      - "OCP Port 1 and PCIE Slot 1 Port 1 (first ports) are bonded for the NMN, HMN and CAN."
+      - "OCP Port 2 and PCIE Slot 1 Port 2 (second ports) cabled but not configured in this release."
+  - type: "application"
+    subtype: "uan"
+    shasta_name: "uan"
+    devices:
+      - name: "ocp"
+        ports: 
+        - destination: "primary"
+          description: "first switch in MLAG pair"
+          vlan_name: "NMN"
+        - destination: "primary"
+          description: "first switch in MLAG pair"
+          vlan_name: "CAN"
+          lag: "mlag-lacp"
+      - name: "pcie-slot1"
+        ports:
+        - destination: "secondary"
+          description: "second switch in MLAG pair"
+        - destination: "secondary"
+          description: "second switch in MLAG pair"
+          vlan_name: "CAN"
+          lag: "mlag-lacp"
+      - name: "ilo"
+        ports: 
+        - destination: 'HMN Leaf'
+          vlan_name: "HMN"
+    notes:
+      - "All ports are cabled."
+      - "The OCP Port 1 connects to the NMN in a non-bonded configuration."
+      - "The PCIE Slot 1 Port 1 is cabled but not configured/used in this release."
+      - "OCP Port 2 and PCIE Slot 1 Port 2 (second ports) are bonded for the CAN."
+  - type: "application"
+    subtype: "login"
+    shasta_name: "ln"
+    devices:
+      - name: "ocp"
+        ports: 
+        - destination: "primary"
+          description: "first switch in MLAG pair"
+          vlan_name: "HMN, NMN, CAN"
+          lag: "mlag-lacp"
+        - destination: "secondary"
+          description: "second switch in MLAG pair"
+          vlan_name: "HMN, NMN, CAN"
+          lag: "mlag-lacp"
+          lag: "mlag-lacp"
+      - name: "ilo"
+        ports: 
+        - destination: 'HMN Leaf'
+          vlan_name: "HMN"
+  - type: "mountain"
+    subtype: "cmm"
+    devices:
+      - name: "cmm"
+        ports: 
+        - destination: "primary"
+          description: "first switch in MLAG pair"
+          vlan_name: "HMN_MTN, NMN_MTN"
+          lag: "mlag-static"
+        - destination: "secondary"
+          description: "second switch in MLAG pair"
+          vlan_name: "HMN_MTN, NMN_MTN"
+          lag: "mlag-static"
+  - type: "mountain"
+    subtype: "cec"
+    devices: 
+      - name: "cec"
+        ports:
+          - destination: "CDU switch access port"
+            vlan_name: "HMN_MTN"

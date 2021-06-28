@@ -1,0 +1,22 @@
+#specs: (include('specs'))
+version: str(min=1, max=256)
+hardware_type: str(min=1, max=256)
+nodes: list(include('nodes'))
+---
+
+ports:
+  destination: str(min=1, max=256)
+  vlan_name: list()
+  device_name: str(required=False)
+  lag: str(required=False)
+
+nodes:
+  type: str(min=1, max=256)
+  subtype: str(min=1, max=256)
+  shasta-name: str(min=1, max=256, required=False)
+  devices: list(include('devices'))
+  notes: list(required=False)
+
+devices:
+  name: str(min=1, max=256)
+  ports: any([str(min=1, max=256), list(include('ports'))])
