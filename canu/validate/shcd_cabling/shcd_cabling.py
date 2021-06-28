@@ -312,7 +312,13 @@ def compare_shcd_cabling(shcd_node_list, cabling_node_list):
     dash = "-" * 60
 
     shcd_dict = node_list_to_dict(shcd_node_list)
+    for x in shcd_dict:
+        for y in shcd_dict[x]["ports"]:
+            del y["destination_node_id"]
     cabling_dict = node_list_to_dict(cabling_node_list)
+    for x in cabling_dict:
+        for y in cabling_dict[x]["ports"]:
+            del y["destination_node_id"]
 
     click.secho(
         "\nSHCD / Cabling Comparison",
@@ -324,20 +330,21 @@ def compare_shcd_cabling(shcd_node_list, cabling_node_list):
 
         if node in cabling_dict.keys():
 
-            shcd_missing_edges = []
+            shcd_missing_connections = []
+            for port in shcd_dict[node]["ports"]:
+                if port not in cabling_dict[node]["ports"]:
+                    shcd_missing_connections.append(
+                        f'port {port["port"]} ==> {port["destination_node_name"]}'
+                    )
 
-            for edge in shcd_dict[node]["edges"]:
-                if edge not in cabling_dict[node]["edges"]:
-                    shcd_missing_edges.append(edge)
-
-            if len(shcd_missing_edges) > 0:
+            if len(shcd_missing_connections) > 0:
                 click.secho(
                     f"{node : <16}: Found in SHCD and on the network, but missing the following connections on the "
                     + "network that were found in the SHCD:",
                     fg="green",
                 )
 
-                click.secho(f"                {str(shcd_missing_edges)}")
+                click.secho(f"                {str(shcd_missing_connections)}")
 
         else:
             click.secho(
@@ -349,20 +356,22 @@ def compare_shcd_cabling(shcd_node_list, cabling_node_list):
 
         if node in shcd_dict.keys():
 
-            cabling_missing_edges = []
+            cabling_missing_connections = []
 
-            for edge in cabling_dict[node]["edges"]:
-                if edge not in shcd_dict[node]["edges"]:
-                    cabling_missing_edges.append(edge)
+            for port in cabling_dict[node]["ports"]:
+                if port not in shcd_dict[node]["ports"]:
+                    cabling_missing_connections.append(
+                        f'port {port["port"]} ==> {port["destination_node_name"]}'
+                    )
 
-            if len(cabling_missing_edges) > 0:
+            if len(cabling_missing_connections) > 0:
                 click.secho(
                     f"{node : <16}: Found on the network and in the SHCD, but missing the following connections in the"
                     + " SHCD that were found on the network:",
                     fg="green",
                 )
 
-                click.secho(str(cabling_missing_edges))
+                click.secho(f"                {str(cabling_missing_connections)}")
 
         if node not in shcd_dict.keys():
             click.secho(
@@ -373,6 +382,8 @@ def compare_shcd_cabling(shcd_node_list, cabling_node_list):
 
 def node_list_to_dict(node_list):
     """Convert node list to a dict.
+
+    TODO:  Move this to model serialization
 
     Args:
         node_list: A list of nodes
@@ -386,14 +397,11 @@ def node_list_to_dict(node_list):
     for node in node_list:
         node_id_dict[node.id()] = node.common_name()
 
-    for node in node_list:
-        edge_names = []
-        for edge in node.edges():
-            edge_names.append(node_id_dict[edge])
+    node_tmp = [node.serialize() for node in node_list]
 
-        node_dict[node.common_name()] = {
-            "id": node.id(),
-            "edges": edge_names,
-        }
+    for node in node_tmp:
+        for port in node["ports"]:
+            port["destination_node_name"] = node_id_dict[port["destination_node_id"]]
+        node_dict[node["common_name"]] = node
 
     return node_dict
