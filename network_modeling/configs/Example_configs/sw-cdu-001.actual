@@ -35,39 +35,27 @@ vlan 4
 vlan 10
     name SUN
 vlan 2000
-    name x1000 nmn
-    vsx-sync
     apply access-list ip nmn-hmn in
     apply access-list ip nmn-hmn out
 vlan 2001
-    name x1001 nmn
-    vsx-sync
     apply access-list ip nmn-hmn in
     apply access-list ip nmn-hmn out
 vlan 2002
-    name x1002 nmn
-    vsx-sync
     apply access-list ip nmn-hmn in
     apply access-list ip nmn-hmn out
 vlan 2003
-    name x1003 nmn
-    vsx-sync
     apply access-list ip nmn-hmn in
     apply access-list ip nmn-hmn out
 vlan 3000
-    name x1000 hmn
     apply access-list ip nmn-hmn in
     apply access-list ip nmn-hmn out
 vlan 3001
-    name x1001 hmn
     apply access-list ip nmn-hmn in
     apply access-list ip nmn-hmn out
 vlan 3002
-    name x1002 hmn
     apply access-list ip nmn-hmn in
     apply access-list ip nmn-hmn out
 vlan 3003
-    name x1003 hmn
     apply access-list ip nmn-hmn in
     apply access-list ip nmn-hmn out
 spanning-tree
