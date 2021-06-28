@@ -1,0 +1,14 @@
+{# leaf-to-spine.lag #}
+interface lag {{ LAG_NUMBER }}
+no shutdown
+description 
+no routing
+vlan trunk native 1
+vlan trunk allowed 2,4,7,10
+lacp mode active
+
+interface {{ INTERFACE_NUMBER }}
+no shutdown
+mtu 9198
+lag {{ LAG_NUMBER }}
+{# end leaf-to-spine.lag #}

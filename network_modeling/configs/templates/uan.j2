@@ -1,0 +1,30 @@
+{# uan #}
+{% for node in cabling.nodes %}
+{% if node.subtype == "uan" %}
+INTERFACE LAG {{ node.config.LAG_NUMBER }} multi-chassis
+no shutdown
+description {{ node.config.DESCRIPTION }}
+no routing
+vlan trunk native 1
+vlan trunk allowed 1-2,4,7
+lacp mode active
+lacp fallback
+spanning-tree port-type admin-edge
+
+interface {{ node.config.INTERFACE_LAG }}
+no shutdown
+mtu 9198
+description {{ node.config.DESCRIPTION }}    
+interface lag {{ node.config.LAG_NUMBER }}
+
+interface {{ node.config.INTERFACE_NUMBER }}
+no shutdown
+mtu 9198
+no routing
+vlan access 2
+description {{ node.config.DESCRIPTION }}
+spanning-tree bpdu-guard
+spanning-tree port-type admin-edge
+{% endif %}
+{% endfor %}
+{# end-uan #}
