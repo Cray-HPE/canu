@@ -8,7 +8,7 @@ import responses
 
 from canu.cache import remove_switch_from_cache
 from canu.cli import cli
-from canu.switch.firmware.status.status import get_firmware
+from canu.switch.firmware.firmware import get_firmware
 
 
 username = "admin"
