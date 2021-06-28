@@ -3,6 +3,7 @@ import click
 from click_help_colors import HelpColorsGroup
 
 from .cabling import cabling
+from .config import config
 from .firmware import firmware
 
 
@@ -18,4 +19,5 @@ def switch(ctx):  # pylint: disable=unused-argument
 
 
 switch.add_command(cabling.cabling)
+switch.add_command(config.config)
 switch.add_command(firmware.firmware)
