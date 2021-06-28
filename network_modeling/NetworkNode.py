@@ -41,6 +41,8 @@ class NetworkNode:
         Disconnect one device from another.
     edges():
         Return a list of all connections.
+    serialize():
+        Return the node as a JSON object.
     """
 
     def __init__(self, id=None, hardware=None, architecture=None):
@@ -52,8 +54,8 @@ class NetworkNode:
             hardware: hardware
             architecture: architecture
         """
-        self.__hw = hardware
-        self.__arch = architecture
+        self.__hardware = hardware
+        self.__architecture = architecture
 
         self.__id = id
         self.__common_name = None
@@ -260,7 +262,7 @@ class NetworkNode:
 
     def arch_type(self):
         """Return architecture type."""
-        return self.__arch["name"]
+        return self.__architecture["name"]
 
     # Get/Set node common name
     # TODO: This is a quick hack.  Could enforce naming standards via arch yaml and/or have
@@ -275,7 +277,7 @@ class NetworkNode:
     def device_connections(self):
         """Return a list of architecturally allowed connections."""
         # Returns list
-        return self.__arch["connections"]
+        return self.__architecture["connections"]
 
     def available_ports(self, speed=None, slot=None):
         """Return number of available ports."""
@@ -285,7 +287,7 @@ class NetworkNode:
             raise Exception(
                 click.secho(
                     f"{__name__}: Available port at speed {speed} not found for {self.common_name()} "
-                    f'of type {self.__arch["name"]} and model {self.__arch["model"]}',
+                    f'of type {self.__architecture["name"]} and model {self.__architecture["model"]}',
                     fg="red",
                 )
             )
@@ -323,10 +325,10 @@ class NetworkNode:
         # Create port stubs if needed and begin to fill out port info
         if src_port is None:
             src_port = NetworkPort()
-            src_port.dst_node_id(dst_node.id())
+            src_port.destination_node_id(dst_node.id())
         if dst_port is None:
             dst_port = NetworkPort()
-            dst_port.dst_node_id(self.id())
+            dst_port.destination_node_id(self.id())
 
         src_port.speed(connection_speed)
         dst_port.speed(connection_speed)
@@ -382,7 +384,7 @@ class NetworkNode:
 
             if self.__ports[index] is not None:
                 existing_port = self.__ports[index]
-                if existing_port.dst_node_id() == dst_node.id():
+                if existing_port.destination_node_id() == dst_node.id():
                     log.warning(
                         f"Node {self.__id}: port {src_port.port()} in slot {src_port.slot()} "
                         f"already connected to Node {dst_node.id()}: port {dst_port.port()} "
@@ -396,12 +398,12 @@ class NetworkNode:
                         click.secho(
                             f"{__name__} Port {src_port.port()} in slot {src_port.slot()} "
                             f"already in use for {self.common_name()} connected to a different "
-                            f"node {existing_port.dst_node_id()}.  Cannot repurpose ports.",
+                            f"node {existing_port.destination_node_id()}.  Cannot repurpose ports.",
                             fg="red",
                         )
                     )
 
-            src_port.dst_node_id(dst_node.id())
+            src_port.destination_node_id(dst_node.id())
             self.__ports[index] = src_port
         else:
             # Assign ports based on first available.
@@ -440,10 +442,26 @@ class NetworkNode:
         # TODO:  this for real
         return False
 
+    def serialize(self):
+        """Resolve this node as a JSON object."""
+        serialized_ports = [
+            port.serialize() for port in self.__ports if port is not None
+        ]
+        serialized = {
+            "common_name": self.__common_name,
+            "id": self.__id,
+            "architecture": self.__architecture["name"],
+            "model": self.__hardware["model"],
+            "type": self.__hardware["type"],
+            "vendor": self.__hardware["vendor"],
+            "ports": serialized_ports,
+        }
+        return serialized
+
     def edges(self):
         """Return a list of all connections."""
         edges = []
         for port in self.__ports:
             if port is not None:
-                edges.append(port.dst_node_id())
+                edges.append(port.destination_node_id())
         return edges
