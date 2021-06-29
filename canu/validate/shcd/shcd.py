@@ -547,7 +547,8 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                         dst_port=dst_node_port,
                         strict=True,
                     )
-                except Exception:
+                except Exception as err:
+                    log.fatal(err)
                     log.fatal(
                         click.secho(
                             f"Failed to connect {src_node.common_name()} "

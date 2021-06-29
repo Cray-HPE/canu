@@ -268,7 +268,6 @@ def validate_cabling_port_data(lldp_info, warnings):
         r"mgmt(\d)", lldp_info["neighbor_port_description"]
     )
     if port_result is not None and port_description_result is not None:
-        print("PORT STUFF port", port_description_result.group(1))
         port_number = int(port_description_result.group(1))
         if port_number in [0, 1]:
             # OCP slot, keep ports same but convert to one's based

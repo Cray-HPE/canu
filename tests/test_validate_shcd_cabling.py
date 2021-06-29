@@ -81,12 +81,16 @@ def test_validate_shcd_cabling():
         )
         assert result.exit_code == 0
         # sw-spine-001:  Found in SHCD, but missing network connections:
-        assert "['ncn-w003', 'ncn-s003', 'uan001', 'uan001', 'sw-leaf-bmc-001']" in str(
-            result.output
+        assert (
+            "['port 4 ==> sw-leaf-bmc-099', 'port 9 ==> ncn-w003', 'port 15 ==> ncn-s003', "
+            "'port 16 ==> uan001', 'port 17 ==> uan001', 'port 47 ==> sw-spine-002', 'port 48 ==> sw-leaf-bmc-001']"
+            in str(result.output)
         )
         # sw-spine-001:  Found in SHCD, but missing network connections:
-        assert "['ncn-w003', 'uan001', 'uan001', 'sw-leaf-bmc-001']" in str(
-            result.output
+        assert (
+            "['port 9 ==> ncn-w003', 'port 16 ==> uan001', 'port 17 ==> uan001', "
+            "'port 47 ==> sw-spine-001', 'port 48 ==> sw-leaf-bmc-001']"
+            in str(result.output)
         )
 
 
@@ -149,12 +153,15 @@ def test_validate_shcd_cabling_full_architecture():
         assert result.exit_code == 0
         # sw-leaf-001: Found in SHCD but not on the network
         assert (
-            "['sw-leaf-bmc-099', 'ncn-w003', 'ncn-s003', 'uan001', 'uan001', 'sw-leaf-bmc-001']"
+            "['port 2 ==> sw-leaf-002', 'port 4 ==> sw-leaf-bmc-099', 'port 9 ==> ncn-w003', 'port 15 ==> ncn-s003', "
+            "'port 16 ==> uan001', 'port 17 ==> uan001', 'port 47 ==> sw-leaf-002', 'port 48 ==> sw-leaf-bmc-001']"
             in str(result.output)
         )
         # sw-leaf-002: Found in SHCD but not on the network
-        assert "['ncn-w003', 'uan001', 'uan001', 'sw-leaf-bmc-001']" in str(
-            result.output
+        assert (
+            "['port 2 ==> sw-leaf-001', 'port 9 ==> ncn-w003', 'port 16 ==> uan001', 'port 17 ==> uan001', "
+            "'port 47 ==> sw-leaf-001', 'port 48 ==> sw-leaf-bmc-001']"
+            in str(result.output)
         )
         assert "sw-leaf-001 connects to 9 nodes" in str(result.output)
         assert "sw-leaf-002 connects to 7 nodes" in str(result.output)
@@ -220,12 +227,15 @@ def test_validate_shcd_cabling_file():
         )
         assert result.exit_code == 0
         # sw-spine-001: Found in SHCD but not on the network
-        assert "['ncn-w003', 'ncn-s003', 'uan001', 'uan001', 'sw-leaf-bmc-001']" in str(
-            result.output
+        assert (
+            "['port 4 ==> sw-leaf-bmc-099', 'port 9 ==> ncn-w003', 'port 15 ==> ncn-s003', 'port 16 ==> uan001', "
+            "'port 17 ==> uan001', 'port 47 ==> sw-spine-002', 'port 48 ==> sw-leaf-bmc-001']"
+            in str(result.output)
         )
         # sw-spine-002: Found in SHCD but not on the network
-        assert "['ncn-w003', 'uan001', 'uan001', 'sw-leaf-bmc-001']" in str(
-            result.output
+        assert (
+            "['port 9 ==> ncn-w003', 'port 16 ==> uan001', 'port 17 ==> uan001', 'port 47 ==> sw-spine-001', "
+            "'port 48 ==> sw-leaf-bmc-001']" in str(result.output)
         )
 
 
@@ -694,12 +704,15 @@ def test_validate_shcd_cabling_corner_prompt():
         )
         assert result.exit_code == 0
         # sw-spine-001: Found in SHCD but not on the network
-        assert "['ncn-w003', 'ncn-s003', 'uan001', 'uan001', 'sw-leaf-bmc-001']" in str(
-            result.output
+        assert (
+            "['port 4 ==> sw-leaf-bmc-099', 'port 9 ==> ncn-w003', 'port 15 ==> ncn-s003', 'port 16 ==> uan001', "
+            "'port 17 ==> uan001', 'port 47 ==> sw-spine-002', 'port 48 ==> sw-leaf-bmc-001']"
+            in str(result.output)
         )
         # sw-spine-002: Found in SHCD but not on the network
-        assert "['ncn-w003', 'uan001', 'uan001', 'sw-leaf-bmc-001']" in str(
-            result.output
+        assert (
+            "['port 9 ==> ncn-w003', 'port 16 ==> uan001', 'port 17 ==> uan001', 'port 47 ==> sw-spine-001', "
+            "'port 48 ==> sw-leaf-bmc-001']" in str(result.output)
         )
 
 
@@ -1180,21 +1193,21 @@ def test_validate_shcd_missing_connections():
             ],
         )
         print(result.output)
-        print(result.exception)
-        print(result.exc_info)
-        print(result.stdout)
         assert result.exit_code == 0
         assert (
             "Found in SHCD and on the network, but missing the following connections on the network"
             in str(result.output)
         )
         # sw-spine-001: Found in SHCD but not on the network
-        assert "['ncn-w003', 'ncn-s003', 'uan001', 'uan001', 'sw-leaf-bmc-001']" in str(
-            result.output
+        assert (
+            "['port 4 ==> sw-leaf-bmc-099', 'port 9 ==> ncn-w003', 'port 15 ==> ncn-s003', 'port 16 ==> uan001', "
+            "'port 17 ==> uan001', 'port 47 ==> sw-spine-002', 'port 48 ==> sw-leaf-bmc-001']"
+            in str(result.output)
         )
         # sw-spine-002: Found in SHCD but not on the network
-        assert "['ncn-w003', 'uan001', 'uan001', 'sw-leaf-bmc-001']" in str(
-            result.output
+        assert (
+            "['port 9 ==> ncn-w003', 'port 16 ==> uan001', 'port 17 ==> uan001', 'port 47 ==> sw-spine-001', "
+            "'port 48 ==> sw-leaf-bmc-001']" in str(result.output)
         )
         assert "uan001          : Found in SHCD but not found on the network." in str(
             result.output
