@@ -398,7 +398,9 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 click.secho(f"Bad range of cells entered for tab {sheet}.", fg="red")
                 click.secho(f"{range_start}:{range_end}\n", fg="red")
                 click.secho(
-                    "Ensure that the upper left corner (Labeled 'Source'), and the lower right corner of the table is entered.",
+                    "Not enough columns selected. Expecting columns labeled:\n"
+                    + "Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port\n"
+                    + "Ensure that the upper left corner (Labeled 'Source'), and the lower right corner of the table is entered.",
                     fg="red",
                 )
                 sys.exit(1)

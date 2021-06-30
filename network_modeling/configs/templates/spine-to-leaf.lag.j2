@@ -1,5 +1,8 @@
 {# spine-to-leaf.lag #}
-interface lag {{ LAG_NUMBER }}
+***===> sw-spine-to-leaf.lag.j2
+{%- for node in cabling.nodes %}
+{%- if node.subtype == "leaf" %}
+interface lag ***===> {{ node.config.LAG_NUMBER }}
 no shutdown
 description 
 no routing
@@ -8,8 +11,11 @@ vlan trunk allowed 2,4,7
 lacp mode active
 spanning-tree root-guard
 
-interface {{  INTERFACE_NUMBER }}
+interface ***===> {{ node.config.INTERFACE_LAG }}
 no shutdown
 mtu 9198
-lag {{ LAG_NUMBER }}
-{# end spine-to-leaf.lag #}
+lag ***===> {{ node.config.LAG_NUMBER }}
+{%- endif %}
+{%- endfor %}
+***===> end sw-spine-to-leaf.lag.j2
+{#- end spine-to-leaf.lag #}

@@ -9,17 +9,7 @@ ntp enable
 
 ssh server vrf default
 ssh server vrf mgmt
-
-access-list ip nmn-hmn
-    10 deny any {{ NMN }} {{ HMN }}
-    20 deny any {{ NMN }} {{ HMN_MTN }}
-    30 deny any {{ HMN}} {{ NMN }}
-    40 deny any {{ HMN }} {{ NMN_MTN }}
-    50 deny any {{ NMN_MTN }} {{ HMN }}
-    60 deny any {{ NMN_MTN }} {{ HMN_MTN }}
-    70 deny any {{ HMN_MTN }} {{ NMN }}
-    80 deny any {{ HMN_MTN }} {{ NMN_MTN }}
-    90 permit any any any
+{% include 'acl.j2' %}
     
 vlan 1
 vlan 2

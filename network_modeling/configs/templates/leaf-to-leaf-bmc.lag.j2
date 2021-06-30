@@ -1,5 +1,8 @@
 {# leaf-to-leaf-bmc #}
-interface lag {{ LAG_NUMBER }}
+***===> leaf-to-leaf-bmc.lag.j2
+{%- for node in cabling.nodes %}
+{%- if node.subtype == "leaf-bmc" %}
+interface lag ***===> {{ node.config.LAG_NUMBER }}
 no shutdown
 description 
 no routing
@@ -7,8 +10,11 @@ vlan trunk native 1
 vlan trunk allowed 2,4,7
 lacp mode active
 
-interface {{ INTERFACE_NUMBER }}
+interface ***===> {{ node.config.INTERFACE_NUMBER }}
 no shutdown
 mtu 9198
-lag {{ LAG_NUMBER }}
-{# end leaf-to-leaf-bmc #}
+lag ***===> {{ node.config.LAG_NUMBER }}
+{%- endif %}
+{%- endfor %}
+***===> end leaf-to-leaf-bmc.lag.j2
+{#- end leaf-to-leaf-bmc #}
