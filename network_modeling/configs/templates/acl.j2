@@ -1,0 +1,28 @@
+{# acl #}
+access-list ip nmn-hmn
+{%- if NMN and HMN %}
+    deny any ***===> {{ NMN }} ***===> {{ HMN }}
+{%- endif %}
+{%- if NMN and HMN_MTN %}
+    deny any ***===NMN> {{ NMN }} ***===HMN_MTN> {{ HMN_MTN }}
+{%- endif %}
+{%- if HMN and NMN %}
+    deny any ***===> {{ HMN}} ***===> {{ NMN }}
+{%- endif %}
+{%- if HMN and NMN_MTN %}
+    deny any ***===> {{ HMN }} ***===> {{ NMN_MTN }}
+{%- endif %}
+{%- if NMN_MTN and HMN %}
+    deny any ***===> {{ NMN_MTN }} ***===> {{ HMN }}
+{%- endif %}
+{%- if NMN_MTN and HMN_MTN %}
+    deny any ***===> {{ NMN_MTN }} ***===> {{ HMN_MTN }}
+{%- endif %}
+{%- if HMN_MTN and NMN %}
+    deny any ***===> {{ HMN_MTN }} ***===> {{ NMN }}
+{%- endif %}
+{%- if HMN_MTN and NMN_MTN %}
+    deny any ***===> {{ HMN_MTN }} ***===> {{ NMN_MTN }}
+{%- endif %}
+    permit any any any
+{#- end acl #}

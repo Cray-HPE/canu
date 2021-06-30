@@ -1,9 +1,15 @@
 {# spine-to-cdu #}
-interface {{ INTERFACE_NUMBER }}
+***===> spine-to-cdu.j2
+{%- for node in cabling.nodes %}
+{%- if node.subtype == "cdu" %}
+interface ***===> {{ node.config.INTERFACE_LAG }}
     no shutdown
     mtu 9198
-    ip address {{ PT_TO_PT_IP }}
+    ip address ***===> {{ node.config.PT_TO_PT_IP }}
     ip ospf 1 area 0.0.0.0
     ip ospf network point-to-point
     ip ospf bfd
-{# end spine-to-cdu #}
+{%- endif %}
+{%- endfor %}
+***===> end spine-to-cdu.j2
+{#- end spine-to-cdu #}

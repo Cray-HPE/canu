@@ -1,29 +1,21 @@
 {# sw-spine.primary #}
+***===> sw-spine.primary.j2
 hostname {{ HOSTNAME }}
 user admin group administrators password plaintext {{ PASSWORD }}
 bfd
 no ip icmp redirect
 vrf CAN
 vrf keepalive
-ntp server {{ NCN_W001 }}
-ntp server {{ NCN_W002 }}
-ntp server {{ NCN_W003 }}
+ntp server ***===> {{ NCN_W001 }}
+ntp server ***===> {{ NCN_W002 }}
+ntp server ***===> {{ NCN_W003 }}
 ntp enable
 !
 !
 !
 ssh server vrf default
 ssh server vrf mgmt
-access-list ip nmn-hmn
-    10 deny any {{ NMN }} {{ HMN }}
-    20 deny any {{ NMN }} {{ HMN_MTN }}
-    30 deny any {{ HMN}} {{ NMN }}
-    40 deny any {{ HMN }} {{ NMN_MTN }}
-    50 deny any {{ NMN_MTN }} {{ HMN }}
-    60 deny any {{ NMN_MTN }} {{ HMN_MTN }}
-    70 deny any {{ HMN_MTN }} {{ NMN }}
-    80 deny any {{ HMN_MTN }} {{ NMN_MTN }}
-    90 permit any any any
+{% include 'acl.j2' %}
     
 vlan 1
 vlan 2
@@ -57,57 +49,57 @@ interface lag 99
     vlan trunk native 1 tag
     vlan trunk allowed all
     lacp mode active
-interface {{ VSX_KEEPALIVE }}
+interface ***===> {{ VSX_KEEPALIVE }}
     no shutdown
     vrf attach keepalive
     ip address 192.168.255.0/31
-interface {{ VSX_ISL_PORT1 }}
+interface ***===> {{ VSX_ISL_PORT1 }}
     no shutdown
     mtu 9198
     description vsx isl
     lag 99
-interface {{ VSX_ISL_PORT2 }}
+interface ***===> {{ VSX_ISL_PORT2 }}
     no shutdown
     mtu 9198
     description vsx isl
     lag 99
 interface loopback 0
-    ip address {{ LOOPBACK_IP }}
-    ipv6 address {{ IPV6_IP }}
+    ip address ***===> {{ LOOPBACK_IP }}
+    ipv6 address ***===> {{ IPV6_IP }}
     ip ospf 1 area 0.0.0.0
     ipv6 ospfv3 1 area 0.0.0.0
 interface vlan 1
     ip mtu 9198
-    ip address {{ MTL_IP }}
+    ip address ***===> {{ MTL_IP }}
     active-gateway ip mac 12:00:00:00:6b:00
-    active-gateway ip {{ MTL_IP_Gateway }}
+    active-gateway ip ***===> {{ MTL_IP_GATEWAY }}
     ipv6 address autoconfig
     ip helper-address 10.92.100.222
     ipv6 ospfv3 1 area 0.0.0.0
     ip igmp enable
 interface vlan 2
     ip mtu 9198
-    ip address {{ NMN_IP }}
+    ip address ***===> {{ NMN_IP }}
     active-gateway ip mac 12:00:00:00:6b:00
-    active-gateway ip {{ NMN_IP_Gateway }}
+    active-gateway ip ***===> {{ NMN_IP_GATEWAY }}
     ipv6 address autoconfig
     ip helper-address 10.92.100.222
     ipv6 ospfv3 1 area 0.0.0.0
     ip igmp enable
 interface vlan 4
     ip mtu 9198
-    ip address {{ HMN_IP }}
+    ip address ***===> {{ HMN_IP }}
     active-gateway ip mac 12:00:00:00:6b:00
-    active-gateway ip {{ HMN_IP_Gateway }}
+    active-gateway ip ***===> {{ HMN_IP_GATEWAY }}
     ipv6 address autoconfig
     ip helper-address 10.92.100.222
     ipv6 ospfv3 1 area 0.0.0.0
     ip igmp enable
 interface vlan 7
     ip mtu 9198
-    ip address {{ CAN_IP_PRIMARY }}
+    ip address ***===> {{ CAN_IP_PRIMARY }}
     active-gateway ip mac 12:00:00:00:6b:00
-    active-gateway ip {{ CAN_IP_Gateway }}
+    active-gateway ip ***===> {{ CAN_IP_GATEWAY }}
     ipv6 address autoconfig
     ip helper-address 10.92.100.222
     ipv6 ospfv3 1 area 0.0.0.0
@@ -123,4 +115,5 @@ vsx
 https-server vrf default
 https-server vrf mgmt
 https-server vrf CAN
+***===> end sw-spine.primary.j2
 {# end sw-spine.primary #}

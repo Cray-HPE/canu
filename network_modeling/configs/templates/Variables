@@ -7,10 +7,10 @@ MTL = sls networks/MTL/ExtraProperties/CIDR
 NMN_MTN = sls networks/NMN_MTN/ExtraProperties/CIDR
 HMN_MTN = sls networks/HMN_MTN/ExtraProperties/CIDR
 
-CAN_IP_Gateway = sls networks/CAN/ExtraProperties/Subnets/Gateway
-MTL_IP_Gateway = sls networks/MTL/ExtraProperties/Subnets/Gateway
-NMN_IP_Gateway = sls networks/HMN/ExtraProperties/Subnets/Gateway
-HMN_IP_Gateway = sls networks/HMN/ExtraProperties/Subnets/Gateway
+CAN_IP_GATEWAY = sls networks/CAN/ExtraProperties/Subnets/Gateway
+MTL_IP_GATEWAY = sls networks/MTL/ExtraProperties/Subnets/Gateway
+NMN_IP_GATEWAY = sls networks/HMN/ExtraProperties/Subnets/Gateway
+HMN_IP_GATEWAY = sls networks/HMN/ExtraProperties/Subnets/Gateway
 
 NCN_W001 = sls networks/NMN/ExtraProperties/subnets/IPReservations/name/ncn-w001
 NCN_W002 = sls networks/NMN/ExtraProperties/subnets/IPReservations/name/ncn-w002
