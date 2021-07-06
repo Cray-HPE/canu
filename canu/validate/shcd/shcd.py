@@ -230,7 +230,9 @@ def validate_shcd_slot_data(cell, sheet, warnings, is_src_slot=False):
         slot: A cleaned up string value from the cell
     """
     valid_slot_names = ["ocp", "pcie-slot1", "bmc", "mgmt", "onboard", "s", "pci", None]
-    location = cell.coordinate
+    location = None
+    if cell.value is not None:
+        location = cell.coordinate
     slot = cell.value
     if isinstance(slot, str):
         slot = slot.strip()
@@ -283,7 +285,9 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False):
     Returns:
         port: A cleaned up integer value from the cell
     """
-    location = cell.coordinate
+    location = None
+    if cell.value is not None:
+        location = cell.coordinate
     port = cell.value
     if isinstance(port, str):
         port = port.strip()
