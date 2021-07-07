@@ -230,7 +230,9 @@ def validate_shcd_slot_data(cell, sheet, warnings, is_src_slot=False):
         slot: A cleaned up string value from the cell
     """
     valid_slot_names = ["ocp", "pcie-slot1", "bmc", "mgmt", "onboard", "s", "pci", None]
-    location = cell.coordinate
+    location = None
+    if cell.value is not None:
+        location = cell.coordinate
     slot = cell.value
     if isinstance(slot, str):
         slot = slot.strip()
@@ -261,7 +263,7 @@ def validate_shcd_slot_data(cell, sheet, warnings, is_src_slot=False):
     # NOTE: This is required for the port to get fixed.
     if is_src_slot:
         if sheet == "HMN" and slot is None:
-            warnings["shcd_slot_data"].append(sheet + ":" + location)
+            warnings["shcd_slot_data"].append(f"{sheet}:{location}")
             log.warning(
                 'A source slot of type "bmc" for servers or "mgmt" for switches must be specified in the HMN tab. '
                 f"Please correct the SHCD for {sheet}:{location} with an empty value."
@@ -283,7 +285,9 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False):
     Returns:
         port: A cleaned up integer value from the cell
     """
-    location = cell.coordinate
+    location = None
+    if cell.value is not None:
+        location = cell.coordinate
     port = cell.value
     if isinstance(port, str):
         port = port.strip()
@@ -294,7 +298,7 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False):
             )
             exit(1)
         if port[0] == "j":
-            warnings["shcd_port_data"].append(sheet + ":" + location)
+            warnings["shcd_port_data"].append(f"{sheet}:{location}")
             log.warning(
                 'Prepending the character "j" to a port will not be allowed in the future. '
                 f"Please correct cell {sheet}:{location} in the SHCD with value {port}"
@@ -311,7 +315,7 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False):
             # is noted by port 3 when there is physically one port.
             # NOTE: This assumes that the slot has already been corrected to "bmc"
             if sheet == "HMN" and int(port) == 3:
-                warnings["shcd_port_conventions"].append(sheet + ":" + location)
+                warnings["shcd_port_conventions"].append(f"{sheet}:{location}")
                 log.warning(
                     f'Bad slot/port convention for port "j{port}" in location {sheet}:{location}.'
                     f'This should be slot "bmc" for servers and "mgmt" for switches, and port "1".'
