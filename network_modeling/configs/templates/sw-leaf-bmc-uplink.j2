@@ -1,4 +1,5 @@
 {# sw-leaf-bmc-uplink #}
+***===> sw-leaf-bmc-uplink.j2
 interface lag 99
 no shutdown
 no routing
@@ -7,15 +8,16 @@ vlan trunk allowed all
 lacp mode active
 exit
 
-interface {{ LEAF_BMC_UPLINK_PORT_PRIMARY }}
+interface ***===> {{ LEAF_BMC_UPLINK_PORT_PRIMARY }}
 no shutdown
 mtu 9198
 lag 99
 exit
 
-interface {{ LEAF_BMC_UPLINK_PORT_SECONDARY }}
+interface ***===> {{ LEAF_BMC_UPLINK_PORT_SECONDARY }}
 no shutdown
 mtu 9198
 lag 99
 exit
+***===> end sw-leaf-bmc-uplink.j2
 {# end sw-leaf-bmc-uplink #}

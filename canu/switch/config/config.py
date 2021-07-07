@@ -89,6 +89,7 @@ env = Environment(
     "switch_name",
     required=True,
     help="The name of the switch to generate config e.g. 'sw-spine-001'",
+    prompt="Switch Name",
 )
 # @click.option("--ip", required=True, help="The IP address of the switch")
 # @click.option("--username", default="admin", show_default=True, help="Switch username")
@@ -202,6 +203,13 @@ def config(
 
     sls_variables = parse_sls(csi_folder)
 
+    # For versions of Shasta < 1.6, the SLS Hostnames need to be renamed
+    if ctx.obj["shasta"]:
+        shasta = ctx.obj["shasta"]
+        # print("shasta", shasta)
+        if float(shasta) < 1.6:
+            sls_variables = rename_sls_hostnames(sls_variables)
+
     switch_config = generate_switch_config(
         shcd_node_list, factory, switch_name, sls_variables
     )
@@ -309,7 +317,6 @@ def generate_switch_config(shcd_node_list, factory, switch_name, sls_variables):
     elif node_shasta_name == "sw-leaf-bmc":
         # Use `sw-leaf-bmc.j2` template
         print("leaf-bmc")
-        # Crashes because sw-leaf-bmc-00X is not in SLS
         # Should the template include: {% include 'ncn-m.lag.j2' %} {% include 'ncn-w.lag.j2' %} {% include 'ncn-s.lag.j2' %}
         # Should there be a leaf-bmc-to-leaf template?
 
@@ -334,26 +341,20 @@ def generate_switch_config(shcd_node_list, factory, switch_name, sls_variables):
         # {'subtype': 'leaf', 'config': {'DESCRIPTION': 'sw-leaf-001', 'LAG_NUMBER': 51, 'INTERFACE_LAG': '1/1/51'}},
         # {'subtype': 'leaf', 'config': {'DESCRIPTION': 'sw-leaf-002', 'LAG_NUMBER': 52, 'INTERFACE_LAG': '1/1/52'}}]
 
-        print(sls_variables["HMN_IPs"])
         HMN_IP = sls_variables["HMN_IPs"][HOSTNAME]
         MTL_IP = sls_variables["MTL_IPs"][HOSTNAME]
         NMN_IP = sls_variables["NMN_IPs"][HOSTNAME]
 
+        VSX_KEEPALIVE = None
+        VSX_ISL_PORT1 = None
+        VSX_ISL_PORT2 = None
+
         # {{ LOOPBACK_IP }}
         # {{ IPV6_IP }}
-
-        # {% include 'sw-leaf-bmc-uplink.j2' %}
-        # {% include 'bmc.j2' %}
 
         # sw-leaf-bmc-uplink.j2
         # {{ LEAF_UPLINK_PORT_PRIMARY }} #connection from leaf-bmc to spine primary
         # {{ LEAF_UPLINK_PORT_SECONDARY }} #connection from leaf-bmc to spine secondary (from SHCD)
-
-        # bmc.j2
-        # {% for node in CABLING.NODES %}
-        # {% if NODE.SUBTYPE == "bmc" %}
-        # {{ node.config.INTERFACE }}
-        # {{ node.config.DESCRIPTION }}
 
     switch_config = template.render(
         HOSTNAME=HOSTNAME,
@@ -470,7 +471,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
             nodes.append(new_node)
         elif shasta_name == "uan":
             new_node = {
-                "subtype": "application",
+                "subtype": "uan",
                 "config": {
                     "DESCRIPTION": destination_node_name,
                     "INTERFACE_LAG": f"1/1/{destination_port}",
@@ -721,5 +722,51 @@ def parse_sls(csi_folder):
             fg="red",
         )
         return
+
+    return sls_variables
+
+
+def rename_sls_hostnames(sls_variables):
+    """Parse and rename SLS switch names.
+
+    The operation needs to be done in two passes to prevent naming conflicts.
+
+    Args:
+        sls_variables: Dictionary containing SLS variables.
+
+    Returns:
+        sls_variables: Dictionary containing renamed SLS variables.
+    """
+    # First pass rename leaf ==> leaf-bmc
+    for key, value in sls_variables["HMN_IPs"].copy().items():
+        new_name = key.replace("-leaf-", "-leaf-bmc-")
+        sls_variables["HMN_IPs"].pop(key)
+        sls_variables["HMN_IPs"][new_name] = value
+
+    for key, value in sls_variables["MTL_IPs"].copy().items():
+        new_name = key.replace("-leaf-", "-leaf-bmc-")
+        sls_variables["MTL_IPs"].pop(key)
+        sls_variables["MTL_IPs"][new_name] = value
+
+    for key, value in sls_variables["NMN_IPs"].copy().items():
+        new_name = key.replace("-leaf-", "-leaf-bmc-")
+        sls_variables["NMN_IPs"].pop(key)
+        sls_variables["NMN_IPs"][new_name] = value
+
+    # Second pass rename agg ==> leaf
+    for key, value in sls_variables["HMN_IPs"].copy().items():
+        new_name = key.replace("-agg-", "-leaf-")
+        sls_variables["HMN_IPs"].pop(key)
+        sls_variables["HMN_IPs"][new_name] = value
+
+    for key, value in sls_variables["MTL_IPs"].copy().items():
+        new_name = key.replace("-agg-", "-leaf-")
+        sls_variables["MTL_IPs"].pop(key)
+        sls_variables["MTL_IPs"][new_name] = value
+
+    for key, value in sls_variables["NMN_IPs"].copy().items():
+        new_name = key.replace("-agg-", "-leaf-")
+        sls_variables["NMN_IPs"].pop(key)
+        sls_variables["NMN_IPs"][new_name] = value
 
     return sls_variables

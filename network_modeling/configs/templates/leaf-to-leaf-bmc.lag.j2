@@ -4,7 +4,7 @@
 {%- if node.subtype == "leaf-bmc" %}
 interface lag ***===> {{ node.config.LAG_NUMBER }}
 no shutdown
-description 
+description ***===> {{ node.config.DESCRIPTION }}
 no routing
 vlan trunk native 1
 vlan trunk allowed 2,4,7

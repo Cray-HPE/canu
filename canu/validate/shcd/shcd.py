@@ -192,7 +192,9 @@ def get_node_common_name(name, mapper):
                     digits = re.findall(r"\d+", name)
                     tmp_id = int(digits[0]) * 2 + int(digits[1])
                 else:
-                    tmp_id = re.sub("^({})0*([1-9]*)".format(lookup_name), r"\2", name)
+                    tmp_id = re.sub(
+                        "^({})0*([1-9]*)".format(lookup_name), r"\2", name
+                    ).strip("-")
                 common_name = f"{tmp_name}{tmp_id:0>3}"
                 return common_name
     return common_name

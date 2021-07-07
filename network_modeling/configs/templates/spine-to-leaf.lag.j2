@@ -2,9 +2,10 @@
 ***===> sw-spine-to-leaf.lag.j2
 {%- for node in cabling.nodes %}
 {%- if node.subtype == "leaf" %}
+
 interface lag ***===> {{ node.config.LAG_NUMBER }}
 no shutdown
-description 
+description ***===> {{ node.config.DESCRIPTION }}
 no routing
 vlan trunk native 1
 vlan trunk allowed 2,4,7

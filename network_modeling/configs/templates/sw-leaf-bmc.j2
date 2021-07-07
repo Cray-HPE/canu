@@ -1,10 +1,11 @@
 {# sw-leaf-bmc #}
-hostname {{ HOSTNAME }}
-user admin group administrators password plaintext {{ PASSWORD }}
+***===> sw-leaf-bmc.j2
+hostname ***===> {{ HOSTNAME }}
+user admin group administrators password plaintext ***===> {{ PASSWORD }}
 no ip icmp redirect
-ntp server {{ NCN_W001 }}
-ntp server {{ NCN_W002 }}
-ntp server {{ NCN_W003 }}
+ntp server ***===> {{ NCN_W001 }}
+ntp server ***===> {{ NCN_W002 }}
+ntp server ***===> {{ NCN_W003 }}
 ntp enable
 
 ssh server vrf default
@@ -35,13 +36,13 @@ shutdown
 {% include 'bmc.j2' %}
 
 interface loopback 0
-    ip address {{ LOOPBACK_IP }}
-    ipv6 address {{ IPV6_IP }}
+    ip address ***===> {{ LOOPBACK_IP }}
+    ipv6 address ***===> {{ IPV6_IP }}
     ip ospf 1 area 0.0.0.0
     ipv6 ospfv3 1 area 0.0.0.0
 interface vlan 1
     ip mtu 9198
-    ip address {{ MTL_IP }}
+    ip address ***===> {{ MTL_IP }}
     ipv6 address autoconfig
     ip helper-address 10.92.100.222
     ipv6 ospfv3 1 area 0.0.0.0
@@ -49,14 +50,14 @@ interface vlan 1
 interface vlan 2
     description NMN
     ip mtu 9198
-    ip address {{ NMN_IP }}
+    ip address ***===> {{ NMN_IP }}
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
     ip igmp enable
 interface vlan 4
     description HMN
     ip mtu 9198
-    ip address {{ HMN_IP }}
+    ip address ***===> {{ HMN_IP }}
     ip helper-address 10.94.100.222
     ip ospf 1 area 0.0.0.0
     ip igmp enable
@@ -64,11 +65,12 @@ snmp-server vrf default
 snmpv3 user testuser auth md5 auth-pass plaintext testpass1 priv des priv-pass ciphertext testpass2
 
 router ospf 1
-    router-id {{ LOOPBACK_IP }}
+    router-id ***===> {{ LOOPBACK_IP }}
     area 0.0.0.0
 router ospfv3 1
-    router-id {{ LOOPBACK_IP }}
+    router-id ***===> {{ LOOPBACK_IP }}
     area 0.0.0.0
 https-server vrf default
 https-server vrf mgmt
+***===> end sw-leaf-bmc.j2
 {# end sw-leaf-bmc #}
