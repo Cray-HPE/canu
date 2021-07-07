@@ -2,6 +2,7 @@
 ***===> ncn-m.lag.j2
 {%- for node in cabling.nodes %}
 {%- if node.subtype == "master" %}
+
 interface lag ***===> {{ node.config.LAG_NUMBER }} multi-chassis
 no shutdown
 description ***===> {{ node.config.DESCRIPTION }}

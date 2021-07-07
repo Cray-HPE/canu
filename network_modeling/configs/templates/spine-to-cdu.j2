@@ -2,6 +2,7 @@
 ***===> spine-to-cdu.j2
 {%- for node in cabling.nodes %}
 {%- if node.subtype == "cdu" %}
+
 interface ***===> {{ node.config.INTERFACE_LAG }}
     no shutdown
     mtu 9198

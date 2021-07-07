@@ -1762,6 +1762,3 @@ def generate_test_file(file_name):
             ws3.cell(column=col + 9, row=row + 15, value=f"{test_data3[row][col]}")
 
     wb.save(filename=test_file)
-
-
-generate_test_file(test_file)
