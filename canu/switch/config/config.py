@@ -8,7 +8,7 @@ import sys
 
 import click
 from click_help_colors import HelpColorsCommand
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
 import natsort
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import ruamel.yaml
@@ -52,6 +52,7 @@ network_templates_folder = os.path.join(
 env = Environment(
     loader=FileSystemLoader(network_templates_folder),
     # trim_blocks=True,
+    undefined=StrictUndefined,
 )
 
 
@@ -206,7 +207,6 @@ def config(
     # For versions of Shasta < 1.6, the SLS Hostnames need to be renamed
     if ctx.obj["shasta"]:
         shasta = ctx.obj["shasta"]
-        # print("shasta", shasta)
         if float(shasta) < 1.6:
             sls_variables = rename_sls_hostnames(sls_variables)
 
@@ -263,120 +263,72 @@ def generate_switch_config(shcd_node_list, factory, switch_name, sls_variables):
         "primary" if is_primary else "secondary"
     ]
     template = env.get_template(template_name)
-
-    HOSTNAME = switch_name
-    # {{ PASSWORD }}
-    NCN_W001 = sls_variables["ncn_w001"]
-    NCN_W002 = sls_variables["ncn_w002"]
-    NCN_W003 = sls_variables["ncn_w003"]
-    NMN = sls_variables["NMN"]
-    HMN = sls_variables["HMN"]
-    HMN_MTN = sls_variables["HMN_MTN"]
-    NMN_MTN = sls_variables["NMN_MTN"]
-
-    HMN_IP_GATEWAY = sls_variables["HMN_IP_GATEWAY"]
-    MTL_IP_GATEWAY = sls_variables["MTL_IP_GATEWAY"]
-    NMN_IP_GATEWAY = sls_variables["NMN_IP_GATEWAY"]
-    CAN_IP_GATEWAY = sls_variables["CAN_IP_GATEWAY"]
-
-    CAN_IP_PRIMARY = sls_variables["CAN_IP_PRIMARY"]
-    CAN_IP_SECONDARY = sls_variables["CAN_IP_SECONDARY"]
+    variables = {
+        "HOSTNAME": switch_name,
+        "PASSWORD": "I DONT KNOW",
+        "NCN_W001": sls_variables["ncn_w001"],
+        "NCN_W002": sls_variables["ncn_w002"],
+        "NCN_W003": sls_variables["ncn_w003"],
+        "NMN": sls_variables["NMN"],
+        "HMN": sls_variables["HMN"],
+        "HMN_MTN": sls_variables["HMN_MTN"],
+        "NMN_MTN": sls_variables["NMN_MTN"],
+        "HMN_IP_GATEWAY": sls_variables["HMN_IP_GATEWAY"],
+        "MTL_IP_GATEWAY": sls_variables["MTL_IP_GATEWAY"],
+        "NMN_IP_GATEWAY": sls_variables["NMN_IP_GATEWAY"],
+        "CAN_IP_GATEWAY": sls_variables["CAN_IP_GATEWAY"],
+        "CAN_IP_PRIMARY": sls_variables["CAN_IP_PRIMARY"],
+        "CAN_IP_SECONDARY": sls_variables["CAN_IP_SECONDARY"],
+    }
 
     cabling = {}
     cabling["nodes"] = get_switch_nodes(switch_name, shcd_node_list, factory)
 
     if node_shasta_name == "sw-spine" or node_shasta_name == "sw-leaf":
+        hostname = variables["HOSTNAME"]
 
-        HMN_IP = sls_variables["HMN_IPs"][HOSTNAME]
-        MTL_IP = sls_variables["MTL_IPs"][HOSTNAME]
-        NMN_IP = sls_variables["NMN_IPs"][HOSTNAME]
+        variables["HMN_IP"] = sls_variables["HMN_IPs"][hostname]
+        variables["MTL_IP"] = sls_variables["MTL_IPs"][hostname]
+        variables["NMN_IP"] = sls_variables["NMN_IPs"][hostname]
 
         # Get connections to switch pair
         pair_connections = get_pair_connections(cabling["nodes"], switch_name)
-        VSX_KEEPALIVE = pair_connections[0]
-        VSX_ISL_PORT1 = pair_connections[1]
-        VSX_ISL_PORT2 = pair_connections[2]
+        variables["VSX_KEEPALIVE"] = pair_connections[0]
+        variables["VSX_ISL_PORT1"] = pair_connections[1]
+        variables["VSX_ISL_PORT2"] = pair_connections[2]
 
-        # {{ LOOPBACK_IP }}
-        # {{ IPV6_IP }}
+        variables["LOOPBACK_IP"] = "I DONT KNOW"
+        variables["IPV6_IP"] = "I DONT KNOW"
 
     elif node_shasta_name == "sw-cdu":
 
-        HMN_IP = None
-        MTL_IP = None
-        NMN_IP = None
-
         # Get connections to switch pair
         pair_connections = get_pair_connections(cabling["nodes"], switch_name)
-        VSX_KEEPALIVE = pair_connections[0]
-        VSX_ISL_PORT1 = pair_connections[1]
-        VSX_ISL_PORT2 = pair_connections[2]
-        # {{ LOOPBACK_IP }}
-        # {{ IPV6_IP }}
+        variables["VSX_KEEPALIVE"] = pair_connections[0]
+        variables["VSX_ISL_PORT1"] = pair_connections[1]
+        variables["VSX_ISL_PORT2"] = pair_connections[2]
+
+        variables["LOOPBACK_IP"] = "I DONT KNOW"
+        variables["IPV6_IP"] = "I DONT KNOW"
 
     elif node_shasta_name == "sw-leaf-bmc":
-        # Use `sw-leaf-bmc.j2` template
-        print("leaf-bmc")
-        # Should the template include: {% include 'ncn-m.lag.j2' %} {% include 'ncn-w.lag.j2' %} {% include 'ncn-s.lag.j2' %}
+        hostname = variables["HOSTNAME"]
+
         # Should there be a leaf-bmc-to-leaf template?
 
-        # [{'subtype': 'master', 'config': {'DESCRIPTION': 'ncn-m002', 'INTERFACE_LAG': '1/1/29', 'LAG_NUMBER': 29}},
-        # {'subtype': 'worker', 'config': {'DESCRIPTION': 'ncn-w001', 'INTERFACE_LAG': '1/1/30', 'LAG_NUMBER': 30}},
-        # {'subtype': 'worker', 'config': {'DESCRIPTION': 'ncn-w002', 'INTERFACE_LAG': '1/1/31', 'LAG_NUMBER': 31}},
-        # {'subtype': 'worker', 'config': {'DESCRIPTION': 'ncn-w003', 'INTERFACE_LAG': '1/1/32', 'LAG_NUMBER': 32}},
-        # {'subtype': 'storage', 'config': {'DESCRIPTION': 'ncn-s001', 'INTERFACE_LAG': '1/1/33', 'LAG_NUMBER': 33}},
-        # {'subtype': 'storage', 'config': {'DESCRIPTION': 'ncn-s002', 'INTERFACE_LAG': '1/1/34', 'LAG_NUMBER': 34}},
-        # {'subtype': 'application', 'config':
-        #   {'DESCRIPTION': 'uan001', 'INTERFACE_LAG': '1/1/35', 'INTERFACE_NUMBER': 'I DONT KNOW', 'LAG_NUMBER': 35}},
-        # {'subtype': 'application', 'config':
-        #   {'DESCRIPTION': 'uan002', 'INTERFACE_LAG': '1/1/36', 'INTERFACE_NUMBER': 'I DONT KNOW', 'LAG_NUMBER': 36}},
-        # {'subtype': 'application', 'config':
-        #   {'DESCRIPTION': 'uan003', 'INTERFACE_LAG': '1/1/37', 'INTERFACE_NUMBER': 'I DONT KNOW', 'LAG_NUMBER': 37}},
-        # {'subtype': 'application', 'config':
-        #   {'DESCRIPTION': 'uan004', 'INTERFACE_LAG': '1/1/38', 'INTERFACE_NUMBER': 'I DONT KNOW', 'LAG_NUMBER': 38}},
-        # {'subtype': 'application', 'config':
-        #   {'DESCRIPTION': 'uan005', 'INTERFACE_LAG': '1/1/39', 'INTERFACE_NUMBER': 'I DONT KNOW', 'LAG_NUMBER': 39}},
-        # {'subtype': 'application', 'config':
-        #   {'DESCRIPTION': 'uan006', 'INTERFACE_LAG': '1/1/40', 'INTERFACE_NUMBER': 'I DONT KNOW', 'LAG_NUMBER': 40}},
-        # {'subtype': 'leaf', 'config': {'DESCRIPTION': 'sw-leaf-001', 'LAG_NUMBER': 51, 'INTERFACE_LAG': '1/1/51'}},
-        # {'subtype': 'leaf', 'config': {'DESCRIPTION': 'sw-leaf-002', 'LAG_NUMBER': 52, 'INTERFACE_LAG': '1/1/52'}}]
+        variables["HMN_IP"] = sls_variables["HMN_IPs"][hostname]
+        variables["MTL_IP"] = sls_variables["MTL_IPs"][hostname]
+        variables["NMN_IP"] = sls_variables["NMN_IPs"][hostname]
 
-        HMN_IP = sls_variables["HMN_IPs"][HOSTNAME]
-        MTL_IP = sls_variables["MTL_IPs"][HOSTNAME]
-        NMN_IP = sls_variables["NMN_IPs"][HOSTNAME]
-
-        VSX_KEEPALIVE = None
-        VSX_ISL_PORT1 = None
-        VSX_ISL_PORT2 = None
-
-        # {{ LOOPBACK_IP }}
-        # {{ IPV6_IP }}
+        variables["LOOPBACK_IP"] = "I DONT KNOW"
+        variables["IPV6_IP"] = "I DONT KNOW"
 
         # sw-leaf-bmc-uplink.j2
-        # {{ LEAF_UPLINK_PORT_PRIMARY }} #connection from leaf-bmc to spine primary
-        # {{ LEAF_UPLINK_PORT_SECONDARY }} #connection from leaf-bmc to spine secondary (from SHCD)
+        variables["LEAF_BMC_UPLINK_PORT_PRIMARY"] = "I DONT KNOW"
+        variables["LEAF_BMC_UPLINK_PORT_SECONDARY"] = "I DONT KNOW"
 
     switch_config = template.render(
-        HOSTNAME=HOSTNAME,
-        NCN_W001=NCN_W001,
-        NCN_W002=NCN_W002,
-        NCN_W003=NCN_W003,
-        NMN=NMN,
-        HMN=HMN,
-        HMN_MTN=HMN_MTN,
-        NMN_MTN=NMN_MTN,
-        VSX_KEEPALIVE=VSX_KEEPALIVE,
-        VSX_ISL_PORT1=VSX_ISL_PORT1,
-        VSX_ISL_PORT2=VSX_ISL_PORT2,
-        HMN_IP=HMN_IP,
-        MTL_IP=MTL_IP,
-        NMN_IP=NMN_IP,
-        HMN_IP_GATEWAY=HMN_IP_GATEWAY,
-        MTL_IP_GATEWAY=MTL_IP_GATEWAY,
-        NMN_IP_GATEWAY=NMN_IP_GATEWAY,
-        CAN_IP_GATEWAY=CAN_IP_GATEWAY,
-        CAN_IP_PRIMARY=CAN_IP_PRIMARY,
-        CAN_IP_SECONDARY=CAN_IP_SECONDARY,
+        variables=variables,
         cabling=cabling,
     )
 
@@ -432,8 +384,8 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
         nodes_by_name[name] = node_tmp
         nodes_by_id[node_tmp["id"]] = node_tmp
 
+    source_id = nodes_by_name[switch_name]["id"]
     for port in nodes_by_name[switch_name]["ports"]:
-
         destination_node_name = nodes_by_id[port["destination_node_id"]]["common_name"]
         source_port = port["port"]
 
@@ -442,7 +394,9 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
         if shasta_name == "ncn-m":
             new_node = {
                 "subtype": "master",
-                # "slot": get_slot(source_id, destination_node_id),
+                "slot": get_destination_slot(
+                    source_id, destination_node_name, nodes_by_name
+                ),
                 "config": {
                     "DESCRIPTION": destination_node_name,
                     "INTERFACE_LAG": f"1/1/{source_port}",
@@ -453,6 +407,9 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
         elif shasta_name == "ncn-s":
             new_node = {
                 "subtype": "storage",
+                "slot": get_destination_slot(
+                    source_id, destination_node_name, nodes_by_name
+                ),
                 "config": {
                     "DESCRIPTION": destination_node_name,
                     "INTERFACE_LAG": f"1/1/{source_port}",
@@ -463,6 +420,30 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
         elif shasta_name == "ncn-w":
             new_node = {
                 "subtype": "worker",
+                "slot": get_destination_slot(
+                    source_id, destination_node_name, nodes_by_name
+                ),
+                "config": {
+                    "DESCRIPTION": destination_node_name,
+                    "INTERFACE_LAG": f"1/1/{source_port}",
+                    "LAG_NUMBER": source_port,
+                },
+            }
+            nodes.append(new_node)
+        elif shasta_name == "cec":
+            new_node = {
+                "subtype": "cec",
+                "slot": None,
+                "config": {
+                    "DESCRIPTION": destination_node_name,
+                    "INTERFACE_NUMBER": f"1/1/{source_port}",
+                },
+            }
+            nodes.append(new_node)
+        elif shasta_name == "cmm":
+            new_node = {
+                "subtype": "cmm",
+                "slot": None,
                 "config": {
                     "DESCRIPTION": destination_node_name,
                     "INTERFACE_LAG": f"1/1/{source_port}",
@@ -473,6 +454,9 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
         elif shasta_name == "uan":
             new_node = {
                 "subtype": "uan",
+                "slot": get_destination_slot(
+                    source_id, destination_node_name, nodes_by_name
+                ),
                 "config": {
                     "DESCRIPTION": destination_node_name,
                     "INTERFACE_LAG": f"1/1/{source_port}",
@@ -484,6 +468,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
         elif shasta_name == "sw-spine":
             new_node = {
                 "subtype": "spine",
+                "slot": None,
                 "config": {
                     "DESCRIPTION": destination_node_name,
                     "LAG_NUMBER": source_port,
@@ -495,6 +480,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
         elif shasta_name == "sw-cdu":
             new_node = {
                 "subtype": "cdu",
+                "slot": None,
                 "config": {
                     "DESCRIPTION": destination_node_name,
                     "INTERFACE_LAG": f"1/1/{source_port}",
@@ -505,6 +491,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
         elif shasta_name == "sw-leaf":
             new_node = {
                 "subtype": "leaf",
+                "slot": None,
                 "config": {
                     "DESCRIPTION": destination_node_name,
                     "LAG_NUMBER": source_port,
@@ -515,6 +502,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
         elif shasta_name == "sw-leaf-bmc":
             new_node = {
                 "subtype": "leaf-bmc",
+                "slot": None,
                 "config": {
                     "DESCRIPTION": destination_node_name,
                     "LAG_NUMBER": source_port,
@@ -771,3 +759,23 @@ def rename_sls_hostnames(sls_variables):
         sls_variables["NMN_IPs"][new_name] = value
 
     return sls_variables
+
+
+def get_destination_slot(source_id, destination_node_name, nodes_by_name):
+    """Get the destination slot type.
+
+    Args:
+        source_id: ID of the source switch.
+        destination_node_name: Name of the destination.
+        nodes_by_name: Dictionary of the nodes.
+
+    Returns:
+        destination_slot: Destination slot type
+    """
+    destination_slot = None
+
+    for port in nodes_by_name[destination_node_name]["ports"]:
+        if port["destination_node_id"] == source_id:
+            destination_slot = port["slot"]
+
+    return destination_slot

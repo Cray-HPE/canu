@@ -69,7 +69,7 @@ def test_validate_cabling():
             ],
         )
         assert result.exit_code == 0
-        assert "sw-spine-001 connects to 3 nodes:" in str(result.output)
+        assert "sw-spine-001 connects to 4 nodes:" in str(result.output)
 
 
 @responses.activate
@@ -177,7 +177,7 @@ def test_validate_cabling_file():
             ],
         )
         assert result.exit_code == 0
-        assert "sw-spine-001 connects to 3 nodes:" in str(result.output)
+        assert "sw-spine-001 connects to 4 nodes:" in str(result.output)
 
 
 def test_validate_cabling_missing_ips():
@@ -547,6 +547,19 @@ lldp_neighbors_json1 = {
                 "port_id_subtype": "link_local_addr",
             },
             "port_id": "99:99:99:99:99:99",
+        }
+    },
+    "1%2F1%2F6": {
+        "aa:aa:aa:aa:aa:aa,1/1/6": {
+            "chassis_id": "aa:aa:aa:aa:aa:aa",
+            "mac_addr": "aa:aa:aa:aa:aa:aa",
+            "neighbor_info": {
+                "chassis_description": "cdu0sw1",
+                "chassis_name": "cdu0sw1",
+                "port_description": "1/1/6",
+                "port_id_subtype": "if_name",
+            },
+            "port_id": "1/1/6",
         }
     },
 }

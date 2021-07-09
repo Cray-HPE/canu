@@ -1,17 +1,15 @@
 {# bmc #}
 ***===> bmc.j2
-{%- for node in cabling.nodes %}
-{%- if node.subtype == "bmc" %}
+{%- for node in cabling.nodes if node.slot == "bmc" %}
 
-interface ***===> {{ node.config.INTERFACE }}
-no shutdown
-mtu 9198
-description ***===> {{ node.config.DESCRIPTION }}    
-no routing
-vlan access 4
-spanning-tree bpdu-guard
-spanning-tree port-type admin-edge
-{%- endif %}
+interface ***===> {{ node.config.INTERFACE_LAG }}
+    no shutdown
+    mtu 9198
+    description ***===> {{ node.config.DESCRIPTION }}    
+    no routing
+    vlan access 4
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
 {%- endfor %}
 ***===> end bmc.j2
 {# end bmc #}

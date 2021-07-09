@@ -13,7 +13,7 @@ test_file_name = "Full_Architecture_Golden_Config_0.0.6.xlsx"
 test_file = os.path.join(test_file_directory, "data", test_file_name)
 architecture = "full"
 tabs = "INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
-corners = "J14,T42,J14,T48,J14,T24,J14,T23"
+corners = "J14,T44,J14,T48,J14,T24,J14,T23"
 csi_folder = "."
 shasta = "1.4"
 switch_name = "sw-spine-001"
@@ -271,9 +271,10 @@ def test_switch_config_leaf_primary():
         assert "interface ***===> 1/1/7" in str(result.output)
         assert "description ***===> ncn-s001" in str(result.output)
 
-        # uan connection needed
-
-        # leaf-bmc connection needed
+        # leaf-bmc
+        assert "interface lag ***===> 51" in str(result.output)
+        assert "description ***===> sw-leaf-bmc-001" in str(result.output)
+        assert "interface ***===> 1/1/51" in str(result.output)
 
         # sw-spine-002
         assert "interface lag ***===> 52" in str(result.output)
@@ -408,9 +409,10 @@ def test_switch_config_leaf_secondary():
         assert "interface ***===> 1/1/7" in str(result.output)
         assert "description ***===> ncn-s001" in str(result.output)
 
-        # uan connection needed
-
-        # leaf-bmc connection needed
+        # leaf-bmc
+        assert "interface lag ***===> 51" in str(result.output)
+        assert "description ***===> sw-leaf-bmc-001" in str(result.output)
+        assert "interface ***===> 1/1/51" in str(result.output)
 
         # sw-spine-002
         assert "interface lag ***===> 52" in str(result.output)
@@ -486,17 +488,25 @@ def test_switch_config_cdu_primary():
             result.output
         )
 
-        # need cmm connection
-        # need cec connection
+        # cmm
+        assert "interface lag ***===> 2 static" in str(result.output)
+        assert "description ***===> cmm000" in str(result.output)
+        assert "interface ***===> 1/1/2" in str(result.output)
+
+        assert "interface lag ***===> 5 static" in str(result.output)
+        assert "description ***===> cmm003" in str(result.output)
+        assert "interface ***===> 1/1/5" in str(result.output)
+
+        # cec
+        assert "interface ***===> 1/1/1" in str(result.output)
+        assert "description ***===> cec000" in str(result.output)
 
         # sw-spine-002
-        # assert "interface lag ***===> 49" in str(result.output)
-        # assert "description ***===> sw-spine-002" in str(result.output)
+        # ip address ***===> ****TBD
         assert "interface ***===> 1/1/49" in str(result.output)
 
         # sw-spine-001
-        # assert "interface lag ***===> 50" in str(result.output)
-        # assert "description ***===> sw-spine-001" in str(result.output)
+        # ip address ***===> ****TBD
         assert "interface ***===> 1/1/50" in str(result.output)
 
         # VSX_KEEPALIVE
@@ -559,17 +569,21 @@ def test_switch_config_cdu_secondary():
             result.output
         )
 
-        # need cmm connection
-        # need cec connection
+        # cmm
+        assert "interface lag ***===> 2 static" in str(result.output)
+        assert "description ***===> cmm000" in str(result.output)
+        assert "interface ***===> 1/1/2" in str(result.output)
+
+        assert "interface lag ***===> 5 static" in str(result.output)
+        assert "description ***===> cmm003" in str(result.output)
+        assert "interface ***===> 1/1/5" in str(result.output)
 
         # sw-spine-002
-        # assert "interface lag ***===> 49" in str(result.output)
-        # assert "description ***===> sw-spine-002" in str(result.output)
+        # ip address ***===> ****TBD
         assert "interface ***===> 1/1/49" in str(result.output)
 
         # sw-spine-001
-        # assert "interface lag ***===> 50" in str(result.output)
-        # assert "description ***===> sw-spine-001" in str(result.output)
+        # ip address ***===> ****TBD
         assert "interface ***===> 1/1/50" in str(result.output)
 
         # VSX_KEEPALIVE
@@ -614,7 +628,6 @@ def test_switch_config_leaf_bmc():
                 leaf_bmc,
             ],
         )
-        print(result.output)
         assert result.exit_code == 0
         assert "hostname ***===> sw-leaf-bmc-001" in str(result.output)
         # NTP
@@ -633,13 +646,20 @@ def test_switch_config_leaf_bmc():
             result.output
         )
 
-        # need 'sw-leaf-bmc-uplink.j2' connection
-        # {{ LEAF_BMC_UPLINK_PORT_PRIMARY }}
-        # {{ LEAF_BMC_UPLINK_PORT_SECONDARY }}
+        # 'sw-leaf-bmc-uplink.j2'
+        assert "interface lag 99" in str(result.output)
+        # interface ***===> {{ LEAF_BMC_UPLINK_PORT_PRIMARY }}
+        # interface ***===> {{ LEAF_BMC_UPLINK_PORT_SECONDARY }}
 
-        # need 'bmc.j2' connection
-        # {{ node.config.INTERFACE }}
-        # {{ node.config.DESCRIPTION }}
+        # 'bmc.j2' connection
+        assert "interface ***===> 1/1/1" in str(result.output)
+        assert "description ***===> ncn-m001" in str(result.output)
+        assert "interface ***===> 1/1/4" in str(result.output)
+        assert "description ***===> ncn-w001" in str(result.output)
+        assert "interface ***===> 1/1/7" in str(result.output)
+        assert "description ***===> ncn-s001" in str(result.output)
+        assert "interface ***===> 1/1/10" in str(result.output)
+        assert "description ***===> uan001" in str(result.output)
 
         # VLAN 1
         # MTL_IP
