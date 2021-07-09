@@ -1,7 +1,7 @@
 {# cmm #}
 ***===> cmm.j2
-{%- for node in cabling.nodes %}
-{%- if node.subtype == "cmm" %}
+{%- for node in cabling.nodes if node.subtype == "cmm" %}
+
 interface lag ***===> {{ node.config.LAG_NUMBER }} static
     no shutdown
     description ***===> {{ node.config.DESCRIPTION }}
@@ -15,7 +15,6 @@ interface ***===> {{ node.config.INTERFACE_LAG }}
     mtu 9198
     description ***===> {{ node.config.DESCRIPTION }}    
     interface lag ***===> {{ node.config.LAG_NUMBER }}
-{%- endif %}
 {%- endfor %}
 ***===> end cmm.j2
 {#- end cmm #}

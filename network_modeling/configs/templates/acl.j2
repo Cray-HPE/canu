@@ -1,28 +1,28 @@
 {# acl #}
 access-list ip nmn-hmn
-{%- if NMN and HMN %}
-    deny any ***===> {{ NMN }} ***===> {{ HMN }}
+{%- if variables.NMN and variables.HMN %}
+    deny any ***===> {{ variables.NMN }} ***===> {{ variables.HMN }}
 {%- endif %}
-{%- if NMN and HMN_MTN %}
-    deny any ***===NMN> {{ NMN }} ***===HMN_MTN> {{ HMN_MTN }}
+{%- if variables.NMN and variables.HMN_MTN %}
+    deny any ***===NMN> {{ variables.NMN }} ***===HMN_MTN> {{ variables.HMN_MTN }}
 {%- endif %}
-{%- if HMN and NMN %}
-    deny any ***===> {{ HMN}} ***===> {{ NMN }}
+{%- if variables.HMN and variables.NMN %}
+    deny any ***===> {{ variables.HMN}} ***===> {{ variables.NMN }}
 {%- endif %}
-{%- if HMN and NMN_MTN %}
-    deny any ***===> {{ HMN }} ***===> {{ NMN_MTN }}
+{%- if variables.HMN and variables.NMN_MTN %}
+    deny any ***===> {{ variables.HMN }} ***===> {{ variables.NMN_MTN }}
 {%- endif %}
-{%- if NMN_MTN and HMN %}
-    deny any ***===> {{ NMN_MTN }} ***===> {{ HMN }}
+{%- if variables.NMN_MTN and variables.HMN %}
+    deny any ***===> {{ variables.NMN_MTN }} ***===> {{ variables.HMN }}
 {%- endif %}
-{%- if NMN_MTN and HMN_MTN %}
-    deny any ***===> {{ NMN_MTN }} ***===> {{ HMN_MTN }}
+{%- if variables.NMN_MTN and variables.HMN_MTN %}
+    deny any ***===> {{ variables.NMN_MTN }} ***===> {{ variables.HMN_MTN }}
 {%- endif %}
-{%- if HMN_MTN and NMN %}
-    deny any ***===> {{ HMN_MTN }} ***===> {{ NMN }}
+{%- if variables.HMN_MTN and variables.NMN %}
+    deny any ***===> {{ variables.HMN_MTN }} ***===> {{ variables.NMN }}
 {%- endif %}
-{%- if HMN_MTN and NMN_MTN %}
-    deny any ***===> {{ HMN_MTN }} ***===> {{ NMN_MTN }}
+{%- if variables.HMN_MTN and variables.NMN_MTN %}
+    deny any ***===> {{ variables.HMN_MTN }} ***===> {{ variables.NMN_MTN }}
 {%- endif %}
     permit any any any
 {#- end acl #}

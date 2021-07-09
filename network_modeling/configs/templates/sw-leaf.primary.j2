@@ -1,12 +1,12 @@
 {# sw-leaf.primary #}
 ***===> sw-leaf.primary.j2
-hostname ***===> {{ HOSTNAME }}
-user admin group administrators password plaintext ***===> {{ PASSWORD }}
+hostname ***===> {{ variables.HOSTNAME }}
+user admin group administrators password plaintext ***===> {{ variables.PASSWORD }}
 no ip icmp redirect
 vrf keepalive
-ntp server ***===> {{ NCN_W001 }}
-ntp server ***===> {{ NCN_W002 }}
-ntp server ***===> {{ NCN_W003 }}
+ntp server ***===> {{ variables.NCN_W001 }}
+ntp server ***===> {{ variables.NCN_W002 }}
+ntp server ***===> {{ variables.NCN_W003 }}
 ntp enable
 !
 !
@@ -50,29 +50,29 @@ interface lag 99
     vlan trunk native 1 tag
     vlan trunk allowed all
     lacp mode active
-interface ***===> {{ VSX_KEEPALIVE }}
+interface ***===> {{ variables.VSX_KEEPALIVE }}
     no shutdown
     vrf attach keepalive
     description vsx vsx keepalive
     ip address 192.168.255.0/31
-interface ***===> {{ VSX_ISL_PORT1 }}
+interface ***===> {{ variables.VSX_ISL_PORT1 }}
     no shutdown
     mtu 9198
     description vsx isl 
     lag 99
-interface ***===> {{ VSX_ISL_PORT2 }}
+interface ***===> {{ variables.VSX_ISL_PORT2 }}
     no shutdown
     mtu 9198
     description vsx isl 
     lag 99
 interface loopback 0
-    ip address ***===> {{ LOOPBACK_IP }}
+    ip address ***===> {{ variables.LOOPBACK_IP }}
     ipv6 address fd01::65/64
     ip ospf 1 area 0.0.0.0
     ipv6 ospfv3 1 area 0.0.0.0
 interface vlan 1
     ip mtu 9198
-    ip address ***===> {{ MTL_IP }}
+    ip address ***===> {{ variables.MTL_IP }}
     ipv6 address autoconfig
     ip helper-address 10.92.100.222
     ipv6 ospfv3 1 area 0.0.0.0
@@ -80,14 +80,14 @@ interface vlan 1
 interface vlan 2
     description NMN
     ip mtu 9198
-    ip address ***===> {{ NMN_IP }}
+    ip address ***===> {{ variables.NMN_IP }}
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
     ip igmp enable
 interface vlan 4
     description HMN
     ip mtu 9198
-    ip address ***===> {{ HMN_IP }}
+    ip address ***===> {{ variables.HMN_IP }}
     ip helper-address 10.94.100.222
     ip ospf 1 area 0.0.0.0
     ip igmp enable
@@ -108,10 +108,10 @@ vsx
 !
 !
 router ospf 1
-    router-id ***===> {{ LOOPBACK_IP }}
+    router-id ***===> {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 router ospfv3 1
-    router-id ***===> {{ LOOPBACK_IP }}
+    router-id ***===> {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 https-server vrf default
 https-server vrf mgmt
