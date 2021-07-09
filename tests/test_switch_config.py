@@ -277,13 +277,15 @@ def test_switch_config_leaf_primary():
 
         # sw-spine-002
         assert "interface lag ***===> 52" in str(result.output)
-        assert "description ***===> sw-spine-002" in str(result.output)
+        assert "description leaf_to_spines_lag" in str(result.output)
+
         assert "interface ***===> 1/1/52" in str(result.output)
+        assert "description ***===> sw-spine-002" in str(result.output)
+        assert "lag ***===> 52" in str(result.output)
 
         # sw-spine-001
-        assert "interface lag ***===> 53" in str(result.output)
-        assert "description ***===> sw-spine-001" in str(result.output)
         assert "interface ***===> 1/1/53" in str(result.output)
+        assert "description ***===> sw-spine-001" in str(result.output)
 
         # VLAN 1
         # MTL_IP
@@ -412,13 +414,15 @@ def test_switch_config_leaf_secondary():
 
         # sw-spine-002
         assert "interface lag ***===> 52" in str(result.output)
-        assert "description ***===> sw-spine-002" in str(result.output)
+        assert "description leaf_to_spines_lag" in str(result.output)
+
         assert "interface ***===> 1/1/52" in str(result.output)
+        assert "description ***===> sw-spine-002" in str(result.output)
+        assert "lag ***===> 52" in str(result.output)
 
         # sw-spine-001
-        assert "interface lag ***===> 53" in str(result.output)
-        assert "description ***===> sw-spine-001" in str(result.output)
         assert "interface ***===> 1/1/53" in str(result.output)
+        assert "description ***===> sw-spine-001" in str(result.output)
 
         # VLAN 1
         # MTL_IP
@@ -610,6 +614,7 @@ def test_switch_config_leaf_bmc():
                 leaf_bmc,
             ],
         )
+        print(result.output)
         assert result.exit_code == 0
         assert "hostname ***===> sw-leaf-bmc-001" in str(result.output)
         # NTP
@@ -629,11 +634,24 @@ def test_switch_config_leaf_bmc():
         )
 
         # need 'sw-leaf-bmc-uplink.j2' connection
-        # need 'bmc.j2' connection
+        # {{ LEAF_BMC_UPLINK_PORT_PRIMARY }}
+        # {{ LEAF_BMC_UPLINK_PORT_SECONDARY }}
 
+        # need 'bmc.j2' connection
+        # {{ node.config.INTERFACE }}
+        # {{ node.config.DESCRIPTION }}
+
+        # VLAN 1
         # MTL_IP
+        assert "ip address ***===> 192.168.1.12" in str(result.output)
+
+        # VLAN 2
         # NMN_IP
+        assert "ip address ***===> 192.168.3.12" in str(result.output)
+
+        # VLAN 4
         # HMN_IP
+        assert "ip address ***===> 192.168.0.12" in str(result.output)
 
         # LOOPBACK_IP
         # assert "router-id ***===>" in str(result.output)
