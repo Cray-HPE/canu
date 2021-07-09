@@ -80,6 +80,16 @@ network_v2:
       connections:
         - name: "spine"
           speed: 100
+    - name: "cec"
+      model: "cec"
+      connections:
+        - name: "mountain_compute_leaf"
+          speed: 1
+    - name: "cmm"
+      model: "cmm"
+      connections:
+        - name: "mountain_compute_leaf"
+          speed: 10
   lookup_mapper:
     - lookup_name: ["mn"]
       shasta_name: "ncn-m"
@@ -117,6 +127,12 @@ network_v2:
     - lookup_name: ["sw-edge"]
       shasta_name: "sw-edge"
       architecture_type: "customer_edge_router"
+    - lookup_name: ["cec"]
+      shasta_name: "cec"
+      architecture_type: "cec"
+    - lookup_name: ["cmm"]
+      shasta_name: "cmm"
+      architecture_type: "cmm"
 network_v2_tds:
   name: "Version 2 TDS"
   description: "Aruba Hardware"
@@ -172,6 +188,16 @@ network_v2_tds:
       connections:
         - name: "mountain_compute_leaf"
           speed: 10
+    - name: "cec"
+      model: "cec"
+      connections:
+        - name: "mountain_compute_leaf"
+          speed: 1
+    - name: "cmm"
+      model: "cmm"
+      connections:
+        - name: "mountain_compute_leaf"
+          speed: 10
   lookup_mapper:
     - lookup_name:
         - "mn"
@@ -205,6 +231,14 @@ network_v2_tds:
         - "sw-100g"
       shasta_name: "sw-edge"
       architecture_type: "customer_edge_router"
+    - lookup_name: 
+        - "cec"
+      shasta_name: "cec"
+      architecture_type: "cec"
+    - lookup_name: 
+        - "cmm"
+      shasta_name: "cmm"
+      architecture_type: "cmm"
 network_v1:
   name: "Dell and Mellanox Architecture"
   description: "Dell and Mellanox Hardware"
