@@ -1,21 +1,29 @@
 {# leaf-to-spine.lag #}
 ***===> leaf-to-spine.lag.j2
-{%- for node in cabling.nodes %}
-{%- if node.subtype == "spine" %}
+{%- set ns = namespace(lag1='') %}
+{%- for node in cabling.nodes if node.subtype == "spine" %}
+{#- Use the namespace to set the first of the two connections from the leaf to a single spine
+They need to be on a single lag 
+Two Separate interfaces e.g. (1/1/53, 1/1/54) #}
+{%- if ns.lag1 == '' %}
+{%- set ns.lag1 = node.config.LAG_NUMBER %}
+interface lag ***===> {{ ns.lag1 }}
+    no shutdown
+    description leaf_to_spines_lag
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 2,4,7,10
+    lacp mode active
+{%- endif %}
+{%- endfor %}
 
-interface lag ***===> {{ node.config.LAG_NUMBER }}
-no shutdown
-description ***===> {{ node.config.DESCRIPTION }}
-no routing
-vlan trunk native 1
-vlan trunk allowed 2,4,7,10
-lacp mode active
+{%- for node in cabling.nodes if node.subtype == "spine"%}
 
 interface ***===> {{ node.config.INTERFACE_LAG }}
-no shutdown
-mtu 9198
-lag ***===> {{ node.config.LAG_NUMBER }}
-{%- endif %}
+    no shutdown
+    mtu 9198
+    description ***===> {{ node.config.DESCRIPTION }}
+    lag ***===> {{ ns.lag1 }}
 {%- endfor %}
 ***===> end leaf-to-spine.lag.j2
 {#- end leaf-to-spine.lag #}

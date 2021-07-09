@@ -6,6 +6,7 @@
 interface ***===> {{ node.config.INTERFACE_LAG }}
     no shutdown
     mtu 9198
+    description ***===> {{ node.config.DESCRIPTION }}
     ip address ***===> {{ node.config.PT_TO_PT_IP }}
     ip ospf 1 area 0.0.0.0
     ip ospf network point-to-point

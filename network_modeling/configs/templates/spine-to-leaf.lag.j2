@@ -4,18 +4,18 @@
 {%- if node.subtype == "leaf" %}
 
 interface lag ***===> {{ node.config.LAG_NUMBER }}
-no shutdown
-description ***===> {{ node.config.DESCRIPTION }}
-no routing
-vlan trunk native 1
-vlan trunk allowed 2,4,7
-lacp mode active
-spanning-tree root-guard
+    no shutdown
+    description ***===> {{ node.config.DESCRIPTION }}
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 2,4,7
+    lacp mode active
+    spanning-tree root-guard
 
 interface ***===> {{ node.config.INTERFACE_LAG }}
-no shutdown
-mtu 9198
-lag ***===> {{ node.config.LAG_NUMBER }}
+    no shutdown
+    mtu 9198
+    lag ***===> {{ node.config.LAG_NUMBER }}
 {%- endif %}
 {%- endfor %}
 ***===> end sw-spine-to-leaf.lag.j2

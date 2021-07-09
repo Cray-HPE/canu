@@ -435,17 +435,18 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
     for port in nodes_by_name[switch_name]["ports"]:
 
         destination_node_name = nodes_by_id[port["destination_node_id"]]["common_name"]
-        destination_port = port["port"]
+        source_port = port["port"]
 
         shasta_name = get_shasta_name(destination_node_name, factory.lookup_mapper())
 
         if shasta_name == "ncn-m":
             new_node = {
                 "subtype": "master",
+                # "slot": get_slot(source_id, destination_node_id),
                 "config": {
                     "DESCRIPTION": destination_node_name,
-                    "INTERFACE_LAG": f"1/1/{destination_port}",
-                    "LAG_NUMBER": destination_port,
+                    "INTERFACE_LAG": f"1/1/{source_port}",
+                    "LAG_NUMBER": source_port,
                 },
             }
             nodes.append(new_node)
@@ -454,8 +455,8 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                 "subtype": "storage",
                 "config": {
                     "DESCRIPTION": destination_node_name,
-                    "INTERFACE_LAG": f"1/1/{destination_port}",
-                    "LAG_NUMBER": destination_port,
+                    "INTERFACE_LAG": f"1/1/{source_port}",
+                    "LAG_NUMBER": source_port,
                 },
             }
             nodes.append(new_node)
@@ -464,8 +465,8 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                 "subtype": "worker",
                 "config": {
                     "DESCRIPTION": destination_node_name,
-                    "INTERFACE_LAG": f"1/1/{destination_port}",
-                    "LAG_NUMBER": destination_port,
+                    "INTERFACE_LAG": f"1/1/{source_port}",
+                    "LAG_NUMBER": source_port,
                 },
             }
             nodes.append(new_node)
@@ -474,9 +475,9 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                 "subtype": "uan",
                 "config": {
                     "DESCRIPTION": destination_node_name,
-                    "INTERFACE_LAG": f"1/1/{destination_port}",
+                    "INTERFACE_LAG": f"1/1/{source_port}",
                     "INTERFACE_NUMBER": "I DONT KNOW",
-                    "LAG_NUMBER": destination_port,
+                    "LAG_NUMBER": source_port,
                 },
             }
             nodes.append(new_node)
@@ -485,8 +486,8 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                 "subtype": "spine",
                 "config": {
                     "DESCRIPTION": destination_node_name,
-                    "LAG_NUMBER": destination_port,
-                    "INTERFACE_LAG": f"1/1/{destination_port}",
+                    "LAG_NUMBER": source_port,
+                    "INTERFACE_LAG": f"1/1/{source_port}",
                     "PT_TO_PT_IP": "****TBD",
                 },
             }
@@ -496,7 +497,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                 "subtype": "cdu",
                 "config": {
                     "DESCRIPTION": destination_node_name,
-                    "INTERFACE_LAG": f"1/1/{destination_port}",
+                    "INTERFACE_LAG": f"1/1/{source_port}",
                     "PT_TO_PT_IP": "****TBD",
                 },
             }
@@ -506,8 +507,8 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                 "subtype": "leaf",
                 "config": {
                     "DESCRIPTION": destination_node_name,
-                    "LAG_NUMBER": destination_port,
-                    "INTERFACE_LAG": f"1/1/{destination_port}",
+                    "LAG_NUMBER": source_port,
+                    "INTERFACE_LAG": f"1/1/{source_port}",
                 },
             }
             nodes.append(new_node)
@@ -516,8 +517,8 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                 "subtype": "leaf-bmc",
                 "config": {
                     "DESCRIPTION": destination_node_name,
-                    "LAG_NUMBER": destination_port,
-                    "INTERFACE_LAG": f"1/1/{destination_port}",
+                    "LAG_NUMBER": source_port,
+                    "INTERFACE_LAG": f"1/1/{source_port}",
                 },
             }
             nodes.append(new_node)
