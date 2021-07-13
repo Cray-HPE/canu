@@ -751,7 +751,6 @@ def test_switch_config_leaf_bmc():
 
 
 def test_switch_config_csi_file_missing():
-    """Error canu init CSI on sls_input_file.json file missing."""
     """Test that the `canu switch config` command errors on sls_input_file.json file missing."""
     bad_csi_folder = "/bad_folder"
     with runner.isolated_filesystem():
@@ -1094,6 +1093,43 @@ def test_switch_config_bad_switch_name_2():
         assert result.exit_code == 0
         assert (
             f"For switch {bad_name_2}, the type cannot be determined. Please check the switch name and try again."
+            in str(result.output)
+        )
+
+
+def test_switch_config_non_switch():
+    """Test that the `canu switch config` command fails on non switch."""
+    non_switch = "ncn-w001"
+    with runner.isolated_filesystem():
+        with open("sls_input_file.json", "w") as f:
+            json.dump(sls_input, f)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--shasta",
+                shasta,
+                "--cache",
+                cache_minutes,
+                "switch",
+                "config",
+                "--architecture",
+                architecture,
+                "--shcd",
+                test_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--csi-folder",
+                csi_folder,
+                "--name",
+                non_switch,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            f"{non_switch} is not a switch. Only switch config can be generated."
             in str(result.output)
         )
 

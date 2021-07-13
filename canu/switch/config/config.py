@@ -84,7 +84,6 @@ env = Environment(
 @click.option(
     "--corners",
     help="The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.",
-    # required=True,
 )
 @click.option(
     "--name",
@@ -322,6 +321,14 @@ def generate_switch_config(shcd_node_list, factory, switch_name, sls_variables):
                 fg="red",
             )
         )
+    elif node_shasta_name not in ["sw-cdu", "sw-leaf-bmc", "sw-leaf", "sw-spine"]:
+        return Exception(
+            click.secho(
+                f"{switch_name} is not a switch. Only switch config can be generated.",
+                fg="red",
+            )
+        )
+
     is_primary, primary, secondary = switch_is_primary(switch_name)
 
     templates = {
@@ -590,7 +597,9 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                 },
             }
             nodes.append(new_node)
-        else:
+        elif shasta_name == "sw-edge":
+            pass
+        else:  # pragma: no cover
             print("*********************************")
             print("Cannot determine destination connection")
             print("Source: ", switch_name)
