@@ -1192,7 +1192,6 @@ def test_validate_shcd_missing_connections():
                 corners,
             ],
         )
-        print(result.output)
         assert result.exit_code == 0
         assert (
             "Found in SHCD and on the network, but missing the following connections on the network"
