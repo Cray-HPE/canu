@@ -3,6 +3,7 @@ import click
 from click_help_colors import HelpColorsGroup
 
 from .cabling import cabling
+from .config import config
 from .firmware import firmware
 
 
@@ -18,4 +19,5 @@ def network(ctx):
 
 
 network.add_command(cabling.cabling)
+network.add_command(config.config)
 network.add_command(firmware.firmware)
