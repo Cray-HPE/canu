@@ -14,6 +14,7 @@ interface lag ***===> {{ node.config.LAG_NUMBER }}
 interface ***===> {{ node.config.INTERFACE_LAG }}
     no shutdown
     mtu 9198
+    description ***===> {{ node.config.DESCRIPTION }}
     lag ***===> {{ node.config.LAG_NUMBER }}
 {%- endfor %}
 ***===> end sw-spine-to-leaf.lag.j2

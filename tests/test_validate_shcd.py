@@ -407,7 +407,6 @@ def test_validate_shcd_port_reuse():
                 "DEBUG",
             ],
         )
-        print(result.output)
         assert result.exit_code == 1
         # assert "Node 1: port 51 in slot None already connected to Node 0: port 52 in slot None" in str(
         #     result.output

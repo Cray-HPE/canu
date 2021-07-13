@@ -17,6 +17,7 @@ CANU reads switch version information from the _canu.yaml_ file in the root dire
 **[Validate SHCD and Cabling](#validate-shcd-and-cabling)**<br>
 **[Validate BGP](#validate-bgp)**<br>
 **[Config BGP](#config-bgp)**<br>
+**[Generate Switch Config](#generate-switch-config)**<br>
 **[Uninstallation](#uninstallation)**<br>
 **[Road Map](#road-map)**<br>
 **[Testing](#testing)**<br>
@@ -52,14 +53,16 @@ When running CANU, the Shasta version is required, you can pass it in with eithe
 
 **[Details](docs/init.md)**<br>
 
-To help make switch setup a breeze. CANU can automatically parse CSI output or the Shasta SLS API for switch IPv4 addresses. In order to parse CSI output, use the `--csi-folder FOLDER` flag to pass in the folder where the _sls_input_file.json_ file is located. To parse the Shasta SLS API for IP addresses, ensure that you have a valid token. The token file can either be passed in with the `--auth-token TOKEN_FILE` flag, or it can be automatically read if the environmental variable **SLS_TOKEN** is set. The SLS address is default set to _api-gw-service-nmn.local_, if you are operating on a system with a different address, you can set it with the `--sls-address SLS_ADDRESS` flag.
+To help make switch setup a breeze. CANU can automatically parse CSI output or the Shasta SLS API for switch IPv4 addresses.
+
+#### CSI Input
+
+- In order to parse CSI output, use the `--csi-folder FOLDER` flag to pass in the folder where the _sls_input_file.json_ file is located.
 
 The _sls_input_file.json_ file is generally stored in one of two places depending on how far the system is in the install process.
 
 - Early in the install process, when running off of the LiveCD the _sls_input_file.json_ file is normally found in the the directory `/var/www/ephemeral/prep/config/SYSTEMNAME/`
 - Later in the install process, the _sls_input_file.json_ file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
-
-The output file for the `canu init` command is set with the `--out FILENAME` flag.
 
 To get the switch IP addresses from CSI output, run the command:
 
@@ -68,12 +71,18 @@ $ canu -s 1.4 init --csi-folder /CSI/OUTPUT/FOLDER/ADDRESS --out output.txt
 8 IP addresses saved to output.txt
 ```
 
+#### SLS API Input
+
+- To parse the Shasta SLS API for IP addresses, ensure that you have a valid token. The token file can either be passed in with the `--auth-token TOKEN_FILE` flag, or it can be automatically read if the environmental variable **SLS_TOKEN** is set. The SLS address is default set to _api-gw-service-nmn.local_, if you are operating on a system with a different address, you can set it with the `--sls-address SLS_ADDRESS` flag.
+
 To get the switch IP addresses from the Shasta SLS API, run the command:
 
 ```bash
 $ canu -s 1.4 init --auth-token ~./config/cray/tokens/ --sls-address 1.2.3.4 --out output.txt
 8 IP addresses saved to output.txt
 ```
+
+The output file for the `canu init` command is set with the `--out FILENAME` flag.
 
 ### Check Single Switch Firmware
 
@@ -454,6 +463,51 @@ BGP Updated
 ```
 
 To print extra details (prefixes, NCN names, IPs), add the `--verbose` flag
+
+### Generate Switch Config
+
+**[Details](docs/switch_config.md)**<br>
+
+CANU can be used to generate switch config.
+
+In order to generate switch config, a valid SHCD must be passed in and system variables must be read in from either CSI output or the SLS API.
+
+#### CSI Input
+
+- In order to parse CSI output, use the `--csi-folder FOLDER` flag to pass in the folder where the _sls_input_file.json_ file is located.
+
+The sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.
+
+- Early in the install process, when running off of the LiveCD the sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/config/SYSTEMNAME/`
+
+- Later in the install process, the sls_input_file.json file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
+
+#### SLS API Input
+
+- To parse the Shasta SLS API for IP addresses, ensure that you have a valid token. The token file can either be passed in with the `--auth-token TOKEN_FILE` flag, or it can be automatically read if the environmental variable **SLS_TOKEN** is set. The SLS address is default set to _api-gw-service-nmn.local_, if you are operating on a system with a different address, you can set it with the `--sls-address SLS_ADDRESS` flag.
+
+#### SHCD Input
+
+- The `--architecture / -a` flag is used to set the architecture of the system, either **TDS**, or **Full**.
+- Use the `--tabs` flag to select which tabs on the spreadsheet will be included.
+- The `--corners` flag is used to input the upper left and lower right corners of the table on each tab of the worksheet. The table should contain the 11 headers: **Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port**. If the corners are not specified, you will be prompted to enter them for each tab.
+
+To generate config for a specific switch, a hostname must also be passed in using the `--name HOSTNAME` flag. To output the config to a file, append the `--out FILENAME` flag.
+
+To generate switch config run: `canu -s 1.5 switch config -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --csi-folder /CSI/OUTPUT/FOLDER/ADDRESS --name SWITCH_HOSTNAME --out FILENAME`
+
+```bash
+$ canu -s 1.5 switch config -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --csi-folder /CSI/OUTPUT/FOLDER/ADDRESS --name sw-spine-001
+
+hostname sw-spine-001
+user admin group administrators password plaintext
+bfd
+no ip icmp redirect
+vrf CAN
+vrf keepalive
+...
+
+```
 
 ## Uninstallation
 

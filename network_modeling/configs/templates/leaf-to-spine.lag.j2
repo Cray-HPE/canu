@@ -7,7 +7,7 @@ They need to be on a single lag
 Two Separate interfaces e.g. (1/1/53, 1/1/54) #}
 {%- if ns.lag1 == '' %}
 {%- set ns.lag1 = node.config.LAG_NUMBER %}
-interface lag ***===> {{ ns.lag1 }}
+interface lag ***===> {{ ns.lag1 }} multi-chassis
     no shutdown
     description leaf_to_spines_lag
     no routing

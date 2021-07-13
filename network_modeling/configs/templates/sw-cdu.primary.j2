@@ -71,11 +71,13 @@ interface ***===> {{ variables.VSX_ISL_PORT1 }}
     mtu 9198
     description vsx isl
     lag 99
+
 interface ***===> {{ variables.VSX_ISL_PORT2 }}
     no shutdown
     mtu 9198
     description vsx isl
     lag 99
+
 interface loopback 0
     ip address ***===> {{ variables.LOOPBACK_IP }}
     ipv6 address ***===> {{ variables.IPV6_IP }}

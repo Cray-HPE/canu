@@ -11,6 +11,7 @@ from click_help_colors import HelpColorsCommand
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 import natsort
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
+import requests
 import ruamel.yaml
 import urllib3
 
@@ -92,16 +93,13 @@ env = Environment(
     help="The name of the switch to generate config e.g. 'sw-spine-001'",
     prompt="Switch Name",
 )
-# @click.option("--ip", required=True, help="The IP address of the switch")
-# @click.option("--username", default="admin", show_default=True, help="Switch username")
-# @click.option(
-#     "--password",
-#     prompt=True,
-#     hide_input=True,
-#     confirmation_prompt=False,
-#     help="Switch password",
-# )
 @click.option("--csi-folder", help="Directory containing the CSI json file")
+@click.option(
+    "--auth-token",
+    envvar="SLS_TOKEN",
+    help="Token for SLS authentication",
+)
+@click.option("--sls-address", default="api-gw-service-nmn.local", show_default=True)
 @click.option(
     "--out", help="Output results to a file", type=click.File("w"), default="-"
 )
@@ -114,12 +112,18 @@ def config(
     corners,
     switch_name,
     csi_folder,
-    out
-    # ip, username, password
+    auth_token,
+    sls_address,
+    out,
 ):
     """Switch config commands.
 
-    Configure Aruba switch.
+    In order to generate switch config, a valid SHCD must be passed in and system variables must be read in from either
+    CSI output or the SLS API.
+
+    To generate config for a specific switch, a hostname must also be passed in using the `--name HOSTNAME` flag.
+    To output the config to a file, append the `--out FILENAME` flag.
+
     \f
     # noqa: D301
 
@@ -131,6 +135,8 @@ def config(
         corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
         switch_name: Switch name
         csi_folder: Directory containing the CSI json file
+        auth_token: Token for SLS authentication
+        sls_address: The address of SLS
         out: Name of the output file
     """
     if architecture.lower() == "full":
@@ -182,8 +188,6 @@ def config(
             )
             sheets.append((tab, range_start, range_end))
 
-    # credentials = {"username": username, "password": password}
-
     # Create Node factory
     factory = NetworkNodeFactory(
         hardware_schema=hardware_schema_file,
@@ -193,16 +197,82 @@ def config(
         architecture_version=architecture,
     )
 
-    # Open the updated cache to model nodes
-    # with open(canu_cache_file, "r+") as file:
-    #     canu_cache = yaml.load(file)
-
     # Get nodes from SHCD
     shcd_node_list, shcd_warnings = node_model_from_shcd(
         factory=factory, spreadsheet=shcd, sheets=sheets
     )
 
-    sls_variables = parse_sls(csi_folder)
+    # Parse sls_input_file.json file from CSI
+    if csi_folder:
+        try:
+            with open(os.path.join(csi_folder, "sls_input_file.json"), "r") as f:
+                input_json = json.load(f)
+
+                # Format the input to be like the SLS JSON
+                sls_json = [
+                    network[x]
+                    for network in [input_json.get("Networks", {})]
+                    for x in network
+                ]
+
+        except FileNotFoundError:
+            click.secho(
+                "The file sls_input_file.json was not found, check that this is the correct CSI directory.",
+                fg="red",
+            )
+            return
+    else:
+        # Get SLS config
+        token = os.environ.get("SLS_TOKEN")
+
+        # Token file takes precedence over the environmental variable
+        if auth_token != token:
+            try:
+                with open(auth_token) as f:
+                    data = json.load(f)
+                    token = data["access_token"]
+
+            except Exception:
+                click.secho(
+                    "Invalid token file, generate another token or try again.",
+                    fg="white",
+                    bg="red",
+                )
+                return
+
+        # SLS
+        url = "https://" + sls_address + "/apis/sls/v1/networks"
+        try:
+            response = requests.get(
+                url,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {token}",
+                },
+                verify=False,
+            )
+            response.raise_for_status()
+
+            sls_json = response.json()
+
+        except requests.exceptions.ConnectionError:
+            return click.secho(
+                f"Error connecting to SLS {sls_address}, check the address or pass in a new address using --sls-address.",
+                fg="white",
+                bg="red",
+            )
+        except requests.exceptions.HTTPError:
+            bad_token_reason = (
+                "environmental variable 'SLS_TOKEN' is correct."
+                if auth_token == token
+                else "token is valid, or generate a new one."
+            )
+            return click.secho(
+                f"Error connecting SLS {sls_address}, check that the {bad_token_reason}",
+                fg="white",
+                bg="red",
+            )
+    sls_variables = parse_sls_for_config(sls_json)
 
     # For versions of Shasta < 1.6, the SLS Hostnames need to be renamed
     if ctx.obj["shasta"]:
@@ -213,6 +283,11 @@ def config(
     switch_config = generate_switch_config(
         shcd_node_list, factory, switch_name, sls_variables
     )
+
+    dash = "-" * 60
+    click.echo("\n")
+    click.secho(f"{switch_name} Config", fg="bright_white")
+    click.echo(dash)
 
     click.echo(switch_config, file=out)
     return
@@ -239,6 +314,14 @@ def generate_switch_config(shcd_node_list, factory, switch_name, sls_variables):
         switch_config: The generated switch configuration
     """
     node_shasta_name = get_shasta_name(switch_name, factory.lookup_mapper())
+
+    if node_shasta_name is None:
+        return Exception(
+            click.secho(
+                f"For switch {switch_name}, the type cannot be determined. Please check the switch name and try again.",
+                fg="red",
+            )
+        )
     is_primary, primary, secondary = switch_is_primary(switch_name)
 
     templates = {
@@ -314,18 +397,12 @@ def generate_switch_config(shcd_node_list, factory, switch_name, sls_variables):
     elif node_shasta_name == "sw-leaf-bmc":
         hostname = variables["HOSTNAME"]
 
-        # Should there be a leaf-bmc-to-leaf template?
-
         variables["HMN_IP"] = sls_variables["HMN_IPs"][hostname]
         variables["MTL_IP"] = sls_variables["MTL_IPs"][hostname]
         variables["NMN_IP"] = sls_variables["NMN_IPs"][hostname]
 
         variables["LOOPBACK_IP"] = "I DONT KNOW"
         variables["IPV6_IP"] = "I DONT KNOW"
-
-        # sw-leaf-bmc-uplink.j2
-        variables["LEAF_BMC_UPLINK_PORT_PRIMARY"] = "I DONT KNOW"
-        variables["LEAF_BMC_UPLINK_PORT_SECONDARY"] = "I DONT KNOW"
 
     switch_config = template.render(
         variables=variables,
@@ -354,7 +431,7 @@ def get_pair_connections(nodes, switch_name):
 
     connections = []
     for x in nodes:
-        if x["config"]["DESCRIPTION"] == pair_hostname:
+        if pair_hostname in x["config"]["DESCRIPTION"]:
             connections.append(x["config"]["INTERFACE_LAG"])
 
     connections = natsort.natsorted(connections)
@@ -384,21 +461,29 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
         nodes_by_name[name] = node_tmp
         nodes_by_id[node_tmp["id"]] = node_tmp
 
+    if switch_name not in nodes_by_name.keys():
+        click.secho(
+            f"For switch {switch_name}, the type cannot be determined. Please check the switch name and try again.",
+            fg="red",
+        )
+        exit()
+
     source_id = nodes_by_name[switch_name]["id"]
     for port in nodes_by_name[switch_name]["ports"]:
         destination_node_name = nodes_by_id[port["destination_node_id"]]["common_name"]
         source_port = port["port"]
 
         shasta_name = get_shasta_name(destination_node_name, factory.lookup_mapper())
+        destination_slot, destination_port = get_destination_slot(
+            source_id, destination_node_name, nodes_by_name
+        )
 
         if shasta_name == "ncn-m":
             new_node = {
                 "subtype": "master",
-                "slot": get_destination_slot(
-                    source_id, destination_node_name, nodes_by_name
-                ),
+                "slot": destination_slot,
                 "config": {
-                    "DESCRIPTION": destination_node_name,
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "INTERFACE_LAG": f"1/1/{source_port}",
                     "LAG_NUMBER": source_port,
                 },
@@ -407,11 +492,9 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
         elif shasta_name == "ncn-s":
             new_node = {
                 "subtype": "storage",
-                "slot": get_destination_slot(
-                    source_id, destination_node_name, nodes_by_name
-                ),
+                "slot": destination_slot,
                 "config": {
-                    "DESCRIPTION": destination_node_name,
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "INTERFACE_LAG": f"1/1/{source_port}",
                     "LAG_NUMBER": source_port,
                 },
@@ -420,11 +503,9 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
         elif shasta_name == "ncn-w":
             new_node = {
                 "subtype": "worker",
-                "slot": get_destination_slot(
-                    source_id, destination_node_name, nodes_by_name
-                ),
+                "slot": destination_slot,
                 "config": {
-                    "DESCRIPTION": destination_node_name,
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "INTERFACE_LAG": f"1/1/{source_port}",
                     "LAG_NUMBER": source_port,
                 },
@@ -435,7 +516,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                 "subtype": "cec",
                 "slot": None,
                 "config": {
-                    "DESCRIPTION": destination_node_name,
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "INTERFACE_NUMBER": f"1/1/{source_port}",
                 },
             }
@@ -445,7 +526,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                 "subtype": "cmm",
                 "slot": None,
                 "config": {
-                    "DESCRIPTION": destination_node_name,
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "INTERFACE_LAG": f"1/1/{source_port}",
                     "LAG_NUMBER": source_port,
                 },
@@ -454,11 +535,10 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
         elif shasta_name == "uan":
             new_node = {
                 "subtype": "uan",
-                "slot": get_destination_slot(
-                    source_id, destination_node_name, nodes_by_name
-                ),
+                "slot": destination_slot,
+                "destination_port": destination_port,
                 "config": {
-                    "DESCRIPTION": destination_node_name,
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "INTERFACE_LAG": f"1/1/{source_port}",
                     "INTERFACE_NUMBER": "I DONT KNOW",
                     "LAG_NUMBER": source_port,
@@ -470,10 +550,10 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                 "subtype": "spine",
                 "slot": None,
                 "config": {
-                    "DESCRIPTION": destination_node_name,
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "LAG_NUMBER": source_port,
                     "INTERFACE_LAG": f"1/1/{source_port}",
-                    "PT_TO_PT_IP": "****TBD",
+                    "PT_TO_PT_IP": "I DONT KNOW",
                 },
             }
             nodes.append(new_node)
@@ -482,9 +562,9 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                 "subtype": "cdu",
                 "slot": None,
                 "config": {
-                    "DESCRIPTION": destination_node_name,
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "INTERFACE_LAG": f"1/1/{source_port}",
-                    "PT_TO_PT_IP": "****TBD",
+                    "PT_TO_PT_IP": "I DONT KNOW",
                 },
             }
             nodes.append(new_node)
@@ -493,7 +573,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                 "subtype": "leaf",
                 "slot": None,
                 "config": {
-                    "DESCRIPTION": destination_node_name,
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "LAG_NUMBER": source_port,
                     "INTERFACE_LAG": f"1/1/{source_port}",
                 },
@@ -504,7 +584,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                 "subtype": "leaf-bmc",
                 "slot": None,
                 "config": {
-                    "DESCRIPTION": destination_node_name,
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "LAG_NUMBER": source_port,
                     "INTERFACE_LAG": f"1/1/{source_port}",
                 },
@@ -512,10 +592,11 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
             nodes.append(new_node)
         else:
             print("*********************************")
-            print("I don't know what this is")
-            print("switch_name", switch_name)
+            print("Cannot determine destination connection")
+            print("Source: ", switch_name)
+            print("Port: ", port)
+            print("Destination: ", destination_node_name)
             print("shasta_name", shasta_name)
-            print("port", port)
             print("*********************************")
 
     return nodes
@@ -548,11 +629,11 @@ def switch_is_primary(switch):
     return is_primary, primary, secondary
 
 
-def parse_sls(csi_folder):
-    """Parse the `sls_input_file.json` file for variables.
+def parse_sls_for_config(input_json):
+    """Parse the `sls_input_file.json` file or the JSON from SLS `/networks` API for config variables.
 
     Args:
-        csi_folder: Directory containing the CSI json file
+        input_json: JSON from the SLS `/networks` API
 
     Returns:
         sls_variables: Dictionary containing SLS variables.
@@ -580,137 +661,92 @@ def parse_sls(csi_folder):
         "NMN_IPs": defaultdict(),
     }
 
-    try:
-        with open(os.path.join(csi_folder, "sls_input_file.json"), "r") as f:
-            input_json = json.load(f)
+    for sls_network in input_json:
+        name = sls_network.get("Name", "")
 
-            for network in [input_json.get("Networks", {})]:
-                for x in network:
-                    name = network[x].get("Name", "")
+        if name == "CAN":
+            sls_variables["CAN"] = sls_network.get("ExtraProperties", {}).get(
+                "CIDR", ""
+            )
+            sls_variables["CAN_IP_GATEWAY"] = (
+                sls_network.get("ExtraProperties", {})
+                .get("Subnets", {})[0]
+                .get("Gateway", "")
+            )
+            for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
+                if subnets["FullName"] == "CAN Bootstrap DHCP Subnet":
+                    for ip in subnets["IPReservations"]:
+                        if ip["Name"] == "can-switch-1":
+                            sls_variables["CAN_IP_PRIMARY"] = ip["IPAddress"]
+                        elif ip["Name"] == "can-switch-2":
+                            sls_variables["CAN_IP_SECONDARY"] = ip["IPAddress"]
 
-                    if name == "CAN":
-                        sls_variables["CAN"] = (
-                            network[x].get("ExtraProperties", {}).get("CIDR", "")
-                        )
-                        sls_variables["CAN_IP_GATEWAY"] = (
-                            network[x]
-                            .get("ExtraProperties", {})
-                            .get("Subnets", {})[0]
-                            .get("Gateway", "")
-                        )
-                        for subnets in (
-                            network[x].get("ExtraProperties", {}).get("Subnets", {})
-                        ):
-                            if subnets["FullName"] == "CAN Bootstrap DHCP Subnet":
-                                for ip in subnets["IPReservations"]:
-                                    if ip["Name"] == "can-switch-1":
-                                        sls_variables["CAN_IP_PRIMARY"] = ip[
-                                            "IPAddress"
-                                        ]
-                                    elif ip["Name"] == "can-switch-2":
-                                        sls_variables["CAN_IP_SECONDARY"] = ip[
-                                            "IPAddress"
-                                        ]
+        elif name == "HMN":
+            sls_variables["HMN"] = sls_network.get("ExtraProperties", {}).get(
+                "CIDR", ""
+            )
+            sls_variables["HMN_IP_GATEWAY"] = (
+                sls_network.get("ExtraProperties", {})
+                .get("Subnets", {})[0]
+                .get("Gateway", "")
+            )
+            for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
+                if subnets["FullName"] == "HMN Management Network Infrastructure":
+                    for ip in subnets["IPReservations"]:
+                        sls_variables["HMN_IPs"][ip["Name"]] = ip["IPAddress"]
 
-                    elif name == "HMN":
-                        sls_variables["HMN"] = (
-                            network[x].get("ExtraProperties", {}).get("CIDR", "")
-                        )
-                        sls_variables["HMN_IP_GATEWAY"] = (
-                            network[x]
-                            .get("ExtraProperties", {})
-                            .get("Subnets", {})[0]
-                            .get("Gateway", "")
-                        )
-                        for subnets in (
-                            network[x].get("ExtraProperties", {}).get("Subnets", {})
-                        ):
-                            if (
-                                subnets["FullName"]
-                                == "HMN Management Network Infrastructure"
-                            ):
-                                for ip in subnets["IPReservations"]:
-                                    sls_variables["HMN_IPs"][ip["Name"]] = ip[
-                                        "IPAddress"
-                                    ]
+        elif name == "MTL":
+            sls_variables["MTL"] = sls_network.get("ExtraProperties", {}).get(
+                "CIDR", ""
+            )
+            sls_variables["MTL_IP_GATEWAY"] = (
+                sls_network.get("ExtraProperties", {})
+                .get("Subnets", {})[0]
+                .get("Gateway", "")
+            )
+            for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
+                if subnets["FullName"] == "MTL Management Network Infrastructure":
+                    for ip in subnets["IPReservations"]:
+                        sls_variables["MTL_IPs"][ip["Name"]] = ip["IPAddress"]
 
-                    elif name == "MTL":
-                        sls_variables["MTL"] = (
-                            network[x].get("ExtraProperties", {}).get("CIDR", "")
-                        )
-                        sls_variables["MTL_IP_GATEWAY"] = (
-                            network[x]
-                            .get("ExtraProperties", {})
-                            .get("Subnets", {})[0]
-                            .get("Gateway", "")
-                        )
-                        for subnets in (
-                            network[x].get("ExtraProperties", {}).get("Subnets", {})
-                        ):
-                            if (
-                                subnets["FullName"]
-                                == "MTL Management Network Infrastructure"
-                            ):
-                                for ip in subnets["IPReservations"]:
-                                    sls_variables["MTL_IPs"][ip["Name"]] = ip[
-                                        "IPAddress"
-                                    ]
+        elif name == "NMN":
+            sls_variables["NMN"] = sls_network.get("ExtraProperties", {}).get(
+                "CIDR", ""
+            )
+            sls_variables["NMN_IP_GATEWAY"] = (
+                sls_network.get("ExtraProperties", {})
+                .get("Subnets", {})[0]
+                .get("Gateway", "")
+            )
 
-                    elif name == "NMN":
-                        sls_variables["NMN"] = (
-                            network[x].get("ExtraProperties", {}).get("CIDR", "")
-                        )
-                        sls_variables["NMN_IP_GATEWAY"] = (
-                            network[x]
-                            .get("ExtraProperties", {})
-                            .get("Subnets", {})[0]
-                            .get("Gateway", "")
-                        )
+            for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
+                if subnets["FullName"] == "NMN Bootstrap DHCP Subnet":
+                    for ip in subnets["IPReservations"]:
+                        if ip["Name"] == "ncn-w001":
+                            sls_variables["ncn_w001"] = ip["IPAddress"]
+                        elif ip["Name"] == "ncn-w002":
+                            sls_variables["ncn_w002"] = ip["IPAddress"]
+                        elif ip["Name"] == "ncn-w003":
+                            sls_variables["ncn_w003"] = ip["IPAddress"]
+                elif subnets["FullName"] == "NMN Management Network Infrastructure":
+                    for ip in subnets["IPReservations"]:
+                        sls_variables["NMN_IPs"][ip["Name"]] = ip["IPAddress"]
 
-                        for subnets in (
-                            network[x].get("ExtraProperties", {}).get("Subnets", {})
-                        ):
-                            if subnets["FullName"] == "NMN Bootstrap DHCP Subnet":
-                                for ip in subnets["IPReservations"]:
-                                    if ip["Name"] == "ncn-w001":
-                                        sls_variables["ncn_w001"] = ip["IPAddress"]
-                                    elif ip["Name"] == "ncn-w002":
-                                        sls_variables["ncn_w002"] = ip["IPAddress"]
-                                    elif ip["Name"] == "ncn-w003":
-                                        sls_variables["ncn_w003"] = ip["IPAddress"]
-                            elif (
-                                subnets["FullName"]
-                                == "NMN Management Network Infrastructure"
-                            ):
-                                for ip in subnets["IPReservations"]:
-                                    sls_variables["NMN_IPs"][ip["Name"]] = ip[
-                                        "IPAddress"
-                                    ]
+        elif name == "NMN_MTN":
+            sls_variables["NMN_MTN"] = sls_network.get("ExtraProperties", {}).get(
+                "CIDR", ""
+            )
+        elif name == "HMN_MTN":
+            sls_variables["HMN_MTN"] = sls_network.get("ExtraProperties", {}).get(
+                "CIDR", ""
+            )
 
-                    elif name == "NMN_MTN":
-                        sls_variables["NMN_MTN"] = (
-                            network[x].get("ExtraProperties", {}).get("CIDR", "")
-                        )
-                    elif name == "HMN_MTN":
-                        sls_variables["HMN_MTN"] = (
-                            network[x].get("ExtraProperties", {}).get("CIDR", "")
-                        )
+        for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
 
-                    for subnets in (
-                        network[x].get("ExtraProperties", {}).get("Subnets", {})
-                    ):
+            vlan = subnets.get("VlanID", "")
+            networks_list.append([name, vlan])
 
-                        vlan = subnets.get("VlanID", "")
-                        networks_list.append([name, vlan])
-
-        networks_list = set(tuple(x) for x in networks_list)
-
-    except FileNotFoundError:
-        click.secho(
-            "The file sls_input_file.json was not found, check that this is the correct CSI directory.",
-            fg="red",
-        )
-        return
+    networks_list = set(tuple(x) for x in networks_list)
 
     return sls_variables
 
@@ -762,7 +798,7 @@ def rename_sls_hostnames(sls_variables):
 
 
 def get_destination_slot(source_id, destination_node_name, nodes_by_name):
-    """Get the destination slot type.
+    """Get the destination slot type and port number.
 
     Args:
         source_id: ID of the source switch.
@@ -771,11 +807,14 @@ def get_destination_slot(source_id, destination_node_name, nodes_by_name):
 
     Returns:
         destination_slot: Destination slot type
+        destination_port: Destination port number
     """
     destination_slot = None
+    destination_port = None
 
     for port in nodes_by_name[destination_node_name]["ports"]:
         if port["destination_node_id"] == source_id:
             destination_slot = port["slot"]
+            destination_port = port["port"]
 
-    return destination_slot
+    return destination_slot, destination_port

@@ -4,6 +4,8 @@ import os
 from pathlib import Path
 
 import click.testing
+import requests
+import responses
 
 from canu.cli import cli
 
@@ -18,6 +20,7 @@ csi_folder = "."
 shasta = "1.4"
 switch_name = "sw-spine-001"
 cache_minutes = 0
+sls_address = "api-gw-service-nmn.local"
 runner = click.testing.CliRunner()
 
 
@@ -70,18 +73,23 @@ def test_switch_config_spine_primary():
         )
         # sw-leaf-001
         assert "interface lag ***===> 1" in str(result.output)
-        assert "description ***===> sw-leaf-001" in str(result.output)
+        assert "description ***===> sw-spine-001:1==>sw-leaf-001:53" in str(
+            result.output
+        )
         assert "interface ***===> 1/1/1" in str(result.output)
 
         # sw-leaf-004
         assert "interface lag ***===> 4" in str(result.output)
-        assert "description ***===> sw-leaf-004" in str(result.output)
+        assert "description ***===> sw-spine-001:4==>sw-leaf-004:53" in str(
+            result.output
+        )
         assert "interface ***===> 1/1/4" in str(result.output)
 
         # sw-cdu-001
         assert "interface ***===> 1/1/5" in str(result.output)
-        # assert "interface lag ***===> 4" in str(result.output)
-        # assert "description ***===> sw-leaf-004" in str(result.output)
+        assert "description ***===> sw-spine-001:5==>sw-cdu-001:50" in str(
+            result.output
+        )
 
         # lag 99
         assert "interface ***===> 1/1/30" in str(result.output)
@@ -164,18 +172,27 @@ def test_switch_config_spine_secondary():
         )
         # sw-leaf-001
         assert "interface lag ***===> 1" in str(result.output)
-        assert "description ***===> sw-leaf-001" in str(result.output)
+        assert "description ***===> sw-spine-002:1==>sw-leaf-001:52" in str(
+            result.output
+        )
         assert "interface ***===> 1/1/1" in str(result.output)
 
         # sw-leaf-004
         assert "interface lag ***===> 4" in str(result.output)
-        assert "description ***===> sw-leaf-004" in str(result.output)
+        assert "description ***===> sw-spine-002:4==>sw-leaf-004:52" in str(
+            result.output
+        )
         assert "interface ***===> 1/1/4" in str(result.output)
 
-        # sw-cdu-001
+        # cdu
         assert "interface ***===> 1/1/5" in str(result.output)
-        # assert "interface lag ***===> 4" in str(result.output)
-        # assert "description ***===> sw-leaf-004" in str(result.output)
+        assert "description ***===> sw-spine-002:5==>sw-cdu-001:49" in str(
+            result.output
+        )
+        assert "interface ***===> 1/1/6" in str(result.output)
+        assert "description ***===> sw-spine-002:6==>sw-cdu-002:49" in str(
+            result.output
+        )
 
         # lag 99
         assert "interface ***===> 1/1/30" in str(result.output)
@@ -259,34 +276,50 @@ def test_switch_config_leaf_primary():
         # ncn-m001
         assert "interface lag ***===> 1 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/1" in str(result.output)
-        assert "description ***===> ncn-m001" in str(result.output)
+        assert "description ***===> sw-leaf-001:1==>ncn-m001:ocp:2" in str(
+            result.output
+        )
 
         # ncn-w001
         assert "interface lag ***===> 5 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/5" in str(result.output)
-        assert "description ***===> ncn-w001" in str(result.output)
+        assert "description ***===> sw-leaf-001:5==>ncn-w001:ocp:1" in str(
+            result.output
+        )
 
         # ncn-s001
         assert "interface lag ***===> 7 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/7" in str(result.output)
-        assert "description ***===> ncn-s001" in str(result.output)
+        assert "description ***===> sw-leaf-001:7==>ncn-s001:ocp:2" in str(
+            result.output
+        )
 
         # leaf-bmc
-        assert "interface lag ***===> 51" in str(result.output)
-        assert "description ***===> sw-leaf-bmc-001" in str(result.output)
+        assert "interface lag ***===> 51 multi-chassis" in str(result.output)
+        assert "description ***===> sw-leaf-001:51==>sw-leaf-bmc-001:48" in str(
+            result.output
+        )
         assert "interface ***===> 1/1/51" in str(result.output)
 
-        # sw-spine-002
-        assert "interface lag ***===> 52" in str(result.output)
+        # leaf-to-spine
+        assert "interface lag ***===> 52 multi-chassis" in str(result.output)
         assert "description leaf_to_spines_lag" in str(result.output)
 
         assert "interface ***===> 1/1/52" in str(result.output)
-        assert "description ***===> sw-spine-002" in str(result.output)
+        assert "description ***===> sw-leaf-001:52==>sw-spine-002:1" in str(
+            result.output
+        )
         assert "lag ***===> 52" in str(result.output)
 
-        # sw-spine-001
         assert "interface ***===> 1/1/53" in str(result.output)
-        assert "description ***===> sw-spine-001" in str(result.output)
+        assert "description ***===> sw-leaf-001:53==>sw-spine-001:1" in str(
+            result.output
+        )
+
+        # lag 99
+        assert "interface ***===> 1/1/54" in str(result.output)
+        assert "interface ***===> 1/1/55" in str(result.output)
+        assert "interface ***===> 1/1/56" in str(result.output)
 
         # VLAN 1
         # MTL_IP
@@ -337,12 +370,11 @@ def test_switch_config_leaf_primary_to_uan():
 
         # uan
         assert "interface lag ***===> 7 multi-chassis" in str(result.output)
-        assert "description ***===> uan001" in str(result.output)
+        assert "description ***===> sw-leaf-003:7==>uan001:ocp:2" in str(result.output)
         assert "interface ***===> 1/1/7" in str(result.output)
 
-        assert "interface lag ***===> 8 multi-chassis" in str(result.output)
-        assert "description ***===> uan001" in str(result.output)
         assert "interface ***===> 1/1/8" in str(result.output)
+        assert "description ***===> sw-leaf-003:7==>uan001:ocp:2" in str(result.output)
 
 
 def test_switch_config_leaf_secondary():
@@ -397,34 +429,50 @@ def test_switch_config_leaf_secondary():
         # ncn-m001
         assert "interface lag ***===> 1 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/1" in str(result.output)
-        assert "description ***===> ncn-m001" in str(result.output)
+        assert "description ***===> sw-leaf-002:1==>ncn-m001:pcie-slot1:2" in str(
+            result.output
+        )
 
         # ncn-w001
         assert "interface lag ***===> 6 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/6" in str(result.output)
-        assert "description ***===> ncn-w001" in str(result.output)
+        assert "description ***===> sw-leaf-002:6==>ncn-w001:ocp:2" in str(
+            result.output
+        )
 
         # ncn-s001
         assert "interface lag ***===> 7 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/7" in str(result.output)
-        assert "description ***===> ncn-s001" in str(result.output)
+        assert "description ***===> sw-leaf-002:7==>ncn-s001:pcie-slot1:2" in str(
+            result.output
+        )
 
         # leaf-bmc
-        assert "interface lag ***===> 51" in str(result.output)
-        assert "description ***===> sw-leaf-bmc-001" in str(result.output)
+        assert "interface lag ***===> 51 multi-chassis" in str(result.output)
+        assert "description ***===> sw-leaf-002:51==>sw-leaf-bmc-001:47" in str(
+            result.output
+        )
         assert "interface ***===> 1/1/51" in str(result.output)
 
-        # sw-spine-002
-        assert "interface lag ***===> 52" in str(result.output)
+        # leaf-to-spine
+        assert "interface lag ***===> 52 multi-chassis" in str(result.output)
         assert "description leaf_to_spines_lag" in str(result.output)
 
         assert "interface ***===> 1/1/52" in str(result.output)
-        assert "description ***===> sw-spine-002" in str(result.output)
+        assert "description ***===> sw-leaf-002:52==>sw-spine-002:2" in str(
+            result.output
+        )
         assert "lag ***===> 52" in str(result.output)
 
-        # sw-spine-001
         assert "interface ***===> 1/1/53" in str(result.output)
-        assert "description ***===> sw-spine-001" in str(result.output)
+        assert "description ***===> sw-leaf-002:53==>sw-spine-001:2" in str(
+            result.output
+        )
+
+        # lag 99
+        assert "interface ***===> 1/1/54" in str(result.output)
+        assert "interface ***===> 1/1/55" in str(result.output)
+        assert "interface ***===> 1/1/56" in str(result.output)
 
         # VLAN 1
         # MTL_IP
@@ -490,24 +538,29 @@ def test_switch_config_cdu_primary():
 
         # cmm
         assert "interface lag ***===> 2 static" in str(result.output)
-        assert "description ***===> cmm000" in str(result.output)
+        assert "description ***===> sw-cdu-001:2==>cmm000:1" in str(result.output)
         assert "interface ***===> 1/1/2" in str(result.output)
 
         assert "interface lag ***===> 5 static" in str(result.output)
-        assert "description ***===> cmm003" in str(result.output)
+        assert "description ***===> sw-cdu-001:5==>cmm003:1" in str(result.output)
         assert "interface ***===> 1/1/5" in str(result.output)
 
         # cec
         assert "interface ***===> 1/1/1" in str(result.output)
-        assert "description ***===> cec000" in str(result.output)
+        assert "description ***===> sw-cdu-001:1==>cec000:1" in str(result.output)
 
-        # sw-spine-002
+        # cdu-to-spine
         # ip address ***===> ****TBD
         assert "interface ***===> 1/1/49" in str(result.output)
+        assert "description ***===> sw-cdu-001:49==>sw-spine-002:5" in str(
+            result.output
+        )
 
-        # sw-spine-001
         # ip address ***===> ****TBD
         assert "interface ***===> 1/1/50" in str(result.output)
+        assert "description ***===> sw-cdu-001:50==>sw-spine-001:5" in str(
+            result.output
+        )
 
         # VSX_KEEPALIVE
         assert "interface ***===> 1/1/48" in str(result.output)
@@ -571,20 +624,25 @@ def test_switch_config_cdu_secondary():
 
         # cmm
         assert "interface lag ***===> 2 static" in str(result.output)
-        assert "description ***===> cmm000" in str(result.output)
+        assert "description ***===> sw-cdu-002:2==>cmm000:2" in str(result.output)
         assert "interface ***===> 1/1/2" in str(result.output)
 
         assert "interface lag ***===> 5 static" in str(result.output)
-        assert "description ***===> cmm003" in str(result.output)
+        assert "description ***===> sw-cdu-002:5==>cmm003:2" in str(result.output)
         assert "interface ***===> 1/1/5" in str(result.output)
 
-        # sw-spine-002
+        # cdu-to-spine
         # ip address ***===> ****TBD
         assert "interface ***===> 1/1/49" in str(result.output)
+        assert "description ***===> sw-cdu-002:49==>sw-spine-002:6" in str(
+            result.output
+        )
 
-        # sw-spine-001
         # ip address ***===> ****TBD
         assert "interface ***===> 1/1/50" in str(result.output)
+        assert "description ***===> sw-cdu-002:50==>sw-spine-001:6" in str(
+            result.output
+        )
 
         # VSX_KEEPALIVE
         assert "interface ***===> 1/1/48" in str(result.output)
@@ -594,7 +652,7 @@ def test_switch_config_cdu_secondary():
         assert "interface ***===> 1/1/52" in str(result.output)
 
         # LOOPBACK_IP
-        assert "router-id ***===>" in str(result.output)
+        assert "router-id ***===> I DONT KNOW" in str(result.output)
 
 
 def test_switch_config_leaf_bmc():
@@ -646,20 +704,35 @@ def test_switch_config_leaf_bmc():
             result.output
         )
 
-        # 'sw-leaf-bmc-uplink.j2'
-        assert "interface lag 99" in str(result.output)
-        # interface ***===> {{ LEAF_BMC_UPLINK_PORT_PRIMARY }}
-        # interface ***===> {{ LEAF_BMC_UPLINK_PORT_SECONDARY }}
+        # 'leaf-bmc-to-leaf.lag.j2'
+        assert "interface lag ***===> 47" in str(result.output)
+        assert "description ***===> leaf_bmc_to_leaf_lag" in str(result.output)
+        assert "interface ***===> 1/1/47" in str(result.output)
+        assert "description ***===> sw-leaf-bmc-001:47==>sw-leaf-002:51" in str(
+            result.output
+        )
+        assert "interface ***===> 1/1/48" in str(result.output)
+        assert "description ***===> sw-leaf-bmc-001:48==>sw-leaf-001:51" in str(
+            result.output
+        )
 
         # 'bmc.j2' connection
         assert "interface ***===> 1/1/1" in str(result.output)
-        assert "description ***===> ncn-m001" in str(result.output)
+        assert "description ***===> sw-leaf-bmc-001:1==>ncn-m001:bmc:1" in str(
+            result.output
+        )
         assert "interface ***===> 1/1/4" in str(result.output)
-        assert "description ***===> ncn-w001" in str(result.output)
+        assert "description ***===> sw-leaf-bmc-001:4==>ncn-w001:bmc:1" in str(
+            result.output
+        )
         assert "interface ***===> 1/1/7" in str(result.output)
-        assert "description ***===> ncn-s001" in str(result.output)
+        assert "description ***===> sw-leaf-bmc-001:7==>ncn-s001:bmc:1" in str(
+            result.output
+        )
         assert "interface ***===> 1/1/10" in str(result.output)
-        assert "description ***===> uan001" in str(result.output)
+        assert "description ***===> sw-leaf-bmc-001:10==>uan001:bmc:1" in str(
+            result.output
+        )
 
         # VLAN 1
         # MTL_IP
@@ -674,7 +747,7 @@ def test_switch_config_leaf_bmc():
         assert "ip address ***===> 192.168.0.12" in str(result.output)
 
         # LOOPBACK_IP
-        # assert "router-id ***===>" in str(result.output)
+        assert "router-id ***===> I DONT KNOW" in str(result.output)
 
 
 def test_switch_config_csi_file_missing():
@@ -705,7 +778,7 @@ def test_switch_config_csi_file_missing():
                 switch_name,
             ],
         )
-        assert result.exit_code == 1
+        assert result.exit_code == 0
         assert (
             "The file sls_input_file.json was not found, check that this is the correct CSI directory"
             in str(result.output)
@@ -951,6 +1024,247 @@ def test_switch_config_not_enough_corners():
         )
 
 
+def test_switch_config_bad_switch_name_1():
+    """Test that the `canu switch config` command fails on bad switch name."""
+    bad_name_1 = "sw-bad"
+    with runner.isolated_filesystem():
+        with open("sls_input_file.json", "w") as f:
+            json.dump(sls_input, f)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--shasta",
+                shasta,
+                "--cache",
+                cache_minutes,
+                "switch",
+                "config",
+                "--architecture",
+                architecture,
+                "--shcd",
+                test_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--csi-folder",
+                csi_folder,
+                "--name",
+                bad_name_1,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            f"For switch {bad_name_1}, the type cannot be determined. Please check the switch name and try again."
+            in str(result.output)
+        )
+
+
+def test_switch_config_bad_switch_name_2():
+    """Test that the `canu switch config` command fails on bad switch name."""
+    bad_name_2 = "sw-spine-999"
+    with runner.isolated_filesystem():
+        with open("sls_input_file.json", "w") as f:
+            json.dump(sls_input, f)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--shasta",
+                shasta,
+                "--cache",
+                cache_minutes,
+                "switch",
+                "config",
+                "--architecture",
+                architecture,
+                "--shcd",
+                test_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--csi-folder",
+                csi_folder,
+                "--name",
+                bad_name_2,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            f"For switch {bad_name_2}, the type cannot be determined. Please check the switch name and try again."
+            in str(result.output)
+        )
+
+
+@responses.activate
+def test_switch_config_sls():
+    """Test that the `canu switch config` command runs with SLS."""
+    with runner.isolated_filesystem():
+        responses.add(
+            responses.GET,
+            f"https://{sls_address}/apis/sls/v1/networks",
+            json=sls_networks,
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--shasta",
+                shasta,
+                "--cache",
+                cache_minutes,
+                "switch",
+                "config",
+                "--architecture",
+                architecture,
+                "--shcd",
+                test_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--name",
+                switch_name,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "hostname sw-spine-001" in str(result.output)
+        assert "ntp server ***===> 192.168.4.4" in str(result.output)
+        assert "ntp server ***===> 192.168.4.5" in str(result.output)
+        assert "ntp server ***===> 192.168.4.6" in str(result.output)
+        assert "deny any ***===> 192.168.3.0/17 ***===> 192.168.0.0/17" in str(
+            result.output
+        )
+        assert "interface ***===> 1/1/30" in str(result.output)
+        assert "interface ***===> 1/1/31" in str(result.output)
+        assert "interface ***===> 1/1/32" in str(result.output)
+
+
+@responses.activate
+def test_switch_config_sls_token_bad():
+    """Test that the `canu switch config` command errors on bad token file."""
+    bad_token = "bad_token.token"
+    with runner.isolated_filesystem():
+        with open(bad_token, "w") as f:
+            f.write('{"access_token": "123"}')
+
+        responses.add(
+            responses.GET,
+            f"https://{sls_address}/apis/sls/v1/networks",
+            body=requests.exceptions.HTTPError(
+                "503 Server Error: Service Unavailable for url"
+            ),
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--shasta",
+                shasta,
+                "--cache",
+                cache_minutes,
+                "switch",
+                "config",
+                "--architecture",
+                architecture,
+                "--shcd",
+                test_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--name",
+                switch_name,
+                "--auth-token",
+                bad_token,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "Error connecting SLS api-gw-service-nmn.local, check that the token is valid, or generate a new one"
+            in str(result.output)
+        )
+
+
+@responses.activate
+def test_switch_config_sls_token_missing():
+    """Test that the `canu switch config` command errors on no token file."""
+    bad_token = "no_token.token"
+
+    result = runner.invoke(
+        cli,
+        [
+            "--shasta",
+            shasta,
+            "--cache",
+            cache_minutes,
+            "switch",
+            "config",
+            "--architecture",
+            architecture,
+            "--shcd",
+            test_file,
+            "--tabs",
+            tabs,
+            "--corners",
+            corners,
+            "--name",
+            switch_name,
+            "--auth-token",
+            bad_token,
+        ],
+    )
+    assert result.exit_code == 0
+    assert "Invalid token file, generate another token or try again." in str(
+        result.output
+    )
+
+
+@responses.activate
+def test_switch_config_sls_address_bad():
+    """Test that the `canu switch config` command errors with bad SLS address."""
+    bad_sls_address = "192.168.254.254"
+
+    responses.add(
+        responses.GET,
+        f"https://{bad_sls_address}/apis/sls/v1/networks",
+        body=requests.exceptions.ConnectionError(
+            "Failed to establish a new connection: [Errno 51] Network is unreachable"
+        ),
+    )
+
+    result = runner.invoke(
+        cli,
+        [
+            "--shasta",
+            shasta,
+            "--cache",
+            cache_minutes,
+            "switch",
+            "config",
+            "--architecture",
+            architecture,
+            "--shcd",
+            test_file,
+            "--tabs",
+            tabs,
+            "--corners",
+            corners,
+            "--name",
+            switch_name,
+            "--sls-address",
+            bad_sls_address,
+        ],
+    )
+    assert result.exit_code == 0
+    assert (
+        "Error connecting to SLS 192.168.254.254, check the address or pass in a new address using --sls-address."
+        in str(result.output)
+    )
+
+
 sls_input = {
     "Networks": {
         "CAN": {
@@ -1076,3 +1390,6 @@ sls_input = {
         },
     }
 }
+sls_networks = [
+    network[x] for network in [sls_input.get("Networks", {})] for x in network
+]
