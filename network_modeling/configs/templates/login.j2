@@ -11,7 +11,7 @@ lacp mode active
 lacp fallback
 spanning-tree port-type admin-edge
 
-interface {{ node.config.INTERFACE_LAG }}
+interface {{ node.config.PORT }}
 no shutdown
 mtu 9198
 description {{ node.config.DESCRIPTION }}    

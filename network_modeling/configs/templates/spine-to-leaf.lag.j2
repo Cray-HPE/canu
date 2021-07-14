@@ -11,7 +11,7 @@ interface lag ***===> {{ node.config.LAG_NUMBER }}
     lacp mode active
     spanning-tree root-guard
 
-interface ***===> {{ node.config.INTERFACE_LAG }}
+interface ***===> {{ node.config.PORT }}
     no shutdown
     mtu 9198
     description ***===> {{ node.config.DESCRIPTION }}
