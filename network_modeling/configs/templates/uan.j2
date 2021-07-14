@@ -1,31 +1,64 @@
 {# uan #}
 ***===> uan.j2
-{%- for node in cabling.nodes if node.subtype == "uan" %}
+{%- set ns = namespace(node1={'subtype':''}, node2={'subtype':''}) %}
 
-interface lag ***===> {{ node.config.LAG_NUMBER }} multi-chassis
+{%- for node in cabling.nodes if node.subtype == "uan" %}
+{%- if node.destination_port == 1%}
+    {%- set ns.node1 = node %}
+{%- else %}
+    {%- set ns.node2 = node %}
+{%- endif %}
+{%- endfor %}
+
+{%- if ns.node1.subtype == 'uan' %}
+{%- if ns.node1.slot == 'ocp' %}
+{# Port 1 OCP #}
+interface ***===> {{ ns.node1.config.PORT }}
     no shutdown
-    description ***===> {{ node.config.DESCRIPTION }}
+    mtu 9198
+    description ***===> {{ ns.node1.config.DESCRIPTION }}
+    vlan access 2
+
+interface lag ***===> 199 multi-chassis
+    no shutdown
+    description ***===> uan_can_lag
     no routing
     vlan trunk native 1
-    vlan trunk allowed 1-2,4,7
+    vlan trunk allowed 7
     lacp mode active
     lacp fallback
     spanning-tree port-type admin-edge
+    ! spanning-tree bpdu-guard
 
-interface ***===> {{ node.config.INTERFACE_LAG }}
+interface ***===> {{ ns.node2.config.PORT }}
     no shutdown
     mtu 9198
-    description ***===> {{ node.config.DESCRIPTION }}    
-    interface lag ***===> {{ node.config.LAG_NUMBER }}
-
-interface ***===> {{ node.config.INTERFACE_NUMBER }}
-    no shutdown
+    description ***===> {{ ns.node2.config.DESCRIPTION }}    
+    lag ***===> 199
+{%- else %}
+{# ns.node1.slot == 'pcie-slot1' #}
+interface ***===> {{ ns.node1.config.PORT }}
+    shutdown
     mtu 9198
+    description ***===> {{ ns.node1.config.DESCRIPTION }}    
+
+interface lag ***===> 199 multi-chassis
+    no shutdown
+    description ***===> uan_can_lag
     no routing
-    vlan access 2
-    description ***===> {{ node.config.DESCRIPTION }}
-    spanning-tree bpdu-guard
+    vlan trunk native 1
+    vlan trunk allowed 7
+    lacp mode active
+    lacp fallback
     spanning-tree port-type admin-edge
-{%- endfor %}
+    ! spanning-tree bpdu-guard
+
+interface ***===> {{ ns.node2.config.PORT }}
+    no shutdown
+    mtu 9198
+    description ***===> {{ ns.node2.config.DESCRIPTION }}    
+    lag ***===> 199
+{%- endif %}
+{%- endif %}
 ***===> end uan.j2
 {#- end-uan #}

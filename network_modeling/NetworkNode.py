@@ -108,19 +108,19 @@ class NetworkNode:
     # slot types/names, but accept None.
     def __select_port_block(self, speed=None, slot=None):
         # Only ports with required speed and remaining ports
-        # print("ZZZZZZ", port_block)
+
         port_block = [
             x
             for x in self.__ports_block_metadata
             if speed in x["speed"] and x["count"] > 0
         ]
-        # print("ZZZZZZ speed and count", port_block)
+
         # Prefer more total ports in a block
         port_block.sort(key=lambda k: (-k["total"]))
-        # print("ZZZZZZ sort totals", port_block)
+
         # Prefer an exact match for slot
         tmp_block = [x for x in port_block if x["slot"] == slot]
-        # print("ZZZZZZ slot match tmp", tmp_block)
+
         # If no exact slot match exists pick the first available.
         # TODO: Replace this with cabling standards.
         if tmp_block:
@@ -129,14 +129,14 @@ class NetworkNode:
                     "Multiple possible port blocks were found.  Using the first one."
                 )
             port_block = tmp_block[0]
-            # print("ZZZZZZ exact match tmp")
+
         elif port_block:
             if len(port_block) > 1:
                 log.warning(
                     "Multiple possible port blocks were found.  Using the first one."
                 )
             port_block = port_block[0]
-            # print("ZZZZZZ match block")
+
         else:
             raise Exception(
                 click.secho(
@@ -149,7 +149,7 @@ class NetworkNode:
         log.debug(
             f"Selected port block for requested slot {slot} and speed {speed}: {port_block}"
         )
-        # print("ZZZZZZ final", port_block)
+
         return port_block
 
     def __decrement_available_ports(self, speed=None, slot=None, count=1):
@@ -365,12 +365,6 @@ class NetworkNode:
             if selected_ports["slot"] is not None:
                 offset = selected_ports["start_index"]
             index = offset + src_port.port() - 1
-            # print("XXXXXX Port-type-by-speed", selected_ports)
-            # print("XXXXXX start_index", selected_ports["start_index"])
-            # print("XXXXXX offset", offset)
-            # print("XXXXXX port number", src_port.port())
-            # print("XXXXXX index", index)
-            # print("XXXXXX ports", self.__ports)
 
             if index > len(self.__ports) - 1:
                 raise Exception(
@@ -404,6 +398,8 @@ class NetworkNode:
                     )
 
             src_port.destination_node_id(dst_node.id())
+            src_port.destination_port(dst_port.port())
+            src_port.destination_slot(dst_port.slot())
             self.__ports[index] = src_port
         else:
             # Assign ports based on first available.

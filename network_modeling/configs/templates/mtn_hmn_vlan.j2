@@ -1,43 +1,22 @@
-vlan 3000
-interface vlan 3000
-ip mtu 9198
-ip address 10.104.0.2/22
-active-gateway ip mac 12:00:00:00:73:00
-active-gateway ip 10.104.0.1
-ipv6 address autoconfig
-ip helper-address 10.94.100.222
-ip ospf 1 area 0.0.0.0
-ip igmp enable
+{# mtn_hmn_vlan #}
+***===> mtn_hmn_vlan.j2
+{%- for cabinet in variables.HMN_MTN_CABINETS %}
 
-vlan 3001
-interface vlan 3001
-ip mtu 9198
-ip address 10.104.4.2/22
-active-gateway ip mac 12:00:00:00:73:00
-active-gateway ip 10.104.4.1
-ipv6 address autoconfig
-ip helper-address 10.94.100.222
-ip ospf 1 area 0.0.0.0
-ip igmp enable
+vlan ***===> {{ cabinet.VlanID }}
+    name ***===> {{ cabinet.Name }}
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
 
-vlan 3002
-interface vlan 3002
-ip mtu 9198
-ip address 10.104.8.2/22
-active-gateway ip mac 12:00:00:00:73:00
-active-gateway ip 10.104.8.1
-ipv6 address autoconfig
-ip helper-address 10.94.100.222
-ip ospf 1 area 0.0.0.0
-ip igmp enable
+interface vlan ***===> {{ cabinet.VlanID }}
+    ip mtu 9198
+    ip address ***===> {{ cabinet.CIDR }}
+    active-gateway ip mac 12:00:00:00:73:00
+    active-gateway ip ***===> {{ cabinet.Gateway }}
+    ipv6 address autoconfig
+    ip helper-address 10.94.100.222
+    ip ospf 1 area 0.0.0.0
+    ip igmp enable
 
-vlan 3003
-interface vlan 3003
-ip mtu 9198
-ip address 10.104.12.2/22
-active-gateway ip mac 12:00:00:00:73:00
-active-gateway ip 10.104.12.1
-ipv6 address autoconfig
-ip helper-address 10.94.100.222
-ip ospf 1 area 0.0.0.0
-ip igmp enable
+{%- endfor %}
+***===> end mtn_hmn_vlan.j2
+{#- end mtn_hmn_vlan #}

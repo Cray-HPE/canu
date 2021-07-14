@@ -71,23 +71,29 @@ def test_switch_config_spine_primary():
         assert "deny any ***===> 192.168.200.0/17 ***===> 192.168.3.0/17" in str(
             result.output
         )
-        # sw-leaf-001
+
+        # sw-spine-to-leaf.lag.j2
         assert "interface lag ***===> 1" in str(result.output)
+        assert "interface ***===> 1/1/1" in str(result.output)
         assert "description ***===> sw-spine-001:1==>sw-leaf-001:53" in str(
             result.output
         )
-        assert "interface ***===> 1/1/1" in str(result.output)
-
-        # sw-leaf-004
-        assert "interface lag ***===> 4" in str(result.output)
+        assert "description ***===> sw-spine-001:2==>sw-leaf-002:53" in str(
+            result.output
+        )
+        assert "description ***===> sw-spine-001:3==>sw-leaf-003:53" in str(
+            result.output
+        )
         assert "description ***===> sw-spine-001:4==>sw-leaf-004:53" in str(
             result.output
         )
-        assert "interface ***===> 1/1/4" in str(result.output)
 
-        # sw-cdu-001
+        # spine-to-cdu.j2
         assert "interface ***===> 1/1/5" in str(result.output)
         assert "description ***===> sw-spine-001:5==>sw-cdu-001:50" in str(
+            result.output
+        )
+        assert "description ***===> sw-spine-001:6==>sw-cdu-002:50" in str(
             result.output
         )
 
@@ -170,21 +176,24 @@ def test_switch_config_spine_secondary():
         assert "deny any ***===> 192.168.200.0/17 ***===> 192.168.3.0/17" in str(
             result.output
         )
-        # sw-leaf-001
+
+        # sw-spine-to-leaf.lag.j2
         assert "interface lag ***===> 1" in str(result.output)
+        assert "interface ***===> 1/1/1" in str(result.output)
         assert "description ***===> sw-spine-002:1==>sw-leaf-001:52" in str(
             result.output
         )
-        assert "interface ***===> 1/1/1" in str(result.output)
-
-        # sw-leaf-004
-        assert "interface lag ***===> 4" in str(result.output)
+        assert "description ***===> sw-spine-002:2==>sw-leaf-002:52" in str(
+            result.output
+        )
+        assert "description ***===> sw-spine-002:3==>sw-leaf-003:52" in str(
+            result.output
+        )
         assert "description ***===> sw-spine-002:4==>sw-leaf-004:52" in str(
             result.output
         )
-        assert "interface ***===> 1/1/4" in str(result.output)
 
-        # cdu
+        # spine-to-cdu.j2
         assert "interface ***===> 1/1/5" in str(result.output)
         assert "description ***===> sw-spine-002:5==>sw-cdu-001:49" in str(
             result.output
@@ -273,24 +282,42 @@ def test_switch_config_leaf_primary():
             result.output
         )
 
-        # ncn-m001
+        # ncn-m.lag.j2
         assert "interface lag ***===> 1 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/1" in str(result.output)
-        assert "description ***===> sw-leaf-001:1==>ncn-m001:ocp:2" in str(
+        assert "description ***===> sw-leaf-001:1==>ncn-m001:ocp:1" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-001:2==>ncn-m001:ocp:2" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-001:3==>ncn-m002:ocp:1" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-001:4==>ncn-m002:ocp:2" in str(
             result.output
         )
 
-        # ncn-w001
+        # ncn-w.lag.j2
         assert "interface lag ***===> 5 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/5" in str(result.output)
         assert "description ***===> sw-leaf-001:5==>ncn-w001:ocp:1" in str(
             result.output
         )
 
-        # ncn-s001
+        # ncn-s.lag.j2
         assert "interface lag ***===> 7 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/7" in str(result.output)
-        assert "description ***===> sw-leaf-001:7==>ncn-s001:ocp:2" in str(
+        assert "description ***===> sw-leaf-001:7==>ncn-s001:ocp:1" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-001:8==>ncn-s001:ocp:2" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-001:9==>ncn-s002:ocp:1" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-001:10==>ncn-s002:ocp:2" in str(
             result.output
         )
 
@@ -368,13 +395,41 @@ def test_switch_config_leaf_primary_to_uan():
         assert result.exit_code == 0
         assert "hostname ***===> sw-leaf-003" in str(result.output)
 
-        # uan
-        assert "interface lag ***===> 7 multi-chassis" in str(result.output)
-        assert "description ***===> sw-leaf-003:7==>uan001:ocp:2" in str(result.output)
-        assert "interface ***===> 1/1/7" in str(result.output)
+        # ncn-m.lag.j2
+        assert "interface lag ***===> 1 multi-chassis" in str(result.output)
+        assert "interface ***===> 1/1/1" in str(result.output)
+        assert "description ***===> sw-leaf-003:1==>ncn-m003:ocp:1" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-003:2==>ncn-m003:ocp:2" in str(
+            result.output
+        )
 
+        # ncn-w.lag.j2
+        assert "interface lag ***===> 3 multi-chassis" in str(result.output)
+        assert "interface ***===> 1/1/3" in str(result.output)
+        assert "description ***===> sw-leaf-003:3==>ncn-w002:ocp:1" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-003:4==>ncn-w003:ocp:1" in str(
+            result.output
+        )
+
+        # ncn-s.lag.j2
+        assert "interface lag ***===> 5 multi-chassis" in str(result.output)
+        assert "interface ***===> 1/1/5" in str(result.output)
+        assert "description ***===> sw-leaf-003:5==>ncn-s003:ocp:1" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-003:6==>ncn-s003:ocp:2" in str(
+            result.output
+        )
+
+        # uan
+        assert "interface ***===> 1/1/7" in str(result.output)
+        assert "description ***===> sw-leaf-003:7==>uan001:ocp:1" in str(result.output)
         assert "interface ***===> 1/1/8" in str(result.output)
-        assert "description ***===> sw-leaf-003:7==>uan001:ocp:2" in str(result.output)
+        assert "description ***===> sw-leaf-003:8==>uan001:ocp:2" in str(result.output)
 
 
 def test_switch_config_leaf_secondary():
@@ -426,24 +481,42 @@ def test_switch_config_leaf_secondary():
             result.output
         )
 
-        # ncn-m001
+        # ncn-m.lag.j2
         assert "interface lag ***===> 1 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/1" in str(result.output)
-        assert "description ***===> sw-leaf-002:1==>ncn-m001:pcie-slot1:2" in str(
+        assert "description ***===> sw-leaf-002:1==>ncn-m001:pcie-slot1:1" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-002:2==>ncn-m001:pcie-slot1:2" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-002:3==>ncn-m002:pcie-slot1:1" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-002:4==>ncn-m002:pcie-slot1:2" in str(
             result.output
         )
 
-        # ncn-w001
+        # ncn-w.lag.j2
         assert "interface lag ***===> 6 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/6" in str(result.output)
         assert "description ***===> sw-leaf-002:6==>ncn-w001:ocp:2" in str(
             result.output
         )
 
-        # ncn-s001
+        # ncn-s.lag.j2
         assert "interface lag ***===> 7 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/7" in str(result.output)
-        assert "description ***===> sw-leaf-002:7==>ncn-s001:pcie-slot1:2" in str(
+        assert "description ***===> sw-leaf-002:7==>ncn-s001:pcie-slot1:1" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-002:8==>ncn-s001:pcie-slot1:2" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-002:9==>ncn-s002:pcie-slot1:1" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-002:10==>ncn-s002:pcie-slot1:2" in str(
             result.output
         )
 
@@ -485,6 +558,81 @@ def test_switch_config_leaf_secondary():
         # VLAN 4
         # HMN_IP
         assert "ip address ***===> 192.168.0.5" in str(result.output)
+
+
+def test_switch_config_leaf_secondary_to_uan():
+    """Test that the `canu switch config` command runs and returns valid secondary leaf config."""
+    leaf_secondary_3 = "sw-leaf-004"
+
+    with runner.isolated_filesystem():
+        with open("sls_input_file.json", "w") as f:
+            json.dump(sls_input, f)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--shasta",
+                shasta,
+                "--cache",
+                cache_minutes,
+                "switch",
+                "config",
+                "--architecture",
+                architecture,
+                "--shcd",
+                test_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--csi-folder",
+                csi_folder,
+                "--name",
+                leaf_secondary_3,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "hostname ***===> sw-leaf-004" in str(result.output)
+
+        # ncn-m.lag.j2
+        assert "interface lag ***===> 1 multi-chassis" in str(result.output)
+        assert "interface ***===> 1/1/1" in str(result.output)
+        assert "description ***===> sw-leaf-004:1==>ncn-m003:pcie-slot1:1" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-004:2==>ncn-m003:pcie-slot1:2" in str(
+            result.output
+        )
+
+        # ncn-w.lag.j2
+        assert "interface lag ***===> 3 multi-chassis" in str(result.output)
+        assert "interface ***===> 1/1/3" in str(result.output)
+        assert "description ***===> sw-leaf-004:3==>ncn-w002:ocp:2" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-004:4==>ncn-w003:ocp:2" in str(
+            result.output
+        )
+
+        # ncn-s.lag.j2
+        assert "interface lag ***===> 5 multi-chassis" in str(result.output)
+        assert "interface ***===> 1/1/5" in str(result.output)
+        assert "description ***===> sw-leaf-004:5==>ncn-s003:pcie-slot1:1" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-004:6==>ncn-s003:pcie-slot1:2" in str(
+            result.output
+        )
+
+        # uan
+        assert "interface ***===> 1/1/7" in str(result.output)
+        assert "description ***===> sw-leaf-004:7==>uan001:pcie-slot1:1" in str(
+            result.output
+        )
+        assert "interface ***===> 1/1/8" in str(result.output)
+        assert "description ***===> sw-leaf-004:8==>uan001:pcie-slot1:2" in str(
+            result.output
+        )
 
 
 def test_switch_config_cdu_primary():
@@ -538,12 +686,11 @@ def test_switch_config_cdu_primary():
 
         # cmm
         assert "interface lag ***===> 2 static" in str(result.output)
-        assert "description ***===> sw-cdu-001:2==>cmm000:1" in str(result.output)
         assert "interface ***===> 1/1/2" in str(result.output)
-
-        assert "interface lag ***===> 5 static" in str(result.output)
+        assert "description ***===> sw-cdu-001:2==>cmm000:1" in str(result.output)
+        assert "description ***===> sw-cdu-001:3==>cmm001:1" in str(result.output)
+        assert "description ***===> sw-cdu-001:4==>cmm002:1" in str(result.output)
         assert "description ***===> sw-cdu-001:5==>cmm003:1" in str(result.output)
-        assert "interface ***===> 1/1/5" in str(result.output)
 
         # cec
         assert "interface ***===> 1/1/1" in str(result.output)
@@ -555,12 +702,29 @@ def test_switch_config_cdu_primary():
         assert "description ***===> sw-cdu-001:49==>sw-spine-002:5" in str(
             result.output
         )
+        assert "description ***===> sw-cdu-001:50==>sw-spine-001:5" in str(
+            result.output
+        )
 
         # ip address ***===> ****TBD
         assert "interface ***===> 1/1/50" in str(result.output)
         assert "description ***===> sw-cdu-001:50==>sw-spine-001:5" in str(
             result.output
         )
+
+        # mtn_hmn_vlan.j2
+        assert "vlan ***===> 3000" in str(result.output)
+        assert "name ***===> cabinet_1000" in str(result.output)
+        assert "interface vlan ***===> 3000" in str(result.output)
+        assert "ip address ***===> 192.168.100.0/22" in str(result.output)
+        assert "active-gateway ip ***===> 192.168.100.1" in str(result.output)
+
+        # mtn_nmn_vlan.j2
+        assert "vlan ***===> 2000" in str(result.output)
+        assert "name ***===> cabinet_1000" in str(result.output)
+        assert "interface vlan ***===> 2000" in str(result.output)
+        assert "ip address ***===> 192.168.106.0/22" in str(result.output)
+        assert "active-gateway ip ***===> 192.168.106.1" in str(result.output)
 
         # VSX_KEEPALIVE
         assert "interface ***===> 1/1/48" in str(result.output)
@@ -624,12 +788,11 @@ def test_switch_config_cdu_secondary():
 
         # cmm
         assert "interface lag ***===> 2 static" in str(result.output)
-        assert "description ***===> sw-cdu-002:2==>cmm000:2" in str(result.output)
         assert "interface ***===> 1/1/2" in str(result.output)
-
-        assert "interface lag ***===> 5 static" in str(result.output)
+        assert "description ***===> sw-cdu-002:2==>cmm000:2" in str(result.output)
+        assert "description ***===> sw-cdu-002:3==>cmm001:2" in str(result.output)
+        assert "description ***===> sw-cdu-002:4==>cmm002:2" in str(result.output)
         assert "description ***===> sw-cdu-002:5==>cmm003:2" in str(result.output)
-        assert "interface ***===> 1/1/5" in str(result.output)
 
         # cdu-to-spine
         # ip address ***===> ****TBD
@@ -643,6 +806,20 @@ def test_switch_config_cdu_secondary():
         assert "description ***===> sw-cdu-002:50==>sw-spine-001:6" in str(
             result.output
         )
+
+        # mtn_hmn_vlan.j2
+        assert "vlan ***===> 3000" in str(result.output)
+        assert "name ***===> cabinet_1000" in str(result.output)
+        assert "interface vlan ***===> 3000" in str(result.output)
+        assert "ip address ***===> 192.168.100.0/22" in str(result.output)
+        assert "active-gateway ip ***===> 192.168.100.1" in str(result.output)
+
+        # mtn_nmn_vlan.j2
+        assert "vlan ***===> 2000" in str(result.output)
+        assert "name ***===> cabinet_1000" in str(result.output)
+        assert "interface vlan ***===> 2000" in str(result.output)
+        assert "ip address ***===> 192.168.106.0/22" in str(result.output)
+        assert "active-gateway ip ***===> 192.168.106.1" in str(result.output)
 
         # VSX_KEEPALIVE
         assert "interface ***===> 1/1/48" in str(result.output)
@@ -721,15 +898,33 @@ def test_switch_config_leaf_bmc():
         assert "description ***===> sw-leaf-bmc-001:1==>ncn-m001:bmc:1" in str(
             result.output
         )
-        assert "interface ***===> 1/1/4" in str(result.output)
+        assert "description ***===> sw-leaf-bmc-001:2==>ncn-m002:bmc:1" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-bmc-001:3==>ncn-m003:bmc:1" in str(
+            result.output
+        )
+
         assert "description ***===> sw-leaf-bmc-001:4==>ncn-w001:bmc:1" in str(
             result.output
         )
-        assert "interface ***===> 1/1/7" in str(result.output)
+        assert "description ***===> sw-leaf-bmc-001:5==>ncn-w002:bmc:1" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-bmc-001:6==>ncn-w003:bmc:1" in str(
+            result.output
+        )
+
         assert "description ***===> sw-leaf-bmc-001:7==>ncn-s001:bmc:1" in str(
             result.output
         )
-        assert "interface ***===> 1/1/10" in str(result.output)
+        assert "description ***===> sw-leaf-bmc-001:8==>ncn-s002:bmc:1" in str(
+            result.output
+        )
+        assert "description ***===> sw-leaf-bmc-001:9==>ncn-s003:bmc:1" in str(
+            result.output
+        )
+
         assert "description ***===> sw-leaf-bmc-001:10==>uan001:bmc:1" in str(
             result.output
         )
@@ -1309,7 +1504,7 @@ sls_input = {
                 "CIDR": "192.168.11.0/24",
                 "Subnets": [
                     {
-                        "FullName": "CAN Bootstrap DHCP Subnet",
+                        "Name": "bootstrap_dhcp",
                         "CIDR": "192.168.11.0/24",
                         "IPReservations": [
                             {"Name": "can-switch-1", "IPAddress": "192.168.11.2"},
@@ -1327,7 +1522,7 @@ sls_input = {
                 "CIDR": "192.168.0.0/17",
                 "Subnets": [
                     {
-                        "FullName": "HMN Management Network Infrastructure",
+                        "Name": "network_hardware",
                         "CIDR": "192.168.0.0/17",
                         "IPReservations": [
                             {"Name": "sw-spine-001", "IPAddress": "192.168.0.2"},
@@ -1353,7 +1548,7 @@ sls_input = {
                 "CIDR": "192.168.1.0/16",
                 "Subnets": [
                     {
-                        "FullName": "MTL Management Network Infrastructure",
+                        "Name": "network_hardware",
                         "CIDR": "192.168.1.0/16",
                         "IPReservations": [
                             {"Name": "sw-spine-001", "IPAddress": "192.168.1.2"},
@@ -1406,6 +1601,7 @@ sls_input = {
                             {"Name": "ncn-w002", "IPAddress": "192.168.4.5"},
                             {"Name": "ncn-w003", "IPAddress": "192.168.4.6"},
                         ],
+                        "Name": "bootstrap_dhcp",
                         "VlanID": 2,
                         "Gateway": "192.168.3.1",
                     },
@@ -1416,12 +1612,34 @@ sls_input = {
             "Name": "NMN_MTN",
             "ExtraProperties": {
                 "CIDR": "192.168.100.0/17",
+                "Subnets": [
+                    {
+                        "FullName": "",
+                        "CIDR": "192.168.100.0/22",
+                        "Name": "cabinet_1000",
+                        "VlanID": 2000,
+                        "Gateway": "192.168.100.1",
+                        "DHCPStart": "192.168.100.10",
+                        "DHCPEnd": "192.168.3.254",
+                    },
+                ],
             },
         },
         "HMN_MTN": {
             "Name": "HMN_MTN",
             "ExtraProperties": {
                 "CIDR": "192.168.200.0/17",
+                "Subnets": [
+                    {
+                        "FullName": "",
+                        "CIDR": "192.168.106.0/22",
+                        "Name": "cabinet_3000",
+                        "VlanID": 3000,
+                        "Gateway": "192.168.106.1",
+                        "DHCPStart": "192.168.106.10",
+                        "DHCPEnd": "192.168.3.254",
+                    },
+                ],
             },
         },
     }
