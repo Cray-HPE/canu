@@ -101,6 +101,13 @@ env = Environment(
     required=True,
     prompt="Folder for configs",
 )
+@click.option(
+    "--password",
+    prompt=True,
+    hide_input=True,
+    confirmation_prompt=False,
+    help="Switch password",
+)
 @click.pass_context
 def config(
     ctx,
@@ -112,6 +119,7 @@ def config(
     auth_token,
     sls_address,
     folder,
+    password,
 ):
     """Generate the config of all Aruba switches (API v10.04) on the network using the SHCD.
 
@@ -132,6 +140,7 @@ def config(
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         folder: Folder to store config files
+        password: Switch password
     """
     if architecture.lower() == "full":
         architecture = "network_v2"
@@ -287,7 +296,12 @@ def config(
         if node_shasta_name in ["sw-cdu", "sw-leaf-bmc", "sw-leaf", "sw-spine"]:
 
             switch_config = generate_switch_config(
-                shcd_node_list, factory, switch_name, sls_variables, template_folder
+                shcd_node_list,
+                factory,
+                switch_name,
+                sls_variables,
+                template_folder,
+                password,
             )
 
             with open(f"{folder}/{switch_name}.aos", "w+") as f:

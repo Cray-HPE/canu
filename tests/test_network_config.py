@@ -22,6 +22,7 @@ shasta = "1.4"
 folder_name = "test_config"
 cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
+password = "test_password"
 runner = click.testing.CliRunner()
 
 
@@ -52,6 +53,8 @@ def test_network_config():
                 csi_folder,
                 "--folder",
                 folder_name,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -91,8 +94,52 @@ def test_network_config_folder_prompt():
                 corners,
                 "--csi-folder",
                 csi_folder,
+                "--password",
+                password,
             ],
             input="test_folder\n",
+        )
+        assert result.exit_code == 0
+        assert "sw-spine-001 Config Generated" in str(result.output)
+        assert "sw-spine-002 Config Generated" in str(result.output)
+        assert "sw-leaf-001 Config Generated" in str(result.output)
+        assert "sw-leaf-002 Config Generated" in str(result.output)
+        assert "sw-leaf-003 Config Generated" in str(result.output)
+        assert "sw-leaf-004 Config Generated" in str(result.output)
+        assert "sw-cdu-001 Config Generated" in str(result.output)
+        assert "sw-cdu-002 Config Generated" in str(result.output)
+        assert "sw-leaf-bmc-001 Config Generated" in str(result.output)
+
+
+def test_network_config_password_prompt():
+    """Test that the `canu network config` command prompts for missing switch password and runs and generates config."""
+    with runner.isolated_filesystem():
+        with open("sls_input_file.json", "w") as f:
+            json.dump(sls_input, f)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--shasta",
+                shasta,
+                "--cache",
+                cache_minutes,
+                "network",
+                "config",
+                "--architecture",
+                architecture,
+                "--shcd",
+                test_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--csi-folder",
+                csi_folder,
+                "--folder",
+                folder_name,
+            ],
+            input="test_password\n",
         )
         assert result.exit_code == 0
         assert "sw-spine-001 Config Generated" in str(result.output)
@@ -131,6 +178,8 @@ def test_network_config_csi_file_missing():
                 bad_csi_folder,
                 "--folder",
                 folder_name,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -163,6 +212,8 @@ def test_network_config_missing_file():
                 csi_folder,
                 "--folder",
                 folder_name,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 2
@@ -195,6 +246,8 @@ def test_network_config_bad_file():
                 csi_folder,
                 "--folder",
                 folder_name,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 2
@@ -226,6 +279,8 @@ def test_network_config_missing_tabs():
                 csi_folder,
                 "--folder",
                 folder_name,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 2
@@ -258,6 +313,8 @@ def test_network_config_bad_tab():
                 csi_folder,
                 "--folder",
                 folder_name,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 1
@@ -289,6 +346,8 @@ def test_network_config_corner_prompt():
                 csi_folder,
                 "--folder",
                 folder_name,
+                "--password",
+                password,
             ],
             input="J14\nT42\nJ14\nT48\nJ14\nT24\nJ14\nT23",
         )
@@ -329,6 +388,8 @@ def test_network_config_not_enough_corners():
                 csi_folder,
                 "--folder",
                 folder_name,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -366,6 +427,8 @@ def test_network_config_sls():
                 corners,
                 "--folder",
                 folder_name,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -417,6 +480,8 @@ def test_network_config_sls_token_bad():
                 folder_name,
                 "--auth-token",
                 bad_token,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -452,6 +517,8 @@ def test_network_config_sls_token_missing():
             folder_name,
             "--auth-token",
             bad_token,
+            "--password",
+            password,
         ],
     )
     assert result.exit_code == 0
@@ -494,6 +561,8 @@ def test_network_config_sls_address_bad():
             folder_name,
             "--sls-address",
             bad_sls_address,
+            "--password",
+            password,
         ],
     )
     assert result.exit_code == 0

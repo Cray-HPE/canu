@@ -21,6 +21,7 @@ shasta = "1.4"
 switch_name = "sw-spine-001"
 cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
+password = "test_password"
 runner = click.testing.CliRunner()
 
 
@@ -51,6 +52,8 @@ def test_switch_config_spine_primary():
                 csi_folder,
                 "--name",
                 switch_name,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -156,6 +159,8 @@ def test_switch_config_spine_secondary():
                 csi_folder,
                 "--name",
                 spine_secondary,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -262,6 +267,8 @@ def test_switch_config_leaf_primary():
                 csi_folder,
                 "--name",
                 leaf_primary,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -360,6 +367,9 @@ def test_switch_config_leaf_primary():
         # HMN_IP
         assert "ip address ***===> 192.168.0.4" in str(result.output)
 
+        # LOOPBACK_IP
+        assert "router-id ***===> 10.2.0.4/32" in str(result.output)
+
 
 def test_switch_config_leaf_primary_to_uan():
     """Test that the `canu switch config` command runs and returns valid primary leaf config."""
@@ -390,6 +400,8 @@ def test_switch_config_leaf_primary_to_uan():
                 csi_folder,
                 "--name",
                 leaf_primary_3,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -431,6 +443,9 @@ def test_switch_config_leaf_primary_to_uan():
         assert "interface ***===> 1/1/8" in str(result.output)
         assert "description ***===> sw-leaf-003:8==>uan001:ocp:2" in str(result.output)
 
+        # LOOPBACK_IP
+        assert "router-id ***===> 10.2.0.6/32" in str(result.output)
+
 
 def test_switch_config_leaf_secondary():
     """Test that the `canu switch config` command runs and returns valid secondary leaf config."""
@@ -461,6 +476,8 @@ def test_switch_config_leaf_secondary():
                 csi_folder,
                 "--name",
                 leaf_secondary,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -559,6 +576,9 @@ def test_switch_config_leaf_secondary():
         # HMN_IP
         assert "ip address ***===> 192.168.0.5" in str(result.output)
 
+        # LOOPBACK_IP
+        assert "router-id ***===> 10.2.0.5/32" in str(result.output)
+
 
 def test_switch_config_leaf_secondary_to_uan():
     """Test that the `canu switch config` command runs and returns valid secondary leaf config."""
@@ -589,6 +609,8 @@ def test_switch_config_leaf_secondary_to_uan():
                 csi_folder,
                 "--name",
                 leaf_secondary_3,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -634,6 +656,9 @@ def test_switch_config_leaf_secondary_to_uan():
             result.output
         )
 
+        # LOOPBACK_IP
+        assert "router-id ***===> 10.2.0.7/32" in str(result.output)
+
 
 def test_switch_config_cdu_primary():
     """Test that the `canu switch config` command runs and returns valid primary cdu config."""
@@ -664,6 +689,8 @@ def test_switch_config_cdu_primary():
                 csi_folder,
                 "--name",
                 cdu_primary,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -734,7 +761,7 @@ def test_switch_config_cdu_primary():
         assert "interface ***===> 1/1/52" in str(result.output)
 
         # LOOPBACK_IP
-        assert "router-id ***===>" in str(result.output)
+        assert "router-id ***===> 10.2.0.16/32" in str(result.output)
 
 
 def test_switch_config_cdu_secondary():
@@ -766,6 +793,8 @@ def test_switch_config_cdu_secondary():
                 csi_folder,
                 "--name",
                 cdu_secondary,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -829,7 +858,7 @@ def test_switch_config_cdu_secondary():
         assert "interface ***===> 1/1/52" in str(result.output)
 
         # LOOPBACK_IP
-        assert "router-id ***===> I DONT KNOW" in str(result.output)
+        assert "router-id ***===> 10.2.0.17/32" in str(result.output)
 
 
 def test_switch_config_leaf_bmc():
@@ -861,6 +890,8 @@ def test_switch_config_leaf_bmc():
                 csi_folder,
                 "--name",
                 leaf_bmc,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -942,7 +973,7 @@ def test_switch_config_leaf_bmc():
         assert "ip address ***===> 192.168.0.12" in str(result.output)
 
         # LOOPBACK_IP
-        assert "router-id ***===> I DONT KNOW" in str(result.output)
+        assert "router-id ***===> 10.2.0.12/32" in str(result.output)
 
 
 def test_switch_config_csi_file_missing():
@@ -970,6 +1001,8 @@ def test_switch_config_csi_file_missing():
                 bad_csi_folder,
                 "--name",
                 switch_name,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -1002,6 +1035,8 @@ def test_switch_config_missing_file():
                 csi_folder,
                 "--name",
                 switch_name,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 2
@@ -1034,6 +1069,8 @@ def test_switch_config_bad_file():
                 csi_folder,
                 "--name",
                 switch_name,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 2
@@ -1065,6 +1102,8 @@ def test_switch_config_missing_tabs():
                 csi_folder,
                 "--name",
                 switch_name,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 2
@@ -1097,6 +1136,8 @@ def test_switch_config_bad_tab():
                 csi_folder,
                 "--name",
                 switch_name,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 1
@@ -1128,8 +1169,53 @@ def test_switch_config_switch_name_prompt():
                 corners,
                 "--csi-folder",
                 csi_folder,
+                "--password",
+                password,
             ],
             input="sw-spine-001\n",
+        )
+        assert result.exit_code == 0
+        assert "hostname sw-spine-001" in str(result.output)
+        assert "ntp server ***===> 192.168.4.4" in str(result.output)
+        assert "ntp server ***===> 192.168.4.5" in str(result.output)
+        assert "ntp server ***===> 192.168.4.6" in str(result.output)
+        assert "deny any ***===> 192.168.3.0/17 ***===> 192.168.0.0/17" in str(
+            result.output
+        )
+        assert "interface ***===> 1/1/30" in str(result.output)
+        assert "interface ***===> 1/1/31" in str(result.output)
+        assert "interface ***===> 1/1/32" in str(result.output)
+
+
+def test_switch_config_switch_password_prompt():
+    """Test that the `canu switch config` command prompts for missing switch password."""
+    with runner.isolated_filesystem():
+        with open("sls_input_file.json", "w") as f:
+            json.dump(sls_input, f)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--shasta",
+                shasta,
+                "--cache",
+                cache_minutes,
+                "switch",
+                "config",
+                "--architecture",
+                architecture,
+                "--shcd",
+                test_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--csi-folder",
+                csi_folder,
+                "--name",
+                switch_name,
+            ],
+            input="test_password\n",
         )
         assert result.exit_code == 0
         assert "hostname sw-spine-001" in str(result.output)
@@ -1169,6 +1255,8 @@ def test_switch_config_corner_prompt():
                 csi_folder,
                 "--name",
                 switch_name,
+                "--password",
+                password,
             ],
             input="J14\nT42\nJ14\nT48\nJ14\nT24\nJ14\nT23",
         )
@@ -1210,6 +1298,8 @@ def test_switch_config_not_enough_corners():
                 csi_folder,
                 "--name",
                 switch_name,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -1246,6 +1336,8 @@ def test_switch_config_bad_switch_name_1():
                 csi_folder,
                 "--name",
                 bad_name_1,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -1283,6 +1375,8 @@ def test_switch_config_bad_switch_name_2():
                 csi_folder,
                 "--name",
                 bad_name_2,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -1320,6 +1414,8 @@ def test_switch_config_non_switch():
                 csi_folder,
                 "--name",
                 non_switch,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -1358,6 +1454,8 @@ def test_switch_config_sls():
                 corners,
                 "--name",
                 switch_name,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -1410,6 +1508,8 @@ def test_switch_config_sls_token_bad():
                 switch_name,
                 "--auth-token",
                 bad_token,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
@@ -1445,6 +1545,8 @@ def test_switch_config_sls_token_missing():
             switch_name,
             "--auth-token",
             bad_token,
+            "--password",
+            password,
         ],
     )
     assert result.exit_code == 0
@@ -1487,6 +1589,8 @@ def test_switch_config_sls_address_bad():
             switch_name,
             "--sls-address",
             bad_sls_address,
+            "--password",
+            password,
         ],
     )
     assert result.exit_code == 0
@@ -1534,7 +1638,9 @@ sls_input = {
                             {"Name": "sw-leaf-001", "IPAddress": "192.168.0.12"},
                             {"Name": "sw-leaf-002", "IPAddress": "192.168.0.13"},
                             {"Name": "sw-leaf-003", "IPAddress": "192.168.0.14"},
-                            {"Name": "sw-leaf-004", "IPAddress": "192.168.0.14"},
+                            {"Name": "sw-leaf-004", "IPAddress": "192.168.0.15"},
+                            {"Name": "sw-cdu-001", "IPAddress": "192.168.0.16"},
+                            {"Name": "sw-cdu-002", "IPAddress": "192.168.0.17"},
                         ],
                         "VlanID": 4,
                         "Gateway": "192.168.0.1",
@@ -1561,6 +1667,8 @@ sls_input = {
                             {"Name": "sw-leaf-002", "IPAddress": "192.168.1.13"},
                             {"Name": "sw-leaf-003", "IPAddress": "192.168.1.14"},
                             {"Name": "sw-leaf-004", "IPAddress": "192.168.1.15"},
+                            {"Name": "sw-cdu-001", "IPAddress": "192.168.1.16"},
+                            {"Name": "sw-cdu-002", "IPAddress": "192.168.1.17"},
                         ],
                         "VlanID": 0,
                         "Gateway": "192.168.1.1",
@@ -1588,6 +1696,8 @@ sls_input = {
                             {"Name": "sw-leaf-002", "IPAddress": "192.168.3.13"},
                             {"Name": "sw-leaf-003", "IPAddress": "192.168.3.14"},
                             {"Name": "sw-leaf-004", "IPAddress": "192.168.3.15"},
+                            {"Name": "sw-cdu-001", "IPAddress": "192.168.3.16"},
+                            {"Name": "sw-cdu-002", "IPAddress": "192.168.3.17"},
                         ],
                         "Name": "network_hardware",
                         "VlanID": 2,
