@@ -1,9 +1,8 @@
-{# sw-leaf.secondary #}
-***===> sw-leaf.secondary.j2
+{#- sw-leaf-bmc #}
+***===> sw-leaf-bmc.j2
 hostname ***===> {{ variables.HOSTNAME }}
 user admin group administrators password plaintext ***===> {{ variables.PASSWORD }}
 no ip icmp redirect
-vrf keepalive
 ntp server ***===> {{ variables.NCN_W001 }}
 ntp server ***===> {{ variables.NCN_W002 }}
 ntp server ***===> {{ variables.NCN_W003 }}
@@ -11,10 +10,10 @@ ntp enable
 !
 !
 !
-{% include 'unknown.j2' %}
+{%- include 'common/unknown.j2' %}
 ssh server vrf default
 ssh server vrf mgmt
-{% include 'acl.j2' %}
+{%- include 'common/acl.j2' %}
     
 vlan 1
 vlan 2
@@ -27,48 +26,21 @@ vlan 4
     apply access-list ip nmn-hmn out
 vlan 7
     name CAN
-vlan 10
-    name SUN
+
 spanning-tree
-spanning-tree priority 10
+spanning-tree priority 15
 spanning-tree max-age 6
 spanning-tree config-name MST0
 spanning-tree config-revision 1
 interface mgmt
     shutdown
 
-{% include 'ncn-m.lag.j2' %}
-{% include 'ncn-w.lag.j2' %}
-{% include 'ncn-s.lag.j2' %}
-{% include 'uan.j2' %}
-{% include 'leaf-to-leaf-bmc.lag.j2' %}
-{% include 'leaf-to-spine.lag.j2' %}
+{% include 'common/leaf-bmc-to-leaf.lag.j2' %}
+{% include 'common/bmc.j2' %}
 
-interface lag 99
-    no shutdown
-    description ISL link
-    no routing
-    vlan trunk native 1 tag
-    vlan trunk allowed all
-    lacp mode active
-interface ***===> {{ variables.VSX_KEEPALIVE }}
-    no shutdown
-    vrf attach keepalive
-    description vsx keepalive
-    ip address 192.168.255.1/31
-interface ***===> {{ variables.VSX_ISL_PORT1 }}
-    no shutdown
-    mtu 9198
-    description vsx isl
-    lag 99
-iinterface ***===> {{ variables.VSX_ISL_PORT2 }}
-    no shutdown
-    mtu 9198
-    description vsx isl
-    lag 99
 interface loopback 0
     ip address ***===> {{ variables.LOOPBACK_IP }}
-    ipv6 address fd01::65/64
+    ipv6 address ***===> {{ variables.IPV6_IP }}
     ip ospf 1 area 0.0.0.0
     ipv6 ospfv3 1 area 0.0.0.0
 interface vlan 1
@@ -92,18 +64,9 @@ interface vlan 4
     ip helper-address 10.94.100.222
     ip ospf 1 area 0.0.0.0
     ip igmp enable
-vsx
-    system-mac 02:00:00:00:65:00
-    inter-switch-link lag 99
-    role secondary
-    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive
-    linkup-delay-timer 600
-    vsx-sync vsx-global
-!
-!
-!
-!
-!
+snmp-server vrf default
+snmpv3 user testuser auth md5 auth-pass plaintext testpass1 priv des priv-pass ciphertext testpass2
+
 router ospf 1
     router-id ***===> {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
@@ -112,5 +75,5 @@ router ospfv3 1
     area 0.0.0.0
 https-server vrf default
 https-server vrf mgmt
-***===> sw-leaf.secondary.j2
-{# end sw-leaf.secondary #}
+***===> end sw-leaf-bmc.j2
+{# end sw-leaf-bmc #}

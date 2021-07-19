@@ -135,8 +135,10 @@ def config(
     """
     if architecture.lower() == "full":
         architecture = "network_v2"
+        template_folder = "full"
     elif architecture.lower() == "tds":
         architecture = "network_v2_tds"
+        template_folder = "tds"
 
     # SHCD Parsing
     sheets = []
@@ -285,7 +287,7 @@ def config(
         if node_shasta_name in ["sw-cdu", "sw-leaf-bmc", "sw-leaf", "sw-spine"]:
 
             switch_config = generate_switch_config(
-                shcd_node_list, factory, switch_name, sls_variables
+                shcd_node_list, factory, switch_name, sls_variables, template_folder
             )
 
             with open(f"{folder}/{switch_name}.aos", "w+") as f:

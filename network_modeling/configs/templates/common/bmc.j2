@@ -1,7 +1,6 @@
-{# bmc #}
+{#- bmc #}
 ***===> bmc.j2
 {%- for node in cabling.nodes if node.slot == "bmc" %}
-
 interface ***===> {{ node.config.PORT }}
     no shutdown
     mtu 9198
@@ -10,6 +9,7 @@ interface ***===> {{ node.config.PORT }}
     vlan access 4
     spanning-tree bpdu-guard
     spanning-tree port-type admin-edge
+
 {%- endfor %}
 ***===> end bmc.j2
-{# end bmc #}
+{#- end bmc #}

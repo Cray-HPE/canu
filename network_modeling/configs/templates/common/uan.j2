@@ -1,4 +1,4 @@
-{# uan #}
+{#- uan #}
 ***===> uan.j2
 {%- for node in cabling.nodes if node.subtype == "uan" %}
 {%- if node.destination_port == 1%}
@@ -13,6 +13,7 @@ interface ***===> {{ node.config.PORT }}
     vlan access 2
 {%- endif %}
 {%- if node.destination_port == 2%}
+
 interface lag ***===> 199 multi-chassis
     no shutdown
     description ***===> uan_can_lag
@@ -29,6 +30,7 @@ interface ***===> {{ node.config.PORT }}
     mtu 9198
     description ***===> {{ node.config.DESCRIPTION }}    
     lag ***===> 199
+
 {%- endif %}
 {%- endfor %}
 ***===> end uan.j2

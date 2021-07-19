@@ -140,8 +140,10 @@ def config(
     """
     if architecture.lower() == "full":
         architecture = "network_v2"
+        template_folder = "full"
     elif architecture.lower() == "tds":
         architecture = "network_v2_tds"
+        template_folder = "tds"
 
     # SHCD Parsing
     sheets = []
@@ -280,7 +282,7 @@ def config(
             sls_variables = rename_sls_hostnames(sls_variables)
 
     switch_config = generate_switch_config(
-        shcd_node_list, factory, switch_name, sls_variables
+        shcd_node_list, factory, switch_name, sls_variables, template_folder
     )
 
     dash = "-" * 60
@@ -300,7 +302,9 @@ def get_shasta_name(name, mapper):
             return shasta_name
 
 
-def generate_switch_config(shcd_node_list, factory, switch_name, sls_variables):
+def generate_switch_config(
+    shcd_node_list, factory, switch_name, sls_variables, template_folder
+):
     """Generate switch config.
 
     Args:
@@ -308,6 +312,7 @@ def generate_switch_config(shcd_node_list, factory, switch_name, sls_variables):
         factory: Node factory object
         switch_name: Switch hostname
         sls_variables: Dictionary containing SLS variables
+        template_folder: Architecture folder contaning the switch templates
 
     Returns:
         switch_config: The generated switch configuration
@@ -333,20 +338,20 @@ def generate_switch_config(shcd_node_list, factory, switch_name, sls_variables):
 
     templates = {
         "sw-spine": {
-            "primary": "sw-spine.primary.j2",
-            "secondary": "sw-spine.secondary.j2",
+            "primary": f"{template_folder}/sw-spine.primary.j2",
+            "secondary": f"{template_folder}/sw-spine.secondary.j2",
         },
         "sw-cdu": {
-            "primary": "sw-cdu.primary.j2",
-            "secondary": "sw-cdu.secondary.j2",
+            "primary": f"{template_folder}/sw-cdu.primary.j2",
+            "secondary": f"{template_folder}/sw-cdu.secondary.j2",
         },
         "sw-leaf": {
-            "primary": "sw-leaf.primary.j2",
-            "secondary": "sw-leaf.secondary.j2",
+            "primary": f"{template_folder}/sw-leaf.primary.j2",
+            "secondary": f"{template_folder}/sw-leaf.secondary.j2",
         },
         "sw-leaf-bmc": {
-            "primary": "sw-leaf-bmc.j2",
-            "secondary": "sw-leaf-bmc.j2",
+            "primary": f"{template_folder}/sw-leaf-bmc.j2",
+            "secondary": f"{template_folder}/sw-leaf-bmc.j2",
         },
     }
     template_name = templates[node_shasta_name][
