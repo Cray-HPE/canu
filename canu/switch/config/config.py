@@ -342,8 +342,8 @@ def generate_switch_config(
             "secondary": f"{template_folder}/sw-spine.secondary.j2",
         },
         "sw-cdu": {
-            "primary": f"{template_folder}/sw-cdu.primary.j2",
-            "secondary": f"{template_folder}/sw-cdu.secondary.j2",
+            "primary": "common/sw-cdu.primary.j2",
+            "secondary": "common/sw-cdu.secondary.j2",
         },
         "sw-leaf": {
             "primary": f"{template_folder}/sw-leaf.primary.j2",
@@ -564,7 +564,6 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "LAG_NUMBER": source_port,
                     "PORT": f"1/1/{source_port}",
-                    "PT_TO_PT_IP": "I DONT KNOW",
                 },
             }
             nodes.append(new_node)
@@ -574,8 +573,8 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                 "slot": None,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "LAG_NUMBER": source_port,
                     "PORT": f"1/1/{source_port}",
-                    "PT_TO_PT_IP": "I DONT KNOW",
                 },
             }
             nodes.append(new_node)
