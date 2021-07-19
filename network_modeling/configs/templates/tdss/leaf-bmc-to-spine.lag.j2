@@ -1,0 +1,26 @@
+{#- spine-bmc-to-spine #}
+***===> spine-bmc-to-spine.lag.j2
+{%- set ns = namespace(lag1='') %}
+{%- for node in cabling.nodes if node.subtype == "spine" %}
+{%- if ns.lag1 == '' %}
+{%- set ns.lag1 = node.config.LAG_NUMBER %}
+interface lag ***===> {{ ns.lag1 }}
+    no shutdown
+    description ***===> spine_bmc_to_spine_lag
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 2,4
+    lacp mode active
+{%- endif %}
+{%- endfor %}
+
+{%- for node in cabling.nodes if node.subtype == "spine"%}
+interface ***===> {{ node.config.PORT }}
+    no shutdown
+    mtu 9198
+    description ***===> {{ node.config.DESCRIPTION }}
+    lag ***===> {{ ns.lag1 }}
+
+{%- endfor %}
+***===> end spine-bmc-to-spine.lag.j2
+{#- end spine-bmc-to-spine #}
