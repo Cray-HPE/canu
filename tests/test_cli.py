@@ -50,7 +50,7 @@ def test_cli_init_csi_good():
     with runner.isolated_filesystem():
         with open("sls_input_file.json", "w") as f:
             f.write(
-                '{"Networks": {"NMN": {"Name": "NMN", "ExtraProperties": { "Subnets": [{"IPReservations":'
+                '{"Networks": {"CAN": {"Name": "CAN", "ExtraProperties": { "Subnets": [{"IPReservations":'
             )
             f.write(
                 '[{"IPAddress": "192.168.1.2","Name": "sw-spine-001"},{"IPAddress": "192.168.1.3","Name": "sw-spine-002"}]}]}}}}'
@@ -96,7 +96,7 @@ def test_cli_init_sls_good():
             f"https://{sls_address}/apis/sls/v1/networks",
             json=[
                 {
-                    "Name": "NMN",
+                    "Name": "CAN",
                     "ExtraProperties": {
                         "Subnets": [
                             {
