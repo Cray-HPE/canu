@@ -1,7 +1,7 @@
 {#- spine-to-cdu.lag #}
 ***===> sw-spine-to-cdu.lag.j2
 {%- for node in cabling.nodes if node.subtype == "cdu" %}
-interface lag ***===> {{ node.config.LAG_NUMBER }}
+interface lag ***===> {{ node.config.LAG_NUMBER }} multi-chassis
     no shutdown
     description ***===> {{ node.config.DESCRIPTION }}
     no routing
