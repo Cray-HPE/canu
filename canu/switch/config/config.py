@@ -493,6 +493,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "PORT": f"1/1/{source_port}",
                     "LAG_NUMBER": source_port,
+                    # "LAG_NUMBER": 60 + hostname - number,
                 },
             }
             nodes.append(new_node)
@@ -504,6 +505,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "PORT": f"1/1/{source_port}",
                     "LAG_NUMBER": source_port,
+                    # "LAG_NUMBER": 70 + hostname - number,
                 },
             }
             nodes.append(new_node)
@@ -515,6 +517,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "PORT": f"1/1/{source_port}",
                     "LAG_NUMBER": source_port,
+                    # "LAG_NUMBER": 120 + hostname - number,
                 },
             }
             nodes.append(new_node)
@@ -536,6 +539,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "PORT": f"1/1/{source_port}",
                     "LAG_NUMBER": source_port,
+                    # "LAG_NUMBER": 170 + hostname - number,
                 },
             }
             nodes.append(new_node)
@@ -548,6 +552,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "PORT": f"1/1/{source_port}",
                     "LAG_NUMBER": source_port,
+                    # "LAG_NUMBER": 180 + hostname - number,
                 },
             }
             nodes.append(new_node)
