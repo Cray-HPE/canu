@@ -39,8 +39,8 @@ spanning-tree config-revision 1
 interface mgmt
     shutdown
 
-{% include 'common/spine-to-leaf.lag.j2' %}
-{% include 'common/spine-to-cdu.j2' %}
+{% include 'full/spine-to-leaf.lag.j2' %}
+{% include 'common/spine-to-cdu.lag.j2' %}
 
 interface lag 99
     no shutdown
