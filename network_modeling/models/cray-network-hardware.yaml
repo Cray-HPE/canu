@@ -102,6 +102,9 @@ network_hardware:
     ports:
       - count: 1
         speed: 1
+      - count: 1
+        speed: 1
+        slot: "bmc"
   - name: "Mountain Compute Cabinet - generic stub"
     vendor: "cray"
     type: "node"
