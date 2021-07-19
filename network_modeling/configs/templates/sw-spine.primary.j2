@@ -17,7 +17,7 @@ ntp enable
 ssh server vrf default
 ssh server vrf mgmt
 {% include 'acl.j2' %}
-    
+
 vlan 1
 vlan 2
     name NMN
@@ -37,7 +37,7 @@ spanning-tree max-age 6
 spanning-tree config-name MST0
 spanning-tree config-revision 1
 interface mgmt
-shutdown
+    shutdown
 
 {% include 'spine-to-leaf.lag.j2' %}
 {% include 'spine-to-cdu.j2' %}
