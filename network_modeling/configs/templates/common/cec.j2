@@ -1,7 +1,6 @@
-{# cec #}
+{#- cec #}
 ***===> cec.j2
 {%- for node in cabling.nodes if node.subtype == "cec" %}
-
 interface ***===> {{ node.config.INTERFACE_NUMBER }}
     no shutdown
     mtu 9198
@@ -10,6 +9,7 @@ interface ***===> {{ node.config.INTERFACE_NUMBER }}
     vlan access 3000
     spanning-tree bpdu-guard
     spanning-tree port-type admin-edge
+
 {%- endfor %}
 ***===> end cec.j2
 {#- end cec #}

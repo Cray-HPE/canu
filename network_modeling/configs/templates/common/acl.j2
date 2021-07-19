@@ -1,4 +1,4 @@
-{# acl #}
+{#- acl #}
 access-list ip nmn-hmn
 {%- if variables.NMN and variables.HMN %}
     deny any ***===> {{ variables.NMN }} ***===> {{ variables.HMN }}
