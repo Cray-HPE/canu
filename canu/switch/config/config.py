@@ -92,6 +92,13 @@ env = Environment(
     help="The name of the switch to generate config e.g. 'sw-spine-001'",
     prompt="Switch Name",
 )
+@click.option(
+    "--password",
+    prompt=True,
+    hide_input=True,
+    confirmation_prompt=False,
+    help="Switch password",
+)
 @click.option("--csi-folder", help="Directory containing the CSI json file")
 @click.option(
     "--auth-token",
@@ -110,6 +117,7 @@ def config(
     tabs,
     corners,
     switch_name,
+    password,
     csi_folder,
     auth_token,
     sls_address,
@@ -133,6 +141,7 @@ def config(
         tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
         corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
         switch_name: Switch name
+        password: Switch password
         csi_folder: Directory containing the CSI json file
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
@@ -282,7 +291,7 @@ def config(
             sls_variables = rename_sls_hostnames(sls_variables)
 
     switch_config = generate_switch_config(
-        shcd_node_list, factory, switch_name, sls_variables, template_folder
+        shcd_node_list, factory, switch_name, sls_variables, template_folder, password
     )
 
     dash = "-" * 60
@@ -303,7 +312,7 @@ def get_shasta_name(name, mapper):
 
 
 def generate_switch_config(
-    shcd_node_list, factory, switch_name, sls_variables, template_folder
+    shcd_node_list, factory, switch_name, sls_variables, template_folder, password
 ):
     """Generate switch config.
 
@@ -313,6 +322,7 @@ def generate_switch_config(
         switch_name: Switch hostname
         sls_variables: Dictionary containing SLS variables
         template_folder: Architecture folder contaning the switch templates
+        password: Switch password
 
     Returns:
         switch_config: The generated switch configuration
@@ -360,7 +370,7 @@ def generate_switch_config(
     template = env.get_template(template_name)
     variables = {
         "HOSTNAME": switch_name,
-        "PASSWORD": "I DONT KNOW",
+        "PASSWORD": password,
         "NCN_W001": sls_variables["ncn_w001"],
         "NCN_W002": sls_variables["ncn_w002"],
         "NCN_W003": sls_variables["ncn_w003"],
@@ -381,42 +391,20 @@ def generate_switch_config(
     cabling = {}
     cabling["nodes"] = get_switch_nodes(switch_name, shcd_node_list, factory)
 
-    if node_shasta_name == "sw-spine" or node_shasta_name == "sw-leaf":
-        hostname = variables["HOSTNAME"]
+    variables["HMN_IP"] = sls_variables["HMN_IPs"][switch_name]
+    variables["MTL_IP"] = sls_variables["MTL_IPs"][switch_name]
+    variables["NMN_IP"] = sls_variables["NMN_IPs"][switch_name]
 
-        variables["HMN_IP"] = sls_variables["HMN_IPs"][hostname]
-        variables["MTL_IP"] = sls_variables["MTL_IPs"][hostname]
-        variables["NMN_IP"] = sls_variables["NMN_IPs"][hostname]
+    last_octet = variables["HMN_IP"].split(".")[3]
+    variables["LOOPBACK_IP"] = "10.2.0." + last_octet + "/32"
+    variables["IPV6_IP"] = "2001:db8:beef:99::" + last_octet + "/128"
 
+    if node_shasta_name in ["sw-spine", "sw-leaf", "sw-cdu"]:
         # Get connections to switch pair
         pair_connections = get_pair_connections(cabling["nodes"], switch_name)
         variables["VSX_KEEPALIVE"] = pair_connections[0]
         variables["VSX_ISL_PORT1"] = pair_connections[1]
         variables["VSX_ISL_PORT2"] = pair_connections[2]
-
-        variables["LOOPBACK_IP"] = "I DONT KNOW"
-        variables["IPV6_IP"] = "I DONT KNOW"
-
-    elif node_shasta_name == "sw-cdu":
-
-        # Get connections to switch pair
-        pair_connections = get_pair_connections(cabling["nodes"], switch_name)
-        variables["VSX_KEEPALIVE"] = pair_connections[0]
-        variables["VSX_ISL_PORT1"] = pair_connections[1]
-        variables["VSX_ISL_PORT2"] = pair_connections[2]
-
-        variables["LOOPBACK_IP"] = "I DONT KNOW"
-        variables["IPV6_IP"] = "I DONT KNOW"
-
-    elif node_shasta_name == "sw-leaf-bmc":
-        hostname = variables["HOSTNAME"]
-
-        variables["HMN_IP"] = sls_variables["HMN_IPs"][hostname]
-        variables["MTL_IP"] = sls_variables["MTL_IPs"][hostname]
-        variables["NMN_IP"] = sls_variables["NMN_IPs"][hostname]
-
-        variables["LOOPBACK_IP"] = "I DONT KNOW"
-        variables["IPV6_IP"] = "I DONT KNOW"
 
     switch_config = template.render(
         variables=variables,
