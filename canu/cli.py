@@ -138,7 +138,7 @@ def init(ctx, csi_folder, auth_token, sls_address, out):
                 input_json = json.load(f)
 
                 # Format the input to be like the SLS JSON
-                input_json_networks = [input_json["Networks"]["NMN"]]
+                input_json_networks = [input_json["Networks"]["CAN"]]
 
                 switch_addresses = parse_sls_json_for_ips(input_json_networks)
 
@@ -210,7 +210,7 @@ def init(ctx, csi_folder, auth_token, sls_address, out):
 
 
 def parse_sls_json_for_ips(shasta):
-    """Parse SLS JSON and return NMN IPv4 addresses.
+    """Parse SLS JSON and return CAN IPv4 addresses.
 
     Args:
         shasta: The SLS JSON to be parsed.
@@ -220,7 +220,7 @@ def parse_sls_json_for_ips(shasta):
     """
     switch_addresses = []
     for sls_network in shasta:
-        if sls_network["Name"] == "NMN":
+        if sls_network["Name"] == "CAN":
             switch_addresses = [
                 ip.get("IPAddress", None)
                 for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {})
