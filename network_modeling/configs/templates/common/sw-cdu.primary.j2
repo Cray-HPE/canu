@@ -29,7 +29,7 @@ interface mgmt
 {% include 'common/cec.j2' %}
 {% include 'common/cdu-to-spine.lag.j2' %}
 
-interface lag 99
+interface lag 256
     no shutdown
     description ISL link
     no routing
@@ -48,13 +48,13 @@ interface ***===> {{ variables.VSX_ISL_PORT1 }}
     no shutdown
     mtu 9198
     description vsx isl
-    lag 99
+    lag 256
 
 interface ***===> {{ variables.VSX_ISL_PORT2 }}
     no shutdown
     mtu 9198
     description vsx isl
-    lag 99
+    lag 256
 
 interface loopback 0
     ip address ***===> {{ variables.LOOPBACK_IP }}
@@ -69,7 +69,7 @@ interface vlan 1
 
 vsx
     system-mac 02:00:00:00:73:00
-    inter-switch-link lag 99
+    inter-switch-link lag 256
     role primary
     keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive
     linkup-delay-timer 600
