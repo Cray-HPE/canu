@@ -1,10 +1,10 @@
 {#- leaf-bmc-to-spine #}
 ***===> leaf-bmc-to-spine.lag.j2
-{%- set ns = namespace(lag1='') %}
+{%- set ns = namespace(lag_displayed=false) %}
 {%- for node in cabling.nodes if node.subtype == "spine" %}
-{%- if ns.lag1 == '' %}
-{%- set ns.lag1 = node.config.LAG_NUMBER %}
-interface lag ***===> {{ ns.lag1 }}
+{%- if ns.lag_displayed == false %}
+{%- set ns.lag_displayed = true %}
+interface lag ***===> 255
     no shutdown
     description ***===> leaf_bmc_to_spine_lag
     no routing
@@ -19,7 +19,7 @@ interface ***===> {{ node.config.PORT }}
     no shutdown
     mtu 9198
     description ***===> {{ node.config.DESCRIPTION }}
-    lag ***===> {{ ns.lag1 }}
+    lag ***===> 255
 
 {%- endfor %}
 ***===> end leaf-bmc-to-spine.lag.j2

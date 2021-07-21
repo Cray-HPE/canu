@@ -391,6 +391,10 @@ def generate_switch_config(
     cabling = {}
     cabling["nodes"] = get_switch_nodes(switch_name, shcd_node_list, factory)
 
+    if switch_name not in sls_variables["HMN_IPs"].keys():
+        click.secho(f"Cannot find {switch_name} in CSI / SLS nodes.", fg="red")
+        exit()
+
     variables["HMN_IP"] = sls_variables["HMN_IPs"][switch_name]
     variables["MTL_IP"] = sls_variables["MTL_IPs"][switch_name]
     variables["NMN_IP"] = sls_variables["NMN_IPs"][switch_name]
@@ -479,35 +483,39 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
         shasta_name = get_shasta_name(destination_node_name, factory.lookup_mapper())
 
         if shasta_name == "ncn-m":
+            # To ensure the lag matches on all connections, calculate lag number based on dest hostname
+            digits = re.findall(r"(\d+)", destination_node_name)[0]
             new_node = {
                 "subtype": "master",
                 "slot": destination_slot,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "PORT": f"1/1/{source_port}",
-                    "LAG_NUMBER": source_port,
+                    "LAG_NUMBER": 60 + int(digits),
                 },
             }
             nodes.append(new_node)
         elif shasta_name == "ncn-s":
+            digits = re.findall(r"(\d+)", destination_node_name)[0]
             new_node = {
                 "subtype": "storage",
                 "slot": destination_slot,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "PORT": f"1/1/{source_port}",
-                    "LAG_NUMBER": source_port,
+                    "LAG_NUMBER": 70 + int(digits),
                 },
             }
             nodes.append(new_node)
         elif shasta_name == "ncn-w":
+            digits = re.findall(r"(\d+)", destination_node_name)[0]
             new_node = {
                 "subtype": "worker",
                 "slot": destination_slot,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "PORT": f"1/1/{source_port}",
-                    "LAG_NUMBER": source_port,
+                    "LAG_NUMBER": 120 + int(digits),
                 },
             }
             nodes.append(new_node)
@@ -522,17 +530,19 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
             }
             nodes.append(new_node)
         elif shasta_name == "cmm":
+            digits = re.findall(r"(\d+)", destination_node_name)[0]
             new_node = {
                 "subtype": "cmm",
                 "slot": None,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "PORT": f"1/1/{source_port}",
-                    "LAG_NUMBER": source_port,
+                    "LAG_NUMBER": 170 + int(digits),
                 },
             }
             nodes.append(new_node)
         elif shasta_name == "uan":
+            digits = re.findall(r"(\d+)", destination_node_name)[0]
             new_node = {
                 "subtype": "uan",
                 "slot": destination_slot,
@@ -540,50 +550,99 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "PORT": f"1/1/{source_port}",
-                    "LAG_NUMBER": source_port,
+                    "LAG_NUMBER": 180 + int(digits),
                 },
             }
             nodes.append(new_node)
         elif shasta_name == "sw-spine":
+            # sw-leaf ==> sw-spine
+            if switch_name.startswith("sw-leaf"):
+                is_primary, primary, secondary = switch_is_primary(switch_name)
+                digits = re.findall(r"(\d+)", primary)[0]
+                lag_number = int(digits)
+
+            # sw-cdu ==> sw-spine
+            elif switch_name.startswith("sw-cdu"):
+                is_primary, primary, secondary = switch_is_primary(switch_name)
+                digits = re.findall(r"(\d+)", primary)[0]
+                lag_number = 30 + int(digits)
+            # sw-leaf-bmc ==> sw-spine
+            elif switch_name.startswith("sw-leaf-bmc"):
+                digits = re.findall(r"(\d+)", switch_name)[0]
+                lag_number = 10 + int(digits)
+            else:
+                lag_number = source_port
             new_node = {
                 "subtype": "spine",
                 "slot": None,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
-                    "LAG_NUMBER": source_port,
+                    "LAG_NUMBER": lag_number,
                     "PORT": f"1/1/{source_port}",
                 },
             }
             nodes.append(new_node)
         elif shasta_name == "sw-cdu":
+            # sw-spine ==> sw-cdu
+            if switch_name.startswith("sw-spine"):
+                is_primary, primary, secondary = switch_is_primary(
+                    destination_node_name
+                )
+                digits = re.findall(r"(\d+)", primary)[0]
+                lag_number = 30 + int(digits)
+            else:
+                lag_number = source_port
             new_node = {
                 "subtype": "cdu",
                 "slot": None,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
-                    "LAG_NUMBER": source_port,
+                    "LAG_NUMBER": lag_number,
                     "PORT": f"1/1/{source_port}",
                 },
             }
             nodes.append(new_node)
         elif shasta_name == "sw-leaf":
+            # sw-spine ==> sw-leaf
+            if switch_name.startswith("sw-spine"):
+                is_primary, primary, secondary = switch_is_primary(
+                    destination_node_name
+                )
+                digits = re.findall(r"(\d+)", primary)[0]
+                lag_number = int(digits)
+            # sw-leaf-bmc ==> sw-leaf
+            elif switch_name.startswith("sw-leaf-bmc"):
+                digits = re.findall(r"(\d+)", switch_name)[0]
+                lag_number = 10 + int(digits)
+            else:
+                lag_number = source_port
             new_node = {
                 "subtype": "leaf",
                 "slot": None,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
-                    "LAG_NUMBER": source_port,
+                    "LAG_NUMBER": lag_number,
                     "PORT": f"1/1/{source_port}",
                 },
             }
             nodes.append(new_node)
         elif shasta_name == "sw-leaf-bmc":
+            # sw-leaf ==> sw-leaf-bmc
+            if switch_name.startswith("sw-leaf"):
+                digits = re.findall(r"(\d+)", destination_node_name)[0]
+                lag_number = 10 + int(digits)
+            # sw-spine ==> sw-leaf-bmc
+            elif switch_name.startswith("sw-spine"):
+                digits = re.findall(r"(\d+)", destination_node_name)[0]
+                lag_number = 10 + int(digits)
+            else:
+                lag_number = source_port
             new_node = {
                 "subtype": "leaf-bmc",
                 "slot": None,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
-                    "LAG_NUMBER": source_port,
+                    "LAG_NUMBER": lag_number,
                     "PORT": f"1/1/{source_port}",
                 },
             }

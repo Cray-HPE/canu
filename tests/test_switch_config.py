@@ -100,7 +100,7 @@ def test_switch_config_spine_primary():
             result.output
         )
 
-        # lag 99
+        # lag 256
         assert "interface ***===> 1/1/30" in str(result.output)
         assert "interface ***===> 1/1/31" in str(result.output)
         assert "interface ***===> 1/1/32" in str(result.output)
@@ -208,7 +208,7 @@ def test_switch_config_spine_secondary():
             result.output
         )
 
-        # lag 99
+        # lag 256
         assert "interface ***===> 1/1/30" in str(result.output)
         assert "interface ***===> 1/1/31" in str(result.output)
         assert "interface ***===> 1/1/32" in str(result.output)
@@ -290,7 +290,7 @@ def test_switch_config_leaf_primary():
         )
 
         # ncn-m.lag.j2
-        assert "interface lag ***===> 1 multi-chassis" in str(result.output)
+        assert "interface lag ***===> 61 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/1" in str(result.output)
         assert "description ***===> sw-leaf-001:1==>ncn-m001:ocp:1" in str(
             result.output
@@ -298,6 +298,7 @@ def test_switch_config_leaf_primary():
         assert "description ***===> sw-leaf-001:2==>ncn-m001:ocp:2" in str(
             result.output
         )
+        assert "interface lag ***===> 62 multi-chassis" in str(result.output)
         assert "description ***===> sw-leaf-001:3==>ncn-m002:ocp:1" in str(
             result.output
         )
@@ -306,14 +307,14 @@ def test_switch_config_leaf_primary():
         )
 
         # ncn-w.lag.j2
-        assert "interface lag ***===> 5 multi-chassis" in str(result.output)
+        assert "interface lag ***===> 121 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/5" in str(result.output)
         assert "description ***===> sw-leaf-001:5==>ncn-w001:ocp:1" in str(
             result.output
         )
 
         # ncn-s.lag.j2
-        assert "interface lag ***===> 7 multi-chassis" in str(result.output)
+        assert "interface lag ***===> 71 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/7" in str(result.output)
         assert "description ***===> sw-leaf-001:7==>ncn-s001:ocp:1" in str(
             result.output
@@ -321,6 +322,7 @@ def test_switch_config_leaf_primary():
         assert "description ***===> sw-leaf-001:8==>ncn-s001:ocp:2" in str(
             result.output
         )
+        assert "interface lag ***===> 72 multi-chassis" in str(result.output)
         assert "description ***===> sw-leaf-001:9==>ncn-s002:ocp:1" in str(
             result.output
         )
@@ -329,28 +331,28 @@ def test_switch_config_leaf_primary():
         )
 
         # leaf-bmc
-        assert "interface lag ***===> 51 multi-chassis" in str(result.output)
+        assert "interface lag ***===> 11 multi-chassis" in str(result.output)
         assert "description ***===> sw-leaf-001:51==>sw-leaf-bmc-001:48" in str(
             result.output
         )
         assert "interface ***===> 1/1/51" in str(result.output)
 
         # leaf-to-spine
-        assert "interface lag ***===> 52 multi-chassis" in str(result.output)
+        assert "interface lag ***===> 1 multi-chassis" in str(result.output)
         assert "description leaf_to_spines_lag" in str(result.output)
 
         assert "interface ***===> 1/1/52" in str(result.output)
         assert "description ***===> sw-leaf-001:52==>sw-spine-002:1" in str(
             result.output
         )
-        assert "lag ***===> 52" in str(result.output)
+        assert "lag ***===> 1" in str(result.output)
 
         assert "interface ***===> 1/1/53" in str(result.output)
         assert "description ***===> sw-leaf-001:53==>sw-spine-001:1" in str(
             result.output
         )
 
-        # lag 99
+        # lag 256
         assert "interface ***===> 1/1/54" in str(result.output)
         assert "interface ***===> 1/1/55" in str(result.output)
         assert "interface ***===> 1/1/56" in str(result.output)
@@ -408,7 +410,7 @@ def test_switch_config_leaf_primary_to_uan():
         assert "hostname ***===> sw-leaf-003" in str(result.output)
 
         # ncn-m.lag.j2
-        assert "interface lag ***===> 1 multi-chassis" in str(result.output)
+        assert "interface lag ***===> 63 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/1" in str(result.output)
         assert "description ***===> sw-leaf-003:1==>ncn-m003:ocp:1" in str(
             result.output
@@ -418,17 +420,18 @@ def test_switch_config_leaf_primary_to_uan():
         )
 
         # ncn-w.lag.j2
-        assert "interface lag ***===> 3 multi-chassis" in str(result.output)
+        assert "interface lag ***===> 122 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/3" in str(result.output)
         assert "description ***===> sw-leaf-003:3==>ncn-w002:ocp:1" in str(
             result.output
         )
+        assert "interface lag ***===> 123 multi-chassis" in str(result.output)
         assert "description ***===> sw-leaf-003:4==>ncn-w003:ocp:1" in str(
             result.output
         )
 
         # ncn-s.lag.j2
-        assert "interface lag ***===> 5 multi-chassis" in str(result.output)
+        assert "interface lag ***===> 73 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/5" in str(result.output)
         assert "description ***===> sw-leaf-003:5==>ncn-s003:ocp:1" in str(
             result.output
@@ -441,6 +444,7 @@ def test_switch_config_leaf_primary_to_uan():
         assert "interface ***===> 1/1/7" in str(result.output)
         assert "description ***===> sw-leaf-003:7==>uan001:ocp:1" in str(result.output)
         assert "interface ***===> 1/1/8" in str(result.output)
+        assert "interface lag ***===> 181 multi-chassis" in str(result.output)
         assert "description ***===> sw-leaf-003:8==>uan001:ocp:2" in str(result.output)
 
         # LOOPBACK_IP
@@ -499,7 +503,7 @@ def test_switch_config_leaf_secondary():
         )
 
         # ncn-m.lag.j2
-        assert "interface lag ***===> 1 multi-chassis" in str(result.output)
+        assert "interface lag ***===> 61 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/1" in str(result.output)
         assert "description ***===> sw-leaf-002:1==>ncn-m001:pcie-slot1:1" in str(
             result.output
@@ -507,6 +511,7 @@ def test_switch_config_leaf_secondary():
         assert "description ***===> sw-leaf-002:2==>ncn-m001:pcie-slot1:2" in str(
             result.output
         )
+        assert "interface lag ***===> 62 multi-chassis" in str(result.output)
         assert "description ***===> sw-leaf-002:3==>ncn-m002:pcie-slot1:1" in str(
             result.output
         )
@@ -515,14 +520,14 @@ def test_switch_config_leaf_secondary():
         )
 
         # ncn-w.lag.j2
-        assert "interface lag ***===> 6 multi-chassis" in str(result.output)
+        assert "interface lag ***===> 121 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/6" in str(result.output)
         assert "description ***===> sw-leaf-002:6==>ncn-w001:ocp:2" in str(
             result.output
         )
 
         # ncn-s.lag.j2
-        assert "interface lag ***===> 7 multi-chassis" in str(result.output)
+        assert "interface lag ***===> 71 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/7" in str(result.output)
         assert "description ***===> sw-leaf-002:7==>ncn-s001:pcie-slot1:1" in str(
             result.output
@@ -530,6 +535,7 @@ def test_switch_config_leaf_secondary():
         assert "description ***===> sw-leaf-002:8==>ncn-s001:pcie-slot1:2" in str(
             result.output
         )
+        assert "interface lag ***===> 72 multi-chassis" in str(result.output)
         assert "description ***===> sw-leaf-002:9==>ncn-s002:pcie-slot1:1" in str(
             result.output
         )
@@ -538,28 +544,28 @@ def test_switch_config_leaf_secondary():
         )
 
         # leaf-bmc
-        assert "interface lag ***===> 51 multi-chassis" in str(result.output)
+        assert "interface lag ***===> 11 multi-chassis" in str(result.output)
         assert "description ***===> sw-leaf-002:51==>sw-leaf-bmc-001:47" in str(
             result.output
         )
         assert "interface ***===> 1/1/51" in str(result.output)
 
         # leaf-to-spine
-        assert "interface lag ***===> 52 multi-chassis" in str(result.output)
+        assert "interface lag ***===> 1 multi-chassis" in str(result.output)
         assert "description leaf_to_spines_lag" in str(result.output)
 
         assert "interface ***===> 1/1/52" in str(result.output)
         assert "description ***===> sw-leaf-002:52==>sw-spine-002:2" in str(
             result.output
         )
-        assert "lag ***===> 52" in str(result.output)
+        assert "lag ***===> 1" in str(result.output)
 
         assert "interface ***===> 1/1/53" in str(result.output)
         assert "description ***===> sw-leaf-002:53==>sw-spine-001:2" in str(
             result.output
         )
 
-        # lag 99
+        # lag 256
         assert "interface ***===> 1/1/54" in str(result.output)
         assert "interface ***===> 1/1/55" in str(result.output)
         assert "interface ***===> 1/1/56" in str(result.output)
@@ -617,7 +623,7 @@ def test_switch_config_leaf_secondary_to_uan():
         assert "hostname ***===> sw-leaf-004" in str(result.output)
 
         # ncn-m.lag.j2
-        assert "interface lag ***===> 1 multi-chassis" in str(result.output)
+        assert "interface lag ***===> 63 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/1" in str(result.output)
         assert "description ***===> sw-leaf-004:1==>ncn-m003:pcie-slot1:1" in str(
             result.output
@@ -627,17 +633,18 @@ def test_switch_config_leaf_secondary_to_uan():
         )
 
         # ncn-w.lag.j2
-        assert "interface lag ***===> 3 multi-chassis" in str(result.output)
+        assert "interface lag ***===> 122 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/3" in str(result.output)
         assert "description ***===> sw-leaf-004:3==>ncn-w002:ocp:2" in str(
             result.output
         )
+        assert "interface lag ***===> 123 multi-chassis" in str(result.output)
         assert "description ***===> sw-leaf-004:4==>ncn-w003:ocp:2" in str(
             result.output
         )
 
         # ncn-s.lag.j2
-        assert "interface lag ***===> 5 multi-chassis" in str(result.output)
+        assert "interface lag ***===> 73 multi-chassis" in str(result.output)
         assert "interface ***===> 1/1/5" in str(result.output)
         assert "description ***===> sw-leaf-004:5==>ncn-s003:pcie-slot1:1" in str(
             result.output
@@ -652,6 +659,7 @@ def test_switch_config_leaf_secondary_to_uan():
             result.output
         )
         assert "interface ***===> 1/1/8" in str(result.output)
+        assert "interface lag ***===> 181 multi-chassis" in str(result.output)
         assert "description ***===> sw-leaf-004:8==>uan001:pcie-slot1:2" in str(
             result.output
         )
@@ -712,11 +720,14 @@ def test_switch_config_cdu_primary():
         )
 
         # cmm
-        assert "interface lag ***===> 2 static" in str(result.output)
+        assert "interface lag ***===> 170 static" in str(result.output)
         assert "interface ***===> 1/1/2" in str(result.output)
         assert "description ***===> sw-cdu-001:2==>cmm000:1" in str(result.output)
+        assert "interface lag ***===> 171 static" in str(result.output)
         assert "description ***===> sw-cdu-001:3==>cmm001:1" in str(result.output)
+        assert "interface lag ***===> 172 static" in str(result.output)
         assert "description ***===> sw-cdu-001:4==>cmm002:1" in str(result.output)
+        assert "interface lag ***===> 173 static" in str(result.output)
         assert "description ***===> sw-cdu-001:5==>cmm003:1" in str(result.output)
 
         # cec
@@ -816,11 +827,14 @@ def test_switch_config_cdu_secondary():
         )
 
         # cmm
-        assert "interface lag ***===> 2 static" in str(result.output)
+        assert "interface lag ***===> 170 static" in str(result.output)
         assert "interface ***===> 1/1/2" in str(result.output)
         assert "description ***===> sw-cdu-002:2==>cmm000:2" in str(result.output)
+        assert "interface lag ***===> 171 static" in str(result.output)
         assert "description ***===> sw-cdu-002:3==>cmm001:2" in str(result.output)
+        assert "interface lag ***===> 172 static" in str(result.output)
         assert "description ***===> sw-cdu-002:4==>cmm002:2" in str(result.output)
+        assert "interface lag ***===> 173 static" in str(result.output)
         assert "description ***===> sw-cdu-002:5==>cmm003:2" in str(result.output)
 
         # cdu-to-spine
@@ -913,7 +927,7 @@ def test_switch_config_leaf_bmc():
         )
 
         # 'leaf-bmc-to-leaf.lag.j2'
-        assert "interface lag ***===> 47" in str(result.output)
+        assert "interface lag ***===> 255" in str(result.output)
         assert "description ***===> leaf_bmc_to_leaf_lag" in str(result.output)
         assert "interface ***===> 1/1/47" in str(result.output)
         assert "description ***===> sw-leaf-bmc-001:47==>sw-leaf-002:51" in str(
