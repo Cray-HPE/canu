@@ -60,7 +60,6 @@ log = logging.getLogger("validate_shcd")
 @click.option(
     "--tabs",
     help="The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.",
-    required=True,
 )
 @click.option(
     "--corners",
@@ -101,6 +100,18 @@ def shcd(ctx, architecture, shcd, tabs, corners, log_):
         architecture = "network_v2_tds"
 
     sheets = []
+
+    if not tabs:
+        wb = load_workbook(shcd, read_only=True)
+        click.secho("What tabs would you like to check in the SHCD?")
+        tab_options = wb.sheetnames
+        for x in tab_options:
+            click.secho(f"{x}", fg="green")
+
+        tabs = click.prompt(
+            "Please enter the tabs to check separated by a comma, e.g. 10G_25G_40G_100G,NMN,HMN.",
+            type=str,
+        )
 
     if corners:
         if len(tabs.split(",")) * 2 != len(corners.split(",")):
