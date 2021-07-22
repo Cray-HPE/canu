@@ -304,7 +304,7 @@ def config(
                 password,
             )
 
-            with open(f"{folder}/{switch_name}.aos", "w+") as f:
+            with open(f"{folder}/{switch_name}.cfg", "w+") as f:
                 f.write(switch_config)
 
             click.secho(f"{switch_name} Config Generated", fg="bright_white")
