@@ -4,6 +4,23 @@ CANU (CSM Automatic Network Utility) will float through a new Shasta network and
 
 CANU reads switch version information from the _canu.yaml_ file in the root directory. This file still needs testing to ensure that switches and firmware versions are labeled properly. Please let us know if something is broken or needs to be updated.
 
+# Quickstart Guide
+
+To checkout a fresh system using CSI:
+
+1. Make a new directory to save switch IP addresses: `mkdir ips_folder`, `cd ips_folder`
+2. Parse CSI files and save switch IP addresses: `canu -s 1.5 init --csi-folder /var/www/prep/SYSTEMNAME/ --out ips.txt`
+3. Check network firmware: `canu -s 1.5 network firmware --ips-file ips.txt`
+4. Check network cabling: `canu -s 1.5 network cabling --ips-file ips.txt`
+5. Validate BGP status: `canu -s 1.5 validate bgp --ips-file ips.txt --verbose`
+6. Validate cabling: `canu -s 1.5 validate cabling --ips-file ips.txt`
+
+If you have the system's SHCD, there are even more commands that can be run
+
+7. Validate the SHCD: `canu -s 1.5 validate shcd --shcd SHCD.xlsx`
+8. Validate the SHCD against network cabling: `canu -s 1.5 validate shcd-cabling --shcd SHCD.xlsx --ips-file ips.txt`
+9. Generate switch config for the network: `canu -s 1.5 network config --shcd SHCD.xlsx --csi-folder /var/www/prep/SYSTEMNAME/ --folder configs`
+
 # Table of Contents
 
 **[Installation](#installation)**<br>
@@ -62,7 +79,7 @@ To help make switch setup a breeze. CANU can automatically parse CSI output or t
 
 The _sls_input_file.json_ file is generally stored in one of two places depending on how far the system is in the install process.
 
-- Early in the install process, when running off of the LiveCD the _sls_input_file.json_ file is normally found in the the directory `/var/www/ephemeral/prep/config/SYSTEMNAME/`
+- Early in the install process, when running off of the LiveCD the _sls_input_file.json_ file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
 - Later in the install process, the _sls_input_file.json_ file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
 
 To get the switch IP addresses from CSI output, run the command:
@@ -447,7 +464,7 @@ To get the network data using CSI, pass in the CSI folder containing the sls_inp
 
 The sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.
 
-- Early in the install process, when running off of the LiveCD the sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/config/SYSTEMNAME/`
+- Early in the install process, when running off of the LiveCD the sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
 
 - Later in the install process, the sls_input_file.json file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
 
@@ -479,7 +496,7 @@ In order to generate switch config, a valid SHCD must be passed in and system va
 
 The sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.
 
-- Early in the install process, when running off of the LiveCD the sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/config/SYSTEMNAME/`
+- Early in the install process, when running off of the LiveCD the sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
 
 - Later in the install process, the sls_input_file.json file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
 
