@@ -83,7 +83,7 @@ def bgp(
 
 
         - Early in the install process, when running off of the LiveCD the
-        sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/config/SYSTEMNAME/`
+        sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
 
         - Later in the install process, the sls_input_file.json file is
         generally in `/mnt/pitdata/prep/SYSTEMNAME/`

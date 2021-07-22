@@ -15,7 +15,7 @@ To get the network data using CSI, pass in the CSI folder containing the sls_inp
 
 The sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.
 
-- Early in the install process, when running off of the LiveCD the sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/config/SYSTEMNAME/`
+- Early in the install process, when running off of the LiveCD the sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
 
 - Later in the install process, the sls_input_file.json file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
 

@@ -1095,8 +1095,11 @@ def test_switch_config_bad_file():
 
 
 def test_switch_config_missing_tabs():
-    """Test that the `canu switch config` command fails on missing tabs."""
+    """Test that the `canu switch config` command prompts for missing tabs."""
     with runner.isolated_filesystem():
+        with open("sls_input_file.json", "w") as f:
+            json.dump(sls_input, f)
+
         result = runner.invoke(
             cli,
             [
@@ -1118,10 +1121,15 @@ def test_switch_config_missing_tabs():
                 switch_name,
                 "--password",
                 password,
+                "--corners",
+                corners,
+                "--csi-folder",
+                csi_folder,
             ],
+            input="INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES\n",
         )
-        assert result.exit_code == 2
-        assert "Error: Missing option '--tabs'." in str(result.output)
+        assert result.exit_code == 0
+        assert "hostname sw-spine-001" in str(result.output)
 
 
 def test_switch_config_bad_tab():

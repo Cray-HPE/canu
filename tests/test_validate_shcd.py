@@ -127,7 +127,7 @@ def test_validate_shcd_bad_file():
 
 
 def test_validate_shcd_missing_tabs():
-    """Test that the `canu validate shcd` command fails on missing tabs."""
+    """Test that the `canu validate shcd` command prompts for missing tabs."""
     with runner.isolated_filesystem():
         generate_test_file(test_file)
         result = runner.invoke(
@@ -143,10 +143,13 @@ def test_validate_shcd_missing_tabs():
                 architecture,
                 "--shcd",
                 test_file,
+                "--corners",
+                corners,
             ],
+            input="25G_10G\n",
         )
-        assert result.exit_code == 2
-        assert "Error: Missing option '--tabs'." in str(result.output)
+        assert result.exit_code == 0
+        assert "sw-spine-001 connects to 18 nodes:" in str(result.output)
 
 
 def test_validate_shcd_bad_tab():

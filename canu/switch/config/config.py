@@ -11,6 +11,7 @@ from click_help_colors import HelpColorsCommand
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 import natsort
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
+from openpyxl import load_workbook
 import requests
 import ruamel.yaml
 import urllib3
@@ -79,7 +80,6 @@ env = Environment(
 @click.option(
     "--tabs",
     help="The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.",
-    required=True,
 )
 @click.option(
     "--corners",
@@ -156,6 +156,18 @@ def config(
 
     # SHCD Parsing
     sheets = []
+
+    if not tabs:
+        wb = load_workbook(shcd, read_only=True)
+        click.secho("What tabs would you like to check in the SHCD?")
+        tab_options = wb.sheetnames
+        for x in tab_options:
+            click.secho(f"{x}", fg="green")
+
+        tabs = click.prompt(
+            "Please enter the tabs to check separated by a comma, e.g. 10G_25G_40G_100G,NMN,HMN.",
+            type=str,
+        )
 
     if corners:
         if len(tabs.split(",")) * 2 != len(corners.split(",")):
