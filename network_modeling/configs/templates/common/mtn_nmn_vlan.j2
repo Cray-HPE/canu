@@ -11,10 +11,8 @@ interface vlan ***===> {{ cabinet.VlanID }}
     ip address ***===> {{ cabinet.CIDR }}
     active-gateway ip mac 12:00:00:00:73:00
     active-gateway ip ***===> {{ cabinet.Gateway }}
-    ipv6 address autoconfig
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
-    ip igmp enable
 
 {%- endfor %}
 ***===> end mtn_nmn_vlan.j2
