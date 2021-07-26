@@ -21,7 +21,6 @@ shasta = "1.4"
 switch_name = "sw-spine-001"
 cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
-password = "test_password"
 runner = click.testing.CliRunner()
 
 
@@ -52,8 +51,6 @@ def test_switch_config_spine_primary():
                 csi_folder,
                 "--name",
                 switch_name,
-                "--password",
-                password,
             ],
         )
         assert result.exit_code == 0
@@ -159,8 +156,6 @@ def test_switch_config_spine_secondary():
                 csi_folder,
                 "--name",
                 spine_secondary,
-                "--password",
-                password,
             ],
         )
         assert result.exit_code == 0
@@ -267,8 +262,6 @@ def test_switch_config_leaf_primary():
                 csi_folder,
                 "--name",
                 leaf_primary,
-                "--password",
-                password,
             ],
         )
         assert result.exit_code == 0
@@ -402,8 +395,6 @@ def test_switch_config_leaf_primary_to_uan():
                 csi_folder,
                 "--name",
                 leaf_primary_3,
-                "--password",
-                password,
             ],
         )
         assert result.exit_code == 0
@@ -480,8 +471,6 @@ def test_switch_config_leaf_secondary():
                 csi_folder,
                 "--name",
                 leaf_secondary,
-                "--password",
-                password,
             ],
         )
         assert result.exit_code == 0
@@ -615,8 +604,6 @@ def test_switch_config_leaf_secondary_to_uan():
                 csi_folder,
                 "--name",
                 leaf_secondary_3,
-                "--password",
-                password,
             ],
         )
         assert result.exit_code == 0
@@ -697,8 +684,6 @@ def test_switch_config_cdu_primary():
                 csi_folder,
                 "--name",
                 cdu_primary,
-                "--password",
-                password,
             ],
         )
         assert result.exit_code == 0
@@ -804,8 +789,6 @@ def test_switch_config_cdu_secondary():
                 csi_folder,
                 "--name",
                 cdu_secondary,
-                "--password",
-                password,
             ],
         )
         assert result.exit_code == 0
@@ -904,8 +887,6 @@ def test_switch_config_leaf_bmc():
                 csi_folder,
                 "--name",
                 leaf_bmc,
-                "--password",
-                password,
             ],
         )
         assert result.exit_code == 0
@@ -1015,8 +996,6 @@ def test_switch_config_csi_file_missing():
                 bad_csi_folder,
                 "--name",
                 switch_name,
-                "--password",
-                password,
             ],
         )
         assert result.exit_code == 0
@@ -1049,8 +1028,6 @@ def test_switch_config_missing_file():
                 csi_folder,
                 "--name",
                 switch_name,
-                "--password",
-                password,
             ],
         )
         assert result.exit_code == 2
@@ -1083,8 +1060,6 @@ def test_switch_config_bad_file():
                 csi_folder,
                 "--name",
                 switch_name,
-                "--password",
-                password,
             ],
         )
         assert result.exit_code == 2
@@ -1119,8 +1094,6 @@ def test_switch_config_missing_tabs():
                 csi_folder,
                 "--name",
                 switch_name,
-                "--password",
-                password,
                 "--corners",
                 corners,
                 "--csi-folder",
@@ -1158,8 +1131,6 @@ def test_switch_config_bad_tab():
                 csi_folder,
                 "--name",
                 switch_name,
-                "--password",
-                password,
             ],
         )
         assert result.exit_code == 1
@@ -1191,53 +1162,8 @@ def test_switch_config_switch_name_prompt():
                 corners,
                 "--csi-folder",
                 csi_folder,
-                "--password",
-                password,
             ],
             input="sw-spine-001\n",
-        )
-        assert result.exit_code == 0
-        assert "hostname sw-spine-001" in str(result.output)
-        assert "ntp server ***===> 192.168.4.4" in str(result.output)
-        assert "ntp server ***===> 192.168.4.5" in str(result.output)
-        assert "ntp server ***===> 192.168.4.6" in str(result.output)
-        assert "deny any ***===> 192.168.3.0/17 ***===> 192.168.0.0/17" in str(
-            result.output
-        )
-        assert "interface ***===> 1/1/30" in str(result.output)
-        assert "interface ***===> 1/1/31" in str(result.output)
-        assert "interface ***===> 1/1/32" in str(result.output)
-
-
-def test_switch_config_switch_password_prompt():
-    """Test that the `canu switch config` command prompts for missing switch password."""
-    with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
-            json.dump(sls_input, f)
-
-        result = runner.invoke(
-            cli,
-            [
-                "--shasta",
-                shasta,
-                "--cache",
-                cache_minutes,
-                "switch",
-                "config",
-                "--architecture",
-                architecture,
-                "--shcd",
-                test_file,
-                "--tabs",
-                tabs,
-                "--corners",
-                corners,
-                "--csi-folder",
-                csi_folder,
-                "--name",
-                switch_name,
-            ],
-            input="test_password\n",
         )
         assert result.exit_code == 0
         assert "hostname sw-spine-001" in str(result.output)
@@ -1277,8 +1203,6 @@ def test_switch_config_corner_prompt():
                 csi_folder,
                 "--name",
                 switch_name,
-                "--password",
-                password,
             ],
             input="J14\nT42\nJ14\nT48\nJ14\nT24\nJ14\nT23",
         )
@@ -1320,8 +1244,6 @@ def test_switch_config_not_enough_corners():
                 csi_folder,
                 "--name",
                 switch_name,
-                "--password",
-                password,
             ],
         )
         assert result.exit_code == 0
@@ -1358,11 +1280,9 @@ def test_switch_config_bad_switch_name_1():
                 csi_folder,
                 "--name",
                 bad_name_1,
-                "--password",
-                password,
             ],
         )
-        assert result.exit_code == 0
+        assert result.exit_code == 1
         assert (
             f"For switch {bad_name_1}, the type cannot be determined. Please check the switch name and try again."
             in str(result.output)
@@ -1397,11 +1317,9 @@ def test_switch_config_bad_switch_name_2():
                 csi_folder,
                 "--name",
                 bad_name_2,
-                "--password",
-                password,
             ],
         )
-        assert result.exit_code == 0
+        assert result.exit_code == 1
         assert (
             f"For switch {bad_name_2}, the type cannot be determined. Please check the switch name and try again."
             in str(result.output)
@@ -1436,11 +1354,9 @@ def test_switch_config_non_switch():
                 csi_folder,
                 "--name",
                 non_switch,
-                "--password",
-                password,
             ],
         )
-        assert result.exit_code == 0
+        assert result.exit_code == 1
         assert (
             f"{non_switch} is not a switch. Only switch config can be generated."
             in str(result.output)
@@ -1476,8 +1392,6 @@ def test_switch_config_sls():
                 corners,
                 "--name",
                 switch_name,
-                "--password",
-                password,
             ],
         )
         assert result.exit_code == 0
@@ -1530,8 +1444,6 @@ def test_switch_config_sls_token_bad():
                 switch_name,
                 "--auth-token",
                 bad_token,
-                "--password",
-                password,
             ],
         )
         assert result.exit_code == 0
@@ -1567,8 +1479,6 @@ def test_switch_config_sls_token_missing():
             switch_name,
             "--auth-token",
             bad_token,
-            "--password",
-            password,
         ],
     )
     assert result.exit_code == 0
@@ -1611,8 +1521,6 @@ def test_switch_config_sls_address_bad():
             switch_name,
             "--sls-address",
             bad_sls_address,
-            "--password",
-            password,
         ],
     )
     assert result.exit_code == 0

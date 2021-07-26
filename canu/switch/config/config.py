@@ -92,13 +92,6 @@ env = Environment(
     help="The name of the switch to generate config e.g. 'sw-spine-001'",
     prompt="Switch Name",
 )
-@click.option(
-    "--password",
-    prompt=True,
-    hide_input=True,
-    confirmation_prompt=False,
-    help="Switch password",
-)
 @click.option("--csi-folder", help="Directory containing the CSI json file")
 @click.option(
     "--auth-token",
@@ -117,7 +110,6 @@ def config(
     tabs,
     corners,
     switch_name,
-    password,
     csi_folder,
     auth_token,
     sls_address,
@@ -141,7 +133,6 @@ def config(
         tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
         corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
         switch_name: Switch name
-        password: Switch password
         csi_folder: Directory containing the CSI json file
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
@@ -302,8 +293,8 @@ def config(
         if float(shasta) < 1.6:
             sls_variables = rename_sls_hostnames(sls_variables)
 
-    switch_config = generate_switch_config(
-        shcd_node_list, factory, switch_name, sls_variables, template_folder, password
+    switch_config, devices = generate_switch_config(
+        shcd_node_list, factory, switch_name, sls_variables, template_folder
     )
 
     dash = "-" * 60
@@ -324,7 +315,7 @@ def get_shasta_name(name, mapper):
 
 
 def generate_switch_config(
-    shcd_node_list, factory, switch_name, sls_variables, template_folder, password
+    shcd_node_list, factory, switch_name, sls_variables, template_folder
 ):
     """Generate switch config.
 
@@ -334,7 +325,6 @@ def generate_switch_config(
         switch_name: Switch hostname
         sls_variables: Dictionary containing SLS variables
         template_folder: Architecture folder contaning the switch templates
-        password: Switch password
 
     Returns:
         switch_config: The generated switch configuration
@@ -382,7 +372,6 @@ def generate_switch_config(
     template = env.get_template(template_name)
     variables = {
         "HOSTNAME": switch_name,
-        "PASSWORD": password,
         "NCN_W001": sls_variables["ncn_w001"],
         "NCN_W002": sls_variables["ncn_w002"],
         "NCN_W003": sls_variables["ncn_w003"],
@@ -405,7 +394,7 @@ def generate_switch_config(
 
     if switch_name not in sls_variables["HMN_IPs"].keys():
         click.secho(f"Cannot find {switch_name} in CSI / SLS nodes.", fg="red")
-        exit()
+        exit(1)
 
     variables["HMN_IP"] = sls_variables["HMN_IPs"][switch_name]
     variables["MTL_IP"] = sls_variables["MTL_IPs"][switch_name]
@@ -426,8 +415,11 @@ def generate_switch_config(
         variables=variables,
         cabling=cabling,
     )
+    devices = set()
+    for node in cabling["nodes"]:
+        devices.add(node["subtype"])
 
-    return switch_config
+    return switch_config, devices
 
 
 def get_pair_connections(nodes, switch_name):
@@ -484,7 +476,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
             f"For switch {switch_name}, the type cannot be determined. Please check the switch name and try again.",
             fg="red",
         )
-        exit()
+        exit(1)
 
     for port in nodes_by_name[switch_name]["ports"]:
         destination_node_name = nodes_by_id[port["destination_node_id"]]["common_name"]

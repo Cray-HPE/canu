@@ -101,13 +101,6 @@ env = Environment(
     required=True,
     prompt="Folder for configs",
 )
-@click.option(
-    "--password",
-    prompt=True,
-    hide_input=True,
-    confirmation_prompt=False,
-    help="Switch password",
-)
 @click.pass_context
 def config(
     ctx,
@@ -119,7 +112,6 @@ def config(
     auth_token,
     sls_address,
     folder,
-    password,
 ):
     """Generate the config of all Aruba switches (API v10.04) on the network using the SHCD.
 
@@ -140,7 +132,6 @@ def config(
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         folder: Folder to store config files
-        password: Switch password
     """
     if architecture.lower() == "full":
         architecture = "network_v2"
@@ -300,25 +291,56 @@ def config(
     # make folder
     if not os.path.exists(folder):
         os.makedirs(folder)
-
+    all_devices = {
+        "cdu",
+        "cec",
+        "cmm",
+        "leaf",
+        "leaf-bmc",
+        "master",
+        "spine",
+        "storage",
+        "uan",
+        "worker",
+    }
+    config_devices = set()
     for node in shcd_node_list:
         switch_name = node.common_name()
         node_shasta_name = get_shasta_name(switch_name, factory.lookup_mapper())
 
         if node_shasta_name in ["sw-cdu", "sw-leaf-bmc", "sw-leaf", "sw-spine"]:
 
-            switch_config = generate_switch_config(
+            switch_config, devices = generate_switch_config(
                 shcd_node_list,
                 factory,
                 switch_name,
                 sls_variables,
                 template_folder,
-                password,
             )
-
+            config_devices.update(devices)
             with open(f"{folder}/{switch_name}.cfg", "w+") as f:
                 f.write(switch_config)
 
             click.secho(f"{switch_name} Config Generated", fg="bright_white")
+    missing_devices = all_devices.difference(config_devices)
+    if len(missing_devices) > 0:
+        dash = "-" * 60
+        click.secho("\nWarning", fg="red")
+
+        click.secho(
+            "\nThe following devices were not found in the configurations.",
+            fg="red",
+        )
+        click.secho(
+            "If the network contains these devices, check the SHCD to ensure all tabs were included.",
+            fg="red",
+        )
+        click.secho(
+            "If the network does not contain these devices, disregard this warning."
+        )
+        click.secho(dash)
+        for x in missing_devices:
+            click.secho(x, fg="bright_white")
+        # print("network all_devices", all_devices.difference(config_devices))
 
     return
