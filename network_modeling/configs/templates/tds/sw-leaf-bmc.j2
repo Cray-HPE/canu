@@ -2,7 +2,6 @@
 ***===> sw-leaf-bmc.j2
 {%- include 'common/unknown.j2' %}
 hostname ***===> {{ variables.HOSTNAME }}
-user admin group administrators password plaintext ***===> {{ variables.PASSWORD }}
 no ip icmp redirect
 ntp server ***===> {{ variables.NCN_W001 }}
 ntp server ***===> {{ variables.NCN_W002 }}

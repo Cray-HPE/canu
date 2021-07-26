@@ -2,7 +2,6 @@
 ***===> sw-spine.primary.j2
 {%- include 'common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
-user admin group administrators password plaintext {{ variables.PASSWORD }}
 bfd
 no ip icmp redirect
 vrf CAN
