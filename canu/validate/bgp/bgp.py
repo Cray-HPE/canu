@@ -46,7 +46,7 @@ import requests
 @click.option(
     "--architecture",
     "-a",
-    type=click.Choice(["Full", "TDS"], case_sensitive=False),
+    type=click.Choice(["Full", "TDS", "V1"], case_sensitive=False),
     help="Shasta architecture",
     required=True,
     prompt="Architecture type",
@@ -76,6 +76,8 @@ def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
         architecture = "full"
     elif architecture.lower() == "tds":
         architecture = "tds"
+    elif architecture.lower() == "v1":
+        architecture = "network_v1"
 
     if ips_file:
         ips = []

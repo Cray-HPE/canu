@@ -1,12 +1,18 @@
 """CANU commands that validate the shcd."""
 from collections import defaultdict, OrderedDict
+import difflib
 
 import click
 from click_help_colors import HelpColorsCommand
-import difflib
+from hier_config import HConfig, Host
 import natsort
 from netmiko import ConnectHandler
 import requests
+import yaml
+
+
+options = yaml.safe_load(open("./canu/validate/config/options.yaml"))
+host = Host("example.rtr", "aoscx", options)
 
 
 @click.command(
@@ -23,10 +29,17 @@ import requests
     confirmation_prompt=False,
     help="Switch password",
 )
-@click.option("--config", "config_file", help="Config file", type=click.File("r"))
+@click.option(
+    "--config",
+    "config_file",
+    help="Config file",
+)
+# @click.option("--config", "config_file", help="Config file", type=click.File("r"))
 @click.pass_context
 def config(ctx, ip, username, password, config_file):
     """Validate switch config.
+
+    Compare the current running switch config with a generated switch config.
 
     \f
     # noqa: D301
@@ -38,12 +51,10 @@ def config(ctx, ip, username, password, config_file):
         password: Switch password
         config_file: Config file
     """
-
     credentials = {"username": username, "password": password}
     if config_file:
-        config_file_list = [
-            line.strip("\n").replace("***===> ", "") for line in config_file
-        ]
+        with open(config_file, "r") as f:
+            config_file_list = [line.strip("\n").replace("***===> ", "") for line in f]
 
     command = "show running-config"
     config = netmiko_command(ip, credentials, command)
@@ -78,10 +89,44 @@ def config(ctx, ip, username, password, config_file):
         switch_headers + switch_acl + switch_vlan + switch_interfaces + switch_vsx,
         config_headers + config_acl + config_vlan + config_interfaces + config_vsx,
     )
+
+    running_config_hier = HConfig(host=host)
+    running_config_hier.load_from_string(config)
+
+    # Build Hierarchical Configuration object for the Generated Config
+    generated_config_hier = HConfig(host=host)
+    generated_config_hier.load_from_file(config_file)
+
+    # Build Hierarchical Configuration object for the Remediation Config
+    remediation_config_hier = running_config_hier.config_to_get_to(
+        generated_config_hier
+    )
+
+    # print("======Config in generated config and not in running========")
+    # in_generated = generated_config_hier.difference(running_config_hier)
+    # for line in in_generated.all_children():
+    #     print(line.cisco_style_text())
+
+    # print("======Config in running config and not in generated========")
+    # in_running = running_config_hier.difference(generated_config_hier)
+    # for line in in_running.all_children():
+    #     # print(line.cisco_style_text())
+    #     print(line.cisco_style_text(style="merged"))
+
+    # print()
+    print("======Config needed to get running config to match generated========")
+    for line in remediation_config_hier.all_children():
+        # print(line.cisco_style_text(style="with_comments"))
+        # print(line.cisco_style_text(style="merged"))
+        print(line.cisco_style_text())
+
+    # print(in_running.tags())
+
     return
 
 
 def netmiko_command(ip, credentials, command):
+    """Send a command to a switch using netmiko."""
     session = requests.Session()
     session.post(f"https://{ip}/rest/v10.04/login", data=credentials, verify=False)
 
@@ -104,7 +149,7 @@ def netmiko_command(ip, credentials, command):
 
 
 def compare_config(config1, config2):
-    """Compare configurations"""
+    """Compare running and generated switch configurations."""
     d = difflib.Differ()
     for diff in d.compare(config1, config2):
         color = ""
@@ -120,6 +165,7 @@ def compare_config(config1, config2):
 
 
 def parse_interface(text):
+    """Parse switch config text."""
     interface = []
     interface_name = None
     interfaces = defaultdict()
@@ -224,9 +270,38 @@ def parse_interface(text):
 
 
 def sort_interfaces(interfaces):
+    """Sort the interfaces in the switch config."""
     sorted_interfaces = OrderedDict(natsort.natsorted(interfaces.items()))
 
     # Turn the sorted interface dict into a single list
     sorted_list = [line for x in sorted_interfaces for line in sorted_interfaces[x]]
     print("\n********sorted_list", sorted_list)
     return sorted_list
+
+
+# def cisco_style_text(
+#     self, style: str = "without_comments", tag: Optional[str] = None
+# ) -> str:
+#     """ Return a Cisco style formated line i.e. indentation_level + text ! comments """
+
+#     comments = []
+#     if style == "without_comments":
+#         pass
+#     elif style == "merged":
+#         # count the number of instances that have the tag
+#         instance_count = 0
+#         instance_comments: Set[str] = set()
+#         for instance in self.instances:
+#             if tag is None or tag in instance["tags"]:
+#                 instance_count += 1
+#                 instance_comments.update(instance["comments"])
+
+#         # should the word 'instance' be plural?
+#         word = "instance" if instance_count == 1 else "instances"
+
+#         comments.append(f"{instance_count} {word}")
+#         comments.extend(instance_comments)
+#     elif style == "with_comments":
+#         comments.extend(self.comments)
+
+#     return f"{'  ' * (self.depth() - 1)}{self.text}{' !{}'.format(', '.join(sorted(comments))) if comments else ''}"

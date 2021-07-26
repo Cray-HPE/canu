@@ -23,6 +23,7 @@ et-xmlfile==1.0.1
 filelock==3.0.12
 flake8==3.8.4
 future==0.18.2
+hier-config==2.0.0
 icdiff==1.9.1
 idna==2.10
 iniconfig==1.1.1
