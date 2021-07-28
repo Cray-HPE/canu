@@ -4,7 +4,7 @@ access-list ip nmn-hmn
     deny any ***===> {{ variables.NMN }} ***===> {{ variables.HMN }}
 {%- endif %}
 {%- if variables.NMN and variables.HMN_MTN %}
-    deny any ***===NMN> {{ variables.NMN }} ***===HMN_MTN> {{ variables.HMN_MTN }}
+    deny any ***===> {{ variables.NMN }} ***===> {{ variables.HMN_MTN }}
 {%- endif %}
 {%- if variables.HMN and variables.NMN %}
     deny any ***===> {{ variables.HMN}} ***===> {{ variables.NMN }}

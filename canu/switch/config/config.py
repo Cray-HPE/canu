@@ -479,6 +479,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
         exit(1)
 
     for port in nodes_by_name[switch_name]["ports"]:
+        destination_node_id = port["destination_node_id"]
         destination_node_name = nodes_by_id[port["destination_node_id"]]["common_name"]
         source_port = port["port"]
         destination_port = port["destination_port"]
@@ -486,28 +487,35 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
 
         shasta_name = get_shasta_name(destination_node_name, factory.lookup_mapper())
 
+        primary_port = get_primary_port(nodes_by_name, switch_name, destination_node_id)
         if shasta_name == "ncn-m":
             # To ensure the lag matches on all connections, calculate lag number based on dest hostname
             digits = re.findall(r"(\d+)", destination_node_name)[0]
             new_node = {
                 "subtype": "master",
                 "slot": destination_slot,
+                "destination_port": destination_port,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "PORT": f"1/1/{source_port}",
-                    "LAG_NUMBER": 60 + int(digits),
+                    "LAG_NUMBER": primary_port,
                 },
             }
             nodes.append(new_node)
         elif shasta_name == "ncn-s":
             digits = re.findall(r"(\d+)", destination_node_name)[0]
+            # ncn-s also needs destination_port to find the match
+            primary_port = get_primary_port(
+                nodes_by_name, switch_name, destination_node_id, destination_port
+            )
             new_node = {
                 "subtype": "storage",
                 "slot": destination_slot,
+                "destination_port": destination_port,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "PORT": f"1/1/{source_port}",
-                    "LAG_NUMBER": 70 + int(digits),
+                    "LAG_NUMBER": primary_port,
                 },
             }
             nodes.append(new_node)
@@ -516,10 +524,11 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
             new_node = {
                 "subtype": "worker",
                 "slot": destination_slot,
+                "destination_port": destination_port,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "PORT": f"1/1/{source_port}",
-                    "LAG_NUMBER": 120 + int(digits),
+                    "LAG_NUMBER": primary_port,
                 },
             }
             nodes.append(new_node)
@@ -541,7 +550,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "PORT": f"1/1/{source_port}",
-                    "LAG_NUMBER": 170 + int(digits),
+                    "LAG_NUMBER": primary_port,
                 },
             }
             nodes.append(new_node)
@@ -554,7 +563,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "PORT": f"1/1/{source_port}",
-                    "LAG_NUMBER": 180 + int(digits),
+                    "LAG_NUMBER": primary_port,
                 },
             }
             nodes.append(new_node)
@@ -563,17 +572,18 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
             if switch_name.startswith("sw-leaf"):
                 is_primary, primary, secondary = switch_is_primary(switch_name)
                 digits = re.findall(r"(\d+)", primary)[0]
-                lag_number = int(digits)
+                lag_number = 100 + int(digits)
 
             # sw-cdu ==> sw-spine
             elif switch_name.startswith("sw-cdu"):
                 is_primary, primary, secondary = switch_is_primary(switch_name)
                 digits = re.findall(r"(\d+)", primary)[0]
-                lag_number = 30 + int(digits)
+                lag_number = 200 + int(digits)
             # sw-leaf-bmc ==> sw-spine
             elif switch_name.startswith("sw-leaf-bmc"):
                 digits = re.findall(r"(\d+)", switch_name)[0]
-                lag_number = 10 + int(digits)
+                lag_number = 150 + int(digits)
+
             else:
                 lag_number = source_port
             new_node = {
@@ -587,18 +597,19 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
             }
             nodes.append(new_node)
         elif shasta_name == "sw-cdu":
+            is_primary, primary, secondary = switch_is_primary(destination_node_name)
             # sw-spine ==> sw-cdu
             if switch_name.startswith("sw-spine"):
-                is_primary, primary, secondary = switch_is_primary(
-                    destination_node_name
-                )
                 digits = re.findall(r"(\d+)", primary)[0]
-                lag_number = 30 + int(digits)
-            else:
-                lag_number = source_port
+                lag_number = 200 + int(digits)
+
+            # sw-cdu ==> sw-cdu
+            elif switch_name.startswith("sw-cdu"):
+                lag_number = 256
             new_node = {
                 "subtype": "cdu",
                 "slot": None,
+                "primary": is_primary,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "LAG_NUMBER": lag_number,
@@ -608,21 +619,21 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
             nodes.append(new_node)
         elif shasta_name == "sw-leaf":
             # sw-spine ==> sw-leaf
+            is_primary, primary, secondary = switch_is_primary(destination_node_name)
             if switch_name.startswith("sw-spine"):
-                is_primary, primary, secondary = switch_is_primary(
-                    destination_node_name
-                )
                 digits = re.findall(r"(\d+)", primary)[0]
-                lag_number = int(digits)
+                lag_number = 100 + int(digits)
             # sw-leaf-bmc ==> sw-leaf
             elif switch_name.startswith("sw-leaf-bmc"):
                 digits = re.findall(r"(\d+)", switch_name)[0]
-                lag_number = 10 + int(digits)
-            else:
-                lag_number = source_port
+                lag_number = 150 + int(digits)
+            # sw-leaf ==> sw-leaf
+            elif switch_name.startswith("sw-leaf"):
+                lag_number = 256
             new_node = {
                 "subtype": "leaf",
                 "slot": None,
+                "primary": is_primary,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "LAG_NUMBER": lag_number,
@@ -634,13 +645,11 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
             # sw-leaf ==> sw-leaf-bmc
             if switch_name.startswith("sw-leaf"):
                 digits = re.findall(r"(\d+)", destination_node_name)[0]
-                lag_number = 10 + int(digits)
+                lag_number = 150 + int(digits)
             # sw-spine ==> sw-leaf-bmc
             elif switch_name.startswith("sw-spine"):
                 digits = re.findall(r"(\d+)", destination_node_name)[0]
-                lag_number = 10 + int(digits)
-            else:
-                lag_number = source_port
+                lag_number = 150 + int(digits)
             new_node = {
                 "subtype": "leaf-bmc",
                 "slot": None,
@@ -858,3 +867,28 @@ def rename_sls_hostnames(sls_variables):
         sls_variables["NMN_IPs"][new_name] = value
 
     return sls_variables
+
+
+def get_primary_port(
+    nodes_by_name, switch_name, destination_node_id, destination_port=None
+):
+    """Return the primary switch port number for a connection to a node.
+
+    Args:
+        nodes_by_name: Dictionary containing the node list where hostname is the key
+        switch_name: Switch hostname
+        destination_node_id: The node id of the destination device.
+        destination_port: (Optional, only used with ncn-s) The destination port
+
+    Returns:
+        port: Port number of the primary connection to a device.
+    """
+    is_primary, primary, secondary = switch_is_primary(switch_name)
+
+    for y in nodes_by_name[primary]["ports"]:
+        if y["destination_node_id"] == destination_node_id:
+            if not destination_port:
+                return y["port"]
+            # Since ncn-s can have multiple connections to a device, returns the correct one
+            elif destination_port and y["destination_port"] == destination_port:
+                return y["port"]
