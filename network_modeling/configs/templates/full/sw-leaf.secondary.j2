@@ -14,7 +14,7 @@ ntp enable
 ssh server vrf default
 ssh server vrf mgmt
 {%- include 'common/acl.j2' %}
-    
+
 vlan 1
 vlan 2
     name NMN
@@ -58,7 +58,7 @@ interface ***===> {{ variables.VSX_ISL_PORT1 }}
     mtu 9198
     description vsx isl
     lag 256
-iinterface ***===> {{ variables.VSX_ISL_PORT2 }}
+interface ***===> {{ variables.VSX_ISL_PORT2 }}
     no shutdown
     mtu 9198
     description vsx isl

@@ -13,7 +13,7 @@ ntp enable
 ssh server vrf default
 ssh server vrf mgmt
 {%- include 'common/acl.j2' %}
-    
+
 vlan 1
 vlan 2
     name NMN
@@ -55,7 +55,6 @@ interface vlan 4
     ip helper-address 10.94.100.222
     ip ospf 1 area 0.0.0.0
 snmp-server vrf default
-snmpv3 user testuser auth md5 auth-pass plaintext testpass1 priv des priv-pass ciphertext testpass2
 
 router ospf 1
     router-id ***===> {{ variables.LOOPBACK_IP }}

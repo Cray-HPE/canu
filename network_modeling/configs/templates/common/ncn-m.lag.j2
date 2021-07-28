@@ -1,6 +1,8 @@
 {#- master #}
 ***===> ncn-m.lag.j2
 {%- for node in cabling.nodes if node.subtype == "master" %}
+{%- if node.destination_port == 1%}
+
 interface lag ***===> {{ node.config.LAG_NUMBER }} multi-chassis
     no shutdown
     description ***===> {{ node.config.DESCRIPTION }}
@@ -14,9 +16,16 @@ interface lag ***===> {{ node.config.LAG_NUMBER }} multi-chassis
 interface ***===> {{ node.config.PORT }}
     no shutdown
     mtu 9198
-    description ***===> {{ node.config.DESCRIPTION }}    
+    description ***===> {{ node.config.DESCRIPTION }}
     lag ***===> {{ node.config.LAG_NUMBER }}
+{%- endif %}
+{%- if node.destination_port == 2%}
 
+interface ***===> {{ node.config.PORT }}
+    shutdown
+    mtu 9198
+    description ***===> {{ node.config.DESCRIPTION }}
+{%- endif %}
 {%- endfor %}
 ***===> end ncn-m.lag.j2
 {#- end master #}
