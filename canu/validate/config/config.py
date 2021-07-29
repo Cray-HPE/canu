@@ -4,6 +4,7 @@ import difflib
 
 import click
 from click_help_colors import HelpColorsCommand
+import click_spinner
 from hier_config import HConfig, Host
 import natsort
 from netmiko import ConnectHandler
@@ -34,7 +35,6 @@ host = Host("example.rtr", "aoscx", options)
     "config_file",
     help="Config file",
 )
-# @click.option("--config", "config_file", help="Config file", type=click.File("r"))
 @click.pass_context
 def config(ctx, ip, username, password, config_file):
     """Validate switch config.
@@ -58,7 +58,6 @@ def config(ctx, ip, username, password, config_file):
 
     command = "show running-config"
     config = netmiko_command(ip, credentials, command)
-    # print("config", config)
 
     (
         switch_interfaces,
@@ -67,13 +66,6 @@ def config(ctx, ip, username, password, config_file):
         switch_vlan,
         switch_vsx,
     ) = parse_interface(config.splitlines())
-    # (
-    #     switch_interfaces,
-    #     switch_headers,
-    #     switch_acl,
-    #     switch_vlan,
-    #     switch_vsx,
-    # ) = parse_interface(y.splitlines())
     switch_interfaces = sort_interfaces(switch_interfaces)
 
     (
@@ -84,11 +76,6 @@ def config(ctx, ip, username, password, config_file):
         config_vsx,
     ) = parse_interface(config_file_list)
     config_interfaces = sort_interfaces(config_interfaces)
-
-    compare_config(
-        switch_headers + switch_acl + switch_vlan + switch_interfaces + switch_vsx,
-        config_headers + config_acl + config_vlan + config_interfaces + config_vsx,
-    )
 
     running_config_hier = HConfig(host=host)
     running_config_hier.load_from_string(config)
@@ -102,54 +89,72 @@ def config(ctx, ip, username, password, config_file):
         generated_config_hier
     )
 
-    # print("======Config in generated config and not in running========")
-    # in_generated = generated_config_hier.difference(running_config_hier)
-    # for line in in_generated.all_children():
-    #     print(line.cisco_style_text())
+    dash = "-" * 60
 
-    # print("======Config in running config and not in generated========")
-    # in_running = running_config_hier.difference(generated_config_hier)
-    # for line in in_running.all_children():
-    #     # print(line.cisco_style_text())
-    #     print(line.cisco_style_text(style="merged"))
+    click.echo("\n")
+    click.secho(
+        "Config differences between running config and config file",
+        fg="bright_white",
+    )
+    click.echo(dash)
+    compare_config(
+        switch_headers + switch_acl + switch_vlan + switch_interfaces + switch_vsx,
+        config_headers + config_acl + config_vlan + config_interfaces + config_vsx,
+    )
 
-    # print()
-    print("======Config needed to get running config to match generated========")
+    click.echo("\n")
+    click.secho(
+        "Comands needed to get running config to match config file",
+        fg="bright_white",
+    )
+    click.echo(dash)
     for line in remediation_config_hier.all_children():
-        # print(line.cisco_style_text(style="with_comments"))
-        # print(line.cisco_style_text(style="merged"))
-        print(line.cisco_style_text())
-
-    # print(in_running.tags())
+        click.echo(line.cisco_style_text())
 
     return
 
 
 def netmiko_command(ip, credentials, command):
-    """Send a command to a switch using netmiko."""
-    session = requests.Session()
-    session.post(f"https://{ip}/rest/v10.04/login", data=credentials, verify=False)
+    """Send a command to a switch using netmiko.
 
-    aruba1 = {
-        "device_type": "aruba_osswitch",
-        "host": ip,
-        "username": credentials["username"],
-        "password": credentials["password"],
-    }
+    Args:
+        ip: Switch ip
+        credentials: Switch credentials
+        command: Command to be run on the switch
 
-    click.secho(f"Connecting to {ip}...")
-    with ConnectHandler(**aruba1) as net_connect:
-        output = net_connect.send_command(command)
-        # print(output)
-        net_connect.disconnect()
+    Returns:
+        output: Text output from the command run.
+    """
+    with click_spinner.spinner():
+        session = requests.Session()
+        session.post(f"https://{ip}/rest/v10.04/login", data=credentials, verify=False)
 
-    session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
+        aruba1 = {
+            "device_type": "aruba_osswitch",
+            "host": ip,
+            "username": credentials["username"],
+            "password": credentials["password"],
+        }
 
+        print(
+            f"  Connecting to {ip}...",
+            end="\r",
+        )
+        with ConnectHandler(**aruba1) as net_connect:
+            output = net_connect.send_command(command)
+            net_connect.disconnect()
+
+        session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
     return output
 
 
 def compare_config(config1, config2):
-    """Compare running and generated switch configurations."""
+    """Compare and print two switch configurations.
+
+    Args:
+        config1: (Str) Switch 1 config
+        config2: (Str) Switch 2 config
+    """
     d = difflib.Differ()
     for diff in d.compare(config1, config2):
         color = ""
@@ -165,7 +170,18 @@ def compare_config(config1, config2):
 
 
 def parse_interface(text):
-    """Parse switch config text."""
+    """Parse switch config text.
+
+    Args:
+        text: (Str) Switch config
+
+    Returns:
+        interfaces: Parsed interfaces
+        headers: Parsed headers
+        acl: Parsed acl
+        vlan: Parsed vlan
+        vsx: Parsed vsx
+    """
     interface = []
     interface_name = None
     interfaces = defaultdict()
@@ -178,16 +194,12 @@ def parse_interface(text):
     vsx_parse = False
 
     for x in text:
-        # print("x", x)
         if x.startswith("interface"):
-            # print("int elif1")
             if interface_name and len(interface) > 0:
-                # print("**add previous to dict")
                 interfaces[interface_name] = interface
                 interface = []
                 interface_name = None
             interface.append(x)
-            # print("startswith", x)
             interface_name = x
 
         elif (
@@ -197,50 +209,37 @@ def parse_interface(text):
             and not vsx_parse
             and not vlan_parse
         ):
-            # print("int elif2")
-            # print("next", x)
-            # print("next", interface)
             interface.append(x)
 
         elif x.startswith("access-list"):
-            # print("acl elif1")
             acl.append(x)
             acl_parse = True
             vlan_parse = False
             vsx_parse = False
 
         elif len(acl) > 0 and x.startswith("    ") and acl_parse:
-            # print("acl elif2")
             acl.append(x)
 
         elif x.startswith("vlan"):
-            # print("vlan elif1")
             vlan.append(x)
             vlan_parse = True
             acl_parse = False
             vsx_parse = False
 
         elif len(vlan) > 0 and x.startswith("    ") and vlan_parse:
-            # print("vlan elif2")
             vlan.append(x)
 
         elif x.startswith("vsx"):
-            # print("vsx elif1")
             vsx.append(x)
             vsx_parse = True
             acl_parse = False
             vlan_parse = False
 
         elif len(vsx) > 0 and x.startswith("    ") and vsx_parse:
-            # print("vsx elif2")
             vsx.append(x)
 
         else:
-            # print("else")
-            # headers.append(x)
             if interface_name and len(interface) > 0:
-                # print("else if")
-                # print("else if interface_name", interface_name)
                 interfaces[interface_name] = interface
                 interface = []
                 interface_name = None
@@ -248,60 +247,31 @@ def parse_interface(text):
                     headers.append(x)
 
             elif acl_parse:
-                # print("not acl_parsed")
                 acl_parse = False
             elif vlan_parse:
-                # print("not vlan_parsed")
                 vlan_parse = False
             elif vsx_parse:
-                # print("not vsx_parsed")
                 vsx_parse = False
             else:
-                # print("else else")
                 if x != "" and x != "!":
-                    # print("final else x", x)
                     headers.append(x)
 
-    # print("interfaces", interfaces)
-    # print("acl", acl)
-    # print("*+*+*+*+vlan", vlan)
-    # print("*+*+*+*+vsx", vsx)
     return interfaces, headers, acl, vlan, vsx
 
 
 def sort_interfaces(interfaces):
-    """Sort the interfaces in the switch config."""
+    """Sort the interfaces in the switch config.
+
+    Args:
+        interfaces: Dictionary containing the parsed interfaces from the switch config
+
+    Returns:
+        A sorted list of interfaces in the switch config
+    """
+    print(interfaces)
     sorted_interfaces = OrderedDict(natsort.natsorted(interfaces.items()))
 
     # Turn the sorted interface dict into a single list
     sorted_list = [line for x in sorted_interfaces for line in sorted_interfaces[x]]
-    print("\n********sorted_list", sorted_list)
+
     return sorted_list
-
-
-# def cisco_style_text(
-#     self, style: str = "without_comments", tag: Optional[str] = None
-# ) -> str:
-#     """ Return a Cisco style formated line i.e. indentation_level + text ! comments """
-
-#     comments = []
-#     if style == "without_comments":
-#         pass
-#     elif style == "merged":
-#         # count the number of instances that have the tag
-#         instance_count = 0
-#         instance_comments: Set[str] = set()
-#         for instance in self.instances:
-#             if tag is None or tag in instance["tags"]:
-#                 instance_count += 1
-#                 instance_comments.update(instance["comments"])
-
-#         # should the word 'instance' be plural?
-#         word = "instance" if instance_count == 1 else "instances"
-
-#         comments.append(f"{instance_count} {word}")
-#         comments.extend(instance_comments)
-#     elif style == "with_comments":
-#         comments.extend(self.comments)
-
-#     return f"{'  ' * (self.depth() - 1)}{self.text}{' !{}'.format(', '.join(sorted(comments))) if comments else ''}"
