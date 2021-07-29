@@ -1,8 +1,16 @@
-# 🛶 CANU v0.0.5~alpha
+# 🛶 CANU v0.0.6
 
-CANU (CSM Automatic Network Utility) will float through a new Shasta network and make setup a breeze. Use CANU to check if Aruba switches on a Shasta network meet the firmware version requirements and check their cabling status using LLDP.
+CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
-CANU reads switch version information from the _canu.yaml_ file in the root directory. This file still needs testing to ensure that switches and firmware versions are labeled properly. Please let us know if something is broken or needs to be updated.
+CANU can be used to:
+
+- Check if Aruba switches on a Shasta network meet the firmware version requirements
+- Check network cabling status using LLDP
+- Validate BGP status
+- Configure BGP
+- Validate that SHCD spreadsheets are configured correctly and pass a number of checks
+- Validate an SHCD against actual network cabling status to check for mis-cabling
+- Generate switch configuration for an entire network
 
 # Quickstart Guide
 
@@ -105,6 +113,8 @@ The output file for the `canu init` command is set with the `--out FILENAME` fla
 ### Check Single Switch Firmware
 
 **[Details](docs/switch_firmware.md)**<br>
+
+CANU checks the switch firmware version against the standard in the _canu.yaml_ file found in the root directory.
 
 To check the firmware of a single switch run: `canu --shasta 1.4 switch firmware --ip 192.168.1.1 --username USERNAME --password PASSWORD`
 
@@ -485,6 +495,7 @@ To print extra details (prefixes, NCN names, IPs), add the `--verbose` flag
 ### Generate Switch Config
 
 **[Details](docs/switch_config.md)**<br>
+To see all the lags that are generated, see [lags](docs/lags.md)
 
 CANU can be used to generate switch config.
 
@@ -530,6 +541,7 @@ vrf keepalive
 ### Generate Network Config
 
 **[Details](docs/network_config.md)**<br>
+To see all the lags that are generated, see [lags](docs/lags.md)
 
 CANU can also generate switch config for all the switches on a network.
 
@@ -576,7 +588,12 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 
 # Changelog
 
-## [0.0.5~alpha] - 2021-5-14
+## [unreleased]
+
+- Added `switch config` to generate switch configuration.
+- Added `network config` to generate network configuration.
+
+## [0.0.5] - 2021-5-14
 
 - Updated license
 - Updated the plan-of-record firmware for the 8360 in Shasta 1.4 and 1.5
@@ -620,7 +637,8 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 - Ability for CANU to get the firmware of a single or multiple Aruba switches
 - Standardized the canu.yaml file to show currently supported switch firmware versions.
 
-[unreleased]: https://stash.us.cray.com/projects/CSM/repos/canu/compare/commits?targetBranch=refs%2Ftags%2F0.0.4&sourceBranch=refs%2Fheads%2Fmaster&targetRepoId=12732
+[unreleased]: https://stash.us.cray.com/projects/CSM/repos/canu/compare/commits?targetBranch=refs%2Ftags%2F0.0.5&sourceBranch=refs%2Fheads%2Fmaster&targetRepoId=12732
+[0.0.5]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.5
 [0.0.4]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.4
 [0.0.3]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.3
 [0.0.2]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.2

@@ -489,8 +489,6 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
 
         primary_port = get_primary_port(nodes_by_name, switch_name, destination_node_id)
         if shasta_name == "ncn-m":
-            # To ensure the lag matches on all connections, calculate lag number based on dest hostname
-            digits = re.findall(r"(\d+)", destination_node_name)[0]
             new_node = {
                 "subtype": "master",
                 "slot": destination_slot,
@@ -503,9 +501,8 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
             }
             nodes.append(new_node)
         elif shasta_name == "ncn-s":
-            digits = re.findall(r"(\d+)", destination_node_name)[0]
             # ncn-s also needs destination_port to find the match
-            primary_port = get_primary_port(
+            primary_port_ncn_s = get_primary_port(
                 nodes_by_name, switch_name, destination_node_id, destination_port
             )
             new_node = {
@@ -515,12 +512,11 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "PORT": f"1/1/{source_port}",
-                    "LAG_NUMBER": primary_port,
+                    "LAG_NUMBER": primary_port_ncn_s,
                 },
             }
             nodes.append(new_node)
         elif shasta_name == "ncn-w":
-            digits = re.findall(r"(\d+)", destination_node_name)[0]
             new_node = {
                 "subtype": "worker",
                 "slot": destination_slot,
@@ -543,7 +539,6 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
             }
             nodes.append(new_node)
         elif shasta_name == "cmm":
-            digits = re.findall(r"(\d+)", destination_node_name)[0]
             new_node = {
                 "subtype": "cmm",
                 "slot": None,
@@ -555,7 +550,6 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
             }
             nodes.append(new_node)
         elif shasta_name == "uan":
-            digits = re.findall(r"(\d+)", destination_node_name)[0]
             new_node = {
                 "subtype": "uan",
                 "slot": destination_slot,
@@ -576,16 +570,15 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
 
             # sw-cdu ==> sw-spine
             elif switch_name.startswith("sw-cdu"):
-                is_primary, primary, secondary = switch_is_primary(switch_name)
-                digits = re.findall(r"(\d+)", primary)[0]
-                lag_number = 200 + int(digits)
+                lag_number = 255
+
             # sw-leaf-bmc ==> sw-spine
             elif switch_name.startswith("sw-leaf-bmc"):
-                digits = re.findall(r"(\d+)", switch_name)[0]
-                lag_number = 150 + int(digits)
+                lag_number = 255
 
-            else:
-                lag_number = source_port
+            # sw-spine ==> sw-spine
+            elif switch_name.startswith("sw-spine"):
+                lag_number = 256
             new_node = {
                 "subtype": "spine",
                 "slot": None,
@@ -623,10 +616,11 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
             if switch_name.startswith("sw-spine"):
                 digits = re.findall(r"(\d+)", primary)[0]
                 lag_number = 100 + int(digits)
+
             # sw-leaf-bmc ==> sw-leaf
             elif switch_name.startswith("sw-leaf-bmc"):
-                digits = re.findall(r"(\d+)", switch_name)[0]
-                lag_number = 150 + int(digits)
+                lag_number = 255
+
             # sw-leaf ==> sw-leaf
             elif switch_name.startswith("sw-leaf"):
                 lag_number = 256
@@ -646,6 +640,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
             if switch_name.startswith("sw-leaf"):
                 digits = re.findall(r"(\d+)", destination_node_name)[0]
                 lag_number = 150 + int(digits)
+
             # sw-spine ==> sw-leaf-bmc
             elif switch_name.startswith("sw-spine"):
                 digits = re.findall(r"(\d+)", destination_node_name)[0]

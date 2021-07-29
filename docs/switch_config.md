@@ -2,6 +2,8 @@
 
 CANU can be used to generate switch config.
 
+To see all the lags that are generated, see [lags](docs/lags.md)
+
 In order to generate switch config, a valid SHCD must be passed in and system variables must be read in from either CSI output or the SLS API.
 
 #### CSI Input
