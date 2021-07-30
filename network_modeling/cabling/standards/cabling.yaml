@@ -1,6 +1,6 @@
 --- # cabling standards
 
-version: "1.0"
+version: "1.2"
 hardware_type: "hpe"
 nodes:
   - type: "ncn"
@@ -15,15 +15,18 @@ nodes:
           device_name: "mgmt0"
           lag: "mlag-lacp"
         - destination: "site"
-          device_name: "Manager 001 to site, otherwise NONE (see notes)"
+          description: "Master 001 to site, otherwise NONE (see notes)"
+          device_name: "mgmt1"
       - name: "pcie-slot1"
         ports: 
         - destination: "secondary"
           description: "second switch in MLAG pair"
           vlan_name: "HMN, NMN, CAN"
-          device_name: "mgmt1"
+          device_name: "mgmt2"
           lag: "mlag-lacp"
-        - destination: 
+        - destination: "None"
+          description: "None"
+          device_name: "mgmt3"
       - name: "ilo"
         ports:
         - destination: 'HMN Leaf'
@@ -98,17 +101,21 @@ nodes:
         ports: 
         - destination: "primary"
           description: "first switch in MLAG pair"
+          device_name: "mgmt0"
           vlan_name: "NMN"
         - destination: "primary"
           description: "first switch in MLAG pair"
+          device_name: "mgmt1"
           vlan_name: "CAN"
           lag: "mlag-lacp"
       - name: "pcie-slot1"
         ports:
         - destination: "secondary"
           description: "second switch in MLAG pair"
+          device_name: "mgmt2"
         - destination: "secondary"
           description: "second switch in MLAG pair"
+          device_name: "mgmt3"
           vlan_name: "CAN"
           lag: "mlag-lacp"
       - name: "ilo"
@@ -128,12 +135,13 @@ nodes:
         ports: 
         - destination: "primary"
           description: "first switch in MLAG pair"
+          device_name: "mgmt0"
           vlan_name: "HMN, NMN, CAN"
           lag: "mlag-lacp"
         - destination: "secondary"
           description: "second switch in MLAG pair"
+          device_name: "mgmt1"
           vlan_name: "HMN, NMN, CAN"
-          lag: "mlag-lacp"
           lag: "mlag-lacp"
       - name: "ilo"
         ports: 
