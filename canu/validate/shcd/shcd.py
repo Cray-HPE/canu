@@ -46,7 +46,7 @@ log = logging.getLogger("validate_shcd")
 @click.option(
     "--architecture",
     "-a",
-    type=click.Choice(["Full", "TDS"], case_sensitive=False),
+    type=click.Choice(["Full", "TDS", "V1"], case_sensitive=False),
     help="Shasta architecture",
     required=True,
     prompt="Architecture type",
@@ -98,6 +98,8 @@ def shcd(ctx, architecture, shcd, tabs, corners, log_):
         architecture = "network_v2"
     elif architecture.lower() == "tds":
         architecture = "network_v2_tds"
+    elif architecture.lower() == "v1":
+        architecture = "network_v1"
 
     sheets = []
 

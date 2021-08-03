@@ -66,7 +66,7 @@ env = Environment(
 @click.option(
     "--architecture",
     "-a",
-    type=click.Choice(["Full", "TDS"], case_sensitive=False),
+    type=click.Choice(["Full", "TDS", "V1"], case_sensitive=False),
     help="Shasta architecture",
     required=True,
     prompt="Architecture type",
@@ -143,7 +143,8 @@ def config(
         template_folder = "full"
     elif architecture.lower() == "tds":
         architecture = "network_v2_tds"
-        template_folder = "tds"
+    elif architecture.lower() == "v1":
+        architecture = "network_v1"
 
     # SHCD Parsing
     sheets = []
