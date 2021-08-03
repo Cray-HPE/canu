@@ -10,11 +10,11 @@ Software Version: CSM v{{ cabling.version }}
 
 ![{{ node.subtype }}](./images/{{ cabling.hardware_type }}_{{ node.subtype }}.png)
 
-| Device | Port | Destination | Name | VLAN | LAG |
-|:-------|------|:-------------------------|:--------------|:--------------------|:-----|
+| Device | Port | Linux Device | Destination | Name | VLAN | LAG |
+|:-------|------|:------|:-------------------------|:--------------|:--------------------|:-----|
 {% for device in node.devices %}
 {% for port in device.ports %}
-| {{ device.name | upper }} | {{ loop.index }} | {{ port.destination }} | {% if port.name|length %} {{ port.name }} {% else %} N/A {% endif %}| {% if port.vlan_name|length %} {{ port.vlan_name }} {% else %} N/A {% endif %} | {% if port.lag|length %} {{port.lag | upper}} {% else %} N/A {% endif %}|
+| {{ device.name | upper }} | {{ loop.index }} | {% if port.device_name|length %} {{ port.device_name }} {% else %} None {% endif %}| {{ port.destination }} | {% if port.name|length %} {{ port.name }} {% else %} N/A {% endif %}| {% if port.vlan_name|length %} {{ port.vlan_name }} {% else %} N/A {% endif %} | {% if port.lag|length %} {{port.lag | upper}} {% else %} N/A {% endif %}|
 {% endfor %}{# end ports loop #}
 {% endfor %}{# end devices loop #}{# leave the following blank line for markdown formatting #}
 

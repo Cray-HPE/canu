@@ -1,5 +1,5 @@
+#!/usr/bin/env python3
 """Generate the cabling_output.md file."""
-# !/usr/bin/env python3
 
 import pprint
 import sys
@@ -42,5 +42,5 @@ template = env.get_template(template_file)  # Defaults to templates/<file>
 output = template.render(cabling=cabling)
 
 # print(output, file=open("../models/output.md", "a"))
-with open("cabling_output.md", "w") as file:
+with open("./generated/sample.md", "w") as file:
     file.write(output)

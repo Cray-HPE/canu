@@ -1,0 +1,26 @@
+{#- leaf-bmc-to-spine #}
+***===> leaf-bmc-to-spine.lag.j2
+{%- set ns = namespace(lag_displayed=false) %}
+{%- for node in cabling.nodes if node.subtype == "spine" %}
+{%- if ns.lag_displayed == false %}
+{%- set ns.lag_displayed = true %}
+interface lag ***===> 255
+    no shutdown
+    description ***===> leaf_bmc_to_spine_lag
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 2,4
+    lacp mode active
+{%- endif %}
+{%- endfor %}
+
+{%- for node in cabling.nodes if node.subtype == "spine"%}
+interface ***===> {{ node.config.PORT }}
+    no shutdown
+    mtu 9198
+    description ***===> {{ node.config.DESCRIPTION }}
+    lag ***===> 255
+
+{%- endfor %}
+***===> end leaf-bmc-to-spine.lag.j2
+{#- end leaf-bmc-to-spine #}

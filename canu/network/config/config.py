@@ -8,6 +8,7 @@ import click
 from click_help_colors import HelpColorsCommand
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
+from openpyxl import load_workbook
 import requests
 import ruamel.yaml
 import urllib3
@@ -82,7 +83,6 @@ env = Environment(
 @click.option(
     "--tabs",
     help="The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.",
-    required=True,
 )
 @click.option(
     "--corners",
@@ -135,6 +135,7 @@ def config(
     """
     if architecture.lower() == "full":
         architecture = "network_v2"
+        template_folder = "full"
     elif architecture.lower() == "tds":
         architecture = "network_v2_tds"
     elif architecture.lower() == "v1":
@@ -142,6 +143,18 @@ def config(
 
     # SHCD Parsing
     sheets = []
+
+    if not tabs:
+        wb = load_workbook(shcd, read_only=True)
+        click.secho("What tabs would you like to check in the SHCD?")
+        tab_options = wb.sheetnames
+        for x in tab_options:
+            click.secho(f"{x}", fg="green")
+
+        tabs = click.prompt(
+            "Please enter the tabs to check separated by a comma, e.g. 10G_25G_40G_100G,NMN,HMN.",
+            type=str,
+        )
 
     if corners:
         if len(tabs.split(",")) * 2 != len(corners.split(",")):
@@ -279,20 +292,56 @@ def config(
     # make folder
     if not os.path.exists(folder):
         os.makedirs(folder)
-
+    all_devices = {
+        "cdu",
+        "cec",
+        "cmm",
+        "leaf",
+        "leaf-bmc",
+        "master",
+        "spine",
+        "storage",
+        "uan",
+        "worker",
+    }
+    config_devices = set()
     for node in shcd_node_list:
         switch_name = node.common_name()
         node_shasta_name = get_shasta_name(switch_name, factory.lookup_mapper())
 
         if node_shasta_name in ["sw-cdu", "sw-leaf-bmc", "sw-leaf", "sw-spine"]:
 
-            switch_config = generate_switch_config(
-                shcd_node_list, factory, switch_name, sls_variables
+            switch_config, devices = generate_switch_config(
+                shcd_node_list,
+                factory,
+                switch_name,
+                sls_variables,
+                template_folder,
             )
-
-            with open(f"{folder}/{switch_name}.aos", "w+") as f:
+            config_devices.update(devices)
+            with open(f"{folder}/{switch_name}.cfg", "w+") as f:
                 f.write(switch_config)
 
             click.secho(f"{switch_name} Config Generated", fg="bright_white")
+    missing_devices = all_devices.difference(config_devices)
+    if len(missing_devices) > 0:
+        dash = "-" * 60
+        click.secho("\nWarning", fg="red")
+
+        click.secho(
+            "\nThe following devices were not found in the configurations.",
+            fg="red",
+        )
+        click.secho(
+            "If the network contains these devices, check the SHCD to ensure all tabs were included.",
+            fg="red",
+        )
+        click.secho(
+            "If the network does not contain these devices, disregard this warning."
+        )
+        click.secho(dash)
+        for x in missing_devices:
+            click.secho(x, fg="bright_white")
+        # print("network all_devices", all_devices.difference(config_devices))
 
     return

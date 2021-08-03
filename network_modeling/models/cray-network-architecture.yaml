@@ -68,7 +68,7 @@ network_v2:
     - name: "river_compute_node"
       model: "river_compute_node"
       connections:
-        - name: "river_compute_leaf"
+        - name: "river_bmc_leaf"
           speed: 1
     - name: "mountain_compute_cabinet"
       model: "mountain_compute_cabinet"
@@ -133,6 +133,9 @@ network_v2:
     - lookup_name: ["cmm"]
       shasta_name: "cmm"
       architecture_type: "cmm"
+    - lookup_name: ["cn"]
+      shasta_name: "cn"
+      architecture_type: "river_compute_node"
 network_v2_tds:
   name: "Version 2 TDS"
   description: "Aruba Hardware"
@@ -181,7 +184,7 @@ network_v2_tds:
     - name: "river_compute_node"
       model: "river_compute_node"
       connections:
-        - name: "river_compute_leaf"
+        - name: "river_bmc_leaf"
           speed: 1
     - name: "mountain_compute_cabinet"
       model: "mountain_compute_cabinet"
@@ -239,6 +242,9 @@ network_v2_tds:
         - "cmm"
       shasta_name: "cmm"
       architecture_type: "cmm"
+    - lookup_name: ["cn"]
+      shasta_name: "cn"
+      architecture_type: "river_compute_node"
 network_v1:
   name: "Dell and Mellanox Architecture"
   description: "Dell and Mellanox Hardware"
