@@ -6,6 +6,7 @@ from click_help_colors import HelpColorsCommand
 from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
+import natsort
 import requests
 
 
@@ -42,9 +43,17 @@ import requests
     default="65533",
     show_default=True,
 )
+@click.option(
+    "--architecture",
+    "-a",
+    type=click.Choice(["Full", "TDS"], case_sensitive=False),
+    help="Shasta architecture",
+    required=True,
+    prompt="Architecture type",
+)
 @click.option("--verbose", is_flag=True, help="Verbose mode")
 @click.pass_context
-def bgp(ctx, ips, ips_file, username, password, asn, verbose):
+def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
     """Validate BGP neighbors..
 
     This command will check the BGP neighbors for the switch IP addresses entered. All of the neighbors of a switch
@@ -60,8 +69,14 @@ def bgp(ctx, ips, ips_file, username, password, asn, verbose):
         username: Switch username
         password: Switch password
         asn: Switch ASN
+        architecture: Shasta architecture
         verbose: Bool indicating verbose output
     """
+    if architecture.lower() == "full":
+        architecture = "full"
+    elif architecture.lower() == "tds":
+        architecture = "tds"
+
     if ips_file:
         ips = []
         lines = [line.strip().replace(",", "") for line in ips_file]
@@ -102,20 +117,16 @@ def bgp(ctx, ips, ips_file, username, password, asn, verbose):
         ip = switch
         hostname = data[switch]["hostname"]
 
-        if "spine" not in str(hostname):
-            errors.append(
-                [
-                    str(ip),
-                    f"{hostname} not a spine switch",
-                ]
-            )
-
         if verbose:
             click.echo(dash)
             click.secho(f"{hostname}", fg="bright_white")
             click.echo(dash)
 
-        data[switch]["status"] = "PASS"
+        if len(bgp_neighbors) == 0:
+            data[switch]["status"] = "SKIP"
+            continue
+        else:
+            data[switch]["status"] = "PASS"
         for neighbor in bgp_neighbors:
             neighbor_status = bgp_neighbors[neighbor]["status"]["bgp_peer_state"]
 
@@ -130,6 +141,24 @@ def bgp(ctx, ips, ips_file, username, password, asn, verbose):
                 if verbose:
                     click.secho(f"{hostname} ===> {neighbor}: {neighbor_status}")
 
+            if architecture == "tds":
+                if "spine" not in str(hostname):
+                    errors.append(
+                        [
+                            str(ip),
+                            f"{hostname} not a spine switch, with TDS architecture BGP config only allowed with spine switches",
+                        ]
+                    )
+            if architecture == "full":
+                if "agg" not in str(hostname) and "leaf" not in str(hostname):
+                    errors.append(
+                        [
+                            str(ip),
+                            f"{hostname} not an agg or leaf switch, with Full architecture BGP config only allowed"
+                            + "with agg and leaf switches",
+                        ]
+                    )
+
     click.echo("\n")
     click.secho("BGP Neighbors Established", fg="bright_white")
     click.echo(dash)
@@ -141,11 +170,9 @@ def bgp(ctx, ips, ips_file, username, password, asn, verbose):
         hostname = data[switch]["hostname"]
         status = data[switch]["status"]
 
-        if "spine" not in str(hostname):
-            click.echo(f"SKIP - IP: {ip} Hostname: {hostname} is not a spine switch.")
-            continue
-
-        color = "green"
+        color = ""
+        if status == "PASS":
+            color = "green"
         if status == "FAIL":
             color = "red"
 
@@ -155,6 +182,8 @@ def bgp(ctx, ips, ips_file, username, password, asn, verbose):
         )
 
     if len(errors) > 0:
+        errors = set(tuple(x) for x in errors)
+        errors = natsort.natsorted(errors)
         click.echo("\n")
         click.secho("Errors", fg="red")
         click.echo(dash)

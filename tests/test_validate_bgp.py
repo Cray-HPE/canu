@@ -6,6 +6,7 @@ import responses
 from canu.cli import cli
 
 
+architecture = "tds"
 shasta = "1.4"
 username = "admin"
 password = "admin"
@@ -54,10 +55,59 @@ def test_validate_bgp():
                 username,
                 "--password",
                 password,
+                "--architecture",
+                architecture,
             ],
         )
         assert result.exit_code == 0
         assert "PASS - IP: 192.168.1.1 Hostname: test-spine" in str(result.output)
+
+
+@responses.activate
+def test_validate_bgp_full_architecture():
+    """Test that the `canu validate bgp` command runs and returns PASS with full architecture."""
+    full_architecture = "full"
+    with runner.isolated_filesystem():
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/login",
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system/vrfs/default/bgp_routers/{asn}/bgp_neighbors?depth=2",
+            json=all_established,
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
+            json={"hostname": "test-leaf", "platform_name": "X86-64"},
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/logout",
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--shasta",
+                shasta,
+                "--cache",
+                cache_minutes,
+                "validate",
+                "bgp",
+                "--ips",
+                ips,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--architecture",
+                full_architecture,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "PASS - IP: 192.168.1.1 Hostname: test-leaf" in str(result.output)
 
 
 @responses.activate
@@ -101,6 +151,8 @@ def test_validate_bgp_file():
                 username,
                 "--password",
                 password,
+                "--architecture",
+                architecture,
             ],
         )
         assert result.exit_code == 0
@@ -146,6 +198,8 @@ def test_validate_bgp_verbose():
                 "--password",
                 password,
                 "--verbose",
+                "--architecture",
+                architecture,
             ],
         )
         assert result.exit_code == 0
@@ -169,6 +223,8 @@ def test_validate_bgp_missing_ips():
                 username,
                 "--password",
                 password,
+                "--architecture",
+                architecture,
             ],
         )
         assert result.exit_code == 2
@@ -198,6 +254,8 @@ def test_validate_bgp_mutually_exclusive_ips_and_file():
                 ips,
                 "--ips-file",
                 "file.txt",
+                "--architecture",
+                architecture,
             ],
         )
         assert result.exit_code == 2
@@ -227,6 +285,8 @@ def test_validate_bgp_invalid_ip():
                 username,
                 "--password",
                 password,
+                "--architecture",
+                architecture,
             ],
         )
         assert result.exit_code == 2
@@ -256,6 +316,8 @@ def test_validate_bgp_invalid_ip_file():
                 username,
                 "--password",
                 password,
+                "--architecture",
+                architecture,
             ],
         )
         assert result.exit_code == 2
@@ -291,6 +353,8 @@ def test_validate_bgp_bad_ip():
                 username,
                 "--password",
                 password,
+                "--architecture",
+                architecture,
             ],
         )
         assert result.exit_code == 0
@@ -332,6 +396,8 @@ def test_validate_bgp_bad_ip_file():
                 username,
                 "--password",
                 password,
+                "--architecture",
+                architecture,
             ],
         )
         assert result.exit_code == 0
@@ -368,6 +434,8 @@ def test_validate_bgp_bad_password():
                 username,
                 "--password",
                 bad_password,
+                "--architecture",
+                architecture,
             ],
         )
         assert result.exit_code == 0
@@ -415,6 +483,8 @@ def test_validate_bgp_fail():
                 username,
                 "--password",
                 password,
+                "--architecture",
+                architecture,
             ],
         )
         assert result.exit_code == 0
@@ -460,6 +530,8 @@ def test_validate_bgp_fail_verbose():
                 "--password",
                 password,
                 "--verbose",
+                "--architecture",
+                architecture,
             ],
         )
         assert result.exit_code == 0
@@ -469,7 +541,7 @@ def test_validate_bgp_fail_verbose():
 
 @responses.activate
 def test_validate_bgp_not_spine():
-    """Test that the `canu validate bgp` command reports that a switch not a spine."""
+    """Test that the `canu validate bgp` command reports SKIP on a switch not a spine."""
     with runner.isolated_filesystem():
         responses.add(
             responses.POST,
@@ -505,11 +577,109 @@ def test_validate_bgp_not_spine():
                 username,
                 "--password",
                 password,
+                "--architecture",
+                architecture,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "SKIP - IP: 192.168.1.1 Hostname: test-leaf" in str(result.output)
+
+
+@responses.activate
+def test_validate_bgp_error_not_spine():
+    """Test that the `canu validate bgp` command given an error on a switch not a spine."""
+    with runner.isolated_filesystem():
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/login",
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system/vrfs/default/bgp_routers/{asn}/bgp_neighbors?depth=2",
+            json=all_established,
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
+            json={"hostname": "test-agg", "platform_name": "X86-64"},
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/logout",
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--shasta",
+                shasta,
+                "--cache",
+                cache_minutes,
+                "validate",
+                "bgp",
+                "--ips",
+                ips,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--architecture",
+                architecture,
             ],
         )
         assert result.exit_code == 0
         assert (
-            "SKIP - IP: 192.168.1.1 Hostname: test-leaf is not a spine switch."
+            "test-agg not a spine switch, with TDS architecture BGP config only allowed with spine switches"
+            in str(result.output)
+        )
+
+
+@responses.activate
+def test_validate_bgp_error_not_agg():
+    """Test that the `canu validate bgp` command given an error on a switch not an agg or leaf."""
+    full_architecture = "full"
+    with runner.isolated_filesystem():
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/login",
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system/vrfs/default/bgp_routers/{asn}/bgp_neighbors?depth=2",
+            json=all_established,
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
+            json={"hostname": "test-spine", "platform_name": "X86-64"},
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/logout",
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--shasta",
+                shasta,
+                "--cache",
+                cache_minutes,
+                "validate",
+                "bgp",
+                "--ips",
+                ips,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--architecture",
+                full_architecture,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "test-spine not an agg or leaf switch, with Full architecture BGP config only allowed"
             in str(result.output)
         )
 

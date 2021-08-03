@@ -1,9 +1,0 @@
-{# cdu-to-spine #}
-interface {{ INTERFACE_NUMBER }}
-    no shutdown
-    mtu 9198
-    ip address {{ PT_TO_PT_IP }}
-    ip ospf 1 area 0.0.0.0
-    ip ospf network point-to-point
-    ip ospf bfd
-{# end cdu-to-spine #}

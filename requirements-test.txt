@@ -1,4 +1,5 @@
 click
+click_default_group
 click_help_colors
 click_option_group
 click_params
