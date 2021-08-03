@@ -205,8 +205,11 @@ def test_network_config_bad_file():
 
 
 def test_network_config_missing_tabs():
-    """Test that the `canu network config` command fails on missing tabs."""
+    """Test that the `canu network config` command prompts for missing tabs."""
     with runner.isolated_filesystem():
+        with open("sls_input_file.json", "w") as f:
+            json.dump(sls_input, f)
+
         result = runner.invoke(
             cli,
             [
@@ -227,9 +230,18 @@ def test_network_config_missing_tabs():
                 "--folder",
                 folder_name,
             ],
+            input="INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES\n",
         )
-        assert result.exit_code == 2
-        assert "Error: Missing option '--tabs'." in str(result.output)
+        assert result.exit_code == 0
+        assert "sw-spine-001 Config Generated" in str(result.output)
+        assert "sw-spine-002 Config Generated" in str(result.output)
+        assert "sw-leaf-001 Config Generated" in str(result.output)
+        assert "sw-leaf-002 Config Generated" in str(result.output)
+        assert "sw-leaf-003 Config Generated" in str(result.output)
+        assert "sw-leaf-004 Config Generated" in str(result.output)
+        assert "sw-cdu-001 Config Generated" in str(result.output)
+        assert "sw-cdu-002 Config Generated" in str(result.output)
+        assert "sw-leaf-bmc-001 Config Generated" in str(result.output)
 
 
 def test_network_config_bad_tab():

@@ -2,6 +2,8 @@
 
 CANU can generate switch config for all the switches on a network.
 
+To see all the lags that are generated, see [lags](docs/lags.md)
+
 In order to generate switch config, a valid SHCD must be passed in and system variables must be read in from either CSI output or the SLS API.
 
 #### CSI Input
@@ -10,7 +12,7 @@ In order to generate switch config, a valid SHCD must be passed in and system va
 
 The sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.
 
-- Early in the install process, when running off of the LiveCD the sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/config/SYSTEMNAME/`
+- Early in the install process, when running off of the LiveCD the sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
 
 - Later in the install process, the sls_input_file.json file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
 
