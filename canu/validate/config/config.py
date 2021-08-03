@@ -8,7 +8,6 @@ import click_spinner
 from hier_config import HConfig, Host
 import natsort
 from netmiko import ConnectHandler
-import requests
 import yaml
 
 
@@ -97,7 +96,7 @@ def config(ctx, ip, username, password, config_file):
         fg="bright_white",
     )
     click.echo(dash)
-    compare_config(
+    differences = compare_config(
         switch_headers + switch_acl + switch_vlan + switch_interfaces + switch_vsx,
         config_headers + config_acl + config_vlan + config_interfaces + config_vsx,
     )
@@ -110,6 +109,15 @@ def config(ctx, ip, username, password, config_file):
     click.echo(dash)
     for line in remediation_config_hier.all_children():
         click.echo(line.cisco_style_text())
+
+    click.echo("\n")
+    click.secho(
+        "Differences",
+        fg="bright_white",
+    )
+    click.echo(dash)
+    click.secho(f"Total Deletions (-): {differences[0]}", fg="red")
+    click.secho(f"Total Additions (+): {differences[1]}", fg="green")
 
     return
 
@@ -126,11 +134,9 @@ def netmiko_command(ip, credentials, command):
         output: Text output from the command run.
     """
     with click_spinner.spinner():
-        session = requests.Session()
-        session.post(f"https://{ip}/rest/v10.04/login", data=credentials, verify=False)
 
         aruba1 = {
-            "device_type": "aruba_osswitch",
+            "device_type": "aruba_os",
             "host": ip,
             "username": credentials["username"],
             "password": credentials["password"],
@@ -144,7 +150,6 @@ def netmiko_command(ip, credentials, command):
             output = net_connect.send_command(command)
             net_connect.disconnect()
 
-        session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
     return output
 
 
@@ -154,19 +159,26 @@ def compare_config(config1, config2):
     Args:
         config1: (Str) Switch 1 config
         config2: (Str) Switch 2 config
+
+    Returns:
+        List with thenumber of additions and deletions
     """
     d = difflib.Differ()
+    additions = 0
+    deletions = 0
     for diff in d.compare(config1, config2):
         color = ""
         if diff.startswith("- "):
             color = "red"
+            deletions += 1
         elif diff.startswith("+ "):
             color = "green"
+            additions += 1
         elif diff.startswith("? "):
             color = "blue"
         click.secho(diff, fg=color)
 
-    return
+    return [additions, deletions]
 
 
 def parse_interface(text):
@@ -268,7 +280,6 @@ def sort_interfaces(interfaces):
     Returns:
         A sorted list of interfaces in the switch config
     """
-    print(interfaces)
     sorted_interfaces = OrderedDict(natsort.natsorted(interfaces.items()))
 
     # Turn the sorted interface dict into a single list
