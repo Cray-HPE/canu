@@ -4,7 +4,7 @@ To help make switch setup a breeze. CANU can automatically parse CSI output or t
 
 The _sls_input_file.json_ file is generally stored in one of two places depending on how far the system is in the install process.
 
-- Early in the install process, when running off of the LiveCD the _sls_input_file.json_ file is normally found in the the directory `/var/www/ephemeral/prep/config/SYSTEMNAME/`
+- Early in the install process, when running off of the LiveCD the _sls_input_file.json_ file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
 - Later in the install process, the _sls_input_file.json_ file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
 
 The output file for the `canu init` command is set with the `--out FILENAME` flag.

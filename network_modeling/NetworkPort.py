@@ -59,6 +59,8 @@ class NetworkPort:
         self.__speed = speed
         self.__slot = slot
         self.__destination_node_id = destination_node_id
+        self.__destination_port = None
+        self.__destination_slot = None
 
     def port(self, number=None):
         """Get or set the physical port number."""
@@ -92,12 +94,26 @@ class NetworkPort:
             self.__destination_node_id = id
         return self.__destination_node_id
 
+    def destination_port(self, port_number=None):
+        """Set the destination Node (edge) port_number for this port."""
+        if port_number is not None:
+            self.__destination_port = port_number
+        return self.__destination_port
+
+    def destination_slot(self, slot=None):
+        """Set the destination Node (edge) slot for this port."""
+        if slot is not None:
+            self.__destination_slot = slot
+        return self.__destination_slot
+
     def reset(self):
         """Reset all port attributes to default (None)."""
         self.__number = None
         self.__speed = None
         self.__slot = None
         self.__destination_node_id = None
+        self.__destination_port = None
+        self.__destination_slot = None
 
     def serialize(self):
         """Resolve this port as a JSON object."""
@@ -106,5 +122,7 @@ class NetworkPort:
             "speed": self.__speed,
             "slot": self.__slot,
             "destination_node_id": self.__destination_node_id,
+            "destination_port": self.__destination_port,
+            "destination_slot": self.__destination_slot,
         }
         return serialized

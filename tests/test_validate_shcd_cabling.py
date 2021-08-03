@@ -585,10 +585,36 @@ def test_validate_shcd_cabling_bad_file():
         )
 
 
+@responses.activate
 def test_validate_shcd_cabling_missing_tabs():
-    """Test that the `canu validate shcd cabling` command fails on missing tabs."""
+    """Test that the `canu validate shcd cabling` command prompts for missing tabs."""
     with runner.isolated_filesystem():
         generate_test_file(test_file)
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/login",
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname,system_mac",
+            json=switch_info1,
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system/interfaces/*/lldp_neighbors?depth=2",
+            json=lldp_neighbors_json1,
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system/vrfs/default/neighbors?depth=2",
+            json=arp_neighbors_json1,
+        )
+
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/logout",
+        )
+
         result = runner.invoke(
             cli,
             [
@@ -608,10 +634,13 @@ def test_validate_shcd_cabling_missing_tabs():
                 password,
                 "--shcd",
                 test_file,
+                "--corners",
+                corners,
             ],
+            input="25G_10G\n",
         )
-        assert result.exit_code == 2
-        assert "Error: Missing option '--tabs'." in str(result.output)
+        assert result.exit_code == 0
+        assert "sw-spine-001 connects to 4 nodes:" in str(result.output)
 
 
 @responses.activate
@@ -1192,7 +1221,6 @@ def test_validate_shcd_missing_connections():
                 corners,
             ],
         )
-        print(result.output)
         assert result.exit_code == 0
         assert (
             "Found in SHCD and on the network, but missing the following connections on the network"
@@ -1762,6 +1790,3 @@ def generate_test_file(file_name):
             ws3.cell(column=col + 9, row=row + 15, value=f"{test_data3[row][col]}")
 
     wb.save(filename=test_file)
-
-
-generate_test_file(test_file)

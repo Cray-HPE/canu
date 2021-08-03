@@ -201,14 +201,18 @@ def get_node_type_yaml(name, mapper):
 
     Returns:
         node_type: A string with the device type
+        rename: The name the node needs to be renamed
     """
     node_type = None
+    rename = None
     for node in mapper:
         for lookup_name in node[0]:
             if re.match("^{}".format(lookup_name.strip()), name):
                 node_type = node[2]
-                return node_type
-    return node_type
+                if lookup_name is not node[1]:
+                    rename = node[1]
+                return node_type, rename
+    return node_type, None
 
 
 def validate_cabling_slot_data(lldp_info, warnings):
@@ -316,16 +320,23 @@ def node_model_from_canu(factory, canu_cache, ips):
                     node_name = f"{start}{middle.rstrip('-')}-{int(digits) :03d}"
 
                 log.debug(f"Source Name Lookup: {node_name}")
-                node_type = get_node_type_yaml(str(src_name), factory.lookup_mapper())
+                node_type, rename = get_node_type_yaml(
+                    str(src_name), factory.lookup_mapper()
+                )
                 log.debug(f"Source Node Type Lookup: {node_type}")
 
                 # If the hostname is not the Shasta name, it needs to be renamed
-                if src_name != node_name:
-                    old_name = node_name
+                if src_name != node_name or rename is not None:
+                    renamed = node_name
+
+                    if rename is not None:
+                        digits = re.findall(r"(\d+)", node_name)[0]
+                        renamed = f"{rename}-{int(digits) :03d}"
+
                     # If type can't be determined, we do not know what to rename the switch
                     if node_type is None:
-                        old_name = ""
-                    warnings["rename"].append([src_name, old_name])
+                        renamed = ""
+                    warnings["rename"].append([src_name, renamed])
                     log.warning(f"Node {src_name} should be renamed to {node_name}")
                 # Create src_node if it does not exist
                 src_node = None
@@ -375,17 +386,26 @@ def node_model_from_canu(factory, canu_cache, ips):
                 log.debug(f"Destination Data: {dst_name} {dst_slot} {dst_port}")
                 dst_node_name = dst_name
                 log.debug(f"Destination Name Lookup:  {dst_node_name}")
-                node_type = get_node_type_yaml(dst_name, factory.lookup_mapper())
+                node_type, dst_rename = get_node_type_yaml(
+                    dst_name, factory.lookup_mapper()
+                )
                 log.debug(f"Destination Node Type Lookup:  {node_type}")
 
-                if dst_name != dst_lldp["neighbor"] and dst_name is not None:
-                    old_dst_name = dst_name
+                if (
+                    dst_name != dst_lldp["neighbor"] or dst_rename is not None
+                ) and dst_name is not None:
+                    dst_renamed = dst_name
+
+                    if dst_rename is not None:
+                        dst_digits = re.findall(r"(\d+)", dst_name)[0]
+                        dst_renamed = f"{dst_rename}-{int(dst_digits) :03d}"
+
                     # If type can't be determined, we do not know what to rename the switch
                     if node_type is None:
-                        old_dst_name = ""
-                    warnings["rename"].append([dst_lldp["neighbor"], old_dst_name])
+                        dst_renamed = ""
+                    warnings["rename"].append([dst_lldp["neighbor"], dst_renamed])
                     log.warning(
-                        f"Node {dst_lldp['neighbor']} should be renamed to {old_dst_name}"
+                        f"Node {dst_lldp['neighbor']} should be renamed {dst_renamed}"
                     )
                 # Create dst_node if it does not exist
                 dst_node = None

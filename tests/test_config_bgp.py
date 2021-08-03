@@ -1006,7 +1006,6 @@ def test_config_bgp_sls_address_bad():
             bad_sls_address,
         ],
     )
-    print(result.output)
     assert result.exit_code == 0
     assert (
         "Error connecting to SLS 192.168.254.254, check the address or pass in a new address using --sls-address."

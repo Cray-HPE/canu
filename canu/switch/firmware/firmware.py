@@ -10,6 +10,7 @@ import urllib3
 
 from canu.cache import cache_switch, firmware_cached_recently, get_switch_from_cache
 
+
 # To disable warnings about unsecured HTTPS requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -35,7 +36,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 )
 @click.pass_context
 def firmware(ctx, ip, username, password, json_, verbose, out):
-    r"""Report the firmware of an Aruba switch (API v10.04) on the network.
+    """Report the firmware of an Aruba switch (API v10.04) on the network.
 
     There are two different statuses that might be indicated.\n
     🛶 - Pass: Indicates that the switch passed the firmware verification.\n

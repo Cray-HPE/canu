@@ -60,7 +60,6 @@ log = logging.getLogger("validate_shcd")
 @click.option(
     "--tabs",
     help="The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.",
-    required=True,
 )
 @click.option(
     "--corners",
@@ -101,6 +100,18 @@ def shcd(ctx, architecture, shcd, tabs, corners, log_):
         architecture = "network_v2_tds"
 
     sheets = []
+
+    if not tabs:
+        wb = load_workbook(shcd, read_only=True)
+        click.secho("What tabs would you like to check in the SHCD?")
+        tab_options = wb.sheetnames
+        for x in tab_options:
+            click.secho(f"{x}", fg="green")
+
+        tabs = click.prompt(
+            "Please enter the tabs to check separated by a comma, e.g. 10G_25G_40G_100G,NMN,HMN.",
+            type=str,
+        )
 
     if corners:
         if len(tabs.split(",")) * 2 != len(corners.split(",")):
@@ -192,7 +203,9 @@ def get_node_common_name(name, mapper):
                     digits = re.findall(r"\d+", name)
                     tmp_id = int(digits[0]) * 2 + int(digits[1])
                 else:
-                    tmp_id = re.sub("^({})0*([1-9]*)".format(lookup_name), r"\2", name)
+                    tmp_id = re.sub(
+                        "^({})0*([1-9]*)".format(lookup_name), r"\2", name
+                    ).strip("-")
                 common_name = f"{tmp_name}{tmp_id:0>3}"
                 return common_name
     return common_name
@@ -402,7 +415,9 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 click.secho(f"Bad range of cells entered for tab {sheet}.", fg="red")
                 click.secho(f"{range_start}:{range_end}\n", fg="red")
                 click.secho(
-                    "Ensure that the upper left corner (Labeled 'Source'), and the lower right corner of the table is entered.",
+                    "Not enough columns selected. Expecting columns labeled:\n"
+                    + "Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port\n"
+                    + "Ensure that the upper left corner (Labeled 'Source'), and the lower right corner of the table is entered.",
                     fg="red",
                 )
                 sys.exit(1)
@@ -619,7 +634,7 @@ def node_list_warnings(node_list, warnings):
             has_mac = False
             for node in nodes:
                 # If the string has a mac address in it, set to True
-                if bool(re.search(r"(?:[0-9a-fA-F]:?){12}", node)):
+                if bool(re.search(r"(?:[0-9a-fA-F]:?){12}", str(node))):
                     has_mac = True
                 click.secho(node, fg="bright_white")
             if has_mac is True:
