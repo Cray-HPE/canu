@@ -1,10 +1,9 @@
 {#- worker #}
-***===> ncn-w.lag.j2
 {%- for node in cabling.nodes if node.subtype == "worker" %}
 
-interface lag ***===> {{ node.config.LAG_NUMBER }} multi-chassis
+interface lag {{ node.config.LAG_NUMBER }} multi-chassis
     no shutdown
-    description ***===> {{ node.config.DESCRIPTION }}
+    description {{ node.config.DESCRIPTION }}
     no routing
     vlan trunk native 1
     vlan trunk allowed 1-2,4,7
@@ -12,11 +11,10 @@ interface lag ***===> {{ node.config.LAG_NUMBER }} multi-chassis
     lacp fallback
     spanning-tree port-type admin-edge
 
-interface ***===> {{ node.config.PORT }}
+interface {{ node.config.PORT }}
     no shutdown
     mtu 9198
-    description ***===> {{ node.config.DESCRIPTION }}
-    lag ***===> {{ node.config.LAG_NUMBER }}
+    description {{ node.config.DESCRIPTION }}
+    lag {{ node.config.LAG_NUMBER }}
 {%- endfor %}
-***===> end ncn-w.lag.j2
 {#- end worker #}

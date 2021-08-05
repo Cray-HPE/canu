@@ -1,11 +1,10 @@
 {#- sw-leaf-bmc #}
-***===> sw-leaf-bmc.j2
 {%- include 'common/unknown.j2' %}
-hostname ***===> {{ variables.HOSTNAME }}
+hostname {{ variables.HOSTNAME }}
 no ip icmp redirect
-ntp server ***===> {{ variables.NCN_W001 }}
-ntp server ***===> {{ variables.NCN_W002 }}
-ntp server ***===> {{ variables.NCN_W003 }}
+ntp server {{ variables.NCN_W001 }}
+ntp server {{ variables.NCN_W002 }}
+ntp server {{ variables.NCN_W003 }}
 ntp enable
 
 
@@ -36,34 +35,33 @@ interface mgmt
 {% include 'common/bmc.j2' %}
 
 interface loopback 0
-    ip address ***===> {{ variables.LOOPBACK_IP }}
+    ip address {{ variables.LOOPBACK_IP }}
     ip ospf 1 area 0.0.0.0
 interface vlan 1
     ip mtu 9198
-    ip address ***===> {{ variables.MTL_IP }}
+    ip address {{ variables.MTL_IP }}
     ip helper-address 10.92.100.222
 interface vlan 2
     description NMN
     ip mtu 9198
-    ip address ***===> {{ variables.NMN_IP }}
+    ip address {{ variables.NMN_IP }}
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
 interface vlan 4
     description HMN
     ip mtu 9198
-    ip address ***===> {{ variables.HMN_IP }}
+    ip address {{ variables.HMN_IP }}
     ip helper-address 10.94.100.222
     ip ospf 1 area 0.0.0.0
 snmp-server vrf default
 snmpv3 user testuser auth md5 auth-pass plaintext testpass1 priv des priv-pass ciphertext testpass2
 
 router ospf 1
-    router-id ***===> {{ variables.LOOPBACK_IP }}
+    router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 router ospfv3 1
-    router-id ***===> {{ variables.LOOPBACK_IP }}
+    router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 https-server vrf default
 https-server vrf mgmt
-***===> end sw-leaf-bmc.j2
 {# end sw-leaf-bmc #}

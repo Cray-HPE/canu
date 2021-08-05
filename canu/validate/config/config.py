@@ -1,12 +1,10 @@
 """CANU commands that validate the shcd."""
-from collections import defaultdict, OrderedDict
 import difflib
 
 import click
 from click_help_colors import HelpColorsCommand
 import click_spinner
 from hier_config import HConfig, Host
-import natsort
 from netmiko import ConnectHandler
 import yaml
 
@@ -51,30 +49,9 @@ def config(ctx, ip, username, password, config_file):
         config_file: Config file
     """
     credentials = {"username": username, "password": password}
-    if config_file:
-        with open(config_file, "r") as f:
-            config_file_list = [line.strip("\n").replace("***===> ", "") for line in f]
 
     command = "show running-config"
     config = netmiko_command(ip, credentials, command)
-
-    (
-        switch_interfaces,
-        switch_headers,
-        switch_acl,
-        switch_vlan,
-        switch_vsx,
-    ) = parse_interface(config.splitlines())
-    switch_interfaces = sort_interfaces(switch_interfaces)
-
-    (
-        config_interfaces,
-        config_headers,
-        config_acl,
-        config_vlan,
-        config_vsx,
-    ) = parse_interface(config_file_list)
-    config_interfaces = sort_interfaces(config_interfaces)
 
     running_config_hier = HConfig(host=host)
     running_config_hier.load_from_string(config)
@@ -97,13 +74,13 @@ def config(ctx, ip, username, password, config_file):
     )
     click.echo(dash)
     differences = compare_config(
-        switch_headers + switch_acl + switch_vlan + switch_interfaces + switch_vsx,
-        config_headers + config_acl + config_vlan + config_interfaces + config_vsx,
+        running_config_hier,
+        generated_config_hier,
     )
 
     click.echo("\n")
     click.secho(
-        "Comands needed to get running config to match config file",
+        "Commands needed to get running config to match config file",
         fg="bright_white",
     )
     click.echo(dash)
@@ -163,10 +140,16 @@ def compare_config(config1, config2):
     Returns:
         List with thenumber of additions and deletions
     """
+    one = []
+    two = []
+    for line in config1.all_children():
+        one.append(line.cisco_style_text())
+    for line in config2.all_children():
+        two.append(line.cisco_style_text())
     d = difflib.Differ()
     additions = 0
     deletions = 0
-    for diff in d.compare(config1, config2):
+    for diff in d.compare(one, two):
         color = ""
         if diff.startswith("- "):
             color = "red"
@@ -179,110 +162,3 @@ def compare_config(config1, config2):
         click.secho(diff, fg=color)
 
     return [additions, deletions]
-
-
-def parse_interface(text):
-    """Parse switch config text.
-
-    Args:
-        text: (Str) Switch config
-
-    Returns:
-        interfaces: Parsed interfaces
-        headers: Parsed headers
-        acl: Parsed acl
-        vlan: Parsed vlan
-        vsx: Parsed vsx
-    """
-    interface = []
-    interface_name = None
-    interfaces = defaultdict()
-    headers = []
-    acl = []
-    acl_parse = False
-    vlan = []
-    vlan_parse = False
-    vsx = []
-    vsx_parse = False
-
-    for x in text:
-        if x.startswith("interface"):
-            if interface_name and len(interface) > 0:
-                interfaces[interface_name] = interface
-                interface = []
-                interface_name = None
-            interface.append(x)
-            interface_name = x
-
-        elif (
-            len(interface) > 0
-            and x.startswith("    ")
-            and not acl_parse
-            and not vsx_parse
-            and not vlan_parse
-        ):
-            interface.append(x)
-
-        elif x.startswith("access-list"):
-            acl.append(x)
-            acl_parse = True
-            vlan_parse = False
-            vsx_parse = False
-
-        elif len(acl) > 0 and x.startswith("    ") and acl_parse:
-            acl.append(x)
-
-        elif x.startswith("vlan"):
-            vlan.append(x)
-            vlan_parse = True
-            acl_parse = False
-            vsx_parse = False
-
-        elif len(vlan) > 0 and x.startswith("    ") and vlan_parse:
-            vlan.append(x)
-
-        elif x.startswith("vsx"):
-            vsx.append(x)
-            vsx_parse = True
-            acl_parse = False
-            vlan_parse = False
-
-        elif len(vsx) > 0 and x.startswith("    ") and vsx_parse:
-            vsx.append(x)
-
-        else:
-            if interface_name and len(interface) > 0:
-                interfaces[interface_name] = interface
-                interface = []
-                interface_name = None
-                if x != "" and x != "!":
-                    headers.append(x)
-
-            elif acl_parse:
-                acl_parse = False
-            elif vlan_parse:
-                vlan_parse = False
-            elif vsx_parse:
-                vsx_parse = False
-            else:
-                if x != "" and x != "!":
-                    headers.append(x)
-
-    return interfaces, headers, acl, vlan, vsx
-
-
-def sort_interfaces(interfaces):
-    """Sort the interfaces in the switch config.
-
-    Args:
-        interfaces: Dictionary containing the parsed interfaces from the switch config
-
-    Returns:
-        A sorted list of interfaces in the switch config
-    """
-    sorted_interfaces = OrderedDict(natsort.natsorted(interfaces.items()))
-
-    # Turn the sorted interface dict into a single list
-    sorted_list = [line for x in sorted_interfaces for line in sorted_interfaces[x]]
-
-    return sorted_list

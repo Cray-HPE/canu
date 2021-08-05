@@ -1,5 +1,4 @@
 {#- leaf-to-spine.lag #}
-***===> leaf-to-spine.lag.j2
 {%- set ns = namespace(lag1='') %}
 {%- for node in cabling.nodes if node.subtype == "spine" %}
 {#- Use the namespace to set the first of the two connections from the leaf to a single spine
@@ -8,7 +7,7 @@ Two Separate interfaces e.g. (1/1/53, 1/1/54) #}
 {%- if ns.lag1 == '' %}
 {%- set ns.lag1 = node.config.LAG_NUMBER %}
 
-interface lag ***===> {{ ns.lag1 }} multi-chassis
+interface lag {{ ns.lag1 }} multi-chassis
     no shutdown
     description leaf_to_spines_lag
     no routing
@@ -19,11 +18,10 @@ interface lag ***===> {{ ns.lag1 }} multi-chassis
 {%- endfor %}
 {%- for node in cabling.nodes if node.subtype == "spine"%}
 
-interface ***===> {{ node.config.PORT }}
+interface {{ node.config.PORT }}
     no shutdown
     mtu 9198
-    description ***===> {{ node.config.DESCRIPTION }}
-    lag ***===> {{ ns.lag1 }}
+    description {{ node.config.DESCRIPTION }}
+    lag {{ ns.lag1 }}
 {%- endfor %}
-***===> end leaf-to-spine.lag.j2
 {#- end leaf-to-spine.lag #}

@@ -1,14 +1,13 @@
 {#- sw-spine.secondary #}
-***===> sw-spine.secondary.j2
 {%- include 'common/unknown.j2' %}
-hostname ***===> {{ variables.HOSTNAME }}
+hostname {{ variables.HOSTNAME }}
 bfd
 no ip icmp redirect
 vrf CAN
 vrf keepalive
-ntp server ***===> {{ variables.NCN_W001 }}
-ntp server ***===> {{ variables.NCN_W002 }}
-ntp server ***===> {{ variables.NCN_W003 }}
+ntp server {{ variables.NCN_W001 }}
+ntp server {{ variables.NCN_W002 }}
+ntp server {{ variables.NCN_W003 }}
 ntp enable
 
 
@@ -47,48 +46,48 @@ interface lag 256
     vlan trunk native 1 tag
     vlan trunk allowed all
     lacp mode active
-interface ***===> {{ variables.VSX_KEEPALIVE }}
+interface {{ variables.VSX_KEEPALIVE }}
     no shutdown
     vrf attach keepalive
     ip address 192.168.255.1/31
-interface ***===> {{ variables.VSX_ISL_PORT1 }}
+interface {{ variables.VSX_ISL_PORT1 }}
     no shutdown
     mtu 9198
     description vsx isl
     lag 256
-interface ***===> {{ variables.VSX_ISL_PORT2 }}
+interface {{ variables.VSX_ISL_PORT2 }}
     no shutdown
     mtu 9198
     description vsx isl
     lag 256
 interface loopback 0
-    ip address ***===> {{ variables.LOOPBACK_IP }}
+    ip address {{ variables.LOOPBACK_IP }}
     ip ospf 1 area 0.0.0.0
 interface vlan 1
     ip mtu 9198
-    ip address ***===> {{ variables.MTL_IP }}
+    ip address {{ variables.MTL_IP }}
     active-gateway ip mac 12:00:00:00:6b:00
-    active-gateway ip ***===> {{ variables.MTL_IP_GATEWAY }}
+    active-gateway ip {{ variables.MTL_IP_GATEWAY }}
     ip helper-address 10.92.100.222
 interface vlan 2
     ip mtu 9198
-    ip address ***===> {{ variables.NMN_IP }}
+    ip address {{ variables.NMN_IP }}
     active-gateway ip mac 12:00:00:00:6b:00
-    active-gateway ip ***===> {{ variables.NMN_IP_GATEWAY }}
+    active-gateway ip {{ variables.NMN_IP_GATEWAY }}
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
 interface vlan 4
     ip mtu 9198
-    ip address ***===> {{ variables.HMN_IP }}
+    ip address {{ variables.HMN_IP }}
     active-gateway ip mac 12:00:00:00:6b:00
-    active-gateway ip ***===> {{ variables.HMN_IP_GATEWAY }}
+    active-gateway ip {{ variables.HMN_IP_GATEWAY }}
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
 interface vlan 7
     ip mtu 9198
-    ip address ***===> {{ variables.CAN_IP_SECONDARY }}
+    ip address {{ variables.CAN_IP_SECONDARY }}
     active-gateway ip mac 12:00:00:00:6b:00
-    active-gateway ip ***===> {{ variables.CAN_IP_GATEWAY }}
+    active-gateway ip {{ variables.CAN_IP_GATEWAY }}
     ip helper-address 10.92.100.222
 vsx
     system-mac 02:00:00:00:6b:00
@@ -98,13 +97,12 @@ vsx
     linkup-delay-timer 600
     vsx-sync vsx-global
 router ospf 1
-    router-id ***===> {{ variables.LOOPBACK_IP }}
+    router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 router ospfv3 1
-    router-id ***===> {{ variables.LOOPBACK_IP }}
+    router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 https-server vrf default
 https-server vrf mgmt
 https-server vrf CAN
-***===> end sw-spine.secondary.j2
 {# end sw-spine.secondary #}
