@@ -11,6 +11,11 @@ def netmiko_mock(*args):
     return switch_config
 
 
+def netmiko_mock_addition(*args):
+    """Mock netmiko command."""
+    return switch_config + "extra line"
+
+
 username = "admin"
 password = "admin"
 ip = "192.168.1.1"
@@ -53,6 +58,43 @@ def test_validate_config(*args):
             "------------------------------------------------------------\n"
             "Total Deletions (-): 0\n"
             "Total Additions (+): 0\n"
+        ) in str(result.output)
+
+
+@patch("canu.validate.config.config.netmiko_command", side_effect=netmiko_mock_addition)
+def test_validate_config_additions(*args):
+    """Test that the `canu validate config` command runs and sees an addition."""
+    switch_config2 = switch_config[:-4] + "ABC"
+    with runner.isolated_filesystem():
+        with open("switch.cfg", "w") as f:
+            f.writelines(switch_config2)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--shasta",
+                shasta,
+                "--cache",
+                cache_minutes,
+                "validate",
+                "config",
+                "--ip",
+                ip,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--config",
+                config_file,
+            ],
+        )
+        print(result.output)
+        assert result.exit_code == 0
+        assert (
+            "Differences\n"
+            "------------------------------------------------------------\n"
+            "Total Deletions (-): 1\n"
+            "Total Additions (+): 2\n"
         ) in str(result.output)
 
 
