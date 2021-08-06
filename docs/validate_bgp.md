@@ -11,10 +11,10 @@ If you want to see the individual status of all the neighbors of a switch, use t
 
 ### 1. Validate BGP
 
-To validate BGP run: `canu -s 1.4 validate bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
+To validate BGP run: `canu validate bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
 ```bash
-$ canu -s 1.4 validate bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
+$ canu validate bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
 
 BGP Neighbors Established
 --------------------------------------------------
@@ -25,10 +25,10 @@ PASS - IP: 192.168.1.2 Hostname: sw-spine02
 
 ### 2. Validate BGP Verbose
 
-To get verbose BGP neighbor details: `canu -s 1.4 validate bgp --ips 192.168.1.1,192.168.1.3,192.168.1.2 --username USERNAME --password PASSWORD --verbose`
+To get verbose BGP neighbor details: `canu validate bgp --ips 192.168.1.1,192.168.1.3,192.168.1.2 --username USERNAME --password PASSWORD --verbose`
 
 ```bash
-$ canu --shasta 1.4 validate bgp --ips 192.168.1.1,192.168.1.3,192.168.1.2 --username USERNAME --password PASSWORD --verbose
+$ canu validate bgp --ips 192.168.1.1,192.168.1.3,192.168.1.2 --username USERNAME --password PASSWORD --verbose
 
 --------------------------------------------------
 sw-spine01

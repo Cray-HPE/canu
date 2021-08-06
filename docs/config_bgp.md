@@ -23,10 +23,10 @@ The sls_input_file.json file is generally stored in one of two places depending 
 
 ### 1. Config BGP from SLS API
 
-To configure BGP run: `canu -s 1.4 config bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --auth_token token_file.token`
+To configure BGP run: `canu config bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --auth_token token_file.token`
 
 ```bash
-$ canu -s 1.4 config bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --auth_token token_file.token
+$ canu config bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --auth_token token_file.token
 
 BGP Updated
 --------------------------------------------------
@@ -37,10 +37,10 @@ BGP Updated
 
 ### 2. Config BGP from CSI
 
-To config BGP from CSI: `canu -s 1.4 config bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --csi-folder /path/to/csi/folder`
+To config BGP from CSI: `canu config bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --csi-folder /path/to/csi/folder`
 
 ```bash
-$ canu -s 1.4 config bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --csi-folder /path/to/csi/folder
+$ canu config bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --csi-folder /path/to/csi/folder
 
 BGP Updated
 --------------------------------------------------
@@ -50,10 +50,10 @@ BGP Updated
 
 ### 3. Config BGP Verbose
 
-To print extra details (prefixes, NCN names, IPs), add the `--verbose` flag: `canu -s 1.4 config bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --verbose`
+To print extra details (prefixes, NCN names, IPs), add the `--verbose` flag: `canu config bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --verbose`
 
 ```bash
-$ canu -s 1.4 config bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --verbose
+$ canu config bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --verbose
 
 BGP Updated
 --------------------------------------------------

@@ -46,6 +46,7 @@ architecture_spec_file = os.path.join(
 )
 
 canu_cache_file = os.path.join(project_root, "canu", "canu_cache.yaml")
+canu_config_file = os.path.join(project_root, "canu", "canu.yaml")
 
 # Import templates
 network_templates_folder = os.path.join(
@@ -57,11 +58,26 @@ env = Environment(
     undefined=StrictUndefined,
 )
 
+# Get Shasta versions from canu.yaml
+with open(canu_config_file, "r") as file:
+    canu_config = yaml.load(file)
+
+shasta_options = canu_config["shasta_versions"]
+
 
 @click.command(
     cls=HelpColorsCommand,
     help_headers_color="yellow",
     help_options_color="blue",
+)
+@click.option(
+    "--shasta",
+    "-s",
+    type=click.Choice(shasta_options),
+    help="Shasta network version",
+    prompt="Shasta network version",
+    required=True,
+    show_choices=True,
 )
 @click.option(
     "--architecture",
@@ -105,6 +121,7 @@ env = Environment(
 @click.pass_context
 def config(
     ctx,
+    shasta,
     architecture,
     shcd,
     tabs,
@@ -128,6 +145,7 @@ def config(
 
     Args:
         ctx: CANU context settings
+        shasta: Shasta version
         architecture: Shasta architecture
         shcd: SHCD file
         tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
@@ -289,8 +307,7 @@ def config(
     sls_variables = parse_sls_for_config(sls_json)
 
     # For versions of Shasta < 1.6, the SLS Hostnames need to be renamed
-    if ctx.obj["shasta"]:
-        shasta = ctx.obj["shasta"]
+    if shasta:
         if float(shasta) < 1.6:
             sls_variables = rename_sls_hostnames(sls_variables)
 

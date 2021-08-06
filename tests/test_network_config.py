@@ -34,12 +34,12 @@ def test_network_config():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -75,12 +75,12 @@ def test_network_config_folder_prompt():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -113,12 +113,12 @@ def test_network_config_csi_file_missing():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -147,12 +147,12 @@ def test_network_config_missing_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--tabs",
@@ -177,12 +177,12 @@ def test_network_config_bad_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -213,12 +213,12 @@ def test_network_config_missing_tabs():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -252,12 +252,12 @@ def test_network_config_bad_tab():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -285,12 +285,12 @@ def test_network_config_corner_prompt():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -323,12 +323,12 @@ def test_network_config_not_enough_corners():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -362,12 +362,12 @@ def test_network_config_sls():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -411,12 +411,12 @@ def test_network_config_sls_token_bad():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -446,12 +446,12 @@ def test_network_config_sls_token_missing():
     result = runner.invoke(
         cli,
         [
-            "--shasta",
-            shasta,
             "--cache",
             cache_minutes,
             "network",
             "config",
+            "--shasta",
+            shasta,
             "--architecture",
             architecture,
             "--shcd",
@@ -488,12 +488,12 @@ def test_network_config_sls_address_bad():
     result = runner.invoke(
         cli,
         [
-            "--shasta",
-            shasta,
             "--cache",
             cache_minutes,
             "network",
             "config",
+            "--shasta",
+            shasta,
             "--architecture",
             architecture,
             "--shcd",

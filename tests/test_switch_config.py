@@ -33,12 +33,12 @@ def test_switch_config_spine_primary():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -251,12 +251,12 @@ def test_switch_config_spine_secondary():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -469,12 +469,12 @@ def test_switch_config_leaf_primary():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -779,12 +779,12 @@ def test_switch_config_leaf_primary_to_uan():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -1059,12 +1059,12 @@ def test_switch_config_leaf_secondary():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -1359,12 +1359,12 @@ def test_switch_config_leaf_secondary_to_uan():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -1636,12 +1636,12 @@ def test_switch_config_cdu_primary():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -1879,12 +1879,12 @@ def test_switch_config_cdu_secondary():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -2110,12 +2110,12 @@ def test_switch_config_leaf_bmc():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -2321,12 +2321,12 @@ def test_switch_config_csi_file_missing():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -2355,12 +2355,12 @@ def test_switch_config_missing_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--tabs",
@@ -2385,12 +2385,12 @@ def test_switch_config_bad_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -2421,12 +2421,12 @@ def test_switch_config_missing_tabs():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -2456,12 +2456,12 @@ def test_switch_config_bad_tab():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -2489,12 +2489,12 @@ def test_switch_config_switch_name_prompt():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -2528,12 +2528,12 @@ def test_switch_config_corner_prompt():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -2565,12 +2565,12 @@ def test_switch_config_not_enough_corners():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -2601,12 +2601,12 @@ def test_switch_config_bad_switch_name_1():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -2638,12 +2638,12 @@ def test_switch_config_bad_switch_name_2():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -2675,12 +2675,12 @@ def test_switch_config_non_switch():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -2715,12 +2715,12 @@ def test_switch_config_sls():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -2763,12 +2763,12 @@ def test_switch_config_sls_token_bad():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "config",
+                "--shasta",
+                shasta,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -2798,12 +2798,12 @@ def test_switch_config_sls_token_missing():
     result = runner.invoke(
         cli,
         [
-            "--shasta",
-            shasta,
             "--cache",
             cache_minutes,
             "switch",
             "config",
+            "--shasta",
+            shasta,
             "--architecture",
             architecture,
             "--shcd",
@@ -2840,12 +2840,12 @@ def test_switch_config_sls_address_bad():
     result = runner.invoke(
         cli,
         [
-            "--shasta",
-            shasta,
             "--cache",
             cache_minutes,
             "switch",
             "config",
+            "--shasta",
+            shasta,
             "--architecture",
             architecture,
             "--shcd",

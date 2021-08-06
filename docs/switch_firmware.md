@@ -2,6 +2,8 @@
 
 Report the firmware of an Aruba switch (API v10.04) on the network.
 
+The Shasta version is required to determine the firmware to validate against, you can pass it in with either `-s` or `--shasta` like `-s 1.4`.
+
 There are two different statuses that might be indicated.
 
 - 🛶 - Pass: Indicates that the switch passed the firmware verification.
@@ -11,19 +13,21 @@ There are two different statuses that might be indicated.
 
 ### 1. Firmware
 
-To check the firmware of a single switch run: `canu --shasta 1.4 switch firmware --ip 192.168.1.1 --username USERNAME --password PASSWORD`
+To check the firmware of a single switch run: `canu switch firmware --shasta 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD`
 
 ```bash
-$ canu --shasta 1.4 switch firmware --ip 192.168.1.1 --username USERNAME --password PASSWORD
+$ canu switch firmware --shasta 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD
+
 🛶 - Pass - IP: 192.168.1.1 Hostname: test-switch-spine01 Firmware: GL.10.06.0001
 ```
 
 ### 2. Firmware Verbose
 
-To get verbose firmware details of a single switch: `canu --shasta 1.4 switch firmware --ip 192.168.1.1 --username USERNAME --password PASSWORD --verbose`
+To get verbose firmware details of a single switch: `canu switch firmware --shasta 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD --verbose`
 
 ```bash
-$ canu --shasta 1.4 switch firmware --ip 192.168.1.1 --username USERNAME --password PASSWORD --verbose
+$ canu switch firmware --shasta 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD --verbose
+
 🛶 - Pass - IP: 192.168.1.1 Hostname: test-switch-spine01
 Current Version: GL.10.06.0010
 Primary Version: GL.10.06.0010
@@ -34,10 +38,10 @@ Booted Image: primary
 
 ### 3. Firmware JSON
 
-To get firmware details of a single switch with JSON output: `canu --shasta 1.4 switch firmware --ip 192.168.1.1 --username USERNAME --password PASSWORD --json`
+To get firmware details of a single switch with JSON output: `canu switch firmware -s 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD --json`
 
 ```bash
-$ canu --shasta 1.4 switch firmware --ip 192.168.1.1 --username USERNAME --password PASSWORD --json
+$ canu switch firmware - 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD --json
 {
   "ip_address": "192.168.1.1",
   "status": "Pass",
@@ -48,10 +52,10 @@ $ canu --shasta 1.4 switch firmware --ip 192.168.1.1 --username USERNAME --passw
 
 ### 4. Firmware JSON Verbose
 
-To get firmware details of a single switch with JSON output: `canu --shasta 1.4 switch firmware --ip 192.168.1.1 --username USERNAME --password PASSWORD --json --verbose`
+To get firmware details of a single switch with JSON output: `canu switch firmware -s 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD --json --verbose`
 
 ```bash
-$ canu --shasta 1.4 switch firmware --ip 192.168.1.1 --username USERNAME --password PASSWORD --json --verbose
+$ canu switch firmware -s 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD --json --verbose
 {
   "ip_address": "192.168.1.1",
   "status": "Pass",
