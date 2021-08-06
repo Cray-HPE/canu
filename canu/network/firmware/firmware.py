@@ -3,6 +3,9 @@ from collections import defaultdict
 import datetime
 import ipaddress
 import json
+import os.path
+from pathlib import Path
+import sys
 
 import click
 from click_help_colors import HelpColorsCommand
@@ -11,16 +14,44 @@ from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
 import emoji
 import requests
+import ruamel.yaml
 
 
 from canu.cache import cache_switch
 from canu.switch.firmware.firmware import get_firmware
+
+yaml = ruamel.yaml.YAML()
+
+
+# Get project root directory
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
+    project_root = sys._MEIPASS
+else:
+    prog = __file__
+    project_root = Path(__file__).resolve().parent.parent.parent.parent
+
+canu_config_file = os.path.join(project_root, "canu", "canu.yaml")
+
+# Get Shasta versions from canu.yaml
+with open(canu_config_file, "r") as file:
+    canu_config = yaml.load(file)
+
+shasta_options = canu_config["shasta_versions"]
 
 
 @click.command(
     cls=HelpColorsCommand,
     help_headers_color="yellow",
     help_options_color="blue",
+)
+@click.option(
+    "--shasta",
+    "-s",
+    type=click.Choice(shasta_options),
+    help="Shasta network version",
+    prompt="Shasta network version",
+    required=True,
+    show_choices=True,
 )
 @optgroup.group(
     "Switch IPv4 input sources",
@@ -50,7 +81,7 @@ from canu.switch.firmware.firmware import get_firmware
 )
 # @click.option("--verbose", "-v", is_flag=True, help="Verbose mode")
 @click.pass_context
-def firmware(ctx, ips, ips_file, username, password, json_, out):
+def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
     """Report the firmware versions of all Aruba switches (API v10.04) on the network.
 
     Pass in either a comma separated list of IP addresses using the --ips option
@@ -72,6 +103,7 @@ def firmware(ctx, ips, ips_file, username, password, json_, out):
 
     Args:
         ctx: CANU context settings
+        shasta: Shasta version
         ips: Comma separated list of IPv4 addresses of switches
         ips_file: File with one IPv4 address per line
         username: Switch username
@@ -82,10 +114,8 @@ def firmware(ctx, ips, ips_file, username, password, json_, out):
     Returns:
         json_formatted: If JSON is selected, returns output
     """
-    if ctx.obj["shasta"]:
-        shasta = ctx.obj["shasta"]
-        config = ctx.obj["config"]
-        cache_minutes = ctx.obj["cache_minutes"]
+    config = ctx.obj["config"]
+    cache_minutes = ctx.obj["cache_minutes"]
 
     if ips_file:
         ips = []

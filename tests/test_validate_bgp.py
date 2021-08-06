@@ -7,7 +7,6 @@ from canu.cli import cli
 
 
 architecture = "tds"
-shasta = "1.4"
 username = "admin"
 password = "admin"
 ip = "192.168.1.1"
@@ -43,8 +42,6 @@ def test_validate_bgp():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -90,8 +87,6 @@ def test_validate_bgp_full_architecture():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -139,8 +134,6 @@ def test_validate_bgp_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -185,8 +178,6 @@ def test_validate_bgp_verbose():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -213,8 +204,6 @@ def test_validate_bgp_missing_ips():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -240,8 +229,6 @@ def test_validate_bgp_mutually_exclusive_ips_and_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -273,8 +260,6 @@ def test_validate_bgp_invalid_ip():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -304,8 +289,6 @@ def test_validate_bgp_invalid_ip_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -341,8 +324,6 @@ def test_validate_bgp_bad_ip():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -384,8 +365,6 @@ def test_validate_bgp_bad_ip_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -422,8 +401,6 @@ def test_validate_bgp_bad_password():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -471,8 +448,6 @@ def test_validate_bgp_fail():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -517,8 +492,6 @@ def test_validate_bgp_fail_verbose():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -565,8 +538,6 @@ def test_validate_bgp_not_spine():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -611,8 +582,6 @@ def test_validate_bgp_error_not_spine():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -661,8 +630,6 @@ def test_validate_bgp_error_not_agg():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",

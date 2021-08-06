@@ -20,7 +20,6 @@ username = "admin"
 password = "admin"
 ip = "192.168.1.1"
 credentials = {"username": username, "password": password}
-shasta = "1.4"
 cache_minutes = 0
 config_file = "switch.cfg"
 runner = click.testing.CliRunner()
@@ -36,8 +35,6 @@ def test_validate_config(*args):
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -72,8 +69,6 @@ def test_validate_config_additions(*args):
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -88,7 +83,6 @@ def test_validate_config_additions(*args):
                 config_file,
             ],
         )
-        print(result.output)
         assert result.exit_code == 0
         assert (
             "Differences\n"

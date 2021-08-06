@@ -17,7 +17,6 @@ credentials = {"username": username, "password": password}
 test_file = "test_file.xlsx"
 tabs = "25G_10G"
 corners = "I14,S30"
-shasta = "1.4"
 cache_minutes = 0
 runner = click.testing.CliRunner()
 
@@ -55,8 +54,6 @@ def test_validate_shcd_cabling():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -128,8 +125,6 @@ def test_validate_shcd_cabling_full_architecture():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -203,8 +198,6 @@ def test_validate_shcd_cabling_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -246,8 +239,6 @@ def test_validate_shcd_cabling_missing_ips():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -280,8 +271,6 @@ def test_validate_shcd_cabling_mutually_exclusive_ips_and_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -320,8 +309,6 @@ def test_validate_shcd_cabling_invalid_ip():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -361,8 +348,6 @@ def test_validate_shcd_cabling_invalid_ip_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -404,8 +389,6 @@ def test_validate_shcd_cabling_bad_ip():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -450,8 +433,6 @@ def test_validate_shcd_cabling_bad_ip_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -491,8 +472,6 @@ def test_validate_shcd_cabling_bad_password():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -524,8 +503,6 @@ def test_validate_shcd_cabling_missing_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -556,8 +533,6 @@ def test_validate_shcd_cabling_bad_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -618,8 +593,6 @@ def test_validate_shcd_cabling_missing_tabs():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -652,8 +625,6 @@ def test_validate_shcd_cabling_bad_tab():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -710,8 +681,6 @@ def test_validate_shcd_cabling_corner_prompt():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -778,8 +747,6 @@ def test_validate_shcd_cabling_corners_too_narrow():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -840,8 +807,6 @@ def test_validate_shcd_cabling_corners_too_high():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -901,8 +866,6 @@ def test_validate_shcd_cabling_corners_bad_cell():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -960,8 +923,6 @@ def test_validate_shcd_cabling_not_enough_corners():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -1021,8 +982,6 @@ def test_validate_shcd_cabling_bad_headers():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -1080,8 +1039,6 @@ def test_validate_shcd_cabling_bad_architectural_definition():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -1140,8 +1097,6 @@ def test_validate_shcd_cabling_rename():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",
@@ -1199,8 +1154,6 @@ def test_validate_shcd_missing_connections():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "validate",

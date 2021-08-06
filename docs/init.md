@@ -16,7 +16,7 @@ The output file for the `canu init` command is set with the `--out FILENAME` fla
 To get the switch IP addresses from CSI output, run the command:
 
 ```bash
-$ canu -s 1.4 init --csi-folder /CSI/OUTPUT/FOLDER/ADDRESS --out output.txt
+$ canu init --csi-folder /CSI/OUTPUT/FOLDER/ADDRESS --out output.txt
 8 IP addresses saved to output.txt
 ```
 
@@ -25,7 +25,7 @@ $ canu -s 1.4 init --csi-folder /CSI/OUTPUT/FOLDER/ADDRESS --out output.txt
 To get the switch IP addresses from the Shasta SLS API, run the command:
 
 ```bash
-$ canu -s 1.4 init --auth-token ~./config/cray/tokens/ --sls-address 1.2.3.4 --out output.txt
+$ canu init --auth-token ~./config/cray/tokens/ --sls-address 1.2.3.4 --out output.txt
 8 IP addresses saved to output.txt
 ```
 
