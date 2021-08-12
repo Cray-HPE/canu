@@ -161,8 +161,10 @@ def config(
         template_folder = "full"
     elif architecture.lower() == "tds":
         architecture = "network_v2_tds"
+        template_folder = "tds"
     elif architecture.lower() == "v1":
         architecture = "network_v1"
+        template_folder = "full"
 
     # SHCD Parsing
     sheets = []
