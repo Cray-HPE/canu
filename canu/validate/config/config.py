@@ -1,5 +1,9 @@
 """CANU commands that validate the shcd."""
+from collections import defaultdict
 import difflib
+import os
+from pathlib import Path
+import sys
 
 import click
 from click_help_colors import HelpColorsCommand
@@ -9,7 +13,15 @@ from netmiko import ConnectHandler
 import yaml
 
 
-options = yaml.safe_load(open("./canu/validate/config/options.yaml"))
+# Get project root directory
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
+    project_root = sys._MEIPASS
+else:
+    prog = __file__
+    project_root = Path(__file__).resolve().parent.parent.parent.parent
+
+options_file = os.path.join(project_root, "canu", "validate", "config", "options.yaml")
+options = yaml.safe_load(open(options_file))
 host = Host("example.rtr", "aoscx", options)
 
 
@@ -65,7 +77,7 @@ def config(ctx, ip, username, password, config_file):
         generated_config_hier
     )
 
-    dash = "-" * 60
+    dash = "-" * 49
 
     click.echo("\n")
     click.secho(
@@ -87,16 +99,121 @@ def config(ctx, ip, username, password, config_file):
     for line in remediation_config_hier.all_children():
         click.echo(line.cisco_style_text())
 
+    print_config_diff_summary(differences)
+
+    return
+
+
+def print_config_diff_summary(differences):
+    """Print a summary of the config differences.
+
+    Args:
+        differences: Dict containing config differences.
+    """
+    dash = "-" * 49
     click.echo("\n")
     click.secho(
         "Differences",
         fg="bright_white",
     )
     click.echo(dash)
-    click.secho(f"Total Deletions (-): {differences[0]}", fg="red")
-    click.secho(f"Total Additions (+): {differences[1]}", fg="green")
 
-    return
+    print_difference_line(
+        "Additions (+)",
+        "",
+        "Deletions (-)",
+        "",
+    )
+    click.echo(dash)
+
+    print_difference_line(
+        "Total Additions:",
+        differences["additions"],
+        "Total Deletions: ",
+        differences["deletions"],
+    )
+    print_difference_line(
+        "Interface:",
+        differences["interface_additions"],
+        "Interface: ",
+        differences["interface_deletions"],
+    )
+    print_difference_line(
+        "Interface Lag:",
+        differences["interface_lag_additions"],
+        "Interface Lag: ",
+        differences["interface_lag_deletions"],
+    )
+    print_difference_line(
+        "Spanning Tree:",
+        differences["spanning_tree_additions"],
+        "Spanning Tree: ",
+        differences["spanning_tree_deletions"],
+    )
+    print_difference_line(
+        "Script:",
+        differences["script_additions"],
+        "Script: ",
+        differences["script_deletions"],
+    )
+    print_difference_line(
+        "Router:",
+        differences["router_additions"],
+        "Router: ",
+        differences["router_deletions"],
+    )
+    print_difference_line(
+        "System Mac:",
+        differences["system_mac_additions"],
+        "System Mac: ",
+        differences["system_mac_deletions"],
+    )
+    print_difference_line(
+        "Inter Switch Link:",
+        differences["isl_additions"],
+        "Inter Switch Link: ",
+        differences["isl_deletions"],
+    )
+    print_difference_line(
+        "Role:",
+        differences["role_additions"],
+        "Role: ",
+        differences["role_deletions"],
+    )
+    print_difference_line(
+        "Keepalive:",
+        differences["keepalive_additions"],
+        "Keepalive: ",
+        differences["keepalive_deletions"],
+    )
+
+
+def print_difference_line(additions, additions_int, deletions, deletions_int):
+    """Print the additions and deletions in red and green text. Doesn't print if zero.
+
+    Args:
+        additions: (str) Text of the additions
+        additions_int: (int) Number of additions
+        deletions: (str) Text of the deletions
+        deletions_int: (int) Number of deletions
+    """
+    if additions_int == 0 and deletions_int == 0:
+        return
+    if additions_int == 0:
+        additions = " "
+        additions_int = " "
+    if deletions_int == 0:
+        deletions = " "
+        deletions_int = " "
+    additions = click.style(str(additions), fg="green")
+    additions_int = click.style(str(additions_int), fg="green")
+    deletions = click.style(str(deletions), fg="red")
+    deletions_int = click.style(str(deletions_int), fg="red")
+    click.echo(
+        "{:<28s}{:>12s}  |  {:<28s}{:>12s}".format(
+            additions, additions_int, deletions, deletions_int
+        )
+    )
 
 
 def netmiko_command(ip, credentials, command):
@@ -138,27 +255,67 @@ def compare_config(config1, config2):
         config2: (Str) Switch 2 config
 
     Returns:
-        List with thenumber of additions and deletions
+        List with the number of additions and deletions
     """
     one = []
     two = []
-    for line in config1.all_children():
+
+    config1.set_order_weight()
+    config2.set_order_weight()
+
+    for line in config1.all_children_sorted():
         one.append(line.cisco_style_text())
-    for line in config2.all_children():
+    for line in config2.all_children_sorted():
         two.append(line.cisco_style_text())
     d = difflib.Differ()
-    additions = 0
-    deletions = 0
+    differences = defaultdict(int)
     for diff in d.compare(one, two):
         color = ""
         if diff.startswith("- "):
             color = "red"
-            deletions += 1
+            differences["deletions"] += 1
         elif diff.startswith("+ "):
             color = "green"
-            additions += 1
+            differences["additions"] += 1
         elif diff.startswith("? "):
             color = "blue"
+
+        if diff.startswith("+ interface 1/1/"):
+            differences["interface_additions"] += 1
+        if diff.startswith("- interface 1/1/"):
+            differences["interface_deletions"] += 1
+        if diff.startswith("+ interface lag"):
+            differences["interface_lag_additions"] += 1
+        if diff.startswith("- interface lag"):
+            differences["interface_lag_deletions"] += 1
+        if diff.startswith("+ spanning-tree"):
+            differences["spanning_tree_additions"] += 1
+        if diff.startswith("- spanning-tree"):
+            differences["spanning_tree_deletions"] += 1
+        if diff.startswith("+ nae-script"):
+            differences["script_additions"] += 1
+        if diff.startswith("- nae-script"):
+            differences["script_deletions"] += 1
+        if diff.startswith("+ router"):
+            differences["router_additions"] += 1
+        if diff.startswith("- router"):
+            differences["router_deletions"] += 1
+        if diff.startswith("+   system-mac"):
+            differences["system_mac_additions"] += 1
+        if diff.startswith("-   system-mac"):
+            differences["system_mac_deletions"] += 1
+        if diff.startswith("+   inter-switch-link"):
+            differences["isl_additions"] += 1
+        if diff.startswith("-   inter-switch-link"):
+            differences["isl_deletions"] += 1
+        if diff.startswith("+   role"):
+            differences["role_additions"] += 1
+        if diff.startswith("-   role"):
+            differences["role_deletions"] += 1
+        if diff.startswith("+   keepalive"):
+            differences["keepalive_additions"] += 1
+        if diff.startswith("-   keepalive"):
+            differences["keepalive_deletions"] += 1
         click.secho(diff, fg=color)
 
-    return [additions, deletions]
+    return differences
