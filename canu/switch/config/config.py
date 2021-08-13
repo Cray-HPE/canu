@@ -421,7 +421,7 @@ def generate_switch_config(
     variables["NMN_IP"] = sls_variables["NMN_IPs"][switch_name]
 
     last_octet = variables["HMN_IP"].split(".")[3]
-    variables["LOOPBACK_IP"] = "10.2.0." + last_octet + "/32"
+    variables["LOOPBACK_IP"] = "10.2.0." + last_octet
     variables["IPV6_IP"] = "2001:db8:beef:99::" + last_octet + "/128"
 
     if node_shasta_name in ["sw-spine", "sw-leaf", "sw-cdu"]:
