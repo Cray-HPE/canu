@@ -47,13 +47,14 @@ def test_validate_config(*args):
         )
         assert result.exit_code == 0
         assert (
+            "Switch: sw-spine-001 (192.168.1.1)\n"
             "Differences\n"
-            "-------------------------------------------------\n"
-            "Additions (+)           |  Deletions (-)         \n"
-            "-------------------------------------------------\n"
-            "Total Additions:     1  |  Total Deletions:     1\n"
-            "                        |  Script:              1\n"
-            "Router:              1  |                        \n"
+            "-------------------------------------------------------------------------\n"
+            "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
+            "-------------------------------------------------------------------------\n"
+            "Total Additions:                 1  |  Total Deletions:                 1\n"
+            "                                    |  Script:                          1\n"
+            "Router:                          1  |                                    \n"
         ) in str(result.output)
 
 
@@ -83,20 +84,21 @@ def test_validate_config_additions(*args):
         )
         assert result.exit_code == 0
         assert (
+            "Switch: sw-spine-001 (192.168.1.1)\n"
             "Differences\n"
-            "-------------------------------------------------\n"
-            "Additions (+)           |  Deletions (-)         \n"
-            "-------------------------------------------------\n"
-            "Total Additions:    12  |  Total Deletions:    12\n"
-            "Interface:           1  |  Interface:           1\n"
-            "Interface Lag:       1  |  Interface Lag:       1\n"
-            "Spanning Tree:       1  |  Spanning Tree:       1\n"
-            "Script:              1  |  Script:              1\n"
-            "Router:              1  |  Router:              1\n"
-            "System Mac:          1  |  System Mac:          1\n"
-            "Inter Switch Link:   1  |  Inter Switch Link:   1\n"
-            "Role:                1  |  Role:                1\n"
-            "Keepalive:           1  |  Keepalive:           1\n"
+            "-------------------------------------------------------------------------\n"
+            "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
+            "-------------------------------------------------------------------------\n"
+            "Total Additions:                12  |  Total Deletions:                12\n"
+            "Interface:                       1  |  Interface:                       1\n"
+            "Interface Lag:                   1  |  Interface Lag:                   1\n"
+            "Spanning Tree:                   1  |  Spanning Tree:                   1\n"
+            "Script:                          1  |  Script:                          1\n"
+            "Router:                          1  |  Router:                          1\n"
+            "System Mac:                      1  |  System Mac:                      1\n"
+            "Inter Switch Link:               1  |  Inter Switch Link:               1\n"
+            "Role:                            1  |  Role:                            1\n"
+            "Keepalive:                       1  |  Keepalive:                       1\n"
         ) in str(result.output)
 
 

@@ -1,4 +1,4 @@
-"""CANU commands that validate the shcd."""
+"""CANU commands that validate a config file."""
 from collections import defaultdict
 import difflib
 import os
@@ -63,7 +63,16 @@ def config(ctx, ip, username, password, config_file):
     credentials = {"username": username, "password": password}
 
     command = "show running-config"
-    config = netmiko_command(ip, credentials, command)
+    with click_spinner.spinner():
+        print(
+            f"  Connecting to {ip}...",
+            end="\r",
+        )
+        config = netmiko_command(ip, credentials, command)
+        hostname = netmiko_command(ip, credentials, "sh run | i host")
+    print("                                                             ", end="\r")
+
+    hostname = hostname.split()[1]
 
     running_config_hier = HConfig(host=host)
     running_config_hier.load_from_string(config)
@@ -77,7 +86,7 @@ def config(ctx, ip, username, password, config_file):
         generated_config_hier
     )
 
-    dash = "-" * 49
+    dash = "-" * 73
 
     click.echo("\n")
     click.secho(
@@ -99,19 +108,25 @@ def config(ctx, ip, username, password, config_file):
     for line in remediation_config_hier.all_children():
         click.echo(line.cisco_style_text())
 
-    print_config_diff_summary(differences)
+    print_config_diff_summary(hostname, ip, differences)
 
     return
 
 
-def print_config_diff_summary(differences):
+def print_config_diff_summary(hostname, ip, differences):
     """Print a summary of the config differences.
 
     Args:
+        hostname: Switch hostname
+        ip: Switch ip
         differences: Dict containing config differences.
     """
-    dash = "-" * 49
+    dash = "-" * 73
     click.echo("\n")
+    click.secho(
+        f"Switch: {hostname} ({ip})",
+        fg="bright_white",
+    )
     click.secho(
         "Differences",
         fg="bright_white",
@@ -119,9 +134,9 @@ def print_config_diff_summary(differences):
     click.echo(dash)
 
     print_difference_line(
-        "Additions (+)",
+        "In Generated Not In Running (+)",
         "",
-        "Deletions (-)",
+        "In Running Not In Generated (-)",
         "",
     )
     click.echo(dash)
@@ -200,17 +215,17 @@ def print_difference_line(additions, additions_int, deletions, deletions_int):
     if additions_int == 0 and deletions_int == 0:
         return
     if additions_int == 0:
-        additions = " "
-        additions_int = " "
+        additions = ""
+        additions_int = ""
     if deletions_int == 0:
-        deletions = " "
-        deletions_int = " "
+        deletions = ""
+        deletions_int = ""
     additions = click.style(str(additions), fg="green")
     additions_int = click.style(str(additions_int), fg="green")
     deletions = click.style(str(deletions), fg="red")
     deletions_int = click.style(str(deletions_int), fg="red")
     click.echo(
-        "{:<28s}{:>12s}  |  {:<28s}{:>12s}".format(
+        "{:<40s}{:>12s}  |  {:<40s}{:>12s}".format(
             additions, additions_int, deletions, deletions_int
         )
     )
@@ -227,32 +242,27 @@ def netmiko_command(ip, credentials, command):
     Returns:
         output: Text output from the command run.
     """
-    with click_spinner.spinner():
+    aruba1 = {
+        "device_type": "aruba_os",
+        "host": ip,
+        "username": credentials["username"],
+        "password": credentials["password"],
+    }
 
-        aruba1 = {
-            "device_type": "aruba_os",
-            "host": ip,
-            "username": credentials["username"],
-            "password": credentials["password"],
-        }
-
-        print(
-            f"  Connecting to {ip}...",
-            end="\r",
-        )
-        with ConnectHandler(**aruba1) as net_connect:
-            output = net_connect.send_command(command)
-            net_connect.disconnect()
+    with ConnectHandler(**aruba1) as net_connect:
+        output = net_connect.send_command(command)
+        net_connect.disconnect()
 
     return output
 
 
-def compare_config(config1, config2):
+def compare_config(config1, config2, print=True):
     """Compare and print two switch configurations.
 
     Args:
         config1: (Str) Switch 1 config
         config2: (Str) Switch 2 config
+        print: Print the comparison to the screen (defaults True)
 
     Returns:
         List with the number of additions and deletions
@@ -316,6 +326,9 @@ def compare_config(config1, config2):
             differences["keepalive_additions"] += 1
         if diff.startswith("-   keepalive"):
             differences["keepalive_deletions"] += 1
-        click.secho(diff, fg=color)
+
+        # Print the difference
+        if print:
+            click.secho(diff, fg=color)
 
     return differences
