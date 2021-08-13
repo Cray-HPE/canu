@@ -148,6 +148,12 @@ def print_config_diff_summary(hostname, ip, differences):
         differences["deletions"],
     )
     print_difference_line(
+        "Hostname:",
+        differences["hostname_additions"],
+        "Hostname: ",
+        differences["hostname_deletions"],
+    )
+    print_difference_line(
         "Interface:",
         differences["interface_additions"],
         "Interface: ",
@@ -290,6 +296,10 @@ def compare_config(config1, config2, print=True):
         elif diff.startswith("? "):
             color = "blue"
 
+        if diff.startswith("+ hostname"):
+            differences["hostname_additions"] += 1
+        if diff.startswith("- hostname"):
+            differences["hostname_deletions"] += 1
         if diff.startswith("+ interface 1/1/"):
             differences["interface_additions"] += 1
         if diff.startswith("- interface 1/1/"):
