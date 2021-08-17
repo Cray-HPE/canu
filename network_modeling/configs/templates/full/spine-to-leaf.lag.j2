@@ -1,9 +1,8 @@
 {#- spine-to-leaf.lag #}
-***===> sw-spine-to-leaf.lag.j2
 {%- for node in cabling.nodes if node.subtype == "leaf" %}
 {%- if node.primary == true %}
 
-interface lag ***===> {{ node.config.LAG_NUMBER }} multi-chassis
+interface lag {{ node.config.LAG_NUMBER }} multi-chassis
     no shutdown
     description spine_to_leaf_lag
     no routing
@@ -13,12 +12,11 @@ interface lag ***===> {{ node.config.LAG_NUMBER }} multi-chassis
     spanning-tree root-guard
 {%- endif %}
 
-interface ***===> {{ node.config.PORT }}
+interface {{ node.config.PORT }}
     no shutdown
     mtu 9198
-    description ***===> {{ node.config.DESCRIPTION }}
-    lag ***===> {{ node.config.LAG_NUMBER }}
+    description {{ node.config.DESCRIPTION }}
+    lag {{ node.config.LAG_NUMBER }}
 
 {%- endfor %}
-***===> end sw-spine-to-leaf.lag.j2
 {#- end spine-to-leaf.lag #}

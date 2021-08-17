@@ -1,13 +1,12 @@
 {#- sw-cdu.secondary #}
-***===> sw-cdu.secondary.j2
 {%- include 'common/unknown.j2' %}
-hostname ***===> {{ variables.HOSTNAME }}
+hostname {{ variables.HOSTNAME }}
 bfd
 no ip icmp redirect
 vrf keepalive
-ntp server ***===> {{ variables.NCN_W001 }}
-ntp server ***===> {{ variables.NCN_W002 }}
-ntp server ***===> {{ variables.NCN_W003 }}
+ntp server {{ variables.NCN_W001 }}
+ntp server {{ variables.NCN_W002 }}
+ntp server {{ variables.NCN_W003 }}
 ntp enable
 
 
@@ -34,27 +33,27 @@ interface lag 256
     vlan trunk allowed all
     lacp mode active
 
-interface ***===> {{ variables.VSX_KEEPALIVE }}
+interface {{ variables.VSX_KEEPALIVE }}
     no shutdown
     mtu 9198
     vrf attach keepalive
     description vsx keepalive
     ip address 192.168.255.1/31
 
-interface ***===> {{ variables.VSX_ISL_PORT1 }}
+interface {{ variables.VSX_ISL_PORT1 }}
     no shutdown
     mtu 9198
     description vsx isl
     lag 256
 
-interface ***===> {{ variables.VSX_ISL_PORT2 }}
+interface {{ variables.VSX_ISL_PORT2 }}
     no shutdown
     mtu 9198
     description vsx isl
     lag 256
 
 interface loopback 0
-    ip address ***===> {{ variables.LOOPBACK_IP }}
+    ip address {{ variables.LOOPBACK_IP }}
     ip ospf 1 area 0.0.0.0
 interface vlan 1
     shutdown
@@ -71,12 +70,11 @@ vsx
     vsx-sync vsx-global
 
 router ospf 1
-    router-id ***===> {{ variables.LOOPBACK_IP }}
+    router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 router ospfv3 1
-    router-id ***===> {{ variables.LOOPBACK_IP }}
+    router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 https-server vrf default
 https-server vrf mgmt
-***===> end sw-cdu.secondary.j2
 {# end sw-cdu.secondary #}

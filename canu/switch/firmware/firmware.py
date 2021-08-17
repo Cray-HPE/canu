@@ -1,14 +1,36 @@
 """CANU commands that report the firmware of an individual switch."""
 import datetime
 import json
+import os.path
+from pathlib import Path
+import sys
 
 import click
 from click_help_colors import HelpColorsCommand
 import emoji
 import requests
+import ruamel.yaml
 import urllib3
 
 from canu.cache import cache_switch, firmware_cached_recently, get_switch_from_cache
+
+yaml = ruamel.yaml.YAML()
+
+
+# Get project root directory
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
+    project_root = sys._MEIPASS
+else:
+    prog = __file__
+    project_root = Path(__file__).resolve().parent.parent.parent.parent
+
+canu_config_file = os.path.join(project_root, "canu", "canu.yaml")
+
+# Get Shasta versions from canu.yaml
+with open(canu_config_file, "r") as file:
+    canu_config = yaml.load(file)
+
+shasta_options = canu_config["shasta_versions"]
 
 
 # To disable warnings about unsecured HTTPS requests
@@ -19,6 +41,15 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     cls=HelpColorsCommand,
     help_headers_color="yellow",
     help_options_color="blue",
+)
+@click.option(
+    "--shasta",
+    "-s",
+    type=click.Choice(shasta_options),
+    help="Shasta network version",
+    prompt="Shasta network version",
+    required=True,
+    show_choices=True,
 )
 @click.option("--ip", required=True, help="The IP address of the switch")
 @click.option("--username", default="admin", show_default=True, help="Switch username")
@@ -35,7 +66,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     "--out", help="Output results to a file", type=click.File("w"), default="-"
 )
 @click.pass_context
-def firmware(ctx, ip, username, password, json_, verbose, out):
+def firmware(ctx, shasta, ip, username, password, json_, verbose, out):
     """Report the firmware of an Aruba switch (API v10.04) on the network.
 
     There are two different statuses that might be indicated.\n
@@ -47,6 +78,7 @@ def firmware(ctx, ip, username, password, json_, verbose, out):
 
     Args:
         ctx: CANU context settings
+        shasta: Shasta version
         ip: Switch IPv4 address
         username: Switch username
         password: Switch password
@@ -54,10 +86,8 @@ def firmware(ctx, ip, username, password, json_, verbose, out):
         verbose: Bool indicating verbose output
         out: Name of the output file
     """
-    if ctx.obj["shasta"]:
-        shasta = ctx.obj["shasta"]
-        config = ctx.obj["config"]
-        cache_minutes = ctx.obj["cache_minutes"]
+    config = ctx.obj["config"]
+    cache_minutes = ctx.obj["cache_minutes"]
 
     credentials = {"username": username, "password": password}
     switch_firmware, switch_info = get_firmware(

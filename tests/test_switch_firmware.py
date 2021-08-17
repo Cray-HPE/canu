@@ -25,8 +25,6 @@ def test_switch_cli():
     result = runner.invoke(
         cli,
         [
-            "--shasta",
-            shasta,
             "switch",
         ],
     )
@@ -140,12 +138,12 @@ def test_switch_firmware():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--ip",
                 ip,
                 "--username",
@@ -190,12 +188,12 @@ def test_switch_firmware_verbose():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--ip",
                 ip,
                 "--username",
@@ -216,12 +214,12 @@ def test_switch_firmware_missing_ip():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--username",
                 username,
                 "--password",
@@ -240,12 +238,12 @@ def test_switch_firmware_invalid_ip():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--ip",
                 invalid_ip,
                 "--username",
@@ -276,12 +274,12 @@ def test_switch_firmware_bad_ip():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--ip",
                 bad_ip,
                 "--username",
@@ -310,12 +308,12 @@ def test_switch_firmware_bad_password():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--ip",
                 ip,
                 "--username",
@@ -361,12 +359,12 @@ def test_switch_firmware_json():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--ip",
                 ip,
                 "--username",
@@ -412,12 +410,12 @@ def test_switch_firmware_json_verbose():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--ip",
                 ip,
                 "--username",
@@ -467,12 +465,12 @@ def test_switch_firmware_mismatch():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--ip",
                 ip,
                 "--username",
@@ -520,12 +518,12 @@ def test_switch_firmware_mismatch_verbose():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--ip",
                 ip,
                 "--username",

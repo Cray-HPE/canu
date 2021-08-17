@@ -31,10 +31,10 @@ Ports are highlighted in **green** when the port name is set with the interface 
 
 ### 1. Network Cabling `--view switch` (default view)
 
-To check the cabling of multiple switches run: `canu --shasta 1.4 network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`. Or to load IP addresses from a file run: `canu --shasta 1.4 network cabling --ips-file ip_file.txt --username USERNAME --password PASSWORD`
+To check the cabling of multiple switches run: `canu network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`. Or to load IP addresses from a file run: `canu network cabling --ips-file ip_file.txt --username USERNAME --password PASSWORD`
 
 ```bash
-$ canu --shasta 1.4 network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
+$ canu network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
 
 Switch: sw-test01 (192.168.1.1)
 Aruba X86-64
@@ -57,10 +57,10 @@ PORT        NEIGHBOR       NEIGHBOR PORT      PORT DESCRIPTION                  
 
 ### 2. Network Cabling `--view equipment`
 
-An example of checking the cabling of multiple switches and displaying with the equipment view: `canu --shasta 1.4 network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --view equipment`
+An example of checking the cabling of multiple switches and displaying with the equipment view: `canu network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --view equipment`
 
 ```bash
-$ canu --shasta 1.4 network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --view equipment
+$ canu network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --view equipment
 
 sw-test01 Test switch description
 aa:aa:aa:aa:aa:aa

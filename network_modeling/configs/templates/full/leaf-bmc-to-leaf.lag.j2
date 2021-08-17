@@ -1,12 +1,11 @@
 {#- leaf-bmc-to-leaf #}
-***===> leaf-bmc-to-leaf.lag.j2
 {%- set ns = namespace(lag_displayed=false) %}
 {%- for node in cabling.nodes if node.subtype == "leaf" %}
 {%- if ns.lag_displayed == false %}
 {%- set ns.lag_displayed = true %}
-interface lag ***===> 255
+interface lag 255
     no shutdown
-    description ***===> leaf_bmc_to_leaf_lag
+    description leaf_bmc_to_leaf_lag
     no routing
     vlan trunk native 1
     vlan trunk allowed 2,4
@@ -16,11 +15,10 @@ interface lag ***===> 255
 
 {%- for node in cabling.nodes if node.subtype == "leaf"%}
 
-interface ***===> {{ node.config.PORT }}
+interface {{ node.config.PORT }}
     no shutdown
     mtu 9198
-    description ***===> {{ node.config.DESCRIPTION }}
-    lag ***===> 255
+    description {{ node.config.DESCRIPTION }}
+    lag 255
 {%- endfor %}
-***===> end leaf-bmc-to-leaf.lag.j2
 {#- end leaf-bmc-to-leaf #}

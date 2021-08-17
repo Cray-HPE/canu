@@ -15,12 +15,71 @@ sectional_overwrite_no_negate: []
 #   order: 600
 ordering:
   - lineage:
-      - startswith: no vlan filter
+      - startswith: hostname
+    order: 1
+  - lineage:
+      - startswith: bfd
+    order: 2
+  - lineage:
+      - startswith: user
+    order: 3
+  - lineage:
+      - startswith: vrf
+    order: 5
+  - lineage:
+      - startswith: ssh
+    order: 10
+  - lineage:
+      - startswith: ntp
+    order: 15
+  - lineage:
+      - startswith: access-list
+    order: 30
+  - lineage:
+      - startswith: vlan
+    order: 50
+  - lineage:
+      - startswith: spanning-tree
+    order: 100
+  - lineage:
+      - startswith: interface mgmt
+    order: 120
+  - lineage:
+      - startswith: interface lag
+    order: 150
+  - lineage:
+      - startswith: interface 1/1
+    order: 400
+  - lineage:
+      - startswith: interface loopback
+    order: 600
+  - lineage:
+      - startswith: interface vlan
     order: 700
   - lineage:
-      - startswith: interface
-      - startswith: no shutdown
-    order: 700
+      - startswith: snmp-server
+    order: 780
+  - lineage:
+      - startswith: snmpv3
+    order: 790
+  - lineage:
+      - startswith: vsx
+    order: 800
+  - lineage:
+      - startswith: ip
+    order: 820
+  - lineage:
+      - startswith: router
+    order: 850
+  - lineage:
+      - startswith: https-server
+    order: 900
+  - lineage:
+      - startswith: nae-script
+    order: 950
+  - lineage:
+      - startswith: nae-agent
+    order: 960
 # adds +1 indent to lines following start_expression and removes the +1 indent for lines following end_expression
 indent_adjust: []
 parent_allows_duplicate_child: []

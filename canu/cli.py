@@ -39,7 +39,6 @@ with open(canu_config_file, "r") as file:
 
 CONTEXT_SETTING = dict(
     obj={
-        "shasta": "",
         "config": canu_config,
     }
 )
@@ -52,13 +51,6 @@ CONTEXT_SETTING = dict(
     help_options_color="blue",
 )
 @click.option(
-    "--shasta",
-    "-s",
-    type=click.Choice(["1.4", "1.5"]),
-    help="Shasta network version",
-    required=True,
-)
-@click.option(
     "--cache",
     "cache_minutes",
     default=10,
@@ -67,11 +59,10 @@ CONTEXT_SETTING = dict(
 )
 @click.version_option(version)
 @click.pass_context
-def cli(ctx, shasta, cache_minutes):
+def cli(ctx, cache_minutes):
     """CANU (CSM Automatic Network Utility) floats through a new Shasta network and makes setup a breeze."""
     ctx.ensure_object(dict)
 
-    ctx.obj["shasta"] = shasta
     ctx.obj["cache_minutes"] = cache_minutes
 
 
