@@ -9,10 +9,10 @@ CANU can be used to validate that network cabling passes basic validation checks
 
 ### Validate Cabling
 
-To validate the cabling run: `canu -s 1.4 validate cabling -a tds --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
+To validate the cabling run: `canu validate cabling -a tds --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
 ```bash
-$ canu -s 1.4 validate cabling -a tds --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
+$ canu validate cabling -a tds --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
 
 Cabling Node Connections
 ------------------------------------------------------------

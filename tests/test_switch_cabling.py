@@ -14,7 +14,6 @@ username = "admin"
 password = "admin"
 ip = "192.168.1.1"
 credentials = {"username": username, "password": password}
-shasta = "1.4"
 cache_minutes = 0
 runner = click.testing.CliRunner()
 
@@ -24,8 +23,6 @@ def test_switch_cli():
     result = runner.invoke(
         cli,
         [
-            "--shasta",
-            shasta,
             "switch",
         ],
     )
@@ -152,8 +149,6 @@ def test_switch_cabling():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
@@ -176,8 +171,6 @@ def test_switch_cabling_missing_ip():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
@@ -200,8 +193,6 @@ def test_switch_cabling_invalid_ip():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
@@ -235,8 +226,6 @@ def test_switch_cabling_bad_ip():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
@@ -268,8 +257,6 @@ def test_switch_cabling_bad_password():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",

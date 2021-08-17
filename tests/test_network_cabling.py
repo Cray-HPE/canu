@@ -12,7 +12,6 @@ password = "admin"
 ip = "192.168.1.1"
 ips = "192.168.1.1"
 credentials = {"username": username, "password": password}
-shasta = "1.4"
 cache_minutes = 0
 runner = click.testing.CliRunner()
 
@@ -49,8 +48,6 @@ def test_network_cabling():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
@@ -102,8 +99,6 @@ def test_network_cabling_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
@@ -184,8 +179,6 @@ def test_network_cabling_file_bidirectional():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
@@ -234,8 +227,6 @@ def test_network_cabling_equipment_view():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
@@ -319,8 +310,6 @@ def test_network_cabling_file_equipment_view_bidirectional():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
@@ -347,8 +336,6 @@ def test_network_cabling_missing_ips():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
@@ -372,8 +359,6 @@ def test_network_cabling_mutually_exclusive_ips_and_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
@@ -403,8 +388,6 @@ def test_network_cabling_invalid_ip():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
@@ -435,8 +418,6 @@ def test_network_cabling_invalid_ip_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
@@ -470,8 +451,6 @@ def test_network_cabling_bad_ip():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
@@ -508,8 +487,6 @@ def test_network_cabling_bad_ip_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
@@ -541,8 +518,6 @@ def test_network_cabling_bad_password():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",

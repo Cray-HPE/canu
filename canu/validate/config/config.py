@@ -1,17 +1,27 @@
-"""CANU commands that validate the shcd."""
-from collections import defaultdict, OrderedDict
+"""CANU commands that validate a config file."""
+from collections import defaultdict
 import difflib
+import os
+from pathlib import Path
+import sys
 
 import click
 from click_help_colors import HelpColorsCommand
 import click_spinner
 from hier_config import HConfig, Host
-import natsort
 from netmiko import ConnectHandler
 import yaml
 
 
-options = yaml.safe_load(open("./canu/validate/config/options.yaml"))
+# Get project root directory
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
+    project_root = sys._MEIPASS
+else:
+    prog = __file__
+    project_root = Path(__file__).resolve().parent.parent.parent.parent
+
+options_file = os.path.join(project_root, "canu", "validate", "config", "options.yaml")
+options = yaml.safe_load(open(options_file))
 host = Host("example.rtr", "aoscx", options)
 
 
@@ -51,30 +61,18 @@ def config(ctx, ip, username, password, config_file):
         config_file: Config file
     """
     credentials = {"username": username, "password": password}
-    if config_file:
-        with open(config_file, "r") as f:
-            config_file_list = [line.strip("\n").replace("***===> ", "") for line in f]
 
     command = "show running-config"
-    config = netmiko_command(ip, credentials, command)
+    with click_spinner.spinner():
+        print(
+            f"  Connecting to {ip}...",
+            end="\r",
+        )
+        config = netmiko_command(ip, credentials, command)
+        hostname = netmiko_command(ip, credentials, "sh run | i host")
+    print("                                                             ", end="\r")
 
-    (
-        switch_interfaces,
-        switch_headers,
-        switch_acl,
-        switch_vlan,
-        switch_vsx,
-    ) = parse_interface(config.splitlines())
-    switch_interfaces = sort_interfaces(switch_interfaces)
-
-    (
-        config_interfaces,
-        config_headers,
-        config_acl,
-        config_vlan,
-        config_vsx,
-    ) = parse_interface(config_file_list)
-    config_interfaces = sort_interfaces(config_interfaces)
+    hostname = hostname.split()[1]
 
     running_config_hier = HConfig(host=host)
     running_config_hier.load_from_string(config)
@@ -88,7 +86,7 @@ def config(ctx, ip, username, password, config_file):
         generated_config_hier
     )
 
-    dash = "-" * 60
+    dash = "-" * 73
 
     click.echo("\n")
     click.secho(
@@ -97,29 +95,146 @@ def config(ctx, ip, username, password, config_file):
     )
     click.echo(dash)
     differences = compare_config(
-        switch_headers + switch_acl + switch_vlan + switch_interfaces + switch_vsx,
-        config_headers + config_acl + config_vlan + config_interfaces + config_vsx,
+        running_config_hier,
+        generated_config_hier,
     )
 
     click.echo("\n")
     click.secho(
-        "Comands needed to get running config to match config file",
+        "Commands needed to get running config to match config file",
         fg="bright_white",
     )
     click.echo(dash)
     for line in remediation_config_hier.all_children():
         click.echo(line.cisco_style_text())
 
+    print_config_diff_summary(hostname, ip, differences)
+
+    return
+
+
+def print_config_diff_summary(hostname, ip, differences):
+    """Print a summary of the config differences.
+
+    Args:
+        hostname: Switch hostname
+        ip: Switch ip
+        differences: Dict containing config differences.
+    """
+    dash = "-" * 73
     click.echo("\n")
+    click.secho(
+        f"Switch: {hostname} ({ip})",
+        fg="bright_white",
+    )
     click.secho(
         "Differences",
         fg="bright_white",
     )
     click.echo(dash)
-    click.secho(f"Total Deletions (-): {differences[0]}", fg="red")
-    click.secho(f"Total Additions (+): {differences[1]}", fg="green")
 
-    return
+    print_difference_line(
+        "In Generated Not In Running (+)",
+        "",
+        "In Running Not In Generated (-)",
+        "",
+    )
+    click.echo(dash)
+
+    print_difference_line(
+        "Total Additions:",
+        differences["additions"],
+        "Total Deletions: ",
+        differences["deletions"],
+    )
+    print_difference_line(
+        "Hostname:",
+        differences["hostname_additions"],
+        "Hostname: ",
+        differences["hostname_deletions"],
+    )
+    print_difference_line(
+        "Interface:",
+        differences["interface_additions"],
+        "Interface: ",
+        differences["interface_deletions"],
+    )
+    print_difference_line(
+        "Interface Lag:",
+        differences["interface_lag_additions"],
+        "Interface Lag: ",
+        differences["interface_lag_deletions"],
+    )
+    print_difference_line(
+        "Spanning Tree:",
+        differences["spanning_tree_additions"],
+        "Spanning Tree: ",
+        differences["spanning_tree_deletions"],
+    )
+    print_difference_line(
+        "Script:",
+        differences["script_additions"],
+        "Script: ",
+        differences["script_deletions"],
+    )
+    print_difference_line(
+        "Router:",
+        differences["router_additions"],
+        "Router: ",
+        differences["router_deletions"],
+    )
+    print_difference_line(
+        "System Mac:",
+        differences["system_mac_additions"],
+        "System Mac: ",
+        differences["system_mac_deletions"],
+    )
+    print_difference_line(
+        "Inter Switch Link:",
+        differences["isl_additions"],
+        "Inter Switch Link: ",
+        differences["isl_deletions"],
+    )
+    print_difference_line(
+        "Role:",
+        differences["role_additions"],
+        "Role: ",
+        differences["role_deletions"],
+    )
+    print_difference_line(
+        "Keepalive:",
+        differences["keepalive_additions"],
+        "Keepalive: ",
+        differences["keepalive_deletions"],
+    )
+
+
+def print_difference_line(additions, additions_int, deletions, deletions_int):
+    """Print the additions and deletions in red and green text. Doesn't print if zero.
+
+    Args:
+        additions: (str) Text of the additions
+        additions_int: (int) Number of additions
+        deletions: (str) Text of the deletions
+        deletions_int: (int) Number of deletions
+    """
+    if additions_int == 0 and deletions_int == 0:
+        return
+    if additions_int == 0:
+        additions = ""
+        additions_int = ""
+    if deletions_int == 0:
+        deletions = ""
+        deletions_int = ""
+    additions = click.style(str(additions), fg="green")
+    additions_int = click.style(str(additions_int), fg="green")
+    deletions = click.style(str(deletions), fg="red")
+    deletions_int = click.style(str(deletions_int), fg="red")
+    click.echo(
+        "{:<40s}{:>12s}  |  {:<40s}{:>12s}".format(
+            additions, additions_int, deletions, deletions_int
+        )
+    )
 
 
 def netmiko_command(ip, credentials, command):
@@ -133,156 +248,97 @@ def netmiko_command(ip, credentials, command):
     Returns:
         output: Text output from the command run.
     """
-    with click_spinner.spinner():
+    aruba1 = {
+        "device_type": "aruba_os",
+        "host": ip,
+        "username": credentials["username"],
+        "password": credentials["password"],
+    }
 
-        aruba1 = {
-            "device_type": "aruba_os",
-            "host": ip,
-            "username": credentials["username"],
-            "password": credentials["password"],
-        }
-
-        print(
-            f"  Connecting to {ip}...",
-            end="\r",
-        )
-        with ConnectHandler(**aruba1) as net_connect:
-            output = net_connect.send_command(command)
-            net_connect.disconnect()
+    with ConnectHandler(**aruba1) as net_connect:
+        output = net_connect.send_command(command)
+        net_connect.disconnect()
 
     return output
 
 
-def compare_config(config1, config2):
+def compare_config(config1, config2, print=True):
     """Compare and print two switch configurations.
 
     Args:
         config1: (Str) Switch 1 config
         config2: (Str) Switch 2 config
+        print: Print the comparison to the screen (defaults True)
 
     Returns:
-        List with thenumber of additions and deletions
+        List with the number of additions and deletions
     """
+    one = []
+    two = []
+
+    config1.set_order_weight()
+    config2.set_order_weight()
+
+    for line in config1.all_children_sorted():
+        one.append(line.cisco_style_text())
+    for line in config2.all_children_sorted():
+        two.append(line.cisco_style_text())
     d = difflib.Differ()
-    additions = 0
-    deletions = 0
-    for diff in d.compare(config1, config2):
+    differences = defaultdict(int)
+    for diff in d.compare(one, two):
         color = ""
         if diff.startswith("- "):
             color = "red"
-            deletions += 1
+            differences["deletions"] += 1
         elif diff.startswith("+ "):
             color = "green"
-            additions += 1
+            differences["additions"] += 1
         elif diff.startswith("? "):
             color = "blue"
-        click.secho(diff, fg=color)
 
-    return [additions, deletions]
+        if diff.startswith("+ hostname"):
+            differences["hostname_additions"] += 1
+        if diff.startswith("- hostname"):
+            differences["hostname_deletions"] += 1
+        if diff.startswith("+ interface 1/1/"):
+            differences["interface_additions"] += 1
+        if diff.startswith("- interface 1/1/"):
+            differences["interface_deletions"] += 1
+        if diff.startswith("+ interface lag"):
+            differences["interface_lag_additions"] += 1
+        if diff.startswith("- interface lag"):
+            differences["interface_lag_deletions"] += 1
+        if diff.startswith("+ spanning-tree"):
+            differences["spanning_tree_additions"] += 1
+        if diff.startswith("- spanning-tree"):
+            differences["spanning_tree_deletions"] += 1
+        if diff.startswith("+ nae-script"):
+            differences["script_additions"] += 1
+        if diff.startswith("- nae-script"):
+            differences["script_deletions"] += 1
+        if diff.startswith("+ router"):
+            differences["router_additions"] += 1
+        if diff.startswith("- router"):
+            differences["router_deletions"] += 1
+        if diff.startswith("+   system-mac"):
+            differences["system_mac_additions"] += 1
+        if diff.startswith("-   system-mac"):
+            differences["system_mac_deletions"] += 1
+        if diff.startswith("+   inter-switch-link"):
+            differences["isl_additions"] += 1
+        if diff.startswith("-   inter-switch-link"):
+            differences["isl_deletions"] += 1
+        if diff.startswith("+   role"):
+            differences["role_additions"] += 1
+        if diff.startswith("-   role"):
+            differences["role_deletions"] += 1
+        if diff.startswith("+   keepalive"):
+            differences["keepalive_additions"] += 1
+        if diff.startswith("-   keepalive"):
+            differences["keepalive_deletions"] += 1
 
+        # Print the difference
+        if print:
+            click.secho(diff, fg=color)
 
-def parse_interface(text):
-    """Parse switch config text.
-
-    Args:
-        text: (Str) Switch config
-
-    Returns:
-        interfaces: Parsed interfaces
-        headers: Parsed headers
-        acl: Parsed acl
-        vlan: Parsed vlan
-        vsx: Parsed vsx
-    """
-    interface = []
-    interface_name = None
-    interfaces = defaultdict()
-    headers = []
-    acl = []
-    acl_parse = False
-    vlan = []
-    vlan_parse = False
-    vsx = []
-    vsx_parse = False
-
-    for x in text:
-        if x.startswith("interface"):
-            if interface_name and len(interface) > 0:
-                interfaces[interface_name] = interface
-                interface = []
-                interface_name = None
-            interface.append(x)
-            interface_name = x
-
-        elif (
-            len(interface) > 0
-            and x.startswith("    ")
-            and not acl_parse
-            and not vsx_parse
-            and not vlan_parse
-        ):
-            interface.append(x)
-
-        elif x.startswith("access-list"):
-            acl.append(x)
-            acl_parse = True
-            vlan_parse = False
-            vsx_parse = False
-
-        elif len(acl) > 0 and x.startswith("    ") and acl_parse:
-            acl.append(x)
-
-        elif x.startswith("vlan"):
-            vlan.append(x)
-            vlan_parse = True
-            acl_parse = False
-            vsx_parse = False
-
-        elif len(vlan) > 0 and x.startswith("    ") and vlan_parse:
-            vlan.append(x)
-
-        elif x.startswith("vsx"):
-            vsx.append(x)
-            vsx_parse = True
-            acl_parse = False
-            vlan_parse = False
-
-        elif len(vsx) > 0 and x.startswith("    ") and vsx_parse:
-            vsx.append(x)
-
-        else:
-            if interface_name and len(interface) > 0:
-                interfaces[interface_name] = interface
-                interface = []
-                interface_name = None
-                if x != "" and x != "!":
-                    headers.append(x)
-
-            elif acl_parse:
-                acl_parse = False
-            elif vlan_parse:
-                vlan_parse = False
-            elif vsx_parse:
-                vsx_parse = False
-            else:
-                if x != "" and x != "!":
-                    headers.append(x)
-
-    return interfaces, headers, acl, vlan, vsx
-
-
-def sort_interfaces(interfaces):
-    """Sort the interfaces in the switch config.
-
-    Args:
-        interfaces: Dictionary containing the parsed interfaces from the switch config
-
-    Returns:
-        A sorted list of interfaces in the switch config
-    """
-    sorted_interfaces = OrderedDict(natsort.natsorted(interfaces.items()))
-
-    # Turn the sorted interface dict into a single list
-    sorted_list = [line for x in sorted_interfaces for line in sorted_interfaces[x]]
-
-    return sorted_list
+    return differences

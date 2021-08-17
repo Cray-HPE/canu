@@ -21,8 +21,6 @@ def test_network_cli():
     result = runner.invoke(
         cli,
         [
-            "--shasta",
-            shasta,
             "network",
         ],
     )
@@ -61,12 +59,12 @@ def test_network_firmware():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--ips",
                 ips,
                 "--username",
@@ -114,12 +112,12 @@ def test_network_firmware_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--ips-file",
                 "test.txt",
                 "--username",
@@ -164,12 +162,12 @@ def test_network_firmware_json():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--ips",
                 ips,
                 "--username",
@@ -191,12 +189,12 @@ def test_network_firmware_missing_ips():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--username",
                 username,
                 "--password",
@@ -216,12 +214,12 @@ def test_network_firmware_mutually_exclusive_ips_and_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--username",
                 username,
                 "--password",
@@ -247,12 +245,12 @@ def test_network_firmware_invalid_ip():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--ips",
                 invalid_ip,
                 "--username",
@@ -276,12 +274,12 @@ def test_network_firmware_invalid_ip_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--ips-file",
                 "test.txt",
                 "--username",
@@ -311,12 +309,12 @@ def test_network_firmware_bad_ip():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--ips",
                 bad_ip,
                 "--username",
@@ -349,12 +347,12 @@ def test_network_firmware_bad_ip_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--ips-file",
                 "test.txt",
                 "--username",
@@ -382,12 +380,12 @@ def test_network_firmware_bad_password():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--ips",
                 ips,
                 "--username",
@@ -432,12 +430,12 @@ def test_network_firmware_mismatch():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "network",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--ips",
                 ips,
                 "--username",

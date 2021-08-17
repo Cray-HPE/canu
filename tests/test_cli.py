@@ -7,7 +7,6 @@ import responses
 from canu.cli import cli
 
 
-shasta = "1.4"
 fileout = "fileout.txt"
 sls_address = "api-gw-service-nmn.local"
 runner = click.testing.CliRunner()
@@ -19,16 +18,16 @@ def test_cli():
     assert result.exit_code == 0
 
 
-def test_cli_missing_shasta():
-    """Error on Shasta flag required."""
-    result = runner.invoke(
-        cli,
-        [
-            "switch",
-        ],
-    )
-    assert result.exit_code == 2
-    assert "Error: Missing option '--shasta' / '-s'" in str(result.output)
+# def test_cli_missing_shasta():
+#     """Error on Shasta flag required."""
+#     result = runner.invoke(
+#         cli,
+#         [
+#             "switch",
+#         ],
+#     )
+#     assert result.exit_code == 2
+#     assert "Error: Missing option '--shasta' / '-s'" in str(result.output)
 
 
 def test_cli_init_missing_out():
@@ -36,8 +35,6 @@ def test_cli_init_missing_out():
     result = runner.invoke(
         cli,
         [
-            "--shasta",
-            shasta,
             "init",
         ],
     )
@@ -58,7 +55,7 @@ def test_cli_init_csi_good():
 
         result = runner.invoke(
             cli,
-            ["--shasta", shasta, "init", "--out", fileout, "--csi-folder", "."],
+            ["init", "--out", fileout, "--csi-folder", "."],
         )
         assert result.exit_code == 0
         assert "2 IP addresses saved to fileout.txt" in str(result.output)
@@ -71,8 +68,6 @@ def test_cli_init_csi_file_missing():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "init",
                 "--out",
                 fileout,
@@ -120,8 +115,6 @@ def test_cli_init_sls_good():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "init",
                 "--out",
                 fileout,
@@ -136,8 +129,6 @@ def test_cli_init_sls_token_flag_missing():
     result = runner.invoke(
         cli,
         [
-            "--shasta",
-            shasta,
             "init",
             "--out",
             fileout,
@@ -166,7 +157,7 @@ def test_cli_init_sls_token_bad():
 
         result = runner.invoke(
             cli,
-            ["--shasta", shasta, "init", "--out", fileout, "--auth-token", bad_token],
+            ["init", "--out", fileout, "--auth-token", bad_token],
         )
         assert result.exit_code == 0
         assert (
@@ -182,7 +173,7 @@ def test_cli_init_sls_token_missing():
 
     result = runner.invoke(
         cli,
-        ["--shasta", shasta, "init", "--out", fileout, "--auth-token", bad_token],
+        ["init", "--out", fileout, "--auth-token", bad_token],
     )
     assert result.exit_code == 0
     assert "Invalid token file, generate another token or try again." in str(
@@ -206,8 +197,6 @@ def test_cli_init_sls_address_bad():
     result = runner.invoke(
         cli,
         [
-            "--shasta",
-            shasta,
             "init",
             "--out",
             fileout,

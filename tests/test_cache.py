@@ -54,12 +54,12 @@ def test_switch_caching():
         runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--ip",
                 ip,
                 "--username",
@@ -74,12 +74,12 @@ def test_switch_caching():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "switch",
                 "firmware",
+                "--shasta",
+                shasta,
                 "--ip",
                 ip,
                 "--username",

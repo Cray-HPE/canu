@@ -9,7 +9,6 @@ import responses
 from canu.cli import cli
 
 
-shasta = "1.4"
 username = "admin"
 password = "admin"
 fileout = "fileout.txt"
@@ -162,8 +161,6 @@ def test_config_bgp():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "config",
@@ -331,8 +328,6 @@ def test_config_bgp_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "config",
@@ -492,8 +487,6 @@ def test_config_bgp_verbose():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "config",
@@ -523,8 +516,6 @@ def test_config_bgp_missing_ips():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "config",
@@ -548,8 +539,6 @@ def test_config_bgp_mutually_exclusive_ips_and_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "config",
@@ -579,8 +568,6 @@ def test_config_bgp_invalid_ip():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "config",
@@ -608,8 +595,6 @@ def test_config_bgp_invalid_ip_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "config",
@@ -657,8 +642,6 @@ def test_config_bgp_bad_ip():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "config",
@@ -713,8 +696,6 @@ def test_config_bgp_bad_ip_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "config",
@@ -759,8 +740,6 @@ def test_config_bgp_bad_password():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "config",
@@ -792,8 +771,6 @@ def test_config_bgp_too_many_ips():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "config",
@@ -824,8 +801,6 @@ def test_config_bgp_too_many_ips_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "config",
@@ -853,8 +828,6 @@ def test_config_bgp_not_enough_ips():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "config",
@@ -883,8 +856,6 @@ def test_config_bgp_not_enough_ips_file():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "config",
@@ -923,8 +894,6 @@ def test_config_bgp_sls_token_bad():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "--cache",
                 cache_minutes,
                 "config",
@@ -954,8 +923,6 @@ def test_config_bgp_sls_token_missing():
     result = runner.invoke(
         cli,
         [
-            "--shasta",
-            shasta,
             "--cache",
             cache_minutes,
             "config",
@@ -992,8 +959,6 @@ def test_config_bgp_sls_address_bad():
     result = runner.invoke(
         cli,
         [
-            "--shasta",
-            shasta,
             "config",
             "bgp",
             "--username",
@@ -1020,8 +985,6 @@ def test_config_bgp_csi_file_missing():
         result = runner.invoke(
             cli,
             [
-                "--shasta",
-                shasta,
                 "config",
                 "bgp",
                 "--username",

@@ -8,10 +8,10 @@ Entries in the table will be colored based on what they are. Neighbors that have
 
 ## Example
 
-To check the cabling of a single switch run: `canu --shasta 1.4 switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD`
+To check the cabling of a single switch run: `canu switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD`
 
 ```bash
-$ canu --shasta 1.4 switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD
+$ canu switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD
 
 Switch: test-switch-spine01 (192.168.1.1)
 Aruba 8325

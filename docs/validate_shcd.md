@@ -10,10 +10,10 @@ CANU can be used to validate that an SHCD (SHasta Cabling Diagram) passes basic 
 
 ### Validate SHCD
 
-To check an SHCD run: `canu -s 1.4 validate shcd -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN,HMN --corners I14,S25,I16,S22,J20,T39`
+To check an SHCD run: `canu validate shcd -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN,HMN --corners I14,S25,I16,S22,J20,T39`
 
 ```bash
-$ canu -s 1.4 validate shcd -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN,HMN --corners I14,S25,I16,S22,J20,T39
+$ canu validate shcd -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN,HMN --corners I14,S25,I16,S22,J20,T39
 
 SHCD Node Connections
 ------------------------------------------------------------
