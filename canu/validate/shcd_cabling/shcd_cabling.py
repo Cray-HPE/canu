@@ -16,8 +16,8 @@ from openpyxl import load_workbook
 import requests
 import ruamel.yaml
 
-from canu.switch.cabling.cabling import get_lldp
-from canu.validate.cabling.cabling import node_model_from_canu
+from canu.report.switch.cabling.cabling import get_lldp
+from canu.validate.network.cabling.cabling import node_model_from_canu
 from canu.validate.shcd.shcd import (
     node_list_warnings,
     node_model_from_shcd,

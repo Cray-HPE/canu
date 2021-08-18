@@ -1,1 +1,0 @@
-"""CANU validate config commands."""

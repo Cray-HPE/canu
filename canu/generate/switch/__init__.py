@@ -1,0 +1,1 @@
+"""CANU generate switch commands."""
