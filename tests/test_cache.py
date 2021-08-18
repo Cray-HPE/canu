@@ -56,6 +56,7 @@ def test_switch_caching():
             [
                 "--cache",
                 cache_minutes,
+                "report",
                 "switch",
                 "firmware",
                 "--shasta",
@@ -76,6 +77,7 @@ def test_switch_caching():
             [
                 "--cache",
                 cache_minutes,
+                "report",
                 "switch",
                 "firmware",
                 "--shasta",

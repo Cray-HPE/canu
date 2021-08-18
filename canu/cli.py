@@ -1,7 +1,4 @@
-"""CANU (CSM Automatic Network Utility) floats through a new Shasta network and makes setup a breeze.
-
-Currently CANU will identity firmware of Aruba switches on a Shasta network.
-"""
+"""CANU (CSM Automatic Network Utility) floats through a new Shasta network and makes setup a breeze."""
 import json
 import os.path
 import sys
@@ -13,8 +10,8 @@ import ruamel.yaml
 import urllib3
 
 from canu.config import config
-from canu.network import network
-from canu.switch import switch
+from canu.generate import generate
+from canu.report import report
 from canu.validate import validate
 
 yaml = ruamel.yaml.YAML()
@@ -67,8 +64,8 @@ def cli(ctx, cache_minutes):
 
 
 cli.add_command(config.config)
-cli.add_command(switch.switch)
-cli.add_command(network.network)
+cli.add_command(generate.generate)
+cli.add_command(report.report)
 cli.add_command(validate.validate)
 
 
