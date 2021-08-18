@@ -140,11 +140,6 @@ def config(ctx, shasta, ips, ips_file, username, password, config_folder):
                         f"{config_folder}/{hostname}.cfg"
                     )
 
-                    # Build Hierarchical Configuration object for the Remediation Config
-                    # remediation_config_hier = running_config_hier.config_to_get_to(
-                    #     generated_config_hier
-                    # )
-
                     differences = compare_config(
                         running_config_hier, generated_config_hier, False
                     )
@@ -156,8 +151,6 @@ def config(ctx, shasta, ips, ips_file, username, password, config_folder):
                             differences,
                         ]
                     )
-
-                    # print_config_diff_summary(hostname, ip, differences)
 
                 except ssh_exception.NetmikoTimeoutException:
                     errors.append(
@@ -173,7 +166,7 @@ def config(ctx, shasta, ips, ips_file, username, password, config_folder):
                             f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again.",
                         ]
                     )
-                except Exception as err:
+                except Exception as err:  # pragma: no cover
                     exception_type = type(err).__name__
                     errors.append(
                         [
