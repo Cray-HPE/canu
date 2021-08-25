@@ -193,7 +193,7 @@ def test_validate_shcd_corner_prompt():
 
 def test_validate_shcd_corners_too_narrow():
     """Test that the `canu validate shcd` command fails on too narrow area."""
-    corners_too_narrow = "I16,R48"
+    corners_too_narrow = "I16,P48"
     with runner.isolated_filesystem():
         generate_test_file(test_file)
         result = runner.invoke(
@@ -214,14 +214,11 @@ def test_validate_shcd_corners_too_narrow():
             ],
         )
         assert result.exit_code == 1
-        assert (
-            "Ensure that the upper left corner (Labeled 'Source'), and the lower right corner of the table is entered."
-            in str(result.output)
-        )
+        assert "Not enough columns exist." in str(result.output)
 
 
 def test_validate_shcd_corners_too_high():
-    """Test that the `canu validate shcd` command fails on empty cells."""
+    """Test that the `canu validate shcd` command fails on empty headers."""
     corners_too_high = "H16,S48"
     with runner.isolated_filesystem():
         generate_test_file(test_file)
@@ -243,7 +240,8 @@ def test_validate_shcd_corners_too_high():
             ],
         )
         assert result.exit_code == 1
-        assert "Ensure the range entered does not contain a row of empty cells." in str(
+        assert "On tab 25G_10G, header column Source not found." in str(result.output)
+        assert "On tab 25G_10G, the header is formatted incorrectly." in str(
             result.output
         )
 
