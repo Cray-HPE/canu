@@ -448,7 +448,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             if found is not None:
                 log.info(
                     f"Required header column {required_header[required_index]} "
-                    "found in spreadsheet cell {header[current_index].coordinate}"
+                    f"found in spreadsheet cell {header[current_index].coordinate}"
                 )
                 required_header[required_index] = found
                 start_index = current_index + 1
