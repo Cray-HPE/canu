@@ -78,11 +78,12 @@ class NetworkNode:
                 port["slot"] = None
         self.__ports = [None] * port_qty
 
-        # Sort from lowest to highest speed.
-        # NOTE: This implicitly makes the assumption that high speed ports are high port numbers.
-        self.__ports_block_metadata = sorted(
-            self.__ports_block_metadata, key=lambda k: max(k["speed"])
-        )
+        if "preserve_hardware_model_port_layout" not in self.__hardware:
+            # Sort from lowest to highest speed.
+            # NOTE: This implicitly makes the assumption that high speed ports are high port numbers.
+            self.__ports_block_metadata = sorted(
+                self.__ports_block_metadata, key=lambda k: max(k["speed"])
+            )
         # Find the list start index by speed.
         start_index = 0
         for block in self.__ports_block_metadata:
@@ -108,7 +109,6 @@ class NetworkNode:
     # slot types/names, but accept None.
     def __select_port_block(self, speed=None, slot=None):
         # Only ports with required speed and remaining ports
-
         port_block = [
             x
             for x in self.__ports_block_metadata
@@ -126,7 +126,7 @@ class NetworkNode:
         if tmp_block:
             if len(tmp_block) > 1:
                 log.warning(
-                    "Multiple possible port blocks were found.  Using the first one."
+                    "Multiple possible port blocks were found.  Using the first one.\n",
                 )
             port_block = tmp_block[0]
 
@@ -135,6 +135,7 @@ class NetworkNode:
                 log.warning(
                     "Multiple possible port blocks were found.  Using the first one."
                 )
+                log.warning(f"TEST block: {port_block}\n")
             port_block = port_block[0]
 
         else:
@@ -147,7 +148,8 @@ class NetworkNode:
             )
 
         log.debug(
-            f"Selected port block for requested slot {slot} and speed {speed}: {port_block}"
+            f"All ports: {self.__ports_block_metadata}\n"
+            f"Selected port block for requested slot {slot} and speed {speed}: {port_block}\n"
         )
 
         return port_block
@@ -250,7 +252,8 @@ class NetworkNode:
             )
 
         log.debug(
-            f"Connection from {south_node.arch_type()} to {north_node.arch_type()} allowed at speed {connection_speed}"
+            f"Connection from {south_node.arch_type()} to {north_node.arch_type()} "
+            f"architecturally allowed at speed {connection_speed}."
         )
 
         return connection_speed
@@ -338,10 +341,12 @@ class NetworkNode:
             speed=connection_speed, slot=src_port.slot()
         )
         if selected_ports is None:
-            log.error(f"No ports available at speed {connection_speed}")
+            log.error(
+                f"No ports available in slot {src_port.slot()} at speed {connection_speed}"
+            )
             return False
         log.debug(
-            f'    {selected_ports["count"]} remaining ports at speed {connection_speed}'
+            f'{selected_ports["count"]} remaining ports in slot {selected_ports["slot"]} at speed {connection_speed}'
         )
 
         # First connect create the connection on the destination (to local).
@@ -386,13 +391,13 @@ class NetworkNode:
                     )
                     if strict:
                         return False
-                    return True
+                    return True  # no-op because already connected
                 else:
                     raise Exception(
                         click.secho(
                             f"{__name__} Port {src_port.port()} in slot {src_port.slot()} "
                             f"already in use for {self.common_name()} connected to a different "
-                            f"node {existing_port.destination_node_id()}.  Cannot repurpose ports.",
+                            f"node {existing_port.destination_node_id()}.  Cannot repurpose previously used ports.",
                             fg="red",
                         )
                     )
@@ -401,6 +406,10 @@ class NetworkNode:
             src_port.destination_port(dst_port.port())
             src_port.destination_slot(dst_port.slot())
             self.__ports[index] = src_port
+            # self.__decrement_available_ports(speed=connection_speed)
+            log.debug(
+                f"Successfully connected {dst_node.common_name()} to {self.common_name()} at speed {connection_speed}"
+            )
         else:
             # Assign ports based on first available.
             start_index = selected_ports["start_index"]
