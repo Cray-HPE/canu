@@ -131,6 +131,9 @@ network_hardware:
     ports:
       - count: 32
         speed: [100, 40]
+      - count: 1
+        speed: 1
+        slot: "mgmt"
   # - name: "Mellanox 2100"
   #   vendor: "mellanox"
   #   model: "2100"
@@ -149,16 +152,28 @@ network_hardware:
         speed: 1
       - count: 4
         speed: [40, 10]
-  # - name: "Dell 4148"
-  #   vendor: "dell"
-  #   type: "switch"
-  #   model: "4148"
-  #   deprecated: True
-  #   ports:
-  #     - count: 48
-  #       speed: 1
-  #     - count: 4
-  #       speed: 40
+      - count: 1
+        speed: 1
+        slot: "mgmt"
+  - name: "Dell 4148T"
+    vendor: "dell"
+    model: "S4148T-ON"
+    type: "switch"
+    deprecated: True
+    preserve_hardware_model_port_layout: True
+    ports:
+      - count: 24
+        speed: [1, 10]
+        slot: "10g_block1"
+      - count: 4
+        speed: 100
+        slot: "100g_block"
+      - count: 24
+        speed: [1, 10]
+        slot: "10g_block2"
+      - count: 1
+        speed: 1
+        slot: "mgmt"
   - name: "River NCN Node - Generic 2 port stub Gigabyte"
     vendor: "gigabyte"
     type: "server"
@@ -166,6 +181,7 @@ network_hardware:
     ports:
       - count: 2
         speed: 40
+        slot: "pcie-slot1"
       - count: 1
         speed: 1
         slot: "onboard"
@@ -179,6 +195,7 @@ network_hardware:
     ports:
       - count: 4
         speed: 40
+        slot: "pcie-slot1"
       - count: 1
         speed: 1
         slot: "onboard"

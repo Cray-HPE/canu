@@ -428,10 +428,10 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             sys.exit(1)
 
         log.info(
-            f"Expecting header with {len(required_header):>2} columns: {required_header}\n"
+            f"Expecting header with {len(required_header):>2} columns: {required_header}"
         )
         log.info(
-            f"Found header with     {len(header):>2} columns: {[x.value for x in header]}\n"
+            f"Found header with     {len(header):>2} columns: {[x.value for x in header]}"
         )
         log.info("Mapping required columns to actual.")
 
@@ -520,7 +520,9 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     node_list.append(src_node)
                     node_name_list.append(node_name)
                 else:
-                    log.debug(f"Node {node_name} already exists, skipping...")
+                    log.debug(
+                        f"Node {node_name} already exists, skipping node creation."
+                    )
 
                 src_index = node_name_list.index(node_name)
             else:
@@ -563,7 +565,9 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     node_list.append(dst_node)
                     node_name_list.append(node_name)
                 else:
-                    log.debug(f"Node {node_name} already exists, skipping...")
+                    log.debug(
+                        f"Node {node_name} already exists, skipping node creation"
+                    )
 
                 dst_index = node_name_list.index(node_name)
 
