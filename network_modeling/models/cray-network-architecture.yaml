@@ -263,6 +263,11 @@ network_v1:
       connections:
         - name: "spine"
           speed: 40
+    - name: "mountain_compute_leaf"
+      model: "S4148T-ON"
+      connections:
+        - name: "spine"
+          speed: 100
     - name: "river_ncn_node_2_port_gigabyte"
       model: "river_ncn_node_2_port_gigabyte"
       connections:
@@ -282,6 +287,18 @@ network_v1:
       connections:
         - name: "spine"
           speed: 100
+        - name: "customer_edge_router"
+          speed: 100
+    - name: "cec"
+      model: "cec"
+      connections:
+        - name: "mountain_compute_leaf"
+          speed: 1
+    - name: "cmm"
+      model: "cmm"
+      connections:
+        - name: "mountain_compute_leaf"
+          speed: 10
   lookup_mapper:
     - lookup_name:
         - "mn"
@@ -308,6 +325,10 @@ network_v1:
       shasta_name: "gn"
       architecture_type: "river_ncn_node_2_port_gigabyte"
     - lookup_name:
+        - "sw-cdu"
+      shasta_name: "sw-cdu"
+      architecture_type: "mountain_compute_leaf"
+    - lookup_name:
         - "sw-smn"
       shasta_name: "sw-leaf-bmc"
       architecture_type: "river_bmc_leaf"
@@ -319,3 +340,9 @@ network_v1:
         - "sw-edge"
       shasta_name: "sw-edge"
       architecture_type: "customer_edge_router"
+    - lookup_name: ["cec"]
+      shasta_name: "cec"
+      architecture_type: "cec"
+    - lookup_name: ["cmm"]
+      shasta_name: "cmm"
+      architecture_type: "cmm"
