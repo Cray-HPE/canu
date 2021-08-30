@@ -461,3 +461,13 @@ class NetworkNode:
             if port is not None:
                 edges.append(port.destination_node_id())
         return edges
+
+    def ports(self):
+        """Return a list of all connections."""
+        ports = []
+        for port in self.__ports:
+            if port is not None:
+                ports.append(port.serialize())
+            else:
+                ports.append(None)
+        return ports

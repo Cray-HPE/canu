@@ -698,8 +698,9 @@ def test_validate_shcd_cabling_corner_prompt():
                 "--tabs",
                 tabs,
             ],
-            input="I16\nS30",
+            input="I14\nS30",
         )
+        print(result.output)
         assert result.exit_code == 0
         # sw-spine-001: Found in SHCD but not on the network
         assert (
@@ -717,7 +718,7 @@ def test_validate_shcd_cabling_corner_prompt():
 @responses.activate
 def test_validate_shcd_cabling_corners_too_narrow():
     """Test that the `canu validate shcd cabling` command fails on too narrow area."""
-    corners_too_narrow = "I16,R48"
+    corners_too_narrow = "I16,P48"
     with runner.isolated_filesystem():
         responses.add(
             responses.POST,
@@ -768,10 +769,7 @@ def test_validate_shcd_cabling_corners_too_narrow():
             ],
         )
         assert result.exit_code == 1
-        assert (
-            "Ensure that the upper left corner (Labeled 'Source'), and the lower right corner of the table is entered."
-            in str(result.output)
-        )
+        assert "Not enough columns exist." in str(result.output)
 
 
 @responses.activate
@@ -828,7 +826,8 @@ def test_validate_shcd_cabling_corners_too_high():
             ],
         )
         assert result.exit_code == 1
-        assert "Ensure the range entered does not contain a row of empty cells." in str(
+        assert "On tab 25G_10G, header column Source not found." in str(result.output)
+        assert "On tab 25G_10G, the header is formatted incorrectly." in str(
             result.output
         )
 

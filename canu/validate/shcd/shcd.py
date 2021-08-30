@@ -267,7 +267,7 @@ def validate_shcd_slot_data(cell, sheet, warnings, is_src_slot=False):
             slot = "pcie-slot1"
         if slot not in valid_slot_names:
             warnings["shcd_slot_data"].append(sheet + ":" + location)
-            log.error(
+            log.warning(
                 f"Slots must be named from the following list {valid_slot_names}."
                 f"Please correct cell {sheet}:{location} in the SHCD with value {slot}."
             )
@@ -372,9 +372,9 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
         range_start = tab[1]
         range_end = tab[2]
 
-        log.info("----------------------------------------")
+        log.info("---------------------------------------------")
         log.info(f"Working on tab/worksheet {sheet}")
-        log.info("----------------------------------------")
+        log.info("---------------------------------------------")
         log.info("")
 
         if sheet not in wb.sheetnames:
@@ -396,67 +396,88 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             )
             sys.exit(1)
 
+        #
+        # Process Headers
+        #
         required_header = [
             "Source",
             "Rack",
             "Location",
             "Slot",
-            None,
             "Port",
             "Destination",
             "Rack",
             "Location",
-            None,
             "Port",
         ]
-        expected_columns = len(required_header)
 
-        for row in block:
-            if len(row) == 0 or len(row) < expected_columns:
-                log.fatal("")
-                click.secho(f"Bad range of cells entered for tab {sheet}.", fg="red")
-                click.secho(f"{range_start}:{range_end}\n", fg="red")
+        header = block[0]
+        if len(header) == 0 or len(header) < len(required_header):
+            log.fatal("")
+            click.secho(
+                f"Bad range of cells entered for tab {sheet}:{range_start}:{range_end}.",
+                fg="red",
+            )
+            click.secho(
+                "Not enough columns exist.\n"
+                "Columns must exist in the following order, but may have other columns in between:\n"
+                f"{required_header}\n"
+                "Ensure that the upper left corner (Labeled 'Source'), and the lower right corner of the table is entered.",
+                fg="red",
+            )
+            sys.exit(1)
+
+        log.info(
+            f"Expecting header with {len(required_header):>2} columns: {required_header}\n"
+        )
+        log.info(
+            f"Found header with     {len(header):>2} columns: {[x.value for x in header]}\n"
+        )
+        log.info("Mapping required columns to actual.")
+
+        start_index = 0
+        for required_index in range(len(required_header)):
+            found = None
+            for current_index in range(start_index, len(header)):
+                if header[current_index].value == required_header[required_index]:
+                    found = current_index
+                    break
+                else:
+                    found = None
+                    continue
+            if found is not None:
+                log.info(
+                    f"Required header column {required_header[required_index]} "
+                    f"found in spreadsheet cell {header[current_index].coordinate}"
+                )
+                required_header[required_index] = found
+                start_index = current_index + 1
+                found = None
+                continue
+            else:
+                log.error("")
                 click.secho(
-                    "Not enough columns selected. Expecting columns labeled:\n"
-                    + "Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port\n"
-                    + "Ensure that the upper left corner (Labeled 'Source'), and the lower right corner of the table is entered.",
+                    f"On tab {sheet}, header column {required_header[required_index]} not found.",
+                    fg="red",
+                )
+                log.fatal("")
+                click.secho(
+                    f"On tab {sheet}, the header is formatted incorrectly.\n"
+                    "Columns must exist in the following order, but may have other columns in between:\n"
+                    f"{required_header}",
                     fg="red",
                 )
                 sys.exit(1)
 
-            if row[0].value == required_header[0]:
-                log.debug(f"Expecting header with {expected_columns} columns")
-                log.debug(f"Found header with {len(row)} columns")
-                error = False
-                for i in range(expected_columns):
-                    if row[i].value != required_header[i]:
-                        log.error("")
-                        click.secho(
-                            f"On tab {sheet}, header column {required_header[i]} not found",
-                            fg="red",
-                        )
-                        error = True
-                    else:
-                        log.debug(f"Header column {required_header[i]} found")
-
-                if error:
-                    log.fatal("")
-                    click.secho(
-                        f"On tab {sheet}, the header is formatted incorrectly.\n",
-                        fg="red",
-                    )
-                    click.secho("The columns should be labeled:", fg="red")
-                    click.secho(
-                        "Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port",
-                        fg="red",
-                    )
-                    sys.exit(1)
-                continue
-
+        #
+        # Process Data
+        #
+        block = block[1:]
+        for row in block:
             # Cable source
             try:
-                src_name = row[0].value.strip()
-                current_row = row[0].row
+                src_name = row[required_header[0]].value.strip()
+                current_row = row[required_header[0]].row
                 log.debug(f"---- Working in sheet {sheet} on row {current_row} ----")
             except AttributeError:
                 log.fatal("")
@@ -468,8 +489,8 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 )
                 sys.exit(1)
 
-            tmp_slot = row[3]
-            tmp_port = row[5]
+            tmp_slot = row[required_header[3]]
+            tmp_port = row[required_header[4]]
             src_slot = validate_shcd_slot_data(
                 tmp_slot, sheet, warnings, is_src_slot=True
             )
@@ -514,11 +535,11 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             # src_node_port = None
 
             # Cable destination
-            dst_name = row[6].value.strip()
+            dst_name = row[required_header[5]].value.strip()
             # dst_xname = row[7].value + row[8].value
             # Create the destination slot and port for the node
             dst_slot = None  # There is no spreadsheet data and dst is always a switch
-            dst_port = validate_shcd_port_data(row[10], sheet, warnings)
+            dst_port = validate_shcd_port_data(row[required_header[8]], sheet, warnings)
             log.debug(f"Destination Data:  {dst_name} {dst_slot} {dst_port}")
             node_name = get_node_common_name(dst_name, factory.lookup_mapper())
             log.debug(f"Destination Name Lookup:  {node_name}")
@@ -602,6 +623,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                         f"to {dst_node.common_name()} bi-directionally"
                     )
                     sys.exit(1)  # TODO: this should probably be an exception
+    wb.close()
 
     return node_list, warnings
 
@@ -739,3 +761,45 @@ def print_node_list(node_list, title):
         click.echo(
             f"{node.id()}: {node.common_name()} connects to {len(node.edges())} nodes: {node.edges()}"
         )
+
+    dash = "-" * 60
+    click.echo("\n")
+    click.secho(f"{title} Port Usage", fg="bright_white")
+    click.echo(dash)
+
+    for node in node_list:
+        click.echo(f"{node.id()}: {node.common_name()} has the following port usage:")
+
+        unused_block = []
+        logical_index = 1
+        for port in node.ports():
+            if port is None:
+                unused_block.append(logical_index)
+                logical_index += 1
+                continue
+            if unused_block:
+                if len(unused_block) == 1:
+                    port_string = f"{unused_block[0]:02}==>UNUSED"
+                else:
+                    port_string = f"{unused_block[0]:02}-{unused_block[len(unused_block)-1]:02}==>UNUSED"
+                unused_block = []  # reset
+                click.secho(f"        {port_string}", fg="green")
+            destination_node_name = [
+                x.common_name()
+                for x in node_list
+                if x.id() == port["destination_node_id"]
+            ]
+            destination_node_name = destination_node_name[0]
+            destination_port_slot = None
+            if port["destination_slot"] is None:
+                destination_port_slot = f'{port["destination_port"]}'
+            else:
+                destination_port_slot = (
+                    f'{port["destination_slot"]}:{port["destination_port"]}'
+                )
+            if port["slot"] is None:
+                port_string = f'{port["port"]:>02}==>{destination_node_name}:{destination_port_slot}'
+            else:
+                port_string = f'{port["slot"]}:{port["port"]}==>{destination_node_name}:{destination_port_slot}'
+            click.echo(f"        {port_string}")
+            logical_index += 1
