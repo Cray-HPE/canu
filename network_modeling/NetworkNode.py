@@ -145,10 +145,11 @@ class NetworkNode:
                 )
             )
 
-        if port_block["count"] < 1:
+        if port_block["count"] - count < 0:
             raise Exception(
                 click.secho(
-                    f"{__name__}: Port count in block {port_block} cannot be below zero.",
+                    f"{__name__}: Port count in block {port_block} cannot be decremented as requested."
+                    f"Decrement of {count} uses more ports than are available.",
                     fg="red",
                 )
             )
