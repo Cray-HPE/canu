@@ -325,6 +325,12 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False):
                 f'Please correct in the SHCD for cell {sheet}:{location} with value "{port}"'
             )
             sys.exit(1)
+        if int(port) < 1:
+            log.fatal(
+                "Ports numbers must be greater than 1. Port numbering must begin at 1. "
+                f'Please correct in the SHCD for cell {sheet}:{location} with value "{port}"'
+            )
+            sys.exit(1)
         if is_src_port:
             # Awful hack around the convention that src slot can be blank and a bmc
             # is noted by port 3 when there is physically one port.

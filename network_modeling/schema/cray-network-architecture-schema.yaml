@@ -34,6 +34,7 @@ connection:
   name: str()
   speed: int()
   number: int(required=False)
+  comment: str(required=False)
 
 lookup_map:
   lookup_name: list(str(min=1, exclude=' '))

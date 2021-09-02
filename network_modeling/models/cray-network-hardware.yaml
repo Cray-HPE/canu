@@ -119,7 +119,6 @@ network_hardware:
     ports:
       - count: 48
         speed: 100
-  # TODO add BMC connections
   #
   # DELLANOX
   #
@@ -164,13 +163,10 @@ network_hardware:
     ports:
       - count: 24
         speed: [1, 10]
-        slot: "10g_block1"
       - count: 4
         speed: 100
-        slot: "100g_block"
       - count: 24
         speed: [1, 10]
-        slot: "10g_block2"
       - count: 1
         speed: 1
         slot: "mgmt"
