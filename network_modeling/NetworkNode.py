@@ -118,6 +118,7 @@ class NetworkNode:
 
         if port_block:
             if len(port_block) > 1:
+                # Prefer more total (not available) ports.
                 port_block.sort(key=lambda k: (-k["total"]))
                 log.warning(
                     "Multiple possible port blocks were found.  Using the first one."
