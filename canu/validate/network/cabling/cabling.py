@@ -355,7 +355,9 @@ def node_model_from_canu(factory, canu_cache, ips):
                         node_list.append(src_node)
                         node_name_list.append(node_name)
                     else:
-                        log.debug(f"Node {node_name} already exists, skipping...")
+                        log.debug(
+                            f"Node {node_name} already exists, skipping node creation."
+                        )
 
                     src_index = node_name_list.index(node_name)
                 else:
@@ -426,7 +428,9 @@ def node_model_from_canu(factory, canu_cache, ips):
                         node_list.append(dst_node)
                         node_name_list.append(dst_node_name)
                     else:
-                        log.debug(f"Node {dst_node_name} already exists, skipping...")
+                        log.debug(
+                            f"Node {dst_node_name} already exists, skipping node creation."
+                        )
 
                     dst_index = node_name_list.index(dst_node_name)
 
