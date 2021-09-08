@@ -7,6 +7,7 @@ general_hardware_profile:
     type: str(min=1, exclude=' ')
     ports: list(include('port'))
     deprecated: bool(required=False)
+    preserve_hardware_model_port_layout: bool(required=False)
 
 port:
     count: int(min=1)
