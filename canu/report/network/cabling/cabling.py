@@ -8,6 +8,7 @@ from click_help_colors import HelpColorsCommand
 from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
+from netmiko import ssh_exception
 import requests
 
 from canu.report.switch.cabling.cabling import get_lldp, print_lldp
@@ -127,8 +128,7 @@ def cabling(ctx, ips, ips_file, username, password, out, view):
                     errors.append(
                         [
                             str(ip),
-                            f"Error connecting to switch {ip}, "
-                            + "check that this IP is an Aruba switch, or check the username or password.",
+                            f"Error connecting to switch {ip}, check the IP address and try again.",
                         ]
                     )
                 except requests.exceptions.ConnectionError:
@@ -143,6 +143,20 @@ def cabling(ctx, ips, ips_file, username, password, out, view):
                         [
                             str(ip),
                             f"Error connecting to switch {ip}.",
+                        ]
+                    )
+                except ssh_exception.NetmikoTimeoutException:
+                    errors.append(
+                        [
+                            str(ip),
+                            f"Timeout error connecting to switch {ip}, check the IP address and try again.",
+                        ]
+                    )
+                except ssh_exception.NetmikoAuthenticationException:
+                    errors.append(
+                        [
+                            str(ip),
+                            f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again.",
                         ]
                     )
 

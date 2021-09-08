@@ -1,4 +1,5 @@
 """Test CANU validate shcd-cabling commands."""
+from unittest.mock import patch
 
 import click.testing
 from openpyxl import Workbook
@@ -372,12 +373,14 @@ def test_validate_shcd_cabling_invalid_ip_file():
         assert "Error: Invalid value:" in str(result.output)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
 @responses.activate
-def test_validate_shcd_cabling_bad_ip():
+def test_validate_shcd_cabling_bad_ip(switch_vendor):
     """Test that the `canu validate shcd-cabling` command errors on bad IP address."""
     bad_ip = "192.168.1.99"
 
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
@@ -413,12 +416,14 @@ def test_validate_shcd_cabling_bad_ip():
         assert "check the IP address and try again" in str(result.output)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
 @responses.activate
-def test_validate_shcd_cabling_bad_ip_file():
+def test_validate_shcd_cabling_bad_ip_file(switch_vendor):
     """Test that the `canu validate shcd-cabling` command errors on a bad IP from a file."""
     bad_ip = "192.168.1.99"
 
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         with open("test.txt", "w") as f:
             f.write(bad_ip)
 

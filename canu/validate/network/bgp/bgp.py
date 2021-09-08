@@ -1,4 +1,5 @@
 """CANU commands that validate the network bgp."""
+from collections import defaultdict
 import ipaddress
 
 import click
@@ -7,7 +8,10 @@ from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
 import natsort
+from netmiko import ssh_exception
 import requests
+
+from canu.utils.utils import switch_vendor
 
 
 @click.command(
@@ -98,7 +102,9 @@ def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
                     end="\r",
                 )
 
-                bgp_neighbors, switch_info = get_bgp_neighbors(ip, credentials, asn)
+                bgp_neighbors, switch_info = get_bgp_neighbors(
+                    str(ip), credentials, asn
+                )
                 if switch_info is None:
                     errors.append(
                         [
@@ -121,7 +127,14 @@ def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
 
         if verbose:
             click.echo(dash)
-            click.secho(f"{hostname}", fg="bright_white")
+            click.secho(
+                f"Switch: {switch_info['hostname']} ({switch_info['ip']})                       ",
+                fg="bright_white",
+            )
+            click.secho(
+                f"{switch_info['vendor'].capitalize()} {switch_info['platform_name']}",
+                fg="bright_white",
+            )
             click.echo(dash)
 
         if len(bgp_neighbors) == 0:
@@ -206,6 +219,51 @@ def get_bgp_neighbors(ip, credentials, asn):
         bgp_neighbors: A dict with switch neighbors
         switch_info: A dict with switch info
     """
+    return_error = True
+    try:
+        vendor = switch_vendor(ip, credentials, return_error)
+
+        if vendor is None:
+            return None, None
+        elif vendor == "aruba":
+            bgp_neighbors, switch_info = get_bgp_neighbors_aruba(ip, credentials, asn)
+        elif vendor == "dell":
+            # This function returns: {}, switch_info
+            # There won't be any Dell switches with BGP neighbors
+            bgp_neighbors, switch_info = get_bgp_neighbors_dell(ip, credentials)
+        elif vendor == "mellanox":
+            bgp_neighbors, switch_info = get_bgp_neighbors_mellanox(ip, credentials)
+
+    except (
+        requests.exceptions.HTTPError,
+        requests.exceptions.RequestException,
+        requests.exceptions.ConnectionError,
+        ssh_exception.NetmikoTimeoutException,
+        ssh_exception.NetmikoAuthenticationException,
+    ) as error:
+        exception_type = type(error).__name__
+        click.secho(
+            f"Error connecting to switch {ip}, {exception_type}.",
+            fg="white",
+            bg="red",
+        )
+        return None, None
+
+    return bgp_neighbors, switch_info
+
+
+def get_bgp_neighbors_aruba(ip, credentials, asn):
+    """Get BGP neighbors for an Aruba switch.
+
+    Args:
+        ip: IPv4 address of the switch
+        credentials: Dictionary with username and password of the switch
+        asn: Switch ASN
+
+    Returns:
+        bgp_neighbors: A dict with switch neighbors
+        switch_info: A dict with switch info
+    """
     session = requests.Session()
     try:
         # Login
@@ -244,7 +302,7 @@ def get_bgp_neighbors(ip, credentials, asn):
         )
         bgp_neighbors_response.raise_for_status()
 
-        bgp_neighbors = bgp_neighbors_response.json()
+        bgp_neighbors_aruba = bgp_neighbors_response.json()
 
         switch_info_response = session.get(
             f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
@@ -253,6 +311,8 @@ def get_bgp_neighbors(ip, credentials, asn):
         switch_info_response.raise_for_status()
 
         switch_info = switch_info_response.json()
+        switch_info["ip"] = ip
+        switch_info["vendor"] = "aruba"
 
         # Logout
         session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
@@ -265,4 +325,157 @@ def get_bgp_neighbors(ip, credentials, asn):
         )
         return "FAIL", None
 
-    return bgp_neighbors, switch_info
+    return bgp_neighbors_aruba, switch_info
+
+
+def get_bgp_neighbors_dell(ip, credentials):
+    """Get Dell switch info. Dell switches won't ever have BGP, so return 0 neighbors.
+
+    Args:
+        ip: IPv4 address of the switch
+        credentials: Dictionary with username and password of the switch
+
+    Returns:
+        bgp_neighbors: An empty dict
+        switch_info: A dict with switch info
+
+    Raises:
+        Exception: Exception
+    """
+    session = requests.Session()
+    try:
+        auth = (credentials["username"], credentials["password"])
+        url = f"https://{ip}/restconf/data/system-sw-state/sw-version"
+
+        response = session.get(url, auth=auth, verify=False)
+        response.raise_for_status()
+        switch_info = response.json()
+        platform_name = switch_info["dell-system-software:sw-version"]["sw-platform"]
+
+        # GET hostname
+        hostname_url = f"https://{ip}/restconf/data/dell-system:system/hostname"
+
+        get_hostname = session.get(hostname_url, auth=auth, verify=False)
+        get_hostname.raise_for_status()
+        hostname = get_hostname.json()
+        switch_info = {
+            "ip_address": ip,
+            "ip": ip,
+            "hostname": hostname["dell-system:hostname"],
+            "platform_name": platform_name,
+            "vendor": "dell",
+        }
+
+    except (
+        requests.exceptions.HTTPError,
+        requests.exceptions.RequestException,
+        requests.exceptions.ConnectionError,
+    ) as connection_err:
+        raise connection_err
+
+    except Exception as error:  # pragma: no cover
+        raise error
+
+    return {}, switch_info
+
+
+def get_bgp_neighbors_mellanox(ip, credentials):
+    """Get BGP neighbors for a Mellanox switch.
+
+    Args:
+        ip: IPv4 address of the switch
+        credentials: Dictionary with username and password of the switch
+
+    Returns:
+        bgp_neighbors: A dict with switch neighbors
+        switch_info: A dict with switch info
+
+    Raises:
+        ConnectionError: Connection error exception
+        HTTPError: Authentication exception
+    """
+    session = requests.Session()
+
+    # Login
+    login = session.post(
+        f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
+        json=credentials,
+        verify=False,
+    )
+
+    if login.status_code == 404:
+        raise requests.exceptions.ConnectionError
+    if login.json()["status"] != "OK":
+        raise requests.exceptions.HTTPError
+
+    try:
+        bgp_status = session.post(
+            f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"cmd": "show ip bgp summary"},
+            verify=False,
+        )
+        bgp_status = bgp_status.json()
+
+        bgp_neighbors_mellanox = defaultdict(list)
+        for x in bgp_status["data"]:
+            if "VRF name" in x.keys():
+                continue
+            for entry in x:
+                neighbor_ip = entry
+                neighbor_status = x[entry][0]["State/PfxRcd"].split("/")[0]
+
+                bgp_neighbor = {
+                    "status": {"bgp_peer_state": neighbor_status.capitalize()},
+                }
+                bgp_neighbors_mellanox[neighbor_ip] = bgp_neighbor
+
+        # Switch Hostname
+        switch_hostname = session.post(
+            f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"cmd": "show hosts | include Hostname"},
+            verify=False,
+        )
+        switch_hostname.raise_for_status()
+
+        hostname = switch_hostname.json()["data"][0]["Hostname"]
+
+        # Switch Model
+        system_type = session.post(
+            f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"cmd": "show system type"},
+            verify=False,
+        )
+        system_type.raise_for_status()
+
+        platform_name = system_type.json()["data"]["value"]
+
+        switch_info = {
+            "platform_name": platform_name[0],
+            "hostname": hostname,
+        }
+
+        # Cache switch values
+        switch_json = {
+            "ip_address": ip,
+            "ip": ip,
+            "hostname": switch_info["hostname"],
+            "platform_name": switch_info["platform_name"],
+            "vendor": "mellanox",
+            # "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        }
+
+    except (
+        requests.exceptions.HTTPError,
+        requests.exceptions.RequestException,
+        requests.exceptions.ConnectionError,
+        Exception,
+    ) as error:
+        exception_type = type(error).__name__
+        click.secho(
+            f"Error connecting to switch {ip}, {exception_type}.",
+            fg="white",
+            bg="red",
+        )
+        return None, None
+
+    return bgp_neighbors_mellanox, switch_json

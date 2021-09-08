@@ -8,11 +8,13 @@ import sys
 import click
 from click_help_colors import HelpColorsCommand
 import emoji
+from netmiko import ssh_exception
 import requests
 import ruamel.yaml
 import urllib3
 
 from canu.cache import cache_switch, firmware_cached_recently, get_switch_from_cache
+from canu.utils.utils import netmiko_commands, switch_vendor
 
 yaml = ruamel.yaml.YAML()
 
@@ -90,15 +92,29 @@ def firmware(ctx, shasta, ip, username, password, json_, verbose, out):
     cache_minutes = ctx.obj["cache_minutes"]
 
     credentials = {"username": username, "password": password}
-    switch_firmware, switch_info = get_firmware(
-        ip, credentials, False, cache_minutes=cache_minutes
-    )
+
+    vendor = switch_vendor(ip, credentials)
+
+    if vendor is None:
+        return
+    elif vendor == "aruba":
+        switch_firmware, switch_info = get_firmware_aruba(
+            ip, credentials, False, cache_minutes
+        )
+    elif vendor == "dell":
+        switch_firmware, switch_info = get_firmware_dell(
+            ip, credentials, False, cache_minutes
+        )
+    elif vendor == "mellanox":
+        switch_firmware, switch_info = get_firmware_mellanox(
+            ip, credentials, False, cache_minutes
+        )
 
     if switch_firmware is None:
         return
 
     # Get the firmware range from the canu.yaml file and the switch info
-    firmware_range = config["shasta"][shasta]["aruba"][switch_info["platform_name"]]
+    firmware_range = config["shasta"][shasta][vendor][switch_info["platform_name"]]
 
     if switch_firmware["current_version"] in firmware_range:
         match_emoji = emoji.emojize(":canoe:")
@@ -173,7 +189,7 @@ def firmware(ctx, shasta, ip, username, password, json_, verbose, out):
             click.secho(f"Firmware should be in: {firmware_range}", fg="red", file=out)
 
 
-def get_firmware(ip, credentials, return_error=False, cache_minutes=10):
+def get_firmware_aruba(ip, credentials, return_error=False, cache_minutes=10):
     """Get the firmware of an Aruba switch using v10.04 API.
 
     Args:
@@ -283,3 +299,191 @@ def get_firmware(ip, credentials, return_error=False, cache_minutes=10):
                     bg="red",
                 )
                 return None, None
+
+
+def get_firmware_dell(ip, credentials, return_error=False, cache_minutes=10):
+    """Get the firmware of a Dell switch using the API.
+
+    Args:
+        ip: IPv4 address of the switch
+        credentials: Dictionary with username and password of the switch
+        return_error: If True, raises requests exceptions, if False prints error and returns None
+        cache_minutes: Age in minutes of cache before requesting new values
+
+    Returns:
+        Dictionary with a switches firmware and dictionary with platform_name and hostname
+    """
+    switch_firmware = {
+        "current_version": "",
+        "primary_version": "",
+        "secondary_version": "",
+        "default_image": "",
+        "booted_image": "",
+    }
+    if firmware_cached_recently(ip, cache_minutes):
+
+        cached_switch = get_switch_from_cache(ip)
+
+        switch_info = {
+            "platform_name": cached_switch["platform_name"],
+            "hostname": cached_switch["hostname"],
+        }
+
+        return cached_switch["firmware"], switch_info
+
+    else:
+
+        session = requests.Session()
+        try:
+            # GET firmware version
+            auth = (credentials["username"], credentials["password"])
+            url = f"https://{ip}/restconf/data/system-sw-state/sw-version"
+
+            response = session.get(url, auth=auth, verify=False)
+            response.raise_for_status()
+            switch_info = response.json()
+            switch_firmware["current_version"] = switch_info[
+                "dell-system-software:sw-version"
+            ]["sw-version"]
+            platform_name = switch_info["dell-system-software:sw-version"][
+                "sw-platform"
+            ]
+
+            # GET hostname
+            hostname_url = f"https://{ip}/restconf/data/dell-system:system/hostname"
+
+            get_hostname = session.get(hostname_url, auth=auth, verify=False)
+            get_hostname.raise_for_status()
+            hostname = get_hostname.json()
+
+            # Cache switch values
+            switch_json = {
+                "ip_address": ip,
+                "hostname": hostname["dell-system:hostname"],
+                "platform_name": platform_name,
+                "vendor": "dell",
+                "firmware": switch_firmware,
+                "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            }
+            cache_switch(switch_json)
+            return switch_firmware, switch_json
+
+        except (
+            requests.exceptions.HTTPError,
+            requests.exceptions.RequestException,
+            requests.exceptions.ConnectionError,
+        ) as error:
+            if return_error:
+                raise error
+            else:
+                click.secho(
+                    f"Error getting firmware version from Dell switch {ip}",
+                    fg="white",
+                    bg="red",
+                )
+                return None, None
+
+
+def get_firmware_mellanox(ip, credentials, return_error=False, cache_minutes=10):
+    """Get the firmware of a Mellanox switch using Netmiko.
+
+    Args:
+        ip: IPv4 address of the switch
+        credentials: Dictionary with username and password of the switch
+        return_error: If True, raises requests exceptions, if False prints error and returns None
+        cache_minutes: Age in minutes of cache before requesting new values
+
+    Returns:
+        Dictionary with a switches firmware and dictionary with platform_name and hostname
+
+    Raises:
+        timeout: Switch timeout.
+        auth_err: Auth error
+        Exception: Error
+    """
+    if firmware_cached_recently(ip, cache_minutes):
+        cached_switch = get_switch_from_cache(ip)
+
+        switch_info = {
+            "platform_name": cached_switch["platform_name"],
+            "hostname": cached_switch["hostname"],
+        }
+
+        return cached_switch["firmware"], switch_info
+
+    try:
+        switch_firmware = {
+            "current_version": "",
+            "primary_version": "",
+            "secondary_version": "",
+            "default_image": "",
+            "booted_image": "",
+        }
+
+        commands = [
+            "show version concise",
+            "show system type",
+            "show running-config | include hostname",
+        ]
+        command_output = netmiko_commands(ip, credentials, commands, "mellanox")
+
+        # Switch Firmware
+        for line in command_output[0].splitlines():
+            switch_firmware["current_version"] = line.split()[1]
+
+        # Switch Model
+        system_type = command_output[1].strip("\n")
+
+        # Switch Hostname
+        hostname = ""
+        for line in command_output[2].splitlines():
+            if line.startswith("   hostname"):
+                hostname = command_output[2].split()[1]
+
+        switch_info = {
+            "platform_name": system_type,
+            "hostname": hostname,
+        }
+
+        # Cache switch values
+        switch_json = {
+            "ip_address": ip,
+            "hostname": switch_info["hostname"],
+            "platform_name": switch_info["platform_name"],
+            "vendor": "mellanox",
+            "firmware": switch_firmware,
+            "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        cache_switch(switch_json)
+
+    except ssh_exception.NetmikoTimeoutException as timeout:
+        if return_error:
+            raise timeout
+        else:
+            click.secho(
+                f"Timeout error connecting to switch {ip}, check the IP address and try again.",
+                fg="white",
+                bg="red",
+            )
+            return None, None
+    except ssh_exception.NetmikoAuthenticationException as auth_err:
+        if return_error:
+            raise auth_err
+        click.secho(
+            f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again.",
+            fg="white",
+            bg="red",
+        )
+        return None, None
+    except Exception as error:  # pragma: no cover
+        if return_error:
+            raise error
+        exception_type = type(error).__name__
+        click.secho(
+            f"{exception_type} {error}",
+            fg="white",
+            bg="red",
+        )
+        return None, None
+
+    return switch_firmware, switch_info

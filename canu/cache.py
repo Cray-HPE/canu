@@ -25,6 +25,16 @@ file_exists = os.path.isfile(canu_cache_file)
 if file_exists:  # pragma: no cover
     with open(canu_cache_file, "r+") as file:
         canu_cache = yaml.load(file)
+    if canu_cache is None:
+        with open(canu_version_file, "r") as version_file:
+            version = version_file.read().replace("\n", "")
+
+        with open(canu_cache_file, "w+") as f:
+            f.write(f"version: {version}\n")
+            f.write("switches:\n")
+
+        with open(canu_cache_file, "r+") as file:
+            canu_cache = yaml.load(file)
 else:  # pragma: no cover
     with open(canu_version_file, "r") as version_file:
         version = version_file.read().replace("\n", "")
@@ -98,7 +108,7 @@ def get_switch_from_cache(ip):
     Raises:
         Exception: If ip address not in cache.
     """
-    if ip_exists_in_cache(ip):
+    if ip_exists_in_cache(str(ip)):
         index = list(map(itemgetter("ip_address"), canu_cache["switches"])).index(ip)
         return canu_cache["switches"][index]
     else:
@@ -154,14 +164,16 @@ def remove_switch_from_cache(ip):
     Returns:
         The updated JSON cache with the switch appended
     """
-    index = list(map(itemgetter("ip_address"), canu_cache["switches"])).index(ip)
+    try:
+        index = list(map(itemgetter("ip_address"), canu_cache["switches"])).index(ip)
 
-    updated_cache = canu_cache
-    updated_cache["switches"].pop(index)
+        updated_cache = canu_cache
+        updated_cache["switches"].pop(index)
 
-    with open(canu_cache_file, "w") as f:
-        yaml.dump(updated_cache, f)
-
+        with open(canu_cache_file, "w") as f:
+            yaml.dump(updated_cache, f)
+    except ValueError:
+        print(f"{ip} not in cache")
     return
 
 
@@ -174,7 +186,7 @@ def ip_exists_in_cache(ip):
     Returns:
         True or False depending on if the IP address is in the cache.
     """
-    if canu_cache["switches"] is not None and ip in map(
+    if canu_cache["switches"] is not None and str(ip) in map(
         itemgetter("ip_address"), canu_cache["switches"]
     ):
         return True

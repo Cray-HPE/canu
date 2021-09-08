@@ -7,10 +7,12 @@ from urllib.parse import unquote
 import click
 from click_help_colors import HelpColorsCommand
 import natsort
+from netmiko import ssh_exception
 import requests
 import urllib3
 
 from canu.cache import cache_switch
+from canu.utils.utils import netmiko_commands, switch_vendor
 
 # To disable warnings about unsecured HTTPS requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -58,7 +60,6 @@ def cabling(ctx, ip, username, password, out):
     """
     credentials = {"username": username, "password": password}
     switch_info, switch_dict, arp = get_lldp(ip, credentials)
-    print("arp", arp)
     if switch_info is None:
         return
 
@@ -71,7 +72,57 @@ def get_lldp(ip, credentials, return_error=False):
     Args:
         ip: IPv4 address of the switch
         credentials: Dictionary with username and password of the switch
-        return_error: Bool if the error show be printed or returned
+        return_error: Bool if the error should be printed or returned
+
+    Returns:
+        switch_info: Dictionary with switch platform_name, hostname and IP address
+        lldp_dict: Dictionary with LLDP information
+        arp: ARP dictionary
+    """
+    try:
+        vendor = switch_vendor(ip, credentials, return_error)
+
+        if vendor is None:
+            return None, None, None
+        elif vendor == "aruba":
+            switch_info, switch_dict, arp = get_lldp_aruba(
+                ip, credentials, return_error
+            )
+        elif vendor == "dell":
+            switch_info, switch_dict, arp = get_lldp_dell(ip, credentials, return_error)
+        elif vendor == "mellanox":
+            switch_info, switch_dict, arp = get_lldp_mellanox(
+                ip, credentials, return_error
+            )
+
+    except (
+        requests.exceptions.HTTPError,
+        requests.exceptions.RequestException,
+        requests.exceptions.ConnectionError,
+        ssh_exception.NetmikoTimeoutException,
+        ssh_exception.NetmikoAuthenticationException,
+    ) as error:
+        if return_error:
+            raise error
+        else:
+            exception_type = type(error).__name__
+            click.secho(
+                f"Error connecting to switch {ip}, {exception_type} {error}.",
+                fg="white",
+                bg="red",
+            )
+            return None, None, None
+
+    return switch_info, switch_dict, arp
+
+
+def get_lldp_aruba(ip, credentials, return_error=False):
+    """Get lldp of an Aruba switch using v10.04 API.
+
+    Args:
+        ip: IPv4 address of the switch
+        credentials: Dictionary with username and password of the switch
+        return_error: Bool if the error should be printed or returned
 
     Returns:
         switch_info: Dictionary with switch platform_name, hostname and IP address
@@ -131,6 +182,7 @@ def get_lldp(ip, credentials, return_error=False):
         switch_info_response.raise_for_status()
         switch_info = switch_info_response.json()
         switch_info["ip"] = ip
+        switch_info["vendor"] = "aruba"
 
         # GET LLDP neighbors
         neighbors = session.get(
@@ -194,6 +246,384 @@ def get_lldp(ip, credentials, return_error=False):
             return None, None, None
 
 
+def get_lldp_dell(ip, credentials, return_error):
+    """Get lldp of a Dell switch using ssh commands.
+
+    Args:
+        ip: IPv4 address of the switch
+        credentials: Dictionary with username and password of the switch
+        return_error: Bool if the error should be printed or returned
+
+    Returns:
+        switch_info: Dictionary with switch platform_name, hostname and IP address
+        lldp_dict: Dictionary with LLDP information
+        arp: ARP dictionary
+
+    Raises:
+        timeout: Bad IP address.
+        auth_err: Bad credentials
+        Exception: Unknown error
+    """
+    try:
+        neighbors_dict = defaultdict(dict)
+        port = 0
+        commands = [
+            "terminal length 0",
+            "show lldp neighbors detail",
+            "show version",
+            'show running-configuration | grep "hostname"',
+            "show ip arp",
+        ]
+        command_output = netmiko_commands(ip, credentials, commands, "dell")
+
+        for line in command_output[1].splitlines():
+            if line.startswith("-----------------------"):
+                port += 1
+            elif line.startswith("Remote Chassis ID:"):
+                chassis_id = line[19:]
+                if chassis_id == "Not Advertised":
+                    chassis_id = ""
+                neighbors_dict[port]["chassis_id"] = chassis_id
+                neighbors_dict[port]["mac_addr"] = chassis_id
+            elif line.startswith("Remote System Desc:"):
+                chassis_description = line[20:]
+                if chassis_description == "Not Advertised":
+                    chassis_description = ""
+                neighbors_dict[port]["chassis_description"] = chassis_description
+            elif line.startswith("Remote Port Description:"):
+                port_description = line[25:]
+                if port_description == "Not Advertised":
+                    port_description = ""
+                neighbors_dict[port]["port_description"] = port_description
+            elif line.startswith("Remote System Name:"):
+                chassis_name = line[20:]
+                if chassis_name == "Not Advertised":
+                    chassis_name = ""
+                neighbors_dict[port]["chassis_name"] = chassis_name
+            elif line.startswith("Remote Port ID: "):
+                port_id = line[16:]
+                neighbors_dict[port]["port_id"] = port_id
+            elif line.startswith("Local Port ID: "):
+                if line.startswith("Local Port ID: ethernet"):
+                    neighbors_dict[port]["local_port_id"] = line.split("ethernet")[1]
+                elif line.startswith("Local Port ID: mgmt"):
+                    neighbors_dict[port]["local_port_id"] = line.split("mgmt")[1]
+
+        lldp_dict = defaultdict(list)
+        for port in neighbors_dict:
+            if "chassis_id" not in neighbors_dict[port].keys():
+                neighbors_dict[port]["chassis_id"] = ""
+            if "chassis_description" not in neighbors_dict[port].keys():
+                neighbors_dict[port]["chassis_description"] = ""
+            if "mac_addr" not in neighbors_dict[port].keys():
+                neighbors_dict[port]["mac_addr"] = neighbors_dict[port].get(
+                    "chassis_id", ""
+                )
+            if "port_description" not in neighbors_dict[port].keys():
+                neighbors_dict[port]["port_description"] = ""
+            if "chassis_name" not in neighbors_dict[port].keys():
+                neighbors_dict[port]["chassis_name"] = ""
+            neighbors_dict[port]["port_id_subtype"] = "if_name"
+            interface = neighbors_dict[port]["local_port_id"]
+            lldp_dict[interface].append(neighbors_dict[port])
+
+        # Order the ports in natural order
+        lldp_dict = OrderedDict(natsort.natsorted(lldp_dict.items()))
+
+        # Switch Firmware and Switch Model
+        switch_firmware = {
+            "current_version": "",
+            "primary_version": "",
+            "secondary_version": "",
+            "default_image": "",
+            "booted_image": "",
+        }
+        for line in command_output[2].splitlines():
+            if line.startswith("OS Version:"):
+                switch_firmware["current_version"] = line[12:]
+            if line.startswith("System Type:"):
+                platform_name = line[13:]
+
+        # Switch Hostname
+        hostname = ""
+        for line in command_output[3].splitlines():
+            if line.startswith("hostname"):
+                hostname = line.split()[1]
+
+        switch_info = {
+            "platform_name": platform_name,
+            "hostname": hostname,
+        }
+
+        # Cache switch values
+        switch_json = {
+            "ip_address": ip,
+            "ip": ip,
+            "hostname": switch_info["hostname"],
+            "platform_name": switch_info["platform_name"],
+            "vendor": "dell",
+            "firmware": switch_firmware,
+            "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        }
+
+        # ARP
+        arp = defaultdict(dict)
+        for line in command_output[4].splitlines()[2:]:
+            line_list = line.split()
+            if len(line_list) != 4:
+                pass
+            arp_ip = line_list[0]
+            arp_mac = line_list[1]
+            arp_vlan = line_list[2]
+            arp_dict = {
+                "ip_address": arp_ip,
+                "mac": arp_mac,
+                "port": [arp_vlan],
+            }
+
+            arp[arp_mac] = arp_dict
+
+        cache_lldp(switch_json, lldp_dict, arp)
+
+    except ssh_exception.NetmikoTimeoutException as timeout:
+        if return_error:
+            raise timeout
+        else:
+            click.secho(
+                f"Timeout error connecting to switch {ip}, check the IP address and try again.",
+                fg="white",
+                bg="red",
+            )
+            return None, None, None
+    except ssh_exception.NetmikoAuthenticationException as auth_err:
+        if return_error:
+            raise auth_err
+        click.secho(
+            f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again.",
+            fg="white",
+            bg="red",
+        )
+        return None, None, None
+    except Exception as error:  # pragma: no cover
+        if return_error:
+            raise error
+        exception_type = type(error).__name__
+        click.secho(
+            f"{exception_type} {error}",
+            fg="white",
+            bg="red",
+        )
+        return None, None, None
+
+    return switch_json, lldp_dict, arp
+
+
+def get_lldp_mellanox(ip, credentials, return_error):
+    """Get lldp of a Shasta switch using the API.
+
+    Args:
+        ip: IPv4 address of the switch
+        credentials: Dictionary with username and password of the switch
+        return_error: Bool if the error show be printed or returned
+
+    Returns:
+        switch_info: Dictionary with switch platform_name, hostname and IP address
+        lldp_dict: Dictionary with LLDP information
+        arp: ARP dictionary
+
+    Raises:
+        HTTPError: IP not Aruba switch, or credentials bad.
+        ConnectionError: Bad IP address.
+    """
+    session = requests.Session()
+
+    # Login
+    login = session.post(
+        f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
+        json=credentials,
+        verify=False,
+    )
+
+    if login.status_code == 404:
+        if return_error:
+            raise requests.exceptions.ConnectionError
+        else:
+            click.secho(
+                f"Error connecting to switch {ip}, check the IP address and try again.",
+                fg="white",
+                bg="red",
+            )
+            return None, None, None
+    if login.json()["status"] != "OK":
+        if return_error:
+            raise requests.exceptions.HTTPError
+        else:
+            click.secho(
+                f"Error connecting to switch {ip}, check the username or password.",
+                fg="white",
+                bg="red",
+            )
+            return None, None, None
+
+    try:
+        lldp_remote = session.post(
+            f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"cmd": "show lldp interfaces ethernet remote"},
+            verify=False,
+        )
+
+        lldp_json = lldp_remote.json()
+
+        neighbors_dict = defaultdict(dict)
+        for x in lldp_json["data"]:
+            for port in x:
+                if x.get("Lines") == [
+                    "",
+                    "No lldp remote information.",
+                    "",
+                ]:
+                    break
+                local_port_id = "1/" + port.strip("Eth").split()[0]
+
+                neighbors_dict[port]["local_port_id"] = local_port_id
+                for prop in x[port]:
+                    if "Remote chassis id" in prop:
+                        chassis_id = prop.get("Remote chassis id")
+                        if chassis_id == "Not Advertised":
+                            chassis_id = ""
+                        neighbors_dict[port]["chassis_id"] = chassis_id
+                        neighbors_dict[port]["mac_addr"] = chassis_id
+                    if "Remote system description" in prop:
+                        chassis_description = prop.get("Remote system description")
+                        if chassis_description == "Not Advertised":
+                            chassis_description = ""
+                        neighbors_dict[port][
+                            "chassis_description"
+                        ] = chassis_description
+                    if "Remote system name" in prop:
+                        chassis_name = prop.get("Remote system name")
+                        if chassis_name == "Not Advertised":
+                            chassis_name = ""
+                        neighbors_dict[port]["chassis_name"] = chassis_name
+                    if "Remote port description" in prop:
+                        port_description = prop.get("Remote port description")
+                        if port_description == "Not Advertised":
+                            port_description = ""
+                        neighbors_dict[port]["port_description"] = port_description
+                    if "Remote port-id" in prop:
+                        port_id = prop.get("Remote port-id")
+                        if port_id == "Not Advertised":
+                            port_id = ""
+                        neighbors_dict[port]["port_id"] = port_id
+
+        lldp_dict = defaultdict(list)
+        for port in neighbors_dict:
+            if "chassis_id" not in neighbors_dict[port].keys():
+                neighbors_dict[port]["chassis_id"] = ""
+            if "mac_addr" not in neighbors_dict[port].keys():
+                neighbors_dict[port]["mac_addr"] = neighbors_dict[port].get(
+                    "chassis_id", ""
+                )
+            if "chassis_description" not in neighbors_dict[port].keys():
+                neighbors_dict[port]["chassis_description"] = ""
+            if "port_description" not in neighbors_dict[port].keys():
+                neighbors_dict[port]["port_description"] = ""
+            if "chassis_name" not in neighbors_dict[port].keys():
+                neighbors_dict[port]["chassis_name"] = ""
+            neighbors_dict[port]["port_id_subtype"] = "if_name"
+            interface = neighbors_dict[port]["local_port_id"]
+            lldp_dict[interface].append(neighbors_dict[port])
+
+        # Order the ports in natural order
+        lldp_dict = OrderedDict(natsort.natsorted(lldp_dict.items()))
+
+        # Switch Hostname
+        switch_hostname = session.post(
+            f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"cmd": "show hosts | include Hostname"},
+            verify=False,
+        )
+        switch_hostname.raise_for_status()
+
+        hostname = switch_hostname.json()["data"][0]["Hostname"]
+
+        # Switch Model
+        system_type = session.post(
+            f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"cmd": "show system type"},
+            verify=False,
+        )
+        system_type.raise_for_status()
+
+        platform_name = system_type.json()["data"]["value"]
+
+        switch_info = {
+            "platform_name": platform_name[0],
+            "hostname": hostname,
+        }
+
+        # Cache switch values
+        switch_json = {
+            "ip_address": ip,
+            "ip": ip,
+            "hostname": switch_info["hostname"],
+            "platform_name": switch_info["platform_name"],
+            "vendor": "mellanox",
+            "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        }
+
+        # ARP
+        arp_response = session.post(
+            f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"cmd": 'show ip arp | exclude "Total number of entries"'},
+            verify=False,
+        )
+        arp_response.raise_for_status()
+        arp_response = arp_response.json()["data"]
+
+        for entry in arp_response:
+            if "VRF Name default" in entry:
+                arp_json = entry
+
+        arp = defaultdict(dict)
+        for arp_ip in arp_json:
+            arp_mac = arp_json[arp_ip][0].get("Hardware Address")
+            arp_port = arp_json[arp_ip][0].get("Interface")
+            arp_dict = {
+                "ip_address": arp_ip,
+                "mac": arp_mac,
+                "port": arp_port,
+            }
+
+            arp[arp_mac] = arp_dict
+
+        logout = session.post(
+            f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-logout",
+            verify=False,
+        )
+        logout.raise_for_status()
+
+        cache_lldp(switch_json, lldp_dict, arp)
+
+    except (
+        requests.exceptions.HTTPError,
+        requests.exceptions.ConnectionError,
+        requests.exceptions.RequestException,
+    ) as error:
+        if return_error:
+            raise error
+
+        exception_type = type(error).__name__
+        click.secho(
+            f"{exception_type} {error} while connecting to {ip}.",
+            fg="white",
+            bg="red",
+        )
+        return None, None, None
+
+    return switch_json, lldp_dict, arp
+
+
 def cache_lldp(switch_info, lldp_dict, arp):
     """Format LLDP info and cache it.
 
@@ -208,7 +638,7 @@ def cache_lldp(switch_info, lldp_dict, arp):
         "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "hostname": switch_info["hostname"],
         "platform_name": switch_info["platform_name"],
-        "vendor": "aruba",
+        "vendor": switch_info["vendor"],
     }
 
     for port in lldp_dict:
@@ -310,7 +740,11 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
         fg="bright_white",
         file=out,
     )
-    click.secho(f"Aruba {switch_info['platform_name']}", fg="bright_white", file=out)
+    click.secho(
+        f"{switch_info['vendor'].capitalize()} {switch_info['platform_name']}",
+        fg="bright_white",
+        file=out,
+    )
 
     click.echo(dash, file=out)
     click.echo(
@@ -348,241 +782,3 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
             file=out,
         )
     print("\n")
-
-
-{
-    "10.103.2.1,vlan7": {
-        "address_family": "ipv4",
-        "from": "dynamic",
-        "in_use_by_routes": False,
-        "ip_address": "10.103.2.1",
-        "last_updated": 0,
-        "mac": "02:01:00:00:01:00",
-        "multicast_l3_neighbor_forwarding": None,
-        "phy_port": {"lag51": "/rest/v10.04/system/interfaces/lag51"},
-        "port": {"vlan7": "/rest/v10.04/system/interfaces/vlan7"},
-        "state": "reachable",
-        "tunnel_endpoint": None,
-    },
-    "10.103.2.10,vlan7": {
-        "address_family": "ipv4",
-        "from": "dynamic",
-        "in_use_by_routes": False,
-        "ip_address": "10.103.2.10",
-        "last_updated": 0,
-        "mac": "14:02:ec:df:a2:08",
-        "multicast_l3_neighbor_forwarding": None,
-        "phy_port": {"lag51": "/rest/v10.04/system/interfaces/lag51"},
-        "port": {"vlan7": "/rest/v10.04/system/interfaces/vlan7"},
-        "state": "reachable",
-        "tunnel_endpoint": None,
-    },
-    "10.103.2.11,vlan7": {
-        "address_family": "ipv4",
-        "from": "dynamic",
-        "in_use_by_routes": False,
-        "ip_address": "10.103.2.11",
-        "last_updated": 0,
-        "mac": "14:02:ec:df:a1:18",
-        "multicast_l3_neighbor_forwarding": None,
-        "phy_port": {"lag51": "/rest/v10.04/system/interfaces/lag51"},
-        "port": {"vlan7": "/rest/v10.04/system/interfaces/vlan7"},
-        "state": "reachable",
-        "tunnel_endpoint": None,
-    },
-    "10.103.2.12,vlan7": {
-        "address_family": "ipv4",
-        "from": "dynamic",
-        "in_use_by_routes": False,
-        "ip_address": "10.103.2.12",
-        "last_updated": 0,
-        "mac": "14:02:ec:df:9a:e8",
-        "multicast_l3_neighbor_forwarding": None,
-        "phy_port": {"lag51": "/rest/v10.04/system/interfaces/lag51"},
-        "port": {"vlan7": "/rest/v10.04/system/interfaces/vlan7"},
-        "state": "reachable",
-        "tunnel_endpoint": None,
-    },
-    "10.103.2.13,vlan7": {
-        "address_family": "ipv4",
-        "from": "dynamic",
-        "in_use_by_routes": False,
-        "ip_address": "10.103.2.13",
-        "last_updated": 0,
-        "mac": "14:02:ec:df:9b:f0",
-        "multicast_l3_neighbor_forwarding": None,
-        "phy_port": {"lag51": "/rest/v10.04/system/interfaces/lag51"},
-        "port": {"vlan7": "/rest/v10.04/system/interfaces/vlan7"},
-        "state": "reachable",
-        "tunnel_endpoint": None,
-    },
-    "10.103.2.2,vlan7": {
-        "address_family": "ipv4",
-        "from": "dynamic",
-        "in_use_by_routes": False,
-        "ip_address": "10.103.2.2",
-        "last_updated": 0,
-        "mac": "b8:d4:e7:d3:9d:00",
-        "multicast_l3_neighbor_forwarding": None,
-        "phy_port": {"lag51": "/rest/v10.04/system/interfaces/lag51"},
-        "port": {"vlan7": "/rest/v10.04/system/interfaces/vlan7"},
-        "state": "reachable",
-        "tunnel_endpoint": None,
-    },
-    "10.103.2.3,vlan7": {
-        "address_family": "ipv4",
-        "from": "dynamic",
-        "in_use_by_routes": False,
-        "ip_address": "10.103.2.3",
-        "last_updated": 0,
-        "mac": "b8:d4:e7:d3:8d:00",
-        "multicast_l3_neighbor_forwarding": None,
-        "phy_port": {"lag51": "/rest/v10.04/system/interfaces/lag51"},
-        "port": {"vlan7": "/rest/v10.04/system/interfaces/vlan7"},
-        "state": "reachable",
-        "tunnel_endpoint": None,
-    },
-    "10.103.2.8,vlan7": {
-        "address_family": "ipv4",
-        "from": "dynamic",
-        "in_use_by_routes": False,
-        "ip_address": "10.103.2.8",
-        "last_updated": 0,
-        "mac": "14:02:ec:df:9c:38",
-        "multicast_l3_neighbor_forwarding": None,
-        "phy_port": {"lag51": "/rest/v10.04/system/interfaces/lag51"},
-        "port": {"vlan7": "/rest/v10.04/system/interfaces/vlan7"},
-        "state": "reachable",
-        "tunnel_endpoint": None,
-    },
-    "10.103.2.9,vlan7": {
-        "address_family": "ipv4",
-        "from": "dynamic",
-        "in_use_by_routes": False,
-        "ip_address": "10.103.2.9",
-        "last_updated": 0,
-        "mac": "14:02:ec:df:9c:f8",
-        "multicast_l3_neighbor_forwarding": None,
-        "phy_port": {"lag51": "/rest/v10.04/system/interfaces/lag51"},
-        "port": {"vlan7": "/rest/v10.04/system/interfaces/vlan7"},
-        "state": "reachable",
-        "tunnel_endpoint": None,
-    },
-    "10.252.1.10,vlan2": {
-        "address_family": "ipv4",
-        "from": "dynamic",
-        "in_use_by_routes": False,
-        "ip_address": "10.252.1.10",
-        "last_updated": 0,
-        "mac": "14:02:ec:df:a1:18",
-        "multicast_l3_neighbor_forwarding": None,
-        "phy_port": {"lag51": "/rest/v10.04/system/interfaces/lag51"},
-        "port": {"vlan2": "/rest/v10.04/system/interfaces/vlan2"},
-        "state": "reachable",
-        "tunnel_endpoint": None,
-    },
-    "10.252.1.11,vlan2": {
-        "address_family": "ipv4",
-        "from": "dynamic",
-        "in_use_by_routes": False,
-        "ip_address": "10.252.1.11",
-        "last_updated": 0,
-        "mac": "14:02:ec:df:9a:e8",
-        "multicast_l3_neighbor_forwarding": None,
-        "phy_port": {"lag51": "/rest/v10.04/system/interfaces/lag51"},
-        "port": {"vlan2": "/rest/v10.04/system/interfaces/vlan2"},
-        "state": "reachable",
-        "tunnel_endpoint": None,
-    },
-    "10.252.1.12,vlan2": {
-        "address_family": "ipv4",
-        "from": "dynamic",
-        "in_use_by_routes": False,
-        "ip_address": "10.252.1.12",
-        "last_updated": 0,
-        "mac": "14:02:ec:df:9b:f0",
-        "multicast_l3_neighbor_forwarding": None,
-        "phy_port": {"lag51": "/rest/v10.04/system/interfaces/lag51"},
-        "port": {"vlan2": "/rest/v10.04/system/interfaces/vlan2"},
-        "state": "reachable",
-        "tunnel_endpoint": None,
-    },
-    "10.252.1.15,vlan2": {
-        "address_family": "ipv4",
-        "from": "dynamic",
-        "in_use_by_routes": False,
-        "ip_address": "10.252.1.15",
-        "last_updated": 0,
-        "mac": "14:02:ec:df:9b:60",
-        "multicast_l3_neighbor_forwarding": None,
-        "phy_port": {"lag51": "/rest/v10.04/system/interfaces/lag51"},
-        "port": {"vlan2": "/rest/v10.04/system/interfaces/vlan2"},
-        "state": "reachable",
-        "tunnel_endpoint": None,
-    },
-    "10.252.1.8,vlan2": {
-        "address_family": "ipv4",
-        "from": "dynamic",
-        "in_use_by_routes": False,
-        "ip_address": "10.252.1.8",
-        "last_updated": 0,
-        "mac": "14:02:ec:df:9c:f8",
-        "multicast_l3_neighbor_forwarding": None,
-        "phy_port": {"lag51": "/rest/v10.04/system/interfaces/lag51"},
-        "port": {"vlan2": "/rest/v10.04/system/interfaces/vlan2"},
-        "state": "reachable",
-        "tunnel_endpoint": None,
-    },
-    "10.252.1.9,vlan2": {
-        "address_family": "ipv4",
-        "from": "dynamic",
-        "in_use_by_routes": False,
-        "ip_address": "10.252.1.9",
-        "last_updated": 0,
-        "mac": "14:02:ec:df:a2:08",
-        "multicast_l3_neighbor_forwarding": None,
-        "phy_port": {"lag51": "/rest/v10.04/system/interfaces/lag51"},
-        "port": {"vlan2": "/rest/v10.04/system/interfaces/vlan2"},
-        "state": "reachable",
-        "tunnel_endpoint": None,
-    },
-    "10.254.1.12,vlan4": {
-        "address_family": "ipv4",
-        "from": "dynamic",
-        "in_use_by_routes": False,
-        "ip_address": "10.254.1.12",
-        "last_updated": 0,
-        "mac": "14:02:ec:df:9c:f8",
-        "multicast_l3_neighbor_forwarding": None,
-        "phy_port": {"lag51": "/rest/v10.04/system/interfaces/lag51"},
-        "port": {"vlan4": "/rest/v10.04/system/interfaces/vlan4"},
-        "state": "reachable",
-        "tunnel_endpoint": None,
-    },
-    "10.254.1.14,vlan4": {
-        "address_family": "ipv4",
-        "from": "dynamic",
-        "in_use_by_routes": False,
-        "ip_address": "10.254.1.14",
-        "last_updated": 0,
-        "mac": "14:02:ec:df:a2:08",
-        "multicast_l3_neighbor_forwarding": None,
-        "phy_port": {"lag51": "/rest/v10.04/system/interfaces/lag51"},
-        "port": {"vlan4": "/rest/v10.04/system/interfaces/vlan4"},
-        "state": "reachable",
-        "tunnel_endpoint": None,
-    },
-    "10.254.1.20,vlan4": {
-        "address_family": "ipv4",
-        "from": "dynamic",
-        "in_use_by_routes": False,
-        "ip_address": "10.254.1.20",
-        "last_updated": 0,
-        "mac": "14:02:ec:df:9b:f0",
-        "multicast_l3_neighbor_forwarding": None,
-        "phy_port": {"lag51": "/rest/v10.04/system/interfaces/lag51"},
-        "port": {"vlan4": "/rest/v10.04/system/interfaces/vlan4"},
-        "state": "reachable",
-        "tunnel_endpoint": None,
-    },
-}

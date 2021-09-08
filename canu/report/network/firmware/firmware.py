@@ -13,12 +13,19 @@ from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
 import emoji
+from netmiko import ssh_exception
 import requests
 import ruamel.yaml
 
 
 from canu.cache import cache_switch
-from canu.report.switch.firmware.firmware import get_firmware
+from canu.report.switch.firmware.firmware import (
+    get_firmware_aruba,
+    get_firmware_dell,
+    get_firmware_mellanox,
+)
+from canu.utils.utils import switch_vendor
+
 
 yaml = ruamel.yaml.YAML()
 
@@ -135,10 +142,23 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
                     end="\r",
                 )
                 try:
-                    switch_firmware, switch_info = get_firmware(
-                        str(ip), credentials, True, cache_minutes
-                    )
-                    firmware_range = config["shasta"][shasta]["aruba"][
+
+                    vendor = switch_vendor(str(ip), credentials, True)
+
+                    if vendor == "aruba":
+                        switch_firmware, switch_info = get_firmware_aruba(
+                            str(ip), credentials, True, cache_minutes=cache_minutes
+                        )
+                    elif vendor == "dell":
+                        switch_firmware, switch_info = get_firmware_dell(
+                            str(ip), credentials
+                        )
+                    elif vendor == "mellanox":
+                        switch_firmware, switch_info = get_firmware_mellanox(
+                            str(ip), credentials
+                        )
+
+                    firmware_range = config["shasta"][shasta][vendor][
                         switch_info["platform_name"]
                     ]
                     if switch_firmware["current_version"] in firmware_range:
@@ -171,7 +191,37 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
                     )
                     cache_switch(switch_json[str(ip)])
 
-                except requests.exceptions.HTTPError:
+                except (
+                    requests.exceptions.HTTPError,
+                    requests.exceptions.ConnectionError,
+                    requests.exceptions.RequestException,
+                    ssh_exception.NetmikoTimeoutException,
+                    ssh_exception.NetmikoAuthenticationException,
+                    KeyError,
+                ) as err:
+                    exception_type = type(err).__name__
+
+                    if exception_type == "HTTPError":
+                        error_message = "HTTP Error. Check that this IP is an Aruba switch, or check the username and password"
+                    elif exception_type == "ConnectionError":
+                        error_message = (
+                            "Connection Error. Check that the IP address is valid"
+                        )
+                    elif exception_type == "RequestException":  # pragma: no cover
+                        error_message = (
+                            "RequestException Error. Error connecting to switch."
+                        )
+                    elif exception_type == "NetmikoTimeoutException":
+                        error_message = (
+                            "Timeout error. Check the IP address and try again."
+                        )
+                    elif exception_type == "NetmikoAuthenticationException":
+                        error_message = "Authentication error. Check the credentials or IP address and try again"
+                    elif exception_type == "KeyError":
+                        error_message = "Could not determine the vendor of the switch."
+
+                    error_emoji = emoji.emojize(":red_triangle_pointed_up:")
+
                     switch_json[str(ip)] = {
                         "ip_address": str(ip),
                         "status": "Error",
@@ -179,74 +229,13 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
                             "%Y-%m-%d %H:%M:%S"
                         ),
                     }
-                    error_emoji = emoji.emojize(":red_triangle_pointed_up:")
-                    data.append(
-                        [
-                            error_emoji,
-                            "Error",
-                            str(ip),
-                            "",
-                            "",
-                            "",
-                        ]
-                    )
-                    errors.append(
-                        [
-                            str(ip),
-                            "HTTP Error. Check that this IP is an Aruba switch, or check the username and password",
-                        ]
-                    )
-                except requests.exceptions.ConnectionError:
-                    switch_json[str(ip)] = {
-                        "ip_address": str(ip),
-                        "status": "Error",
-                        "updated_at": datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                    }
-                    error_emoji = emoji.emojize(":red_triangle_pointed_up:")
-                    data.append(
-                        [
-                            error_emoji,
-                            "Error",
-                            str(ip),
-                            "",
-                            "",
-                            "",
-                        ]
-                    )
-                    errors.append(
-                        [
-                            str(ip),
-                            "Connection Error. Check that the IP address is valid",
-                        ]
-                    )
-                except requests.exceptions.RequestException:  # pragma: no cover
-                    switch_json[str(ip)] = {
-                        "ip_address": str(ip),
-                        "status": "Error",
-                        "updated_at": datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                    }
-                    error_emoji = emoji.emojize(":red_triangle_pointed_up:")
-                    data.append(
-                        [
-                            error_emoji,
-                            "Error",
-                            str(ip),
-                            "",
-                            "",
-                            "",
-                        ]
-                    )
-                    errors.append(
-                        [
-                            str(ip),
-                            "RequestException Error. Error connecting to switch.",
-                        ]
-                    )
+                    data.append([error_emoji, "Error", str(ip), "", "", ""])
+                    errors.append([str(ip), error_message])
+
                 except Exception:  # pragma: no cover
+                    error_message = "Unknown error connecting to switch."
+                    error_emoji = emoji.emojize(":red_triangle_pointed_up:")
+
                     switch_json[str(ip)] = {
                         "ip_address": str(ip),
                         "status": "Error",
@@ -254,17 +243,8 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
                             "%Y-%m-%d %H:%M:%S"
                         ),
                     }
-                    data.append(
-                        [
-                            error_emoji,
-                            "Error",
-                            str(ip),
-                            "",
-                            "",
-                            "",
-                        ]
-                    )
-                    errors.append([str(ip), "Unknown error connecting to switch."])
+                    data.append([error_emoji, "Error", str(ip), "", "", ""])
+                    errors.append([str(ip), error_message])
 
         if json_:
             json_formatted = json.dumps(switch_json, indent=2)

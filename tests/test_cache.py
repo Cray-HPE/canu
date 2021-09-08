@@ -1,5 +1,6 @@
 """Test CANU cache."""
 import json
+from unittest.mock import patch
 
 import click.testing
 import pytest
@@ -22,10 +23,12 @@ cache_minutes = 10
 runner = click.testing.CliRunner()
 
 
+@patch("canu.report.switch.firmware.firmware.switch_vendor")
 @responses.activate
-def test_switch_caching():
+def test_switch_caching(switch_vendor):
     """Test that the `canu switch firmware` command caches the switch info."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",

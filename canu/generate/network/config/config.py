@@ -361,6 +361,5 @@ def config(
         click.secho(dash)
         for x in missing_devices:
             click.secho(x, fg="bright_white")
-        # print("network all_devices", all_devices.difference(config_devices))
 
     return

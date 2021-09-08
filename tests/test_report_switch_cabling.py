@@ -1,10 +1,13 @@
 """Test CANU report switch cabling commands."""
+from unittest.mock import patch
 
 import click.testing
+from netmiko import ssh_exception
 import pytest
 import requests
 import responses
 
+from canu.cache import remove_switch_from_cache
 from canu.cli import cli
 from canu.report.switch.cabling.cabling import get_lldp
 
@@ -12,6 +15,8 @@ from canu.report.switch.cabling.cabling import get_lldp
 username = "admin"
 password = "admin"
 ip = "192.168.1.1"
+ip_dell = "192.168.1.2"
+ip_mellanox = "192.168.1.3"
 credentials = {"username": username, "password": password}
 cache_minutes = 0
 runner = click.testing.CliRunner()
@@ -29,10 +34,12 @@ def test_switch_cli():
     assert result.exit_code == 0
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
 @responses.activate
-def test_get_lldp_function():
+def test_get_lldp_function(switch_vendor):
     """Test the `get_lldp` function returns valid switch information."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -74,14 +81,17 @@ def test_get_lldp_function():
 
         assert arp["192.168.1.2,vlan1"]["mac"] == "00:00:00:00:00:00"
         assert list(arp["192.168.1.2,vlan1"]["port"])[0] == "vlan1"
+        remove_switch_from_cache(ip)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
 @responses.activate
-def test_get_lldp_function_bad_ip():
+def test_get_lldp_function_bad_ip(switch_vendor):
     """Test that the `canu report switch cabling` command errors on a bad IP."""
     bad_ip = "192.168.1.99"
 
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
@@ -96,10 +106,12 @@ def test_get_lldp_function_bad_ip():
         assert "Failed to establish a new connection" in str(connection_error.value)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
 @responses.activate
-def test_get_lldp_function_bad_credentials():
+def test_get_lldp_function_bad_credentials(switch_vendor):
     """Test that the `canu report switch cabling` command errors on bad credentials."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -111,12 +123,15 @@ def test_get_lldp_function_bad_credentials():
         with pytest.raises(requests.exceptions.HTTPError) as http_error:
             get_lldp(ip, bad_credentials, True)
         assert "Unauthorized for url" in str(http_error.value)
+    remove_switch_from_cache(ip)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
 @responses.activate
-def test_switch_cabling():
+def test_switch_cabling(switch_vendor):
     """Test that the `canu switch cabling` command runs and returns valid cabling."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -164,6 +179,7 @@ def test_switch_cabling():
         )
         assert result.exit_code == 0
         assert "1/1/1   ==> sw-test01      1/1/1" in str(result.output)
+        remove_switch_from_cache(ip)
 
 
 def test_switch_cabling_missing_ip():
@@ -212,12 +228,14 @@ def test_switch_cabling_invalid_ip():
         assert "check the IP address and try again" in str(result.output)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
 @responses.activate
-def test_switch_cabling_bad_ip():
+def test_switch_cabling_bad_ip(switch_vendor):
     """Test that the `canu switch cabling` command errors on bad IP address."""
     bad_ip = "192.168.1.99"
 
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
@@ -246,12 +264,14 @@ def test_switch_cabling_bad_ip():
         assert "check the IP address and try again" in str(result.output)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
 @responses.activate
-def test_switch_cabling_bad_password():
+def test_switch_cabling_bad_password(switch_vendor):
     """Test that the `canu switch cabling` command errors on bad credentials."""
     bad_password = "foo"
 
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -277,6 +297,373 @@ def test_switch_cabling_bad_password():
         assert result.exit_code == 0
         assert "check the username or password" in str(result.output)
 
+
+# Dell
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_commands")
+def test_switch_cabling_dell(netmiko_commands, switch_vendor):
+    """Test that the `canu switch cabling` command runs and returns valid Dell cabling."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "dell"
+        netmiko_commands.return_value = netmiko_commands_dell
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "report",
+                "switch",
+                "cabling",
+                "--ip",
+                ip_dell,
+                "--username",
+                username,
+                "--password",
+                password,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "1/1/1   ==> sw-test01      Eth1/15            sw-test01                                             Test Switch 1\n"
+            "1/1/2   ==> sw-test02      Eth1/15            sw-test02                                             Test Switch 2\n"
+        ) in str(result.output)
+        remove_switch_from_cache(ip)
+
+
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_commands")
+def test_switch_cabling_dell_timeout(netmiko_commands, switch_vendor):
+    """Test that the `canu switch cabling` command errors on ssh timeout."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "dell"
+        netmiko_commands.side_effect = ssh_exception.NetmikoTimeoutException
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "report",
+                "switch",
+                "cabling",
+                "--ip",
+                ip_dell,
+                "--username",
+                username,
+                "--password",
+                password,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "Timeout error connecting to switch 192.168.1.2, check the IP address and try again."
+            in str(result.output)
+        )
+
+
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_commands")
+def test_switch_cabling_dell_auth(netmiko_commands, switch_vendor):
+    """Test that the `canu switch cabling` command errors on ssh auth."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "dell"
+        netmiko_commands.side_effect = ssh_exception.NetmikoAuthenticationException
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "report",
+                "switch",
+                "cabling",
+                "--ip",
+                ip_dell,
+                "--username",
+                username,
+                "--password",
+                password,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "Authentication error connecting to switch 192.168.1.2, check the credentials or IP address and try again."
+            in str(result.output)
+        )
+
+
+# Mellanox
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@responses.activate
+def test_switch_cabling_mellanox(switch_vendor):
+    """Test that the `canu switch cabling` command runs and returns valid Mellanox cabling."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "mellanox"
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"status": "OK", "status_msg": "Successfully logged-in"},
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json=lldp_json_mellanox,
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"data": [{"Hostname": "sw-test03"}]},
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"data": {"value": ["MSN2100"]}},
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json=arp_neighbors_mellanox,
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-logout",
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "report",
+                "switch",
+                "cabling",
+                "--ip",
+                ip_mellanox,
+                "--username",
+                username,
+                "--password",
+                password,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "1/1/1   ==> sw-test03      Eth1/11            sw-test03                                             Test Switch 3\n"
+            "1/1/2   ==> sw-test04      Eth1/12            sw-test04                                             Test Switch 4\n"
+        ) in str(result.output)
+        remove_switch_from_cache(ip)
+
+
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@responses.activate
+def test_switch_cabling_mellanox_no_neighbors(switch_vendor):
+    """Test that the `canu switch cabling` command runs and returns valid Mellanox cabling."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "mellanox"
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"status": "OK", "status_msg": "Successfully logged-in"},
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={
+                "status": "OK",
+                "executed_command": "show lldp interfaces ethernet remote",
+                "status_message": "",
+                "data": [{"Lines": ["", "No lldp remote information.", ""]}],
+            },
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"data": [{"Hostname": "sw-test03"}]},
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"data": {"value": ["MSN2100"]}},
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json=arp_neighbors_mellanox,
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-logout",
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "report",
+                "switch",
+                "cabling",
+                "--ip",
+                ip_mellanox,
+                "--username",
+                username,
+                "--password",
+                password,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "Switch: sw-test03 (192.168.1.3)                       \n"
+            "Mellanox MSN2100\n"
+            "---------------------------------------------------------------------------------------------------------------"
+            "---------------------------------------\n"
+            "PORT        NEIGHBOR       NEIGHBOR PORT      PORT DESCRIPTION                                      DESCRIPTION\n"
+            "---------------------------------------------------------------------------------------------------------------"
+            "---------------------------------------\n"
+            "\n"
+            "\n"
+        ) in str(result.output)
+        remove_switch_from_cache(ip)
+
+
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@responses.activate
+def test_switch_cabling_mellanox_auth_error(switch_vendor):
+    """Test that the `canu switch cabling` command errors on authentication error."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "mellanox"
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"status": "ERROR", "status_msg": "Invalid username or password"},
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "report",
+                "switch",
+                "cabling",
+                "--ip",
+                ip_mellanox,
+                "--username",
+                username,
+                "--password",
+                password,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "Error connecting to switch 192.168.1.3, check the username or password."
+            in str(result.output)
+        )
+
+
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@responses.activate
+def test_switch_cabling_mellanox_connection_error(switch_vendor):
+    """Test that the `canu switch cabling` command errors on connection error."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "mellanox"
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            status=404,
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "report",
+                "switch",
+                "cabling",
+                "--ip",
+                ip_mellanox,
+                "--username",
+                username,
+                "--password",
+                password,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "Error connecting to switch 192.168.1.3, check the IP address and try again."
+            in str(result.output)
+        )
+
+
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@responses.activate
+def test_switch_cabling_mellanox_exception(switch_vendor):
+    """Test that the `canu switch cabling` command errors on switch exception after login."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "mellanox"
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"status": "OK", "status_msg": "Successfully logged-in"},
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            body=requests.exceptions.HTTPError(),
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "report",
+                "switch",
+                "cabling",
+                "--ip",
+                ip_mellanox,
+                "--username",
+                username,
+                "--password",
+                password,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "HTTPError  while connecting to 192.168.1.3." in str(result.output)
+
+
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+def test_switch_cabling_vendor_error(switch_vendor):
+    """Test that the `canu switch cabling` command errors."""
+    with runner.isolated_filesystem():
+        switch_vendor.side_effect = requests.exceptions.HTTPError
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "report",
+                "switch",
+                "cabling",
+                "--ip",
+                ip,
+                "--username",
+                username,
+                "--password",
+                password,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "Error connecting to switch 192.168.1.1, HTTPError ." in str(
+            result.output
+        )
+
+
+remove_switch_from_cache(ip)
+remove_switch_from_cache(ip_dell)
+remove_switch_from_cache(ip_mellanox)
 
 lldp_neighbors_json = {
     "1%2F1%2F1": {
@@ -355,4 +742,112 @@ arp_neighbors_json = {
         "ip_address": "192.168.1.3",
         "port": {"vlan2": "/rest/v10.04/system/interfaces/vlan2"},
     },
+}
+
+netmiko_commands_dell = [
+    "",
+    " \n"
+    + "Remote Chassis ID: aa:bb:cc:dd:ee:ff\n"
+    + "Remote Port ID: Eth1/15\n"
+    + "Remote Port Description: sw-test01\n"
+    + "Local Port ID: ethernet1/1/1\n"
+    + "Remote System Name: sw-test01\n"
+    + "Remote System Desc: Test Switch 1\n"
+    + "--------------------------------------------------------------------------- \n"
+    + "Remote Chassis ID: 11:22:33:44:55:66\n"
+    + "Remote Port ID: Eth1/15\n"
+    + "Remote Port Description: sw-test02\n"
+    + "Local Port ID: ethernet1/1/2\n"
+    + "Remote System Name: sw-test02\n"
+    + "Remote System Desc: Test Switch 2\n"
+    + "--------------------------------------------------------------------------- \n"
+    + "Remote Chassis ID: Not Advertised\n"
+    + "Remote Port ID: Not Advertised\n"
+    + "Remote Port Description: Not Advertised\n"
+    + "Local Port ID: mgmt1/1/3\n"
+    + "Remote System Name: Not Advertised\n"
+    + "Remote System Desc: Not Advertised\n"
+    + "--------------------------------------------------------------------------- \n"
+    + "Remote Port ID: Not Advertised\n"
+    + "Local Port ID: ethernet1/1/4\n"
+    + "--------------------------------------------------------------------------- \n",
+    "OS Version: 10.5.1.4\nSystem Type: S3048-ON\n",
+    "hostname sw-test-dell",
+    "Address        Hardware address    Interface                     Egress Interface    \n"
+    + "------------------------------------------------------------------------------------------\n"
+    + "192.168.1.1    aa:bb:cc:dd:ee:ff   vlan2                         port-channel100     \n"
+    + "192.168.1.2    11:22:33:44:55:66   vlan7                         port-channel100     \n",
+]
+
+lldp_json_mellanox = {
+    "status": "OK",
+    "executed_command": "show lldp interfaces ethernet remote",
+    "status_message": "",
+    "data": [
+        {
+            "Eth1/1 (Po100)": [
+                {
+                    "port id subtype": "Interface Name (5)",
+                    "Remote chassis id": "aa:bb:cc:dd:ee:ff",
+                    "Remote system description": "Test Switch 3",
+                    "Remote port-id": "Eth1/11",
+                    "Remote port description": "sw-test03",
+                    "Remote system name": "sw-test03",
+                },
+            ]
+        },
+        {
+            "Eth1/2 (Po100)": [
+                {
+                    "port id subtype": "Interface Name (5)",
+                    "Remote chassis id": "11:22:33:44:55:66",
+                    "Remote system description": "Test Switch 4",
+                    "Remote port-id": "Eth1/12",
+                    "Remote port description": "sw-test04",
+                    "Remote system name": "sw-test04",
+                },
+            ]
+        },
+        {
+            "Eth1/3 (Po100)": [
+                {
+                    "port id subtype": "Interface Name (5)",
+                    "Remote chassis id": "Not Advertised",
+                    "Remote system description": "Not Advertised",
+                    "Remote port-id": "Not Advertised",
+                    "Remote port description": "Not Advertised",
+                    "Remote system name": "Not Advertised",
+                },
+            ]
+        },
+        {
+            "Eth1/4 (Po100)": [
+                {
+                    "port id subtype": "Interface Name (5)",
+                    "Remote port-id": "Not Advertised",
+                },
+            ]
+        },
+    ],
+}
+
+arp_neighbors_mellanox = {
+    "status": "OK",
+    "executed_command": 'show ip arp | exclude "Total number of entries"',
+    "status_message": "",
+    "data": [
+        {"Flags": [{"G": "EVPN Default GW"}]},
+        {
+            "VRF Name default": [
+                {
+                    "192.168.1.9": [
+                        {"Hardware Address": "aa:bb:cc:dd:ee:ff", "Interface": "vlan 7"}
+                    ],
+                    "192.168.1.10": [
+                        {"Hardware Address": "11:22:33:44:55:66", "Interface": "vlan 4"}
+                    ],
+                }
+            ]
+        },
+    ],
 }

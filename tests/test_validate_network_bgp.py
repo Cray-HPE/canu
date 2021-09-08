@@ -1,4 +1,6 @@
 """Test CANU validate network bgp commands."""
+from unittest.mock import patch
+
 import click.testing
 import requests
 import responses
@@ -11,15 +13,19 @@ username = "admin"
 password = "admin"
 ip = "192.168.1.1"
 ips = "192.168.1.1"
+ip_dell = "192.168.1.2"
+ip_mellanox = "192.168.1.3"
 cache_minutes = 0
 asn = 65533
 runner = click.testing.CliRunner()
 
 
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
 @responses.activate
-def test_validate_bgp():
+def test_validate_bgp(switch_vendor):
     """Test that the `canu validate network bgp` command runs and returns PASS."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -61,11 +67,13 @@ def test_validate_bgp():
         assert "PASS - IP: 192.168.1.1 Hostname: test-spine" in str(result.output)
 
 
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
 @responses.activate
-def test_validate_bgp_full_architecture():
+def test_validate_bgp_full_architecture(switch_vendor):
     """Test that the `canu validate network bgp` command runs and returns PASS with full architecture."""
     full_architecture = "full"
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -107,10 +115,12 @@ def test_validate_bgp_full_architecture():
         assert "PASS - IP: 192.168.1.1 Hostname: test-leaf" in str(result.output)
 
 
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
 @responses.activate
-def test_validate_bgp_file():
+def test_validate_bgp_file(switch_vendor):
     """Test that the `canu validate network bgp` command runs from a file input and returns PASS."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         with open("test.txt", "w") as f:
             f.write("192.168.1.1")
 
@@ -155,10 +165,12 @@ def test_validate_bgp_file():
         assert "PASS - IP: 192.168.1.1 Hostname: test-spine" in str(result.output)
 
 
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
 @responses.activate
-def test_validate_bgp_verbose():
+def test_validate_bgp_verbose(switch_vendor):
     """Test that the `canu validate network bgp` command runs verbose and returns PASS."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -315,12 +327,14 @@ def test_validate_bgp_invalid_ip_file():
         assert "Error: Invalid value:" in str(result.output)
 
 
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
 @responses.activate
-def test_validate_bgp_bad_ip():
+def test_validate_bgp_bad_ip(switch_vendor):
     """Test that the `canu validate network bgp` command errors on a bad IP."""
     bad_ip = "192.168.1.99"
 
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
@@ -354,12 +368,14 @@ def test_validate_bgp_bad_ip():
         )
 
 
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
 @responses.activate
-def test_validate_bgp_bad_ip_file():
+def test_validate_bgp_bad_ip_file(switch_vendor):
     """Test that the `canu validate network bgp` command errors on a bad IP from a file."""
     bad_ip = "192.168.1.99"
 
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         with open("test.txt", "w") as f:
             f.write(bad_ip)
 
@@ -396,12 +412,14 @@ def test_validate_bgp_bad_ip_file():
         )
 
 
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
 @responses.activate
-def test_validate_bgp_bad_password():
+def test_validate_bgp_bad_password(switch_vendor):
     """Test that the `canu validate network bgp` command errors on bad credentials."""
     bad_password = "foo"
 
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -433,10 +451,12 @@ def test_validate_bgp_bad_password():
         )
 
 
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
 @responses.activate
-def test_validate_bgp_fail():
+def test_validate_bgp_fail(switch_vendor):
     """Test that the `canu validate network bgp` command reports that a switch failed bgp check."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -478,10 +498,12 @@ def test_validate_bgp_fail():
         assert "FAIL - IP: 192.168.1.1 Hostname: test-spine" in str(result.output)
 
 
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
 @responses.activate
-def test_validate_bgp_fail_verbose():
+def test_validate_bgp_fail_verbose(switch_vendor):
     """Test that the `canu validate network bgp` command reports that a switch failed bgp check."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -525,10 +547,12 @@ def test_validate_bgp_fail_verbose():
         assert "FAIL - IP: 192.168.1.1 Hostname: test-spine" in str(result.output)
 
 
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
 @responses.activate
-def test_validate_bgp_not_spine():
+def test_validate_bgp_not_spine(switch_vendor):
     """Test that the `canu validate network bgp` command reports SKIP on a switch not a spine."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -570,10 +594,12 @@ def test_validate_bgp_not_spine():
         assert "SKIP - IP: 192.168.1.1 Hostname: test-leaf" in str(result.output)
 
 
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
 @responses.activate
-def test_validate_bgp_error_not_spine():
+def test_validate_bgp_error_not_spine(switch_vendor):
     """Test that the `canu validate network bgp` command given an error on a switch not a spine."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -618,11 +644,13 @@ def test_validate_bgp_error_not_spine():
         )
 
 
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
 @responses.activate
-def test_validate_bgp_error_not_agg():
+def test_validate_bgp_error_not_agg(switch_vendor):
     """Test that the `canu validate network bgp` command given an error on a switch not an agg or leaf."""
     full_architecture = "full"
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -667,6 +695,333 @@ def test_validate_bgp_error_not_agg():
         )
 
 
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
+@responses.activate
+def test_validate_bgp_vendor_error(switch_vendor):
+    """Test that the `canu validate network bgp` command errors on 'None' vendor."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = None
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "network",
+                "bgp",
+                "--ips",
+                ips,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--architecture",
+                architecture,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "192.168.1.1     - Connection Error" in str(result.output)
+
+
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
+@patch("canu.validate.network.bgp.bgp.get_bgp_neighbors_aruba")
+@responses.activate
+def test_validate_bgp_exception(get_bgp_neighbors_aruba, switch_vendor):
+    """Test that the `canu validate network bgp` command errors on exception."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        get_bgp_neighbors_aruba.side_effect = requests.exceptions.HTTPError
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "network",
+                "bgp",
+                "--ips",
+                ips,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--architecture",
+                architecture,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "192.168.1.1     - Connection Error" in str(result.output)
+
+
+# Dell
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
+@responses.activate
+def test_validate_bgp_dell(switch_vendor):
+    """Test that the `canu validate network bgp` command runs with Dell switch."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "dell"
+        responses.add(
+            responses.GET,
+            f"https://{ip_dell}/restconf/data/system-sw-state/sw-version",
+            json=dell_firmware_mock,
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip_dell}/restconf/data/dell-system:system/hostname",
+            json=dell_hostname_mock,
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "network",
+                "bgp",
+                "--ips",
+                ip_dell,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--architecture",
+                architecture,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "SKIP - IP: 192.168.1.2 Hostname: test-dell" in str(result.output)
+
+
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
+@responses.activate
+def test_validate_bgp_dell_http_error(switch_vendor):
+    """Test that the `canu validate network bgp` command errors with Dell switch http error."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "dell"
+        responses.add(
+            responses.GET,
+            f"https://{ip_dell}/restconf/data/system-sw-state/sw-version",
+            body=requests.exceptions.HTTPError(),
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "network",
+                "bgp",
+                "--ips",
+                ip_dell,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--architecture",
+                architecture,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "192.168.1.2     - Connection Error" in str(result.output)
+
+
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
+@responses.activate
+def test_validate_bgp_dell_request_error(switch_vendor):
+    """Test that the `canu validate network bgp` command errors with Dell switch request error."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "dell"
+        responses.add(
+            responses.GET,
+            f"https://{ip_dell}/restconf/data/system-sw-state/sw-version",
+            body=requests.exceptions.RequestException(),
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "network",
+                "bgp",
+                "--ips",
+                ip_dell,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--architecture",
+                architecture,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "192.168.1.2     - Connection Error" in str(result.output)
+
+
+# Mellanox
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
+@responses.activate
+def test_validate_bgp_mellanox(switch_vendor):
+    """Test that the `canu validate network bgp` command runs with Mellanox switch."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "mellanox"
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"status": "OK", "status_msg": "Successfully logged-in"},
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json=bgp_status_mellanox,
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"data": [{"Hostname": "sw-spine-mellanox"}]},
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"data": {"value": ["MSN2100"]}},
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "network",
+                "bgp",
+                "--ips",
+                ip_mellanox,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--architecture",
+                architecture,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "PASS - IP: 192.168.1.3 Hostname: sw-spine-mellanox" in str(
+            result.output
+        )
+
+
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
+@responses.activate
+def test_validate_bgp_mellanox_connection_error(switch_vendor):
+    """Test that the `canu validate network bgp` command errors with Mellanox switch connection error."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "mellanox"
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            status=404,
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "network",
+                "bgp",
+                "--ips",
+                ip_mellanox,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--architecture",
+                architecture,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "192.168.1.3     - Connection Error" in str(result.output)
+
+
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
+@responses.activate
+def test_validate_bgp_mellanox_bad_login(switch_vendor):
+    """Test that the `canu validate network bgp` command errors with Mellanox switch bad login."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "mellanox"
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"status": "ERROR", "status_msg": "Invalid username or password"},
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "network",
+                "bgp",
+                "--ips",
+                ip_mellanox,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--architecture",
+                architecture,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "192.168.1.3     - Connection Error" in str(result.output)
+
+
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
+@responses.activate
+def test_validate_bgp_mellanox_exception(switch_vendor):
+    """Test that the `canu validate network bgp` command errors with Mellanox switch exception."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "mellanox"
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"status": "OK", "status_msg": "Successfully logged-in"},
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            body=requests.exceptions.HTTPError(),
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "network",
+                "bgp",
+                "--ips",
+                ip_mellanox,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--architecture",
+                architecture,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "192.168.1.3     - Connection Error" in str(result.output)
+
+
 all_established = {
     "192.168.1.2": {
         "status": {"bgp_peer_state": "Established"},
@@ -689,4 +1044,31 @@ one_idle = {
     "192.168.1.4": {
         "status": {"bgp_peer_state": "Idle"},
     },
+}
+
+dell_firmware_mock = {
+    "dell-system-software:sw-version": {
+        "sw-version": "10.5.1.4",
+        "sw-platform": "S4048T-ON",
+    }
+}
+
+dell_hostname_mock = {"dell-system:hostname": "test-dell"}
+
+bgp_status_mellanox = {
+    "status": "OK",
+    "executed_command": "show ip bgp summary",
+    "status_message": "",
+    "data": [
+        {
+            "VRF name": "default",
+        },
+        {
+            "192.168.1.9": [
+                {
+                    "State/PfxRcd": "ESTABLISHED/13",
+                }
+            ],
+        },
+    ],
 }

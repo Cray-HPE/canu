@@ -298,8 +298,6 @@ def node_model_from_canu(factory, canu_cache, ips):
 
     for switch in canu_cache["switches"]:
         if ipaddress.ip_address(switch["ip_address"]) in ips:
-            print("***switch", switch)
-            print("***switch[ip_address]", switch["ip_address"])
             src_name = switch["hostname"]
 
             for port in switch["cabling"]:
