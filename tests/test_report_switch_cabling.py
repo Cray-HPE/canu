@@ -661,10 +661,6 @@ def test_switch_cabling_vendor_error(switch_vendor):
         )
 
 
-remove_switch_from_cache(ip)
-remove_switch_from_cache(ip_dell)
-remove_switch_from_cache(ip_mellanox)
-
 lldp_neighbors_json = {
     "1%2F1%2F1": {
         "aa:bb:cc:88:99:00,1/1/1": {
