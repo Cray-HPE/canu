@@ -843,10 +843,6 @@ def test_network_cabling_mellanox_bad_login(switch_vendor):
         )
 
 
-remove_switch_from_cache(ip)
-remove_switch_from_cache(ip_dell)
-remove_switch_from_cache(ip_mellanox)
-
 # Switch 1
 switch_info1 = {
     "hostname": "sw-test01",
