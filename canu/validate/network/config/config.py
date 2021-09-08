@@ -13,9 +13,9 @@ from hier_config import HConfig, Host
 from netmiko import ssh_exception
 import ruamel.yaml
 
+from canu.utils.utils import netmiko_command
 from canu.validate.switch.config.config import (
     compare_config,
-    netmiko_command,
     print_config_diff_summary,
 )
 

@@ -61,7 +61,6 @@ def test_validate_network_config(*args):
                 shasta,
             ],
         )
-        print(result.output)
         assert result.exit_code == 0
         assert (
             "Switch: sw-spine-001 (192.168.1.1)\n"

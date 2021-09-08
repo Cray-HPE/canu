@@ -9,8 +9,9 @@ import click
 from click_help_colors import HelpColorsCommand
 import click_spinner
 from hier_config import HConfig, Host
-from netmiko import ConnectHandler
 import yaml
+
+from canu.utils.utils import netmiko_command
 
 
 # Get project root directory
@@ -237,31 +238,6 @@ def print_difference_line(additions, additions_int, deletions, deletions_int):
             additions, additions_int, deletions, deletions_int
         )
     )
-
-
-def netmiko_command(ip, credentials, command):
-    """Send a command to a switch using netmiko.
-
-    Args:
-        ip: Switch ip
-        credentials: Switch credentials
-        command: Command to be run on the switch
-
-    Returns:
-        output: Text output from the command run.
-    """
-    aruba1 = {
-        "device_type": "aruba_os",
-        "host": ip,
-        "username": credentials["username"],
-        "password": credentials["password"],
-    }
-
-    with ConnectHandler(**aruba1) as net_connect:
-        output = net_connect.send_command(command)
-        net_connect.disconnect()
-
-    return output
 
 
 def compare_config(config1, config2, print=True):
