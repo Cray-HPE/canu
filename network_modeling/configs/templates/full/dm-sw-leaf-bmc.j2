@@ -7,8 +7,6 @@ ntp server {{ variables.NCN_W002 }}
 ntp server {{ variables.NCN_W003 }}
 ntp enable
 
-{%- include 'common/acl.j2' %}
-
 interface loopback 0
     ip address {{ variables.LOOPBACK_IP }}
     ip ospf 1 area 0.0.0.0

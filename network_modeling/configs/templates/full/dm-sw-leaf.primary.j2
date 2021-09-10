@@ -32,8 +32,6 @@ iscsi target port 3260
 router ospf 1
 router-id {{ variables.LOOPBACK_IP }}
    
-{%- include 'common/acl.j2' %}
-
 {% include 'tds/leaf-bmc-to-spine.lag.j2' %}
 {% include 'common/bmc.j2' %}
 
