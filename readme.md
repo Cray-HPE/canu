@@ -65,10 +65,13 @@ In order to run CANU, both python3 and pip3 need to be installed.
     - docker-compose
   ```bash
     sh run_canu_docker.sh
-    ```
+  ```
   - CANU source files can be found inside the container at /app/canu
   - shared folder between local disk is call `files` and is mounted in the container at `/files`
-
+  - When you are finished with the container:
+  ```bash
+    docker-compose down
+  ```  
 
 - To run CANU in a Python Virtualenv:
   - Prerequisites
