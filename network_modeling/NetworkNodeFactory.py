@@ -92,7 +92,7 @@ class NetworkNodeFactory:
                 click.secho(
                     f"Error validating {data_file} with {schema_file}: {err}", fg="red"
                 )
-            )
+            ) from err
 
     # For convenience to users the yamale schema allows port speeds as int or list.
     # Convert integers to lists here for consistency.
@@ -215,7 +215,7 @@ class NetworkNodeFactory:
         architecture_version = self.__architecture_version
         name = architecture_data[architecture_version]["name"]
         if "deprecated" in architecture_data[architecture_version]:
-            log.warn(f"Architecture {name} is deprecated")
+            log.warning(f"Architecture {name} is deprecated")
 
     def __generate_node_id(self):
         self.__node_id += 1

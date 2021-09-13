@@ -117,6 +117,54 @@ def test_validate_bgp_full_architecture(switch_vendor):
 
 @patch("canu.validate.network.bgp.bgp.switch_vendor")
 @responses.activate
+def test_validate_bgp_v1_architecture(switch_vendor):
+    """Test that the `canu validate network bgp` command runs and returns PASS with full architecture."""
+    v1_architecture = "v1"
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/login",
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system/vrfs/default/bgp_routers/{asn}/bgp_neighbors?depth=2",
+            json=all_established,
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
+            json={"hostname": "test-leaf", "platform_name": "X86-64"},
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/logout",
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "network",
+                "bgp",
+                "--ips",
+                ips,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--architecture",
+                v1_architecture,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "PASS - IP: 192.168.1.1 Hostname: test-leaf" in str(result.output)
+
+
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
+@responses.activate
 def test_validate_bgp_file(switch_vendor):
     """Test that the `canu validate network bgp` command runs from a file input and returns PASS."""
     with runner.isolated_filesystem():

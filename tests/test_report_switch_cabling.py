@@ -325,8 +325,8 @@ def test_switch_cabling_dell(netmiko_commands, switch_vendor):
         )
         assert result.exit_code == 0
         assert (
-            "1/1/1   ==> sw-test01      Eth1/15            sw-test01                                             Test Switch 1\n"
-            "1/1/2   ==> sw-test02      Eth1/15            sw-test02                                             Test Switch 2\n"
+            "1/1/1   ==> sw-test01      1/1/15             sw-test01                                             Test Switch 1\n"
+            "1/1/2   ==> sw-test02      1/1/15             sw-test02                                             Test Switch 2\n"
         ) in str(result.output)
         remove_switch_from_cache(ip)
 
@@ -448,10 +448,10 @@ def test_switch_cabling_mellanox(switch_vendor):
         )
         assert result.exit_code == 0
         assert (
-            "1/1/1   ==> sw-test03      Eth1/11            sw-test03                                             Test Switch 3\n"
-            "1/1/2   ==> sw-test04      Eth1/12            sw-test04                                             Test Switch 4\n"
+            "1/1/1   ==> sw-test03      1/1/11             sw-test03                                             Test Switch 3\n"
+            "1/1/2   ==> sw-test04      1/1/12             sw-test04                                             Test Switch 4\n"
         ) in str(result.output)
-        remove_switch_from_cache(ip)
+        remove_switch_from_cache(ip_mellanox)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -751,7 +751,7 @@ netmiko_commands_dell = [
     + "Remote System Desc: Test Switch 1\n"
     + "--------------------------------------------------------------------------- \n"
     + "Remote Chassis ID: 11:22:33:44:55:66\n"
-    + "Remote Port ID: Eth1/15\n"
+    + "Remote Port ID: ethernet1/1/15\n"
     + "Remote Port Description: sw-test02\n"
     + "Local Port ID: ethernet1/1/2\n"
     + "Remote System Name: sw-test02\n"
@@ -768,7 +768,7 @@ netmiko_commands_dell = [
     + "Local Port ID: ethernet1/1/4\n"
     + "--------------------------------------------------------------------------- \n",
     "OS Version: 10.5.1.4\nSystem Type: S3048-ON\n",
-    "hostname sw-test-dell",
+    "sw-test-dell",
     "Address        Hardware address    Interface                     Egress Interface    \n"
     + "------------------------------------------------------------------------------------------\n"
     + "192.168.1.1    aa:bb:cc:dd:ee:ff   vlan2                         port-channel100     \n"
@@ -798,7 +798,7 @@ lldp_json_mellanox = {
                     "port id subtype": "Interface Name (5)",
                     "Remote chassis id": "11:22:33:44:55:66",
                     "Remote system description": "Test Switch 4",
-                    "Remote port-id": "Eth1/12",
+                    "Remote port-id": "ethernet1/1/12",
                     "Remote port description": "sw-test04",
                     "Remote system name": "sw-test04",
                 },

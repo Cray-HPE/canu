@@ -67,7 +67,7 @@ def cabling(ctx, ip, username, password, out):
 
 
 def get_lldp(ip, credentials, return_error=False):
-    """Get lldp of an Aruba switch using v10.04 API.
+    """Get lldp of an Aruba, Dell, or Mellanox switch.
 
     Args:
         ip: IPv4 address of the switch
@@ -183,6 +183,7 @@ def get_lldp_aruba(ip, credentials, return_error=False):
         switch_info = switch_info_response.json()
         switch_info["ip"] = ip
         switch_info["vendor"] = "aruba"
+        switch_info["hostname"] = switch_info["hostname"]
 
         # GET LLDP neighbors
         neighbors = session.get(
@@ -271,7 +272,7 @@ def get_lldp_dell(ip, credentials, return_error):
             "terminal length 0",
             "show lldp neighbors detail",
             "show version",
-            'show running-configuration | grep "hostname"',
+            "system hostname",
             "show ip arp",
         ]
         command_output = netmiko_commands(ip, credentials, commands, "dell")
@@ -302,6 +303,10 @@ def get_lldp_dell(ip, credentials, return_error):
                 neighbors_dict[port]["chassis_name"] = chassis_name
             elif line.startswith("Remote Port ID: "):
                 port_id = line[16:]
+                if port_id.startswith("Eth"):
+                    port_id = "1/" + port_id[3:]
+                if port_id.startswith("ethernet"):
+                    port_id = port_id[8:]
                 neighbors_dict[port]["port_id"] = port_id
             elif line.startswith("Local Port ID: "):
                 if line.startswith("Local Port ID: ethernet"):
@@ -345,10 +350,7 @@ def get_lldp_dell(ip, credentials, return_error):
                 platform_name = line[13:]
 
         # Switch Hostname
-        hostname = ""
-        for line in command_output[3].splitlines():
-            if line.startswith("hostname"):
-                hostname = line.split()[1]
+        hostname = command_output[3]
 
         switch_info = {
             "platform_name": platform_name,
@@ -514,6 +516,10 @@ def get_lldp_mellanox(ip, credentials, return_error):
                         port_id = prop.get("Remote port-id")
                         if port_id == "Not Advertised":
                             port_id = ""
+                        if port_id.startswith("Eth"):
+                            port_id = "1/" + port_id[3:]
+                        if port_id.startswith("ethernet"):
+                            port_id = port_id[8:]
                         neighbors_dict[port]["port_id"] = port_id
 
         lldp_dict = defaultdict(list)

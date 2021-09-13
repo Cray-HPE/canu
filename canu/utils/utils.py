@@ -302,7 +302,6 @@ def netmiko_commands(ip, credentials, commands, device_type="autodetect"):
         "host": ip,
         "username": credentials["username"],
         "password": credentials["password"],
-        "session_log": "netmiko_session.log",
     }
     output = []
     with ConnectHandler(**switch) as net_connect:
