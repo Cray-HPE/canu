@@ -259,11 +259,11 @@ network_v2_tds:
         - "sw-100g"
       shasta_name: "sw-edge"
       architecture_type: "customer_edge_router"
-    - lookup_name: 
+    - lookup_name:
         - "cec"
       shasta_name: "cec"
       architecture_type: "cec"
-    - lookup_name: 
+    - lookup_name:
         - "cmm"
       shasta_name: "cmm"
       architecture_type: "cmm"
@@ -360,6 +360,7 @@ network_v1:
       architecture_type: "mountain_compute_leaf"
     - lookup_name:
         - "sw-smn"
+        - "sw-leaf"
       shasta_name: "sw-leaf-bmc"
       architecture_type: "river_bmc_leaf"
     - lookup_name:

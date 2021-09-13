@@ -1,4 +1,5 @@
-"""Test CANU validate shcd commands."""
+"""Test CANU validate shcd-cabling commands."""
+from unittest.mock import patch
 
 import click.testing
 from openpyxl import Workbook
@@ -23,7 +24,7 @@ runner = click.testing.CliRunner()
 
 @responses.activate
 def test_validate_shcd_cabling():
-    """Test that the `canu validate shcd cabling` command runs and returns valid cabling."""
+    """Test that the `canu validate shcd-cabling` command runs and returns valid cabling."""
     with runner.isolated_filesystem():
         generate_test_file(test_file)
         responses.add(
@@ -93,7 +94,7 @@ def test_validate_shcd_cabling():
 
 @responses.activate
 def test_validate_shcd_cabling_full_architecture():
-    """Test that the `canu validate shcd cabling` command runs and returns valid cabling with full architecture."""
+    """Test that the `canu validate shcd-cabling` command runs and returns valid cabling with full architecture."""
     full_architecture = "full"
     with runner.isolated_filesystem():
         generate_test_file(test_file)
@@ -164,7 +165,7 @@ def test_validate_shcd_cabling_full_architecture():
 
 @responses.activate
 def test_validate_shcd_cabling_file():
-    """Test that the `canu validate shcd cabling` command runs and returns valid cabling with IPs from file."""
+    """Test that the `canu validate shcd-cabling` command runs and returns valid cabling with IPs from file."""
     with runner.isolated_filesystem():
         with open("test.txt", "w") as f:
             f.write("192.168.1.1")
@@ -233,7 +234,7 @@ def test_validate_shcd_cabling_file():
 
 
 def test_validate_shcd_cabling_missing_ips():
-    """Test that the `canu validate shcd cabling` command errors on missing IP address."""
+    """Test that the `canu validate shcd-cabling` command errors on missing IP address."""
     with runner.isolated_filesystem():
         generate_test_file(test_file)
         result = runner.invoke(
@@ -265,7 +266,7 @@ def test_validate_shcd_cabling_missing_ips():
 
 
 def test_validate_shcd_cabling_mutually_exclusive_ips_and_file():
-    """Test that the `canu validate shcd cabling` command only accepts IPs from command line OR file input, not both."""
+    """Test that the `canu validate shcd-cabling` command only accepts IPs from command line OR file input, not both."""
     with runner.isolated_filesystem():
         generate_test_file(test_file)
         result = runner.invoke(
@@ -301,7 +302,7 @@ def test_validate_shcd_cabling_mutually_exclusive_ips_and_file():
 
 
 def test_validate_shcd_cabling_invalid_ip():
-    """Test that the `canu validate shcd cabling` command errors on invalid IP address."""
+    """Test that the `canu validate shcd-cabling` command errors on invalid IP address."""
     invalid_ip = "999.999.999.999"
 
     with runner.isolated_filesystem():
@@ -337,7 +338,7 @@ def test_validate_shcd_cabling_invalid_ip():
 
 
 def test_validate_shcd_cabling_invalid_ip_file():
-    """Test that the `canu validate shcd cabling` command errors on invalid IPs from a file."""
+    """Test that the `canu validate shcd-cabling` command errors on invalid IPs from a file."""
     invalid_ip = "999.999.999.999"
 
     with runner.isolated_filesystem():
@@ -372,12 +373,14 @@ def test_validate_shcd_cabling_invalid_ip_file():
         assert "Error: Invalid value:" in str(result.output)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
 @responses.activate
-def test_validate_shcd_cabling_bad_ip():
-    """Test that the `canu validate shcd cabling` command errors on bad IP address."""
+def test_validate_shcd_cabling_bad_ip(switch_vendor):
+    """Test that the `canu validate shcd-cabling` command errors on bad IP address."""
     bad_ip = "192.168.1.99"
 
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
@@ -413,12 +416,14 @@ def test_validate_shcd_cabling_bad_ip():
         assert "check the IP address and try again" in str(result.output)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
 @responses.activate
-def test_validate_shcd_cabling_bad_ip_file():
-    """Test that the `canu validate shcd cabling` command errors on a bad IP from a file."""
+def test_validate_shcd_cabling_bad_ip_file(switch_vendor):
+    """Test that the `canu validate shcd-cabling` command errors on a bad IP from a file."""
     bad_ip = "192.168.1.99"
 
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         with open("test.txt", "w") as f:
             f.write(bad_ip)
 
@@ -459,7 +464,7 @@ def test_validate_shcd_cabling_bad_ip_file():
 
 @responses.activate
 def test_validate_shcd_cabling_bad_password():
-    """Test that the `canu validate shcd cabling` command errors on bad credentials."""
+    """Test that the `canu validate shcd-cabling` command errors on bad credentials."""
     bad_password = "foo"
 
     with runner.isolated_filesystem():
@@ -497,7 +502,7 @@ def test_validate_shcd_cabling_bad_password():
 
 
 def test_validate_shcd_cabling_missing_file():
-    """Test that the `canu validate shcd cabling` command fails on missing file."""
+    """Test that the `canu validate shcd-cabling` command fails on missing file."""
     with runner.isolated_filesystem():
         generate_test_file(test_file)
         result = runner.invoke(
@@ -526,7 +531,7 @@ def test_validate_shcd_cabling_missing_file():
 
 
 def test_validate_shcd_cabling_bad_file():
-    """Test that the `canu validate shcd cabling` command fails on bad file."""
+    """Test that the `canu validate shcd-cabling` command fails on bad file."""
     bad_file = "does_not_exist.xlsx"
     with runner.isolated_filesystem():
         generate_test_file(test_file)
@@ -562,7 +567,7 @@ def test_validate_shcd_cabling_bad_file():
 
 @responses.activate
 def test_validate_shcd_cabling_missing_tabs():
-    """Test that the `canu validate shcd cabling` command prompts for missing tabs."""
+    """Test that the `canu validate shcd-cabling` command prompts for missing tabs."""
     with runner.isolated_filesystem():
         generate_test_file(test_file)
         responses.add(
@@ -618,7 +623,7 @@ def test_validate_shcd_cabling_missing_tabs():
 
 @responses.activate
 def test_validate_shcd_cabling_bad_tab():
-    """Test that the `canu validate shcd cabling` command fails on bad tab name."""
+    """Test that the `canu validate shcd-cabling` command fails on bad tab name."""
     bad_tab = "NMN"
     with runner.isolated_filesystem():
         generate_test_file(test_file)
@@ -651,7 +656,7 @@ def test_validate_shcd_cabling_bad_tab():
 
 @responses.activate
 def test_validate_shcd_cabling_corner_prompt():
-    """Test that the `canu validate shcd cabling` command prompts for corner input and runs."""
+    """Test that the `canu validate shcd-cabling` command prompts for corner input and runs."""
     with runner.isolated_filesystem():
         responses.add(
             responses.POST,
@@ -774,7 +779,7 @@ def test_validate_shcd_cabling_corners_too_narrow():
 
 @responses.activate
 def test_validate_shcd_cabling_corners_too_high():
-    """Test that the `canu validate shcd cabling` command fails on empty cells."""
+    """Test that the `canu validate shcd-cabling` command fails on empty cells."""
     corners_too_high = "H16,S48"
     with runner.isolated_filesystem():
         responses.add(
@@ -834,7 +839,7 @@ def test_validate_shcd_cabling_corners_too_high():
 
 @responses.activate
 def test_validate_shcd_cabling_corners_bad_cell():
-    """Test that the `canu validate shcd cabling` command fails on bad cell."""
+    """Test that the `canu validate shcd-cabling` command fails on bad cell."""
     corners_bad_cell = "16,S48"
     with runner.isolated_filesystem():
         responses.add(
@@ -891,7 +896,7 @@ def test_validate_shcd_cabling_corners_bad_cell():
 
 @responses.activate
 def test_validate_shcd_cabling_not_enough_corners():
-    """Test that the `canu validate shcd cabling` command fails on not enough corners."""
+    """Test that the `canu validate shcd-cabling` command fails on not enough corners."""
     not_enough_corners = "H16"
     with runner.isolated_filesystem():
         responses.add(
@@ -950,7 +955,7 @@ def test_validate_shcd_cabling_not_enough_corners():
 
 @responses.activate
 def test_validate_shcd_cabling_bad_headers():
-    """Test that the `canu validate shcd cabling` command fails on bad headers."""
+    """Test that the `canu validate shcd-cabling` command fails on bad headers."""
     bad_header_tab = "Bad_Headers"
     with runner.isolated_filesystem():
         responses.add(
@@ -1007,7 +1012,7 @@ def test_validate_shcd_cabling_bad_headers():
 
 @responses.activate
 def test_validate_shcd_cabling_bad_architectural_definition():
-    """Test that the `canu validate shcd cabling` command fails with bad connections."""
+    """Test that the `canu validate shcd-cabling` command fails with bad connections."""
     corners_bad_row = "I14,S31"
     with runner.isolated_filesystem():
         responses.add(
@@ -1066,7 +1071,7 @@ def test_validate_shcd_cabling_bad_architectural_definition():
 
 @responses.activate
 def test_validate_shcd_cabling_rename():
-    """Test that the `canu validate shcd cabling` command runs and finds bad naming."""
+    """Test that the `canu validate shcd-cabling` command runs and finds bad naming."""
     with runner.isolated_filesystem():
         responses.add(
             responses.POST,
@@ -1123,7 +1128,7 @@ def test_validate_shcd_cabling_rename():
 
 @responses.activate
 def test_validate_shcd_missing_connections():
-    """Test that the `canu validate shcd cabling` command runs and finds missing connections."""
+    """Test that the `canu validate shcd-cabling` command runs and finds missing connections."""
     with runner.isolated_filesystem():
         responses.add(
             responses.POST,
