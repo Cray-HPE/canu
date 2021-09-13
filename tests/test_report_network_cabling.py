@@ -603,8 +603,8 @@ def test_network_cabling_dell(netmiko_commands, switch_vendor):
         )
         assert result.exit_code == 0
         assert (
-            "1/1/1   ==> sw-test01      Eth1/15            sw-test01                                             Test Switch 1\n"
-            "1/1/2   ==> sw-test02      Eth1/15            sw-test02                                             Test Switch 2\n"
+            "1/1/1   ==> sw-test01      1/1/15             sw-test01                                             Test Switch 1\n"
+            "1/1/2   ==> sw-test02      1/1/15             sw-test02                                             Test Switch 2\n"
         ) in str(result.output)
         remove_switch_from_cache(ip_dell)
 
@@ -727,8 +727,8 @@ def test_network_cabling_mellanox(switch_vendor):
         )
         assert result.exit_code == 0
         assert (
-            "1/1/1   ==> sw-test03      Eth1/11            sw-test03                                             Test Switch 3\n"
-            "1/1/2   ==> sw-test04      Eth1/12            sw-test04                                             Test Switch 4\n"
+            "1/1/1   ==> sw-test03      1/1/11             sw-test03                                             Test Switch 3\n"
+            "1/1/2   ==> sw-test04      1/1/12             sw-test04                                             Test Switch 4\n"
         ) in str(result.output)
         remove_switch_from_cache(ip_mellanox)
 

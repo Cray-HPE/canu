@@ -151,11 +151,11 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
                         )
                     elif vendor == "dell":
                         switch_firmware, switch_info = get_firmware_dell(
-                            str(ip), credentials
+                            str(ip), credentials, True
                         )
                     elif vendor == "mellanox":
                         switch_firmware, switch_info = get_firmware_mellanox(
-                            str(ip), credentials
+                            str(ip), credentials, True
                         )
 
                     firmware_range = config["shasta"][shasta][vendor][
@@ -202,7 +202,9 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
                     exception_type = type(err).__name__
 
                     if exception_type == "HTTPError":
-                        error_message = "HTTP Error. Check that this IP is an Aruba switch, or check the username and password"
+                        error_message = (
+                            "HTTP Error. Check the IP, username, or password"
+                        )
                     elif exception_type == "ConnectionError":
                         error_message = (
                             "Connection Error. Check that the IP address is valid"
@@ -232,8 +234,10 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
                     data.append([error_emoji, "Error", str(ip), "", "", ""])
                     errors.append([str(ip), error_message])
 
-                except Exception:  # pragma: no cover
-                    error_message = "Unknown error connecting to switch."
+                except Exception as error:  # pragma: no cover
+                    exception_type = type(error).__name__
+
+                    error_message = f"Error connecting to switch, {exception_type}."
                     error_emoji = emoji.emojize(":red_triangle_pointed_up:")
 
                     switch_json[str(ip)] = {

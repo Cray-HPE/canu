@@ -58,7 +58,7 @@ log = logging.getLogger("validate_shcd")
 @click.option(
     "--architecture",
     "-a",
-    type=click.Choice(["Full", "TDS"], case_sensitive=False),
+    type=click.Choice(["Full", "TDS", "v1"], case_sensitive=False),
     help="Shasta architecture",
     required=True,
     prompt="Architecture type",
@@ -118,6 +118,8 @@ def cabling(ctx, architecture, ips, ips_file, username, password, log_):
         architecture = "network_v2"
     elif architecture.lower() == "tds":
         architecture = "network_v2_tds"
+    elif architecture.lower() == "v1":
+        architecture = "network_v1"
 
     if ips_file:
         ips = []
@@ -215,12 +217,13 @@ def get_node_type_yaml(name, mapper):
     return node_type, None
 
 
-def validate_cabling_slot_data(lldp_info, warnings):
+def validate_cabling_slot_data(lldp_info, warnings, vendor="aruba"):
     """Ensure LLDP data is parsed properly into a slot.
 
     Args:
         lldp_info: String representing port and slot info from LLDP.
         warnings: Existing list of warnings to post to.
+        vendor: Switch vendor
 
     Returns:
         slot: A cleaned up string value from initial LLDP data.
@@ -235,9 +238,12 @@ def validate_cabling_slot_data(lldp_info, warnings):
     )
     if port_result is not None and port_description_result is not None:
         port_number = int(port_description_result.group(1))
-        if port_number in [0, 1]:
-            return "ocp"
-        elif port_number in [2, 3]:
+        if vendor == "aruba":
+            if port_number in [0, 1]:
+                return "ocp"
+            elif port_number in [2, 3]:
+                return "pcie-slot1"
+        else:
             return "pcie-slot1"
 
     return None
@@ -374,7 +380,9 @@ def node_model_from_canu(factory, canu_cache, ips):
 
                 # If starts with 'sw-' then add an extra '-' before the number, and convert to 3 digit
                 dst_name = dst_lldp["neighbor"]
-                dst_slot = validate_cabling_slot_data(dst_lldp, warnings)
+                dst_slot = validate_cabling_slot_data(
+                    dst_lldp, warnings, vendor=switch["vendor"]
+                )
                 dst_port = validate_cabling_port_data(dst_lldp, warnings)
 
                 if dst_name.startswith("sw-"):
