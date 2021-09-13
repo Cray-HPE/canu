@@ -18,18 +18,6 @@ def test_cli():
     assert result.exit_code == 0
 
 
-# def test_cli_missing_shasta():
-#     """Error on Shasta flag required."""
-#     result = runner.invoke(
-#         cli,
-#         [
-#             "switch",
-#         ],
-#     )
-#     assert result.exit_code == 2
-#     assert "Error: Missing option '--shasta' / '-s'" in str(result.output)
-
-
 def test_cli_init_missing_out():
     """Error canu init on no --out flag."""
     result = runner.invoke(
