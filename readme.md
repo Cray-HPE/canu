@@ -59,17 +59,41 @@ In order to run CANU, both python3 and pip3 need to be installed.
 
 ## Installation
 
-To install the development build of CANU type:
+- To run CANU inside a container:
+    ```bash
+    sh run_canu_docker.sh
+    ```
+  - CANU source files can be found inside the container at /app/canu
+  - shared folder between local disk is call `files` and is mounted in the container at `/files`
 
-```bash
-python3 setup.py develop --user
-```
 
-If that doesn't work, try:
+- To run CANU in a Python Virtualenv:
 
-```bash
-pip3 install --editable .
-```
+    ```bash
+    python3 -m venv .venv
+    ./.venv/bin/activate
+    pip3 install -r /app/canu/requirements.txt
+    pip3 install --editable /app/canu/
+    ```
+
+    - When you are done working in the Python Virtualenv.
+    Use the following command to exit out of the Python Virtualenv:
+    ```bash
+    deactivate 
+    ```
+
+
+- To install the development build of CANU type:
+
+    ```bash
+    python3 setup.py develop --user
+    ```
+
+    If that doesn't work, try:
+    
+    ```bash
+    pip3 install --editable .
+    ```
 
 ## Usage
 
