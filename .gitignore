@@ -1,5 +1,6 @@
 # CANU Files
 canu_cache.yaml
+files/*
 
 # Build artifacts
 *.py[cod]
@@ -34,6 +35,7 @@ htmlcov
 # IDEs
 *.sublime-workspace
 .vscode
+.venv/
 
 # Mac
 .DS_Store
