@@ -60,7 +60,10 @@ In order to run CANU, both python3 and pip3 need to be installed.
 ## Installation
 
 - To run CANU inside a container:
-    ```bash
+  - Prequisites:
+    - docker
+    - docker-compose
+  ```bash
     sh run_canu_docker.sh
     ```
   - CANU source files can be found inside the container at /app/canu
@@ -68,8 +71,11 @@ In order to run CANU, both python3 and pip3 need to be installed.
 
 
 - To run CANU in a Python Virtualenv:
-
-    ```bash
+  - Prerequisites
+    - python3
+    - pip3
+    - Python Virtualenv
+  ```bash
     python3 -m venv .venv
     ./.venv/bin/activate
     pip3 install -r /app/canu/requirements.txt
