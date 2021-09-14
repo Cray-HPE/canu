@@ -24,6 +24,9 @@ else:
 options_file = os.path.join(
     project_root, "canu", "validate", "switch", "config", "options.yaml"
 )
+tags_file = os.path.join(
+    project_root, "canu", "validate", "switch", "config", "tags.yaml"
+)
 options = yaml.safe_load(open(options_file))
 host = Host("example.rtr", "aoscx", options)
 
@@ -89,6 +92,11 @@ def config(ctx, ip, username, password, config_file):
         generated_config_hier
     )
 
+    host.load_tags_from_file(tags_file)
+    host.load_running_config(config)
+    host.load_generated_config_from_file(config_file)
+
+
     dash = "-" * 73
 
     click.echo("\n")
@@ -96,23 +104,36 @@ def config(ctx, ip, username, password, config_file):
         "Config differences between running config and config file",
         fg="bright_white",
     )
-    click.echo(dash)
+
     differences = compare_config(
         running_config_hier,
         generated_config_hier,
     )
 
     click.echo("\n")
+
     click.secho(
-        "Commands needed to get running config to match config file",
+        "Safe Commands",
+        fg="bright_white",
+    ) 
+    click.echo(dash)
+    click.echo(host.remediation_config_filtered_text({"safe"}, {}))
+    click.echo(dash)
+    click.secho(
+        "Manual commands",
         fg="bright_white",
     )
     click.echo(dash)
-    for line in remediation_config_hier.all_children():
-        click.echo(line.cisco_style_text())
-
+    click.echo(host.remediation_config_filtered_text({"manual"}, {}))
+    click.echo(dash)
+    click.secho(
+        "commands not safe or manual",
+        fg="bright_white",
+    )
+    click.echo(dash)
+    click.echo(host.remediation_config_filtered_text({}, {"safe", "manual"}))
     print_config_diff_summary(hostname, ip, differences)
-
+    click.echo(dash)
     return
 
 
