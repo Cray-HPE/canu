@@ -265,18 +265,6 @@ class NetworkNode:
                 self.__location = setlocation
         return self.__location
 
-    def rack_number(self, number=None):
-        """Get/Set node rack placement."""
-        if number is not None:
-            self.__rack_number = number
-        return self.__rack_number
-
-    def rack_elevation(self, elevation=None):
-        """Get/Set node rack placement."""
-        if elevation is not None:
-            self.__rack_elevation = elevation
-        return self.__rack_elevation
-
     # Architecturally allowed connections.
     def device_connections(self):
         """Return a list of architecturally allowed connections."""
