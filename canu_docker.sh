@@ -18,6 +18,9 @@ case $1 in
         echo "The folder ${path}/files"
         echo "is mounted on the container at /files"
         echo ""
+        echo "Type exit to disconnect from container before trying to shutdown the container"
+        echo ""
+        docker exec -it canu /bin/bash
     ;;
 
     down)
