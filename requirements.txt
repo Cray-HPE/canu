@@ -73,4 +73,4 @@ urllib3==1.26.3
 validators==0.14.2
 virtualenv==20.4.2
 wrapt==1.12.1
-yamale==3.0.4
+yamale==3.0.8
