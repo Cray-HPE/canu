@@ -167,6 +167,8 @@
     - lineage:
         - startswith: vsx
         - startswith: role
+    - lineage:
+        - startswith: hostname
   # Default when expression: list of expressions
   negation_default_when: []
   # Negate substitutions: expression -> negate with

@@ -96,7 +96,6 @@ def config(ctx, ip, username, password, config_file):
     host.load_running_config(config)
     host.load_generated_config_from_file(config_file)
 
-
     dash = "-" * 73
 
     click.echo("\n")
@@ -106,8 +105,8 @@ def config(ctx, ip, username, password, config_file):
     )
 
     differences = compare_config(
-        running_config_hier,
-        generated_config_hier,
+        running_config_hier.difference(generated_config_hier),
+        generated_config_hier.difference(running_config_hier),
     )
 
     click.echo("\n")
