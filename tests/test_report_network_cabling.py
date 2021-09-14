@@ -539,12 +539,14 @@ def test_network_cabling_bad_ip_file(get_lldp, switch_vendor):
         assert "check the IP address and try again" in str(result.output)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
 @responses.activate
-def test_network_cabling_bad_password():
+def test_network_cabling_bad_password(switch_vendor):
     """Test that the `canu report network cabling` command errors on bad credentials."""
     bad_password = "foo"
 
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -569,7 +571,7 @@ def test_network_cabling_bad_password():
         )
         assert result.exit_code == 0
         assert (
-            "Authentication error connecting to switch 192.168.1.1, check the credentials or IP address and try again."
+            "Error connecting to switch 192.168.1.1, check the IP address and try again."
             in str(result.output)
         )
 
