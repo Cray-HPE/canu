@@ -569,7 +569,7 @@ def test_network_cabling_bad_password():
         )
         assert result.exit_code == 0
         assert (
-            "Timeout error connecting to switch 192.168.1.1, check the IP address and try again."
+            "Authentication error connecting to switch 192.168.1.1, check the credentials or IP address and try again."
             in str(result.output)
         )
 
