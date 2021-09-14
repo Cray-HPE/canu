@@ -7,17 +7,28 @@ then
     mkdir files
 fi
 
-if [[ "$1" == "up" ]]; then
-    docker-compose up -d --build
-    docker exec -it canu /bin/bash
-fi
+# get local path
+path=$(pwd)
 
-if [[ "$1" == "down" ]]; then
-    docker-compose down
-fi
+case $1 in
 
-if [[ "$1" != "up" ]] || [[ "$1" != "up" ]]; then
-    echo "usuage is:"
-    echo "canu_docker.sh up - for starting container"
-    echo "canu_docker.sh down - for stopping container"
-fi
+    up)
+        docker-compose up -d --build
+        echo ""
+        echo "The folder ${path}/files"
+        echo "is mounted on the container at /files"
+        echo ""
+    ;;
+
+    down)
+        docker-compose down
+    ;;
+
+    *)
+        echo ""
+        echo "canu_docker.sh usuage is:"
+        echo "canu_docker.sh up - for starting container"
+        echo "canu_docker.sh down - for stopping container"
+        echo ""
+    ;;
+esac
