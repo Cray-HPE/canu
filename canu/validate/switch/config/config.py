@@ -27,6 +27,8 @@ options_file = os.path.join(
 tags_file = os.path.join(
     project_root, "canu", "validate", "switch", "config", "tags.yaml"
 )
+
+tags = yaml.safe_load(open(tags_file))
 options = yaml.safe_load(open(options_file))
 host = Host("example.rtr", "aoscx", options)
 
@@ -89,7 +91,7 @@ def config(ctx, ip, username, password, config_file):
 
     # Build Hierarchical Configuration object for the Remediation Config
 
-    host.load_tags_from_file(tags_file)
+    host.load_tags(tags)
     host.load_running_config(config)
     host.load_generated_config_from_file(config_file)
 
