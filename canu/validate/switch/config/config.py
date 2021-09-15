@@ -100,8 +100,7 @@ def config(ctx, ip, username, password, config_file):
         "Config differences between running config and config file",
         fg="bright_white",
     )
-    print(running_config_hier.difference(generated_config_hier))
-    print(generated_config_hier.difference(running_config_hier))
+
     differences = compare_config(
         running_config_hier.difference(generated_config_hier),
         generated_config_hier.difference(running_config_hier),
