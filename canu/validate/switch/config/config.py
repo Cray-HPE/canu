@@ -109,21 +109,31 @@ def config(ctx, ip, username, password, config_file):
     click.echo("\n")
 
     click.secho(
-        "Safe Commands" "\n" "These commands should be safe to run while the system is running.",
+        "Safe Commands"
+        "\n"
+        "These commands should be safe to run while the system is running.",
         fg="bright_white",
     )
     click.echo(dash)
     click.echo(host.remediation_config_filtered_text({"safe"}, {}))
     click.echo(dash)
     click.secho(
-        "Manual Commands" "\n" "These commands may cause disruption to the system and should be done only during a maintenance period." "\n" "It is recommended to have an out of band connection while running these commands.",
+        "Manual Commands"
+        "\n"
+        "These commands may cause disruption to the system and should be done only during a maintenance period."
+        "\n"
+        "It is recommended to have an out of band connection while running these commands.",
         fg="bright_white",
     )
     click.echo(dash)
     click.echo(host.remediation_config_filtered_text({"manual"}, {}))
     click.echo(dash)
     click.secho(
-        "Commands NOT classified as Safe or Manual" "\n" "These commands include authentication as well as unique commands for the system." "\n" "These should be looked over carefully before keeping/applying." ,
+        "Commands NOT classified as Safe or Manual"
+        "\n"
+        "These commands include authentication as well as unique commands for the system."
+        "\n"
+        "These should be looked over carefully before keeping/applying.",
         fg="bright_white",
     )
     click.echo(dash)
