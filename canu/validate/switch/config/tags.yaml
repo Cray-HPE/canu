@@ -105,8 +105,6 @@
     - interface loopback
     - ntp
     - router ospf
-    - no snmp
-    - snmp
     - hostname
   add_tags: safe
 #manual starts with

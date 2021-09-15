@@ -88,9 +88,6 @@ def config(ctx, ip, username, password, config_file):
     generated_config_hier.load_from_file(config_file)
 
     # Build Hierarchical Configuration object for the Remediation Config
-    remediation_config_hier = running_config_hier.config_to_get_to(
-        generated_config_hier
-    )
 
     host.load_tags_from_file(tags_file)
     host.load_running_config(config)
@@ -103,7 +100,8 @@ def config(ctx, ip, username, password, config_file):
         "Config differences between running config and config file",
         fg="bright_white",
     )
-
+    print(running_config_hier.difference(generated_config_hier))
+    print(generated_config_hier.difference(running_config_hier))
     differences = compare_config(
         running_config_hier.difference(generated_config_hier),
         generated_config_hier.difference(running_config_hier),
@@ -114,7 +112,7 @@ def config(ctx, ip, username, password, config_file):
     click.secho(
         "Safe Commands",
         fg="bright_white",
-    ) 
+    )
     click.echo(dash)
     click.echo(host.remediation_config_filtered_text({"safe"}, {}))
     click.echo(dash)

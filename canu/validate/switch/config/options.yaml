@@ -183,3 +183,13 @@
     - startswith: vsx
     - startswith: keepalive peer
     use: no keepalive  
+  - lineage:
+    - startswith: interface vlan
+    - startswith: active-gateway ip mac
+    use: no active-gateway ip mac
+  - lineage:
+    - startswith: spanning-tree bpdu-guard
+    use: no spanning-tree bpdu-guard timeout
+  - lineage:
+    - contains: interface lag multi-chassis
+    use: no interface lag 
