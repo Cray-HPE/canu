@@ -1,5 +1,6 @@
 """CANU commands that validate the shcd."""
 from collections import defaultdict
+import json
 import logging
 import os
 from pathlib import Path
@@ -8,9 +9,11 @@ import sys
 
 import click
 from click_help_colors import HelpColorsCommand
+import jsonschema
 import natsort
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from network_modeling.NetworkPort import NetworkPort
+from network_modeling.NodeLocation import NodeLocation
 from openpyxl import load_workbook
 
 
@@ -22,6 +25,9 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent.parent
 
 # Schema and Data files
+json_schema_file = os.path.join(
+    project_root, "network_modeling", "schema", "cray-system-topology-schema.json"
+)
 hardware_schema_file = os.path.join(
     project_root, "network_modeling", "schema", "cray-network-hardware-schema.yaml"
 )
@@ -66,6 +72,7 @@ log = logging.getLogger("validate_shcd")
     help="The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.",
     # required=True,
 )
+@click.option("--out", help="Output JSON model to a file", type=click.File("w"))
 @click.option(
     "--log",
     "log_",
@@ -75,7 +82,7 @@ log = logging.getLogger("validate_shcd")
     default="ERROR",
 )
 @click.pass_context
-def shcd(ctx, architecture, shcd, tabs, corners, log_):
+def shcd(ctx, architecture, shcd, tabs, corners, out, log_):
     """Validate a SHCD file.
 
     Pass in a SHCD file to validate that it works architecturally. The validation will ensure that spine switches,
@@ -90,6 +97,7 @@ def shcd(ctx, architecture, shcd, tabs, corners, log_):
         shcd: SHCD file
         tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
         corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
+        out: Filename for the JSON Topology if requested.
         log_: Level of logging.
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
@@ -174,12 +182,17 @@ def shcd(ctx, architecture, shcd, tabs, corners, log_):
 
     node_list_warnings(node_list, warnings)
 
+    if out:
+        json_output(node_list, out, json_schema_file)
 
-def get_node_common_name(name, mapper):
+
+def get_node_common_name(name, rack_number, rack_elevation, mapper):
     """Map SHCD device names to hostname.
 
     Args:
         name: A string from SHCD representing the device name
+        rack_number: A string for rack the device is in (e.g. x1001)
+        rack_elevation: A string for the position of the device in the rack (e.g. u19)
         mapper: An array of tuples (SHCD name, hostname, device type)
 
     Returns:
@@ -193,6 +206,12 @@ def get_node_common_name(name, mapper):
                 tmp_name = None
                 if node[1].find("sw-") != -1:
                     tmp_name = node[1] + "-"
+                elif node[1].find("cmm") != -1:
+                    tmp_name = node[1] + "-" + rack_number + "-"
+                elif node[1].find("cec") != -1:
+                    tmp_name = node[1] + "-" + rack_number + "-"
+                elif node[1].find("pdu") != -1:
+                    tmp_name = node[1] + "-" + rack_number + "-"
                 else:
                     tmp_name = node[1]
                 if tmp_name == "sw-cdu-" and not name.startswith("sw-cdu"):
@@ -482,21 +501,30 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
         for row in block:
             # Cable source
             try:
-                src_name = row[required_header[0]].value.strip()
                 current_row = row[required_header[0]].row
                 log.debug(f"---- Working in sheet {sheet} on row {current_row} ----")
+                src_name = row[required_header[0]].value.strip()
+                tmp_slot = row[required_header[3]]
+                tmp_port = row[required_header[4]]
+                src_rack = None
+                if row[required_header[1]].value:
+                    src_rack = row[required_header[1]].value.strip()
+                src_elevation = None
+                if row[required_header[2]].value:
+                    src_elevation = row[required_header[2]].value.strip()
+                src_location = NodeLocation(src_rack, src_elevation)
             except AttributeError:
                 log.fatal("")
-                click.secho(f"Bad range of cells entered for tab {sheet}.", fg="red")
-                click.secho(f"{range_start}:{range_end}\n", fg="red")
                 click.secho(
-                    "Ensure the range entered does not contain a row of empty cells.",
+                    f"Bad cell data or range of cells entered for sheet {sheet} in row {current_row} for source data.",
+                    fg="red",
+                )
+                click.secho(
+                    "Ensure the range entered does not contain empty cells.",
                     fg="red",
                 )
                 sys.exit(1)
 
-            tmp_slot = row[required_header[3]]
-            tmp_port = row[required_header[4]]
             src_slot = validate_shcd_slot_data(
                 tmp_slot, sheet, warnings, is_src_slot=True
             )
@@ -504,8 +532,11 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 tmp_port, sheet, warnings, is_src_port=True
             )
             log.debug(f"Source Data:  {src_name} {src_slot} {src_port}")
-            node_name = get_node_common_name(src_name, factory.lookup_mapper())
+            node_name = get_node_common_name(
+                src_name, src_rack, src_elevation, factory.lookup_mapper()
+            )
             log.debug(f"Source Name Lookup:  {node_name}")
+            log.debug(f"Source rack {src_rack} in location {src_elevation}")
             node_type = get_node_type(src_name, factory.lookup_mapper())
             log.debug(f"Source Node Type Lookup:  {node_type}")
 
@@ -522,6 +553,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                         sys.exit(1)
 
                     src_node.common_name(node_name)
+                    src_node.location(src_location)
 
                     node_list.append(src_node)
                     node_name_list.append(node_name)
@@ -537,19 +569,39 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     f"Node type for {src_name} cannot be determined by node type ({node_type}) or node name ({node_name})"
                 )
 
-            # src_xname = row[1].value + row[2].value
             # Create the source port for the node
             src_node_port = NetworkPort(number=src_port, slot=src_slot)
-            # src_node_port = None
 
             # Cable destination
-            dst_name = row[required_header[5]].value.strip()
-            # dst_xname = row[7].value + row[8].value
-            # Create the destination slot and port for the node
-            dst_slot = None  # There is no spreadsheet data and dst is always a switch
-            dst_port = validate_shcd_port_data(row[required_header[8]], sheet, warnings)
+            try:
+                dst_name = row[required_header[5]].value.strip()
+                dst_slot = None  # dst is always a switch
+                dst_port = validate_shcd_port_data(
+                    row[required_header[8]], sheet, warnings
+                )
+                dst_rack = None
+                if row[required_header[6]].value:
+                    dst_rack = row[required_header[6]].value.strip()
+                dst_elevation = None
+                if row[required_header[7]].value:
+                    dst_elevation = row[required_header[7]].value.strip()
+                dst_location = NodeLocation(dst_rack, dst_elevation)
+            except AttributeError:
+                log.fatal("")
+                click.secho(
+                    f"Bad cell data or range of cells entered for sheet {sheet} in row {current_row} for destination data.",
+                    fg="red",
+                )
+                click.secho(
+                    "Ensure the range entered does not contain empty cells.",
+                    fg="red",
+                )
+                sys.exit(1)
+
             log.debug(f"Destination Data:  {dst_name} {dst_slot} {dst_port}")
-            node_name = get_node_common_name(dst_name, factory.lookup_mapper())
+            node_name = get_node_common_name(
+                dst_name, dst_rack, dst_elevation, factory.lookup_mapper()
+            )
             log.debug(f"Destination Name Lookup:  {node_name}")
             node_type = get_node_type(dst_name, factory.lookup_mapper())
             log.debug(f"Destination Node Type Lookup:  {node_type}")
@@ -567,6 +619,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                         sys.exit(1)
 
                     dst_node.common_name(node_name)
+                    dst_node.location(dst_location)
 
                     node_list.append(dst_node)
                     node_name_list.append(node_name)
@@ -813,3 +866,35 @@ def print_node_list(node_list, title):
                 port_string = f'{port["slot"]}:{port["port"]}==>{destination_node_name}:{destination_port_slot}'
             click.echo(f"        {port_string}")
             logical_index += 1
+
+
+def json_output(node_list, out, json_schema_file):
+    """Create a schema-validated JSON Topology file from the model."""
+    model = []
+    for node in node_list:
+        model.append(node.serialize())
+
+    with open(json_schema_file, "r") as file:
+        json_schema = json.load(file)
+
+    validator = jsonschema.Draft7Validator(json_schema)
+
+    try:
+        validator.check_schema(json_schema)
+    except jsonschema.exceptions.SchemaError as err:
+        click.secho(
+            f"Schema {json_schema_file} is invalid: {[x.message for x in err.context]}\n"
+            "Cannot generate and write Topology JSON file.",
+            fg="red",
+        )
+        exit(1)
+
+    errors = sorted(validator.iter_errors(model), key=str)
+    if errors:
+        click.secho("Topology JSON failed schema checks:", fg="red")
+        for error in errors:
+            click.secho(f"    {error.message} in {error.absolute_path}", fg="red")
+        exit(1)
+
+    json_model = json.dumps(model, indent=2)
+    click.echo(json_model, file=out)
