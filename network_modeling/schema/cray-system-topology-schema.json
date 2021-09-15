@@ -1,0 +1,87 @@
+{
+    "title": "Network Topology Schema",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "common_name": {
+                "type": "string"
+            },
+            "id": {
+                "type": "integer",
+                "minimum": 0
+            },
+            "rack_number": {
+                "type": "string"
+            },
+            "rack_elevation": {
+                "type": "string"
+            },
+            "architecture": {
+                "type": "string"
+            },
+            "model": {
+                "type": "string"
+            },
+            "type": {
+                "type": "string"
+            },
+            "vendor": {
+                "type": "string"
+            },
+            "ports": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "speed": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "slot": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "destination_node_id": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "destination_port": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "destination_slot": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        }
+                    },
+                    "minProperties": 6,
+                    "additionalProperties": false
+                }
+            },
+            "location": {
+                "type": "object",
+                "properties": {
+                    "rack": {
+                        "type": "string"
+                    },
+                    "elevation": {
+                        "type": "string"
+                    }
+                },
+                "minProperties": 2,
+                "additionalProperties": false
+            }
+        },
+        "minProperties": 8,
+        "additionalProperties": false
+    }
+}
