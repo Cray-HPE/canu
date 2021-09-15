@@ -74,3 +74,4 @@ validators==0.14.2
 virtualenv==20.4.2
 wrapt==1.12.1
 yamale==3.0.8
+hier-config==2.0.1
