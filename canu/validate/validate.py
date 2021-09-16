@@ -2,10 +2,10 @@
 import click
 from click_help_colors import HelpColorsGroup
 
-from .network import network
-from .shcd import shcd
-from .shcd_cabling import shcd_cabling
-from .switch import switch
+from canu.validate.network import network
+from canu.validate.shcd import shcd
+from canu.validate.shcd_cabling import shcd_cabling
+from canu.validate.switch import switch
 
 
 @click.group(
@@ -16,7 +16,6 @@ from .switch import switch
 @click.pass_context
 def validate(ctx):
     """CANU validate commands."""
-    pass
 
 
 validate.add_command(network.network)

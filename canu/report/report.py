@@ -2,8 +2,8 @@
 import click
 from click_help_colors import HelpColorsGroup
 
-from .network import network
-from .switch import switch
+from canu.report.network import network
+from canu.report.switch import switch
 
 
 @click.group(
@@ -14,7 +14,6 @@ from .switch import switch
 @click.pass_context
 def report(ctx):
     """Canu report commands."""
-    pass
 
 
 report.add_command(network.network)

@@ -2,8 +2,8 @@
 import click
 from click_help_colors import HelpColorsGroup
 
-from .network import network
-from .switch import switch
+from canu.generate.network import network
+from canu.generate.switch import switch
 
 
 @click.group(
@@ -14,7 +14,6 @@ from .switch import switch
 @click.pass_context
 def generate(ctx):
     """Canu generate commands."""
-    pass
 
 
 generate.add_command(network.network)

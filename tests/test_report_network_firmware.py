@@ -1,7 +1,7 @@
 """Test CANU report network firmware commands."""
 from unittest.mock import patch
 
-import click.testing
+from click import testing
 from netmiko import ssh_exception
 import requests
 import responses
@@ -18,7 +18,7 @@ ips = "192.168.1.1"
 ip_dell = "192.168.1.2"
 ip_mellanox = "192.168.1.3"
 cache_minutes = 0
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 
 
 def test_network_cli():
@@ -327,7 +327,7 @@ def test_network_firmware_bad_ip(switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -368,7 +368,7 @@ def test_network_firmware_bad_ip_file(switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -583,7 +583,7 @@ def test_network_firmware_dell(get_firmware_dell, switch_vendor):
         )
         assert result.exit_code == 0
         assert "Pass    192.168.1.2     test-dell           10.5.1.4" in str(
-            result.output
+            result.output,
         )
         remove_switch_from_cache(ip_dell)
 
@@ -661,7 +661,7 @@ def test_network_firmware_mellanox(get_firmware_mellanox, switch_vendor):
         )
         assert result.exit_code == 0
         assert "Pass    192.168.1.3     test-mellanox       3.9.1014" in str(
-            result.output
+            result.output,
         )
         remove_switch_from_cache(ip_mellanox)
 
@@ -760,5 +760,5 @@ def test_network_firmware_no_vendor(switch_vendor):
         )
         assert result.exit_code == 0
         assert "192.168.1.1     - Could not determine the vendor of the switch." in str(
-            result.output
+            result.output,
         )

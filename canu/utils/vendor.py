@@ -1,15 +1,16 @@
-"""CANU utils."""
+"""CANU vendor utils."""
 import datetime
 import re
 
 import click
-from netmiko import ConnectHandler, ssh_exception, SSHDetect
+from netmiko import ssh_exception, SSHDetect
 import requests
 
 from canu.cache import (
     cache_switch,
     get_switch_from_cache,
 )
+from canu.utils.ssh import netmiko_command
 
 
 def switch_vendor(
@@ -77,7 +78,10 @@ def switch_vendor(
 
             # could not determine, check if Aruba
             remote_version = netmiko_command(
-                ip, credentials, "show version", "autodetect"
+                ip,
+                credentials,
+                "show version",
+                "autodetect",
             )
 
             aruba_match = re.search(r"ArubaOS", remote_version)
@@ -151,7 +155,9 @@ def check_aruba(ip, credentials):
     try:
         # Login
         login = session.post(
-            f"https://{ip}/rest/v10.04/login", data=credentials, verify=False
+            f"https://{ip}/rest/v10.04/login",
+            data=credentials,
+            verify=False,
         )
         login.raise_for_status()
         # Logout
@@ -245,70 +251,3 @@ def check_mellanox(ip, credentials):
 
     else:
         return True
-
-
-def netmiko_command(ip, credentials, command, device_type="autodetect"):
-    """Send a single command to a switch using netmiko.
-
-    Args:
-        ip: Switch ip
-        credentials: Switch credentials
-        command: Command to be run on the switch
-        device_type: The switch type
-
-    Returns:
-        output: Text output from the command run.
-    """
-    type = {
-        "aruba": "aruba_os",
-        "dell": "dell_os10",
-        "mellanox": "mellanox_mlnxos",
-        "autodetect": "autodetect",
-    }
-    switch = {
-        "device_type": type[device_type],
-        "host": ip,
-        "username": credentials["username"],
-        "password": credentials["password"],
-    }
-
-    with ConnectHandler(**switch) as net_connect:
-        output = net_connect.send_command(command)
-        net_connect.disconnect()
-
-    return output
-
-
-def netmiko_commands(ip, credentials, commands, device_type="autodetect"):
-    """Send a list of commands to a switch using netmiko.
-
-    Args:
-        ip: Switch ip
-        credentials: Switch credentials
-        commands: List of commands to be run on the switch
-        device_type: The switch type
-
-    Returns:
-        output: Text output from the command run.
-    """
-    type = {
-        "aruba": "aruba_os",
-        "dell": "dell_os10",
-        "mellanox": "mellanox_mlnxos",
-        "autodetect": "autodetect",
-    }
-    switch = {
-        "device_type": type[device_type],
-        "host": ip,
-        "username": credentials["username"],
-        "password": credentials["password"],
-    }
-    output = []
-    with ConnectHandler(**switch) as net_connect:
-        net_connect.enable()
-        for command in commands:
-            command_output = net_connect.send_command(command)
-            output.append(command_output)
-        net_connect.disconnect()
-
-    return output

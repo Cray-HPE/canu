@@ -13,7 +13,7 @@ from hier_config import HConfig, Host
 from netmiko import ssh_exception
 import ruamel.yaml
 
-from canu.utils.utils import netmiko_command
+from canu.utils.ssh import netmiko_command
 from canu.validate.switch.config.config import (
     compare_config,
     print_config_diff_summary,
@@ -39,7 +39,12 @@ with open(canu_config_file, "r") as file:
 shasta_options = canu_config["shasta_versions"]
 
 options_file = os.path.join(
-    project_root, "canu", "validate", "switch", "config", "options.yaml"
+    project_root,
+    "canu",
+    "validate",
+    "switch",
+    "config",
+    "options.yaml",
 )
 options = yaml.load(open(options_file))
 host = Host("example.rtr", "aoscx", options)
@@ -137,11 +142,13 @@ def config(ctx, shasta, ips, ips_file, username, password, config_folder):
                     # Build Hierarchical Configuration object for the Generated Config
                     generated_config_hier = HConfig(host=host)
                     generated_config_hier.load_from_file(
-                        f"{config_folder}/{hostname}.cfg"
+                        f"{config_folder}/{hostname}.cfg",
                     )
 
                     differences = compare_config(
-                        running_config_hier, generated_config_hier, False
+                        running_config_hier,
+                        generated_config_hier,
+                        False,
                     )
 
                     config_data.append(
@@ -149,7 +156,7 @@ def config(ctx, shasta, ips, ips_file, username, password, config_folder):
                             hostname,
                             ip,
                             differences,
-                        ]
+                        ],
                     )
 
                 except ssh_exception.NetmikoTimeoutException:
@@ -157,14 +164,14 @@ def config(ctx, shasta, ips, ips_file, username, password, config_folder):
                         [
                             str(ip),
                             f"Timeout error connecting to switch {ip}, check the IP address and try again.",
-                        ]
+                        ],
                     )
                 except ssh_exception.NetmikoAuthenticationException:
                     errors.append(
                         [
                             str(ip),
                             f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again.",
-                        ]
+                        ],
                     )
                 except Exception as err:  # pragma: no cover
                     exception_type = type(err).__name__
@@ -172,7 +179,7 @@ def config(ctx, shasta, ips, ips_file, username, password, config_folder):
                         [
                             str(ip),
                             f"{exception_type} {err}",
-                        ]
+                        ],
                     )
 
     for switch in config_data:

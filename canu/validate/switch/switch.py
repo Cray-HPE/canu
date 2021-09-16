@@ -2,7 +2,7 @@
 import click
 from click_help_colors import HelpColorsGroup
 
-from .config import config
+from canu.validate.switch.config import config
 
 
 @click.group(
@@ -13,7 +13,6 @@ from .config import config
 @click.pass_context
 def switch(ctx):
     """Commands that validate a switch."""
-    pass
 
 
 switch.add_command(config.config)

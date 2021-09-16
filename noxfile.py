@@ -31,7 +31,7 @@ def tests(session):
         "--cov-report=",
         "--cov-fail-under={}".format(COVERAGE_FAIL),
         path,
-        *session.posargs
+        *session.posargs,
     )
 
 
@@ -43,9 +43,17 @@ def lint(session):
         "flake8",
         "flake8-black",
         "flake8-bugbear",
+        "flake8-commas",
+        "flake8-comprehensions",
+        "flake8-debugger",
         "flake8-docstrings",
+        "flake8-eradicate",
         "flake8-import-order",
+        "flake8_quotes",
+        "flake8-string-format",
+        "pep8-naming",
         "darglint",
+        # "wemake-python-styleguide",
         "toml",
     )
     session.run("flake8", *args)
@@ -55,7 +63,6 @@ def lint(session):
 def black(session):
     """Run Black, the uncompromising Python code formatter."""
     args = session.posargs or locations
-    # exclude = "(/bin, /lib)"
     exclude = """
     ^/(
     (
@@ -73,6 +80,9 @@ def cover(session):
     """Run the final coverage report."""
     session.install("coverage", "pytest-cov")
     session.run(
-        "coverage", "report", "--show-missing", "--fail-under={}".format(COVERAGE_FAIL)
+        "coverage",
+        "report",
+        "--show-missing",
+        "--fail-under={}".format(COVERAGE_FAIL),
     )
     session.run("coverage", "erase")

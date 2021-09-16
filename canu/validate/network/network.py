@@ -2,9 +2,9 @@
 import click
 from click_help_colors import HelpColorsGroup
 
-from .bgp import bgp
-from .cabling import cabling
-from .config import config
+from canu.validate.network.bgp import bgp
+from canu.validate.network.cabling import cabling
+from canu.validate.network.config import config
 
 
 @click.group(
@@ -15,7 +15,6 @@ from .config import config
 @click.pass_context
 def network(ctx):
     """Commands that validate the network."""
-    pass
 
 
 network.add_command(bgp.bgp)

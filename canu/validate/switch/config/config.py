@@ -11,7 +11,7 @@ import click_spinner
 from hier_config import HConfig, Host
 import yaml
 
-from canu.utils.utils import netmiko_command
+from canu.utils.ssh import netmiko_command
 
 
 # Get project root directory
@@ -22,7 +22,12 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
 options_file = os.path.join(
-    project_root, "canu", "validate", "switch", "config", "options.yaml"
+    project_root,
+    "canu",
+    "validate",
+    "switch",
+    "config",
+    "options.yaml",
 )
 options = yaml.safe_load(open(options_file))
 host = Host("example.rtr", "aoscx", options)
@@ -86,7 +91,7 @@ def config(ctx, ip, username, password, config_file):
 
     # Build Hierarchical Configuration object for the Remediation Config
     remediation_config_hier = running_config_hier.config_to_get_to(
-        generated_config_hier
+        generated_config_hier,
     )
 
     dash = "-" * 73
@@ -235,8 +240,11 @@ def print_difference_line(additions, additions_int, deletions, deletions_int):
     deletions_int = click.style(str(deletions_int), fg="red")
     click.echo(
         "{:<40s}{:>12s}  |  {:<40s}{:>12s}".format(
-            additions, additions_int, deletions, deletions_int
-        )
+            additions,
+            additions_int,
+            deletions,
+            deletions_int,
+        ),
     )
 
 
