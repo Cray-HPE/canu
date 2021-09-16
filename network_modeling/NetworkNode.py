@@ -5,6 +5,7 @@ import logging
 import click
 
 from .NetworkPort import NetworkPort
+from .NodeLocation import NodeLocation
 
 log = logging.getLogger(__name__)
 
@@ -59,6 +60,7 @@ class NetworkNode:
 
         self.__id = id
         self.__common_name = None
+        self.__location = None
         self.__ports_block_metadata = copy.deepcopy(hardware["ports"])
         self.__ports = []
 
@@ -207,7 +209,7 @@ class NetworkNode:
                 f"{__name__} Multiple architectural connection matches found between "
                 f"{self.common_name()} ({self.arch_type()}) "
                 f"and {node.common_name()} ({node.arch_type()}). "
-                "Validate architectural definition."
+                "This may not be an error, but validating the architectural definition is suggested."
             )
 
         if south_node is None or north_node is None:
@@ -253,6 +255,15 @@ class NetworkNode:
         if name is not None:
             self.__common_name = name
         return self.__common_name
+
+    def location(self, setlocation=None):
+        """Get/Set position of node in the datacenter."""
+        if setlocation is not None:
+            if not isinstance(setlocation, NodeLocation):
+                log.error("Attempting to set location a non-NodeLocation instance.")
+            else:
+                self.__location = setlocation
+        return self.__location
 
     # Architecturally allowed connections.
     def device_connections(self):
@@ -432,6 +443,11 @@ class NetworkNode:
         serialized_ports = [
             port.serialize() for port in self.__ports if port is not None
         ]
+
+        serialized_location = None
+        if self.__location is not None:
+            serialized_location = self.__location.serialize()
+
         serialized = {
             "common_name": self.__common_name,
             "id": self.__id,
@@ -440,6 +456,7 @@ class NetworkNode:
             "type": self.__hardware["type"],
             "vendor": self.__hardware["vendor"],
             "ports": serialized_ports,
+            "location": serialized_location,
         }
         return serialized
 
