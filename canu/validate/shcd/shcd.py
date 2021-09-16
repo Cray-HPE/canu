@@ -26,7 +26,10 @@ else:
 
 # Schema and Data files
 json_schema_file = os.path.join(
-    project_root, "network_modeling", "schema", "cray-system-topology-schema.json"
+    project_root,
+    "network_modeling",
+    "schema",
+    "cray-system-topology-schema.json",
 )
 hardware_schema_file = os.path.join(
     project_root,
@@ -555,7 +558,10 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             )
             log.debug(f"Source Data:  {src_name} {src_slot} {src_port}")
             node_name = get_node_common_name(
-                src_name, src_rack, src_elevation, factory.lookup_mapper()
+                src_name,
+                src_rack,
+                src_elevation,
+                factory.lookup_mapper(),
             )
             log.debug(f"Source Name Lookup:  {node_name}")
             log.debug(f"Source rack {src_rack} in location {src_elevation}")
@@ -599,7 +605,9 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 dst_name = row[required_header[5]].value.strip()
                 dst_slot = None  # dst is always a switch
                 dst_port = validate_shcd_port_data(
-                    row[required_header[8]], sheet, warnings
+                    row[required_header[8]],
+                    sheet,
+                    warnings,
                 )
                 dst_rack = None
                 if row[required_header[6]].value:
@@ -622,7 +630,10 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
 
             log.debug(f"Destination Data:  {dst_name} {dst_slot} {dst_port}")
             node_name = get_node_common_name(
-                dst_name, dst_rack, dst_elevation, factory.lookup_mapper()
+                dst_name,
+                dst_rack,
+                dst_elevation,
+                factory.lookup_mapper(),
             )
             log.debug(f"Destination Name Lookup:  {node_name}")
             node_type = get_node_type(dst_name, factory.lookup_mapper())

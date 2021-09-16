@@ -211,7 +211,7 @@ class NetworkNode:
                 f"{__name__} Multiple architectural connection matches found between "
                 f"{self.common_name()} ({self.arch_type()}) "
                 f"and {node.common_name()} ({node.arch_type()}). "
-                "This may not be an error, but validating the architectural definition is suggested."
+                "This may not be an error, but validating the architectural definition is suggested.",
             )
 
         if south_node is None or north_node is None:

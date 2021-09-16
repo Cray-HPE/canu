@@ -30,7 +30,12 @@ options_file = os.path.join(
     "options.yaml",
 )
 tags_file = os.path.join(
-    project_root, "canu", "validate", "switch", "config", "tags.yaml"
+    project_root,
+    "canu",
+    "validate",
+    "switch",
+    "config",
+    "tags.yaml",
 )
 
 tags = yaml.safe_load(open(tags_file))
