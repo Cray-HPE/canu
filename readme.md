@@ -708,13 +708,17 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 
 # Changelog
 
-## [unreleased]
+## [0.0.6] - 2021-9-15
 
-- Added `canu generate switch config` to generate switch configuration.
-- Added `canu generate network config` to generate network configuration.
-- Added `canu validate switch config` to compare running switch config to a file.
-- Added `canu validate network config` to compare running network config to files.
+- Added alpha version of schema-checked JSON output in `validate shcd` as a machine-readable exchange for SHCD data.
+- Add ability to run CANU in a container, and update Python virtual environment documentation.
+- Added `canu generate switch config` to generate switch configuration for Aruba systems.
+- Added `canu generate network config` to generate network configuration for Aruba systems.
+- Added `canu validate switch config` to compare running switch config to a file for Aruba systems.
+- Added `canu validate network config` to compare running network config to files for Aruba systems.
 - Update naming conventions to `canu <verb> switch/network <noun>`
+- Add the ability to fully track device slot and port assignments.
+
 
 ## [0.0.5] - 2021-5-14
 
