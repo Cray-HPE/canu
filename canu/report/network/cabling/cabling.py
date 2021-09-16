@@ -63,7 +63,10 @@ from canu.report.switch.cabling.cabling import get_lldp, print_lldp
     help="Switch password",
 )
 @click.option(
-    "--out", help="Output results to a file", type=click.File("w"), default="-"
+    "--out",
+    help="Output results to a file",
+    type=click.File("w"),
+    default="-",
 )
 @click.option(
     "--view",
@@ -136,49 +139,53 @@ def cabling(ctx, ips, ips_file, username, password, out, view):
                     end="\r",
                 )
                 try:
-                    switch_info, switch_dict, arp = get_lldp(str(ip), credentials, True)
+                    switch_info, switch_dict, arp = get_lldp(
+                        str(ip),
+                        credentials,
+                        return_error=True,
+                    )
 
                     switch_data.append(
                         [
                             switch_info,
                             switch_dict,
                             arp,
-                        ]
+                        ],
                     )
                 except requests.exceptions.HTTPError:
                     errors.append(
                         [
                             str(ip),
                             f"Error connecting to switch {ip}, check the IP address and try again.",
-                        ]
+                        ],
                     )
                 except requests.exceptions.ConnectionError:
                     errors.append(
                         [
                             str(ip),
                             f"Error connecting to switch {ip}, check the IP address and try again.",
-                        ]
+                        ],
                     )
                 except requests.exceptions.RequestException:  # pragma: no cover
                     errors.append(
                         [
                             str(ip),
                             f"Error connecting to switch {ip}.",
-                        ]
+                        ],
                     )
                 except ssh_exception.NetmikoTimeoutException:
                     errors.append(
                         [
                             str(ip),
                             f"Timeout error connecting to switch {ip}, check the IP address and try again.",
-                        ]
+                        ],
                     )
                 except ssh_exception.NetmikoAuthenticationException:
                     errors.append(
                         [
                             str(ip),
                             f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again.",
-                        ]
+                        ],
                     )
 
         if view == "switch":
@@ -214,7 +221,7 @@ def equipment_table(switch_data):
     for i in range(len(switch_data)):
         # Add the mac address to equipment_json
         equipment_json[switch_data[i][0]["system_mac"]].update(
-            {"hostname": switch_data[i][0]["hostname"]}
+            {"hostname": switch_data[i][0]["hostname"]},
         )
 
         for port in switch_data[i][1]:
@@ -260,7 +267,7 @@ def equipment_table(switch_data):
                 }
 
                 equipment_json[neighbor_mac]["connections_from"].update(
-                    {neighbor_port: connection_dict}
+                    {neighbor_port: connection_dict},
                 )
 
     # Go through a third time to add all ARP info to equipment_json
@@ -376,11 +383,11 @@ def print_equipment(equipment_json, out="-"):
                     port_description = ""
                 text_color = ""
                 if "ncn" in str(
-                    equipment_json[equipment]["connections_from"][port]["hostname"]
+                    equipment_json[equipment]["connections_from"][port]["hostname"],
                 ):  # pragma: no cover
                     text_color = "blue"
                 if "sw-" in str(
-                    equipment_json[equipment]["connections_from"][port]["hostname"]
+                    equipment_json[equipment]["connections_from"][port]["hostname"],
                 ):
                     text_color = "green"
 
@@ -394,7 +401,7 @@ def print_equipment(equipment_json, out="-"):
                         str(
                             equipment_json[equipment]["connections_from"][port][
                                 "hostname"
-                            ]
+                            ],
                         ),
                         equipment_json[equipment]["connections_from"][port]["port"],
                         description,

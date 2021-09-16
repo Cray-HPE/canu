@@ -23,7 +23,7 @@
 import json
 from unittest.mock import patch
 
-import click.testing
+from click import testing
 import pytest
 import responses
 
@@ -41,7 +41,7 @@ ip = "192.168.1.1"
 credentials = {"username": username, "password": password}
 shasta = "1.4"
 cache_minutes = 10
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 
 
 @patch("canu.report.switch.firmware.firmware.switch_vendor")
