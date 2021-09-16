@@ -3,6 +3,7 @@ from click import testing
 import requests
 import responses
 
+from canu.cache import remove_switch_from_cache
 from canu.cli import cli
 
 
@@ -46,6 +47,8 @@ def test_cli_init_csi_good():
         )
         assert result.exit_code == 0
         assert "2 IP addresses saved to fileout.txt" in str(result.output)
+        remove_switch_from_cache("192.168.1.2")
+        remove_switch_from_cache("192.168.1.3")
 
 
 def test_cli_init_csi_file_missing():
@@ -98,6 +101,24 @@ def test_cli_init_sls_good():
                 },
             ],
         )
+        responses.add(
+            responses.GET,
+            f"https://{sls_address}/apis/sls/v1/hardware",
+            json={
+                "d0w1": {
+                    "ExtraProperties": {
+                        "Brand": "Aruba",
+                        "Aliases": ["sw-spine-001"],
+                    },
+                },
+                "d0w2": {
+                    "ExtraProperties": {
+                        "Brand": "Aruba",
+                        "Aliases": ["sw-spine-002"],
+                    },
+                },
+            },
+        )
 
         result = runner.invoke(
             cli,
@@ -107,8 +128,11 @@ def test_cli_init_sls_good():
                 fileout,
             ],
         )
+        print(result.output)
         assert result.exit_code == 0
         assert "2 IP addresses saved to fileout.txt" in str(result.output)
+        remove_switch_from_cache("192.168.1.2")
+        remove_switch_from_cache("192.168.1.3")
 
 
 def test_cli_init_sls_token_flag_missing():
