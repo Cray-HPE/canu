@@ -1,7 +1,7 @@
 """Test CANU validate network config commands."""
 from unittest.mock import patch
 
-import click.testing
+from click import testing
 from netmiko import ssh_exception
 
 from canu.cli import cli
@@ -29,8 +29,7 @@ ips = "192.168.1.1"
 credentials = {"username": username, "password": password}
 cache_minutes = 0
 shasta = "1.4"
-# config_file = "sw-spine-001.cfg"
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 
 
 @patch("canu.validate.network.config.config.netmiko_command", side_effect=netmiko_mock)
@@ -64,13 +63,13 @@ def test_validate_network_config(*args):
         assert result.exit_code == 0
         assert (
             "Switch: sw-spine-001 (192.168.1.1)\n"
-            "Differences\n"
-            "-------------------------------------------------------------------------\n"
-            "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
-            "-------------------------------------------------------------------------\n"
-            "Total Additions:                 1  |  Total Deletions:                 1\n"
-            "                                    |  Script:                          1\n"
-            "Router:                          1  |                                    \n"
+            + "Differences\n"
+            + "-------------------------------------------------------------------------\n"
+            + "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
+            + "-------------------------------------------------------------------------\n"
+            + "Total Additions:                 1  |  Total Deletions:                 1\n"
+            + "                                    |  Script:                          1\n"
+            + "Router:                          1  |                                    \n"
         ) in str(result.output)
 
 
@@ -108,13 +107,13 @@ def test_validate_network_config_file(*args):
         assert result.exit_code == 0
         assert (
             "Switch: sw-spine-001 (192.168.1.1)\n"
-            "Differences\n"
-            "-------------------------------------------------------------------------\n"
-            "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
-            "-------------------------------------------------------------------------\n"
-            "Total Additions:                 1  |  Total Deletions:                 1\n"
-            "                                    |  Script:                          1\n"
-            "Router:                          1  |                                    \n"
+            + "Differences\n"
+            + "-------------------------------------------------------------------------\n"
+            + "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
+            + "-------------------------------------------------------------------------\n"
+            + "Total Additions:                 1  |  Total Deletions:                 1\n"
+            + "                                    |  Script:                          1\n"
+            + "Router:                          1  |                                    \n"
         ) in str(result.output)
 
 
@@ -152,8 +151,8 @@ def test_validate_network_config_timeout(*args):
         assert result.exit_code == 0
         assert (
             "Errors\n"
-            "----------------------------------------------------------------------------------------------------\n"
-            "192.168.1.1     - Timeout error connecting to switch 192.168.1.1, check the IP address and try again.\n"
+            + "----------------------------------------------------------------------------------------------------\n"
+            + "192.168.1.1     - Timeout error connecting to switch 192.168.1.1, check the IP address and try again.\n"
         ) in str(result.output)
 
 
@@ -191,6 +190,6 @@ def test_validate_network_config_authentication(*args):
         assert result.exit_code == 0
         assert (
             "Errors\n"
-            "----------------------------------------------------------------------------------------------------\n"
-            "192.168.1.1     - Authentication error connecting to switch 192.168.1.1, check the credentials or IP ad"
+            + "----------------------------------------------------------------------------------------------------\n"
+            + "192.168.1.1     - Authentication error connecting to switch 192.168.1.1, check the credentials or IP ad"
         ) in str(result.output)

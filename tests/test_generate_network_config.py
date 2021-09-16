@@ -3,7 +3,7 @@ import json
 import os
 from pathlib import Path
 
-import click.testing
+from click import testing
 import requests
 import responses
 
@@ -22,7 +22,7 @@ shasta = "1.4"
 folder_name = "test_config"
 cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 
 
 def test_network_config():
@@ -354,7 +354,7 @@ def test_network_config_not_enough_corners():
         )
         assert result.exit_code == 0
         assert "There were 1 corners entered, but there should be 8." in str(
-            result.output
+            result.output,
         )
 
 
@@ -414,7 +414,7 @@ def test_network_config_sls_token_bad():
             responses.GET,
             f"https://{sls_address}/apis/sls/v1/networks",
             body=requests.exceptions.HTTPError(
-                "503 Server Error: Service Unavailable for url"
+                "503 Server Error: Service Unavailable for url",
             ),
         )
 
@@ -480,7 +480,7 @@ def test_network_config_sls_token_missing():
     )
     assert result.exit_code == 0
     assert "Invalid token file, generate another token or try again." in str(
-        result.output
+        result.output,
     )
 
 
@@ -493,7 +493,7 @@ def test_network_config_sls_address_bad():
         responses.GET,
         f"https://{bad_sls_address}/apis/sls/v1/networks",
         body=requests.exceptions.ConnectionError(
-            "Failed to establish a new connection: [Errno 51] Network is unreachable"
+            "Failed to establish a new connection: [Errno 51] Network is unreachable",
         ),
     )
 

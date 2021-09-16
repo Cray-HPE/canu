@@ -64,7 +64,7 @@ def bgp(
     password,
     asn,
     verbose,
-):
+):  # noqa:WPS211
     """Configure BGP for a pair of switches.
 
     This command will remove previous configuration (BGP, Prefix Lists, Route Maps), then add prefix lists, create
@@ -220,7 +220,7 @@ def bgp(
                             str(ip),
                             f"Error connecting to switch {ip}, check that this IP is an Aruba switch, or check the "
                             + "username or password.",
-                        ]
+                        ],
                     )
                     continue
 
@@ -229,7 +229,7 @@ def bgp(
                         [
                             str(ip),
                             f"Error connecting to switch {ip}, check the IP address and try again.",
-                        ]
+                        ],
                     )
                     continue
 
@@ -238,7 +238,7 @@ def bgp(
                         [
                             str(ip),
                             f"Error connecting to switch {ip}.",
-                        ]
+                        ],
                     )
                     continue
 
@@ -317,7 +317,7 @@ def parse_sls(sls_json):
 
             # get CAN prefix
             if "CAN Bootstrap DHCP Subnet" in full_name:
-                CAN_prefix = subnets["CIDR"]
+                can_prefix = subnets["CIDR"]
 
                 # CAN NCN IPs
                 ncn_can_ips = [
@@ -328,16 +328,16 @@ def parse_sls(sls_json):
 
             # get HMN prefix
             if "HMN MetalLB" in full_name:
-                HMN_prefix = subnets["CIDR"]
+                hmn_prefix = subnets["CIDR"]
 
             # get NMN prefix
             if "NMN MetalLB" in full_name:
-                NMN_prefix = subnets["CIDR"]
+                nmn_prefix = subnets["CIDR"]
 
                 # get TFTP prefix
                 for ip in subnets["IPReservations"]:
                     if "cray-tftp" in ip["Name"]:
-                        TFTP_prefix = ip["IPAddress"] + "/32"
+                        tftp_prefix = ip["IPAddress"] + "/32"
 
             # NCN Names
             if "NMN Bootstrap DHCP Subnet" in full_name:
@@ -363,10 +363,10 @@ def parse_sls(sls_json):
                 ]
 
     prefix = {
-        "can": CAN_prefix,
-        "hmn": HMN_prefix,
-        "nmn": NMN_prefix,
-        "tftp": TFTP_prefix,
+        "can": can_prefix,
+        "hmn": hmn_prefix,
+        "nmn": nmn_prefix,
+        "tftp": tftp_prefix,
     }
     ncn = {
         "names": ncn_names,
@@ -404,10 +404,10 @@ def add_prefix_list(ip, session, prefix):
         session: Switch login session
         prefix: Dict containing prefix for ("can", "hmn", "nmn", "tftp")
     """
-    CAN_prefix = prefix["can"]
-    HMN_prefix = prefix["hmn"]
-    NMN_prefix = prefix["nmn"]
-    TFTP_prefix = prefix["tftp"]
+    can_prefix = prefix["can"]
+    hmn_prefix = prefix["hmn"]
+    nmn_prefix = prefix["nmn"]
+    tftp_prefix = prefix["tftp"]
 
     prefix_list_template = {
         "action": "permit",
@@ -424,7 +424,7 @@ def add_prefix_list(ip, session, prefix):
         json=prefix_list_pl_can,
         verify=False,
     )
-    prefix_list_template["prefix"] = CAN_prefix
+    prefix_list_template["prefix"] = can_prefix
     prefix_list_template["preference"] = 10
     session.post(
         f"https://{ip}/rest/v10.04/system/prefix_lists/pl-can/prefix_list_entries",
@@ -439,7 +439,7 @@ def add_prefix_list(ip, session, prefix):
         json=prefix_list_pl_hmn,
         verify=False,
     )
-    prefix_list_template["prefix"] = HMN_prefix
+    prefix_list_template["prefix"] = hmn_prefix
     prefix_list_template["preference"] = 20
     session.post(
         f"https://{ip}/rest/v10.04/system/prefix_lists/pl-hmn/prefix_list_entries",
@@ -454,7 +454,7 @@ def add_prefix_list(ip, session, prefix):
         json=prefix_list_pl_nmn,
         verify=False,
     )
-    prefix_list_template["prefix"] = NMN_prefix
+    prefix_list_template["prefix"] = nmn_prefix
     prefix_list_template["preference"] = 30
     session.post(
         f"https://{ip}/rest/v10.04/system/prefix_lists/pl-nmn/prefix_list_entries",
@@ -469,7 +469,7 @@ def add_prefix_list(ip, session, prefix):
         json=prefix_list_tftp,
         verify=False,
     )
-    prefix_list_template["prefix"] = TFTP_prefix
+    prefix_list_template["prefix"] = tftp_prefix
     prefix_list_template["ge"] = 32
     prefix_list_template["le"] = 32
     prefix_list_template["preference"] = 10
@@ -505,7 +505,9 @@ def create_route_maps(ip, session, ncn):
     for name in ncn_names:
         route_map = {"name": name}
         session.post(
-            f"https://{ip}/rest/v10.04/system/route_maps", json=route_map, verify=False
+            f"https://{ip}/rest/v10.04/system/route_maps",
+            json=route_map,
+            verify=False,
         )
 
         route_map_entry_tftp["preference"] = 10

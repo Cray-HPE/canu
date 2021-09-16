@@ -1,7 +1,7 @@
 """Test CANU validate shcd-cabling commands."""
 from unittest.mock import patch
 
-import click.testing
+from click import testing
 from openpyxl import Workbook
 import requests
 import responses
@@ -19,7 +19,7 @@ test_file = "test_file.xlsx"
 tabs = "25G_10G"
 corners = "I14,S30"
 cache_minutes = 0
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 
 
 @responses.activate
@@ -81,7 +81,7 @@ def test_validate_shcd_cabling():
         # sw-spine-001:  Found in SHCD, but missing network connections:
         assert (
             "['port 4 ==> sw-leaf-bmc-099', 'port 9 ==> ncn-w003', 'port 15 ==> ncn-s003', "
-            "'port 16 ==> uan001', 'port 17 ==> uan001', 'port 47 ==> sw-spine-002', 'port 48 ==> sw-leaf-bmc-001']"
+            + "'port 16 ==> uan001', 'port 17 ==> uan001', 'port 47 ==> sw-spine-002', 'port 48 ==> sw-leaf-bmc-001']"
             in str(result.output)
         )
         # sw-spine-001:  Found in SHCD, but missing network connections:
@@ -150,13 +150,13 @@ def test_validate_shcd_cabling_full_architecture():
         # sw-leaf-001: Found in SHCD but not on the network
         assert (
             "['port 2 ==> sw-leaf-002', 'port 4 ==> sw-leaf-bmc-099', 'port 9 ==> ncn-w003', 'port 15 ==> ncn-s003', "
-            "'port 16 ==> uan001', 'port 17 ==> uan001', 'port 47 ==> sw-leaf-002', 'port 48 ==> sw-leaf-bmc-001']"
+            + "'port 16 ==> uan001', 'port 17 ==> uan001', 'port 47 ==> sw-leaf-002', 'port 48 ==> sw-leaf-bmc-001']"
             in str(result.output)
         )
         # sw-leaf-002: Found in SHCD but not on the network
         assert (
             "['port 2 ==> sw-leaf-001', 'port 9 ==> ncn-w003', 'port 16 ==> uan001', 'port 17 ==> uan001', "
-            "'port 47 ==> sw-leaf-001', 'port 48 ==> sw-leaf-bmc-001']"
+            + "'port 47 ==> sw-leaf-001', 'port 48 ==> sw-leaf-bmc-001']"
             in str(result.output)
         )
         assert "sw-leaf-001 connects to 9 nodes" in str(result.output)
@@ -223,13 +223,14 @@ def test_validate_shcd_cabling_file():
         # sw-spine-001: Found in SHCD but not on the network
         assert (
             "['port 4 ==> sw-leaf-bmc-099', 'port 9 ==> ncn-w003', 'port 15 ==> ncn-s003', 'port 16 ==> uan001', "
-            "'port 17 ==> uan001', 'port 47 ==> sw-spine-002', 'port 48 ==> sw-leaf-bmc-001']"
+            + "'port 17 ==> uan001', 'port 47 ==> sw-spine-002', 'port 48 ==> sw-leaf-bmc-001']"
             in str(result.output)
         )
         # sw-spine-002: Found in SHCD but not on the network
         assert (
             "['port 9 ==> ncn-w003', 'port 16 ==> uan001', 'port 17 ==> uan001', 'port 47 ==> sw-spine-001', "
-            "'port 48 ==> sw-leaf-bmc-001']" in str(result.output)
+            + "'port 48 ==> sw-leaf-bmc-001']"
+            in str(result.output)
         )
 
 
@@ -385,7 +386,7 @@ def test_validate_shcd_cabling_bad_ip(switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
         generate_test_file(test_file)
@@ -431,7 +432,7 @@ def test_validate_shcd_cabling_bad_ip_file(switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
         generate_test_file(test_file)
@@ -705,18 +706,18 @@ def test_validate_shcd_cabling_corner_prompt():
             ],
             input="I14\nS30",
         )
-        print(result.output)
         assert result.exit_code == 0
         # sw-spine-001: Found in SHCD but not on the network
         assert (
             "['port 4 ==> sw-leaf-bmc-099', 'port 9 ==> ncn-w003', 'port 15 ==> ncn-s003', 'port 16 ==> uan001', "
-            "'port 17 ==> uan001', 'port 47 ==> sw-spine-002', 'port 48 ==> sw-leaf-bmc-001']"
+            + "'port 17 ==> uan001', 'port 47 ==> sw-spine-002', 'port 48 ==> sw-leaf-bmc-001']"
             in str(result.output)
         )
         # sw-spine-002: Found in SHCD but not on the network
         assert (
             "['port 9 ==> ncn-w003', 'port 16 ==> uan001', 'port 17 ==> uan001', 'port 47 ==> sw-spine-001', "
-            "'port 48 ==> sw-leaf-bmc-001']" in str(result.output)
+            + "'port 48 ==> sw-leaf-bmc-001']"
+            in str(result.output)
         )
 
 
@@ -833,7 +834,7 @@ def test_validate_shcd_cabling_corners_too_high():
         assert result.exit_code == 1
         assert "On tab 25G_10G, header column Source not found." in str(result.output)
         assert "On tab 25G_10G, the header is formatted incorrectly." in str(
-            result.output
+            result.output,
         )
 
 
@@ -949,7 +950,7 @@ def test_validate_shcd_cabling_not_enough_corners():
         )
         assert result.exit_code == 0
         assert "There were 1 corners entered, but there should be 2." in str(
-            result.output
+            result.output,
         )
 
 
@@ -1065,7 +1066,7 @@ def test_validate_shcd_cabling_bad_architectural_definition():
         )
         assert result.exit_code == 1
         assert "No architectural definition found to allow connection between" in str(
-            result.output
+            result.output,
         )
 
 
@@ -1186,16 +1187,17 @@ def test_validate_shcd_missing_connections():
         # sw-spine-001: Found in SHCD but not on the network
         assert (
             "['port 4 ==> sw-leaf-bmc-099', 'port 9 ==> ncn-w003', 'port 15 ==> ncn-s003', 'port 16 ==> uan001', "
-            "'port 17 ==> uan001', 'port 47 ==> sw-spine-002', 'port 48 ==> sw-leaf-bmc-001']"
+            + "'port 17 ==> uan001', 'port 47 ==> sw-spine-002', 'port 48 ==> sw-leaf-bmc-001']"
             in str(result.output)
         )
         # sw-spine-002: Found in SHCD but not on the network
         assert (
             "['port 9 ==> ncn-w003', 'port 16 ==> uan001', 'port 17 ==> uan001', 'port 47 ==> sw-spine-001', "
-            "'port 48 ==> sw-leaf-bmc-001']" in str(result.output)
+            + "'port 48 ==> sw-leaf-bmc-001']"
+            in str(result.output)
         )
         assert "uan001          : Found in SHCD but not found on the network." in str(
-            result.output
+            result.output,
         )
         assert (
             "ncn-m88         : Found on the network but not found in the SHCD."
@@ -1222,7 +1224,7 @@ lldp_neighbors_json1 = {
                 "port_id_subtype": "if_name",
             },
             "port_id": "1/1/1",
-        }
+        },
     },
     "1%2F1%2F2": {
         "aa:bb:cc:88:00:00,1/1/2": {
@@ -1235,7 +1237,7 @@ lldp_neighbors_json1 = {
                 "port_id_subtype": "if_name",
             },
             "port_id": "1/1/2",
-        }
+        },
     },
     "1%2F1%2F3": {
         "00:00:00:00:00:00,00:00:00:00:00:00": {
@@ -1272,7 +1274,7 @@ lldp_neighbors_json1 = {
                 "port_id_subtype": "link_local_addr",
             },
             "port_id": "aa:aa:aa:aa:aa:aa",
-        }
+        },
     },
     "1%2F1%2F5": {
         "99:99:99:99:99:99,1/1/5": {
@@ -1285,7 +1287,7 @@ lldp_neighbors_json1 = {
                 "port_id_subtype": "if_name",
             },
             "port_id": "1/1/5",
-        }
+        },
     },
 }
 
@@ -1326,8 +1328,8 @@ lldp_neighbors_json2 = {
                 "port_id_subtype": "if_name",
             },
             "port_id": "1/1/1",
-        }
-    }
+        },
+    },
 }
 
 arp_neighbors_json2 = {
@@ -1600,7 +1602,7 @@ def generate_test_file(file_name):
     ws2["I14"] = "Source"
     ws2["J14"] = "Rack"
     ws2["K14"] = "Location"
-    # ws2["L14"] = "Slot" # Missing Header
+    # Missing Header
     # None
     ws2["M14"] = "Port"
     ws2["N14"] = "Destination"

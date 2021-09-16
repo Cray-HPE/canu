@@ -14,7 +14,8 @@ import ruamel.yaml
 import urllib3
 
 from canu.cache import cache_switch, firmware_cached_recently, get_switch_from_cache
-from canu.utils.utils import netmiko_commands, switch_vendor
+from canu.utils.ssh import netmiko_commands
+from canu.utils.vendor import switch_vendor
 
 yaml = ruamel.yaml.YAML()
 
@@ -65,7 +66,10 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 @click.option("--json", "json_", is_flag=True, help="Output JSON")
 @click.option("--verbose", is_flag=True, help="Verbose mode")
 @click.option(
-    "--out", help="Output results to a file", type=click.File("w"), default="-"
+    "--out",
+    help="Output results to a file",
+    type=click.File("w"),
+    default="-",
 )
 @click.pass_context
 def firmware(ctx, shasta, ip, username, password, json_, verbose, out):
@@ -99,15 +103,24 @@ def firmware(ctx, shasta, ip, username, password, json_, verbose, out):
         return
     elif vendor == "aruba":
         switch_firmware, switch_info = get_firmware_aruba(
-            ip, credentials, False, cache_minutes
+            ip,
+            credentials,
+            False,
+            cache_minutes,
         )
     elif vendor == "dell":
         switch_firmware, switch_info = get_firmware_dell(
-            ip, credentials, False, cache_minutes
+            ip,
+            credentials,
+            False,
+            cache_minutes,
         )
     elif vendor == "mellanox":
         switch_firmware, switch_info = get_firmware_mellanox(
-            ip, credentials, False, cache_minutes
+            ip,
+            credentials,
+            False,
+            cache_minutes,
         )
 
     if switch_firmware is None:
@@ -169,7 +182,8 @@ def firmware(ctx, shasta, ip, username, password, json_, verbose, out):
         click.echo(f"Current Version: {switch_firmware['current_version']}", file=out)
         click.echo(f"Primary Version: {switch_firmware['primary_version']}", file=out)
         click.echo(
-            f"Secondary Version: {switch_firmware['secondary_version']}", file=out
+            f"Secondary Version: {switch_firmware['secondary_version']}",
+            file=out,
         )
         click.echo(f"Default Image: {switch_firmware['default_image']}", file=out)
         click.echo(f"Booted Image: {switch_firmware['booted_image']}", file=out)
@@ -222,7 +236,9 @@ def get_firmware_aruba(ip, credentials, return_error=False, cache_minutes=10):
         try:
             # Login
             login = session.post(
-                f"https://{ip}/rest/v10.04/login", data=credentials, verify=False
+                f"https://{ip}/rest/v10.04/login",
+                data=credentials,
+                verify=False,
             )
             login.raise_for_status()
 

@@ -1,6 +1,5 @@
 """Test CANU cli."""
-
-import click.testing
+from click import testing
 import requests
 import responses
 
@@ -9,7 +8,7 @@ from canu.cli import cli
 
 fileout = "fileout.txt"
 sls_address = "api-gw-service-nmn.local"
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 
 
 def test_cli():
@@ -35,10 +34,10 @@ def test_cli_init_csi_good():
     with runner.isolated_filesystem():
         with open("sls_input_file.json", "w") as f:
             f.write(
-                '{"Networks": {"CAN": {"Name": "CAN", "ExtraProperties": { "Subnets": [{"IPReservations":'
+                '{"Networks": {"NMN": {"Name": "NMN", "ExtraProperties": { "Subnets": [{"IPReservations":',
             )
             f.write(
-                '[{"IPAddress": "192.168.1.2","Name": "sw-spine-001"},{"IPAddress": "192.168.1.3","Name": "sw-spine-002"}]}]}}}}'
+                '[{"IPAddress": "192.168.1.2","Name": "sw-spine-001"},{"IPAddress": "192.168.1.3","Name": "sw-spine-002"}]}]}}}}',
             )
 
         result = runner.invoke(
@@ -79,7 +78,7 @@ def test_cli_init_sls_good():
             f"https://{sls_address}/apis/sls/v1/networks",
             json=[
                 {
-                    "Name": "CAN",
+                    "Name": "NMN",
                     "ExtraProperties": {
                         "Subnets": [
                             {
@@ -93,10 +92,10 @@ def test_cli_init_sls_good():
                                         "Name": "sw-spine-002",
                                     },
                                 ],
-                            }
+                            },
                         ],
                     },
-                }
+                },
             ],
         )
 
@@ -139,7 +138,7 @@ def test_cli_init_sls_token_bad():
             responses.GET,
             f"https://{sls_address}/apis/sls/v1/networks",
             body=requests.exceptions.HTTPError(
-                "503 Server Error: Service Unavailable for url"
+                "503 Server Error: Service Unavailable for url",
             ),
         )
 
@@ -165,7 +164,7 @@ def test_cli_init_sls_token_missing():
     )
     assert result.exit_code == 0
     assert "Invalid token file, generate another token or try again." in str(
-        result.output
+        result.output,
     )
 
 
@@ -178,7 +177,7 @@ def test_cli_init_sls_address_bad():
         responses.GET,
         f"https://{bad_sls_address}/apis/sls/v1/networks",
         body=requests.exceptions.ConnectionError(
-            "Failed to establish a new connection: [Errno 51] Network is unreachable"
+            "Failed to establish a new connection: [Errno 51] Network is unreachable",
         ),
     )
 

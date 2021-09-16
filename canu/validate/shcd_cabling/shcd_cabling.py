@@ -35,16 +35,28 @@ else:
 
 # Schema and Data files
 hardware_schema_file = os.path.join(
-    project_root, "network_modeling", "schema", "cray-network-hardware-schema.yaml"
+    project_root,
+    "network_modeling",
+    "schema",
+    "cray-network-hardware-schema.yaml",
 )
 hardware_spec_file = os.path.join(
-    project_root, "network_modeling", "models", "cray-network-hardware.yaml"
+    project_root,
+    "network_modeling",
+    "models",
+    "cray-network-hardware.yaml",
 )
 architecture_schema_file = os.path.join(
-    project_root, "network_modeling", "schema", "cray-network-architecture-schema.yaml"
+    project_root,
+    "network_modeling",
+    "schema",
+    "cray-network-architecture-schema.yaml",
 )
 architecture_spec_file = os.path.join(
-    project_root, "network_modeling", "models", "cray-network-architecture.yaml"
+    project_root,
+    "network_modeling",
+    "models",
+    "cray-network-architecture.yaml",
 )
 
 canu_cache_file = os.path.join(project_root, "canu", "canu_cache.yaml")
@@ -78,7 +90,6 @@ log = logging.getLogger("validate_shcd")
 @click.option(
     "--corners",
     help="The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.",
-    # required=True,
 )
 @optgroup.group(
     "Network cabling IPv4 input sources",
@@ -107,12 +118,20 @@ log = logging.getLogger("validate_shcd")
     "log_",
     help="Level of logging.",
     type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
-    # required=True,
     default="ERROR",
 )
 @click.pass_context
 def shcd_cabling(
-    ctx, architecture, shcd, tabs, corners, ips, ips_file, username, password, log_
+    ctx,
+    architecture,
+    shcd,
+    tabs,
+    corners,
+    ips,
+    ips_file,
+    username,
+    password,
+    log_,
 ):
     """Validate a SHCD file against the current network cabling .
 
@@ -166,7 +185,8 @@ def shcd_cabling(
             log.error("")
             click.secho("Not enough corners.\n", fg="red")
             click.secho(
-                f"Make sure each tab: {tabs.split(',')} has 2 corners.\n", fg="red"
+                f"Make sure each tab: {tabs.split(',')} has 2 corners.\n",
+                fg="red",
             )
             click.secho(
                 f"There were {len(corners.split(','))} corners entered, but there should be {len(tabs.split(',')) * 2}.",
@@ -189,7 +209,7 @@ def shcd_cabling(
                     tabs.split(",")[i],
                     corners.split(",")[i * 2].strip(),
                     corners.split(",")[i * 2 + 1].strip(),
-                )
+                ),
             )
     else:
         for tab in tabs.split(","):
@@ -199,7 +219,8 @@ def shcd_cabling(
                 type=str,
             )
             range_end = click.prompt(
-                "Enter the cell of the lower right corner", type=str
+                "Enter the cell of the lower right corner",
+                type=str,
             )
             sheets.append((tab, range_start, range_end))
 
@@ -223,7 +244,7 @@ def shcd_cabling(
                 )
                 try:
                     # Get LLDP info (stored in cache)
-                    get_lldp(str(ip), credentials, True)
+                    get_lldp(str(ip), credentials, return_error=True)
 
                 except requests.exceptions.HTTPError:
                     errors.append(
@@ -231,7 +252,7 @@ def shcd_cabling(
                             str(ip),
                             f"Error connecting to switch {ip}, "
                             + "check that this IP is an Aruba switch, or check the username or password.",
-                        ]
+                        ],
                     )
                 except requests.exceptions.ConnectionError:
                     errors.append(
@@ -239,14 +260,14 @@ def shcd_cabling(
                             str(ip),
                             f"Error connecting to switch {ip},"
                             + " check the IP address and try again.",
-                        ]
+                        ],
                     )
                 except requests.exceptions.RequestException:  # pragma: no cover
                     errors.append(
                         [
                             str(ip),
                             f"Error connecting to switch {ip}.",
-                        ]
+                        ],
                     )
 
     # Create SHCD Node factory
@@ -259,7 +280,9 @@ def shcd_cabling(
     )
 
     shcd_node_list, shcd_warnings = node_model_from_shcd(
-        factory=shcd_factory, spreadsheet=shcd, sheets=sheets
+        factory=shcd_factory,
+        spreadsheet=shcd,
+        sheets=sheets,
     )
     dash = "-" * 100
     double_dash = "=" * 100
@@ -288,7 +311,9 @@ def shcd_cabling(
         canu_cache = yaml.load(file)
 
     cabling_node_list, cabling_warnings = node_model_from_canu(
-        cabling_factory, canu_cache, ips
+        cabling_factory,
+        canu_cache,
+        ips,
     )
 
     click.echo("\n")
@@ -346,7 +371,7 @@ def compare_shcd_cabling(shcd_node_list, cabling_node_list):
             for port in shcd_dict[node]["ports"]:
                 if port not in cabling_dict[node]["ports"]:
                     shcd_missing_connections.append(
-                        f'port {port["port"]} ==> {port["destination_node_name"]}'
+                        f'port {port["port"]} ==> {port["destination_node_name"]}',
                     )
 
             if len(shcd_missing_connections) > 0:
@@ -373,7 +398,7 @@ def compare_shcd_cabling(shcd_node_list, cabling_node_list):
             for port in cabling_dict[node]["ports"]:
                 if port not in shcd_dict[node]["ports"]:
                     cabling_missing_connections.append(
-                        f'port {port["port"]} ==> {port["destination_node_name"]}'
+                        f'port {port["port"]} ==> {port["destination_node_name"]}',
                     )
 
             if len(cabling_missing_connections) > 0:

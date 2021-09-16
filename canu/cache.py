@@ -81,7 +81,8 @@ def firmware_cached_recently(ip, max_cache_time=10):
         time_now = datetime.datetime.now()
 
         cache_time = datetime.datetime.strptime(
-            canu_cache["switches"][index]["updated_at"], "%Y-%m-%d %H:%M:%S"
+            canu_cache["switches"][index]["updated_at"],
+            "%Y-%m-%d %H:%M:%S",
         )
 
         time_difference = time_now - cache_time
@@ -126,7 +127,7 @@ def update_switch_in_cache(cache, switch):
         The updated JSON cache with the switch updated.
     """
     index = list(map(itemgetter("ip_address"), cache["switches"])).index(
-        switch["ip_address"]
+        switch["ip_address"],
     )
     for attribute in switch:
         cache["switches"][index].update({attribute: switch[attribute]})
@@ -187,7 +188,8 @@ def ip_exists_in_cache(ip):
         True or False depending on if the IP address is in the cache.
     """
     if canu_cache["switches"] is not None and str(ip) in map(
-        itemgetter("ip_address"), canu_cache["switches"]
+        itemgetter("ip_address"),
+        canu_cache["switches"],
     ):
         return True
     return False

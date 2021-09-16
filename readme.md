@@ -89,6 +89,7 @@ The _sls_input_file.json_ file is generally stored in one of two places dependin
 
 - Early in the install process, when running off of the LiveCD the _sls_input_file.json_ file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
 - Later in the install process, the _sls_input_file.json_ file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
+- The switch IPs will be read from the 'NMN' network, if a different network is desired, use the `--network` flag to choose a different one e.g. (CAN, MTL, NMN).
 
 To get the switch IP addresses from CSI output, run the command:
 

@@ -48,13 +48,13 @@ class NetworkPort:
         """
         if not isinstance(number, int) and number is not None:
             raise Exception(
-                click.secho(f"Port number {number} must be an integer", fg="red")
+                click.secho(f"Port number {number} must be an integer", fg="red"),
             )
         self.__number = number
 
         if not isinstance(speed, int) and speed is not None:
             raise Exception(
-                click.secho(f"Port speed {speed} must be an integer", fg="red")
+                click.secho(f"Port speed {speed} must be an integer", fg="red"),
             )
         self.__speed = speed
         self.__slot = slot
@@ -67,7 +67,7 @@ class NetworkPort:
         if number is not None:
             if not isinstance(number, int):
                 raise Exception(
-                    click.secho(f"Port number {number} must be an integer", fg="red")
+                    click.secho(f"Port number {number} must be an integer", fg="red"),
                 )
             self.__number = number
         return self.__number
@@ -77,7 +77,7 @@ class NetworkPort:
         if speed is not None:
             if not isinstance(speed, int):
                 raise Exception(
-                    click.secho(f"Port speed {speed} must be an integer", fg="red")
+                    click.secho(f"Port speed {speed} must be an integer", fg="red"),
                 )
             self.__speed = speed
         return self.__speed

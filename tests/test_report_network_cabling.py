@@ -1,7 +1,7 @@
 """Test CANU report network cabling commands."""
 from unittest.mock import patch
 
-import click.testing
+from click import testing
 from netmiko import ssh_exception
 import requests
 import responses
@@ -23,7 +23,7 @@ ip_dell = "192.168.1.2"
 ip_mellanox = "192.168.1.3"
 credentials = {"username": username, "password": password}
 cache_minutes = 0
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -262,7 +262,7 @@ def test_network_cabling_equipment_view():
         )
         assert result.exit_code == 0
         assert "11:11:11:11:11:11         <=== sw-test01       1/1/3" in str(
-            result.output
+            result.output,
         )
         remove_switch_from_cache(ip)
 
@@ -347,7 +347,7 @@ def test_network_cabling_file_equipment_view_bidirectional():
         )
         assert result.exit_code == 0
         assert "11:11:11:11:11:11         <=== sw-test01       1/1/3" in str(
-            result.output
+            result.output,
         )
         remove_switch_from_cache(ip)
 
@@ -474,7 +474,7 @@ def test_network_cabling_bad_ip(get_lldp, switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -515,7 +515,7 @@ def test_network_cabling_bad_ip_file(get_lldp, switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -539,12 +539,14 @@ def test_network_cabling_bad_ip_file(get_lldp, switch_vendor):
         assert "check the IP address and try again" in str(result.output)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
 @responses.activate
-def test_network_cabling_bad_password():
+def test_network_cabling_bad_password(switch_vendor):
     """Test that the `canu report network cabling` command errors on bad credentials."""
     bad_password = "foo"
 
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -569,7 +571,7 @@ def test_network_cabling_bad_password():
         )
         assert result.exit_code == 0
         assert (
-            "Timeout error connecting to switch 192.168.1.1, check the IP address and try again."
+            "Error connecting to switch 192.168.1.1, check the IP address and try again."
             in str(result.output)
         )
 
@@ -862,7 +864,7 @@ lldp_neighbors_json1 = {
                 "port_id_subtype": "if_name",
             },
             "port_id": "1/1/1",
-        }
+        },
     },
     "1%2F1%2F2": {
         "bb:bb:bb:bb:bb:cc,1/1/2": {
@@ -875,7 +877,7 @@ lldp_neighbors_json1 = {
                 "port_id_subtype": "if_name",
             },
             "port_id": "1/1/2",
-        }
+        },
     },
     "1%2F1%2F3": {
         "00:00:00:00:00:00,00:00:00:00:00:00": {
@@ -912,7 +914,7 @@ lldp_neighbors_json1 = {
                 "port_id_subtype": "link_local_addr",
             },
             "port_id": "cc:cc:cc:cc:cc:cc",
-        }
+        },
     },
 }
 
@@ -953,7 +955,7 @@ lldp_neighbors_json2 = {
                 "port_id_subtype": "if_name",
             },
             "port_id": "1/1/1",
-        }
+        },
     },
     "1%2F1%2F2": {
         "aa:aa:aa:aa:aa:bb,1/1/2": {
@@ -966,7 +968,7 @@ lldp_neighbors_json2 = {
                 "port_id_subtype": "if_name",
             },
             "port_id": "1/1/2",
-        }
+        },
     },
 }
 

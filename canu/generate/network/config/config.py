@@ -36,16 +36,28 @@ else:
 
 # Schema and Data files
 hardware_schema_file = os.path.join(
-    project_root, "network_modeling", "schema", "cray-network-hardware-schema.yaml"
+    project_root,
+    "network_modeling",
+    "schema",
+    "cray-network-hardware-schema.yaml",
 )
 hardware_spec_file = os.path.join(
-    project_root, "network_modeling", "models", "cray-network-hardware.yaml"
+    project_root,
+    "network_modeling",
+    "models",
+    "cray-network-hardware.yaml",
 )
 architecture_schema_file = os.path.join(
-    project_root, "network_modeling", "schema", "cray-network-architecture-schema.yaml"
+    project_root,
+    "network_modeling",
+    "schema",
+    "cray-network-architecture-schema.yaml",
 )
 architecture_spec_file = os.path.join(
-    project_root, "network_modeling", "models", "cray-network-architecture.yaml"
+    project_root,
+    "network_modeling",
+    "models",
+    "cray-network-architecture.yaml",
 )
 
 canu_cache_file = os.path.join(project_root, "canu", "canu_cache.yaml")
@@ -53,11 +65,13 @@ canu_config_file = os.path.join(project_root, "canu", "canu.yaml")
 
 # Import templates
 network_templates_folder = os.path.join(
-    project_root, "network_modeling", "configs", "templates"
+    project_root,
+    "network_modeling",
+    "configs",
+    "templates",
 )
 env = Environment(
     loader=FileSystemLoader(network_templates_folder),
-    # trim_blocks=True,
     undefined=StrictUndefined,
 )
 
@@ -180,7 +194,8 @@ def config(
         if len(tabs.split(",")) * 2 != len(corners.split(",")):
             click.secho("Not enough corners.\n", fg="red")
             click.secho(
-                f"Make sure each tab: {tabs.split(',')} has 2 corners.\n", fg="red"
+                f"Make sure each tab: {tabs.split(',')} has 2 corners.\n",
+                fg="red",
             )
             click.secho(
                 f"There were {len(corners.split(','))} corners entered, but there should be {len(tabs.split(',')) * 2}.",
@@ -203,7 +218,7 @@ def config(
                     tabs.split(",")[i],
                     corners.split(",")[i * 2].strip(),
                     corners.split(",")[i * 2 + 1].strip(),
-                )
+                ),
             )
     else:
         for tab in tabs.split(","):
@@ -213,7 +228,8 @@ def config(
                 type=str,
             )
             range_end = click.prompt(
-                "Enter the cell of the lower right corner", type=str
+                "Enter the cell of the lower right corner",
+                type=str,
             )
             sheets.append((tab, range_start, range_end))
 
@@ -228,7 +244,9 @@ def config(
 
     # Get nodes from SHCD
     shcd_node_list, shcd_warnings = node_model_from_shcd(
-        factory=factory, spreadsheet=shcd, sheets=sheets
+        factory=factory,
+        spreadsheet=shcd,
+        sheets=sheets,
     )
 
     # Parse sls_input_file.json file from CSI
@@ -356,7 +374,7 @@ def config(
             fg="red",
         )
         click.secho(
-            "If the network does not contain these devices, disregard this warning."
+            "If the network does not contain these devices, disregard this warning.",
         )
         click.secho(dash)
         for x in missing_devices:
