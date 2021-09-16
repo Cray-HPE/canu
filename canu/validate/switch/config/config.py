@@ -90,10 +90,11 @@ def config(ctx, ip, username, password, config_file):
     generated_config_hier.load_from_file(config_file)
 
     # Build Hierarchical Configuration object for the Remediation Config
+    remediation_config_hier = running_config_hier.config_to_get_to(
+        generated_config_hier
+    )
 
-    host.load_tags(tags)
-    host.load_running_config(config)
-    host.load_generated_config_from_file(config_file)
+    remediation_config_hier.add_tags(tags)
 
     dash = "-" * 73
 
@@ -114,10 +115,11 @@ def config(ctx, ip, username, password, config_file):
         "Safe Commands"
         "\n"
         "These commands should be safe to run while the system is running.",
-        fg="bright_white",
+        fg="green",
     )
     click.echo(dash)
-    click.echo(host.remediation_config_filtered_text({"safe"}, {}))
+    for line in remediation_config_hier.with_tags({"safe"}).all_children():
+        click.echo(line.cisco_style_text())
     click.echo(dash)
     click.secho(
         "Manual Commands"
@@ -125,10 +127,11 @@ def config(ctx, ip, username, password, config_file):
         "These commands may cause disruption to the system and should be done only during a maintenance period."
         "\n"
         "It is recommended to have an out of band connection while running these commands.",
-        fg="bright_white",
+        fg="red",
     )
     click.echo(dash)
-    click.echo(host.remediation_config_filtered_text({"manual"}, {}))
+    for line in remediation_config_hier.with_tags({"manual"}).all_children():
+        click.echo(line.cisco_style_text())
     click.echo(dash)
     click.secho(
         "Commands NOT classified as Safe or Manual"
@@ -136,12 +139,14 @@ def config(ctx, ip, username, password, config_file):
         "These commands include authentication as well as unique commands for the system."
         "\n"
         "These should be looked over carefully before keeping/applying.",
-        fg="bright_white",
+        fg="yellow",
     )
     click.echo(dash)
-    click.echo(host.remediation_config_filtered_text({}, {"safe", "manual"}))
-    print_config_diff_summary(hostname, ip, differences)
+    for line in remediation_config_hier.all_children_sorted_untagged():
+        click.echo(line.cisco_style_text())
     click.echo(dash)
+    print_config_diff_summary(hostname, ip, differences)
+
     return
 
 

@@ -9,10 +9,10 @@
     - https-server vrf mgmt
   add_tags: safe
 #equals manual
-- lineage:
-  - equals:
-    - interface mgmt
-  add_tags: mgmt
+# - lineage:
+#   - equals:
+#     - interface mgmt
+#   add_tags: mgmt
 
 #interface starts with safe
 - lineage:
@@ -119,3 +119,10 @@
     - no interface vlan
     - no interface
   add_tags: manual
+
+# - lineage:
+#   - startswith:
+#     - no snmp
+#     - no user admin
+#   add_tags: creds
+

@@ -190,6 +190,4 @@
   - lineage:
     - startswith: spanning-tree bpdu-guard
     use: no spanning-tree bpdu-guard timeout
-  - lineage:
-    - contains: interface lag multi-chassis
-    use: no interface lag 
+
