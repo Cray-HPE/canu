@@ -23,7 +23,7 @@
 from collections import defaultdict
 import json
 
-import click.testing
+from click import testing
 import requests
 import responses
 
@@ -39,7 +39,7 @@ ip2 = "192.168.1.2"
 ips = "192.168.1.1,192.168.1.2"
 cache_minutes = 0
 asn = 65533
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 token = "123abc"
 
 
@@ -97,7 +97,7 @@ def test_config_bgp():
             )
 
             # Route Maps
-            # ncn_names = ['ncn-w001', 'ncn-w002', 'ncn-w003', 'ncn-w004', 'ncn-w005']
+            # ncn_names are ['ncn-w001', 'ncn-w002', 'ncn-w003', 'ncn-w004', 'ncn-w005']
             responses.add(
                 responses.POST,
                 f"https://{ip}/rest/v10.04/system/route_maps",
@@ -264,7 +264,7 @@ def test_config_bgp_file():
             )
 
             # Route Maps
-            # ncn_names = ['ncn-w001', 'ncn-w002', 'ncn-w003', 'ncn-w004', 'ncn-w005']
+            # ncn_names are ['ncn-w001', 'ncn-w002', 'ncn-w003', 'ncn-w004', 'ncn-w005']
             responses.add(
                 responses.POST,
                 f"https://{ip}/rest/v10.04/system/route_maps",
@@ -423,7 +423,7 @@ def test_config_bgp_verbose():
             )
 
             # Route Maps
-            # ncn_names = ['ncn-w001', 'ncn-w002', 'ncn-w003', 'ncn-w004', 'ncn-w005']
+            # ncn_names are ['ncn-w001', 'ncn-w002', 'ncn-w003', 'ncn-w004', 'ncn-w005']
             responses.add(
                 responses.POST,
                 f"https://{ip}/rest/v10.04/system/route_maps",
@@ -649,14 +649,14 @@ def test_config_bgp_bad_ip():
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
         responses.add(
             responses.POST,
             f"https://{bad_ip2}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -703,14 +703,14 @@ def test_config_bgp_bad_ip_file():
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
         responses.add(
             responses.POST,
             f"https://{bad_ip2}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -908,7 +908,7 @@ def test_config_bgp_sls_token_bad():
             responses.GET,
             f"https://{sls_address}/apis/sls/v1/networks",
             body=requests.exceptions.HTTPError(
-                "503 Server Error: Service Unavailable for url"
+                "503 Server Error: Service Unavailable for url",
             ),
         )
 
@@ -960,7 +960,7 @@ def test_config_bgp_sls_token_missing():
     )
     assert result.exit_code == 0
     assert "Invalid token file, generate another token or try again." in str(
-        result.output
+        result.output,
     )
 
 
@@ -973,7 +973,7 @@ def test_config_bgp_sls_address_bad():
         responses.GET,
         f"https://{bad_sls_address}/apis/sls/v1/networks",
         body=requests.exceptions.ConnectionError(
-            "Failed to establish a new connection: [Errno 51] Network is unreachable"
+            "Failed to establish a new connection: [Errno 51] Network is unreachable",
         ),
     )
 
@@ -1038,7 +1038,7 @@ sls_networks = [
                     "IPReservations": [
                         {"IPAddress": "192.168.7.60", "Name": "cray-tftp"},
                     ],
-                }
+                },
             ],
         },
     },
@@ -1078,7 +1078,7 @@ sls_networks = [
                         {"IPAddress": "192.168.5.28", "Name": "ncn-w004"},
                         {"IPAddress": "192.168.5.29", "Name": "ncn-w005"},
                     ],
-                }
+                },
             ],
         },
     },
@@ -1091,7 +1091,7 @@ sls_networks = [
                 {
                     "CIDR": "192.168.6.0/24",
                     "FullName": "HMN MetalLB",
-                }
+                },
             ],
         },
     },
@@ -1111,7 +1111,7 @@ sls_networks = [
                         {"IPAddress": "192.168.20.47", "Name": "ncn-w004"},
                         {"IPAddress": "192.168.20.48", "Name": "ncn-w005"},
                     ],
-                }
+                },
             ],
         },
     },

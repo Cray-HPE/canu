@@ -22,7 +22,7 @@
 """Test CANU validate network cabling commands."""
 from unittest.mock import patch
 
-import click.testing
+from click import testing
 import requests
 import responses
 
@@ -39,7 +39,7 @@ ip_dell = "192.168.1.2"
 ip_mellanox = "192.168.1.3"
 credentials = {"username": username, "password": password}
 cache_minutes = 0
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -93,7 +93,6 @@ def test_validate_cabling(switch_vendor):
                 "DEBUG",
             ],
         )
-        print(result.output)
         assert result.exit_code == 0
         assert "sw-spine-001 connects to 4 nodes:" in str(result.output)
         remove_switch_from_cache(ip)
@@ -394,7 +393,7 @@ def test_validate_cabling_bad_ip(switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -435,7 +434,7 @@ def test_validate_cabling_bad_ip_file(switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -582,10 +581,10 @@ def test_switch_cabling_dell(netmiko_commands, switch_vendor):
         assert result.exit_code == 0
         assert (
             "Cabling Node Connections\n"
-            "------------------------------------------------------------\n"
-            "0: sw-spine-003 connects to 2 nodes: [1, 2]\n"
-            "1: sw-leaf-001 connects to 1 nodes: [0]\n"
-            "2: sw-leaf-002 connects to 1 nodes: [0]\n"
+            + "------------------------------------------------------------\n"
+            + "0: sw-spine-003 connects to 2 nodes: [1, 2]\n"
+            + "1: sw-leaf-001 connects to 1 nodes: [0]\n"
+            + "2: sw-leaf-002 connects to 1 nodes: [0]\n"
         ) in str(result.output)
         remove_switch_from_cache(ip_dell)
 
@@ -650,23 +649,23 @@ def test_switch_cabling_mellanox(switch_vendor):
         assert result.exit_code == 0
         assert (
             "Cabling Node Connections\n"
-            "------------------------------------------------------------\n"
-            "0: sw-spine-004 connects to 2 nodes: [1, 2]\n"
-            "1: sw-leaf-003 connects to 1 nodes: [0]\n"
-            "2: sw-leaf-004 connects to 1 nodes: [0]\n"
-            "\n"
-            "\n"
-            "Cabling Port Usage\n"
-            "------------------------------------------------------------\n"
-            "0: sw-spine-004 has the following port usage:\n"
-            "        01==>sw-leaf-003:11\n"
-            "        02==>sw-leaf-004:12\n"
-            "1: sw-leaf-003 has the following port usage:\n"
-            "        01-10==>UNUSED\n"
-            "        11==>sw-spine-004:1\n"
-            "2: sw-leaf-004 has the following port usage:\n"
-            "        01-11==>UNUSED\n"
-            "        12==>sw-spine-004:2\n"
+            + "------------------------------------------------------------\n"
+            + "0: sw-spine-004 connects to 2 nodes: [1, 2]\n"
+            + "1: sw-leaf-003 connects to 1 nodes: [0]\n"
+            + "2: sw-leaf-004 connects to 1 nodes: [0]\n"
+            + "\n"
+            + "\n"
+            + "Cabling Port Usage\n"
+            + "------------------------------------------------------------\n"
+            + "0: sw-spine-004 has the following port usage:\n"
+            + "        01==>sw-leaf-003:11\n"
+            + "        02==>sw-leaf-004:12\n"
+            + "1: sw-leaf-003 has the following port usage:\n"
+            + "        01-10==>UNUSED\n"
+            + "        11==>sw-spine-004:1\n"
+            + "2: sw-leaf-004 has the following port usage:\n"
+            + "        01-11==>UNUSED\n"
+            + "        12==>sw-spine-004:2\n"
         ) in str(result.output)
         remove_switch_from_cache(ip_mellanox)
 
@@ -690,7 +689,7 @@ lldp_neighbors_json1 = {
                 "port_id_subtype": "if_name",
             },
             "port_id": "1/1/1",
-        }
+        },
     },
     "1%2F1%2F2": {
         "aa:bb:cc:88:00:00,1/1/2": {
@@ -703,7 +702,7 @@ lldp_neighbors_json1 = {
                 "port_id_subtype": "if_name",
             },
             "port_id": "1/1/2",
-        }
+        },
     },
     "1%2F1%2F3": {
         "00:00:00:00:00:00,00:00:00:00:00:00": {
@@ -740,7 +739,7 @@ lldp_neighbors_json1 = {
                 "port_id_subtype": "if_name",
             },
             "port_id": "1/1/4",
-        }
+        },
     },
     "1%2F1%2F5": {
         "99:99:99:99:99:99,99:99:99:99:99:99": {
@@ -753,7 +752,7 @@ lldp_neighbors_json1 = {
                 "port_id_subtype": "link_local_addr",
             },
             "port_id": "99:99:99:99:99:99",
-        }
+        },
     },
     "1%2F1%2F6": {
         "aa:aa:aa:aa:aa:aa,1/1/6": {
@@ -766,7 +765,7 @@ lldp_neighbors_json1 = {
                 "port_id_subtype": "if_name",
             },
             "port_id": "1/1/6",
-        }
+        },
     },
 }
 
@@ -807,8 +806,8 @@ lldp_neighbors_json2 = {
                 "port_id_subtype": "if_name",
             },
             "port_id": "1/1/1",
-        }
-    }
+        },
+    },
 }
 
 arp_neighbors_json2 = {
@@ -881,7 +880,7 @@ lldp_json_mellanox = {
                     "Remote port description": "sw-leaf03",
                     "Remote system name": "sw-leaf03",
                 },
-            ]
+            ],
         },
         {
             "Eth1/2 (Po100)": [
@@ -893,7 +892,7 @@ lldp_json_mellanox = {
                     "Remote port description": "sw-leaf04",
                     "Remote system name": "sw-leaf04",
                 },
-            ]
+            ],
         },
         {
             "Eth1/3 (Po100)": [
@@ -905,7 +904,7 @@ lldp_json_mellanox = {
                     "Remote port description": "Not Advertised",
                     "Remote system name": "Not Advertised",
                 },
-            ]
+            ],
         },
         {
             "Eth1/4 (Po100)": [
@@ -913,7 +912,7 @@ lldp_json_mellanox = {
                     "port id subtype": "Interface Name (5)",
                     "Remote port-id": "Not Advertised",
                 },
-            ]
+            ],
         },
     ],
 }
@@ -928,13 +927,19 @@ arp_neighbors_mellanox = {
             "VRF Name default": [
                 {
                     "192.168.1.9": [
-                        {"Hardware Address": "aa:bb:cc:dd:ee:ff", "Interface": "vlan 7"}
+                        {
+                            "Hardware Address": "aa:bb:cc:dd:ee:ff",
+                            "Interface": "vlan 7",
+                        },
                     ],
                     "192.168.1.10": [
-                        {"Hardware Address": "11:22:33:44:55:66", "Interface": "vlan 4"}
+                        {
+                            "Hardware Address": "11:22:33:44:55:66",
+                            "Interface": "vlan 4",
+                        },
                     ],
-                }
-            ]
+                },
+            ],
         },
     ],
 }

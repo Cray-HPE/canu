@@ -32,7 +32,7 @@ import natsort
 from netmiko import ssh_exception
 import requests
 
-from canu.utils.utils import switch_vendor
+from canu.utils.vendor import switch_vendor
 
 
 @click.command(
@@ -124,14 +124,16 @@ def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
                 )
 
                 bgp_neighbors, switch_info = get_bgp_neighbors(
-                    str(ip), credentials, asn
+                    str(ip),
+                    credentials,
+                    asn,
                 )
                 if switch_info is None:
                     errors.append(
                         [
                             str(ip),
                             "Connection Error",
-                        ]
+                        ],
                     )
                 else:
                     data[ip] = {
@@ -183,7 +185,7 @@ def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
                         [
                             str(ip),
                             f"{hostname} not a spine switch, with TDS architecture BGP config only allowed with spine switches",
-                        ]
+                        ],
                     )
             if architecture == "full":
                 if "agg" not in str(hostname) and "leaf" not in str(hostname):
@@ -192,7 +194,7 @@ def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
                             str(ip),
                             f"{hostname} not an agg or leaf switch, with Full architecture BGP config only allowed"
                             + "with agg and leaf switches",
-                        ]
+                        ],
                     )
 
     click.echo("\n")
@@ -218,7 +220,7 @@ def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
         )
 
     if len(errors) > 0:
-        errors = set(tuple(x) for x in errors)
+        errors = {tuple(x) for x in errors}
         errors = natsort.natsorted(errors)
         click.echo("\n")
         click.secho("Errors", fg="red")
@@ -289,7 +291,9 @@ def get_bgp_neighbors_aruba(ip, credentials, asn):
     try:
         # Login
         login = session.post(
-            f"https://{ip}/rest/v10.04/login", data=credentials, verify=False
+            f"https://{ip}/rest/v10.04/login",
+            data=credentials,
+            verify=False,
         )
         login.raise_for_status()
 
@@ -482,7 +486,6 @@ def get_bgp_neighbors_mellanox(ip, credentials):
             "hostname": switch_info["hostname"],
             "platform_name": switch_info["platform_name"],
             "vendor": "mellanox",
-            # "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
 
     except (

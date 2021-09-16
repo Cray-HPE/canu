@@ -45,7 +45,7 @@ from canu.report.switch.firmware.firmware import (
     get_firmware_dell,
     get_firmware_mellanox,
 )
-from canu.utils.utils import switch_vendor
+from canu.utils.vendor import switch_vendor
 
 
 yaml = ruamel.yaml.YAML()
@@ -105,7 +105,10 @@ shasta_options = canu_config["shasta_versions"]
 )
 @click.option("--json", "json_", is_flag=True, help="Output JSON")
 @click.option(
-    "--out", help="Output results to a file", type=click.File("w"), default="-"
+    "--out",
+    help="Output results to a file",
+    type=click.File("w"),
+    default="-",
 )
 # @click.option("--verbose", "-v", is_flag=True, help="Verbose mode")
 @click.pass_context
@@ -168,15 +171,22 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
 
                     if vendor == "aruba":
                         switch_firmware, switch_info = get_firmware_aruba(
-                            str(ip), credentials, True, cache_minutes=cache_minutes
+                            str(ip),
+                            credentials,
+                            True,
+                            cache_minutes=cache_minutes,
                         )
                     elif vendor == "dell":
                         switch_firmware, switch_info = get_firmware_dell(
-                            str(ip), credentials, True
+                            str(ip),
+                            credentials,
+                            True,
                         )
                     elif vendor == "mellanox":
                         switch_firmware, switch_info = get_firmware_mellanox(
-                            str(ip), credentials, True
+                            str(ip),
+                            credentials,
+                            True,
                         )
 
                     firmware_range = config["shasta"][shasta][vendor][
@@ -197,7 +207,7 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
                         "platform_name": switch_info["platform_name"],
                         "firmware": switch_firmware,
                         "updated_at": datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
+                            "%Y-%m-%d %H:%M:%S",
                         ),
                     }
                     data.append(
@@ -208,7 +218,7 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
                             switch_info["hostname"],
                             switch_firmware["current_version"],
                             firmware_error,
-                        ]
+                        ],
                     )
                     cache_switch(switch_json[str(ip)])
 
@@ -249,7 +259,7 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
                         "ip_address": str(ip),
                         "status": "Error",
                         "updated_at": datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
+                            "%Y-%m-%d %H:%M:%S",
                         ),
                     }
                     data.append([error_emoji, "Error", str(ip), "", "", ""])
@@ -265,7 +275,7 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
                         "ip_address": str(ip),
                         "status": "Error",
                         "updated_at": datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
+                            "%Y-%m-%d %H:%M:%S",
                         ),
                     }
                     data.append([error_emoji, "Error", str(ip), "", "", ""])
@@ -301,7 +311,12 @@ def firmware_table(data, out="-"):
     click.echo(dash, file=out)
     click.echo(
         "{:^4s}{:<8s}{:<16s}{:<20s}{:<20s}{}".format(
-            heading[0], heading[1], heading[2], heading[3], heading[4], heading[5]
+            heading[0],
+            heading[1],
+            heading[2],
+            heading[3],
+            heading[4],
+            heading[5],
         ),
         file=out,
     )
