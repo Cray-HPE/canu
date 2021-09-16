@@ -1,4 +1,5 @@
 """CANU (CSM Automatic Network Utility) floats through a new Shasta network and makes setup a breeze."""
+from collections import defaultdict
 import json
 import os.path
 import sys
@@ -9,6 +10,7 @@ import requests
 import ruamel.yaml
 import urllib3
 
+from canu.cache import cache_switch
 from canu.config import config
 from canu.generate import generate
 from canu.report import report
@@ -34,11 +36,11 @@ with open(canu_version_file, "r") as version_file:
 with open(canu_config_file, "r") as file:
     canu_config = yaml.load(file)
 
-CONTEXT_SETTING = dict(
-    obj={
+CONTEXT_SETTING = {
+    "obj": {
         "config": canu_config,
-    }
-)
+    },
+}
 
 
 @click.group(
@@ -82,13 +84,19 @@ cli.add_command(validate.validate)
 )
 @click.option("--sls-address", default="api-gw-service-nmn.local", show_default=True)
 @click.option(
+    "--network",
+    default="NMN",
+    help="Switch network e.g. (CAN, MTL, NMN)",
+    show_default=True,
+)
+@click.option(
     "--out",
     required=True,
     help="Output file with CSI IP addresses",
     type=click.File("w"),
 )
 @click.pass_context
-def init(ctx, csi_folder, auth_token, sls_address, out):
+def init(ctx, csi_folder, auth_token, sls_address, network, out):
     """Initialize CANU by extracting all the switch IPs from yaml files in the CSI folder, or by getting IPs from SLS.
 
     To access SLS, a token must be passed in using the --auth-token flag.
@@ -115,6 +123,7 @@ def init(ctx, csi_folder, auth_token, sls_address, out):
         csi_folder: Directory containing the CSI json file
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
+        network: Switch network e.g. (CAN, MTL, NMN).
         out: Name of the output file
     """
     switch_addresses = []
@@ -126,9 +135,14 @@ def init(ctx, csi_folder, auth_token, sls_address, out):
                 input_json = json.load(f)
 
                 # Format the input to be like the SLS JSON
-                input_json_networks = [input_json["Networks"]["CAN"]]
+                input_json_networks = [input_json["Networks"][network]]
+                input_json_hardware = input_json.get("Hardware", {})
 
-                switch_addresses = parse_sls_json_for_ips(input_json_networks)
+                switch_addresses, switch_dict = parse_sls_json_for_ips(
+                    input_json_networks,
+                    network,
+                )
+                parse_sls_json_for_vendor(input_json_hardware, switch_dict)
 
         except FileNotFoundError:
             click.secho(
@@ -155,21 +169,37 @@ def init(ctx, csi_folder, auth_token, sls_address, out):
                 )
 
         # SLS
-        url = "https://" + sls_address + "/apis/sls/v1/networks"
+        networks_url = "https://" + sls_address + "/apis/sls/v1/networks"
+        hardware_url = "https://" + sls_address + "/apis/sls/v1/hardware"
         try:
-            response = requests.get(
-                url,
+            # Networks
+            networks_response = requests.get(
+                networks_url,
                 headers={
                     "Content-Type": "application/json",
                     "Authorization": f"Bearer {token}",
                 },
                 verify=False,
             )
-            response.raise_for_status()
+            networks_response.raise_for_status()
+            shasta_networks = networks_response.json()
+            switch_addresses, switch_dict = parse_sls_json_for_ips(
+                shasta_networks,
+                network,
+            )
 
-            shasta_networks = response.json()
-
-            switch_addresses = parse_sls_json_for_ips(shasta_networks)
+            # Hardware
+            hardware_response = requests.get(
+                hardware_url,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {token}",
+                },
+                verify=False,
+            )
+            hardware_response.raise_for_status()
+            shasta_hardware = hardware_response.json()
+            parse_sls_json_for_vendor(shasta_hardware, switch_dict)
 
         except requests.exceptions.ConnectionError:
             return click.secho(
@@ -193,31 +223,69 @@ def init(ctx, csi_folder, auth_token, sls_address, out):
     for ip in switch_addresses:
         click.echo(ip, file=out)
     click.secho(
-        f"{len(switch_addresses)} IP addresses saved to {out.name}", fg="yellow"
+        f"{len(switch_addresses)} IP addresses saved to {out.name}",
+        fg="yellow",
     )
 
 
-def parse_sls_json_for_ips(shasta):
-    """Parse SLS JSON and return CAN IPv4 addresses.
+def parse_sls_json_for_ips(shasta, network="NMN"):
+    """Parse SLS JSON and return IPv4 addresses.
+
+    Defaults to the "NMN" network, but another network can be passed in. Cache the switch IP and hostname.
 
     Args:
         shasta: The SLS JSON to be parsed.
+        network: Switch network e.g. (CAN, MTL, NMN).
 
     Returns:
-        A list of switch IPs.
+        switch_addresses: A list of switch IPs.
+        switch_dict: Dictionary of IP addresses and hostnames
+
     """
     switch_addresses = []
+    switch_dict = defaultdict()
     for sls_network in shasta:
-        if sls_network["Name"] == "CAN":
-            switch_addresses = [
-                ip.get("IPAddress", None)
-                for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {})
-                for ip in subnets.get("IPReservations", {})
-                # Only get the IP addresses if the name starts with "sw-"
-                if ip.get("Name", "").startswith("sw-")
-            ]
+        if sls_network["Name"] == network:
+            for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
+                for ip in subnets.get("IPReservations", {}):
+                    # Only get the IP addresses if the name starts with "sw-"
+                    if ip.get("Name", "").startswith("sw-"):
+                        ip_address = ip.get("IPAddress", None)
+                        hostname = ip.get("Name", "")
+                        switch_json = {
+                            "ip_address": ip_address,
+                            "hostname": hostname,
+                        }
+                        cache_switch(switch_json)
+                        switch_addresses.append(ip_address)
+                        switch_dict[hostname] = ip_address
 
-    return switch_addresses
+    return switch_addresses, switch_dict
+
+
+def parse_sls_json_for_vendor(shasta, switch_dict):
+    """Parse SLS JSON for switch vendor and cache the results.
+
+    Args:
+        shasta: The SLS JSON to be parsed.
+        switch_dict: Dictionary of IP addresses and hostnames
+    """
+    for device in shasta:
+        alias_list = shasta[device].get("ExtraProperties", {}).get("Aliases", [])
+
+        for alias in alias_list:
+            if alias.startswith("sw-"):
+                vendor = shasta[device]["ExtraProperties"].get("Brand", "").lower()
+                hostname = alias
+
+                switch_json = {
+                    "ip_address": switch_dict[hostname],
+                    "hostname": hostname,
+                    "vendor": vendor,
+                }
+                cache_switch(switch_json)
+
+    return
 
 
 if __name__ == "__main__":  # pragma: no cover

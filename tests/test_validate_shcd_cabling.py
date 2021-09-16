@@ -6,6 +6,7 @@ from openpyxl import Workbook
 import requests
 import responses
 
+from canu.cache import remove_switch_from_cache
 from canu.cli import cli
 
 
@@ -22,10 +23,12 @@ cache_minutes = 0
 runner = testing.CliRunner()
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
 @responses.activate
-def test_validate_shcd_cabling():
+def test_validate_shcd_cabling(switch_vendor):
     """Test that the `canu validate shcd-cabling` command runs and returns valid cabling."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         generate_test_file(test_file)
         responses.add(
             responses.POST,
@@ -90,13 +93,16 @@ def test_validate_shcd_cabling():
             "'port 47 ==> sw-spine-001', 'port 48 ==> sw-leaf-bmc-001']"
             in str(result.output)
         )
+        remove_switch_from_cache(ip)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
 @responses.activate
-def test_validate_shcd_cabling_full_architecture():
+def test_validate_shcd_cabling_full_architecture(switch_vendor):
     """Test that the `canu validate shcd-cabling` command runs and returns valid cabling with full architecture."""
     full_architecture = "full"
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         generate_test_file(test_file)
         responses.add(
             responses.POST,
@@ -161,12 +167,15 @@ def test_validate_shcd_cabling_full_architecture():
         )
         assert "sw-leaf-001 connects to 9 nodes" in str(result.output)
         assert "sw-leaf-002 connects to 7 nodes" in str(result.output)
+        remove_switch_from_cache(ip)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
 @responses.activate
-def test_validate_shcd_cabling_file():
+def test_validate_shcd_cabling_file(switch_vendor):
     """Test that the `canu validate shcd-cabling` command runs and returns valid cabling with IPs from file."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         with open("test.txt", "w") as f:
             f.write("192.168.1.1")
 
@@ -232,6 +241,7 @@ def test_validate_shcd_cabling_file():
             + "'port 48 ==> sw-leaf-bmc-001']"
             in str(result.output)
         )
+        remove_switch_from_cache(ip)
 
 
 def test_validate_shcd_cabling_missing_ips():
@@ -463,12 +473,14 @@ def test_validate_shcd_cabling_bad_ip_file(switch_vendor):
         assert "check the IP address and try again" in str(result.output)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
 @responses.activate
-def test_validate_shcd_cabling_bad_password():
+def test_validate_shcd_cabling_bad_password(switch_vendor):
     """Test that the `canu validate shcd-cabling` command errors on bad credentials."""
     bad_password = "foo"
 
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -566,10 +578,12 @@ def test_validate_shcd_cabling_bad_file():
         )
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
 @responses.activate
-def test_validate_shcd_cabling_missing_tabs():
+def test_validate_shcd_cabling_missing_tabs(switch_vendor):
     """Test that the `canu validate shcd-cabling` command prompts for missing tabs."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         generate_test_file(test_file)
         responses.add(
             responses.POST,
@@ -620,14 +634,41 @@ def test_validate_shcd_cabling_missing_tabs():
         )
         assert result.exit_code == 0
         assert "sw-spine-001 connects to 4 nodes:" in str(result.output)
+        remove_switch_from_cache(ip)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
 @responses.activate
-def test_validate_shcd_cabling_bad_tab():
+def test_validate_shcd_cabling_bad_tab(switch_vendor):
     """Test that the `canu validate shcd-cabling` command fails on bad tab name."""
-    bad_tab = "NMN"
+    bad_tab = "BAD_TAB"
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         generate_test_file(test_file)
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/login",
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname,system_mac",
+            json=switch_info1,
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system/interfaces/*/lldp_neighbors?depth=2",
+            json=lldp_neighbors_json1,
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system/vrfs/default/neighbors?depth=2",
+            json=arp_neighbors_json1,
+        )
+
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/logout",
+        )
         result = runner.invoke(
             cli,
             [
@@ -652,7 +693,7 @@ def test_validate_shcd_cabling_bad_tab():
             ],
         )
         assert result.exit_code == 1
-        assert "Tab NMN not found in test_file.xlsx" in str(result.output)
+        assert "Tab BAD_TAB not found in test_file.xlsx" in str(result.output)
 
 
 @responses.activate
@@ -719,6 +760,7 @@ def test_validate_shcd_cabling_corner_prompt():
             + "'port 48 ==> sw-leaf-bmc-001']"
             in str(result.output)
         )
+        remove_switch_from_cache(ip)
 
 
 @responses.activate
@@ -776,6 +818,7 @@ def test_validate_shcd_cabling_corners_too_narrow():
         )
         assert result.exit_code == 1
         assert "Not enough columns exist." in str(result.output)
+        remove_switch_from_cache(ip)
 
 
 @responses.activate
@@ -836,6 +879,7 @@ def test_validate_shcd_cabling_corners_too_high():
         assert "On tab 25G_10G, the header is formatted incorrectly." in str(
             result.output,
         )
+        remove_switch_from_cache(ip)
 
 
 @responses.activate
@@ -893,6 +937,7 @@ def test_validate_shcd_cabling_corners_bad_cell():
         )
         assert result.exit_code == 1
         assert "Bad range of cells entered for tab 25G_10G." in str(result.output)
+        remove_switch_from_cache(ip)
 
 
 @responses.activate
@@ -952,6 +997,7 @@ def test_validate_shcd_cabling_not_enough_corners():
         assert "There were 1 corners entered, but there should be 2." in str(
             result.output,
         )
+        remove_switch_from_cache(ip)
 
 
 @responses.activate
@@ -1009,6 +1055,7 @@ def test_validate_shcd_cabling_bad_headers():
         )
         assert result.exit_code == 1
         assert "On tab Bad_Headers, header column Slot not found" in str(result.output)
+        remove_switch_from_cache(ip)
 
 
 @responses.activate
@@ -1068,6 +1115,7 @@ def test_validate_shcd_cabling_bad_architectural_definition():
         assert "No architectural definition found to allow connection between" in str(
             result.output,
         )
+        remove_switch_from_cache(ip)
 
 
 @responses.activate
@@ -1125,6 +1173,7 @@ def test_validate_shcd_cabling_rename():
         assert result.exit_code == 0
         assert "sw-leaf-bmc99 should be renamed sw-leaf-bmc-099" in str(result.output)
         assert "sw-spine01 should be renamed sw-spine-001" in str(result.output)
+        remove_switch_from_cache(ip)
 
 
 @responses.activate
@@ -1203,6 +1252,7 @@ def test_validate_shcd_missing_connections():
             "ncn-m88         : Found on the network but not found in the SHCD."
             in str(result.output)
         )
+        remove_switch_from_cache(ip)
 
 
 # Switch 1
