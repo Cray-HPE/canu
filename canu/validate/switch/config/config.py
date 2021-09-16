@@ -29,6 +29,11 @@ options_file = os.path.join(
     "config",
     "options.yaml",
 )
+tags_file = os.path.join(
+    project_root, "canu", "validate", "switch", "config", "tags.yaml"
+)
+
+tags = yaml.safe_load(open(tags_file))
 options = yaml.safe_load(open(options_file))
 host = Host("example.rtr", "aoscx", options)
 
@@ -94,6 +99,8 @@ def config(ctx, ip, username, password, config_file):
         generated_config_hier,
     )
 
+    remediation_config_hier.add_tags(tags)
+
     dash = "-" * 73
 
     click.echo("\n")
@@ -101,21 +108,48 @@ def config(ctx, ip, username, password, config_file):
         "Config differences between running config and config file",
         fg="bright_white",
     )
-    click.echo(dash)
+
     differences = compare_config(
-        running_config_hier,
-        generated_config_hier,
+        running_config_hier.difference(generated_config_hier),
+        generated_config_hier.difference(running_config_hier),
     )
 
     click.echo("\n")
+
     click.secho(
-        "Commands needed to get running config to match config file",
-        fg="bright_white",
+        "Safe Commands"
+        "\n"
+        "These commands should be safe to run while the system is running.",
+        fg="green",
     )
     click.echo(dash)
-    for line in remediation_config_hier.all_children():
+    for line in remediation_config_hier.with_tags({"safe"}).all_children():
         click.echo(line.cisco_style_text())
-
+    click.echo(dash)
+    click.secho(
+        "Manual Commands"
+        "\n"
+        "These commands may cause disruption to the system and should be done only during a maintenance period."
+        "\n"
+        "It is recommended to have an out of band connection while running these commands.",
+        fg="red",
+    )
+    click.echo(dash)
+    for line in remediation_config_hier.with_tags({"manual"}).all_children():
+        click.echo(line.cisco_style_text())
+    click.echo(dash)
+    click.secho(
+        "Commands NOT classified as Safe or Manual"
+        "\n"
+        "These commands include authentication as well as unique commands for the system."
+        "\n"
+        "These should be looked over carefully before keeping/applying.",
+        fg="yellow",
+    )
+    click.echo(dash)
+    for line in remediation_config_hier.all_children_sorted_untagged():
+        click.echo(line.cisco_style_text())
+    click.echo(dash)
     print_config_diff_summary(hostname, ip, differences)
 
     return
