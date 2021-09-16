@@ -104,20 +104,22 @@ def test_cli_init_sls_good():
         responses.add(
             responses.GET,
             f"https://{sls_address}/apis/sls/v1/hardware",
-            json={
-                "d0w1": {
-                    "ExtraProperties": {
-                        "Brand": "Aruba",
-                        "Aliases": ["sw-spine-001"],
+            json=[
+                {
+                    "d0w1": {
+                        "ExtraProperties": {
+                            "Brand": "Aruba",
+                            "Aliases": ["sw-spine-001"],
+                        },
+                    },
+                    "d0w2": {
+                        "ExtraProperties": {
+                            "Brand": "Aruba",
+                            "Aliases": ["sw-spine-002"],
+                        },
                     },
                 },
-                "d0w2": {
-                    "ExtraProperties": {
-                        "Brand": "Aruba",
-                        "Aliases": ["sw-spine-002"],
-                    },
-                },
-            },
+            ],
         )
 
         result = runner.invoke(
