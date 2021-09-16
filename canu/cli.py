@@ -199,7 +199,7 @@ def init(ctx, csi_folder, auth_token, sls_address, network, out):
             )
             hardware_response.raise_for_status()
             shasta_hardware = hardware_response.json()
-            parse_sls_json_for_vendor(shasta_hardware, switch_dict)
+            parse_sls_json_for_vendor(shasta_hardware[0], switch_dict)
 
         except requests.exceptions.ConnectionError:
             return click.secho(
