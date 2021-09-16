@@ -717,8 +717,12 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 - Added `canu generate network config` to generate network configuration for Aruba systems.
 - Added `canu validate switch config` to compare running switch config to a file for Aruba systems.
 - Added `canu validate network config` to compare running network config to files for Aruba systems.
-- Update naming conventions to `canu <verb> switch/network <noun>`
-- Add the ability to fully track device slot and port assignments.
+- Updated naming conventions to `canu <verb> switch/network <noun>`
+- Added the ability to fully track device slot and port assignments.
+- Known Limitations:
+  - Mountain hardware (CMM, CEC, PDU) are not yet properly handled in the generated switch configurations.
+  - Slingshot switches (sw-hsn) are not yet properly handled in the model or generated switch configurations.
+  - Switch and SNMP passwords have been removed from generated configurations until the handling code is secure.
 
 
 ## [0.0.5] - 2021-5-14
