@@ -36,6 +36,8 @@ from openpyxl import load_workbook
 import requests
 import ruamel.yaml
 import urllib3
+import netaddr
+import ipaddress
 
 from canu.cache import cache_directory
 from canu.validate.shcd.shcd import node_model_from_shcd
@@ -446,8 +448,14 @@ def generate_switch_config(
         "NCN_W001": sls_variables["ncn_w001"],
         "NCN_W002": sls_variables["ncn_w002"],
         "NCN_W003": sls_variables["ncn_w003"],
+        "MTL_NETMASK": sls_variables["MTL_NETMASK"],
+        "MTL_PREFIX_LEN": sls_variables["MTL_PREFIX_LEN"],
         "NMN": sls_variables["NMN"],
+        "NMN_NETMASK": sls_variables["NMN_NETMASK"],
+        "NMN_PREFIX_LEN": sls_variables["NMN_PREFIX_LEN"],
         "HMN": sls_variables["HMN"],
+        "HMN_NETMASK": sls_variables["HMN_NETMASK"],
+        "HMN_PREFIX_LEN": sls_variables["HMN_PREFIX_LEN"],
         "HMN_MTN": sls_variables["HMN_MTN"],
         "NMN_MTN": sls_variables["NMN_MTN"],
         "HMN_IP_GATEWAY": sls_variables["HMN_IP_GATEWAY"],
@@ -467,7 +475,7 @@ def generate_switch_config(
         click.secho(f"Cannot find {switch_name} in CSI / SLS nodes.", fg="red")
         exit(1)
 
-    variables["HMN_IP"] = sls_variables["HMN_IPs"][switch_name]
+    variables["HMN_IP"] = sls_variables["HMN_IPs"][switch_name] 
     variables["MTL_IP"] = sls_variables["MTL_IPs"][switch_name]
     variables["NMN_IP"] = sls_variables["NMN_IPs"][switch_name]
 
@@ -790,9 +798,17 @@ def parse_sls_for_config(input_json):
 
     sls_variables = {
         "CAN": None,
+        "CAN_NETMASK": None,
+        "CAN_PREFIX_LEN": None,
         "HMN": None,
+        "HMN_NETMASK": None,
+        "HMN_PREFIX_LEN": None,
         "MTL": None,
+        "MTL_NETMASK": None,
+        "MTL_PREFIX_LEN": None,
         "NMN": None,
+        "NMN_NETMASK": None,
+        "NMN_PREFIX_LEN": None,
         "HMN_MTN": None,
         "NMN_MTN": None,
         "CAN_IP_GATEWAY": None,
@@ -829,10 +845,12 @@ def parse_sls_for_config(input_json):
                             sls_variables["CAN_IP_SECONDARY"] = ip["IPAddress"]
 
         elif name == "HMN":
-            sls_variables["HMN"] = sls_network.get("ExtraProperties", {}).get(
+            sls_variables["HMN"] = netaddr.IPNetwork(sls_network.get("ExtraProperties", {}).get(
                 "CIDR",
                 "",
-            )
+            ))
+            sls_variables["HMN_NETMASK"] = sls_variables["HMN"].netmask
+            sls_variables["HMN_PREFIX_LEN"] = sls_variables["HMN"].prefixlen
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 if subnets["Name"] == "network_hardware":
                     sls_variables["HMN_IP_GATEWAY"] = subnets["Gateway"]
@@ -840,10 +858,12 @@ def parse_sls_for_config(input_json):
                         sls_variables["HMN_IPs"][ip["Name"]] = ip["IPAddress"]
 
         elif name == "MTL":
-            sls_variables["MTL"] = sls_network.get("ExtraProperties", {}).get(
+            sls_variables["MTL"] = netaddr.IPNetwork(sls_network.get("ExtraProperties", {}).get(
                 "CIDR",
                 "",
-            )
+            ))
+            sls_variables["MTL_NETMASK"] = sls_variables["MTL"].netmask
+            sls_variables["MTL_PREFIX_LEN"] = sls_variables["MTL"].prefixlen
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 if subnets["Name"] == "network_hardware":
                     sls_variables["MTL_IP_GATEWAY"] = subnets["Gateway"]
@@ -851,10 +871,12 @@ def parse_sls_for_config(input_json):
                         sls_variables["MTL_IPs"][ip["Name"]] = ip["IPAddress"]
 
         elif name == "NMN":
-            sls_variables["NMN"] = sls_network.get("ExtraProperties", {}).get(
+            sls_variables["NMN"] = netaddr.IPNetwork(sls_network.get("ExtraProperties", {}).get(
                 "CIDR",
                 "",
-            )
+            ))
+            sls_variables["NMN_NETMASK"] = sls_variables["NMN"].netmask
+            sls_variables["NMN_PREFIX_LEN"] = sls_variables["NMN"].prefixlen
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 if subnets["Name"] == "bootstrap_dhcp":
                     for ip in subnets["IPReservations"]:
@@ -940,6 +962,7 @@ def rename_sls_hostnames(sls_variables):
         sls_variables["NMN_IPs"].pop(key)
         sls_variables["NMN_IPs"][new_name] = value
 
+    print(sls_variables["HMN_NETMASK"])
     return sls_variables
 
 
