@@ -89,7 +89,7 @@ interface vlan 4
     ip ospf 1 area 0.0.0.0
 interface vlan 7
     ip mtu 9198
-    ip address {{ variables.CAN_IP_SECONDARY }}
+    ip address {{ variables.CAN_IP_SECONDARY }}/{{ variables.CAN_PREFIX_LEN }}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.CAN_IP_GATEWAY }}
     ip helper-address 10.92.100.222
