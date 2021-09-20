@@ -19,6 +19,8 @@
   - startswith: interface 1
   - startswith:
     - description
+    - no description
+    - routing
     - mtu
     - no mtu
     - no shutdown
@@ -26,6 +28,9 @@
     - no shutdown
     - spanning-tree
     - vlan
+    - no routing
+    - speed
+    - no speed
   add_tags: safe
 #interface starts with manual
 - lineage:
@@ -37,7 +42,11 @@
     - no lag
     - vrf
     - no vrf
+    - no spanning-tree
   add_tags: manual
+- lineage:
+  - startswith: no interface 1
+  add_tags: no interface
 
 #interface vlan starts with safe
 - lineage:
@@ -48,6 +57,8 @@
     - ip helper
     - ip ospf
     - description
+    - ip helper
+    - no ip helper
   add_tags: safe
 #interface vlan starts with manual
 - lineage:
@@ -85,6 +96,11 @@
     - vlan
     - no vlan
     - no routing
+    - lacp rate
+    - no lacp rate
+  add_tags: manual
+- lineage:
+  - startswith: no interface lag
   add_tags: manual
 
 #vlan starts with safe
@@ -106,6 +122,8 @@
     - ntp
     - router ospf
     - hostname
+    - no ip dns
+    - ip dns
   add_tags: safe
 #manual starts with
 - lineage:
@@ -117,7 +135,6 @@
     - no vrf
     - no spanning-tree
     - no interface vlan
-    - no interface
   add_tags: manual
 
 # - lineage:

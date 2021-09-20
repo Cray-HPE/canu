@@ -53,7 +53,7 @@ interface {{ variables.VSX_ISL_PORT2 }}
     lag 256
 
 interface loopback 0
-    ip address {{ variables.LOOPBACK_IP }}
+    ip address {{ variables.LOOPBACK_IP }}/32
     ip ospf 1 area 0.0.0.0
 interface vlan 1
     shutdown
