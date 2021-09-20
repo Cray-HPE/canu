@@ -22,7 +22,7 @@
 import os
 from setuptools import setup, find_packages
 
-BASE_DIR=os.path.dirname(__file__)
+BASE_DIR = os.path.dirname(__file__)
 with open(os.path.join(BASE_DIR, "requirements.txt")) as req_file:
     REQUIREMENTS = req_file.read()
 
@@ -46,7 +46,7 @@ setup(
                                        "schema/*.yaml",
                                        "models/*yaml",
                                        "configs/templates/**/*"],
-    },
+                  },
     exclude_package_data={"canu": ["canu_cache.yaml"]},
     install_requires=REQUIREMENTS,
     entry_points="""

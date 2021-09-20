@@ -34,7 +34,7 @@ import ruamel.yaml
 def cache_directory():
     """Create and return the cache directory location.
 
-    Prefers the user's home directory, otherwise OS temporary directory.
+    Prefer the user home directory, otherwise OS temporary directory.
 
     Returns:
         cachedir: Location of the canu cache.
@@ -42,11 +42,15 @@ def cache_directory():
     try:
         basedir = Path.home()
         cachedir = os.path.join(basedir, ".canu")
-        Path(cachedir).mkdir(parents=True, exist_ok=True)
     except Exception:
         basedir = tempfile.gettempdir()
         cachedir = os.path.join(basedir, ".canu")
+
+    try:
         Path(cachedir).mkdir(parents=True, exist_ok=True)
+    except Exception:
+        print(f"Cannot create cache directory: {cachedir}")
+        sys.exit(1)
 
     return cachedir
 
