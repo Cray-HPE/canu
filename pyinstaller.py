@@ -28,7 +28,7 @@ a = Analysis(['canu/cli.py'],
              pathex=['canu', '/workspace'],
              binaries=[],
              datas=[
-               ('.version', '.'),
+               ('canu/.version', 'canu
                ('canu/canu.yaml', 'canu'),
                ('network_modeling/models/*', 'network_modeling/models'),
                ('network_modeling/schema/*', 'network_modeling/schema'),

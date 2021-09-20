@@ -49,7 +49,7 @@ else:
     parent_directory = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 canu_config_file = os.path.join(parent_directory, "canu", "canu.yaml")
-canu_version_file = os.path.join(parent_directory, ".version")
+canu_version_file = os.path.join(parent_directory, "canu", ".version")
 
 with open(canu_version_file, "r") as version_file:
     version = version_file.read().replace("\n", "")
