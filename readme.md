@@ -80,9 +80,8 @@ In order to run CANU, both python3 and pip3 need to be installed.
     - Python Virtualenv
   ```bash
     python3 -m venv .venv
-    ./.venv/bin/activate
-    pip3 install -r /app/canu/requirements.txt
-    pip3 install --editable /app/canu/
+    source ./.venv/bin/activate
+    pip3 install ./canu
     ```
 
     - When you are done working in the Python Virtualenv.
@@ -709,6 +708,13 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 
 # Changelog
 
+## [development]
+
+- Installation now supports non-developer modes.
+- The directory of canu_cache.yaml is now dynamically configured in the user's home directory (preferred), or the system temporary directory depending on filesystem permissions.
+
+## [unreleased]
+
 ## [0.0.6] - 2021-9-15
 
 - Added alpha version of schema-checked JSON output in `validate shcd` as a machine-readable exchange for SHCD data.
@@ -769,9 +775,11 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 - Ability for CANU to get the firmware of a single or multiple Aruba switches
 - Standardized the canu.yaml file to show currently supported switch firmware versions.
 
-[unreleased]: https://stash.us.cray.com/projects/CSM/repos/canu/compare/commits?targetBranch=refs%2Ftags%2F0.0.5&sourceBranch=refs%2Fheads%2Fmaster&targetRepoId=12732
-[0.0.5]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.5
-[0.0.4]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.4
-[0.0.3]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.3
-[0.0.2]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.2
-[0.0.1]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.1
+[development]: https://github.com/Cray-HPE/canu/tree/develop
+[unreleased]: https://github.com/Cray-HPE/canu/tree/main
+[0.0.6]: https://github.com/Cray-HPE/canu/tree/0.0.6
+[0.0.5]: https://github.com/Cray-HPE/canu/tree/0.0.5
+[0.0.4]: https://github.com/Cray-HPE/canu/tree/0.0.4 
+[0.0.3]: https://github.com/Cray-HPE/canu/tree/0.0.3 
+[0.0.2]: https://github.com/Cray-HPE/canu/tree/0.0.2 
+[0.0.1]: https://github.com/Cray-HPE/canu/tree/0.0.1 

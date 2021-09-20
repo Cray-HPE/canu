@@ -34,6 +34,7 @@ from hier_config import HConfig, Host
 from netmiko import ssh_exception
 import ruamel.yaml
 
+from canu.cache import cache_directory
 from canu.utils.ssh import netmiko_command
 from canu.validate.switch.config.config import (
     compare_config,
@@ -50,7 +51,7 @@ else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
-canu_cache_file = os.path.join(project_root, "canu", "canu_cache.yaml")
+canu_cache_file = os.path.join(cache_directory(), "canu_cache.yaml")
 canu_config_file = os.path.join(project_root, "canu", "canu.yaml")
 
 # Get Shasta versions from canu.yaml
