@@ -26,6 +26,7 @@ import os
 from pathlib import Path
 import re
 import sys
+import pprint
 
 import click
 from click_help_colors import HelpColorsCommand
@@ -480,7 +481,7 @@ def generate_switch_config(
     }
 
     cabling = {}
-    cabling["nodes"] = get_switch_nodes(switch_name, shcd_node_list, factory)
+    cabling["nodes"] = get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables)
 
     if switch_name not in sls_variables["HMN_IPs"].keys():
         click.secho(f"Cannot find {switch_name} in CSI / SLS nodes.", fg="red")
@@ -538,7 +539,7 @@ def get_pair_connections(nodes, switch_name):
     return connections
 
 
-def get_switch_nodes(switch_name, shcd_node_list, factory):
+def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
     """Get the nodes connected to the switch ports.
 
     Args:
@@ -571,6 +572,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
     for port in nodes_by_name[switch_name]["ports"]:
         destination_node_id = port["destination_node_id"]
         destination_node_name = nodes_by_id[port["destination_node_id"]]["common_name"]
+        destination_rack = nodes_by_id[port["destination_node_id"]]["location"]["rack"]
         source_port = port["port"]
         destination_port = port["destination_port"]
         destination_slot = port["destination_slot"]
@@ -622,16 +624,31 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
             }
             nodes.append(new_node)
         elif shasta_name == "cec":
+            destination_rack_int = int(re.search(r'\d+', destination_rack)[0])
+            for cabinets in sls_variables["NMN_MTN_CABINETS"]:
+                sls_rack_int = int(re.search(r'\d+', (cabinets["Name"]))[0])
+                if destination_rack_int == sls_rack_int:
+                    native_vlan = cabinets["VlanID"]
             new_node = {
                 "subtype": "cec",
                 "slot": None,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "INTERFACE_NUMBER": f"1/1/{source_port}",
+                    "NATIVE_VLAN": native_vlan,
                 },
             }
             nodes.append(new_node)
         elif shasta_name == "cmm":
+            destination_rack_int = int(re.search(r'\d+', destination_rack)[0])
+            for cabinets in sls_variables["NMN_MTN_CABINETS"]:
+                sls_rack_int = int(re.search(r'\d+', (cabinets["Name"]))[0])
+                if destination_rack_int == sls_rack_int:
+                    native_vlan = cabinets["VlanID"]
+            for cabinets in sls_variables["HMN_MTN_CABINETS"]:
+                sls_rack_int = int(re.search(r'\d+', (cabinets["Name"]))[0])
+                if destination_rack_int == sls_rack_int:
+                    tagged_vlan = cabinets["VlanID"]
             new_node = {
                 "subtype": "cmm",
                 "slot": None,
@@ -639,6 +656,8 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "PORT": f"1/1/{source_port}",
                     "LAG_NUMBER": primary_port,
+                    "NATIVE_VLAN": native_vlan,
+                    "TAGGED_VLAN": tagged_vlan,
                 },
             }
             nodes.append(new_node)
@@ -960,7 +979,6 @@ def parse_sls_for_config(input_json):
             networks_list.append([name, vlan])
 
     networks_list = {tuple(x) for x in networks_list}
-
     return sls_variables
 
 
@@ -1007,7 +1025,7 @@ def rename_sls_hostnames(sls_variables):
         sls_variables["NMN_IPs"].pop(key)
         sls_variables["NMN_IPs"][new_name] = value
 
-    print(sls_variables["HMN_NETMASK"])
+    print(sls_variables["NMN_MTN_CABINETS"])
     return sls_variables
 
 

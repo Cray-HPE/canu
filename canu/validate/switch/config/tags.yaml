@@ -124,6 +124,7 @@
     - hostname
     - no ip dns
     - ip dns
+    - no ntp
   add_tags: safe
 #manual starts with
 - lineage:
