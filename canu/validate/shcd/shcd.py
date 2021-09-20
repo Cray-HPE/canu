@@ -23,7 +23,7 @@
 from collections import defaultdict
 import json
 import logging
-import os
+from os import path
 from pathlib import Path
 import re
 import sys
@@ -46,31 +46,31 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent.parent
 
 # Schema and Data files
-json_schema_file = os.path.join(
+json_schema_file = path.join(
     project_root,
     "network_modeling",
     "schema",
     "cray-system-topology-schema.json",
 )
-hardware_schema_file = os.path.join(
+hardware_schema_file = path.join(
     project_root,
     "network_modeling",
     "schema",
     "cray-network-hardware-schema.yaml",
 )
-hardware_spec_file = os.path.join(
+hardware_spec_file = path.join(
     project_root,
     "network_modeling",
     "models",
     "cray-network-hardware.yaml",
 )
-architecture_schema_file = os.path.join(
+architecture_schema_file = path.join(
     project_root,
     "network_modeling",
     "schema",
     "cray-network-architecture-schema.yaml",
 )
-architecture_spec_file = os.path.join(
+architecture_spec_file = path.join(
     project_root,
     "network_modeling",
     "models",

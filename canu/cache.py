@@ -23,7 +23,7 @@
 
 import datetime
 from operator import itemgetter
-import os.path
+from os import path
 import sys
 
 import ruamel.yaml
@@ -35,12 +35,12 @@ yaml = ruamel.yaml.YAML()
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
     parent_directory = sys._MEIPASS
 else:
-    parent_directory = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    parent_directory = path.abspath(path.dirname(path.dirname(__file__)))
 
-canu_cache_file = os.path.join(parent_directory, "canu", "canu_cache.yaml")
-canu_version_file = os.path.join(parent_directory, ".version")
+canu_cache_file = path.join(parent_directory, "canu", "canu_cache.yaml")
+canu_version_file = path.join(parent_directory, ".version")
 
-file_exists = os.path.isfile(canu_cache_file)
+file_exists = path.isfile(canu_cache_file)
 
 # Open the Cache file, and generate it if it does not exist
 if file_exists:  # pragma: no cover

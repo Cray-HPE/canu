@@ -22,7 +22,7 @@
 """CANU (CSM Automatic Network Utility) floats through a new Shasta network and makes setup a breeze."""
 from collections import defaultdict
 import json
-import os.path
+from os import environ, path
 import sys
 
 import click
@@ -46,10 +46,10 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
     parent_directory = sys._MEIPASS
 else:
-    parent_directory = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    parent_directory = path.abspath(path.dirname(path.dirname(__file__)))
 
-canu_config_file = os.path.join(parent_directory, "canu", "canu.yaml")
-canu_version_file = os.path.join(parent_directory, ".version")
+canu_config_file = path.join(parent_directory, "canu", "canu.yaml")
+canu_version_file = path.join(parent_directory, ".version")
 
 with open(canu_version_file, "r") as version_file:
     version = version_file.read().replace("\n", "")
@@ -152,7 +152,7 @@ def init(ctx, csi_folder, auth_token, sls_address, network, out):
     # Parse sls_input_file.json file from CSI and filter "Node Management Network" IP addresses
     if csi_folder:
         try:
-            with open(os.path.join(csi_folder, "sls_input_file.json"), "r") as f:
+            with open(path.join(csi_folder, "sls_input_file.json"), "r") as f:
                 input_json = json.load(f)
 
                 # Format the input to be like the SLS JSON
@@ -173,7 +173,7 @@ def init(ctx, csi_folder, auth_token, sls_address, network, out):
             return
 
     else:
-        token = os.environ.get("SLS_TOKEN")
+        token = environ.get("SLS_TOKEN")
 
         # Token file takes precedence over the environmental variable
         if auth_token != token:

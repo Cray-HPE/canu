@@ -22,7 +22,7 @@
 """CANU generate switch config commands."""
 from collections import defaultdict
 import json
-import os
+from os import environ, path
 from pathlib import Path
 import re
 import sys
@@ -53,36 +53,36 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
 # Schema and Data files
-hardware_schema_file = os.path.join(
+hardware_schema_file = path.join(
     project_root,
     "network_modeling",
     "schema",
     "cray-network-hardware-schema.yaml",
 )
-hardware_spec_file = os.path.join(
+hardware_spec_file = path.join(
     project_root,
     "network_modeling",
     "models",
     "cray-network-hardware.yaml",
 )
-architecture_schema_file = os.path.join(
+architecture_schema_file = path.join(
     project_root,
     "network_modeling",
     "schema",
     "cray-network-architecture-schema.yaml",
 )
-architecture_spec_file = os.path.join(
+architecture_spec_file = path.join(
     project_root,
     "network_modeling",
     "models",
     "cray-network-architecture.yaml",
 )
 
-canu_cache_file = os.path.join(project_root, "canu", "canu_cache.yaml")
-canu_config_file = os.path.join(project_root, "canu", "canu.yaml")
+canu_cache_file = path.join(project_root, "canu", "canu_cache.yaml")
+canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
 # Import templates
-network_templates_folder = os.path.join(
+network_templates_folder = path.join(
     project_root,
     "network_modeling",
     "configs",
@@ -281,7 +281,7 @@ def config(
     # Parse sls_input_file.json file from CSI
     if csi_folder:
         try:
-            with open(os.path.join(csi_folder, "sls_input_file.json"), "r") as f:
+            with open(path.join(csi_folder, "sls_input_file.json"), "r") as f:
                 input_json = json.load(f)
 
                 # Format the input to be like the SLS JSON
@@ -299,7 +299,7 @@ def config(
             return
     else:
         # Get SLS config
-        token = os.environ.get("SLS_TOKEN")
+        token = environ.get("SLS_TOKEN")
 
         # Token file takes precedence over the environmental variable
         if auth_token != token:

@@ -21,7 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """Test CANU generate switch config commands."""
 import json
-import os
+from os import path
 from pathlib import Path
 
 from click import testing
@@ -33,7 +33,7 @@ from canu.cli import cli
 test_file_directory = Path(__file__).resolve().parent
 
 test_file_name = "Full_Architecture_Golden_Config_0.0.6.xlsx"
-test_file = os.path.join(test_file_directory, "data", test_file_name)
+test_file = path.join(test_file_directory, "data", test_file_name)
 architecture = "full"
 tabs = "INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners = "J14,T44,J14,T48,J14,T24,J14,T23"
@@ -44,7 +44,7 @@ cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
 
 test_file_name_tds = "TDS_Architecture_Golden_Config_0.0.6.xlsx"
-test_file_tds = os.path.join(test_file_directory, "data", test_file_name_tds)
+test_file_tds = path.join(test_file_directory, "data", test_file_name_tds)
 architecture_tds = "TDS"
 tabs_tds = "INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners_tds = "J14,T30,J14,T48,J14,T24,J14,T23"

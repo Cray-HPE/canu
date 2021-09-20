@@ -1,6 +1,6 @@
 [flake8]
 select = B,B9,BLK,C,D,DAR,E,F,I,W,C4,N
-ignore = E203,E501,W503,WPS111,WPS201,WPS202,WPS216,WPS226,WPS305,WPS336,I001,I004,I005
+ignore = E203,E501,W503,WPS111,WPS201,WPS202,WPS216,WPS226,WPS305,WPS336,I001,I003,I004,I005
 max-line-length = 120
 application-import-names = canu,tests
 import-order-style = google

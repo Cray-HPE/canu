@@ -24,7 +24,7 @@ from collections import defaultdict
 import datetime
 import ipaddress
 import json
-import os.path
+from os import path
 from pathlib import Path
 import sys
 
@@ -58,7 +58,7 @@ else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
-canu_config_file = os.path.join(project_root, "canu", "canu.yaml")
+canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
 # Get Shasta versions from canu.yaml
 with open(canu_config_file, "r") as file:

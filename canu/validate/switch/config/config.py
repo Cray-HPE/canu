@@ -22,7 +22,7 @@
 """CANU commands that validate switch running config against a config file."""
 from collections import defaultdict
 import difflib
-import os
+from os import path
 from pathlib import Path
 import sys
 
@@ -42,7 +42,7 @@ else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
-options_file = os.path.join(
+options_file = path.join(
     project_root,
     "canu",
     "validate",
@@ -50,7 +50,7 @@ options_file = os.path.join(
     "config",
     "options.yaml",
 )
-tags_file = os.path.join(
+tags_file = path.join(
     project_root,
     "canu",
     "validate",

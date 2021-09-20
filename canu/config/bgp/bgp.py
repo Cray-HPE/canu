@@ -22,7 +22,7 @@
 """CANU commands that configure BGP."""
 import ipaddress
 import json
-import os
+from os import environ, path
 
 import click
 from click_help_colors import HelpColorsCommand
@@ -146,7 +146,7 @@ def bgp(
     # Parse sls_input_file.json file from CSI
     if csi_folder:
         try:
-            with open(os.path.join(csi_folder, "sls_input_file.json"), "r") as f:
+            with open(path.join(csi_folder, "sls_input_file.json"), "r") as f:
                 input_json = json.load(f)
 
                 # Format the input to be like the SLS JSON
@@ -164,7 +164,7 @@ def bgp(
             return
     else:
         # Get SLS config
-        token = os.environ.get("SLS_TOKEN")
+        token = environ.get("SLS_TOKEN")
 
         # Token file takes precedence over the environmental variable
         if auth_token != token:

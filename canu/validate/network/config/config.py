@@ -21,7 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate the network config."""
 import ipaddress
-import os
+from os import path
 from pathlib import Path
 import sys
 
@@ -50,8 +50,8 @@ else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
-canu_cache_file = os.path.join(project_root, "canu", "canu_cache.yaml")
-canu_config_file = os.path.join(project_root, "canu", "canu.yaml")
+canu_cache_file = path.join(project_root, "canu", "canu_cache.yaml")
+canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
 # Get Shasta versions from canu.yaml
 with open(canu_config_file, "r") as file:
@@ -59,7 +59,7 @@ with open(canu_config_file, "r") as file:
 
 shasta_options = canu_config["shasta_versions"]
 
-options_file = os.path.join(
+options_file = path.join(
     project_root,
     "canu",
     "validate",
