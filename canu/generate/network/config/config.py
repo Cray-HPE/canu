@@ -34,6 +34,7 @@ import requests
 import ruamel.yaml
 import urllib3
 
+from canu.cache import cache_directory
 from canu.generate.switch.config.config import (
     generate_switch_config,
     get_shasta_name,
@@ -81,7 +82,7 @@ architecture_spec_file = path.join(
     "cray-network-architecture.yaml",
 )
 
-canu_cache_file = path.join(project_root, "canu", "canu_cache.yaml")
+canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
 # Import templates

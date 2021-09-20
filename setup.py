@@ -19,25 +19,35 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
+import os
 from setuptools import setup, find_packages
 
-with open("requirements.txt") as req_file:
+BASE_DIR = os.path.dirname(__file__)
+with open(os.path.join(BASE_DIR, "requirements.txt")) as req_file:
     REQUIREMENTS = req_file.read()
 
-with open(".version") as version_file:
+with open(os.path.join(BASE_DIR, "canu", ".version")) as version_file:
     VERSION = version_file.read()
 
 setup(
     name="canu",
-    author="Brooks Vinyard",
-    author_email="brooks.vinyard@broadwing.io",
+    author="Sean Lynn",
+    author_email="sean.lynn@hpe.com",
     description="CSM Automatic Network Utility",
-    long_description="CANU floats through a new Shasta network and makes setup a breeze.",
+    long_description="CANU floats through Shasta networks and makes configuration a breeze.",
     version=VERSION,
     py_modules=["canu"],
     packages=find_packages(exclude=("tests",)),
-    package_data={"canu": ["canu.yaml", "canu/canu.yaml"]},
     include_package_data=True,
+    package_data={"canu": [".version",
+                           "canu.yaml",
+                           "validate/switch/config/*.yaml"],
+                  "network_modeling": ["schema/*.json",
+                                       "schema/*.yaml",
+                                       "models/*yaml",
+                                       "configs/templates/**/*"],
+                  },
+    exclude_package_data={"canu": ["canu_cache.yaml"]},
     install_requires=REQUIREMENTS,
     entry_points="""
         [console_scripts]

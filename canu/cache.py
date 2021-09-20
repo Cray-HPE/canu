@@ -24,9 +24,35 @@
 import datetime
 from operator import itemgetter
 from os import path
+from pathlib import Path
 import sys
+import tempfile
 
 import ruamel.yaml
+
+
+def cache_directory():
+    """Create and return the cache directory location.
+
+    Prefer the user home directory, otherwise OS temporary directory.
+
+    Returns:
+        cachedir: Location of the canu cache.
+    """
+    try:
+        basedir = Path.home()
+        cachedir = path.join(basedir, ".canu")
+    except Exception:
+        basedir = tempfile.gettempdir()
+        cachedir = path.join(basedir, ".canu")
+
+    try:
+        Path(cachedir).mkdir(parents=True, exist_ok=True)
+    except Exception:
+        print(f"Cannot create cache directory: {cachedir}")
+        sys.exit(1)
+
+    return cachedir
 
 
 yaml = ruamel.yaml.YAML()
@@ -37,8 +63,8 @@ if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cov
 else:
     parent_directory = path.abspath(path.dirname(path.dirname(__file__)))
 
-canu_cache_file = path.join(parent_directory, "canu", "canu_cache.yaml")
-canu_version_file = path.join(parent_directory, ".version")
+canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
+canu_version_file = path.join(parent_directory, "canu", ".version")
 
 file_exists = path.isfile(canu_cache_file)
 

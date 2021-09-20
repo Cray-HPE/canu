@@ -37,6 +37,7 @@ from openpyxl import load_workbook
 import requests
 import ruamel.yaml
 
+from canu.cache import cache_directory
 from canu.report.switch.cabling.cabling import get_lldp
 from canu.validate.network.cabling.cabling import node_model_from_canu
 from canu.validate.shcd.shcd import (
@@ -80,7 +81,7 @@ architecture_spec_file = path.join(
     "cray-network-architecture.yaml",
 )
 
-canu_cache_file = path.join(project_root, "canu", "canu_cache.yaml")
+canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 
 log = logging.getLogger("validate_shcd")
 

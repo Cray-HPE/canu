@@ -23,20 +23,25 @@
 
 block_cipher = None
 
-
+added_files = [
+               ('canu/.version', 'canu'),
+               ('canu/canu.yaml', 'canu'),
+               ('canu/validate/switch/config/*.yaml', 'canu/validate/switch/config'),
+               ('network_modeling/models/*', 'network_modeling/models'),
+               ('network_modeling/schema/*', 'network_modeling/schema'),
+               ('network_modeling/configs/templates/*.j2', 'network_modeling/configs/templates'),
+               ('network_modeling/configs/templates/common/*.j2', 'network_modeling/configs/templates/common'),
+               ('network_modeling/configs/templates/full/*.j2', 'network_modeling/configs/templates/full'),
+               ('network_modeling/configs/templates/tds/*.j2', 'network_modeling/configs/templates/tds'),
+             ]
 a = Analysis(['canu/cli.py'],
              pathex=['canu', '/workspace'],
              binaries=[],
-             datas=[
-               ('.version', '.'),
-               ('canu/canu.yaml', 'canu'),
-               ('network_modeling/models/*', 'network_modeling/models'),
-               ('network_modeling/schema/*', 'network_modeling/schema'),
-             ],
+             datas=added_files,
              hiddenimports=['network_modeling'],
              hookspath=[],
              runtime_hooks=[],
-             excludes=[],
+             excludes=['tests'],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
              cipher=block_cipher,
