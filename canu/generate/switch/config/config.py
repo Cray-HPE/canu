@@ -524,33 +524,39 @@ def generate_switch_config(
             ]
 
             destination_rack_list.append(int(re.search(r"\d+", destination_rack)[0]))
-        for cabinets in variables["HMN_MTN_CABINETS"]:
+        for cabinets in (
+            sls_variables["NMN_MTN_CABINETS"] + sls_variables["HMN_MTN_CABINETS"]
+        ):
+            print(cabinets)
             ip_address = netaddr.IPNetwork(cabinets["CIDR"])
-            is_primary, primary, secondary = switch_is_primary(switch_name)
+            is_primary = switch_is_primary(switch_name)
+            print(is_primary)
             sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
             if sls_rack_int in destination_rack_list:
-                variables["HMN_MTN_VLANS"].append(cabinets)
-                variables["HMN_MTN_VLANS"][-1]["PREFIX_LENGTH"] = ip_address.prefixlen
-                if is_primary:
-                    ip = str(ip_address[2])
-                    variables["HMN_MTN_VLANS"][-1]["IP"] = ip
-                else:
-                    ip = str(ip_address[3])
-                    variables["HMN_MTN_VLANS"][-1]["IP"] = ip
+                if cabinets in sls_variables["NMN_MTN_CABINETS"]:
+                    print("NMN")
+                    variables["NMN_MTN_VLANS"].append(cabinets)
+                    variables["NMN_MTN_VLANS"][-1][
+                        "PREFIX_LENGTH"
+                    ] = ip_address.prefixlen
+                    if is_primary[0]:
+                        ip = str(ip_address[2])
+                        variables["NMN_MTN_VLANS"][-1]["IP"] = ip
+                    else:
+                        ip = str(ip_address[3])
+                        variables["NMN_MTN_VLANS"][-1]["IP"] = ip
 
-        for cabinets in sls_variables["NMN_MTN_CABINETS"]:
-            ip_address = netaddr.IPNetwork(cabinets["CIDR"])
-            is_primary, primary, secondary = switch_is_primary(switch_name)
-            sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
-            if sls_rack_int in destination_rack_list:
-                variables["NMN_MTN_VLANS"].append(cabinets)
-                variables["NMN_MTN_VLANS"][-1]["PREFIX_LENGTH"] = ip_address.prefixlen
-                if is_primary:
-                    ip = str(ip_address[2])
-                    variables["NMN_MTN_VLANS"][-1]["IP"] = ip
-                else:
-                    ip = str(ip_address[3])
-                    variables["NMN_MTN_VLANS"][-1]["IP"] = ip
+                if cabinets in sls_variables["HMN_MTN_CABINETS"]:
+                    variables["HMN_MTN_VLANS"].append(cabinets)
+                    variables["HMN_MTN_VLANS"][-1][
+                        "PREFIX_LENGTH"
+                    ] = ip_address.prefixlen
+                    if is_primary[0]:
+                        ip = str(ip_address[2])
+                        variables["HMN_MTN_VLANS"][-1]["IP"] = ip
+                    else:
+                        ip = str(ip_address[3])
+                        variables["HMN_MTN_VLANS"][-1]["IP"] = ip
 
     switch_config = template.render(
         variables=variables,
