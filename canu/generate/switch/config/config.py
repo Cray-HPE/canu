@@ -26,7 +26,6 @@ import os
 from pathlib import Path
 import re
 import sys
-import pprint
 
 import click
 from click_help_colors import HelpColorsCommand
@@ -503,7 +502,7 @@ def generate_switch_config(
         variables["VSX_ISL_PORT1"] = pair_connections[1]
         variables["VSX_ISL_PORT2"] = pair_connections[2]
 
-#get VLANs and IPs for CDU switches
+    # get VLANs and IPs for CDU switches
     if "sw-cdu" in node_shasta_name:
         nodes = []
         nodes_by_name = {}
@@ -536,7 +535,7 @@ def generate_switch_config(
                 else:
                     ip = str(ip_address[3])
                     variables["HMN_MTN_VLANS"][-1]["IP"] = ip
-            
+
         for cabinets in sls_variables["NMN_MTN_CABINETS"]:
             ip_address = netaddr.IPNetwork(cabinets["CIDR"])
             is_primary, primary, secondary = switch_is_primary(switch_name)
@@ -692,7 +691,6 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
             destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
             for cabinets in sls_variables["NMN_MTN_CABINETS"]:
                 sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
-                # print(rack_to_vlan_mapper(switch_name, sls_rack_int, sls_variables, shcd_node_list))
                 if destination_rack_int == sls_rack_int:
                     native_vlan = cabinets["VlanID"]
             for cabinets in sls_variables["HMN_MTN_CABINETS"]:
