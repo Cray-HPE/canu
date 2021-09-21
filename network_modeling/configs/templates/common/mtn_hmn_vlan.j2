@@ -7,7 +7,7 @@ vlan {{ cabinet.VlanID }}
 
 interface vlan {{ cabinet.VlanID }}
     ip mtu 9198
-    ip address {{ cabinet.IP }}
+    ip address {{ cabinet.IP }}/{{ cabinet.PREFIX_LENGTH }}
     active-gateway ip mac 12:00:00:00:73:00
     active-gateway ip {{ cabinet.Gateway }}
     ipv6 address autoconfig
