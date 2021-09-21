@@ -41,6 +41,8 @@ Router:                          1  |
 
 ```
 
+![](images/canu_validate_switch_config.png)
+
 ## Flags
 
 | Option       | Description         |

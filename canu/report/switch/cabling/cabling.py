@@ -734,7 +734,7 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
             if len(arp_list) > 0 and neighbor_description == "":
                 neighbor_description = "No LLDP data, check ARP vlan info."
             duplicate = False
-            if port:
+            if len(lldp_dict[port_number]) > 1:
                 duplicate = True
 
             table.append(

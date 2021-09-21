@@ -60,48 +60,54 @@ In order to run CANU, both python3 and pip3 need to be installed.
 ## Installation
 
 - To run CANU inside a container:
+
   - Prequisites:
     - docker
     - docker-compose
+
   ```bash
     sh canu_docker.sh up
   ```
+
   - CANU source files can be found inside the container at /app/canu
   - shared folder between local disk is call `files` and is mounted in the container at `/files`
   - When you are finished with the container and `exit` the container:
+
   ```bash
     sh canu_docker.sh down
-  ```  
+  ```
 
 - To run CANU in a Python Virtualenv:
+
   - Prerequisites
     - python3
     - pip3
     - Python Virtualenv
+
   ```bash
     python3 -m venv .venv
     source ./.venv/bin/activate
     pip3 install ./canu
-    ```
+  ```
 
-    - When you are done working in the Python Virtualenv.
+  - When you are done working in the Python Virtualenv.
     Use the following command to exit out of the Python Virtualenv:
-    ```bash
-    deactivate 
-    ```
 
+  ```bash
+  deactivate
+  ```
 
 - To install the development build of CANU type:
 
-    ```bash
-    python3 setup.py develop --user
-    ```
+  ```bash
+  python3 setup.py develop --user
+  ```
 
-    If that doesn't work, try:
-    
-    ```bash
-    pip3 install --editable .
-    ```
+  If that doesn't work, try:
+
+  ```bash
+  pip3 install --editable .
+  ```
 
 ## Usage
 
@@ -141,6 +147,8 @@ $ canu init --auth-token ~./config/cray/tokens/ --sls-address 1.2.3.4 --out outp
 8 IP addresses saved to output.txt
 ```
 
+![](docs/images/canu_init.png)
+
 The output file for the `canu init` command is set with the `--out FILENAME` flag.
 
 ### Report Switch Firmware
@@ -155,8 +163,10 @@ To check the firmware of a single switch run: `canu report switch firmware --sha
 
 ```bash
 $ canu report switch firmware --shasta 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD
-🛶 - Pass - IP: 192.168.1.1 Hostname:test-switch-spine01 Firmware: GL.10.06.0001
+🛶 - Pass - IP: 192.168.1.1 Hostname:sw-spine-001 Firmware: GL.10.06.0010
 ```
+
+![](docs/images/canu_report_switch_firmware.png)
 
 ### Report Network Firmware
 
@@ -193,6 +203,8 @@ GL.10.06.0010 - 1 switches
 FL.10.06.0010 - 1 switches
 FL.10.05.0010 - 1 switches
 ```
+
+![](docs/images/canu_report_network_firmware.png)
 
 When using the _network firmware_ commands, the table will show either: 🛶 Pass, ❌ Fail, or 🔺 Error. The switch will **pass** or **fail** based on if the switch firmware matches the _canu.yaml_
 
@@ -257,6 +269,8 @@ PORT        NEIGHBOR       NEIGHBOR PORT      PORT DESCRIPTION                  
 1/1/51  ==> test-spine02   1/1/51                                                                   Aruba JL635A  GL.10.06.0010
 1/1/52  ==> test-spine02   1/1/52                                                                   Aruba JL635A  GL.10.06.0010
 ```
+
+![](docs/images/canu_report_switch_cabling.png)
 
 Sometimes when checking cabling using LLDP, the neighbor does not return any information except a MAC address. When that is the case, CANU looks up the MAC in the ARP table and displays the IP addresses and vlan information associated with the MAC.
 
@@ -338,6 +352,8 @@ Node type could not be determined for the following
 ------------------------------------------------------------
 CAN switch
 ```
+
+![](docs/images/canu_validate_shcd.png)
 
 ### Validate Network Cabling
 
@@ -463,6 +479,8 @@ sw-spine-002    : Found in SHCD and on the network, but missing the following co
 sw-leaf-bmc-001 : Found in SHCD but not found on the network.
 uan001          : Found in SHCD but not found on the network.
 ```
+
+![](docs/images/canu_validate_shcd_cabling.png)
 
 The output of the `validate shcd-cabling` command will show the results for `validate shcd`, `validate cabling`, and then a comparison of the two results. If there are nodes found on the SHCD, or on the network that are not found in the other one, it will be displayed in _blue_. If a node is found on both the network and in the SHCD, but the connections are not the same, it will be shown in _green_, and the missing connections will be shown.
 
@@ -645,6 +663,8 @@ Router:                          1  |
 
 ```
 
+![](docs/images/canu_validate_switch_config.png)
+
 ### Validate Network Config
 
 **[Details](docs/validate_network_config.md)**<br>
@@ -706,6 +726,12 @@ $ nox
 
 To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. To rerun a session without reinstalling all testing dependencies use the `-rs` flag instead of `-s`.
 
+To run a specific test, like `test_report_switch_firmware.py` :
+
+```bash
+$ nox -s tests -- tests/test_report_switch_firmware.py
+```
+
 # Changelog
 
 ## [development]
@@ -729,7 +755,6 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
   - Mountain hardware (CMM, CEC, PDU) are not yet properly handled in the generated switch configurations.
   - Slingshot switches (sw-hsn) are not yet properly handled in the model or generated switch configurations.
   - Switch and SNMP passwords have been removed from generated configurations until the handling code is secure.
-
 
 ## [0.0.5] - 2021-5-14
 
@@ -779,7 +804,7 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 [unreleased]: https://github.com/Cray-HPE/canu/tree/main
 [0.0.6]: https://github.com/Cray-HPE/canu/tree/0.0.6
 [0.0.5]: https://github.com/Cray-HPE/canu/tree/0.0.5
-[0.0.4]: https://github.com/Cray-HPE/canu/tree/0.0.4 
-[0.0.3]: https://github.com/Cray-HPE/canu/tree/0.0.3 
-[0.0.2]: https://github.com/Cray-HPE/canu/tree/0.0.2 
-[0.0.1]: https://github.com/Cray-HPE/canu/tree/0.0.1 
+[0.0.4]: https://github.com/Cray-HPE/canu/tree/0.0.4
+[0.0.3]: https://github.com/Cray-HPE/canu/tree/0.0.3
+[0.0.2]: https://github.com/Cray-HPE/canu/tree/0.0.2
+[0.0.1]: https://github.com/Cray-HPE/canu/tree/0.0.1
