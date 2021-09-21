@@ -480,7 +480,10 @@ def generate_switch_config(
     }
     cabling = {}
     cabling["nodes"] = get_switch_nodes(
-        switch_name, shcd_node_list, factory, sls_variables
+        switch_name,
+        shcd_node_list,
+        factory,
+        sls_variables,
     )
 
     if switch_name not in sls_variables["HMN_IPs"].keys():
@@ -504,7 +507,6 @@ def generate_switch_config(
 
     # get VLANs and IPs for CDU switches
     if "sw-cdu" in node_shasta_name:
-        nodes = []
         nodes_by_name = {}
         nodes_by_id = {}
         destination_rack_list = []
@@ -520,8 +522,8 @@ def generate_switch_config(
             destination_rack = nodes_by_id[port["destination_node_id"]]["location"][
                 "rack"
             ]
-            destination_rack_list.append(int(re.search(r"\d+", destination_rack)[0]))
 
+            destination_rack_list.append(int(re.search(r"\d+", destination_rack)[0]))
         for cabinets in variables["HMN_MTN_CABINETS"]:
             ip_address = netaddr.IPNetwork(cabinets["CIDR"])
             is_primary, primary, secondary = switch_is_primary(switch_name)
@@ -594,6 +596,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
         switch_name: Switch hostname
         shcd_node_list: List of nodes from the SHCD
         factory: Node factory object
+        sls_variables: Dictionary containing SLS variables.
 
     Returns:
         List of nodes connected to the switch
@@ -673,17 +676,17 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
             nodes.append(new_node)
         elif shasta_name == "cec":
             destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
-            for cabinets in sls_variables["NMN_MTN_CABINETS"]:
+            for cabinets in sls_variables["HMN_MTN_CABINETS"]:
                 sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
                 if destination_rack_int == sls_rack_int:
-                    native_vlan = cabinets["VlanID"]
+                    hmn_mtn_vlan = cabinets["VlanID"]
             new_node = {
                 "subtype": "cec",
                 "slot": None,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "INTERFACE_NUMBER": f"1/1/{source_port}",
-                    "NATIVE_VLAN": native_vlan,
+                    "NATIVE_VLAN": hmn_mtn_vlan,
                 },
             }
             nodes.append(new_node)
@@ -692,11 +695,11 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
             for cabinets in sls_variables["NMN_MTN_CABINETS"]:
                 sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
                 if destination_rack_int == sls_rack_int:
-                    native_vlan = cabinets["VlanID"]
+                    nmn_mtn_vlan = cabinets["VlanID"]
             for cabinets in sls_variables["HMN_MTN_CABINETS"]:
                 sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
                 if destination_rack_int == sls_rack_int:
-                    tagged_vlan = cabinets["VlanID"]
+                    hmn_mtn_vlan = cabinets["VlanID"]
             new_node = {
                 "subtype": "cmm",
                 "slot": None,
@@ -704,8 +707,8 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "PORT": f"1/1/{source_port}",
                     "LAG_NUMBER": primary_port,
-                    "NATIVE_VLAN": native_vlan,
-                    "TAGGED_VLAN": tagged_vlan,
+                    "NATIVE_VLAN": nmn_mtn_vlan,
+                    "TAGGED_VLAN": hmn_mtn_vlan,
                 },
             }
             nodes.append(new_node)
