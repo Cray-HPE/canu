@@ -479,9 +479,10 @@ def generate_switch_config(
         "NMN_MTN_CABINETS": sls_variables["NMN_MTN_CABINETS"],
         "HMN_MTN_CABINETS": sls_variables["HMN_MTN_CABINETS"],
     }
-
     cabling = {}
-    cabling["nodes"] = get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables)
+    cabling["nodes"] = get_switch_nodes(
+        switch_name, shcd_node_list, factory, sls_variables
+    )
 
     if switch_name not in sls_variables["HMN_IPs"].keys():
         click.secho(f"Cannot find {switch_name} in CSI / SLS nodes.", fg="red")
@@ -501,6 +502,54 @@ def generate_switch_config(
         variables["VSX_KEEPALIVE"] = pair_connections[0]
         variables["VSX_ISL_PORT1"] = pair_connections[1]
         variables["VSX_ISL_PORT2"] = pair_connections[2]
+
+#get VLANs and IPs for CDU switches
+    if "sw-cdu" in node_shasta_name:
+        nodes = []
+        nodes_by_name = {}
+        nodes_by_id = {}
+        destination_rack_list = []
+        variables["NMN_MTN_VLANS"] = []
+        variables["HMN_MTN_VLANS"] = []
+
+        for node in shcd_node_list:
+            node_tmp = node.serialize()
+            name = node_tmp["common_name"]
+            nodes_by_name[name] = node_tmp
+            nodes_by_id[node_tmp["id"]] = node_tmp
+        for port in nodes_by_name[switch_name]["ports"]:
+            destination_rack = nodes_by_id[port["destination_node_id"]]["location"][
+                "rack"
+            ]
+            destination_rack_list.append(int(re.search(r"\d+", destination_rack)[0]))
+
+        for cabinets in variables["HMN_MTN_CABINETS"]:
+            ip_address = netaddr.IPNetwork(cabinets["CIDR"])
+            is_primary, primary, secondary = switch_is_primary(switch_name)
+            sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
+
+            if sls_rack_int in destination_rack_list:
+                variables["HMN_MTN_VLANS"].append(cabinets)
+                if is_primary:
+                    ip = str(ip_address[2])
+                    variables["HMN_MTN_VLANS"][-1]["IP"] = ip
+                else:
+                    ip = str(ip_address[3])
+                    variables["HMN_MTN_VLANS"][-1]["IP"] = ip
+    
+        for cabinets in sls_variables["NMN_MTN_CABINETS"]:
+            ip_address = netaddr.IPNetwork(cabinets["CIDR"])
+            is_primary, primary, secondary = switch_is_primary(switch_name)
+            sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
+        
+            if sls_rack_int in destination_rack_list:
+                variables["NMN_MTN_VLANS"].append(cabinets)
+                if is_primary:
+                    ip = str(ip_address[2])
+                    variables["NMN_MTN_VLANS"][-1]["IP"] = ip
+                else:
+                    ip = str(ip_address[3])
+                    variables["NMN_MTN_VLANS"][-1]["IP"] = ip
 
     switch_config = template.render(
         variables=variables,
@@ -624,9 +673,9 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
             }
             nodes.append(new_node)
         elif shasta_name == "cec":
-            destination_rack_int = int(re.search(r'\d+', destination_rack)[0])
+            destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
             for cabinets in sls_variables["NMN_MTN_CABINETS"]:
-                sls_rack_int = int(re.search(r'\d+', (cabinets["Name"]))[0])
+                sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
                 if destination_rack_int == sls_rack_int:
                     native_vlan = cabinets["VlanID"]
             new_node = {
@@ -640,13 +689,14 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
             }
             nodes.append(new_node)
         elif shasta_name == "cmm":
-            destination_rack_int = int(re.search(r'\d+', destination_rack)[0])
+            destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
             for cabinets in sls_variables["NMN_MTN_CABINETS"]:
-                sls_rack_int = int(re.search(r'\d+', (cabinets["Name"]))[0])
+                sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
+                # print(rack_to_vlan_mapper(switch_name, sls_rack_int, sls_variables, shcd_node_list))
                 if destination_rack_int == sls_rack_int:
                     native_vlan = cabinets["VlanID"]
             for cabinets in sls_variables["HMN_MTN_CABINETS"]:
-                sls_rack_int = int(re.search(r'\d+', (cabinets["Name"]))[0])
+                sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
                 if destination_rack_int == sls_rack_int:
                     tagged_vlan = cabinets["VlanID"]
             new_node = {
@@ -1025,7 +1075,6 @@ def rename_sls_hostnames(sls_variables):
         sls_variables["NMN_IPs"].pop(key)
         sls_variables["NMN_IPs"][new_name] = value
 
-    print(sls_variables["NMN_MTN_CABINETS"])
     return sls_variables
 
 

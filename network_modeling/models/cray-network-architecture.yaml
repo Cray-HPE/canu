@@ -55,10 +55,10 @@ network_v2:
           speed: 100
           number: 2
           comment: "isl"
-        - name: "river_ncn_leaf"
-          speed: 10
-          number: 1
-          comment: "keepalive"
+        # - name: "river_ncn_leaf"
+        #   speed: 10
+        #   number: 1
+        #   comment: "keepalive"
     - name: "river_bmc_leaf"
       model: "6300M_JL762A"
       connections:

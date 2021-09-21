@@ -1,5 +1,5 @@
 {#- mtn_hmn_vlan #}
-{%- for cabinet in variables.HMN_MTN_CABINETS %}
+{%- for cabinet in variables.HMN_MTN_VLANS %}
 vlan {{ cabinet.VlanID }}
     name {{ cabinet.Name }}
     apply access-list ip nmn-hmn in
@@ -7,7 +7,7 @@ vlan {{ cabinet.VlanID }}
 
 interface vlan {{ cabinet.VlanID }}
     ip mtu 9198
-    ip address {{ cabinet.CIDR }}
+    ip address {{ cabinet.IP }}
     active-gateway ip mac 12:00:00:00:73:00
     active-gateway ip {{ cabinet.Gateway }}
     ipv6 address autoconfig
