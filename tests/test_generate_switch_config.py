@@ -97,6 +97,7 @@ def test_switch_config_spine_primary():
 
         assert (
             "ssh server vrf default\n"
+            + "ssh server vrf keepalive\n"
             + "ssh server vrf mgmt\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
@@ -316,6 +317,7 @@ def test_switch_config_spine_secondary():
 
         assert (
             "ssh server vrf default\n"
+            + "ssh server vrf keepalive\n"
             + "ssh server vrf mgmt\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
@@ -533,6 +535,7 @@ def test_switch_config_leaf_primary():
 
         assert (
             "ssh server vrf default\n"
+            + "ssh server vrf keepalive\n"
             + "ssh server vrf mgmt\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
@@ -844,6 +847,7 @@ def test_switch_config_leaf_primary_to_uan():
 
         assert (
             "ssh server vrf default\n"
+            + "ssh server vrf keepalive\n"
             + "ssh server vrf mgmt\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
@@ -1126,6 +1130,7 @@ def test_switch_config_leaf_secondary():
 
         assert (
             "ssh server vrf default\n"
+            + "ssh server vrf keepalive\n"
             + "ssh server vrf mgmt\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
@@ -1427,6 +1432,7 @@ def test_switch_config_leaf_secondary_to_uan():
 
         assert (
             "ssh server vrf default\n"
+            + "ssh server vrf keepalive\n"
             + "ssh server vrf mgmt\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
@@ -1706,6 +1712,7 @@ def test_switch_config_cdu_primary():
 
         assert (
             "ssh server vrf default\n"
+            + "ssh server vrf keepalive\n"
             + "ssh server vrf mgmt\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
@@ -1952,6 +1959,7 @@ def test_switch_config_cdu_secondary():
 
         assert (
             "ssh server vrf default\n"
+            + "ssh server vrf keepalive\n"
             + "ssh server vrf mgmt\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
@@ -2976,6 +2984,7 @@ def test_switch_config_tds_spine_primary():
 
         assert (
             "ssh server vrf default\n"
+            + "ssh server vrf keepalive\n"
             + "ssh server vrf mgmt\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
@@ -3398,6 +3407,7 @@ def test_switch_config_tds_spine_secondary():
 
         assert (
             "ssh server vrf default\n"
+            + "ssh server vrf keepalive\n"
             + "ssh server vrf mgmt\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
@@ -3818,6 +3828,7 @@ def test_switch_config_tds_cdu_primary():
 
         assert (
             "ssh server vrf default\n"
+            + "ssh server vrf keepalive\n"
             + "ssh server vrf mgmt\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
@@ -4062,6 +4073,7 @@ def test_switch_config_tds_cdu_secondary():
 
         assert (
             "ssh server vrf default\n"
+            + "ssh server vrf keepalive\n"
             + "ssh server vrf mgmt\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
