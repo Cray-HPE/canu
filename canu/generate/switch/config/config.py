@@ -527,14 +527,11 @@ def generate_switch_config(
         for cabinets in (
             sls_variables["NMN_MTN_CABINETS"] + sls_variables["HMN_MTN_CABINETS"]
         ):
-            print(cabinets)
             ip_address = netaddr.IPNetwork(cabinets["CIDR"])
             is_primary = switch_is_primary(switch_name)
-            print(is_primary)
             sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
             if sls_rack_int in destination_rack_list:
                 if cabinets in sls_variables["NMN_MTN_CABINETS"]:
-                    print("NMN")
                     variables["NMN_MTN_VLANS"].append(cabinets)
                     variables["NMN_MTN_VLANS"][-1][
                         "PREFIX_LENGTH"
