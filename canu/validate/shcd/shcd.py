@@ -543,16 +543,76 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             try:
                 current_row = row[required_header[0]].row
                 log.debug(f"---- Working in sheet {sheet} on row {current_row} ----")
-                src_name = row[required_header[0]].value.strip()
-                tmp_slot = row[required_header[3]]
-                tmp_port = row[required_header[4]]
-                src_rack = None
+                # HMN tab
+                # row[required_header[0] == Source
+                source_name = row[required_header[0]].value.strip()
+
+                # row[required_header[1] == Rack
+                source_rack = None
                 if row[required_header[1]].value:
-                    src_rack = row[required_header[1]].value.strip()
-                src_elevation = None
+                  source_rack = row[required_header[1]].value.strip()
+
+                # row[required_header[2] == Location
+                source_elevation = None
                 if row[required_header[2]].value:
-                    src_elevation = row[required_header[2]].value.strip()
-                src_location = NodeLocation(src_rack, src_elevation)
+                  source_elevation = row[required_header[2]].value.strip()
+                  if row[required_header[2]].value[-1] == "L" \
+                  or row[required_header[2]].value[-1] == "R":
+                    source_sub_elevation = row[required_header[2]].value[-1]
+                  else:
+                    source_sub_elevation = None
+              
+                # row[required_header[3] == Slot
+                # source_slot = None
+                # if row[required_header[3]].value:
+                source_slot = row[required_header[3]]
+                click.echo("source_slot")
+                click.echo(source_slot.value)
+
+                 # row[required_header[4] == Port
+                # source_port = None
+                # if row[required_header[4]].value:
+                source_port = row[required_header[4]]
+                click.echo("source_port")
+                click.echo(source_port.value)
+
+                # row[required_header[5] == Destination
+                dest = None
+                if row[required_header[5]].value:
+                  dest = row[required_header[5]].value
+                  click.echo("dest")
+                  click.echo(dest)
+                
+                # row[required_header[6] == Rack
+                dest_rack = None
+                if row[required_header[6]].value:
+                  dest_rack = row[required_header[6]].value
+                  click.echo("dest_rack")
+                  click.echo(dest_rack)
+
+                # row[required_header[7] == Location
+                dest_loc = None
+                if row[required_header[7]].value:
+                  dest_loc = row[required_header[7]].value
+                  click.echo("dest_loc")
+                  click.echo(dest_loc)
+
+                # row[required_header[8] == Port
+                dest_port = None
+                if row[required_header[8]].value:
+                    dest_port = row[required_header[8]].value
+                    click.echo("dest_port")
+                    click.echo(dest_port)
+
+                src_location = NodeLocation(source_rack, 
+                                            source_elevation,
+                                            source_sub_elevation, 
+                                            source_slot.value,
+                                            str(source_port.value),
+                                            dest,
+                                            dest_rack,
+                                            dest_loc,
+                                            dest_port)
             except AttributeError:
                 log.fatal("")
                 click.secho(
@@ -566,27 +626,27 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 sys.exit(1)
 
             src_slot = validate_shcd_slot_data(
-                tmp_slot,
+                source_slot,
                 sheet,
                 warnings,
                 is_src_slot=True,
             )
             src_port = validate_shcd_port_data(
-                tmp_port,
+                source_port,
                 sheet,
                 warnings,
                 is_src_port=True,
             )
-            log.debug(f"Source Data:  {src_name} {src_slot} {src_port}")
+            log.debug(f"Source Data:  {source_name} {src_slot} {src_port}")
             node_name = get_node_common_name(
-                src_name,
-                src_rack,
-                src_elevation,
+                source_name,
+                source_rack,
+                source_elevation,
                 factory.lookup_mapper(),
             )
             log.debug(f"Source Name Lookup:  {node_name}")
-            log.debug(f"Source rack {src_rack} in location {src_elevation}")
-            node_type = get_node_type(src_name, factory.lookup_mapper())
+            log.debug(f"Source rack {source_rack} in location {source_elevation}")
+            node_type = get_node_type(source_name, factory.lookup_mapper())
             log.debug(f"Source Node Type Lookup:  {node_type}")
 
             # Create src_node if it does not exist
@@ -613,9 +673,9 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
 
                 src_index = node_name_list.index(node_name)
             else:
-                warnings["node_type"].append(src_name)
+                warnings["node_type"].append(source_name)
                 log.warning(
-                    f"Node type for {src_name} cannot be determined by node type ({node_type}) or node name ({node_name})",
+                    f"Node type for {source_name} cannot be determined by node type ({node_type}) or node name ({node_name})",
                 )
 
             # Create the source port for the node
@@ -637,6 +697,10 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 if row[required_header[7]].value:
                     dst_elevation = row[required_header[7]].value.strip()
                 dst_location = NodeLocation(dst_rack, dst_elevation)
+                src_location = NodeLocation(dst_rack, 
+                            dst_elevation, 
+                            dst_slot,
+                            dst_port)
             except AttributeError:
                 log.fatal("")
                 click.secho(
@@ -925,6 +989,8 @@ def json_output(node_list, out, json_schema_file):
     """Create a schema-validated JSON Topology file from the model."""
     model = []
     for node in node_list:
+        # click.echo("node.serialize()")
+        # click.echo(json.dumps(node.serialize(), indent=2))
         model.append(node.serialize())
 
     with open(json_schema_file, "r") as file:

@@ -75,9 +75,30 @@
                     },
                     "elevation": {
                         "type": "string"
+                    },
+                    "sub_elevation": {
+                      "type":  ["string", "null"]
+                    },
+                    "source_slot": {
+                      "type":  ["string", "null"]
+                    },
+                    "source_port": {
+                      "type":  ["string", "null"]
+                    },
+                    "dest": {
+                      "type":  ["string", "null"]
+                    },
+                    "dest_rack": {
+                      "type":  ["string", "null"]
+                    },
+                    "dest_loc": {
+                      "type":  ["string", "null"]
+                    },
+                    "dest_port": {
+                      "type":  ["string", "null"]
                     }
                 },
-                "minProperties": 2,
+                "minProperties": 7,
                 "additionalProperties": false
             }
         },
