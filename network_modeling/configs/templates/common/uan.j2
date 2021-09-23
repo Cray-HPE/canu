@@ -5,10 +5,11 @@ interface {{ node.config.PORT }}
 {%- if node.slot == 'ocp' %}
     no shutdown
 {%- else %}
-    shutdown
+
 {%- endif %}
     mtu 9198
     description {{ node.config.DESCRIPTION }}
+    no routing
     vlan access 2
 {%- endif %}
 {%- if node.destination_port == 2%}
