@@ -715,7 +715,7 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 
 ## [unreleased]
 
-## [0.0.6] - 2021-9-15
+## [0.0.6] - 2021-9-23
 
 - Added alpha version of schema-checked JSON output in `validate shcd` as a machine-readable exchange for SHCD data.
 - Add ability to run CANU in a container, and update Python virtual environment documentation.
@@ -725,8 +725,10 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 - Added `canu validate network config` to compare running network config to files for Aruba systems.
 - Updated naming conventions to `canu <verb> switch/network <noun>`
 - Added the ability to fully track device slot and port assignments.
+- Mountain hardware (CMM, CEC) is now being generated in the switch configurations.
+- Fixed multiple templates to match what is on the Aruba switch, these include, UANs, Loopbacks, VLAN interfaces, ACLs.
 - Known Limitations:
-  - Mountain hardware (CMM, CEC, PDU) are not yet properly handled in the generated switch configurations.
+  - PDUs are not yet properly handled in the generated switch configurations.
   - Slingshot switches (sw-hsn) are not yet properly handled in the model or generated switch configurations.
   - Switch and SNMP passwords have been removed from generated configurations until the handling code is secure.
 

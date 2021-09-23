@@ -31,6 +31,7 @@ import click
 from click_help_colors import HelpColorsCommand
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 import natsort
+import netaddr
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from openpyxl import load_workbook
 import requests
@@ -446,10 +447,28 @@ def generate_switch_config(
         "NCN_W001": sls_variables["ncn_w001"],
         "NCN_W002": sls_variables["ncn_w002"],
         "NCN_W003": sls_variables["ncn_w003"],
+        "CAN": sls_variables["CAN"],
+        "CAN_NETMASK": sls_variables["CAN_NETMASK"],
+        "CAN_NETWORK_IP": sls_variables["CAN_NETWORK_IP"],
+        "CAN_PREFIX_LEN": sls_variables["CAN_PREFIX_LEN"],
+        "MTL_NETMASK": sls_variables["MTL_NETMASK"],
+        "MTL_PREFIX_LEN": sls_variables["MTL_PREFIX_LEN"],
         "NMN": sls_variables["NMN"],
+        "NMN_NETMASK": sls_variables["NMN_NETMASK"],
+        "NMN_NETWORK_IP": sls_variables["NMN_NETWORK_IP"],
+        "NMN_PREFIX_LEN": sls_variables["NMN_PREFIX_LEN"],
         "HMN": sls_variables["HMN"],
+        "HMN_NETMASK": sls_variables["HMN_NETMASK"],
+        "HMN_NETWORK_IP": sls_variables["HMN_NETWORK_IP"],
+        "HMN_PREFIX_LEN": sls_variables["HMN_PREFIX_LEN"],
         "HMN_MTN": sls_variables["HMN_MTN"],
+        "HMN_MTN_NETMASK": sls_variables["HMN_MTN_NETMASK"],
+        "HMN_MTN_NETWORK_IP": sls_variables["HMN_MTN_NETWORK_IP"],
+        "HMN__MTN_PREFIX_LEN": sls_variables["HMN_MTN_PREFIX_LEN"],
         "NMN_MTN": sls_variables["NMN_MTN"],
+        "NMN_MTN_NETMASK": sls_variables["NMN_MTN_NETMASK"],
+        "NMN_MTN_NETWORK_IP": sls_variables["NMN_MTN_NETWORK_IP"],
+        "NMN__MTN_PREFIX_LEN": sls_variables["NMN_MTN_PREFIX_LEN"],
         "HMN_IP_GATEWAY": sls_variables["HMN_IP_GATEWAY"],
         "MTL_IP_GATEWAY": sls_variables["MTL_IP_GATEWAY"],
         "NMN_IP_GATEWAY": sls_variables["NMN_IP_GATEWAY"],
@@ -459,9 +478,13 @@ def generate_switch_config(
         "NMN_MTN_CABINETS": sls_variables["NMN_MTN_CABINETS"],
         "HMN_MTN_CABINETS": sls_variables["HMN_MTN_CABINETS"],
     }
-
     cabling = {}
-    cabling["nodes"] = get_switch_nodes(switch_name, shcd_node_list, factory)
+    cabling["nodes"] = get_switch_nodes(
+        switch_name,
+        shcd_node_list,
+        factory,
+        sls_variables,
+    )
 
     if switch_name not in sls_variables["HMN_IPs"].keys():
         click.secho(f"Cannot find {switch_name} in CSI / SLS nodes.", fg="red")
@@ -481,6 +504,56 @@ def generate_switch_config(
         variables["VSX_KEEPALIVE"] = pair_connections[0]
         variables["VSX_ISL_PORT1"] = pair_connections[1]
         variables["VSX_ISL_PORT2"] = pair_connections[2]
+
+    # get VLANs and IPs for CDU switches
+    if "sw-cdu" in node_shasta_name:
+        nodes_by_name = {}
+        nodes_by_id = {}
+        destination_rack_list = []
+        variables["NMN_MTN_VLANS"] = []
+        variables["HMN_MTN_VLANS"] = []
+
+        for node in shcd_node_list:
+            node_tmp = node.serialize()
+            name = node_tmp["common_name"]
+            nodes_by_name[name] = node_tmp
+            nodes_by_id[node_tmp["id"]] = node_tmp
+        for port in nodes_by_name[switch_name]["ports"]:
+            destination_rack = nodes_by_id[port["destination_node_id"]]["location"][
+                "rack"
+            ]
+
+            destination_rack_list.append(int(re.search(r"\d+", destination_rack)[0]))
+        for cabinets in (
+            sls_variables["NMN_MTN_CABINETS"] + sls_variables["HMN_MTN_CABINETS"]
+        ):
+            ip_address = netaddr.IPNetwork(cabinets["CIDR"])
+            is_primary = switch_is_primary(switch_name)
+            sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
+            if sls_rack_int in destination_rack_list:
+                if cabinets in sls_variables["NMN_MTN_CABINETS"]:
+                    variables["NMN_MTN_VLANS"].append(cabinets)
+                    variables["NMN_MTN_VLANS"][-1][
+                        "PREFIX_LENGTH"
+                    ] = ip_address.prefixlen
+                    if is_primary[0]:
+                        ip = str(ip_address[2])
+                        variables["NMN_MTN_VLANS"][-1]["IP"] = ip
+                    else:
+                        ip = str(ip_address[3])
+                        variables["NMN_MTN_VLANS"][-1]["IP"] = ip
+
+                if cabinets in sls_variables["HMN_MTN_CABINETS"]:
+                    variables["HMN_MTN_VLANS"].append(cabinets)
+                    variables["HMN_MTN_VLANS"][-1][
+                        "PREFIX_LENGTH"
+                    ] = ip_address.prefixlen
+                    if is_primary[0]:
+                        ip = str(ip_address[2])
+                        variables["HMN_MTN_VLANS"][-1]["IP"] = ip
+                    else:
+                        ip = str(ip_address[3])
+                        variables["HMN_MTN_VLANS"][-1]["IP"] = ip
 
     switch_config = template.render(
         variables=variables,
@@ -519,13 +592,14 @@ def get_pair_connections(nodes, switch_name):
     return connections
 
 
-def get_switch_nodes(switch_name, shcd_node_list, factory):
+def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
     """Get the nodes connected to the switch ports.
 
     Args:
         switch_name: Switch hostname
         shcd_node_list: List of nodes from the SHCD
         factory: Node factory object
+        sls_variables: Dictionary containing SLS variables.
 
     Returns:
         List of nodes connected to the switch
@@ -552,6 +626,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
     for port in nodes_by_name[switch_name]["ports"]:
         destination_node_id = port["destination_node_id"]
         destination_node_name = nodes_by_id[port["destination_node_id"]]["common_name"]
+        destination_rack = nodes_by_id[port["destination_node_id"]]["location"]["rack"]
         source_port = port["port"]
         destination_port = port["destination_port"]
         destination_slot = port["destination_slot"]
@@ -603,16 +678,31 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
             }
             nodes.append(new_node)
         elif shasta_name == "cec":
+            destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
+            for cabinets in sls_variables["HMN_MTN_CABINETS"]:
+                sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
+                if destination_rack_int == sls_rack_int:
+                    hmn_mtn_vlan = cabinets["VlanID"]
             new_node = {
                 "subtype": "cec",
                 "slot": None,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "INTERFACE_NUMBER": f"1/1/{source_port}",
+                    "NATIVE_VLAN": hmn_mtn_vlan,
                 },
             }
             nodes.append(new_node)
         elif shasta_name == "cmm":
+            destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
+            for cabinets in sls_variables["NMN_MTN_CABINETS"]:
+                sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
+                if destination_rack_int == sls_rack_int:
+                    nmn_mtn_vlan = cabinets["VlanID"]
+            for cabinets in sls_variables["HMN_MTN_CABINETS"]:
+                sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
+                if destination_rack_int == sls_rack_int:
+                    hmn_mtn_vlan = cabinets["VlanID"]
             new_node = {
                 "subtype": "cmm",
                 "slot": None,
@@ -620,6 +710,8 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "PORT": f"1/1/{source_port}",
                     "LAG_NUMBER": primary_port,
+                    "NATIVE_VLAN": nmn_mtn_vlan,
+                    "TAGGED_VLAN": hmn_mtn_vlan,
                 },
             }
             nodes.append(new_node)
@@ -790,11 +882,29 @@ def parse_sls_for_config(input_json):
 
     sls_variables = {
         "CAN": None,
+        "CAN_NETMASK": None,
+        "CAN_PREFIX_LEN": None,
+        "CAN_NETWORK_IP": None,
         "HMN": None,
+        "HMN_NETMASK": None,
+        "HMN_NETWORK_IP": None,
+        "HMN_PREFIX_LEN": None,
         "MTL": None,
+        "MTL_NETMASK": None,
+        "MTL_NETWORK_IP": None,
+        "MTL_PREFIX_LEN": None,
         "NMN": None,
+        "NMN_NETMASK": None,
+        "NMN_NETWORK_IP": None,
+        "NMN_PREFIX_LEN": None,
         "HMN_MTN": None,
+        "HMN_MTN_NETMASK": None,
+        "HMN_MTN_NETWORK_IP": None,
+        "HMN_MTN_PREFIX_LEN": None,
         "NMN_MTN": None,
+        "NMN_MTN_NETMASK": None,
+        "NMN_MTN_NETWORK_IP": None,
+        "NMN_MTN_PREFIX_LEN": None,
         "CAN_IP_GATEWAY": None,
         "HMN_IP_GATEWAY": None,
         "MTL_IP_GATEWAY": None,
@@ -815,10 +925,15 @@ def parse_sls_for_config(input_json):
         name = sls_network.get("Name", "")
 
         if name == "CAN":
-            sls_variables["CAN"] = sls_network.get("ExtraProperties", {}).get(
-                "CIDR",
-                "",
+            sls_variables["CAN"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
             )
+            sls_variables["CAN_NETMASK"] = sls_variables["CAN"].netmask
+            sls_variables["CAN_PREFIX_LEN"] = sls_variables["CAN"].prefixlen
+            sls_variables["CAN_NETWORK_IP"] = sls_variables["CAN"].ip
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 if subnets["Name"] == "bootstrap_dhcp":
                     sls_variables["CAN_IP_GATEWAY"] = subnets["Gateway"]
@@ -829,10 +944,15 @@ def parse_sls_for_config(input_json):
                             sls_variables["CAN_IP_SECONDARY"] = ip["IPAddress"]
 
         elif name == "HMN":
-            sls_variables["HMN"] = sls_network.get("ExtraProperties", {}).get(
-                "CIDR",
-                "",
+            sls_variables["HMN"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
             )
+            sls_variables["HMN_NETMASK"] = sls_variables["HMN"].netmask
+            sls_variables["HMN_PREFIX_LEN"] = sls_variables["HMN"].prefixlen
+            sls_variables["HMN_NETWORK_IP"] = sls_variables["HMN"].ip
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 if subnets["Name"] == "network_hardware":
                     sls_variables["HMN_IP_GATEWAY"] = subnets["Gateway"]
@@ -840,10 +960,15 @@ def parse_sls_for_config(input_json):
                         sls_variables["HMN_IPs"][ip["Name"]] = ip["IPAddress"]
 
         elif name == "MTL":
-            sls_variables["MTL"] = sls_network.get("ExtraProperties", {}).get(
-                "CIDR",
-                "",
+            sls_variables["MTL"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
             )
+            sls_variables["MTL_NETMASK"] = sls_variables["MTL"].netmask
+            sls_variables["MTL_PREFIX_LEN"] = sls_variables["MTL"].prefixlen
+            sls_variables["MTL_NETWORK_IP"] = sls_variables["MTL"].ip
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 if subnets["Name"] == "network_hardware":
                     sls_variables["MTL_IP_GATEWAY"] = subnets["Gateway"]
@@ -851,10 +976,15 @@ def parse_sls_for_config(input_json):
                         sls_variables["MTL_IPs"][ip["Name"]] = ip["IPAddress"]
 
         elif name == "NMN":
-            sls_variables["NMN"] = sls_network.get("ExtraProperties", {}).get(
-                "CIDR",
-                "",
+            sls_variables["NMN"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
             )
+            sls_variables["NMN_NETMASK"] = sls_variables["NMN"].netmask
+            sls_variables["NMN_PREFIX_LEN"] = sls_variables["NMN"].prefixlen
+            sls_variables["NMN_NETWORK_IP"] = sls_variables["NMN"].ip
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 if subnets["Name"] == "bootstrap_dhcp":
                     for ip in subnets["IPReservations"]:
@@ -870,19 +1000,29 @@ def parse_sls_for_config(input_json):
                         sls_variables["NMN_IPs"][ip["Name"]] = ip["IPAddress"]
 
         elif name == "NMN_MTN":
-            sls_variables["NMN_MTN"] = sls_network.get("ExtraProperties", {}).get(
-                "CIDR",
-                "",
+            sls_variables["NMN_MTN"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
             )
+            sls_variables["NMN_MTN_NETMASK"] = sls_variables["NMN_MTN"].netmask
+            sls_variables["NMN_MTN_PREFIX_LEN"] = sls_variables["NMN_MTN"].prefixlen
+            sls_variables["NMN_MTN_NETWORK_IP"] = sls_variables["NMN_MTN"].ip
             sls_variables["NMN_MTN_CABINETS"] = list(
                 sls_network.get("ExtraProperties", {}).get("Subnets", {}),
             )
 
         elif name == "HMN_MTN":
-            sls_variables["HMN_MTN"] = sls_network.get("ExtraProperties", {}).get(
-                "CIDR",
-                "",
+            sls_variables["HMN_MTN"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
             )
+            sls_variables["HMN_MTN_NETMASK"] = sls_variables["HMN_MTN"].netmask
+            sls_variables["HMN_MTN_PREFIX_LEN"] = sls_variables["HMN_MTN"].prefixlen
+            sls_variables["HMN_MTN_NETWORK_IP"] = sls_variables["HMN_MTN"].ip
             sls_variables["HMN_MTN_CABINETS"] = list(
                 sls_network.get("ExtraProperties", {}).get("Subnets", {}),
             )
@@ -893,7 +1033,6 @@ def parse_sls_for_config(input_json):
             networks_list.append([name, vlan])
 
     networks_list = {tuple(x) for x in networks_list}
-
     return sls_variables
 
 

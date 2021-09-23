@@ -11,6 +11,7 @@ ntp enable
 
 
 ssh server vrf default
+ssh server vrf keepalive
 ssh server vrf mgmt
 {%- include 'common/acl.j2' %}
 
@@ -63,22 +64,22 @@ interface {{ variables.VSX_ISL_PORT2 }}
     description vsx isl
     lag 256
 interface loopback 0
-    ip address {{ variables.LOOPBACK_IP }}
+    ip address {{ variables.LOOPBACK_IP }}/32
     ip ospf 1 area 0.0.0.0
 interface vlan 1
     ip mtu 9198
-    ip address {{ variables.MTL_IP }}
+    ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}}
     ip helper-address 10.92.100.222
 interface vlan 2
     description NMN
     ip mtu 9198
-    ip address {{ variables.NMN_IP }}
+    ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}}
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
 interface vlan 4
     description HMN
     ip mtu 9198
-    ip address {{ variables.HMN_IP }}
+    ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
     ip helper-address 10.94.100.222
     ip ospf 1 area 0.0.0.0
 vsx
