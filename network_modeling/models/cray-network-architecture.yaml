@@ -83,6 +83,10 @@ network_v2:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
+          comment: "onboard nmn"
+        - name: "river_bmc_leaf"
+          speed: 1
+          comment: "bmc"
     - name: "mountain_compute_cabinet"
       model: "mountain_compute_cabinet"
       connections:
@@ -211,6 +215,10 @@ network_v2_tds:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
+          comment: "onboard nmn"
+        - name: "river_bmc_leaf"
+          speed: 1
+          comment: "bmc"
     - name: "mountain_compute_cabinet"
       model: "mountain_compute_cabinet"
       connections:
@@ -329,6 +337,10 @@ network_v1:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
+          comment: "onboard nmn"
+        - name: "river_bmc_leaf"
+          speed: 1
+          comment: "bmc"
   lookup_mapper:
     - lookup_name:
         - "mn"
