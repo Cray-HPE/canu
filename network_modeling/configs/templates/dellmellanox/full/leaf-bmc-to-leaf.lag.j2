@@ -1,0 +1,21 @@
+{#- leaf-bmc-to-leaf #}
+{%- set ns = namespace(lag_displayed=false) %}
+{%- for node in cabling.nodes if node.subtype == "leaf" %}
+{%- if ns.lag_displayed == false %}
+{%- set ns.lag_displayed = true %}
+
+{%- for node in cabling.nodes if node.subtype == "spine"%}
+interface ethernet{{ node.config.PORT }}
+    description {{ node.config.DESCRIPTION }}
+    no shutdown
+    channel-group {{ node.config.LAG_NUMBER }} mode active
+    no switchport
+    mtu 9216
+    speed 10000
+    flowcontrol receive off
+
+
+{%- endif %}
+{%- endfor %}
+
+{{#- end leaf-bmc-to-leaf #}

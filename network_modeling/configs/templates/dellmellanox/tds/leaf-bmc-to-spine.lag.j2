@@ -1,0 +1,26 @@
+{#- leaf-bmc-to-spine #}
+{%- set ns = namespace(lag_displayed=false) %}
+{%- for node in cabling.nodes if node.subtype == "spine" %}
+{%- if ns.lag_displayed == false %}
+{%- set ns.lag_displayed = true %}
+interface lag 255
+  .
+.
+.
+.
+.
+
+{%- endif %}
+{%- endfor %}
+
+{%- for node in cabling.nodes if node.subtype == "spine"%}
+interface {{ node.config.PORT }}
+.
+.
+.
+.
+.
+
+{%- endfor %}
+{#- end leaf-bmc-to-spine #}% 
+
