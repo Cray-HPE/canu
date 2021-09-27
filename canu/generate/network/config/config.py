@@ -388,11 +388,11 @@ def config(
         click.secho("\nWarning", fg="red")
 
         click.secho(
-            "\nThe following devices were not found in the configurations.",
+            "\nThe following devices typically exist, but were not found in the current configuration.",
             fg="red",
         )
         click.secho(
-            "If the network contains these devices, check the SHCD to ensure all tabs were included.",
+            "If the network is supposed to have these devices, check the SHCD to ensure all tabs were included.",
             fg="red",
         )
         click.secho(
