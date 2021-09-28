@@ -37,8 +37,13 @@ from canu.generate import generate
 from canu.report import report
 from canu.utils.cache import cache_switch
 from canu.validate import validate
+<<<<<<< HEAD
 
 yaml = YAML()
+=======
+from canu.test import test
+yaml = ruamel.yaml.YAML()
+>>>>>>> a91de8c (added override option)
 
 # To disable warnings about unsecured HTTPS requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -92,6 +97,7 @@ cli.add_command(config.config)
 cli.add_command(generate.generate)
 cli.add_command(report.report)
 cli.add_command(validate.validate)
+cli.add_command(test.test)
 
 
 @cli.command(
