@@ -21,7 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """Test CANU validate network config commands."""
 import json
-from os import urandom
+from os import mkdir, urandom
 from unittest.mock import patch
 
 from click import testing
@@ -50,7 +50,8 @@ def test_validate_network_config(netmiko_command, switch_vendor):
         switch_vendor.return_value = "aruba"
         netmiko_command.return_value = "sw-spine-001"
         netmiko_command.return_value = switch_config
-        with open("sw-spine-001.cfg", "w") as f:
+        mkdir("generated")
+        with open("generated/sw-spine-001.cfg", "w") as f:
             f.writelines(switch_config_edit)
 
         result = runner.invoke(
@@ -68,7 +69,7 @@ def test_validate_network_config(netmiko_command, switch_vendor):
                 "--password",
                 password,
                 "--generated",
-                ".",
+                "generated/",
                 "-s",
                 shasta,
             ],
@@ -90,9 +91,11 @@ def test_validate_network_config_running_file():
     """Test that the `canu validate network config` command runs."""
     switch_config_edit = switch_config[:-15] + "router add\n"
     with runner.isolated_filesystem():
-        with open("running_switch.cfg", "w") as f:
+        mkdir("running")
+        mkdir("generated")
+        with open("running/running_switch.cfg", "w") as f:
             f.writelines(switch_config)
-        with open("sw-spine-001.cfg", "w") as f:
+        with open("generated/sw-spine-001.cfg", "w") as f:
             f.writelines(switch_config_edit)
 
         result = runner.invoke(
@@ -104,9 +107,9 @@ def test_validate_network_config_running_file():
                 "network",
                 "config",
                 "--running",
-                ".",
+                "running/",
                 "--generated",
-                ".",
+                "generated/",
                 "-s",
                 shasta,
             ],
@@ -133,7 +136,8 @@ def test_validate_network_config_json(netmiko_command, switch_vendor):
         switch_vendor.return_value = "aruba"
         netmiko_command.return_value = "sw-spine-001"
         netmiko_command.return_value = switch_config
-        with open("sw-spine-001.cfg", "w") as f:
+        mkdir("generated")
+        with open("generated/sw-spine-001.cfg", "w") as f:
             f.writelines(switch_config_edit)
 
         result = runner.invoke(
@@ -151,7 +155,7 @@ def test_validate_network_config_json(netmiko_command, switch_vendor):
                 "--password",
                 password,
                 "--generated",
-                ".",
+                "generated/",
                 "-s",
                 shasta,
                 "--json",
@@ -192,9 +196,11 @@ def test_validate_network_config_json_file():
     """Test that the `canu validate network config` command runs and outputs JSON from files."""
     switch_config_edit = switch_config[:-15] + "router add\n"
     with runner.isolated_filesystem():
-        with open("running_switch.cfg", "w") as f:
+        mkdir("running")
+        mkdir("generated")
+        with open("running/running_switch.cfg", "w") as f:
             f.writelines(switch_config)
-        with open("sw-spine-001.cfg", "w") as f:
+        with open("generated/sw-spine-001.cfg", "w") as f:
             f.writelines(switch_config_edit)
 
         result = runner.invoke(
@@ -206,9 +212,9 @@ def test_validate_network_config_json_file():
                 "network",
                 "config",
                 "--running",
-                ".",
+                "running/",
                 "--generated",
-                ".",
+                "generated/",
                 "-s",
                 shasta,
                 "--json",
@@ -254,10 +260,11 @@ def test_validate_network_config_file(netmiko_command, switch_vendor):
         switch_vendor.return_value = "aruba"
         netmiko_command.return_value = "sw-spine-001"
         netmiko_command.return_value = switch_config
+        mkdir("generated")
         with open("test.txt", "w") as f:
             f.write("192.168.1.1")
 
-        with open("sw-spine-001.cfg", "w") as f:
+        with open("generated/sw-spine-001.cfg", "w") as f:
             f.writelines(switch_config_edit)
 
         result = runner.invoke(
@@ -275,7 +282,7 @@ def test_validate_network_config_file(netmiko_command, switch_vendor):
                 "--password",
                 password,
                 "--generated",
-                ".",
+                "generated/",
                 "-s",
                 shasta,
             ],
@@ -302,7 +309,8 @@ def test_validate_network_config_password_prompt(netmiko_command, switch_vendor)
         switch_vendor.return_value = "aruba"
         netmiko_command.return_value = "sw-spine-001"
         netmiko_command.return_value = switch_config
-        with open("sw-spine-001.cfg", "w") as f:
+        mkdir("generated")
+        with open("generated/sw-spine-001.cfg", "w") as f:
             f.writelines(switch_config_edit)
 
         result = runner.invoke(
@@ -318,7 +326,7 @@ def test_validate_network_config_password_prompt(netmiko_command, switch_vendor)
                 "--username",
                 username,
                 "--generated",
-                ".",
+                "generated/",
                 "-s",
                 shasta,
             ],
@@ -345,7 +353,8 @@ def test_validate_network_config_timeout(netmiko_command, switch_vendor):
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
         netmiko_command.side_effect = ssh_exception.NetmikoTimeoutException
-        with open("sw-spine-001.cfg", "w") as f:
+        mkdir("generated")
+        with open("generated/sw-spine-001.cfg", "w") as f:
             f.writelines(switch_config_edit)
 
         result = runner.invoke(
@@ -363,7 +372,7 @@ def test_validate_network_config_timeout(netmiko_command, switch_vendor):
                 "--password",
                 password,
                 "--generated",
-                ".",
+                "generated/",
                 "-s",
                 shasta,
             ],
@@ -384,7 +393,8 @@ def test_validate_network_config_authentication(netmiko_command, switch_vendor):
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
         netmiko_command.side_effect = ssh_exception.NetmikoAuthenticationException
-        with open("sw-spine-001.cfg", "w") as f:
+        mkdir("generated")
+        with open("generated/sw-spine-001.cfg", "w") as f:
             f.writelines(switch_config_edit)
 
         result = runner.invoke(
@@ -402,7 +412,7 @@ def test_validate_network_config_authentication(netmiko_command, switch_vendor):
                 "--password",
                 password,
                 "--generated",
-                ".",
+                "generated/",
                 "-s",
                 shasta,
             ],
@@ -419,14 +429,16 @@ def test_validate_network_config_bad_config_file():
     """Test that the `canu validate network config` command fails on bad file."""
     switch_config_edit = switch_config[:-15] + "router add\n"
     with runner.isolated_filesystem():
+        mkdir("running")
+        mkdir("generated")
         # Generate random binary file
-        with open("bad.file", "wb") as f:
+        with open("running/bad.file", "wb") as f:
             f.write(urandom(128))
 
-        with open("bad_config.cfg", "w") as f:
+        with open("running/bad_config.cfg", "w") as f:
             f.write("bad")
 
-        with open("switch.cfg", "w") as f:
+        with open("running/switch.cfg", "w") as f:
             f.writelines(switch_config_edit)
         result = runner.invoke(
             cli,
@@ -437,35 +449,39 @@ def test_validate_network_config_bad_config_file():
                 "network",
                 "config",
                 "--running",
-                ".",
+                "running/",
                 "--generated",
-                ".",
+                "generated/",
                 "-s",
                 shasta,
             ],
         )
-        print(result.output)
         assert result.exit_code == 0
         assert (
-            "Errors\n"
-            + "----------------------------------------------------------------------------------------------------\n"
-            + "./bad_config.cfg - The file ./bad_config.cfg is not a valid config file.\n"
-            + "sw-spine-001    - Could not find generated config file ./sw-spine-001.cfg\n"
-            + "./bad.file      - The file ./bad.file is not a valid config file.\n"
+            "running/bad_config.cfg - The file running/bad_config.cfg is not a valid config file."
+        ) in str(result.output)
+        assert (
+            "sw-spine-001    - Could not find generated config file generated/sw-spine-001.cfg"
+        ) in str(result.output)
+        assert (
+            "running/bad.file - The file running/bad.file is not a valid config file."
         ) in str(result.output)
 
 
 def test_validate_network_config_bad_config_file_json():
     """Test that the `canu validate network config` command errors on bad file JSON."""
     with runner.isolated_filesystem():
+        mkdir("running")
+        mkdir("generated")
+
         # Generate random binary file
-        with open("bad.file", "wb") as f:
+        with open("running/bad.file", "wb") as f:
             f.write(urandom(128))
 
-        with open("bad_config.cfg", "w") as f:
+        with open("running/bad_config.cfg", "w") as f:
             f.write("bad")
 
-        with open("switch.cfg", "w") as f:
+        with open("running/switch.cfg", "w") as f:
             f.writelines(switch_config)
         result = runner.invoke(
             cli,
@@ -476,9 +492,9 @@ def test_validate_network_config_bad_config_file_json():
                 "network",
                 "config",
                 "--running",
-                ".",
+                "running/",
                 "--generated",
-                ".",
+                "generated/",
                 "-s",
                 shasta,
                 "--json",
@@ -513,8 +529,8 @@ def test_validate_network_config_bad_config_file_json():
                 "keepalive_deletions": 1,
             },
             "errors": {
-                "./bad_config.cfg": "The file ./bad_config.cfg is not a valid config file.",
-                "sw-spine-001": "Could not find generated config file ./sw-spine-001.cfg",
-                "./bad.file": "The file ./bad.file is not a valid config file.",
+                "running/bad_config.cfg": "The file running/bad_config.cfg is not a valid config file.",
+                "sw-spine-001": "Could not find generated config file generated/sw-spine-001.cfg",
+                "running/bad.file": "The file running/bad.file is not a valid config file.",
             },
         }
