@@ -190,8 +190,6 @@ def config(ctx, ip, running, username, password, generated_config, json_, out):
         generated_config_hier,
     )
 
-    remediation_config_hier.add_tags(tags)
-
     dash = "-" * 73
 
     print_differences = True
@@ -222,9 +220,19 @@ def config(ctx, ip, running, username, password, generated_config, json_, out):
         fg="green",
         file=out,
     )
+
+    remediation_config_hier.add_tags(tags)
+    port_reset_cmds = ["no mtu", "shutdown", "no description", "routing", "no speed"]
+    for line in remediation_config_hier.with_tags({"no interface"}).all_children():
+        interface = str(line)
+        remediation_config_hier.del_child_by_text(interface)
+        for x in port_reset_cmds:
+            remediation_config_hier.add_child(interface[3:]).add_child(x)
+    remediation_config_hier.add_tags(tags)
+
     click.echo(dash, file=out)
     for safe_line in remediation_config_hier.with_tags({"safe"}).all_children():
-        click.echo(safe_line.cisco_style_text(), file=out)
+        click.echo(safe_line.cisco_style_text())
     click.echo(dash, file=out)
 
     click.secho(
@@ -252,11 +260,14 @@ def config(ctx, ip, running, username, password, generated_config, json_, out):
         fg="yellow",
         file=out,
     )
+
     click.echo(dash, file=out)
     for untagged_line in remediation_config_hier.all_children_sorted_untagged():
         click.echo(untagged_line.cisco_style_text(), file=out)
     click.echo(dash, file=out)
     print_config_diff_summary(hostname, ip, differences, out)
+    for line in remediation_config_hier.with_tags({"interface"}).all_children():
+        click.echo(line.cisco_style_text())
 
 
 def get_switch_config(ip, credentials, return_error=False):

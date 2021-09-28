@@ -1,7 +1,7 @@
 from opensuse/leap:15.3
 
 # create canu user
-RUN useradd -u 1001 canu
+RUN useradd -u 1001 -m canu -d /home/canu
 
 # update command prompt
 RUN echo 'export PS1="canu \w : "' >> /etc/bash.bashrc
@@ -22,3 +22,5 @@ RUN chown -R canu /app/canu
 
 # set none root user: canu
 USER canu
+
+WORKDIR /app/canu

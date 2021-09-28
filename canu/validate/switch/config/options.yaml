@@ -156,7 +156,10 @@ idempotent_commands:
           - description
           - ip address
   - lineage:
-      - startswith: router ospf 1
+      - startswith: interface vlan
+      - startswith: ip ospf
+  - lineage:
+      - startswith: router ospf
       - startswith: router-id
   - lineage:
       - startswith: vsx
@@ -188,5 +191,110 @@ negation_negate_with:
       - startswith: active-gateway ip mac
     use: no active-gateway ip mac
   - lineage:
+      - startswith: interface 1
+      - startswith: speed auto
+    use: no speed
+  - lineage:
+      - startswith: interface lag
+      - startswith: lacp rate
+    use: no lacp rate
+  - lineage:
+      - startswith: interface 1
+      - startswith: mtu
+    use: no mtu
+  - lineage:
       - startswith: spanning-tree bpdu-guard
     use: no spanning-tree bpdu-guard timeout
+  - lineage:
+      - startswith: interface lag 1 multi-chassis
+    use: no interface lag 1
+  - lineage:
+      - startswith: interface lag 2 multi-chassis
+    use: no interface lag 2
+  - lineage:
+      - startswith: interface lag 3 multi-chassis
+    use: no interface lag 3
+  - lineage:
+      - startswith: interface lag 4 multi-chassis
+    use: no interface lag 4
+  - lineage:
+      - startswith: interface lag 5 multi-chassis
+    use: no interface lag 5
+  - lineage:
+      - startswith: interface lag 6 multi-chassis
+    use: no interface lag 6
+  - lineage:
+      - startswith: interface lag 7 multi-chassis
+    use: no interface lag 7
+  - lineage:
+      - startswith: interface lag 8 multi-chassis
+    use: no interface lag 8
+  - lineage:
+      - startswith: interface lag 9 multi-chassis
+    use: no interface lag 9
+  - lineage:
+      - startswith: interface lag 10 multi-chassis
+    use: no interface lag 10
+  - lineage:
+      - startswith: interface lag 11 multi-chassis
+    use: no interface lag 11
+  - lineage:
+      - startswith: interface lag 12 multi-chassis
+    use: no interface lag 12
+  - lineage:
+      - startswith: interface lag 13 multi-chassis
+    use: no interface lag 13
+  - lineage:
+      - startswith: interface lag 14 multi-chassis
+    use: no interface lag 14
+  - lineage:
+      - startswith: interface lag 15 multi-chassis
+    use: no interface lag 15
+  - lineage:
+      - startswith: interface lag 16 multi-chassis
+    use: no interface lag 16
+  - lineage:
+      - startswith: interface lag 17 multi-chassis
+    use: no interface lag 17
+  - lineage:
+      - startswith: interface lag 18 multi-chassis
+    use: no interface lag 18
+  - lineage:
+      - startswith: interface lag 19 multi-chassis
+    use: no interface lag 19
+  - lineage:
+      - startswith: interface lag 20 multi-chassis
+    use: no interface lag 20
+  - lineage:
+      - startswith: interface lag 21 multi-chassis
+    use: no interface lag 21
+  - lineage:
+      - startswith: interface lag 22 multi-chassis
+    use: no interface lag 22
+  - lineage:
+      - startswith: interface lag 23 multi-chassis
+    use: no interface lag 23
+  - lineage:
+      - startswith: interface lag 48 multi-chassis
+    use: no interface lag 48
+  - lineage:
+      - startswith: interface lag 53 multi-chassis
+    use: no interface lag 53
+  - lineage:
+      - startswith: interface lag 99 multi-chassis
+    use: no interface lag 99
+  - lineage:
+      - startswith: interface lag 100 multi-chassis
+    use: no interface lag 100
+  - lineage:
+      - startswith: interface lag 101 multi-chassis
+    use: no interface lag 101
+  - lineage:
+      - startswith: interface lag 151 multi-chassis
+    use: no interface lag 151
+  - lineage:
+      - startswith: interface lag 255 multi-chassis
+    use: no interface lag 255
+  - lineage:
+      - startswith: interface lag 256 multi-chassis
+    use: no interface lag 256

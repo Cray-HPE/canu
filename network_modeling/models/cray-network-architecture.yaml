@@ -55,10 +55,10 @@ network_v2:
           speed: 100
           number: 2
           comment: "isl"
-        - name: "river_ncn_leaf"
-          speed: 10
-          number: 1
-          comment: "keepalive"
+        # - name: "river_ncn_leaf"
+        #   speed: 10
+        #   number: 1
+        #   comment: "keepalive"
     - name: "river_bmc_leaf"
       model: "6300M_JL762A"
       connections:
@@ -83,6 +83,10 @@ network_v2:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
+          comment: "onboard nmn"
+        - name: "river_bmc_leaf"
+          speed: 1
+          comment: "bmc"
     - name: "mountain_compute_cabinet"
       model: "mountain_compute_cabinet"
       connections:
@@ -211,6 +215,10 @@ network_v2_tds:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
+          comment: "onboard nmn"
+        - name: "river_bmc_leaf"
+          speed: 1
+          comment: "bmc"
     - name: "mountain_compute_cabinet"
       model: "mountain_compute_cabinet"
       connections:
@@ -329,6 +337,10 @@ network_v1:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
+          comment: "onboard nmn"
+        - name: "river_bmc_leaf"
+          speed: 1
+          comment: "bmc"
   lookup_mapper:
     - lookup_name:
         - "mn"
