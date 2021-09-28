@@ -50,7 +50,7 @@ def tests(session):
         "--cov=network_modeling",
         "--cov-append",
         "--cov-report=",
-        "--cov-fail-under={}".format(COVERAGE_FAIL),
+        f"--cov-fail-under={COVERAGE_FAIL}",
         path,
         *session.posargs,
     )

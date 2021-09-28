@@ -178,7 +178,7 @@ def check_aruba(ip, credentials):
 
         # Put vendor in cache
         switch_cache = {
-            "ip_address": ip,
+            "ip_address": str(ip),
             "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "vendor": "aruba",
         }
@@ -214,7 +214,7 @@ def check_dell(ip, credentials):
 
         # Put vendor in cache
         switch_cache = {
-            "ip_address": ip,
+            "ip_address": str(ip),
             "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "vendor": "dell",
         }
@@ -249,7 +249,7 @@ def check_mellanox(ip, credentials):
 
         # Put vendor in cache
         switch_cache = {
-            "ip_address": ip,
+            "ip_address": str(ip),
             "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "vendor": "mellanox",
         }

@@ -35,7 +35,7 @@ import click_spinner
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from openpyxl import load_workbook
 import requests
-import ruamel.yaml
+from ruamel.yaml import YAML
 
 from canu.cache import cache_directory
 from canu.report.switch.cabling.cabling import get_lldp
@@ -46,7 +46,7 @@ from canu.validate.shcd.shcd import (
     print_node_list,
 )
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 # Get project root directory
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover

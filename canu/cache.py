@@ -28,7 +28,7 @@ from pathlib import Path
 import sys
 import tempfile
 
-import ruamel.yaml
+from ruamel.yaml import YAML
 
 
 def cache_directory():
@@ -55,7 +55,7 @@ def cache_directory():
     return cachedir
 
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 # To get the canu_cache.yaml file
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
@@ -104,7 +104,7 @@ def cache_switch(switch):
 
     The updated cache is immediately written to a file.
     """
-    if ip_exists_in_cache(switch["ip_address"]):
+    if ip_exists_in_cache(str(switch["ip_address"])):
         updated_cache = update_switch_in_cache(canu_cache, switch)
     else:
         updated_cache = add_switch_to_cache(canu_cache, switch)

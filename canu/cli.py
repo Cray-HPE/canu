@@ -28,7 +28,7 @@ import sys
 import click
 from click_help_colors import HelpColorsCommand, HelpColorsGroup
 import requests
-import ruamel.yaml
+from ruamel.yaml import YAML
 import urllib3
 
 from canu.cache import cache_switch
@@ -37,7 +37,7 @@ from canu.generate import generate
 from canu.report import report
 from canu.validate import validate
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 # To disable warnings about unsecured HTTPS requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

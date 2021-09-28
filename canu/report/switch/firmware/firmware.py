@@ -31,14 +31,14 @@ from click_help_colors import HelpColorsCommand
 import emoji
 from netmiko import ssh_exception
 import requests
-import ruamel.yaml
+from ruamel.yaml import YAML
 import urllib3
 
 from canu.cache import cache_switch, firmware_cached_recently, get_switch_from_cache
 from canu.utils.ssh import netmiko_commands
 from canu.utils.vendor import switch_vendor
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 
 # Get project root directory

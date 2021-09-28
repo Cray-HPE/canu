@@ -36,7 +36,7 @@ import click_spinner
 import emoji
 from netmiko import ssh_exception
 import requests
-import ruamel.yaml
+from ruamel.yaml import YAML
 
 
 from canu.cache import cache_switch
@@ -48,7 +48,7 @@ from canu.report.switch.firmware.firmware import (
 from canu.utils.vendor import switch_vendor
 
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 
 # Get project root directory

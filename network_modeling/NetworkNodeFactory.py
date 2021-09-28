@@ -23,13 +23,13 @@
 import logging
 
 import click
-import ruamel.yaml
+from ruamel.yaml import YAML
 import yamale
 
 from .NetworkNode import NetworkNode
 
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 log = logging.getLogger(__name__)
 

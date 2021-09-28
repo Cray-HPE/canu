@@ -31,7 +31,7 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from openpyxl import load_workbook
 import requests
-import ruamel.yaml
+from ruamel.yaml import YAML
 import urllib3
 
 from canu.cache import cache_directory
@@ -43,7 +43,7 @@ from canu.generate.switch.config.config import (
 )
 from canu.validate.shcd.shcd import node_model_from_shcd
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 # To disable warnings about unsecured HTTPS requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
