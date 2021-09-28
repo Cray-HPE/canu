@@ -20,32 +20,37 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Test CANU validate switch config commands."""
+import json
+from os import urandom
 from unittest.mock import patch
 
 from click import testing
+from netmiko import ssh_exception
 
 from canu.cli import cli
-
-
-def netmiko_mock(*args):
-    """Mock netmiko command."""
-    return switch_config
 
 
 username = "admin"
 password = "admin"
 ip = "192.168.1.1"
+ip_dell = "192.168.1.2"
+ip_mellanox = "192.168.1.3"
 credentials = {"username": username, "password": password}
 cache_minutes = 0
-config_file = "switch.cfg"
+generated_config_file = "switch.cfg"
+running_config_file = "running_switch.cfg"
 runner = testing.CliRunner()
 
 
-@patch("canu.validate.switch.config.config.netmiko_command", side_effect=netmiko_mock)
-def test_validate_config(*args):
+@patch("canu.validate.switch.config.config.switch_vendor")
+@patch("canu.validate.switch.config.config.netmiko_command")
+def test_validate_config(netmiko_command, switch_vendor):
     """Test that the `canu validate switch config` command runs."""
     switch_config_edit = switch_config[:-15] + "router add\n"
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = "sw-spine-001"
+        netmiko_command.return_value = switch_config
         with open("switch.cfg", "w") as f:
             f.writelines(switch_config_edit)
 
@@ -63,8 +68,8 @@ def test_validate_config(*args):
                 username,
                 "--password",
                 password,
-                "--config",
-                config_file,
+                "--generated",
+                generated_config_file,
             ],
         )
         assert result.exit_code == 0
@@ -80,10 +85,74 @@ def test_validate_config(*args):
         ) in str(result.output)
 
 
-@patch("canu.validate.switch.config.config.netmiko_command", side_effect=netmiko_mock)
-def test_validate_config_additions(*args):
+@patch("canu.validate.switch.config.config.switch_vendor")
+@patch("canu.validate.switch.config.config.netmiko_command")
+def test_validate_config_json(netmiko_command, switch_vendor):
+    """Test that the `canu validate switch config` command runs and prints json."""
+    switch_config_edit = switch_config[:-15] + "router add\n"
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = "sw-spine-001"
+        netmiko_command.return_value = switch_config
+        with open("switch.cfg", "w") as f:
+            f.writelines(switch_config_edit)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "switch",
+                "config",
+                "--ip",
+                ip,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--generated",
+                generated_config_file,
+                "--json",
+            ],
+        )
+        result_json = json.loads(result.output)
+
+        assert result.exit_code == 0
+        assert result_json == {
+            "additions": 1,
+            "deletions": 1,
+            "hostname_additions": 0,
+            "hostname_deletions": 0,
+            "interface_additions": 0,
+            "interface_deletions": 0,
+            "interface_lag_additions": 0,
+            "interface_lag_deletions": 0,
+            "spanning_tree_additions": 0,
+            "spanning_tree_deletions": 0,
+            "script_additions": 0,
+            "script_deletions": 1,
+            "router_additions": 1,
+            "router_deletions": 0,
+            "system_mac_additions": 0,
+            "system_mac_deletions": 0,
+            "isl_additions": 0,
+            "isl_deletions": 0,
+            "role_additions": 0,
+            "role_deletions": 0,
+            "keepalive_additions": 0,
+            "keepalive_deletions": 0,
+        }
+
+
+@patch("canu.validate.switch.config.config.switch_vendor")
+@patch("canu.validate.switch.config.config.netmiko_command")
+def test_validate_config_additions(netmiko_command, switch_vendor):
     """Test that the `canu validate switch config` command runs and sees an addition."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = "sw-spine-001"
+        netmiko_command.return_value = switch_config
         with open("switch.cfg", "w") as f:
             f.writelines(switch_config2)
 
@@ -101,8 +170,8 @@ def test_validate_config_additions(*args):
                 username,
                 "--password",
                 password,
-                "--config",
-                config_file,
+                "--generated",
+                generated_config_file,
             ],
         )
         assert result.exit_code == 0
@@ -112,7 +181,8 @@ def test_validate_config_additions(*args):
             + "-------------------------------------------------------------------------\n"
             + "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
             + "-------------------------------------------------------------------------\n"
-            + "Total Additions:                12  |  Total Deletions:                12\n"
+            + "Total Additions:                13  |  Total Deletions:                13\n"
+            + "Hostname:                        1  |  Hostname:                        1\n"
             + "Interface:                       1  |  Interface:                       1\n"
             + "Interface Lag:                   1  |  Interface Lag:                   1\n"
             + "Spanning Tree:                   1  |  Spanning Tree:                   1\n"
@@ -122,6 +192,318 @@ def test_validate_config_additions(*args):
             + "Inter Switch Link:               1  |  Inter Switch Link:               1\n"
             + "Role:                            1  |  Role:                            1\n"
             + "Keepalive:                       1  |  Keepalive:                       1\n"
+        ) in str(result.output)
+
+
+def test_validate_config_running_file():
+    """Test that the `canu validate switch config` command runs and sees an addition."""
+    with runner.isolated_filesystem():
+        with open("running_switch.cfg", "w") as f:
+            f.writelines(switch_config)
+        with open("switch.cfg", "w") as f:
+            f.writelines(switch_config2)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "switch",
+                "config",
+                "--running",
+                running_config_file,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--generated",
+                generated_config_file,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "Switch: sw-spine-001\n"
+            + "Differences\n"
+            + "-------------------------------------------------------------------------\n"
+            + "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
+            + "-------------------------------------------------------------------------\n"
+            + "Total Additions:                13  |  Total Deletions:                13\n"
+            + "Hostname:                        1  |  Hostname:                        1\n"
+            + "Interface:                       1  |  Interface:                       1\n"
+            + "Interface Lag:                   1  |  Interface Lag:                   1\n"
+            + "Spanning Tree:                   1  |  Spanning Tree:                   1\n"
+            + "Script:                          1  |  Script:                          1\n"
+            + "Router:                          1  |  Router:                          1\n"
+            + "System Mac:                      1  |  System Mac:                      1\n"
+            + "Inter Switch Link:               1  |  Inter Switch Link:               1\n"
+            + "Role:                            1  |  Role:                            1\n"
+            + "Keepalive:                       1  |  Keepalive:                       1\n"
+        ) in str(result.output)
+
+
+@patch("canu.validate.switch.config.config.switch_vendor")
+@patch("canu.validate.switch.config.config.netmiko_command")
+def test_validate_config_password_prompt(netmiko_command, switch_vendor):
+    """Test that the `canu validate switch config` command runs after password prompt."""
+    switch_config_edit = switch_config[:-15] + "router add\n"
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = "sw-spine-001"
+        netmiko_command.return_value = switch_config
+        with open("switch.cfg", "w") as f:
+            f.writelines(switch_config_edit)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "switch",
+                "config",
+                "--ip",
+                ip,
+                "--username",
+                username,
+                "--generated",
+                generated_config_file,
+            ],
+            input=password,
+        )
+        assert result.exit_code == 0
+        assert (
+            "Switch: sw-spine-001 (192.168.1.1)\n"
+            + "Differences\n"
+            + "-------------------------------------------------------------------------\n"
+            + "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
+            + "-------------------------------------------------------------------------\n"
+            + "Total Additions:                 1  |  Total Deletions:                 1\n"
+            + "                                    |  Script:                          1\n"
+            + "Router:                          1  |                                    \n"
+        ) in str(result.output)
+
+
+@patch("canu.validate.switch.config.config.switch_vendor")
+@patch("canu.validate.switch.config.config.netmiko_command")
+def test_validate_config_timeout(netmiko_command, switch_vendor):
+    """Test that the `canu validate switch config` command fails on timeout."""
+    switch_config_edit = switch_config[:-15] + "router add\n"
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.side_effect = ssh_exception.NetmikoTimeoutException
+        with open("switch.cfg", "w") as f:
+            f.writelines(switch_config_edit)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "switch",
+                "config",
+                "--ip",
+                ip,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--generated",
+                generated_config_file,
+            ],
+        )
+        assert result.exit_code == 0
+        assert ("Timeout error. Check the IP address and try again.") in str(
+            result.output,
+        )
+
+
+@patch("canu.validate.switch.config.config.switch_vendor")
+@patch("canu.validate.switch.config.config.netmiko_command")
+def test_validate_config_auth_exception(netmiko_command, switch_vendor):
+    """Test that the `canu validate switch config` command fails on auth exception."""
+    switch_config_edit = switch_config[:-15] + "router add\n"
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.side_effect = ssh_exception.NetmikoAuthenticationException
+        with open("switch.cfg", "w") as f:
+            f.writelines(switch_config_edit)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "switch",
+                "config",
+                "--ip",
+                ip,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--generated",
+                generated_config_file,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "Authentication error. Check the credentials or IP address and try again"
+        ) in str(result.output)
+
+
+def test_validate_config_bad_config_file():
+    """Test that the `canu validate switch config` command fails on bad file."""
+    non_config_file = "bad.file"
+    switch_config_edit = switch_config[:-15] + "router add\n"
+    with runner.isolated_filesystem():
+        # Generate random binary file
+        with open(non_config_file, "wb") as f:
+            f.write(urandom(128))
+
+        with open("switch.cfg", "w") as f:
+            f.writelines(switch_config_edit)
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "switch",
+                "config",
+                "--running",
+                non_config_file,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--generated",
+                generated_config_file,
+            ],
+        )
+        assert result.exit_code == 0
+        assert ("The file bad.file is not a valid config file.") in str(result.output)
+
+
+@patch("canu.validate.switch.config.config.switch_vendor")
+@patch("canu.validate.switch.config.config.netmiko_command")
+def test_validate_config_no_vendor(netmiko_command, switch_vendor):
+    """Test that the `canu validate switch config` command error on no vendor."""
+    switch_config_edit = switch_config[:-15] + "router add\n"
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = None
+        netmiko_command.return_value = "sw-spine-001"
+        netmiko_command.return_value = switch_config
+        with open("switch.cfg", "w") as f:
+            f.writelines(switch_config_edit)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "switch",
+                "config",
+                "--ip",
+                ip,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--generated",
+                generated_config_file,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "There wan an error determining the vendor of the switch." in str(
+            result.output,
+        )
+
+
+@patch("canu.validate.switch.config.config.switch_vendor")
+@patch("canu.validate.switch.config.config.netmiko_commands")
+def test_validate_config_dell(netmiko_commands, switch_vendor):
+    """Test that the `canu validate switch config` command runs on dell switch."""
+    switch_config_edit = switch_config[:-15] + "router add\n"
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "dell"
+        netmiko_commands.return_value = [switch_config, "sw-spine-001"]
+        with open("switch.cfg", "w") as f:
+            f.writelines(switch_config_edit)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "switch",
+                "config",
+                "--ip",
+                ip_dell,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--generated",
+                generated_config_file,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "Switch: sw-spine-001 (192.168.1.2)\n"
+            + "Differences\n"
+            + "-------------------------------------------------------------------------\n"
+            + "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
+            + "-------------------------------------------------------------------------\n"
+            + "Total Additions:                 1  |  Total Deletions:                 1\n"
+            + "                                    |  Script:                          1\n"
+            + "Router:                          1  |                                    \n"
+        ) in str(result.output)
+
+
+@patch("canu.validate.switch.config.config.switch_vendor")
+@patch("canu.validate.switch.config.config.netmiko_commands")
+def test_validate_config_mellanox(netmiko_commands, switch_vendor):
+    """Test that the `canu validate switch config` command runs on mellanox switch."""
+    switch_config_edit = switch_config[:-15] + "router add\n"
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "mellanox"
+        netmiko_commands.return_value = [switch_config, "hostname: sw-spine-001"]
+        with open("switch.cfg", "w") as f:
+            f.writelines(switch_config_edit)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "switch",
+                "config",
+                "--ip",
+                ip_mellanox,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--generated",
+                generated_config_file,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "Switch: sw-spine-001 (192.168.1.3)\n"
+            + "Differences\n"
+            + "-------------------------------------------------------------------------\n"
+            + "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
+            + "-------------------------------------------------------------------------\n"
+            + "Total Additions:                 1  |  Total Deletions:                 1\n"
+            + "                                    |  Script:                          1\n"
+            + "Router:                          1  |                                    \n"
         ) in str(result.output)
 
 
@@ -304,7 +686,7 @@ switch_config = (
 )
 
 switch_config2 = (
-    "hostname sw-spine-001\n"
+    "hostname sw-spine-01\n"
     "bfd\n"
     + "no ip icmp redirect\n"
     + "vrf CAN\n"

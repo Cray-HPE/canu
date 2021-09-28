@@ -624,16 +624,21 @@ sw-leaf-bmc-001 Config Generated
 
 **[Details](docs/validate_switch_config.md)**<br>
 
-After config has been generated, CANU can validate the generated config against running switch config. After running the `validate switch config` command, you will be shown a line by line comparison of the currently running switch config against the config file that was passed in. You will also be given a list of remediation commands that can be typed into the switch to get the running config to match the config file. There will be a summary table at the end highlighting the most important differences between the configs.
+After config has been generated, CANU can validate the generated config against running switch config. The running config can be from either an IP address, or a config file.
+
+- To get running config from an IP address, use the flags `--ip 192.168.1.1 --username USERNAME --password PASSWORD`.
+- To get running config from a file, use the flag `--running RUNNING_CONFIG.cfg` instead.
+
+After running the `validate switch config` command, you will be shown a line by line comparison of the currently running switch config against the config file that was passed in. You will also be given a list of remediation commands that can be typed into the switch to get the running config to match the config file. There will be a summary table at the end highlighting the most important differences between the configs.
 
 - Lines that are red and start with a `-` are in the running config, but not in the config file
 - Lines that are green and start with a `+` are not in the running config, but are in the config file
 - Lines that are blue and start with a `?` are attempting to point out specific line differences
 
-To validate switch config run: `canu validate switch config --ip 192.168.1.1 --username USERNAME --password PASSWORD --config SWITCH_CONFIG.cfg`
+To validate switch config run: `canu validate switch config --ip 192.168.1.1 --username USERNAME --password PASSWORD --generated SWITCH_CONFIG.cfg`
 
 ```bash
-$ canu validate switch config --ip 192.168.1.1 --config sw-spine-001.cfg
+$ canu validate switch config --ip 192.168.1.1 --generated sw-spine-001.cfg
 
 hostname sw-spine-001
 - ntp server 192.168.1.10
@@ -665,16 +670,26 @@ Router:                          1  |
 
 ![](docs/images/canu_validate_switch_config.png)
 
+#### File Output and JSON
+
+To output the results of the config validation command to a file, append the `--out FILENAME` flag. To get the results as JSON, use the `--json` flag.
+
 ### Validate Network Config
 
 **[Details](docs/validate_network_config.md)**<br>
 
-The `validate network config` command works almost the same as thh above `validate switch config` command. Pass in a list of ips, or a file of ip addresses and a directory of generated config files and there will be a summary table for each switch highlighting the most important differences between the runnig switch config and the config files.
+The `validate network config` command works almost the same as the above `validate switch config` command. There are three options for passing in the running config:
 
-To validate switch config run: `canu validate network config --ips-file ips.txt --username USERNAME --password PASSWORD --config /CONFIG/FOLDER`
+- A comma separated list of ips using `--ips 192.168.1.1,192.168.1.`
+- A file of ip addresses, one per line using the flag `--ips-file ips.txt`
+- A directory containing the running configuration `--running RUNNING/CONFIG/DIRECTORY`
+
+A directory of generated config files will also need to be passed in using `--generated GENERATED/CONFIG/DIRECTORY`. There will be a summary table for each switch highlighting the most important differences between the running switch config and the generated config files.
+
+To validate switch config run: `canu validate network config --ips-file ips.txt --username USERNAME --password PASSWORD --generated /CONFIG/FOLDER`
 
 ```bash
-$ canu validate network config -s 1.5 --ips-file ips.txt --config /CONFIG/FOLDER
+$ canu validate network config -s 1.5 --ips-file ips.txt --generated /CONFIG/FOLDER
 
 Switch: sw-leaf-001 (192.168.1.1)
 Differences
@@ -703,6 +718,10 @@ Errors
 ----------------------------------------------------------------------------------------------------
 192.168.1.3      - Timeout error connecting to switch 192.168.1.3, check the IP address and try again.
 ```
+
+#### File Output and JSON
+
+To output the results of the config validation command to a file, append the `--out FILENAME` flag. To get the results as JSON, use the `--json` flag.
 
 ## Uninstallation
 
