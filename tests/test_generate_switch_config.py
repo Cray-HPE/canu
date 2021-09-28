@@ -36,7 +36,7 @@ test_file_name = "Full_Architecture_Golden_Config_0.0.6.xlsx"
 test_file = os.path.join(test_file_directory, "data", test_file_name)
 architecture = "full"
 tabs = "INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
-corners = "J14,T44,J14,T48,J14,T24,J14,T23"
+corners = "J14,T44,J14,T48,J14,T28,J14,T27"
 csi_folder = "."
 shasta = "1.4"
 switch_name = "sw-spine-001"
@@ -47,7 +47,7 @@ test_file_name_tds = "TDS_Architecture_Golden_Config_0.0.6.xlsx"
 test_file_tds = os.path.join(test_file_directory, "data", test_file_name_tds)
 architecture_tds = "TDS"
 tabs_tds = "INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
-corners_tds = "J14,T30,J14,T48,J14,T24,J14,T23"
+corners_tds = "J14,T30,J14,T48,J14,T28,J14,T27"
 
 runner = testing.CliRunner()
 
