@@ -29,6 +29,7 @@ import sys
 
 import click
 from click_help_colors import HelpColorsCommand
+from hier_config import HConfig, Host
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 import natsort
 import netaddr
@@ -37,6 +38,7 @@ from openpyxl import load_workbook
 import requests
 import ruamel.yaml
 import urllib3
+import yaml
 
 from canu.cache import cache_directory
 from canu.validate.shcd.shcd import node_model_from_shcd
@@ -158,6 +160,11 @@ shasta_options = canu_config["shasta_versions"]
     type=click.File("w"),
     default="-",
 )
+@click.option(
+    "--override",
+    help="Switch configuration override",
+    type=click.Path(),
+)
 @click.pass_context
 def config(
     ctx,
@@ -171,6 +178,7 @@ def config(
     auth_token,
     sls_address,
     out,
+    override,
 ):
     """Switch config commands.
 
@@ -195,6 +203,7 @@ def config(
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         out: Name of the output file
+        override: Input file to ignore switch configuration
     """
     if architecture.lower() == "full":
         architecture = "network_v2"
@@ -363,16 +372,19 @@ def config(
         switch_name,
         sls_variables,
         template_folder,
+        override,
     )
 
     dash = "-" * 60
     click.echo("\n")
-    click.secho(f"{switch_name} Config", fg="bright_white")
     click.echo(dash)
 
+    if override:
+        click.secho(f"{switch_name} Override Switch Config", fg="yellow")
+    else:
+        click.secho(f"{switch_name} Switch Config", fg="bright_white")
     click.echo(switch_config, file=out)
     return
-
 
 def get_shasta_name(name, mapper):
     """Parse mapper to get Shasta name."""
@@ -381,13 +393,13 @@ def get_shasta_name(name, mapper):
         if shasta_name in name:
             return shasta_name
 
-
 def generate_switch_config(
     shcd_node_list,
     factory,
     switch_name,
     sls_variables,
     template_folder,
+    override,
 ):
     """Generate switch config.
 
@@ -562,6 +574,34 @@ def generate_switch_config(
     devices = set()
     for node in cabling["nodes"]:
         devices.add(node["subtype"])
+    
+    if override:
+        try:
+            with open(os.path.join(override), "r") as f:
+                options_file = os.path.join(
+                    project_root,
+                    "canu",
+                    "validate",
+                    "switch",
+                    "config",
+                    "options.yaml",
+                )
+                override_tags = yaml.load(f)
+                if switch_name in override_tags:
+                    options = yaml.load(open(options_file))
+                    host = Host(switch_name, "aoscx", options)
+                    override_config = ""
+                    override_config_hier = HConfig(host=host)
+                    override_config_hier.load_from_string(switch_config).add_tags(override_tags[switch_name])
+                    for line in override_config_hier.all_children_sorted_by_tags(None, "override"):
+                        override_config = override_config + "\n" + line.cisco_style_text()
+
+                    return override_config, devices
+        except FileNotFoundError:
+            click.secho(
+                "The override .yaml file was not found, check that you entered the right file.",
+                fg="red",
+            )
 
     return switch_config, devices
 
