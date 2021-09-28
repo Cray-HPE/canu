@@ -196,7 +196,11 @@ def config(
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         folder: Folder to store config files
+<<<<<<< HEAD
         override: Input file that defines what config should be ignored
+=======
+        override: Input file to ignore switch configuration
+>>>>>>> a91de8c (added override option)
     """
     if architecture.lower() == "full":
         architecture = "network_v2"
@@ -389,7 +393,11 @@ def config(
             config_devices.update(devices)
             with open(f"{folder}/{switch_name}.cfg", "w+") as f:
                 f.write(switch_config)
+<<<<<<< HEAD
             if "# OVERRIDE" in switch_config:
+=======
+            if override:
+>>>>>>> a91de8c (added override option)
                 click.secho(f"{switch_name} Override Config Generated", fg="yellow")
             else:
                 click.secho(f"{switch_name} Config Generated", fg="bright_white")
