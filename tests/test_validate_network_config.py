@@ -215,7 +215,7 @@ def test_validate_network_config_json_file():
             ],
         )
         result_json = json.loads(result.output)
-
+        print(result_json)
         assert result.exit_code == 0
         assert result_json == {
             "sw-spine-001": {
@@ -444,13 +444,14 @@ def test_validate_network_config_bad_config_file():
                 shasta,
             ],
         )
+        print(result.output)
         assert result.exit_code == 0
         assert (
             "Errors\n"
-            "----------------------------------------------------------------------------------------------------\n"
-            "./bad_config.cfg - The file ./bad_config.cfg is not a valid config file.\n"
-            "sw-spine-001    - Could not find generated config file ./sw-spine-001.cfg\n"
-            "./bad.file      - The file ./bad.file is not a valid config file.\n"
+            + "----------------------------------------------------------------------------------------------------\n"
+            + "./bad_config.cfg - The file ./bad_config.cfg is not a valid config file.\n"
+            + "sw-spine-001    - Could not find generated config file ./sw-spine-001.cfg\n"
+            + "./bad.file      - The file ./bad.file is not a valid config file.\n"
         ) in str(result.output)
 
 
