@@ -50,16 +50,6 @@ interface vlan4
  ip address {{ variables.HMN_IP }}
  ip ospf 1 area 0.0.0.4
 
-interface vlan7
- description CAN
- no shutdown
- ip address {{ variables.CAN_IP }}
-
-interface vlan10
- Description SUN
- no shutdown
- IP address {{ variables.SUN_IP }}
-
 interface vlan2000
  description CAB_1000_MTN_NMN
  no shutdown
@@ -67,7 +57,6 @@ interface vlan2000
  ip ospf 1 area 0.0.0.2
  ip ospf authentication-key !nitial0
  ip ospf passive
- ip helper-address 10.92.100.222
 
 interface vlan3000
  description CAB_1000_MTN_HMN

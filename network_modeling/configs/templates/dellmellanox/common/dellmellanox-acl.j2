@@ -1,0 +1,30 @@
+{#- acl #}
+ipv4 access-list nmn-hmn
+ipv4 access-list nmn-hmn bind-point rif
+{%- if variables.NMN and variables.HMN %}
+	ipv4 access-list nmn-hmn seq-number 10 deny ip {{ variables.NMN }} mask {{ variables.NMN_NETMASK }} ip {{ variables.HMN }} mask {{ variables.HMN_NETMASK }} 
+{%- endif %}
+{%- if variables.NMN and variables.HMN_MTN %}
+	ipv4 access-list nmn-hmn seq-number 20 deny ip {{ variables.NMN }} mask {{ variables.NMN_NETMASK }} ip {{ variables.HMN_MTN }} mask {{ variables.HMN_MTN_NETMASK }} 
+{%- endif %}
+{%- if variables.HMN and variables.NMN %}
+	ipv4 access-list nmn-hmn seq-number 40 deny ip {{ variables.HMN}} mask {{ variables.HMN_NETMASK }} ip {{ variables.NMN }} mask {{ variables.NMN_NETMASK }}
+{%- endif %}
+{%- if variables.HMN and variables.NMN_MTN %}
+	ipv4 access-list nmn-hmn seq-number 50 deny ip {{ variables.HMN }} mask {{ variables.HMN_NETMASK }} ip {{ variables.NMN_MTN }} mask {{ variables.NMN_MTN_NETMASK }}
+{%- endif %}
+{%- if variables.NMN_MTN and variables.HMN %}
+	ipv4 access-list nmn-hmn seq-number 60 deny ip {{ variables.NMN_MTN }}  mask {{ variables.NMN_MTN_NETMASK }} ip {{ variables.HMN }} mask {{ variables.HMN_NETMASK }}
+{%- endif %}
+{%- if variables.NMN_MTN and variables.HMN_MTN %}
+	ipv4 access-list nmn-hmn seq-number 70 deny ip {{ variables.NMN_MTN }} mask {{ variables.NMN_MTN_NETMASK }} ip {{ variables.HMN_MTN }} mask {{ variables.HMN_MTN_NETMASK }}
+{%- endif %}
+{%- if variables.HMN_MTN and variables.NMN %}
+	ipv4 access-list nmn-hmn seq-number 80 deny ip {{ variables.HMN_MTN }} mask {{ variables.HMN_MTN_NETMASK }} ip {{ variables.NMN }} mask {{ variables.NMN_NETMASK }}
+{%- endif %}
+	permit any any any
+	ipv4 access-list nmn-hmn seq-number 90 permit ip any any
+	interface vlan 2 ipv4 port access-group nmn-hmn
+	interface vlan 4 ipv4 port access-group nmn-hmn
+{#- end acl #}
+

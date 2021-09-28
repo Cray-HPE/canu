@@ -3,22 +3,17 @@
 {%- for node in cabling.nodes if node.subtype == "spine" %}
 {%- if ns.lag_displayed == false %}
 {%- set ns.lag_displayed = true %}
-interface lag 255
-    no shutdown
-    description leaf_bmc_to_spine_lag
-    no routing
-    vlan trunk native 1
-    vlan trunk allowed 2,4
-    lacp mode active
-{%- endif %}
-{%- endfor %}
 
 {%- for node in cabling.nodes if node.subtype == "spine"%}
-interface {{ node.config.PORT }}
-    no shutdown
-    mtu 9198
+interface ethernet{{ node.config.PORT }}
     description {{ node.config.DESCRIPTION }}
-    lag 255
+    no shutdown
+    channel-group {{ node.config.LAG_NUMBER }} mode active
+    no switchport
+    mtu 9216
+    speed 10000
+    flowcontrol receive off
 
 {%- endfor %}
 {#- end leaf-bmc-to-spine #}
+

@@ -2,7 +2,6 @@
 {%- for node in cabling.nodes if node.slot == "bmc" %}
 interface ethernet{{ node.config.PORT }}
     no shutdown
-    no shutdown
     switchport access vlan 4
     mtu 9216
     description {{ node.config.DESCRIPTION }}
