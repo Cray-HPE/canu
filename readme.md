@@ -46,6 +46,7 @@ If you have the system's SHCD, there are even more commands that can be run
 **[Generate Network Config](#generate-network-config)**<br>
 **[Validate Switch Config](#validate-switch-config)**<br>
 **[Validate Network Config](#validate-network-config)**<br>
+**[Cache](#cache)**<br>
 **[Uninstallation](#uninstallation)**<br>
 **[Road Map](#road-map)**<br>
 **[Testing](#testing)**<br>
@@ -722,6 +723,14 @@ Errors
 #### File Output and JSON
 
 To output the results of the config validation command to a file, append the `--out FILENAME` flag. To get the results as JSON, use the `--json` flag.
+
+### Cache
+
+There are several commands to help with the canu cache:
+
+- `canu cache location` will tell you the folder where your cache is located
+- `canu cache print` will print a colored version of your cache to the screen
+- `canu cache delete` will delete your cache file, the file will be created again on the next canu command
 
 ## Uninstallation
 

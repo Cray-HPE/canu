@@ -57,14 +57,15 @@ def cache_directory():
     return cachedir
 
 
-# To get the canu_cache.yaml file
+# Get project root directory
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
-    parent_directory = sys._MEIPASS
+    project_root = sys._MEIPASS
 else:
-    parent_directory = path.abspath(path.dirname(path.dirname(__file__)))
+    prog = __file__
+    project_root = Path(__file__).resolve().parent.parent.parent
 
 canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
-canu_version_file = path.join(parent_directory, "canu", ".version")
+canu_version_file = path.join(project_root, "canu", ".version")
 
 file_exists = path.isfile(canu_cache_file)
 
