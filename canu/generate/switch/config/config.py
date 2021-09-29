@@ -38,7 +38,7 @@ import requests
 from ruamel.yaml import YAML
 import urllib3
 
-from canu.cache import cache_directory
+from canu.utils.cache import cache_directory
 from canu.validate.shcd.shcd import node_model_from_shcd
 
 yaml = YAML()

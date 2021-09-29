@@ -27,7 +27,7 @@ import click
 from netmiko import ssh_exception, SSHDetect
 import requests
 
-from canu.cache import (
+from canu.utils.cache import (
     cache_switch,
     get_switch_from_cache,
 )
@@ -103,9 +103,9 @@ def switch_vendor(
                 "autodetect",
             )
 
-            aruba_match = re.search(r"ArubaOS", remote_version)
-            dell_match = re.search(r"Dell EMC Networking", remote_version)
-            mellanox_match = re.search(r"Mellanox", remote_version)
+            aruba_match = re.search("ArubaOS", remote_version)
+            dell_match = re.search("Dell EMC Networking", remote_version)
+            mellanox_match = re.search("Mellanox", remote_version)
 
             if aruba_match:
                 vendor = "aruba"
@@ -176,14 +176,6 @@ def check_aruba(ip, credentials):
         # Logout
         session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
 
-        # Put vendor in cache
-        switch_cache = {
-            "ip_address": str(ip),
-            "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "vendor": "aruba",
-        }
-
-        cache_switch(switch_cache)
     except (
         requests.exceptions.HTTPError,
         requests.exceptions.ConnectionError,
@@ -191,8 +183,16 @@ def check_aruba(ip, credentials):
     ):
         return False
 
-    else:
-        return True
+    # Put vendor in cache
+    switch_cache = {
+        "ip_address": str(ip),
+        "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "vendor": "aruba",
+    }
+
+    cache_switch(switch_cache)
+
+    return True
 
 
 def check_dell(ip, credentials):
@@ -212,14 +212,6 @@ def check_dell(ip, credentials):
         response = session.get(url, auth=auth, verify=False)
         response.raise_for_status()
 
-        # Put vendor in cache
-        switch_cache = {
-            "ip_address": str(ip),
-            "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "vendor": "dell",
-        }
-
-        cache_switch(switch_cache)
     except (
         requests.exceptions.HTTPError,
         requests.exceptions.ConnectionError,
@@ -227,8 +219,16 @@ def check_dell(ip, credentials):
     ):
         return False
 
-    else:
-        return True
+    # Put vendor in cache
+    switch_cache = {
+        "ip_address": str(ip),
+        "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "vendor": "dell",
+    }
+
+    cache_switch(switch_cache)
+
+    return True
 
 
 def check_mellanox(ip, credentials):
@@ -247,14 +247,6 @@ def check_mellanox(ip, credentials):
         response = session.get(url, json=credentials, verify=False)
         response.raise_for_status()
 
-        # Put vendor in cache
-        switch_cache = {
-            "ip_address": str(ip),
-            "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "vendor": "mellanox",
-        }
-
-        cache_switch(switch_cache)
     except (
         requests.exceptions.HTTPError,
         requests.exceptions.ConnectionError,
@@ -262,5 +254,13 @@ def check_mellanox(ip, credentials):
     ):
         return False
 
-    else:
-        return True
+    # Put vendor in cache
+    switch_cache = {
+        "ip_address": str(ip),
+        "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "vendor": "mellanox",
+    }
+
+    cache_switch(switch_cache)
+
+    return True

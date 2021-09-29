@@ -31,10 +31,10 @@ import requests
 from ruamel.yaml import YAML
 import urllib3
 
-from canu.cache import cache_switch
 from canu.config import config
 from canu.generate import generate
 from canu.report import report
+from canu.utils.cache import cache_switch
 from canu.validate import validate
 
 yaml = YAML()
@@ -54,8 +54,8 @@ canu_version_file = path.join(parent_directory, "canu", ".version")
 with open(canu_version_file, "r") as version_file:
     version = version_file.read().replace("\n", "")
 
-with open(canu_config_file, "r") as file:
-    canu_config = yaml.load(file)
+with open(canu_config_file, "r") as canu_f:
+    canu_config = yaml.load(canu_f)
 
 CONTEXT_SETTING = {
     "obj": {
@@ -178,8 +178,8 @@ def init(ctx, csi_folder, auth_token, sls_address, network, out):
         # Token file takes precedence over the environmental variable
         if auth_token != token:
             try:
-                with open(auth_token) as f:
-                    data = json.load(f)
+                with open(auth_token) as auth_f:
+                    data = json.load(auth_f)
                     token = data["access_token"]
 
             except Exception:
@@ -305,8 +305,6 @@ def parse_sls_json_for_vendor(shasta, switch_dict):
                     "vendor": vendor,
                 }
                 cache_switch(switch_json)
-
-    return
 
 
 if __name__ == "__main__":  # pragma: no cover

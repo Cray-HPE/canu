@@ -146,8 +146,8 @@ def bgp(
     # Parse sls_input_file.json file from CSI
     if csi_folder:
         try:
-            with open(path.join(csi_folder, "sls_input_file.json"), "r") as f:
-                input_json = json.load(f)
+            with open(path.join(csi_folder, "sls_input_file.json"), "r") as csi_f:
+                input_json = json.load(csi_f)
 
                 # Format the input to be like the SLS JSON
                 sls_json = [
@@ -169,9 +169,9 @@ def bgp(
         # Token file takes precedence over the environmental variable
         if auth_token != token:
             try:
-                with open(auth_token) as f:
-                    data = json.load(f)
-                    token = data["access_token"]
+                with open(auth_token) as auth_f:
+                    auth_data = json.load(auth_f)
+                    token = auth_data["access_token"]
 
             except Exception:
                 click.secho(
@@ -289,15 +289,13 @@ def bgp(
 
     dash = "-" * 50
 
-    click.echo("\n")
-    click.secho("BGP Updated", fg="bright_white")
+    click.secho("\nBGP Updated", fg="bright_white")
     click.echo(dash)
-    for ip in ips:
-        click.echo(ip)
+    for bgp_ip in ips:
+        click.echo(bgp_ip)
 
     if verbose:
-        click.echo("\n")
-        click.secho("Details", fg="bright_white")
+        click.secho("\nDetails", fg="bright_white")
         click.echo(dash)
         click.echo(f"CAN Prefix: {prefix['can']}")
         click.echo(f"HMN Prefix: {prefix['hmn']}")
@@ -309,8 +307,7 @@ def bgp(
         click.echo(f"NCN HMN IPs: {ncn['hmn']}")
 
     if len(errors) > 0:
-        click.echo("\n")
-        click.secho("Errors", fg="red")
+        click.secho("\nErrors", fg="red")
         click.echo(dash)
         for error in errors:
             click.echo("{:<15s} - {}".format(error[0], error[1]))
@@ -363,24 +360,24 @@ def parse_sls(sls_json):
             # NCN Names
             if "NMN Bootstrap DHCP Subnet" in full_name:
                 ncn_names = [
-                    ip.get("Name", None)
-                    for ip in subnets.get("IPReservations", {})
-                    if "ncn-w" in ip.get("Name", "")
+                    ncn_name_ip.get("Name", None)
+                    for ncn_name_ip in subnets.get("IPReservations", {})
+                    if "ncn-w" in ncn_name_ip.get("Name", "")
                 ]
 
                 # NCN NMN IPs
                 ncn_nmn_ips = [
-                    ip.get("IPAddress", None)
-                    for ip in subnets.get("IPReservations", {})
-                    if "ncn-w" in ip.get("Name", "")
+                    nmn_ip.get("IPAddress", None)
+                    for nmn_ip in subnets.get("IPReservations", {})
+                    if "ncn-w" in nmn_ip.get("Name", "")
                 ]
 
             # NMN NCN IPs
             if "HMN Bootstrap DHCP Subnet" in full_name:
                 ncn_hmn_ips = [
-                    ip.get("IPAddress", None)
-                    for ip in subnets.get("IPReservations", {})
-                    if "ncn-w" in ip.get("Name", "")
+                    hmn_ip.get("IPAddress", None)
+                    for hmn_ip in subnets.get("IPReservations", {})
+                    if "ncn-w" in hmn_ip.get("Name", "")
                 ]
 
     prefix = {
@@ -570,8 +567,6 @@ def create_route_maps(ip, session, ncn):
         "set": {"ipv4_next_hop_address": ""},
     }
     add_route_entry(ip, session, ncn_nmn_ips, ncn_names, route_map_entry_nmn)
-
-    return
 
 
 def add_route_entry(ip, session, ips, ncn_names, route_map_entry):

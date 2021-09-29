@@ -37,7 +37,7 @@ from hier_config import HConfig, Host
 from netmiko import ssh_exception
 from ruamel.yaml import YAML
 
-from canu.cache import cache_directory
+from canu.utils.cache import cache_directory
 from canu.validate.switch.config.config import (
     compare_config,
     get_switch_config,

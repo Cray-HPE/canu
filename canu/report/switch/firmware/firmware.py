@@ -34,7 +34,11 @@ import requests
 from ruamel.yaml import YAML
 import urllib3
 
-from canu.cache import cache_switch, firmware_cached_recently, get_switch_from_cache
+from canu.utils.cache import (
+    cache_switch,
+    firmware_cached_recently,
+    get_switch_from_cache,
+)
 from canu.utils.ssh import netmiko_commands
 from canu.utils.vendor import switch_vendor
 

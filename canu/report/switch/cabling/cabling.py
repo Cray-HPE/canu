@@ -32,7 +32,7 @@ from netmiko import ssh_exception
 import requests
 import urllib3
 
-from canu.cache import cache_switch
+from canu.utils.cache import cache_switch
 from canu.utils.ssh import netmiko_commands
 from canu.utils.vendor import switch_vendor
 

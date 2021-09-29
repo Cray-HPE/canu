@@ -38,8 +38,8 @@ from network_modeling.NetworkPort import NetworkPort
 import requests
 from ruamel.yaml import YAML
 
-from canu.cache import cache_directory
 from canu.report.switch.cabling.cabling import get_lldp
+from canu.utils.cache import cache_directory
 from canu.validate.shcd.shcd import node_list_warnings, print_node_list
 
 yaml = YAML()
@@ -416,7 +416,6 @@ def node_model_from_canu(factory, canu_cache, ips):
                 # Cable destination
                 dst_lldp = switch["cabling"][port][0]
 
-                # If starts with 'sw-' then add an extra '-' before the number, and convert to 3 digit
                 dst_name = dst_lldp["neighbor"]
                 dst_slot = validate_cabling_slot_data(
                     dst_lldp,
@@ -425,6 +424,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                 )
                 dst_port = validate_cabling_port_data(dst_lldp, warnings)
 
+                # If starts with 'sw-' then add an extra '-' before the number, and convert to 3 digit
                 if dst_name.startswith("sw-"):
                     dst_start = "sw-"
                     dst_middle = re.findall(r"(?:sw-)([a-z-]+)", dst_name)[0]

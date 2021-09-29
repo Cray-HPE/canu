@@ -34,13 +34,13 @@ import requests
 from ruamel.yaml import YAML
 import urllib3
 
-from canu.cache import cache_directory
 from canu.generate.switch.config.config import (
     generate_switch_config,
     get_shasta_name,
     parse_sls_for_config,
     rename_sls_hostnames,
 )
+from canu.utils.cache import cache_directory
 from canu.validate.shcd.shcd import node_model_from_shcd
 
 yaml = YAML()

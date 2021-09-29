@@ -34,7 +34,6 @@ from canu.generate.switch.config import config
 @click.pass_context
 def switch(ctx):
     """Canu generate switch commands."""
-    pass
 
 
 switch.add_command(config.config)

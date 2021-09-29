@@ -37,8 +37,8 @@ from openpyxl import load_workbook
 import requests
 from ruamel.yaml import YAML
 
-from canu.cache import cache_directory
 from canu.report.switch.cabling.cabling import get_lldp
+from canu.utils.cache import cache_directory
 from canu.validate.network.cabling.cabling import node_model_from_canu
 from canu.validate.shcd.shcd import (
     node_list_warnings,

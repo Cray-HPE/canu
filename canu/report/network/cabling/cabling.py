@@ -187,8 +187,7 @@ def cabling(ctx, ips, ips_file, username, password, out, view):
 
         dash = "-" * 100
         if len(errors) > 0:
-            click.echo("\n", file=out)
-            click.secho("Errors", fg="red", file=out)
+            click.secho("\nErrors", fg="red", file=out)
             click.echo(dash, file=out)
             for error in errors:
                 click.echo("{:<15s} - {}".format(error[0], error[1]), file=out)

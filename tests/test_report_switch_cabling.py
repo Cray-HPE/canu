@@ -28,9 +28,9 @@ import pytest
 import requests
 import responses
 
-from canu.cache import remove_switch_from_cache
 from canu.cli import cli
 from canu.report.switch.cabling.cabling import get_lldp
+from canu.utils.cache import remove_switch_from_cache
 
 
 username = "admin"

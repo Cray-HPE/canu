@@ -39,12 +39,12 @@ import requests
 from ruamel.yaml import YAML
 
 
-from canu.cache import cache_switch
 from canu.report.switch.firmware.firmware import (
     get_firmware_aruba,
     get_firmware_dell,
     get_firmware_mellanox,
 )
+from canu.utils.cache import cache_switch
 from canu.utils.vendor import switch_vendor
 
 
