@@ -38,7 +38,6 @@ from openpyxl import load_workbook
 import requests
 import ruamel.yaml
 import urllib3
-import yaml
 
 from canu.cache import cache_directory
 from canu.validate.shcd.shcd import node_model_from_shcd
@@ -203,7 +202,7 @@ def config(
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         out: Name of the output file
-        override: Input file to ignore switch configuration
+        override: Input file that defines what config should be ignored
     """
     if architecture.lower() == "full":
         architecture = "network_v2"
@@ -386,12 +385,14 @@ def config(
     click.echo(switch_config, file=out)
     return
 
+
 def get_shasta_name(name, mapper):
     """Parse mapper to get Shasta name."""
     for node in mapper:
         shasta_name = node[1]
         if shasta_name in name:
             return shasta_name
+
 
 def generate_switch_config(
     shcd_node_list,
@@ -409,6 +410,7 @@ def generate_switch_config(
         switch_name: Switch hostname
         sls_variables: Dictionary containing SLS variables
         template_folder: Architecture folder contaning the switch templates
+        override: Input file that defines what config should be ignored
 
     Returns:
         switch_config: The generated switch configuration
@@ -574,7 +576,7 @@ def generate_switch_config(
     devices = set()
     for node in cabling["nodes"]:
         devices.add(node["subtype"])
-    
+
     if override:
         try:
             with open(os.path.join(override), "r") as f:
@@ -592,13 +594,31 @@ def generate_switch_config(
                     host = Host(switch_name, "aoscx", options)
                     override_config = "!OVERRIDE CONFIG" + "\n"
                     override_config_hier = HConfig(host=host)
-                    override_config_hier.load_from_string(switch_config).add_tags(override_tags[switch_name])
-                    for line in override_config_hier.all_children_sorted_by_tags("override", None):
-                        override_config = override_config + "\n" + "!" + line.cisco_style_text()
+                    override_config_hier.load_from_string(switch_config).add_tags(
+                        override_tags[switch_name]
+                    )
+                    for line in override_config_hier.all_children_sorted_by_tags(
+                        "override", None
+                    ):
+                        override_config = (
+                            override_config + "\n" + "!" + line.cisco_style_text()
+                        )
                     dash = "!" * 60
-                    override_config = override_config + "\n" + dash + "\n" + "!GENERATED CONFIG" +"\n" + dash
-                    for line in override_config_hier.all_children_sorted_by_tags(None, "override"):
-                        override_config = override_config + "\n" + line.cisco_style_text()
+                    override_config = (
+                        override_config
+                        + "\n"
+                        + dash
+                        + "\n"
+                        + "!GENERATED CONFIG"
+                        + "\n"
+                        + dash
+                    )
+                    for line in override_config_hier.all_children_sorted_by_tags(
+                        None, "override"
+                    ):
+                        override_config = (
+                            override_config + "\n" + line.cisco_style_text()
+                        )
 
                     return override_config, devices
         except FileNotFoundError:

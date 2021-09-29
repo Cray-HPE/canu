@@ -192,7 +192,7 @@ def config(
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         folder: Folder to store config files
-        override: Input file to ignore switch configuration
+        override: Input file that defines what config should be ignored
     """
     if architecture.lower() == "full":
         architecture = "network_v2"
