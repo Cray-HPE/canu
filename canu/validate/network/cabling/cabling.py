@@ -23,7 +23,7 @@
 from collections import defaultdict
 import ipaddress
 import logging
-import os
+from os import path
 from pathlib import Path
 import re
 import sys
@@ -36,13 +36,13 @@ import click_spinner
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from network_modeling.NetworkPort import NetworkPort
 import requests
-import ruamel.yaml
+from ruamel.yaml import YAML
 
-from canu.cache import cache_directory
 from canu.report.switch.cabling.cabling import get_lldp
+from canu.utils.cache import cache_directory
 from canu.validate.shcd.shcd import node_list_warnings, print_node_list
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 
 # Get project root directory
@@ -53,32 +53,32 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
 # Schema and Data files
-hardware_schema_file = os.path.join(
+hardware_schema_file = path.join(
     project_root,
     "network_modeling",
     "schema",
     "cray-network-hardware-schema.yaml",
 )
-hardware_spec_file = os.path.join(
+hardware_spec_file = path.join(
     project_root,
     "network_modeling",
     "models",
     "cray-network-hardware.yaml",
 )
-architecture_schema_file = os.path.join(
+architecture_schema_file = path.join(
     project_root,
     "network_modeling",
     "schema",
     "cray-network-architecture-schema.yaml",
 )
-architecture_spec_file = os.path.join(
+architecture_spec_file = path.join(
     project_root,
     "network_modeling",
     "models",
     "cray-network-architecture.yaml",
 )
 
-canu_cache_file = os.path.join(cache_directory(), "canu_cache.yaml")
+canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 
 log = logging.getLogger("validate_shcd")
 
@@ -416,7 +416,6 @@ def node_model_from_canu(factory, canu_cache, ips):
                 # Cable destination
                 dst_lldp = switch["cabling"][port][0]
 
-                # If starts with 'sw-' then add an extra '-' before the number, and convert to 3 digit
                 dst_name = dst_lldp["neighbor"]
                 dst_slot = validate_cabling_slot_data(
                     dst_lldp,
@@ -425,6 +424,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                 )
                 dst_port = validate_cabling_port_data(dst_lldp, warnings)
 
+                # If starts with 'sw-' then add an extra '-' before the number, and convert to 3 digit
                 if dst_name.startswith("sw-"):
                     dst_start = "sw-"
                     dst_middle = re.findall(r"(?:sw-)([a-z-]+)", dst_name)[0]

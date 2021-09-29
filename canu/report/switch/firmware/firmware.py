@@ -22,7 +22,7 @@
 """CANU commands that report the firmware of an individual switch."""
 import datetime
 import json
-import os.path
+from os import path
 from pathlib import Path
 import sys
 
@@ -31,28 +31,32 @@ from click_help_colors import HelpColorsCommand
 import emoji
 from netmiko import ssh_exception
 import requests
-import ruamel.yaml
+from ruamel.yaml import YAML
 import urllib3
 
-from canu.cache import cache_switch, firmware_cached_recently, get_switch_from_cache
+from canu.utils.cache import (
+    cache_switch,
+    firmware_cached_recently,
+    get_switch_from_cache,
+)
 from canu.utils.ssh import netmiko_commands
 from canu.utils.vendor import switch_vendor
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 
 # Get project root directory
-if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # noqa
     project_root = sys._MEIPASS
 else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
-canu_config_file = os.path.join(project_root, "canu", "canu.yaml")
+canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
 # Get Shasta versions from canu.yaml
-with open(canu_config_file, "r") as file:
-    canu_config = yaml.load(file)
+with open(canu_config_file, "r") as config_file:
+    canu_config = yaml.load(config_file)
 
 shasta_options = canu_config["shasta_versions"]
 
@@ -126,22 +130,22 @@ def firmware(ctx, shasta, ip, username, password, json_, verbose, out):
         switch_firmware, switch_info = get_firmware_aruba(
             ip,
             credentials,
-            False,
-            cache_minutes,
+            return_error=False,
+            cache_minutes=cache_minutes,
         )
     elif vendor == "dell":
         switch_firmware, switch_info = get_firmware_dell(
             ip,
             credentials,
-            False,
-            cache_minutes,
+            return_error=False,
+            cache_minutes=cache_minutes,
         )
     elif vendor == "mellanox":
         switch_firmware, switch_info = get_firmware_mellanox(
             ip,
             credentials,
-            False,
-            cache_minutes,
+            return_error=False,
+            cache_minutes=cache_minutes,
         )
 
     if switch_firmware is None:
@@ -174,18 +178,18 @@ def firmware(ctx, shasta, ip, username, password, json_, verbose, out):
             )
             click.echo(json_formatted, file=out)
             return json_formatted
-        else:
-            json_formatted = json.dumps(
-                {
-                    "ip_address": ip,
-                    "status": firmware_match,
-                    "firmware": switch_firmware["current_version"],
-                    "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                },
-                indent=2,
-            )
-            click.echo(json_formatted, file=out)
-            return switch_firmware["current_version"]
+
+        json_formatted = json.dumps(
+            {
+                "ip_address": ip,
+                "status": firmware_match,
+                "firmware": switch_firmware["current_version"],
+                "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            },
+            indent=2,
+        )
+        click.echo(json_formatted, file=out)
+        return switch_firmware["current_version"]
 
     if verbose:
         if firmware_match == "Pass":
@@ -237,9 +241,6 @@ def get_firmware_aruba(ip, credentials, return_error=False, cache_minutes=10):
         Dictionary with a switches firmware and dictionary with platform_name and hostname
 
     Raises:
-        http_error: IP not Aruba switch, or credentials bad.
-        connection_error: Bad ip address.
-        request_exception: Error
         error: Error
     """
     if firmware_cached_recently(ip, cache_minutes):
@@ -263,36 +264,30 @@ def get_firmware_aruba(ip, credentials, return_error=False, cache_minutes=10):
             )
             login.raise_for_status()
 
-        except requests.exceptions.HTTPError as http_error:
+        except (
+            requests.exceptions.HTTPError,
+            requests.exceptions.ConnectionError,
+            requests.exceptions.RequestException,
+        ) as err:
             if return_error:
-                raise http_error
-            else:
-                click.secho(
-                    f"Error connecting to switch {ip}, check that this IP is an Aruba switch, or check the username or password",
-                    fg="white",
-                    bg="red",
+                raise err
+            exception_type = type(err).__name__
+
+            if exception_type == "HTTPError":
+                error_message = (
+                    f"Error connecting to switch {ip}, check the username or password"
                 )
-                return None, None
-        except requests.exceptions.ConnectionError as connection_error:
-            if return_error:
-                raise connection_error
-            else:
-                click.secho(
-                    f"Error connecting to switch {ip}, check the IP address and try again",
-                    fg="white",
-                    bg="red",
-                )
-                return None, None
-        except requests.exceptions.RequestException as request_exception:  # pragma: no cover
-            if return_error:
-                raise request_exception
-            else:
-                click.secho(
-                    f"Error connecting to switch  {ip}.",
-                    fg="white",
-                    bg="red",
-                )
-                return None, None
+            elif exception_type == "ConnectionError":
+                error_message = f"Error connecting to switch {ip}, check the IP address and try again"
+            else:  # pragma: no cover
+                error_message = f"Error connecting to switch {ip}."
+
+            click.secho(
+                error_message,
+                fg="white",
+                bg="red",
+            )
+            return None, None
 
         try:
             # GET firmware version
@@ -329,13 +324,13 @@ def get_firmware_aruba(ip, credentials, return_error=False, cache_minutes=10):
         except requests.exceptions.RequestException as error:  # pragma: no cover
             if return_error:
                 raise error
-            else:
-                click.secho(
-                    f"Error getting firmware version from switch {ip}",
-                    fg="white",
-                    bg="red",
-                )
-                return None, None
+
+            click.secho(
+                f"Error getting firmware version from switch {ip}",
+                fg="white",
+                bg="red",
+            )
+            return None, None
 
 
 def get_firmware_dell(ip, credentials, return_error=False, cache_minutes=10):
@@ -412,13 +407,13 @@ def get_firmware_dell(ip, credentials, return_error=False, cache_minutes=10):
         ) as error:
             if return_error:
                 raise error
-            else:
-                click.secho(
-                    f"Error getting firmware version from Dell switch {ip}",
-                    fg="white",
-                    bg="red",
-                )
-                return None, None
+
+            click.secho(
+                f"Error getting firmware version from Dell switch {ip}",
+                fg="white",
+                bg="red",
+            )
+            return None, None
 
 
 def get_firmware_mellanox(ip, credentials, return_error=False, cache_minutes=10):
@@ -434,8 +429,6 @@ def get_firmware_mellanox(ip, credentials, return_error=False, cache_minutes=10)
         Dictionary with a switches firmware and dictionary with platform_name and hostname
 
     Raises:
-        timeout: Switch timeout.
-        auth_err: Auth error
         Exception: Error
     """
     if firmware_cached_recently(ip, cache_minutes):
@@ -493,31 +486,25 @@ def get_firmware_mellanox(ip, credentials, return_error=False, cache_minutes=10)
         }
         cache_switch(switch_json)
 
-    except ssh_exception.NetmikoTimeoutException as timeout:
+    except (
+        ssh_exception.NetmikoTimeoutException,
+        ssh_exception.NetmikoAuthenticationException,
+        Exception,
+    ) as err:
         if return_error:
-            raise timeout
+            raise err
+
+        exception_type = type(err).__name__
+
+        if exception_type == "NetmikoTimeoutException":
+            error_message = f"Timeout error connecting to switch {ip}, check the IP address and try again."
+        elif exception_type == "NetmikoAuthenticationException":
+            error_message = f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again."
         else:
-            click.secho(
-                f"Timeout error connecting to switch {ip}, check the IP address and try again.",
-                fg="white",
-                bg="red",
-            )
-            return None, None
-    except ssh_exception.NetmikoAuthenticationException as auth_err:
-        if return_error:
-            raise auth_err
+            error_message = f"{exception_type} {err}"
+
         click.secho(
-            f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again.",
-            fg="white",
-            bg="red",
-        )
-        return None, None
-    except Exception as error:  # pragma: no cover
-        if return_error:
-            raise error
-        exception_type = type(error).__name__
-        click.secho(
-            f"{exception_type} {error}",
+            error_message,
             fg="white",
             bg="red",
         )

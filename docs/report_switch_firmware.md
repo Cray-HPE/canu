@@ -21,6 +21,8 @@ $ canu report switch firmware --shasta 1.4 --ip 192.168.1.1 --username USERNAME 
 🛶 - Pass - IP: 192.168.1.1 Hostname: test-switch-spine01 Firmware: GL.10.06.0001
 ```
 
+![](images/canu_report_switch_firmware.png)
+
 ### 2. Firmware Verbose
 
 To get verbose firmware details of a single switch: `canu report switch firmware --shasta 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD --verbose`
@@ -36,6 +38,8 @@ Default Image: primary
 Booted Image: primary
 ```
 
+![](images/canu_report_switch_firmware_verbose.png)
+
 ### 3. Firmware JSON
 
 To get firmware details of a single switch with JSON output: `canu report switch firmware -s 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD --json`
@@ -49,6 +53,8 @@ $ canu report switch firmware - 1.4 --ip 192.168.1.1 --username USERNAME --passw
   "updated_at": "2021-01-01 08:00:00"
 }
 ```
+
+![](images/canu_report_switch_firmware_json.png)
 
 ### 4. Firmware JSON Verbose
 
@@ -71,6 +77,8 @@ $ canu report switch firmware -s 1.4 --ip 192.168.1.1 --username USERNAME --pass
   "updated_at": "2021-01-01 08:00:00"
 }
 ```
+
+![](images/canu_report_switch_firmware_json_verbose.png)
 
 ### File Out
 

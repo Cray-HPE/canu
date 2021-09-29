@@ -21,7 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that generate the config of the entire Shasta network."""
 import json
-import os
+from os import environ, makedirs, path
 from pathlib import Path
 import sys
 
@@ -31,19 +31,19 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from openpyxl import load_workbook
 import requests
-import ruamel.yaml
+from ruamel.yaml import YAML
 import urllib3
 
-from canu.cache import cache_directory
 from canu.generate.switch.config.config import (
     generate_switch_config,
     get_shasta_name,
     parse_sls_for_config,
     rename_sls_hostnames,
 )
+from canu.utils.cache import cache_directory
 from canu.validate.shcd.shcd import node_model_from_shcd
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 # To disable warnings about unsecured HTTPS requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -57,36 +57,36 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
 # Schema and Data files
-hardware_schema_file = os.path.join(
+hardware_schema_file = path.join(
     project_root,
     "network_modeling",
     "schema",
     "cray-network-hardware-schema.yaml",
 )
-hardware_spec_file = os.path.join(
+hardware_spec_file = path.join(
     project_root,
     "network_modeling",
     "models",
     "cray-network-hardware.yaml",
 )
-architecture_schema_file = os.path.join(
+architecture_schema_file = path.join(
     project_root,
     "network_modeling",
     "schema",
     "cray-network-architecture-schema.yaml",
 )
-architecture_spec_file = os.path.join(
+architecture_spec_file = path.join(
     project_root,
     "network_modeling",
     "models",
     "cray-network-architecture.yaml",
 )
 
-canu_cache_file = os.path.join(cache_directory(), "canu_cache.yaml")
-canu_config_file = os.path.join(project_root, "canu", "canu.yaml")
+canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
+canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
 # Import templates
-network_templates_folder = os.path.join(
+network_templates_folder = path.join(
     project_root,
     "network_modeling",
     "configs",
@@ -293,7 +293,7 @@ def config(
 
     else:
         # Get SLS config
-        token = os.environ.get("SLS_TOKEN")
+        token = environ.get("SLS_TOKEN")
 
         # Token file takes precedence over the environmental variable
         if auth_token != token:
@@ -350,8 +350,8 @@ def config(
             sls_variables = rename_sls_hostnames(sls_variables)
 
     # make folder
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    if not path.exists(folder):
+        makedirs(folder)
     all_devices = {
         "cdu",
         "cec",

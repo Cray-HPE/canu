@@ -152,39 +152,30 @@ def cabling(ctx, ips, ips_file, username, password, out, view):
                             arp,
                         ],
                     )
-                except requests.exceptions.HTTPError:
+                except (
+                    requests.exceptions.HTTPError,
+                    requests.exceptions.ConnectionError,
+                    requests.exceptions.RequestException,
+                    ssh_exception.NetmikoTimeoutException,
+                    ssh_exception.NetmikoAuthenticationException,
+                ) as err:
+                    exception_type = type(err).__name__
+
+                    if exception_type == "HTTPError":
+                        error_message = f"Error connecting to switch {ip}, check the IP address and try again."
+                    if exception_type == "ConnectionError":
+                        error_message = f"Error connecting to switch {ip}, check the IP address and try again."
+                    if exception_type == "RequestException":
+                        error_message = f"Error connecting to switch {ip}."
+                    if exception_type == "NetmikoTimeoutException":
+                        error_message = f"Timeout error connecting to switch {ip}, check the IP address and try again."
+                    if exception_type == "NetmikoAuthenticationException":
+                        error_message = f"Auth error connecting to switch {ip}, check the credentials or IP address and try again."
+
                     errors.append(
                         [
                             str(ip),
-                            f"Error connecting to switch {ip}, check the IP address and try again.",
-                        ],
-                    )
-                except requests.exceptions.ConnectionError:
-                    errors.append(
-                        [
-                            str(ip),
-                            f"Error connecting to switch {ip}, check the IP address and try again.",
-                        ],
-                    )
-                except requests.exceptions.RequestException:  # pragma: no cover
-                    errors.append(
-                        [
-                            str(ip),
-                            f"Error connecting to switch {ip}.",
-                        ],
-                    )
-                except ssh_exception.NetmikoTimeoutException:
-                    errors.append(
-                        [
-                            str(ip),
-                            f"Timeout error connecting to switch {ip}, check the IP address and try again.",
-                        ],
-                    )
-                except ssh_exception.NetmikoAuthenticationException:
-                    errors.append(
-                        [
-                            str(ip),
-                            f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again.",
+                            error_message,
                         ],
                     )
 
@@ -196,8 +187,7 @@ def cabling(ctx, ips, ips_file, username, password, out, view):
 
         dash = "-" * 100
         if len(errors) > 0:
-            click.echo("\n", file=out)
-            click.secho("Errors", fg="red", file=out)
+            click.secho("\nErrors", fg="red", file=out)
             click.echo(dash, file=out)
             for error in errors:
                 click.echo("{:<15s} - {}".format(error[0], error[1]), file=out)

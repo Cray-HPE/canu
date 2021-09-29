@@ -26,8 +26,10 @@ import pprint
 import sys
 
 from jinja2 import Environment, FileSystemLoader
+from ruamel.yaml import YAML
 import yamale
-import yaml
+
+yaml = YAML()
 
 
 cabling_file = "../cabling/standards/cabling.yaml"

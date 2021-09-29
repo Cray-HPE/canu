@@ -26,8 +26,8 @@ from click import testing
 import requests
 import responses
 
-from canu.cache import remove_switch_from_cache
 from canu.cli import cli
+from canu.utils.cache import remove_switch_from_cache
 
 
 fileout = "fileout.txt"
@@ -176,7 +176,6 @@ def test_cli_init_sls_good():
                 fileout,
             ],
         )
-        print(result.output)
         assert result.exit_code == 0
         assert "2 IP addresses saved to fileout.txt" in str(result.output)
         remove_switch_from_cache("192.168.1.2")

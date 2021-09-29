@@ -28,9 +28,9 @@ import pytest
 import requests
 import responses
 
-from canu.cache import remove_switch_from_cache
 from canu.cli import cli
 from canu.report.switch.cabling.cabling import get_lldp
+from canu.utils.cache import remove_switch_from_cache
 
 
 username = "admin"
@@ -122,7 +122,7 @@ def test_get_lldp_function_bad_ip(switch_vendor):
         )
 
         with pytest.raises(requests.exceptions.ConnectionError) as connection_error:
-            get_lldp(bad_ip, credentials, True)
+            get_lldp(bad_ip, credentials, return_error=True)
 
         assert "Failed to establish a new connection" in str(connection_error.value)
 
@@ -142,7 +142,7 @@ def test_get_lldp_function_bad_credentials(switch_vendor):
         bad_credentials = {"username": "foo", "password": "foo"}
 
         with pytest.raises(requests.exceptions.HTTPError) as http_error:
-            get_lldp(ip, bad_credentials, True)
+            get_lldp(ip, bad_credentials, return_error=True)
         assert "Unauthorized for url" in str(http_error.value)
     remove_switch_from_cache(ip)
 

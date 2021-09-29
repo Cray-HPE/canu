@@ -22,7 +22,7 @@
 """CANU commands that configure BGP."""
 import ipaddress
 import json
-import os
+from os import environ
 
 import click
 from click_help_colors import HelpColorsCommand
@@ -165,14 +165,14 @@ def bgp(
 
     else:
         # Get SLS config
-        token = os.environ.get("SLS_TOKEN")
+        token = environ.get("SLS_TOKEN")
 
         # Token file takes precedence over the environmental variable
         if auth_token != token:
             try:
-                with open(auth_token) as f:
-                    data = json.load(f)
-                    token = data["access_token"]
+                with open(auth_token) as auth_f:
+                    auth_data = json.load(auth_f)
+                    token = auth_data["access_token"]
 
             except Exception:
                 click.secho(
@@ -290,15 +290,13 @@ def bgp(
 
     dash = "-" * 50
 
-    click.echo("\n")
-    click.secho("BGP Updated", fg="bright_white")
+    click.secho("\nBGP Updated", fg="bright_white")
     click.echo(dash)
-    for ip in ips:
-        click.echo(ip)
+    for bgp_ip in ips:
+        click.echo(bgp_ip)
 
     if verbose:
-        click.echo("\n")
-        click.secho("Details", fg="bright_white")
+        click.secho("\nDetails", fg="bright_white")
         click.echo(dash)
         click.echo(f"CAN Prefix: {prefix['can']}")
         click.echo(f"HMN Prefix: {prefix['hmn']}")
@@ -310,8 +308,7 @@ def bgp(
         click.echo(f"NCN HMN IPs: {ncn['hmn']}")
 
     if len(errors) > 0:
-        click.echo("\n")
-        click.secho("Errors", fg="red")
+        click.secho("\nErrors", fg="red")
         click.echo(dash)
         for error in errors:
             click.echo("{:<15s} - {}".format(error[0], error[1]))
@@ -364,24 +361,24 @@ def parse_sls(sls_json):
             # NCN Names
             if "NMN Bootstrap DHCP Subnet" in full_name:
                 ncn_names = [
-                    ip.get("Name", None)
-                    for ip in subnets.get("IPReservations", {})
-                    if "ncn-w" in ip.get("Name", "")
+                    ncn_name_ip.get("Name", None)
+                    for ncn_name_ip in subnets.get("IPReservations", {})
+                    if "ncn-w" in ncn_name_ip.get("Name", "")
                 ]
 
                 # NCN NMN IPs
                 ncn_nmn_ips = [
-                    ip.get("IPAddress", None)
-                    for ip in subnets.get("IPReservations", {})
-                    if "ncn-w" in ip.get("Name", "")
+                    nmn_ip.get("IPAddress", None)
+                    for nmn_ip in subnets.get("IPReservations", {})
+                    if "ncn-w" in nmn_ip.get("Name", "")
                 ]
 
             # NMN NCN IPs
             if "HMN Bootstrap DHCP Subnet" in full_name:
                 ncn_hmn_ips = [
-                    ip.get("IPAddress", None)
-                    for ip in subnets.get("IPReservations", {})
-                    if "ncn-w" in ip.get("Name", "")
+                    hmn_ip.get("IPAddress", None)
+                    for hmn_ip in subnets.get("IPReservations", {})
+                    if "ncn-w" in hmn_ip.get("Name", "")
                 ]
 
     prefix = {
@@ -572,8 +569,6 @@ def create_route_maps(ip, session, ncn):
     }
     add_route_entry(ip, session, ncn_nmn_ips, ncn_names, route_map_entry_nmn)
 
-    return
-
 
 def add_route_entry(ip, session, ips, ncn_names, route_map_entry):
     """Add route entries to a switch.
@@ -661,8 +656,8 @@ def update_bgp_neighbors(ip, ips, session, asn, ncn):
         if x != ip:
             vsx_neighbor = dict(bgp_neighbor)
             vsx_neighbor["ip_or_ifname_or_group_name"] = x
-            del vsx_neighbor["route_maps"]
-            del vsx_neighbor["passive"]
+            vsx_neighbor.pop("route_maps")
+            vsx_neighbor.pop("passive")
             session.post(
                 f"https://{ip}/rest/v10.04/system/vrfs/default/bgp_routers/{asn}/bgp_neighbors",
                 json=vsx_neighbor,

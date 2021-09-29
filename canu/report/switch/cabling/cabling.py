@@ -32,7 +32,7 @@ from netmiko import ssh_exception
 import requests
 import urllib3
 
-from canu.cache import cache_switch
+from canu.utils.cache import cache_switch
 from canu.utils.ssh import netmiko_commands
 from canu.utils.vendor import switch_vendor
 
@@ -159,8 +159,6 @@ def get_lldp_aruba(ip, credentials, return_error=False):
         arp: ARP dictionary
 
     Raises:
-        http_error: IP not Aruba switch, or credentials bad.
-        connection_error: Bad ip address.
         error: Error
     """
     session = requests.Session()
@@ -173,35 +171,33 @@ def get_lldp_aruba(ip, credentials, return_error=False):
         )
         login.raise_for_status()
 
-    except requests.exceptions.HTTPError as http_error:
+    except (
+        requests.exceptions.HTTPError,
+        requests.exceptions.ConnectionError,
+        requests.exceptions.RequestException,
+    ) as err:
         if return_error:
-            raise http_error
+            raise err
+
+        exception_type = type(err).__name__
+
+        if exception_type == "HTTPError":
+            error_message = (
+                f"Error connecting to switch {ip}, check the username or password."
+            )
+        elif exception_type == "ConnectionError":
+            error_message = (
+                f"Error connecting to switch {ip}, check the IP address and try again."
+            )
+        else:
+            error_message = f"Error connecting to switch {ip}."
 
         click.secho(
-            f"Error connecting to switch {ip}, check that this IP is an Aruba switch, or check the username or password.",
+            str(error_message),
             fg="white",
             bg="red",
         )
-        return None, None, None
-    except requests.exceptions.ConnectionError as connection_error:
-        if return_error:
-            raise connection_error
 
-        click.secho(
-            f"Error connecting to switch {ip}, check the IP address and try again.",
-            fg="white",
-            bg="red",
-        )
-        return None, None, None
-    except requests.exceptions.RequestException as error:  # pragma: no cover
-        if return_error:
-            raise error
-
-        click.secho(
-            f"Error connecting to switch {ip}.",
-            fg="white",
-            bg="red",
-        )
         return None, None, None
 
     try:
@@ -285,8 +281,6 @@ def get_lldp_dell(ip, credentials, return_error):
         arp: ARP dictionary
 
     Raises:
-        timeout: Bad IP address.
-        auth_err: Bad credentials
         Exception: Unknown error
     """
     try:
@@ -413,34 +407,29 @@ def get_lldp_dell(ip, credentials, return_error):
 
         cache_lldp(switch_json, lldp_dict, arp)
 
-    except ssh_exception.NetmikoTimeoutException as timeout:
+    except (
+        ssh_exception.NetmikoTimeoutException,
+        ssh_exception.NetmikoAuthenticationException,
+        Exception,
+    ) as err:
         if return_error:
-            raise timeout
+            raise err
+
+        exception_type = type(err).__name__
+
+        if exception_type == "NetmikoTimeoutException":
+            error_message = f"Timeout error connecting to switch {ip}, check the IP address and try again."
+        elif exception_type == "NetmikoAuthenticationException":
+            error_message = f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again."
+        else:
+            error_message = f"{exception_type}, {err}."
 
         click.secho(
-            f"Timeout error connecting to switch {ip}, check the IP address and try again.",
+            error_message,
             fg="white",
             bg="red",
         )
-        return None, None, None
-    except ssh_exception.NetmikoAuthenticationException as auth_err:
-        if return_error:
-            raise auth_err
-        click.secho(
-            f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again.",
-            fg="white",
-            bg="red",
-        )
-        return None, None, None
-    except Exception as error:  # pragma: no cover
-        if return_error:
-            raise error
-        exception_type = type(error).__name__
-        click.secho(
-            f"{exception_type} {error}",
-            fg="white",
-            bg="red",
-        )
+
         return None, None, None
 
     return switch_json, lldp_dict, arp
@@ -745,7 +734,7 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
             if len(arp_list) > 0 and neighbor_description == "":
                 neighbor_description = "No LLDP data, check ARP vlan info."
             duplicate = False
-            if port:
+            if len(lldp_dict[port_number]) > 1:
                 duplicate = True
 
             table.append(

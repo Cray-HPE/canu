@@ -27,8 +27,8 @@ from netmiko import ssh_exception
 import requests
 import responses
 
-from canu.cache import remove_switch_from_cache
 from canu.cli import cli
+from canu.utils.cache import remove_switch_from_cache
 from .test_report_switch_cabling import (
     arp_neighbors_mellanox,
     lldp_json_mellanox,
@@ -689,7 +689,7 @@ def test_network_cabling_dell_auth(netmiko_commands, switch_vendor):
         )
         assert result.exit_code == 0
         assert (
-            "Authentication error connecting to switch 192.168.1.2, check the credentials or IP address and try again."
+            "Auth error connecting to switch 192.168.1.2, check the credentials or IP address and try again."
             in str(result.output)
         )
 

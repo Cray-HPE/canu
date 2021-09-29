@@ -297,28 +297,30 @@ def get_bgp_neighbors_aruba(ip, credentials, asn):
         )
         login.raise_for_status()
 
-    except requests.exceptions.HTTPError:
-        click.secho(
-            f"Error connecting to switch {ip}, check that this IP is an Aruba switch, or check the username or password",
-            fg="white",
-            bg="red",
-        )
-        return None, None
-    except requests.exceptions.ConnectionError:
-        click.secho(
-            f"Error connecting to switch {ip}, check the IP address and try again",
-            fg="white",
-            bg="red",
-        )
-        return None, None
-    except requests.exceptions.RequestException:  # pragma: no cover
-        click.secho(
-            f"Error connecting to switch  {ip}.",
-            fg="white",
-            bg="red",
-        )
-        return None, None
+    except (
+        requests.exceptions.HTTPError,
+        requests.exceptions.ConnectionError,
+        requests.exceptions.RequestException,
+    ) as err:
+        exception_type = type(err).__name__
 
+        if exception_type == "HTTPError":
+            error_message = (
+                f"Error connecting to switch {ip}, check the username or password"
+            )
+        elif exception_type == "ConnectionError":
+            error_message = (
+                f"Error connecting to switch {ip}, check the IP address and try again."
+            )
+        else:
+            error_message = f"Error connecting to switch {ip}."
+
+        click.secho(
+            str(error_message),
+            fg="white",
+            bg="red",
+        )
+        return None, None
     # Get neighbors
     try:
         bgp_neighbors_response = session.get(

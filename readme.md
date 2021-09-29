@@ -46,6 +46,7 @@ If you have the system's SHCD, there are even more commands that can be run
 **[Generate Network Config](#generate-network-config)**<br>
 **[Validate Switch Config](#validate-switch-config)**<br>
 **[Validate Network Config](#validate-network-config)**<br>
+**[Cache](#cache)**<br>
 **[Uninstallation](#uninstallation)**<br>
 **[Road Map](#road-map)**<br>
 **[Testing](#testing)**<br>
@@ -60,48 +61,54 @@ In order to run CANU, both python3 and pip3 need to be installed.
 ## Installation
 
 - To run CANU inside a container:
+
   - Prequisites:
     - docker
     - docker-compose
+
   ```bash
     sh canu_docker.sh up
   ```
+
   - CANU source files can be found inside the container at /app/canu
   - shared folder between local disk is call `files` and is mounted in the container at `/files`
   - When you are finished with the container and `exit` the container:
+
   ```bash
     sh canu_docker.sh down
-  ```  
+  ```
 
 - To run CANU in a Python Virtualenv:
+
   - Prerequisites
     - python3
     - pip3
     - Python Virtualenv
+
   ```bash
     python3 -m venv .venv
     source ./.venv/bin/activate
     pip3 install ./canu
-    ```
+  ```
 
-    - When you are done working in the Python Virtualenv.
+  - When you are done working in the Python Virtualenv.
     Use the following command to exit out of the Python Virtualenv:
-    ```bash
-    deactivate 
-    ```
 
+  ```bash
+  deactivate
+  ```
 
 - To install the development build of CANU type:
 
-    ```bash
-    python3 setup.py develop --user
-    ```
+  ```bash
+  python3 setup.py develop --user
+  ```
 
-    If that doesn't work, try:
-    
-    ```bash
-    pip3 install --editable .
-    ```
+  If that doesn't work, try:
+
+  ```bash
+  pip3 install --editable .
+  ```
 
 ## Usage
 
@@ -141,6 +148,8 @@ $ canu init --auth-token ~./config/cray/tokens/ --sls-address 1.2.3.4 --out outp
 8 IP addresses saved to output.txt
 ```
 
+![](docs/images/canu_init.png)
+
 The output file for the `canu init` command is set with the `--out FILENAME` flag.
 
 ### Report Switch Firmware
@@ -155,8 +164,10 @@ To check the firmware of a single switch run: `canu report switch firmware --sha
 
 ```bash
 $ canu report switch firmware --shasta 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD
-🛶 - Pass - IP: 192.168.1.1 Hostname:test-switch-spine01 Firmware: GL.10.06.0001
+🛶 - Pass - IP: 192.168.1.1 Hostname:sw-spine-001 Firmware: GL.10.06.0010
 ```
+
+![](docs/images/canu_report_switch_firmware.png)
 
 ### Report Network Firmware
 
@@ -193,6 +204,8 @@ GL.10.06.0010 - 1 switches
 FL.10.06.0010 - 1 switches
 FL.10.05.0010 - 1 switches
 ```
+
+![](docs/images/canu_report_network_firmware.png)
 
 When using the _network firmware_ commands, the table will show either: 🛶 Pass, ❌ Fail, or 🔺 Error. The switch will **pass** or **fail** based on if the switch firmware matches the _canu.yaml_
 
@@ -257,6 +270,8 @@ PORT        NEIGHBOR       NEIGHBOR PORT      PORT DESCRIPTION                  
 1/1/51  ==> test-spine02   1/1/51                                                                   Aruba JL635A  GL.10.06.0010
 1/1/52  ==> test-spine02   1/1/52                                                                   Aruba JL635A  GL.10.06.0010
 ```
+
+![](docs/images/canu_report_switch_cabling.png)
 
 Sometimes when checking cabling using LLDP, the neighbor does not return any information except a MAC address. When that is the case, CANU looks up the MAC in the ARP table and displays the IP addresses and vlan information associated with the MAC.
 
@@ -338,6 +353,8 @@ Node type could not be determined for the following
 ------------------------------------------------------------
 CAN switch
 ```
+
+![](docs/images/canu_validate_shcd.png)
 
 ### Validate Network Cabling
 
@@ -463,6 +480,8 @@ sw-spine-002    : Found in SHCD and on the network, but missing the following co
 sw-leaf-bmc-001 : Found in SHCD but not found on the network.
 uan001          : Found in SHCD but not found on the network.
 ```
+
+![](docs/images/canu_validate_shcd_cabling.png)
 
 The output of the `validate shcd-cabling` command will show the results for `validate shcd`, `validate cabling`, and then a comparison of the two results. If there are nodes found on the SHCD, or on the network that are not found in the other one, it will be displayed in _blue_. If a node is found on both the network and in the SHCD, but the connections are not the same, it will be shown in _green_, and the missing connections will be shown.
 
@@ -606,16 +625,21 @@ sw-leaf-bmc-001 Config Generated
 
 **[Details](docs/validate_switch_config.md)**<br>
 
-After config has been generated, CANU can validate the generated config against running switch config. After running the `validate switch config` command, you will be shown a line by line comparison of the currently running switch config against the config file that was passed in. You will also be given a list of remediation commands that can be typed into the switch to get the running config to match the config file. There will be a summary table at the end highlighting the most important differences between the configs.
+After config has been generated, CANU can validate the generated config against running switch config. The running config can be from either an IP address, or a config file.
+
+- To get running config from an IP address, use the flags `--ip 192.168.1.1 --username USERNAME --password PASSWORD`.
+- To get running config from a file, use the flag `--running RUNNING_CONFIG.cfg` instead.
+
+After running the `validate switch config` command, you will be shown a line by line comparison of the currently running switch config against the config file that was passed in. You will also be given a list of remediation commands that can be typed into the switch to get the running config to match the config file. There will be a summary table at the end highlighting the most important differences between the configs.
 
 - Lines that are red and start with a `-` are in the running config, but not in the config file
 - Lines that are green and start with a `+` are not in the running config, but are in the config file
 - Lines that are blue and start with a `?` are attempting to point out specific line differences
 
-To validate switch config run: `canu validate switch config --ip 192.168.1.1 --username USERNAME --password PASSWORD --config SWITCH_CONFIG.cfg`
+To validate switch config run: `canu validate switch config --ip 192.168.1.1 --username USERNAME --password PASSWORD --generated SWITCH_CONFIG.cfg`
 
 ```bash
-$ canu validate switch config --ip 192.168.1.1 --config sw-spine-001.cfg
+$ canu validate switch config --ip 192.168.1.1 --generated sw-spine-001.cfg
 
 hostname sw-spine-001
 - ntp server 192.168.1.10
@@ -645,16 +669,28 @@ Router:                          1  |
 
 ```
 
+![](docs/images/canu_validate_switch_config.png)
+
+#### File Output and JSON
+
+To output the results of the config validation command to a file, append the `--out FILENAME` flag. To get the results as JSON, use the `--json` flag.
+
 ### Validate Network Config
 
 **[Details](docs/validate_network_config.md)**<br>
 
-The `validate network config` command works almost the same as thh above `validate switch config` command. Pass in a list of ips, or a file of ip addresses and a directory of generated config files and there will be a summary table for each switch highlighting the most important differences between the runnig switch config and the config files.
+The `validate network config` command works almost the same as the above `validate switch config` command. There are three options for passing in the running config:
 
-To validate switch config run: `canu validate network config --ips-file ips.txt --username USERNAME --password PASSWORD --config /CONFIG/FOLDER`
+- A comma separated list of ips using `--ips 192.168.1.1,192.168.1.`
+- A file of ip addresses, one per line using the flag `--ips-file ips.txt`
+- A directory containing the running configuration `--running RUNNING/CONFIG/DIRECTORY`
+
+A directory of generated config files will also need to be passed in using `--generated GENERATED/CONFIG/DIRECTORY`. There will be a summary table for each switch highlighting the most important differences between the running switch config and the generated config files.
+
+To validate switch config run: `canu validate network config --ips-file ips.txt --username USERNAME --password PASSWORD --generated /CONFIG/FOLDER`
 
 ```bash
-$ canu validate network config -s 1.5 --ips-file ips.txt --config /CONFIG/FOLDER
+$ canu validate network config -s 1.5 --ips-file ips.txt --generated /CONFIG/FOLDER
 
 Switch: sw-leaf-001 (192.168.1.1)
 Differences
@@ -684,6 +720,18 @@ Errors
 192.168.1.3      - Timeout error connecting to switch 192.168.1.3, check the IP address and try again.
 ```
 
+#### File Output and JSON
+
+To output the results of the config validation command to a file, append the `--out FILENAME` flag. To get the results as JSON, use the `--json` flag.
+
+### Cache
+
+There are several commands to help with the canu cache:
+
+- `canu cache location` will tell you the folder where your cache is located
+- `canu cache print` will print a colored version of your cache to the screen
+- `canu cache delete` will delete your cache file, the file will be created again on the next canu command
+
 ## Uninstallation
 
 `pip3 uninstall canu`
@@ -705,6 +753,12 @@ $ nox
 ```
 
 To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. To rerun a session without reinstalling all testing dependencies use the `-rs` flag instead of `-s`.
+
+To run a specific test, like `test_report_switch_firmware.py` :
+
+```bash
+$ nox -s tests -- tests/test_report_switch_firmware.py
+```
 
 # Changelog
 
@@ -732,7 +786,6 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
   - PDUs are not yet properly handled in the generated switch configurations.
   - Slingshot switches (sw-hsn) are not yet properly handled in the model or generated switch configurations.
   - Switch and SNMP passwords have been removed from generated configurations until the handling code is secure.
-
 
 ## [0.0.5] - 2021-5-14
 
@@ -782,7 +835,7 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 [unreleased]: https://github.com/Cray-HPE/canu/tree/main
 [0.0.6]: https://github.com/Cray-HPE/canu/tree/0.0.6
 [0.0.5]: https://github.com/Cray-HPE/canu/tree/0.0.5
-[0.0.4]: https://github.com/Cray-HPE/canu/tree/0.0.4 
-[0.0.3]: https://github.com/Cray-HPE/canu/tree/0.0.3 
-[0.0.2]: https://github.com/Cray-HPE/canu/tree/0.0.2 
-[0.0.1]: https://github.com/Cray-HPE/canu/tree/0.0.1 
+[0.0.4]: https://github.com/Cray-HPE/canu/tree/0.0.4
+[0.0.3]: https://github.com/Cray-HPE/canu/tree/0.0.3
+[0.0.2]: https://github.com/Cray-HPE/canu/tree/0.0.2
+[0.0.1]: https://github.com/Cray-HPE/canu/tree/0.0.1

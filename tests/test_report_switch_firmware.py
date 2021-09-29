@@ -29,9 +29,9 @@ import pytest
 import requests
 import responses
 
-from canu.cache import get_switch_from_cache, remove_switch_from_cache
 from canu.cli import cli
 from canu.report.switch.firmware.firmware import get_firmware_aruba
+from canu.utils.cache import get_switch_from_cache, remove_switch_from_cache
 
 
 username = "admin"
