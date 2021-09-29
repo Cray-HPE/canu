@@ -145,7 +145,7 @@ def init(ctx, sls_file, auth_token, sls_address, network, out):
 
     Args:
         ctx: CANU context settings
-        sls_file: Directory containing the CSI json file
+        sls_file: File containing the CSI json data
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         network: Switch network e.g. (CAN, MTL, NMN).

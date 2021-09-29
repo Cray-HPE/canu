@@ -78,7 +78,7 @@ sw-leaf-bmc-001 Config Generated
 | `--shcd`              | SHCD File                                                                  |
 | `--tabs`              | The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.         |
 | `--corners`           | The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'. |
-| `--sls_file`        | File containing the CSI json file                                     |
+| `--sls_file`          | File containing the CSI json file                                          |
 | `--auth_token`        | Token for SLS authentication                                               |
 | `--sls_address`       | The address of SLS                                                         |
 | `--folder`            | Folder to store config files                                               |

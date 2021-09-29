@@ -1,6 +1,6 @@
 # Initialization
 
-To help make switch setup a breeze. CANU can automatically parse CSI output or the Shasta SLS API for switch IPv4 addresses. In order to parse CSI output, use the `--sls-file FOLDER` flag to pass in the folder where the _sls_file.json_ file is located. To parse the Shasta SLS API for IP addresses, ensure that you have a valid token. The token file can either be passed in with the `--auth-token TOKEN_FILE` flag, or it can be automatically read if the environmental variable **SLS_TOKEN** is set. The SLS address is default set to _api-gw-service-nmn.local_, if you are operating on a system with a different address, you can set it with the `--sls-address SLS_ADDRESS` flag.
+To help make switch setup a breeze. CANU can automatically parse CSI output or the Shasta SLS API for switch IPv4 addresses. In order to parse CSI output, use the `--sls-file SLS_FILE` flag to pass in the folder where the _sls_file.json_ file is located. To parse the Shasta SLS API for IP addresses, ensure that you have a valid token. The token file can either be passed in with the `--auth-token TOKEN_FILE` flag, or it can be automatically read if the environmental variable **SLS_TOKEN** is set. The SLS address is default set to _api-gw-service-nmn.local_, if you are operating on a system with a different address, you can set it with the `--sls-address SLS_ADDRESS` flag.
 
 If used, the CSI-generated sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.
 
@@ -34,7 +34,7 @@ $ canu init --auth-token ~./config/cray/tokens/ --sls-address 1.2.3.4 --out outp
 
 | Option          | Description                            |
 | --------------- | -------------------------------------- |
-| `--sls_file`  | File containing the CSI json file |
+| `--sls_file`    | File containing the CSI json           |
 | `--auth_token`  | Token for SLS authentication           |
 | `--sls_address` | The address of SLS                     |
 | `--out`         | Name of the output file                |

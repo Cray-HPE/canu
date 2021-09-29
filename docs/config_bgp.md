@@ -79,7 +79,7 @@ NCN HMN IPs: ['192.168.20.44', '192.168.20.45', '192.168.20.46', '192.168.20.47'
 
 | Option          | Description                            |
 | --------------- | -------------------------------------- |
-| `--sls_file`  | File containing the CSI json file |
+| `--sls_file`    | File containing the CSI json           |
 | `--auth_token`  | Token for SLS authentication           |
 | `--sls_address` | The address of SLS                     |
 | `--ips`         | Switch IPv4 address                    |
