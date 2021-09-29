@@ -38,10 +38,13 @@ from canu.report import report
 from canu.utils.cache import cache_switch
 from canu.validate import validate
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 yaml = YAML()
 =======
 from canu.test import test
+=======
+>>>>>>> 95f14f8 (remove canu.test)
 yaml = ruamel.yaml.YAML()
 >>>>>>> a91de8c (added override option)
 
@@ -97,7 +100,6 @@ cli.add_command(config.config)
 cli.add_command(generate.generate)
 cli.add_command(report.report)
 cli.add_command(validate.validate)
-cli.add_command(test.test)
 
 
 @cli.command(
