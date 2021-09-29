@@ -37,7 +37,7 @@ test_file = os.path.join(test_file_directory, "data", test_file_name)
 architecture = "full"
 tabs = "INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners = "J14,T44,J14,T48,J14,T24,J14,T23"
-csi_folder = "."
+sls_file = "sls_file.json"
 shasta = "1.4"
 switch_name = "sw-spine-001"
 cache_minutes = 0
@@ -55,7 +55,7 @@ runner = testing.CliRunner()
 def test_switch_config_spine_primary():
     """Test that the `canu generate switch config` command runs and returns valid primary spine config."""
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open(sls_file, "w") as f:
             json.dump(sls_input, f)
 
         result = runner.invoke(
@@ -76,8 +76,8 @@ def test_switch_config_spine_primary():
                 tabs,
                 "--corners",
                 corners,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 switch_name,
             ],
@@ -275,7 +275,7 @@ def test_switch_config_spine_secondary():
     spine_secondary = "sw-spine-002"
 
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open(sls_file, "w") as f:
             json.dump(sls_input, f)
 
         result = runner.invoke(
@@ -296,8 +296,8 @@ def test_switch_config_spine_secondary():
                 tabs,
                 "--corners",
                 corners,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 spine_secondary,
             ],
@@ -495,7 +495,7 @@ def test_switch_config_leaf_primary():
     leaf_primary = "sw-leaf-001"
 
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open(sls_file, "w") as f:
             json.dump(sls_input, f)
 
         result = runner.invoke(
@@ -516,8 +516,8 @@ def test_switch_config_leaf_primary():
                 tabs,
                 "--corners",
                 corners,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 leaf_primary,
             ],
@@ -807,7 +807,7 @@ def test_switch_config_leaf_primary_to_uan():
     leaf_primary_3 = "sw-leaf-003"
 
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open(sls_file, "w") as f:
             json.dump(sls_input, f)
 
         result = runner.invoke(
@@ -828,8 +828,8 @@ def test_switch_config_leaf_primary_to_uan():
                 tabs,
                 "--corners",
                 corners,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 leaf_primary_3,
             ],
@@ -1090,7 +1090,7 @@ def test_switch_config_leaf_secondary():
     leaf_secondary = "sw-leaf-002"
 
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open(sls_file, "w") as f:
             json.dump(sls_input, f)
 
         result = runner.invoke(
@@ -1111,8 +1111,8 @@ def test_switch_config_leaf_secondary():
                 tabs,
                 "--corners",
                 corners,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 leaf_secondary,
             ],
@@ -1392,7 +1392,7 @@ def test_switch_config_leaf_secondary_to_uan():
     leaf_secondary_3 = "sw-leaf-004"
 
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open(sls_file, "w") as f:
             json.dump(sls_input, f)
 
         result = runner.invoke(
@@ -1413,8 +1413,8 @@ def test_switch_config_leaf_secondary_to_uan():
                 tabs,
                 "--corners",
                 corners,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 leaf_secondary_3,
             ],
@@ -1671,7 +1671,7 @@ def test_switch_config_cdu_primary():
     cdu_primary = "sw-cdu-001"
 
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open(sls_file, "w") as f:
             json.dump(sls_input, f)
 
         result = runner.invoke(
@@ -1692,8 +1692,8 @@ def test_switch_config_cdu_primary():
                 tabs,
                 "--corners",
                 corners,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 cdu_primary,
             ],
@@ -1918,7 +1918,7 @@ def test_switch_config_cdu_secondary():
     cdu_secondary = "sw-cdu-002"
 
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open(sls_file, "w") as f:
             json.dump(sls_input, f)
 
         result = runner.invoke(
@@ -1939,8 +1939,8 @@ def test_switch_config_cdu_secondary():
                 tabs,
                 "--corners",
                 corners,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 cdu_secondary,
             ],
@@ -2151,7 +2151,7 @@ def test_switch_config_leaf_bmc():
     leaf_bmc = "sw-leaf-bmc-001"
 
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open(sls_file, "w") as f:
             json.dump(sls_input, f)
 
         result = runner.invoke(
@@ -2172,8 +2172,8 @@ def test_switch_config_leaf_bmc():
                 tabs,
                 "--corners",
                 corners,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 leaf_bmc,
             ],
@@ -2363,8 +2363,8 @@ def test_switch_config_leaf_bmc():
 
 
 def test_switch_config_csi_file_missing():
-    """Test that the `canu generate switch config` command errors on sls_input_file.json file missing."""
-    bad_csi_folder = "/bad_folder"
+    """Test that the `canu generate switch config` command errors on sls_file.json file missing."""
+    bad_sls_file = "/bad_file.json"
     with runner.isolated_filesystem():
         result = runner.invoke(
             cli,
@@ -2384,22 +2384,21 @@ def test_switch_config_csi_file_missing():
                 tabs,
                 "--corners",
                 corners,
-                "--csi-folder",
-                bad_csi_folder,
+                "--sls-file",
+                bad_sls_file,
                 "--name",
                 switch_name,
             ],
         )
-        assert result.exit_code == 0
-        assert (
-            "The file sls_input_file.json was not found, check that this is the correct CSI directory"
-            in str(result.output)
-        )
+        assert result.exit_code == 2
+        assert "No such file or directory" in str(result.output)
 
 
 def test_switch_config_missing_file():
     """Test that the `canu generate switch config` command fails on missing file."""
     with runner.isolated_filesystem():
+        with open(sls_file, "w") as f:
+            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -2417,8 +2416,8 @@ def test_switch_config_missing_file():
                 tabs,
                 "--corners",
                 corners,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 switch_name,
             ],
@@ -2450,8 +2449,8 @@ def test_switch_config_bad_file():
                 tabs,
                 "--corners",
                 corners,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 switch_name,
             ],
@@ -2466,7 +2465,7 @@ def test_switch_config_bad_file():
 def test_switch_config_missing_tabs():
     """Test that the `canu generate switch config` command prompts for missing tabs."""
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open(sls_file, "w") as f:
             json.dump(sls_input, f)
 
         result = runner.invoke(
@@ -2485,14 +2484,14 @@ def test_switch_config_missing_tabs():
                 test_file,
                 "--corners",
                 corners,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 switch_name,
                 "--corners",
                 corners,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
             ],
             input="INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES\n",
         )
@@ -2505,6 +2504,9 @@ def test_switch_config_bad_tab():
     bad_tab = "BAD_TAB_NAME"
     bad_tab_corners = "I14,S48"
     with runner.isolated_filesystem():
+        with open(sls_file, "w") as f:
+            json.dump(sls_input, f)
+
         result = runner.invoke(
             cli,
             [
@@ -2523,8 +2525,8 @@ def test_switch_config_bad_tab():
                 bad_tab,
                 "--corners",
                 bad_tab_corners,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 switch_name,
             ],
@@ -2536,7 +2538,7 @@ def test_switch_config_bad_tab():
 def test_switch_config_switch_name_prompt():
     """Test that the `canu generate switch config` command prompts for missing switch name."""
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open(sls_file, "w") as f:
             json.dump(sls_input, f)
 
         result = runner.invoke(
@@ -2557,8 +2559,8 @@ def test_switch_config_switch_name_prompt():
                 tabs,
                 "--corners",
                 corners,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
             ],
             input="sw-spine-001\n",
         )
@@ -2578,7 +2580,7 @@ def test_switch_config_switch_name_prompt():
 def test_switch_config_corner_prompt():
     """Test that the `canu generate switch config` command prompts for corner input and runs."""
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open(sls_file, "w") as f:
             json.dump(sls_input, f)
 
         result = runner.invoke(
@@ -2597,8 +2599,8 @@ def test_switch_config_corner_prompt():
                 test_file,
                 "--tabs",
                 tabs,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 switch_name,
             ],
@@ -2621,6 +2623,8 @@ def test_switch_config_not_enough_corners():
     """Test that the `canu generate switch config` command fails on not enough corners."""
     not_enough_corners = "H16"
     with runner.isolated_filesystem():
+        with open(sls_file, "w") as f:
+            json.dump(sls_input, f)
         result = runner.invoke(
             cli,
             [
@@ -2639,8 +2643,8 @@ def test_switch_config_not_enough_corners():
                 tabs,
                 "--corners",
                 not_enough_corners,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 switch_name,
             ],
@@ -2655,7 +2659,7 @@ def test_switch_config_bad_switch_name_1():
     """Test that the `canu generate switch config` command fails on bad switch name."""
     bad_name_1 = "sw-bad"
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open(sls_file, "w") as f:
             json.dump(sls_input, f)
 
         result = runner.invoke(
@@ -2676,8 +2680,8 @@ def test_switch_config_bad_switch_name_1():
                 tabs,
                 "--corners",
                 corners,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 bad_name_1,
             ],
@@ -2693,7 +2697,7 @@ def test_switch_config_bad_switch_name_2():
     """Test that the `canu generate switch config` command fails on bad switch name."""
     bad_name_2 = "sw-spine-999"
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open(sls_file, "w") as f:
             json.dump(sls_input, f)
 
         result = runner.invoke(
@@ -2714,8 +2718,8 @@ def test_switch_config_bad_switch_name_2():
                 tabs,
                 "--corners",
                 corners,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 bad_name_2,
             ],
@@ -2731,7 +2735,7 @@ def test_switch_config_non_switch():
     """Test that the `canu generate switch config` command fails on non switch."""
     non_switch = "ncn-w001"
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open(sls_file, "w") as f:
             json.dump(sls_input, f)
 
         result = runner.invoke(
@@ -2752,8 +2756,8 @@ def test_switch_config_non_switch():
                 tabs,
                 "--corners",
                 corners,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 non_switch,
             ],
@@ -2942,7 +2946,7 @@ def test_switch_config_sls_address_bad():
 def test_switch_config_tds_spine_primary():
     """Test that the `canu generate switch config` command runs and returns valid TDS primary spine config."""
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open(sls_file, "w") as f:
             json.dump(sls_input, f)
 
         result = runner.invoke(
@@ -2963,8 +2967,8 @@ def test_switch_config_tds_spine_primary():
                 tabs_tds,
                 "--corners",
                 corners_tds,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 switch_name,
             ],
@@ -3365,7 +3369,7 @@ def test_switch_config_tds_spine_secondary():
     spine_secondary = "sw-spine-002"
 
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open(sls_file, "w") as f:
             json.dump(sls_input, f)
 
         result = runner.invoke(
@@ -3386,8 +3390,8 @@ def test_switch_config_tds_spine_secondary():
                 tabs_tds,
                 "--corners",
                 corners_tds,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 spine_secondary,
             ],
@@ -3787,7 +3791,7 @@ def test_switch_config_tds_cdu_primary():
     cdu_primary_tds = "sw-cdu-001"
 
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open(sls_file, "w") as f:
             json.dump(sls_input, f)
 
         result = runner.invoke(
@@ -3808,8 +3812,8 @@ def test_switch_config_tds_cdu_primary():
                 tabs_tds,
                 "--corners",
                 corners_tds,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 cdu_primary_tds,
             ],
@@ -4032,7 +4036,7 @@ def test_switch_config_tds_cdu_secondary():
     cdu_secondary_tds = "sw-cdu-002"
 
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open(sls_file, "w") as f:
             json.dump(sls_input, f)
 
         result = runner.invoke(
@@ -4053,8 +4057,8 @@ def test_switch_config_tds_cdu_secondary():
                 tabs_tds,
                 "--corners",
                 corners_tds,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 cdu_secondary_tds,
             ],
@@ -4265,7 +4269,7 @@ def test_switch_config_tds_leaf_bmc():
     leaf_bmc_tds = "sw-leaf-bmc-001"
 
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open(sls_file, "w") as f:
             json.dump(sls_input, f)
 
         result = runner.invoke(
@@ -4286,8 +4290,8 @@ def test_switch_config_tds_leaf_bmc():
                 tabs_tds,
                 "--corners",
                 corners_tds,
-                "--csi-folder",
-                csi_folder,
+                "--sls-file",
+                sls_file,
                 "--name",
                 leaf_bmc_tds,
             ],

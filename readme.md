@@ -17,7 +17,7 @@ CANU can be used to:
 To checkout a fresh system using CSI:
 
 1. Make a new directory to save switch IP addresses: `mkdir ips_folder`, `cd ips_folder`
-2. Parse CSI files and save switch IP addresses: `canu init --csi-folder /var/www/prep/SYSTEMNAME/ --out ips.txt`
+2. Parse CSI files and save switch IP addresses: `canu init --sls-file sls_input_file.json --out ips.txt`
 3. Check network firmware: `canu report network firmware -s 1.5 --ips-file ips.txt`
 4. Check network cabling: `canu report network cabling --ips-file ips.txt`
 5. Validate BGP status: `canu validate network bgp --ips-file ips.txt --verbose`
@@ -27,7 +27,7 @@ If you have the system's SHCD, there are even more commands that can be run
 
 7. Validate the SHCD: `canu validate shcd --shcd SHCD.xlsx`
 8. Validate the SHCD against network cabling: `canu validate shcd-cabling --shcd SHCD.xlsx --ips-file ips.txt`
-9. Generate switch config for the network: `canu generate network config --shcd SHCD.xlsx --csi-folder /var/www/prep/SYSTEMNAME/ --folder configs`
+9. Generate switch config for the network: `canu generate network config --shcd SHCD.xlsx --sls-file sls_input_file.json --folder configs`
 
 # Table of Contents
 
@@ -111,22 +111,22 @@ To run, just type `canu`, it should run and display help. To see a list of comma
 
 **[Details](docs/init.md)**<br>
 
-To help make switch setup a breeze. CANU can automatically parse CSI output or the Shasta SLS API for switch IPv4 addresses.
+To help make switch setup a breeze. CANU can automatically parse SLS JSON data - including CSI sls_input_file.json output or the Shasta SLS API for switch IPv4 addresses.
 
 #### CSI Input
 
-- In order to parse CSI output, use the `--csi-folder FOLDER` flag to pass in the folder where the _sls_input_file.json_ file is located.
+- In order to parse CSI output, use the `--sls-file FILE` flag to pass in the folder where an SLS JSON file is located.
 
-The _sls_input_file.json_ file is generally stored in one of two places depending on how far the system is in the install process.
+The CSI _sls_input_file.json_ file is generally stored in one of two places depending on how far the system is in the install process.
 
-- Early in the install process, when running off of the LiveCD the _sls_input_file.json_ file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
-- Later in the install process, the _sls_input_file.json_ file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
+- Early in the install process, when running off of the LiveCD the CSI _sls_input_file.json_ file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
+- Later in the install process, the CSI _sls_input_file.json_ file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
 - The switch IPs will be read from the 'NMN' network, if a different network is desired, use the `--network` flag to choose a different one e.g. (CAN, MTL, NMN).
 
 To get the switch IP addresses from CSI output, run the command:
 
 ```bash
-$ canu init --csi-folder /CSI/OUTPUT/FOLDER/ADDRESS --out output.txt
+$ canu init --sls-file SLS_FILE --out output.txt
 8 IP addresses saved to output.txt
 ```
 
@@ -501,19 +501,19 @@ CANU can be used to configure BGP for a pair of switches.
 This command will remove previous configuration (BGP, Prefix Lists, Route Maps), then add prefix lists, create
 route maps, and update BGP neighbors, then write it all to the switch memory.
 
-The network and NCN data can be read from one of two sources, the SLS API, or using CSI.
+The network and NCN data can be read from one of two sources, the SLS API, or using any SLS File - including CSI-generated sls_input_file.json.
 
 To access SLS, a token must be passed in using the `--auth-token` flag.
 Tokens are typically stored in ~./config/cray/tokens/
 Instead of passing in a token file, the environmental variable SLS_TOKEN can be used.
 
-To get the network data using CSI, pass in the CSI folder containing the sls_input_file.json file using the `--csi-folder` flag
+To get the network data using CSI, pass in the CSI folder containing the SLS JSON file using the `--sls-file` flag
 
-The sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.
+The CSI SLS JSON file is generally stored in one of two places depending on how far the system is in the install process.
 
-- Early in the install process, when running off of the LiveCD the sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
+- Early in the install process, when running off of the LiveCD the CSI sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
 
-- Later in the install process, the sls_input_file.json file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
+- Later in the install process, the CSI sls_input_file.json file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
 
 To configure BGP run: `canu config bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
@@ -536,11 +536,11 @@ To see all the lags that are generated, see [lags](docs/lags.md)
 
 CANU can be used to generate switch config.
 
-In order to generate switch config, a valid SHCD must be passed in and system variables must be read in from either CSI output or the SLS API.
+In order to generate switch config, a valid SHCD must be passed in and system variables must be read in from any SLS data, including CSI output or the SLS API.
 
 #### CSI Input
 
-- In order to parse CSI output, use the `--csi-folder FOLDER` flag to pass in the folder where the _sls_input_file.json_ file is located.
+- In order to parse CSI output, use the `--sls-file FILE` flag to pass in the folder where the _sls_file.json_ file is located.
 
 The sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.
 
@@ -561,10 +561,10 @@ The sls_input_file.json file is generally stored in one of two places depending 
 
 To generate config for a specific switch, a hostname must also be passed in using the `--name HOSTNAME` flag. To output the config to a file, append the `--out FILENAME` flag.
 
-To generate switch config run: `canu generate switch config -s 1.5 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --csi-folder /CSI/OUTPUT/FOLDER/ADDRESS --name SWITCH_HOSTNAME --out FILENAME`
+To generate switch config run: `canu generate switch config -s 1.5 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --sls-file SLS_FILE --name SWITCH_HOSTNAME --out FILENAME`
 
 ```bash
-$ canu generate switch config -s 1.5 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --csi-folder /CSI/OUTPUT/FOLDER/ADDRESS --name sw-spine-001
+$ canu generate switch config -s 1.5 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --name sw-spine-001
 
 hostname sw-spine-001
 user admin group administrators password plaintext
@@ -585,10 +585,10 @@ CANU can also generate switch config for all the switches on a network.
 
 In order to generate network config, a valid SHCD must be passed in and system variables must be read in from either CSI output or the SLS API. The instructions are exactly the same as the above **[Generate Switch Config](#generate-switch-config)** except there will not be a hostname and a folder must be specified for config output using the `--folder FOLDERNAME` flag.
 
-To generate switch config run: `canu generate network config -s 1.5 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --csi-folder /CSI/OUTPUT/FOLDER/ADDRESS --folder FOLDERNAME`
+To generate switch config run: `canu generate network config -s 1.5 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --sls-file SLS_FILE --folder FOLDERNAME`
 
 ```bash
-$ canu generate network config -s 1.5 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --csi-folder /CSI/OUTPUT/FOLDER/ADDRESS --folder switch_config
+$ canu generate network config -s 1.5 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config
 
 sw-spine-001 Config Generated
 sw-spine-002 Config Generated
@@ -710,7 +710,8 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 
 ## [development]
 
-- Installation now supports non-developer modes.
+- Command line option --csi-folder has changed to --sls-file. Any SLS JSON file can be used.
+- Installation via pip now supports non-developer modes. Pyinstaller binary and RPM now work as advertised.
 - The directory of canu_cache.yaml is now dynamically configured in the user's home directory (preferred), or the system temporary directory depending on filesystem permissions.
 
 ## [unreleased]
