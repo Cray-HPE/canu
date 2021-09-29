@@ -97,7 +97,11 @@ cli.add_command(validate.validate)
     help_headers_color="yellow",
     help_options_color="blue",
 )
-@click.option("--csi-folder", help="Directory containing the CSI json file")
+@click.option(
+    "--sls-file",
+    help="File containing system SLS JSON data.",
+    type=click.File("r"),
+)
 @click.option(
     "--auth-token",
     envvar="SLS_TOKEN",
@@ -117,23 +121,23 @@ cli.add_command(validate.validate)
     type=click.File("w"),
 )
 @click.pass_context
-def init(ctx, csi_folder, auth_token, sls_address, network, out):
+def init(ctx, sls_file, auth_token, sls_address, network, out):
     """Initialize CANU by extracting all the switch IPs from yaml files in the CSI folder, or by getting IPs from SLS.
 
     To access SLS, a token must be passed in using the --auth-token flag.
     Tokens are typically stored in ~./config/cray/tokens/
     Instead of passing in a token file, the environmental variable SLS_TOKEN can be used.
 
-    To initialize using CSI, pass in the CSI folder containing the sls_input_file.json file using the --csi-folder flag
+    To initialize using any SLS data, pass in the file containing SLS JSON data (sometimes sls_input_file.json) the --sls-file flag
 
-    The sls_input_file.json file is generally stored in one of two places
+    If used, CSI-generated sls_input_file.json file is generally stored in one of two places
     depending on how far the system is in the install process.
 
 
-     - Early in the install process, when running off of the LiveCD the
+     - Early in the install process, when running off of the LiveCD the CSI
      sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
 
-     - Later in the install process, the sls_input_file.json file is
+     - Later in the install process, the CSI sls_input_file.json file is
      generally in `/mnt/pitdata/prep/SYSTEMNAME/`
 
     \f
@@ -141,7 +145,7 @@ def init(ctx, csi_folder, auth_token, sls_address, network, out):
 
     Args:
         ctx: CANU context settings
-        csi_folder: Directory containing the CSI json file
+        sls_file: File containing the CSI json data
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         network: Switch network e.g. (CAN, MTL, NMN).
@@ -149,28 +153,26 @@ def init(ctx, csi_folder, auth_token, sls_address, network, out):
     """
     switch_addresses = []
 
-    # Parse sls_input_file.json file from CSI and filter "Node Management Network" IP addresses
-    if csi_folder:
+    # Parse SLS input file. and filter "Node Management Network" IP addresses
+    if sls_file:
         try:
-            with open(os.path.join(csi_folder, "sls_input_file.json"), "r") as f:
-                input_json = json.load(f)
-
-                # Format the input to be like the SLS JSON
-                input_json_networks = [input_json["Networks"][network]]
-                input_json_hardware = input_json.get("Hardware", {})
-
-                switch_addresses, switch_dict = parse_sls_json_for_ips(
-                    input_json_networks,
-                    network,
-                )
-                parse_sls_json_for_vendor(input_json_hardware, switch_dict)
-
-        except FileNotFoundError:
+            input_json = json.load(sls_file)
+        except (json.JSONDecodeError, UnicodeDecodeError):
             click.secho(
-                "The file sls_input_file.json was not found, check that this is the correct CSI directory.",
+                f"The file {sls_file.name} is not valid JSON.",
                 fg="red",
             )
             return
+
+        # Format the input to be like the SLS JSON
+        input_json_networks = [input_json["Networks"][network]]
+        input_json_hardware = input_json.get("Hardware", {})
+
+        switch_addresses, switch_dict = parse_sls_json_for_ips(
+            input_json_networks,
+            network,
+        )
+        parse_sls_json_for_vendor(input_json_hardware, switch_dict)
 
     else:
         token = os.environ.get("SLS_TOKEN")
@@ -279,7 +281,8 @@ def parse_sls_json_for_ips(shasta, network="NMN"):
                         }
                         cache_switch(switch_json)
                         switch_addresses.append(ip_address)
-                        switch_dict[hostname] = ip_address
+                        if hostname:
+                            switch_dict[hostname] = ip_address
 
     return switch_addresses, switch_dict
 
