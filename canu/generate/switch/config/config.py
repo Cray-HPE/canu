@@ -145,7 +145,11 @@ shasta_options = canu_config["shasta_versions"]
     help="The name of the switch to generate config e.g. 'sw-spine-001'",
     prompt="Switch Name",
 )
-@click.option("--csi-folder", help="Directory containing the CSI json file")
+@click.option(
+    "--sls-file",
+    help="File containing system SLS JSON data.",
+    type=click.File("r"),
+)
 @click.option(
     "--auth-token",
     envvar="SLS_TOKEN",
@@ -167,7 +171,7 @@ def config(
     tabs,
     corners,
     switch_name,
-    csi_folder,
+    sls_file,
     auth_token,
     sls_address,
     out,
@@ -191,7 +195,7 @@ def config(
         tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
         corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
         switch_name: Switch name
-        csi_folder: Directory containing the CSI json file
+        sls_file: JSON file containing SLS data
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         out: Name of the output file
@@ -280,25 +284,22 @@ def config(
         sheets=sheets,
     )
 
-    # Parse sls_input_file.json file from CSI
-    if csi_folder:
+    # Parse SLS input file.
+    if sls_file:
         try:
-            with open(os.path.join(csi_folder, "sls_input_file.json"), "r") as f:
-                input_json = json.load(f)
-
-                # Format the input to be like the SLS JSON
-                sls_json = [
-                    network[x]
-                    for network in [input_json.get("Networks", {})]
-                    for x in network
-                ]
-
-        except FileNotFoundError:
+            input_json = json.load(sls_file)
+        except (json.JSONDecodeError, UnicodeDecodeError):
             click.secho(
-                "The file sls_input_file.json was not found, check that this is the correct CSI directory.",
+                f"The file {sls_file.name} is not valid JSON.",
                 fg="red",
             )
             return
+
+        # Format the input to be like the SLS JSON
+        sls_json = [
+            network[x] for network in [input_json.get("Networks", {})] for x in network
+        ]
+
     else:
         # Get SLS config
         token = os.environ.get("SLS_TOKEN")
@@ -870,7 +871,7 @@ def switch_is_primary(switch):
 
 
 def parse_sls_for_config(input_json):
-    """Parse the `sls_input_file.json` file or the JSON from SLS `/networks` API for config variables.
+    """Parse the `sls_file.json` file or the JSON from SLS `/networks` API for config variables.
 
     Args:
         input_json: JSON from the SLS `/networks` API
