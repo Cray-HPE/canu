@@ -34,7 +34,9 @@ interface lag  multi-chassis
     no shutdown
     description 
     no routing
-    vlan trunk native 1    vlan trunk allowed 10    lacp mode active
+    vlan trunk native 1
+    vlan trunk allowed 10
+    lacp mode active
     lacp fallback
     spanning-tree port-type admin-edge
 
