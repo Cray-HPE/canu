@@ -22,7 +22,7 @@
 """CANU commands that configure BGP."""
 import ipaddress
 import json
-from os import environ, path
+from os import environ
 
 import click
 from click_help_colors import HelpColorsCommand
@@ -37,7 +37,11 @@ import requests
     help_headers_color="yellow",
     help_options_color="blue",
 )
-@click.option("--csi-folder", help="Directory containing the CSI json file")
+@click.option(
+    "--sls-file",
+    help="File containing system SLS JSON data.",
+    type=click.File("r"),
+)
 @click.option(
     "--auth-token",
     envvar="SLS_TOKEN",
@@ -76,7 +80,7 @@ import requests
 @click.pass_context
 def bgp(
     ctx,
-    csi_folder,
+    sls_file,
     auth_token,
     sls_address,
     ips,
@@ -97,9 +101,9 @@ def bgp(
     Tokens are typically stored in ~./config/cray/tokens/
     Instead of passing in a token file, the environmental variable SLS_TOKEN can be used.
 
-    To get the network data using CSI, pass in the CSI folder containing the sls_input_file.json file using the `--csi-folder` flag
+    To initialize using any SLS data, pass in the file containing SLS JSON data (sometimes sls_input_file.json) the --sls-file flag
 
-    The sls_input_file.json file is generally stored in one of two places
+    If used, CSI-generated sls_file.json file is generally stored in one of two places
     depending on how far the system is in the install process.
 
 
@@ -116,7 +120,7 @@ def bgp(
 
     Args:
         ctx: CANU context settings
-        csi_folder: Directory containing the CSI json file
+        sls_file: Directory containing the CSI json file
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         ips: Comma separated list of IPv4 addresses of switches
@@ -143,25 +147,22 @@ def bgp(
         )
         return
 
-    # Parse sls_input_file.json file from CSI
-    if csi_folder:
+    # Parse SLS input file.
+    if sls_file:
         try:
-            with open(path.join(csi_folder, "sls_input_file.json"), "r") as csi_f:
-                input_json = json.load(csi_f)
-
-                # Format the input to be like the SLS JSON
-                sls_json = [
-                    network[x]
-                    for network in [input_json.get("Networks", {})]
-                    for x in network
-                ]
-
-        except FileNotFoundError:
+            input_json = json.load(sls_file)
+        except (json.JSONDecodeError, UnicodeDecodeError):
             click.secho(
-                "The file sls_input_file.json was not found, check that this is the correct CSI directory.",
+                f"The file {sls_file.name} is not valid JSON.",
                 fg="red",
             )
             return
+
+        # Format the input to be like the SLS JSON
+        sls_json = [
+            network[x] for network in [input_json.get("Networks", {})] for x in network
+        ]
+
     else:
         # Get SLS config
         token = environ.get("SLS_TOKEN")
@@ -655,8 +656,8 @@ def update_bgp_neighbors(ip, ips, session, asn, ncn):
         if x != ip:
             vsx_neighbor = dict(bgp_neighbor)
             vsx_neighbor["ip_or_ifname_or_group_name"] = x
-            del vsx_neighbor["route_maps"]
-            del vsx_neighbor["passive"]
+            vsx_neighbor.pop("route_maps")
+            vsx_neighbor.pop("passive")
             session.post(
                 f"https://{ip}/rest/v10.04/system/vrfs/default/bgp_routers/{asn}/bgp_neighbors",
                 json=vsx_neighbor,

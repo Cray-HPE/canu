@@ -140,7 +140,11 @@ shasta_options = canu_config["shasta_versions"]
     "--corners",
     help="The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.",
 )
-@click.option("--csi-folder", help="Directory containing the CSI json file")
+@click.option(
+    "--sls-file",
+    help="File containing system SLS JSON data.",
+    type=click.File("r"),
+)
 @click.option(
     "--auth-token",
     envvar="SLS_TOKEN",
@@ -161,7 +165,7 @@ def config(
     shcd,
     tabs,
     corners,
-    csi_folder,
+    sls_file,
     auth_token,
     sls_address,
     folder,
@@ -182,7 +186,7 @@ def config(
         shcd: SHCD file
         tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
         corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
-        csi_folder: Directory containing the CSI json file
+        sls_file: Directory containing the CSI json file
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         folder: Folder to store config files
@@ -271,25 +275,22 @@ def config(
         sheets=sheets,
     )
 
-    # Parse sls_input_file.json file from CSI
-    if csi_folder:
+    # Parse SLS input file.
+    if sls_file:
         try:
-            with open(path.join(csi_folder, "sls_input_file.json"), "r") as f:
-                input_json = json.load(f)
-
-                # Format the input to be like the SLS JSON
-                sls_json = [
-                    network[x]
-                    for network in [input_json.get("Networks", {})]
-                    for x in network
-                ]
-
-        except FileNotFoundError:
+            input_json = json.load(sls_file)
+        except (json.JSONDecodeError, UnicodeDecodeError):
             click.secho(
-                "The file sls_input_file.json was not found, check that this is the correct CSI directory.",
+                f"The file {sls_file.name} is not valid JSON.",
                 fg="red",
             )
             return
+
+        # Format the input to be like the SLS JSON
+        sls_json = [
+            network[x] for network in [input_json.get("Networks", {})] for x in network
+        ]
+
     else:
         # Get SLS config
         token = environ.get("SLS_TOKEN")

@@ -204,14 +204,14 @@ def test_config_bgp():
 def test_config_bgp_file():
     """Test that the `canu config bgp` command runs from CSI input."""
     with runner.isolated_filesystem():
-        # format sls_networks to be like sls_input_file.json
+        # format sls_networks to be like sls_file.json
         sls_json = defaultdict()
         for network in sls_networks:
             name = network["Name"]
             sls_json[name] = network
         sls_json = {"Networks": sls_json}
 
-        with open("sls_input_file.json", "w") as f:
+        with open("sls_file.json", "w") as f:
             f.write(json.dumps(sls_json))
 
         responses.add(
@@ -359,8 +359,8 @@ def test_config_bgp_file():
                 password,
                 "--ips",
                 ips,
-                "--csi-folder",
-                ".",
+                "--sls-file",
+                "sls_file.json",
             ],
         )
         assert result.exit_code == 0
@@ -1000,8 +1000,8 @@ def test_config_bgp_sls_address_bad():
 
 
 def test_config_bgp_csi_file_missing():
-    """Test that the `canu config bgp` command errors on sls_input_file.json file missing."""
-    bad_csi_folder = "/bad_folder"
+    """Test that the `canu config bgp` command errors on sls_file.json file missing."""
+    bad_sls_file = "/bad_folder"
     with runner.isolated_filesystem():
         result = runner.invoke(
             cli,
@@ -1014,15 +1014,12 @@ def test_config_bgp_csi_file_missing():
                 password,
                 "--ips",
                 ips,
-                "--csi-folder",
-                bad_csi_folder,
+                "--sls-file",
+                bad_sls_file,
             ],
         )
-        assert result.exit_code == 0
-        assert (
-            "The file sls_input_file.json was not found, check that this is the correct CSI directory"
-            in str(result.output)
-        )
+        assert result.exit_code == 2
+        assert "No such file or directory" in str(result.output)
 
 
 sls_networks = [

@@ -20,6 +20,8 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Test CANU cli."""
+from os import urandom
+
 from click import testing
 import requests
 import responses
@@ -54,7 +56,7 @@ def test_cli_init_missing_out():
 def test_cli_init_csi_good():
     """Run canu init CSI with no errors."""
     with runner.isolated_filesystem():
-        with open("sls_input_file.json", "w") as f:
+        with open("sls_file.json", "w") as f:
             f.write(
                 '{"Networks": {"NMN": {"Name": "NMN", "ExtraProperties": { "Subnets": [{"IPReservations":',
             )
@@ -64,7 +66,7 @@ def test_cli_init_csi_good():
 
         result = runner.invoke(
             cli,
-            ["init", "--out", fileout, "--csi-folder", "."],
+            ["init", "--out", fileout, "--sls-file", "sls_file.json"],
         )
         assert result.exit_code == 0
         assert "2 IP addresses saved to fileout.txt" in str(result.output)
@@ -72,9 +74,9 @@ def test_cli_init_csi_good():
         remove_switch_from_cache("192.168.1.3")
 
 
-def test_cli_init_csi_file_missing():
-    """Error canu init CSI on sls_input_file.json file missing."""
-    bad_csi_folder = "/bad_folder"
+def test_cli_init_sls_file_missing():
+    """Error canu init SLS on sls_file.json file missing."""
+    bad_sls_file = "bad_sls_file.json"
     with runner.isolated_filesystem():
         result = runner.invoke(
             cli,
@@ -82,14 +84,37 @@ def test_cli_init_csi_file_missing():
                 "init",
                 "--out",
                 fileout,
-                "--csi-folder",
-                bad_csi_folder,
+                "--sls-file",
+                bad_sls_file,
+            ],
+        )
+        assert result.exit_code == 2
+        assert "Error: Invalid value for '--sls-file': Could not open file:" in str(
+            result.output,
+        )
+        assert "No such file or directory" in str(result.output)
+
+
+def test_cli_init_sls_invalid_json():
+    """Error canu init SLS on sls_file.json being invalid JSON."""
+    bad_sls_file = "invalid_json_sls_file.json"
+    with runner.isolated_filesystem():
+        # Generate junk data in what should be a json file
+        with open(bad_sls_file, "wb") as f:
+            f.write(urandom(128))
+        result = runner.invoke(
+            cli,
+            [
+                "init",
+                "--out",
+                fileout,
+                "--sls-file",
+                bad_sls_file,
             ],
         )
         assert result.exit_code == 0
-        assert (
-            "The file sls_input_file.json was not found, check that this is the correct CSI directory"
-            in str(result.output)
+        assert "The file invalid_json_sls_file.json is not valid JSON" in str(
+            result.output,
         )
 
 

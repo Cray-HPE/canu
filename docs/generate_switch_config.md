@@ -8,13 +8,13 @@ In order to generate switch config, a valid SHCD must be passed in and system va
 
 #### CSI Input
 
-- In order to parse CSI output, use the `--csi-folder FOLDER` flag to pass in the folder where the _sls_input_file.json_ file is located.
+- In order to parse network data using SLS, pass in the file containing SLS JSON data (sometimes sls_file.json) the --sls-file flag
 
-The sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.
+- If used, CSI-generated sls_file.json file is generally stored in one of two places depending on how far the system is in the install process.
 
-- Early in the install process, when running off of the LiveCD the sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
+- Early in the install process, when running off of the LiveCD the sls_file.json file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
 
-- Later in the install process, the sls_input_file.json file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
+- Later in the install process, the sls_file.json file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
 
 #### SLS API Input
 
@@ -50,10 +50,10 @@ vrf keepalive
 
 ### 2. Generate switch config from CSI for sw-leaf-bmc-001
 
-To generate switch config run: `canu generate switch config -s 1.5 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --csi-folder /CSI/OUTPUT/FOLDER/ADDRESS --name SWITCH_HOSTNAME --out FILENAME`
+To generate switch config run: `canu generate switch config -s 1.5 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --sls-file /CSI/OUTPUT/FOLDER/ADDRESS --name SWITCH_HOSTNAME --out FILENAME`
 
 ```bash
-$ canu generate switch config -s 1.5 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --csi-folder /CSI/OUTPUT/FOLDER/ADDRESS --name sw-leaf-bmc-001
+$ canu generate switch config -s 1.5 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file /CSI/OUTPUT/FOLDER/ADDRESS --name sw-leaf-bmc-001
 
 hostname sw-leaf-bmc-001
 user admin group administrators password plaintext
@@ -75,7 +75,7 @@ ntp enable
 | `--shcd`              | SHCD File                                                                  |
 | `--tabs`              | The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.         |
 | `--corners`           | The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'. |
-| `--csi_folder`        | Directory containing the CSI json file                                     |
+| `--sls_file`          | File containing the CSI json                                               |
 | `--auth_token`        | Token for SLS authentication                                               |
 | `--sls_address`       | The address of SLS                                                         |
 | `--name`              | Switch Name                                                                |

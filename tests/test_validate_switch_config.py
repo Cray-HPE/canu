@@ -198,10 +198,10 @@ def test_validate_config_additions(netmiko_command, switch_vendor):
 def test_validate_config_running_file():
     """Test that the `canu validate switch config` command runs and sees an addition."""
     with runner.isolated_filesystem():
-        with open("running_switch.cfg", "w") as f:
-            f.writelines(switch_config)
-        with open("switch.cfg", "w") as f:
-            f.writelines(switch_config2)
+        with open("running_switch.cfg", "w") as switch_f:
+            switch_f.writelines(switch_config)
+        with open("switch.cfg", "w") as switch2_f:
+            switch2_f.writelines(switch_config2)
 
         result = runner.invoke(
             cli,
@@ -687,7 +687,7 @@ switch_config = (
 
 switch_config2 = (
     "hostname sw-spine-01\n"
-    "bfd\n"
+    + "bfd\n"
     + "no ip icmp redirect\n"
     + "vrf CAN\n"
     + "vrf keepalive\n"

@@ -28,6 +28,7 @@ from pathlib import Path
 import sys
 import tempfile
 
+import click
 from ruamel.yaml import YAML
 
 yaml = YAML()
@@ -51,7 +52,7 @@ def cache_directory():
     try:
         Path(cachedir).mkdir(parents=True, exist_ok=True)
     except Exception:
-        print(f"Cannot create cache directory: {cachedir}")
+        click.secho(f"Cannot create cache directory: {cachedir}", fg="red")
         sys.exit(1)
 
     return cachedir
@@ -84,12 +85,12 @@ if file_exists:  # pragma: no cover
         with open(canu_cache_file, "r+") as canu_f:
             canu_cache = yaml.load(canu_f)
 else:  # pragma: no cover
-    with open(canu_version_file, "r") as version_file:
-        version = version_file.read().replace("\n", "")
+    with open(canu_version_file, "r") as version_f:
+        version = version_f.read().replace("\n", "")
 
-    with open(canu_cache_file, "w+") as cache_f:
-        cache_f.write(f"version: {version}\n")
-        cache_f.write("switches:\n")
+    with open(canu_cache_file, "w+") as new_cache_f:
+        new_cache_f.write(f"version: {version}\n")
+        new_cache_f.write("switches:\n")
 
     with open(canu_cache_file, "r+") as canu_file:
         canu_cache = yaml.load(canu_file)
@@ -110,8 +111,8 @@ def cache_switch(switch):
     else:
         updated_cache = add_switch_to_cache(canu_cache, switch)
 
-    with open(canu_cache_file, "w") as f:
-        yaml.dump(updated_cache, f)
+    with open(canu_cache_file, "w") as cache_f:
+        yaml.dump(updated_cache, cache_f)
 
 
 def firmware_cached_recently(ip, max_cache_time=10):
@@ -219,7 +220,7 @@ def remove_switch_from_cache(ip):
         with open(canu_cache_file, "w") as canu_f:
             yaml.dump(updated_cache, canu_f)
     except ValueError:
-        print(f"{ip} not in cache")
+        click.secho(f"{ip} not in cache", fg="red")
 
 
 def ip_exists_in_cache(ip):
