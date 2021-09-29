@@ -41,9 +41,13 @@ flake8-quotes==3.3.0
 flake8-rst-docstrings==0.2.3
 flake8-string-format==0.3.0
 future==0.18.2
+<<<<<<< HEAD
 gitdb==4.0.7
 GitPython==3.1.18
 hier-config
+=======
+hier-config==1.6.1
+>>>>>>> d47fca6 (define heir config version)
 icdiff==1.9.1
 idna==2.10
 iniconfig==1.1.1
