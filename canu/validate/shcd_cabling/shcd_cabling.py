@@ -23,7 +23,7 @@
 from collections import defaultdict
 import ipaddress
 import logging
-import os
+from os import path
 from pathlib import Path
 import sys
 
@@ -35,10 +35,10 @@ import click_spinner
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from openpyxl import load_workbook
 import requests
-import ruamel.yaml
+from ruamel.yaml import YAML
 
-from canu.cache import cache_directory
 from canu.report.switch.cabling.cabling import get_lldp
+from canu.utils.cache import cache_directory
 from canu.validate.network.cabling.cabling import node_model_from_canu
 from canu.validate.shcd.shcd import (
     node_list_warnings,
@@ -46,7 +46,7 @@ from canu.validate.shcd.shcd import (
     print_node_list,
 )
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 # Get project root directory
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
@@ -56,32 +56,32 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent.parent
 
 # Schema and Data files
-hardware_schema_file = os.path.join(
+hardware_schema_file = path.join(
     project_root,
     "network_modeling",
     "schema",
     "cray-network-hardware-schema.yaml",
 )
-hardware_spec_file = os.path.join(
+hardware_spec_file = path.join(
     project_root,
     "network_modeling",
     "models",
     "cray-network-hardware.yaml",
 )
-architecture_schema_file = os.path.join(
+architecture_schema_file = path.join(
     project_root,
     "network_modeling",
     "schema",
     "cray-network-architecture-schema.yaml",
 )
-architecture_spec_file = os.path.join(
+architecture_spec_file = path.join(
     project_root,
     "network_modeling",
     "models",
     "cray-network-architecture.yaml",
 )
 
-canu_cache_file = os.path.join(cache_directory(), "canu_cache.yaml")
+canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 
 log = logging.getLogger("validate_shcd")
 
@@ -94,7 +94,7 @@ log = logging.getLogger("validate_shcd")
 @click.option(
     "--architecture",
     "-a",
-    type=click.Choice(["Full", "TDS"], case_sensitive=False),
+    type=click.Choice(["Full", "TDS", "V1"], case_sensitive=False),
     help="Shasta architecture",
     required=True,
     prompt="Architecture type",
@@ -186,6 +186,8 @@ def shcd_cabling(
         architecture = "network_v2"
     elif architecture.lower() == "tds":
         architecture = "network_v2_tds"
+    elif architecture.lower() == "v1":
+        architecture = "network_v1"
 
     # SHCD Parsing
     sheets = []

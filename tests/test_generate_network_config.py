@@ -21,7 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """Test CANU generate network config."""
 import json
-import os
+from os import path
 from pathlib import Path
 
 from click import testing
@@ -34,7 +34,7 @@ from .test_generate_switch_config import sls_input, sls_networks
 test_file_directory = Path(__file__).resolve().parent
 
 test_file_name = "Full_Architecture_Golden_Config_0.0.6.xlsx"
-test_file = os.path.join(test_file_directory, "data", test_file_name)
+test_file = path.join(test_file_directory, "data", test_file_name)
 architecture = "full"
 tabs = "INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners = "J14,T44,J14,T48,J14,T28,J14,T27"

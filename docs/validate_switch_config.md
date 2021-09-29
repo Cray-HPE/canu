@@ -1,6 +1,11 @@
 # Validate Switch Config
 
-After config has been generated, CANU can validate the generated config against running switch config. After running the `validate switch config` command, you will be shown a line by line comparison of the currently running switch config against the config file that was passed in. You will also be given a list of remediation commands that can be typed into the switch to get the running config to match the config file. There will be a summary table at the end highlighting the most important differences between the configs.
+After config has been generated, CANU can validate the generated config against running switch config. The running config can be from either an IP address, or a config file.
+
+- To get running config from an IP address, use the flags `--ip 192.168.1.1 --username USERNAME --password PASSWORD`.
+- To get running config from a file, use the flag `--running RUNNING_CONFIG.cfg` instead.
+
+After running the `validate switch config` command, you will be shown a line by line comparison of the currently running switch config against the config file that was passed in. You will also be given a list of remediation commands that can be typed into the switch to get the running config to match the config file. There will be a summary table at the end highlighting the most important differences between the configs.
 
 - Lines that are red and start with a `-` are in the running config, but not in the config file
 - Lines that are green and start with a `+` are not in the running config, but are in the config file
@@ -8,10 +13,10 @@ After config has been generated, CANU can validate the generated config against 
 
 ## Example
 
-To validate switch config run: `canu validate switch config --ip 192.168.1.1 --username USERNAME --password PASSWORD --config SWITCH_CONFIG.cfg`
+To validate switch config run: `canu validate switch config --ip 192.168.1.1 --username USERNAME --password PASSWORD --generated SWITCH_CONFIG.cfg`
 
 ```bash
-$ canu validate switch config --ip 192.168.1.1 --config sw-spine-001.cfg
+$ canu validate switch config --ip 192.168.1.1 --generated sw-spine-001.cfg
 
 hostname sw-spine-001
 - ntp server 192.168.1.10
@@ -41,14 +46,23 @@ Router:                          1  |
 
 ```
 
+![](images/canu_validate_switch_config.png)
+
+## File Output and JSON
+
+To output the results of the config validation command to a file, append the `--out FILENAME` flag. To get the results as JSON, use the `--json` flag.
+
 ## Flags
 
-| Option       | Description         |
-| ------------ | ------------------- |
-| `--ip`       | Switch IPv4 address |
-| `--username` | Switch username     |
-| `--password` | Switch password     |
-| `--config`   | Config file         |
+| Option        | Description                 |
+| ------------- | --------------------------- |
+| `--ip`        | Switch IPv4 address         |
+| `--username`  | Switch username             |
+| `--password`  | Switch password             |
+| `--running`   | Running config file         |
+| `--generated` | Generated config file       |
+| `--json`      | Bool indicating json output |
+| `--out`       | Name of the output file     |
 
 ---
 

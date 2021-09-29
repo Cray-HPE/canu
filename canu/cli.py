@@ -22,22 +22,23 @@
 """CANU (CSM Automatic Network Utility) floats through a new Shasta network and makes setup a breeze."""
 from collections import defaultdict
 import json
-import os.path
+from os import environ, path
 import sys
 
 import click
 from click_help_colors import HelpColorsCommand, HelpColorsGroup
 import requests
-import ruamel.yaml
+from ruamel.yaml import YAML
 import urllib3
 
-from canu.cache import cache_switch
+from canu.cache import cache
 from canu.config import config
 from canu.generate import generate
 from canu.report import report
+from canu.utils.cache import cache_switch
 from canu.validate import validate
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 # To disable warnings about unsecured HTTPS requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -46,16 +47,16 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
     parent_directory = sys._MEIPASS
 else:
-    parent_directory = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    parent_directory = path.abspath(path.dirname(path.dirname(__file__)))
 
-canu_config_file = os.path.join(parent_directory, "canu", "canu.yaml")
-canu_version_file = os.path.join(parent_directory, "canu", ".version")
+canu_config_file = path.join(parent_directory, "canu", "canu.yaml")
+canu_version_file = path.join(parent_directory, "canu", ".version")
 
 with open(canu_version_file, "r") as version_file:
     version = version_file.read().replace("\n", "")
 
-with open(canu_config_file, "r") as file:
-    canu_config = yaml.load(file)
+with open(canu_config_file, "r") as canu_f:
+    canu_config = yaml.load(canu_f)
 
 CONTEXT_SETTING = {
     "obj": {
@@ -86,6 +87,7 @@ def cli(ctx, cache_minutes):
     ctx.obj["cache_minutes"] = cache_minutes
 
 
+cli.add_command(cache.cache)
 cli.add_command(config.config)
 cli.add_command(generate.generate)
 cli.add_command(report.report)
@@ -175,14 +177,14 @@ def init(ctx, sls_file, auth_token, sls_address, network, out):
         parse_sls_json_for_vendor(input_json_hardware, switch_dict)
 
     else:
-        token = os.environ.get("SLS_TOKEN")
+        token = environ.get("SLS_TOKEN")
 
         # Token file takes precedence over the environmental variable
         if auth_token != token:
             try:
-                with open(auth_token) as f:
-                    data = json.load(f)
-                    token = data["access_token"]
+                with open(auth_token) as auth_f:
+                    auth_data = json.load(auth_f)
+                    token = auth_data["access_token"]
 
             except Exception:
                 return click.secho(
@@ -294,12 +296,13 @@ def parse_sls_json_for_vendor(shasta, switch_dict):
         shasta: The SLS JSON to be parsed.
         switch_dict: Dictionary of IP addresses and hostnames
     """
-    for device in shasta:
-        alias_list = shasta[device].get("ExtraProperties", {}).get("Aliases", [])
+    # for device in shasta:
+    for _key, device in shasta.items():
+        alias_list = device.get("ExtraProperties", {}).get("Aliases", [])
 
         for alias in alias_list:
             if alias.startswith("sw-"):
-                vendor = shasta[device]["ExtraProperties"].get("Brand", "").lower()
+                vendor = device["ExtraProperties"].get("Brand", "").lower()
                 hostname = alias
 
                 switch_json = {
@@ -308,8 +311,6 @@ def parse_sls_json_for_vendor(shasta, switch_dict):
                     "vendor": vendor,
                 }
                 cache_switch(switch_json)
-
-    return
 
 
 if __name__ == "__main__":  # pragma: no cover

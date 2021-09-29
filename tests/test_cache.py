@@ -27,12 +27,12 @@ from click import testing
 import pytest
 import responses
 
-from canu.cache import (
+from canu.cli import cli
+from canu.utils.cache import (
     firmware_cached_recently,
     get_switch_from_cache,
     remove_switch_from_cache,
 )
-from canu.cli import cli
 
 
 username = "admin"

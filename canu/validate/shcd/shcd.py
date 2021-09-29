@@ -23,7 +23,7 @@
 from collections import defaultdict
 import json
 import logging
-import os
+from os import path
 from pathlib import Path
 import re
 import sys
@@ -46,31 +46,31 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent.parent
 
 # Schema and Data files
-json_schema_file = os.path.join(
+json_schema_file = path.join(
     project_root,
     "network_modeling",
     "schema",
     "cray-system-topology-schema.json",
 )
-hardware_schema_file = os.path.join(
+hardware_schema_file = path.join(
     project_root,
     "network_modeling",
     "schema",
     "cray-network-hardware-schema.yaml",
 )
-hardware_spec_file = os.path.join(
+hardware_spec_file = path.join(
     project_root,
     "network_modeling",
     "models",
     "cray-network-hardware.yaml",
 )
-architecture_schema_file = os.path.join(
+architecture_schema_file = path.join(
     project_root,
     "network_modeling",
     "schema",
     "cray-network-architecture-schema.yaml",
 )
-architecture_spec_file = os.path.join(
+architecture_spec_file = path.join(
     project_root,
     "network_modeling",
     "models",
@@ -314,21 +314,21 @@ def validate_shcd_slot_data(cell, sheet, warnings, is_src_slot=False):
             warnings["shcd_slot_data"].append(sheet + ":" + location)
             log.warning(
                 'Prepending the character "s" to a slot will not be allowed in the future. '
-                f"Please correct cell {sheet}:{location} in the SHCD with value {slot} and prefer pcie-slot1.",
+                + f"Please correct cell {sheet}:{location} in the SHCD with value {slot} and prefer pcie-slot1.",
             )
             slot = "pcie-slot" + slot[1:]
         if slot and slot == "pci":
             warnings["shcd_slot_data"].append(sheet + ":" + location)
             log.warning(
                 "The name pcie alone as a slot will not be allowed in the future"
-                f"Please correct cell {sheet}:{location} in the SHCD with value {slot} and prefer pcie-slot1.",
+                + f"Please correct cell {sheet}:{location} in the SHCD with value {slot} and prefer pcie-slot1.",
             )
             slot = "pcie-slot1"
         if slot not in valid_slot_names:
             warnings["shcd_slot_data"].append(sheet + ":" + location)
             log.warning(
                 f"Slots must be named from the following list {valid_slot_names}."
-                f"Please correct cell {sheet}:{location} in the SHCD with value {slot}.",
+                + f"Please correct cell {sheet}:{location} in the SHCD with value {slot}.",
             )
         if not slot:
             slot = None
@@ -340,7 +340,7 @@ def validate_shcd_slot_data(cell, sheet, warnings, is_src_slot=False):
             warnings["shcd_slot_data"].append(f"{sheet}:{location}")
             log.warning(
                 'A source slot of type "bmc" for servers or "mgmt" for switches must be specified in the HMN tab. '
-                f"Please correct the SHCD for {sheet}:{location} with an empty value.",
+                + f"Please correct the SHCD for {sheet}:{location} with an empty value.",
             )
             slot = "bmc"
 
@@ -368,26 +368,26 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False):
         if not port:
             log.fatal(
                 "A port number must be specified. "
-                f"Please correct the SHCD for {sheet}:{location} with an empty value",
+                + f"Please correct the SHCD for {sheet}:{location} with an empty value",
             )
             exit(1)
         if port[0] == "j":
             warnings["shcd_port_data"].append(f"{sheet}:{location}")
             log.warning(
                 'Prepending the character "j" to a port will not be allowed in the future. '
-                f"Please correct cell {sheet}:{location} in the SHCD with value {port}",
+                + f"Please correct cell {sheet}:{location} in the SHCD with value {port}",
             )
             port = port[1:]
         if re.search(r"\D", port) is not None:
             log.fatal(
                 "Port numbers must be integers. "
-                f'Please correct in the SHCD for cell {sheet}:{location} with value "{port}"',
+                + f'Please correct in the SHCD for cell {sheet}:{location} with value "{port}"',
             )
             sys.exit(1)
         if int(port) < 1:
             log.fatal(
                 "Ports numbers must be greater than 1. Port numbering must begin at 1. "
-                f'Please correct in the SHCD for cell {sheet}:{location} with value "{port}"',
+                + f'Please correct in the SHCD for cell {sheet}:{location} with value "{port}"',
             )
             sys.exit(1)
         if is_src_port:
@@ -398,14 +398,14 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False):
                 warnings["shcd_port_conventions"].append(f"{sheet}:{location}")
                 log.warning(
                     f'Bad slot/port convention for port "j{port}" in location {sheet}:{location}.'
-                    f'This should be slot "bmc" for servers and "mgmt" for switches, and port "1".',
+                    + 'This should be slot "bmc" for servers and "mgmt" for switches, and port "1".',
                 )
                 port = 1
 
     if port is None:
         log.fatal(
             "A port number must be specified. "
-            f"Please correct the SHCD for {sheet}:{location} with an empty value",
+            + f"Please correct the SHCD for {sheet}:{location} with an empty value",
         )
         exit(1)
 
@@ -461,9 +461,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             )
             sys.exit(1)
 
-        #
         # Process Headers
-        #
         required_header = [
             "Source",
             "Rack",
@@ -534,9 +532,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 )
                 sys.exit(1)
 
-        #
         # Process Data
-        #
         block = block[1:]
         for row in block:
             # Cable source
@@ -710,8 +706,8 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     log.fatal(
                         click.secho(
                             f"Failed to connect {src_node.common_name()} "
-                            f"to {dst_node.common_name()} bi-directionally "
-                            f"while working on sheet {sheet}, row {current_row}.",
+                            + f"to {dst_node.common_name()} bi-directionally "
+                            + f"while working on sheet {sheet}, row {current_row}.",
                             fg="red",
                         ),
                     )
@@ -725,18 +721,18 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     log.error(
                         click.secho(
                             f"Failed to connect {src_node.common_name()}"
-                            f" to {dst_node.common_name()} bi-directionally",
+                            + f" to {dst_node.common_name()} bi-directionally",
                             fg="red",
                         ),
                     )
                     for node in node_list:
                         click.secho(
                             f"Node {node.id()} named {node.common_name()} connects "
-                            f"to {len(node.edges())} ports on nodes: {node.edges()}",
+                            + f"to {len(node.edges())} ports on nodes: {node.edges()}",
                         )
                     log.fatal(
                         f"Failed to connect {src_node.common_name()} "
-                        f"to {dst_node.common_name()} bi-directionally",
+                        + f"to {dst_node.common_name()} bi-directionally",
                     )
                     sys.exit(1)  # TODO: this should probably be an exception
     wb.close()
@@ -764,8 +760,8 @@ def node_list_warnings(node_list, warnings):
         if warnings["node_type"]:
             click.secho(
                 "\nNode type could not be determined for the following."
-                "\nThese nodes are not currently included in the model."
-                "\n(This may be a missing architectural definition/lookup or a spelling error)",
+                + "\nThese nodes are not currently included in the model."
+                + "\n(This may be a missing architectural definition/lookup or a spelling error)",
                 fg="red",
             )
             click.secho(dash)
@@ -784,7 +780,7 @@ def node_list_warnings(node_list, warnings):
         if warnings["zero_connections"]:
             click.secho(
                 "\nThe following nodes have zero connections"
-                "\n(The node type may not have been found or no connections are present)",
+                + "\n(The node type may not have been found or no connections are present)",
                 fg="red",
             )
             click.secho(dash)
@@ -810,7 +806,7 @@ def node_list_warnings(node_list, warnings):
         if warnings["shcd_port_data"]:
             click.secho(
                 '\nSHCD port definitions are using a deprecated "j" prefix'
-                '\n(Remove the prepended "j" in each cell to correct)',
+                + '\n(Remove the prepended "j" in each cell to correct)',
                 fg="red",
             )
             click.secho(dash)
@@ -827,8 +823,8 @@ def node_list_warnings(node_list, warnings):
         if warnings["shcd_port_conventions"]:
             click.secho(
                 "\nSHCD port convention in the HMN tab is to use port 3 to represent BMCs."
-                '\n(Correct the values in the following cells to use a Slot of "bmc" and a port of "1" for servers)'
-                '\n(Correct the values in the following cells to use a Slot of "mgmt" and a port of "1" for switches)',
+                + '\n(Correct the values in the following cells to use a Slot of "bmc" and a port of "1" for servers)'
+                + '\n(Correct the values in the following cells to use a Slot of "mgmt" and a port of "1" for switches)',
                 fg="red",
             )
             click.secho(dash)
@@ -845,7 +841,7 @@ def node_list_warnings(node_list, warnings):
         if warnings["shcd_slot_data"]:
             click.secho(
                 "\nSHCD slot definitions used are either deprecated, missing or incorrect."
-                '\n(Correct values in the following cells to be appropriate values of ["bmc", "ocp", "pcie-slot1, "mgmt", None]',
+                + '\n(Correct values in the following cells to be appropriate values of ["bmc", "ocp", "pcie-slot1, "mgmt", None]',
                 fg="red",
             )
             click.secho(dash)
@@ -937,7 +933,7 @@ def json_output(node_list, out, json_schema_file):
     except jsonschema.exceptions.SchemaError as err:
         click.secho(
             f"Schema {json_schema_file} is invalid: {[x.message for x in err.context]}\n"
-            "Cannot generate and write Topology JSON file.",
+            + "Cannot generate and write Topology JSON file.",
             fg="red",
         )
         exit(1)

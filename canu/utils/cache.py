@@ -23,12 +23,15 @@
 
 import datetime
 from operator import itemgetter
-import os.path
+from os import path
 from pathlib import Path
 import sys
 import tempfile
 
-import ruamel.yaml
+import click
+from ruamel.yaml import YAML
+
+yaml = YAML()
 
 
 def cache_directory():
@@ -41,37 +44,36 @@ def cache_directory():
     """
     try:
         basedir = Path.home()
-        cachedir = os.path.join(basedir, ".canu")
+        cachedir = path.join(basedir, ".canu")
     except Exception:
         basedir = tempfile.gettempdir()
-        cachedir = os.path.join(basedir, ".canu")
+        cachedir = path.join(basedir, ".canu")
 
     try:
         Path(cachedir).mkdir(parents=True, exist_ok=True)
     except Exception:
-        print(f"Cannot create cache directory: {cachedir}")
+        click.secho(f"Cannot create cache directory: {cachedir}", fg="red")
         sys.exit(1)
 
     return cachedir
 
 
-yaml = ruamel.yaml.YAML()
-
-# To get the canu_cache.yaml file
+# Get project root directory
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
-    parent_directory = sys._MEIPASS
+    project_root = sys._MEIPASS
 else:
-    parent_directory = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    prog = __file__
+    project_root = Path(__file__).resolve().parent.parent.parent
 
-canu_cache_file = os.path.join(cache_directory(), "canu_cache.yaml")
-canu_version_file = os.path.join(parent_directory, "canu", ".version")
+canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
+canu_version_file = path.join(project_root, "canu", ".version")
 
-file_exists = os.path.isfile(canu_cache_file)
+file_exists = path.isfile(canu_cache_file)
 
 # Open the Cache file, and generate it if it does not exist
 if file_exists:  # pragma: no cover
-    with open(canu_cache_file, "r+") as file:
-        canu_cache = yaml.load(file)
+    with open(canu_cache_file, "r+") as canu_exist_f:
+        canu_cache = yaml.load(canu_exist_f)
     if canu_cache is None:
         with open(canu_version_file, "r") as version_file:
             version = version_file.read().replace("\n", "")
@@ -80,18 +82,18 @@ if file_exists:  # pragma: no cover
             f.write(f"version: {version}\n")
             f.write("switches:\n")
 
-        with open(canu_cache_file, "r+") as file:
-            canu_cache = yaml.load(file)
+        with open(canu_cache_file, "r+") as canu_f:
+            canu_cache = yaml.load(canu_f)
 else:  # pragma: no cover
-    with open(canu_version_file, "r") as version_file:
-        version = version_file.read().replace("\n", "")
+    with open(canu_version_file, "r") as version_f:
+        version = version_f.read().replace("\n", "")
 
-    with open(canu_cache_file, "w+") as f:
-        f.write(f"version: {version}\n")
-        f.write("switches:\n")
+    with open(canu_cache_file, "w+") as new_cache_f:
+        new_cache_f.write(f"version: {version}\n")
+        new_cache_f.write("switches:\n")
 
-    with open(canu_cache_file, "r+") as file:
-        canu_cache = yaml.load(file)
+    with open(canu_cache_file, "r+") as canu_file:
+        canu_cache = yaml.load(canu_file)
 
 
 def cache_switch(switch):
@@ -104,13 +106,13 @@ def cache_switch(switch):
 
     The updated cache is immediately written to a file.
     """
-    if ip_exists_in_cache(switch["ip_address"]):
+    if ip_exists_in_cache(str(switch["ip_address"])):
         updated_cache = update_switch_in_cache(canu_cache, switch)
     else:
         updated_cache = add_switch_to_cache(canu_cache, switch)
 
-    with open(canu_cache_file, "w") as f:
-        yaml.dump(updated_cache, f)
+    with open(canu_cache_file, "w") as cache_f:
+        yaml.dump(updated_cache, cache_f)
 
 
 def firmware_cached_recently(ip, max_cache_time=10):
@@ -208,9 +210,6 @@ def remove_switch_from_cache(ip):
 
     Args:
         ip: The IPv4 address to remove from the cache.
-
-    Returns:
-        The updated JSON cache with the switch appended
     """
     try:
         index = list(map(itemgetter("ip_address"), canu_cache["switches"])).index(ip)
@@ -218,11 +217,10 @@ def remove_switch_from_cache(ip):
         updated_cache = canu_cache
         updated_cache["switches"].pop(index)
 
-        with open(canu_cache_file, "w") as f:
-            yaml.dump(updated_cache, f)
+        with open(canu_cache_file, "w") as canu_f:
+            yaml.dump(updated_cache, canu_f)
     except ValueError:
-        print(f"{ip} not in cache")
-    return
+        click.secho(f"{ip} not in cache", fg="red")
 
 
 def ip_exists_in_cache(ip):

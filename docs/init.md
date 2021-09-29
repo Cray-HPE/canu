@@ -21,6 +21,8 @@ $ canu init --sls-file SLS_FILE --out output.txt
 8 IP addresses saved to output.txt
 ```
 
+![](images/canu_init.png)
+
 ### 2. SLS Shasta API
 
 To get the switch IP addresses from the Shasta SLS API, run the command:

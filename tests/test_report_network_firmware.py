@@ -27,8 +27,8 @@ from netmiko import ssh_exception
 import requests
 import responses
 
-from canu.cache import remove_switch_from_cache
 from canu.cli import cli
+from canu.utils.cache import remove_switch_from_cache
 
 
 shasta = "1.4"

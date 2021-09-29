@@ -27,8 +27,8 @@ from openpyxl import Workbook
 import requests
 import responses
 
-from canu.cache import remove_switch_from_cache
 from canu.cli import cli
+from canu.utils.cache import remove_switch_from_cache
 
 
 architecture = "tds"

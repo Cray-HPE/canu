@@ -515,7 +515,7 @@ def test_validate_bgp_bad_password(switch_vendor):
         )
         assert result.exit_code == 0
         assert (
-            "Error connecting to switch 192.168.1.1, check that this IP is an Aruba switch, or check the username or password"
+            "Error connecting to switch 192.168.1.1, check the username or password"
             in str(result.output)
         )
 

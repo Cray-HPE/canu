@@ -24,7 +24,7 @@ from collections import defaultdict
 import datetime
 import ipaddress
 import json
-import os.path
+from os import path
 from pathlib import Path
 import sys
 
@@ -36,19 +36,19 @@ import click_spinner
 import emoji
 from netmiko import ssh_exception
 import requests
-import ruamel.yaml
+from ruamel.yaml import YAML
 
 
-from canu.cache import cache_switch
 from canu.report.switch.firmware.firmware import (
     get_firmware_aruba,
     get_firmware_dell,
     get_firmware_mellanox,
 )
+from canu.utils.cache import cache_switch
 from canu.utils.vendor import switch_vendor
 
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 
 # Get project root directory
@@ -58,7 +58,7 @@ else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
-canu_config_file = os.path.join(project_root, "canu", "canu.yaml")
+canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
 # Get Shasta versions from canu.yaml
 with open(canu_config_file, "r") as file:

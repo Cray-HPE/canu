@@ -27,7 +27,7 @@ import click
 from netmiko import ssh_exception, SSHDetect
 import requests
 
-from canu.cache import (
+from canu.utils.cache import (
     cache_switch,
     get_switch_from_cache,
 )
@@ -50,8 +50,6 @@ def switch_vendor(
         vendor: The switch vendor.
 
     Raises:
-        timeout: Bad IP address.
-        auth_err: Bad credentials
         Exception: Unknown error
         NetmikoTimeoutException: Could not determine switch vendor
     """
@@ -105,9 +103,9 @@ def switch_vendor(
                 "autodetect",
             )
 
-            aruba_match = re.search(r"ArubaOS", remote_version)
-            dell_match = re.search(r"Dell EMC Networking", remote_version)
-            mellanox_match = re.search(r"Mellanox", remote_version)
+            aruba_match = re.search("ArubaOS", remote_version)
+            dell_match = re.search("Dell EMC Networking", remote_version)
+            mellanox_match = re.search("Mellanox", remote_version)
 
             if aruba_match:
                 vendor = "aruba"
@@ -129,32 +127,26 @@ def switch_vendor(
         }
 
         cache_switch(switch_cache)
-    except ssh_exception.NetmikoTimeoutException as timeout:
+
+    except (
+        ssh_exception.NetmikoTimeoutException,
+        ssh_exception.NetmikoAuthenticationException,
+        Exception,
+    ) as err:
         if return_error:
-            raise timeout
+            raise err
+
+        exception_type = type(err).__name__
+
+        if exception_type == "NetmikoTimeoutException":
+            error_message = f"Timeout error connecting to switch {ip}, check the IP address and try again."
+        elif exception_type == "NetmikoAuthenticationException":
+            error_message = f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again."
         else:
-            click.secho(
-                f"Timeout error connecting to switch {ip}, check the IP address and try again.",
-                fg="white",
-                bg="red",
-            )
-            return None
-    except ssh_exception.NetmikoAuthenticationException as auth_err:
-        if return_error:
-            raise auth_err
-        click.secho(
-            f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again.",
-            fg="white",
-            bg="red",
-        )
-        return None
-    except Exception as error:  # pragma: no cover
-        if return_error:
-            raise error
-        exception_type = type(error).__name__
+            error_message = f"{exception_type}, {err}."
 
         click.secho(
-            f"{exception_type} {error}",
+            error_message,
             fg="white",
             bg="red",
         )
@@ -184,14 +176,6 @@ def check_aruba(ip, credentials):
         # Logout
         session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
 
-        # Put vendor in cache
-        switch_cache = {
-            "ip_address": ip,
-            "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "vendor": "aruba",
-        }
-
-        cache_switch(switch_cache)
     except (
         requests.exceptions.HTTPError,
         requests.exceptions.ConnectionError,
@@ -199,8 +183,16 @@ def check_aruba(ip, credentials):
     ):
         return False
 
-    else:
-        return True
+    # Put vendor in cache
+    switch_cache = {
+        "ip_address": str(ip),
+        "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "vendor": "aruba",
+    }
+
+    cache_switch(switch_cache)
+
+    return True
 
 
 def check_dell(ip, credentials):
@@ -220,14 +212,6 @@ def check_dell(ip, credentials):
         response = session.get(url, auth=auth, verify=False)
         response.raise_for_status()
 
-        # Put vendor in cache
-        switch_cache = {
-            "ip_address": ip,
-            "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "vendor": "dell",
-        }
-
-        cache_switch(switch_cache)
     except (
         requests.exceptions.HTTPError,
         requests.exceptions.ConnectionError,
@@ -235,8 +219,16 @@ def check_dell(ip, credentials):
     ):
         return False
 
-    else:
-        return True
+    # Put vendor in cache
+    switch_cache = {
+        "ip_address": str(ip),
+        "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "vendor": "dell",
+    }
+
+    cache_switch(switch_cache)
+
+    return True
 
 
 def check_mellanox(ip, credentials):
@@ -255,14 +247,6 @@ def check_mellanox(ip, credentials):
         response = session.get(url, json=credentials, verify=False)
         response.raise_for_status()
 
-        # Put vendor in cache
-        switch_cache = {
-            "ip_address": ip,
-            "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "vendor": "mellanox",
-        }
-
-        cache_switch(switch_cache)
     except (
         requests.exceptions.HTTPError,
         requests.exceptions.ConnectionError,
@@ -270,5 +254,13 @@ def check_mellanox(ip, credentials):
     ):
         return False
 
-    else:
-        return True
+    # Put vendor in cache
+    switch_cache = {
+        "ip_address": str(ip),
+        "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "vendor": "mellanox",
+    }
+
+    cache_switch(switch_cache)
+
+    return True

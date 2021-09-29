@@ -81,6 +81,8 @@ sw-leaf-bmc-001 : Found in SHCD but not found on the network.
 uan001          : Found in SHCD but not found on the network.
 ```
 
+![](images/canu_validate_shcd_cabling.png)
+
 The output of the `validate shcd-cabling` command will show the results for `validate shcd`, `validate cabling`, and then a comparison of the two results. If there are nodes found on the SHCD, or on the network that are not found in the other one, it will be displayed in _blue_. If a node is found on both the network and in the SHCD, but the connections are not the same, it will be shown in _green_, and the missing connections will be shown.
 
 ## Flags
