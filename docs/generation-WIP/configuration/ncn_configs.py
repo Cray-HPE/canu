@@ -32,8 +32,8 @@ import yamale
 yaml = YAML()
 
 
-cabling_file = "../cabling/standards/cabling.yaml"
-yamale_schema = "../cabling/standards/cabling_schema.yaml"
+cabling_file = "../../../network_modeling/cabling/standards/cabling.yaml"
+yamale_schema = "../../../network_modeling/cabling/standards/cabling_schema.yaml"
 template_file = "edge_port_config.j2"
 
 schema = yamale.make_schema(yamale_schema)
@@ -106,7 +106,7 @@ for node in cabling["nodes"]:
 pprint.pprint(cabling["nodes"])  # noqa:WPS421
 # Load template and process
 
-file_loader = FileSystemLoader("templates")
+file_loader = FileSystemLoader("../../../network_modeling/configs/templates")
 env = Environment(
     loader=file_loader,
     trim_blocks=True,
@@ -116,5 +116,5 @@ output = template.render(cabling=cabling)
 print(output)  # noqa:WPS421
 
 # print(output, file=open("../models/output.md", "a"))
-with open("port_configs.md", "w") as file_output:
+with open("sample_port_configs.md", "w") as file_output:
     file_output.write(output)
