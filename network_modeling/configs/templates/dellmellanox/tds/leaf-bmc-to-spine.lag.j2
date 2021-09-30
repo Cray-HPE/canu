@@ -3,23 +3,16 @@
 {%- for node in cabling.nodes if node.subtype == "spine" %}
 {%- if ns.lag_displayed == false %}
 {%- set ns.lag_displayed = true %}
-interface lag 255
-  .
-.
-.
-.
-.
+
+interface ethernet{{ node.config.PORT }}
+    description {{ node.config.DESCRIPTION }}
+    no shutdown
+    channel-group {{ node.config.LAG_NUMBER }} mode active
+    no switchport
+    mtu 9216
+    speed 10000
 
 {%- endif %}
-{%- endfor %}
-
-{%- for node in cabling.nodes if node.subtype == "spine"%}
-interface {{ node.config.PORT }}
-.
-.
-.
-.
-.
 
 {%- endfor %}
 {#- end leaf-bmc-to-spine #}% 
