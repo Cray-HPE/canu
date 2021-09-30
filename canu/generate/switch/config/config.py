@@ -593,7 +593,7 @@ def generate_switch_config(
                 if switch_name in override_tags:
                     options = yaml.load(open(options_file))
                     host = Host(switch_name, "aoscx", options)
-                    override_config = """# OVERRIDE CONFIG
+                    override_config = """# OVERRIDE CONFIG,
 # The configuration below has been ignored and is not included in the GENERATED CONFIG
 """
                     override_config_hier = HConfig(host=host)
@@ -625,9 +625,10 @@ def generate_switch_config(
                     return override_config, devices
         except FileNotFoundError:
             click.secho(
-                "The override .yaml file was not found, check that you entered the right file.",
+                "The override yaml file was not found, check that you entered the right file name and path.",
                 fg="red",
             )
+            exit(1)
 
     return switch_config, devices
 
