@@ -13,8 +13,9 @@ interface ethernet{{ node.config.PORT }}
     mtu 9216
     speed 10000
 
+{%- endfor %}
 
 {%- endif %}
 {%- endfor %}
 
-{{#- end leaf-bmc-to-leaf #}
+{#- end leaf-bmc-to-leaf #}

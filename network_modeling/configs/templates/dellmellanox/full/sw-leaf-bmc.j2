@@ -69,6 +69,6 @@ interface vlan 4
 snmp-server vrf default
 
 router ospf 1
-router-id {{ variables.LOOPBACK }}
+router-id {{ variables.LOOPBACK_IP }}
 
 {# end sw-leaf-bmc #}
