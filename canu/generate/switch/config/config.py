@@ -593,29 +593,30 @@ def generate_switch_config(
                 if switch_name in override_tags:
                     options = yaml.load(open(options_file))
                     host = Host(switch_name, "aoscx", options)
-                    override_config = "!OVERRIDE CONFIG" + "\n"
+                    override_config = """# OVERRIDE CONFIG
+# The configuration below has been ignored and is not included in the GENERATED CONFIG
+"""
                     override_config_hier = HConfig(host=host)
                     override_config_hier.load_from_string(switch_config).add_tags(
-                        override_tags[switch_name]
+                        override_tags[switch_name],
                     )
                     for line in override_config_hier.all_children_sorted_by_tags(
-                        "override", None
+                        "override",
+                        None,
                     ):
                         override_config = (
-                            override_config + "\n" + "!" + line.cisco_style_text()
+                            override_config + "\n" + "#" + line.cisco_style_text()
                         )
-                    dash = "!" * 60
                     override_config = (
-                        override_config
-                        + "\n"
-                        + dash
-                        + "\n"
-                        + "!GENERATED CONFIG"
-                        + "\n"
-                        + dash
+                        override_config + """
+
+
+#GENERATED CONFIG
+"""
                     )
                     for line in override_config_hier.all_children_sorted_by_tags(
-                        None, "override"
+                        None,
+                        "override",
                     ):
                         override_config = (
                             override_config + "\n" + line.cisco_style_text()
