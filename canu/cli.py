@@ -39,12 +39,15 @@ from canu.utils.cache import cache_switch
 from canu.validate import validate
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 yaml = YAML()
 =======
 from canu.test import test
 =======
 >>>>>>> 95f14f8 (remove canu.test)
+=======
+>>>>>>> 95f14f8623d98998d50b39ed5f35b7568d4a6404
 yaml = ruamel.yaml.YAML()
 >>>>>>> a91de8c (added override option)
 
