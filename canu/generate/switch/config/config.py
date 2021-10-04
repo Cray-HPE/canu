@@ -610,7 +610,7 @@ def generate_switch_config(
                     override_config = (
                         override_config
                         + """
-# #GENERATED CONFIG
+# GENERATED CONFIG
 # """
                     )
                     for line in override_config_hier.all_children_sorted_by_tags(

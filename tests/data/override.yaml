@@ -35,86 +35,86 @@ sw-leaf-001:
   add_tags: override
 
 sw-leaf-002:
-  - lineage:
-    - startswith: vsx
-    - startswith:
-      - inter-switch-link
-    add_tags: override
-  - lineage:
-    - contains: loopback 0
-    - startswith:
-      - ip address
-    add_tags: override
-  - lineage: 
-    - equals: ssh server vrf keepalive
-    add_tags: override
+- lineage:
+  - startswith: vsx
+  - startswith:
+    - inter-switch-link
+  add_tags: override
+- lineage:
+  - contains: loopback 0
+  - startswith:
+    - ip address
+  add_tags: override
+- lineage: 
+  - equals: ssh server vrf keepalive
+  add_tags: override
 
 sw-leaf-003:
-  - lineage:
-    - startswith: vsx
-    - startswith:
-      - inter-switch-link
-    add_tags: override
-  - lineage:
-    - contains: loopback 0
-    - startswith:
-      - ip address
-    add_tags: override
-  - lineage: 
-    - equals: ssh server vrf keepalive
-    add_tags: override
+- lineage:
+  - startswith: vsx
+  - startswith:
+    - inter-switch-link
+  add_tags: override
+- lineage:
+  - contains: loopback 0
+  - startswith:
+    - ip address
+  add_tags: override
+- lineage: 
+  - equals: ssh server vrf keepalive
+  add_tags: override
 
 sw-leaf-004:
-  - lineage:
-    - startswith: vsx
-    - startswith:
-      - inter-switch-link
-    add_tags: override
-  - lineage:
-    - contains: loopback 0
-    - startswith:
-      - ip address
-    add_tags: override
-  - lineage: 
-    - equals: ssh server vrf keepalive
-    add_tags: override
+- lineage:
+  - startswith: vsx
+  - startswith:
+    - inter-switch-link
+  add_tags: override
+- lineage:
+  - contains: loopback 0
+  - startswith:
+    - ip address
+  add_tags: override
+- lineage: 
+  - equals: ssh server vrf keepalive
+  add_tags: override
 
 sw-cdu-001:
-  - lineage:
-    - startswith: vsx
-    - startswith:
-      - inter-switch-link
-    add_tags: override
-  - lineage:
-    - contains: loopback 0
-    - startswith:
-      - ip address
-    add_tags: override
-  - lineage: 
-    - equals: ssh server vrf keepalive
-    add_tags: override
+- lineage:
+  - startswith: vsx
+  - startswith:
+    - inter-switch-link
+  add_tags: override
+- lineage:
+  - contains: loopback 0
+  - startswith:
+    - ip address
+  add_tags: override
+- lineage: 
+  - equals: ssh server vrf keepalive
+  add_tags: override
 
 sw-cdu-002:
-  - lineage:
-    - startswith: vsx
-    - startswith:
-      - inter-switch-link
-    add_tags: override
-  - lineage:
-    - contains: loopback 0
-    - startswith:
-      - ip address
-    add_tags: override
-  - lineage: 
-    - equals: ssh server vrf keepalive
-    add_tags: override
+- lineage:
+  - startswith: vsx
+  - startswith:
+    - inter-switch-link
+  add_tags: override
+- lineage:
+  - contains: loopback 0
+  - startswith:
+    - ip address
+  add_tags: override
+- lineage: 
+  - equals: ssh server vrf keepalive
+  add_tags: override
 
 sw-leaf-bmc-001:
-  - lineage:
-    - startswith: interface vlan 2
-    - startswith:
-      - ip address
-    add_tags: override
-  - lineage: 
-    - equals: ssh server vrf mgmt
-    add_tags: override
+- lineage:
+  - startswith: interface vlan 2
+  - startswith:
+    - ip address
+  add_tags: override
+- lineage: 
+  - equals: ssh server vrf mgmt
+  add_tags: override
