@@ -12,6 +12,7 @@ interface vlan {{ cabinet.VlanID }}
     active-gateway ip {{ cabinet.Gateway }}
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
+    ip ospf passive
 
 {%- endfor %}
 {#- end mtn_nmn_vlan #}

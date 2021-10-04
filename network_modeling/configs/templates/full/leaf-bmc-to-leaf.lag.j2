@@ -8,7 +8,7 @@ interface lag 255
     description leaf_bmc_to_leaf_lag
     no routing
     vlan trunk native 1
-    vlan trunk allowed 2,4
+    vlan trunk allowed 1-2,4
     lacp mode active
 {%- endif %}
 {%- endfor %}

@@ -210,6 +210,9 @@ negation_negate_with:
       - startswith: spanning-tree bpdu-guard
     use: no spanning-tree bpdu-guard timeout
   - lineage:
+      - startswith: spanning-tree bpdu-guard
+    use: no spanning-tree bpdu-guard timeout
+  - lineage:
       - startswith: interface lag 1 multi-chassis
     use: no interface lag 1
   - lineage:
