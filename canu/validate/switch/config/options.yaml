@@ -141,6 +141,8 @@ per_line_sub:
     replace: ""
   - search: ^crypto key generate rsa general-keys.*$
     replace: ""
+  - search: vsf
+    replace: ""
 idempotent_commands_blacklist: []
 
 # These commands do not require negation, they simply overwrite themselves
