@@ -31,8 +31,8 @@ import yamale
 yaml = YAML()
 
 
-cabling_file = "./standards/cabling.yaml"
-yamale_schema = "./standards/cabling_schema.yaml"
+cabling_file = "../../../network_modeling/cabling/standards/cabling.yaml"
+yamale_schema = "../../../network_modeling/cabling/standards/cabling_schema.yaml"
 template_file = "cabling.md.j2"
 
 schema = yamale.make_schema(yamale_schema)

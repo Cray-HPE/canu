@@ -855,6 +855,13 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 - Command line option --csi-folder has changed to --sls-file. Any SLS JSON file can be used.
 - Installation via pip now supports non-developer modes. Pyinstaller binary and RPM now work as advertised.
 - The directory of canu_cache.yaml is now dynamically configured in the user's home directory (preferred), or the system temporary directory depending on filesystem permissions.
+- Added `canu cache location` print the folder where your cache is located
+- Added `canu cache print` to print a colored version of your cache to the screen
+- Added `canu cache delete` to delete the cache file, the file will be created again on the next canu command
+- Added Dell and Mellanox support to the `canu validate switch config` command
+- Added Dell and Mellanox support to the `canu validate network config` command
+- Added ability to compare two config files with `canu validate switch config`
+- Added ability to compare two config folders with `canu validate network config`
 
 ## [unreleased]
 
