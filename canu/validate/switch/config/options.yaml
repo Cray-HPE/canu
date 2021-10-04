@@ -82,6 +82,8 @@ ordering:
     order: 960
 # adds +1 indent to lines following start_expression and removes the +1 indent for lines following end_expression
 indent_adjust: []
+  # - start_expression: "system-mac"
+  #   end_expression: "vsx-sync"
 parent_allows_duplicate_child: []
 sectional_exiting:
   # This rule is used in the hierarchical_configuration unit test for .add_section_exiting()
@@ -139,6 +141,8 @@ per_line_sub:
     replace: ""
   - search: ^crypto key generate rsa general-keys.*$
     replace: ""
+  - search: "  "
+    replace: "    "
 idempotent_commands_blacklist: []
 
 # These commands do not require negation, they simply overwrite themselves

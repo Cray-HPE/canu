@@ -22,6 +22,7 @@
 """CANU generate switch config commands."""
 from collections import defaultdict
 import json
+import os
 from os import environ, path
 from pathlib import Path
 import re
@@ -206,15 +207,7 @@ def config(
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         out: Name of the output file
-<<<<<<< HEAD
-<<<<<<< HEAD
-        override: Input file that defines what config should be ignored
-=======
         override: Input file to ignore switch configuration
->>>>>>> a91de8c (added override option)
-=======
-        override: Input file that defines what config should be ignored
->>>>>>> 9aa5a0d (format)
     """
     if architecture.lower() == "full":
         architecture = "network_v2"
@@ -389,7 +382,6 @@ def config(
 
     if override:
         click.secho(f"{switch_name} Override Switch Config", fg="yellow")
-    else:
         click.secho(f"{switch_name} Switch Config", fg="bright_white")
     click.echo(switch_config, file=out)
     return
@@ -601,57 +593,7 @@ def generate_switch_config(
                 if switch_name in override_tags:
                     options = yaml.load(open(options_file))
                     host = Host(switch_name, "aoscx", options)
-                    override_config = "!OVERRIDE CONFIG" + "\n"
-                    override_config_hier = HConfig(host=host)
-                    override_config_hier.load_from_string(switch_config).add_tags(
-                        override_tags[switch_name]
-                    )
-                    for line in override_config_hier.all_children_sorted_by_tags(
-                        "override", None
-                    ):
-                        override_config = (
-                            override_config + "\n" + "!" + line.cisco_style_text()
-                        )
-                    dash = "!" * 60
-                    override_config = (
-                        override_config
-                        + "\n"
-                        + dash
-                        + "\n"
-                        + "!GENERATED CONFIG"
-                        + "\n"
-                        + dash
-                    )
-                    for line in override_config_hier.all_children_sorted_by_tags(
-                        None, "override"
-                    ):
-                        override_config = (
-                            override_config + "\n" + line.cisco_style_text()
-                        )
-
-                    return override_config, devices
-        except FileNotFoundError:
-            click.secho(
-                "The override .yaml file was not found, check that you entered the right file.",
-                fg="red",
-            )
-
-    if override:
-        try:
-            with open(os.path.join(override), "r") as f:
-                options_file = os.path.join(
-                    project_root,
-                    "canu",
-                    "validate",
-                    "switch",
-                    "config",
-                    "options.yaml",
-                )
-                override_tags = yaml.load(f)
-                if switch_name in override_tags:
-                    options = yaml.load(open(options_file))
-                    host = Host(switch_name, "aoscx", options)
-                    override_config = """# OVERRIDE CONFIG,
+                    override_config = """# OVERRIDE CONFIG
 # The configuration below has been ignored and is not included in the GENERATED CONFIG
 """
                     override_config_hier = HConfig(host=host)
@@ -666,24 +608,31 @@ def generate_switch_config(
                             override_config + "\n" + "#" + line.cisco_style_text()
                         )
                     override_config = (
-                        override_config + """
+                        override_config
+                        + """
 
 
-#GENERATED CONFIG
-"""
+# #GENERATED CONFIG
+# """
                     )
                     for line in override_config_hier.all_children_sorted_by_tags(
                         None,
                         "override",
                     ):
-                        override_config = (
-                            override_config + "\n" + line.cisco_style_text()
-                        )
+                        # add two spaces to indented config to match aruba formatting.
+                        if line.cisco_style_text().startswith("  "):
+                            override_config = (
+                                override_config + "\n" + "  " + line.cisco_style_text()
+                            )
+                        else:
+                            override_config = (
+                                override_config + "\n" + line.cisco_style_text()
+                            )
 
                     return override_config, devices
         except FileNotFoundError:
             click.secho(
-                "The override yaml file was not found, check that you entered the right file name and path.",
+                "The override yaml file was not found, check that you entered the right file name and path",
                 fg="red",
             )
             exit(1)

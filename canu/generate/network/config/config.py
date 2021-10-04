@@ -389,15 +389,8 @@ def config(
             config_devices.update(devices)
             with open(f"{folder}/{switch_name}.cfg", "w+") as f:
                 f.write(switch_config)
-<<<<<<< HEAD
-<<<<<<< HEAD
+
             if "# OVERRIDE" in switch_config:
-=======
-            if override:
->>>>>>> a91de8c (added override option)
-=======
-            if "!OVERRIDE" in switch_config:
->>>>>>> 3acff4c (add override config to config file output)
                 click.secho(f"{switch_name} Override Config Generated", fg="yellow")
             else:
                 click.secho(f"{switch_name} Config Generated", fg="bright_white")
