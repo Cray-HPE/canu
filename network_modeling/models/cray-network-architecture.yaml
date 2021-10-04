@@ -166,7 +166,7 @@ network_v2:
     - lookup_name: ["cmm"]
       shasta_name: "cmm"
       architecture_type: "cmm"
-    - lookup_name: ["cn"]
+    - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"
 network_v2_tds:
@@ -300,7 +300,7 @@ network_v2_tds:
         - "cmm"
       shasta_name: "cmm"
       architecture_type: "cmm"
-    - lookup_name: ["cn"]
+    - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"
 network_v1:
@@ -423,6 +423,6 @@ network_v1:
     - lookup_name: ["cmm"]
       shasta_name: "cmm"
       architecture_type: "cmm"
-    - lookup_name: ["cn"]
+    - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"
