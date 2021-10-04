@@ -593,12 +593,7 @@ def generate_switch_config(
                 if switch_name in override_tags:
                     options = yaml.load(open(options_file))
                     host = Host(switch_name, "aoscx", options)
-<<<<<<< HEAD
                     override_config = """# OVERRIDE CONFIG
-=======
-<<<<<<< HEAD
-                    override_config = """# OVERRIDE CONFIG,
->>>>>>> 9ab9e188ed8c98f659bbcc0adf5fdfefdf93fc1d
 # The configuration below has been ignored and is not included in the GENERATED CONFIG
 """
                     override_config_hier = HConfig(host=host)
@@ -615,39 +610,12 @@ def generate_switch_config(
                     override_config = (
                         override_config
                         + """
-
-
 # #GENERATED CONFIG
 # """
                     )
                     for line in override_config_hier.all_children_sorted_by_tags(
                         None,
                         "override",
-=======
-                    override_config = "!OVERRIDE CONFIG" + "\n"
-                    override_config_hier = HConfig(host=host)
-                    override_config_hier.load_from_string(switch_config).add_tags(
-                        override_tags[switch_name]
-                    )
-                    for line in override_config_hier.all_children_sorted_by_tags(
-                        "override", None
-                    ):
-                        override_config = (
-                            override_config + "\n" + "!" + line.cisco_style_text()
-                        )
-                    dash = "!" * 60
-                    override_config = (
-                        override_config
-                        + "\n"
-                        + dash
-                        + "\n"
-                        + "!GENERATED CONFIG"
-                        + "\n"
-                        + dash
-                    )
-                    for line in override_config_hier.all_children_sorted_by_tags(
-                        None, "override"
->>>>>>> 95f14f8623d98998d50b39ed5f35b7568d4a6404
                     ):
                         # add two spaces to indented config to match aruba formatting.
                         if line.cisco_style_text().startswith("  "):
@@ -662,20 +630,10 @@ def generate_switch_config(
                     return override_config, devices
         except FileNotFoundError:
             click.secho(
-<<<<<<< HEAD
-                "The override yaml file was not found, check that you entered the right file name and path",
-=======
-<<<<<<< HEAD
                 "The override yaml file was not found, check that you entered the right file name and path.",
->>>>>>> 9ab9e188ed8c98f659bbcc0adf5fdfefdf93fc1d
                 fg="red",
             )
             exit(1)
-=======
-                "The override .yaml file was not found, check that you entered the right file.",
-                fg="red",
-            )
->>>>>>> 95f14f8623d98998d50b39ed5f35b7568d4a6404
 
     return switch_config, devices
 
