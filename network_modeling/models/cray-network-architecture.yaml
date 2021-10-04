@@ -120,6 +120,11 @@ network_v2:
       connections:
         - name: "mountain_compute_leaf"
           speed: 10
+    - name: "pdu"
+      model: "pdu"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
   lookup_mapper:
     - lookup_name: ["mn"]
       shasta_name: "ncn-m"
@@ -166,6 +171,12 @@ network_v2:
     - lookup_name: ["cmm"]
       shasta_name: "cmm"
       architecture_type: "cmm"
+    - lookup_name: 
+        - '^x\d+p\d+$'
+        - '^pdu\d+$'
+      shasta_name: "pdu"
+      architecture_type: "pdu"
+      regex: true
     - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"
@@ -255,6 +266,11 @@ network_v2_tds:
       connections:
         - name: "mountain_compute_leaf"
           speed: 10
+    - name: "pdu"
+      model: "pdu"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
   lookup_mapper:
     - lookup_name:
         - "mn"
@@ -301,6 +317,12 @@ network_v2_tds:
         - "cmm"
       shasta_name: "cmm"
       architecture_type: "cmm"
+    - lookup_name: 
+        - '^x\d+p\d+$'
+        - '^pdu\d+$'
+      shasta_name: "pdu"
+      architecture_type: "pdu"
+      regex: true
     - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"
@@ -363,6 +385,11 @@ network_v1:
       connections:
         - name: "mountain_compute_leaf"
           speed: 10
+    - name: "pdu"
+      model: "pdu"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
     - name: "river_compute_node"
       model: "river_compute_node"
       connections:
@@ -425,6 +452,11 @@ network_v1:
     - lookup_name: ["cmm"]
       shasta_name: "cmm"
       architecture_type: "cmm"
+      # x3000p1 or pdu1
+    - lookup_name: ['^x\d+p\d+$', '^pdu\d+$']
+      shasta_name: "pdu"
+      architecture_type: "pdu"
+      regex: true
     - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"

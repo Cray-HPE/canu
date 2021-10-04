@@ -25,6 +25,7 @@ import logging
 import click
 from ruamel.yaml import YAML
 import yamale
+import re
 
 from .NetworkNode import NetworkNode
 
@@ -217,11 +218,19 @@ class NetworkNodeFactory:
         for lookup in lookup_mapper:
             lookup_name = lookup["architecture_type"]
             found = False
-            for component in components:
-                if component["name"] != lookup_name:
-                    continue
-                found = True
-                break
+            print(lookup["regex"])
+            if lookup["regex"] == True:
+                for component in components:
+                  if not bool(re.search(component["name"], lookup_name)):
+                      continue
+                  found = True
+                  break
+            else:
+                for component in components:
+                  if component["name"] != lookup_name:
+                      continue
+                  found = True
+                  break
             if not found:
                 raise Exception(
                     click.secho(
