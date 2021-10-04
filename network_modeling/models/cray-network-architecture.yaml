@@ -130,7 +130,7 @@ network_v2:
     - lookup_name: ["sn"]
       shasta_name: "ncn-s"
       architecture_type: "river_ncn_node_4_port"
-    - lookup_name: ["uan"]
+    - lookup_name: ["uan", "slurm"]
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port"
     - lookup_name: ["Ln", "ln"]
@@ -270,6 +270,7 @@ network_v2_tds:
       architecture_type: "river_ncn_node_4_port"
     - lookup_name:
         - "uan"
+        - "slurm"
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port"
     - lookup_name:
@@ -386,6 +387,7 @@ network_v1:
       architecture_type: "river_ncn_node_2_port_gigabyte"
     - lookup_name:
         - "uan"
+        - "slurm"
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port_gigabyte"
     - lookup_name:
