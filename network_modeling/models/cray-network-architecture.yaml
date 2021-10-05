@@ -130,7 +130,7 @@ network_v2:
     - lookup_name: ["sn"]
       shasta_name: "ncn-s"
       architecture_type: "river_ncn_node_4_port"
-    - lookup_name: ["uan"]
+    - lookup_name: ["uan", "slurm"]
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port"
     - lookup_name: ["Ln", "ln"]
@@ -166,7 +166,7 @@ network_v2:
     - lookup_name: ["cmm"]
       shasta_name: "cmm"
       architecture_type: "cmm"
-    - lookup_name: ["cn"]
+    - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"
 network_v2_tds:
@@ -270,6 +270,7 @@ network_v2_tds:
       architecture_type: "river_ncn_node_4_port"
     - lookup_name:
         - "uan"
+        - "slurm"
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port"
     - lookup_name:
@@ -300,7 +301,7 @@ network_v2_tds:
         - "cmm"
       shasta_name: "cmm"
       architecture_type: "cmm"
-    - lookup_name: ["cn"]
+    - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"
 network_v1:
@@ -386,6 +387,7 @@ network_v1:
       architecture_type: "river_ncn_node_2_port_gigabyte"
     - lookup_name:
         - "uan"
+        - "slurm"
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port_gigabyte"
     - lookup_name:
@@ -423,6 +425,6 @@ network_v1:
     - lookup_name: ["cmm"]
       shasta_name: "cmm"
       architecture_type: "cmm"
-    - lookup_name: ["cn"]
+    - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"
