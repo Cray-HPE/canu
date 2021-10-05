@@ -223,7 +223,6 @@ def config(ctx, ip, running, username, password, generated_config, json_, out):
 
     remediation_config_hier.add_tags(tags)
     port_reset_cmds = ["no mtu", "shutdown", "no description", "routing", "no speed"]
-    port_reset_cmds_6300 = ["no mtu", "shutdown", "no description", "no routing", "no speed"]
     for line in remediation_config_hier.with_tags({"no interface"}).all_children():
         interface = str(line)
         remediation_config_hier.del_child_by_text(interface)
