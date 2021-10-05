@@ -1,8 +1,7 @@
 {#- acl #}
-{% set sequence = 0 %}
 access-list ip nmn-hmn
 {%- if variables.NMN and variables.HMN %}
-{% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }} {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }}
+{% set sequence = 10 %}    {{ sequence }} deny any {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }} {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }}
 {%- endif %}
 {%- if variables.HMN and variables.NMN %}
 {% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }}

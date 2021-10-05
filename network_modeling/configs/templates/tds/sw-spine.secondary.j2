@@ -1,7 +1,6 @@
 {#- sw-spine.secondary #}
 {%- include 'common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
-bfd
 no ip icmp redirect
 vrf CAN
 vrf keepalive
@@ -104,6 +103,7 @@ vsx
     vsx-sync vsx-global
 router ospf 1
     router-id {{ variables.LOOPBACK_IP }}
+    redistribute bgp
     area 0.0.0.0
 router ospfv3 1
     router-id {{ variables.LOOPBACK_IP }}
