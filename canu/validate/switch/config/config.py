@@ -22,6 +22,7 @@
 """CANU commands that validate switch running config against a config file."""
 import difflib
 import json
+import os
 from os import path
 from pathlib import Path
 import sys
@@ -110,8 +111,23 @@ host = Host("example.rtr", "aoscx", options)
     type=click.File("w"),
     default="-",
 )
+@click.option(
+    "--override",
+    help="Switch configuration override",
+    type=click.Path(),
+)
 @click.pass_context
-def config(ctx, ip, running, username, password, generated_config, json_, out):
+def config(
+    ctx,
+    ip,
+    running,
+    username,
+    password,
+    generated_config,
+    json_,
+    out,
+    override,
+):
     """Validate switch config.
 
     Compare the current running switch config with a generated switch config.
@@ -129,6 +145,7 @@ def config(ctx, ip, running, username, password, generated_config, json_, out):
         generated_config: Generated config file
         json_: Bool indicating json output
         out: Name of the output file
+        override: Input file to ignore switch configuration
     """
     running_config_hier = HConfig(host=host)
     if ip:
@@ -185,16 +202,53 @@ def config(ctx, ip, running, username, password, generated_config, json_, out):
     generated_config_hier = HConfig(host=host)
     generated_config_hier.load_from_file(generated_config)
 
-    # Build Hierarchical Configuration object for the Remediation Config
-    remediation_config_hier = running_config_hier.config_to_get_to(
-        generated_config_hier,
-    )
-
     dash = "-" * 73
+
+    if override:
+        try:
+            with open(os.path.join(override), "r") as f:
+                override_tags = yaml.load(f)
+                running_config_hier.add_tags(override_tags[hostname])
+                generated_config_hier.add_tags(override_tags[hostname])
+                click.secho(
+                    "\n"
+                    + "Ignored config"
+                    + "\n"
+                    + "The commands below come from the override file that was provided.",
+                    fg="blue",
+                    file=out,
+                )
+                click.echo(dash)
+                for line in running_config_hier.all_children_sorted_by_tags(
+                    "override",
+                    None,
+                ):
+                    click.echo(line.cisco_style_text())
+                    running_config_hier.del_child_by_text(line.cisco_style_text())
+
+                click.echo(dash)
+                for line in generated_config_hier.all_children_sorted_by_tags(
+                    "override",
+                    None,
+                ):
+                    generated_config_hier.del_child_by_text(line.cisco_style_text())
+
+        except FileNotFoundError:
+            click.secho(
+                "The override yaml file was not found, check that you entered the right file name and path.",
+                fg="red",
+            )
+            exit(1)
 
     print_differences = True
     if json_:
         print_differences = False
+
+    click.secho(
+        "\n" + "Config differences between running config and generated config" + "\n",
+        fg="bright_white",
+        file=out,
+    )
 
     differences = compare_config(
         running_config_hier.difference(generated_config_hier),
@@ -207,13 +261,12 @@ def config(ctx, ip, running, username, password, generated_config, json_, out):
         click.echo(json.dumps(differences, indent=2), file=out)
         return
 
-    click.secho(
-        "\n" + "Config differences between running config and generated config" + "\n",
-        fg="bright_white",
-        file=out,
+    # Build Hierarchical Configuration object for the Remediation Config
+    remediation_config_hier = running_config_hier.config_to_get_to(
+        generated_config_hier,
     )
-
     click.secho(
+        "\n"
         "Safe Commands"
         + "\n"
         + "These commands should be safe to run while the system is running.",
@@ -260,7 +313,6 @@ def config(ctx, ip, running, username, password, generated_config, json_, out):
         fg="yellow",
         file=out,
     )
-
     click.echo(dash, file=out)
     for untagged_line in remediation_config_hier.all_children_sorted_untagged():
         click.echo(untagged_line.cisco_style_text(), file=out)
