@@ -244,12 +244,6 @@ def config(
     if json_:
         print_differences = False
 
-    click.secho(
-        "\n" + "Config differences between running config and generated config" + "\n",
-        fg="bright_white",
-        file=out,
-    )
-
     differences = compare_config(
         running_config_hier.difference(generated_config_hier),
         generated_config_hier.difference(running_config_hier),
@@ -260,6 +254,12 @@ def config(
     if json_:
         click.echo(json.dumps(differences, indent=2), file=out)
         return
+
+    click.secho(
+        "\n" + "Config differences between running config and generated config" + "\n",
+        fg="bright_white",
+        file=out,
+    )
 
     # Build Hierarchical Configuration object for the Remediation Config
     remediation_config_hier = running_config_hier.config_to_get_to(
