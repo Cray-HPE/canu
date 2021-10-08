@@ -1,8 +1,16 @@
---- # Definition of network components: model, size, speeds, etc...
+--- 
+# This file defines how hardware connects to the network
+# Models here must be represented cray-network-hardware.yaml
+# Definition of network components: model, size, speeds, etc...
 # NOTE:  Only specify upward/north connections and east/west (MLAG).
 #        1. compute/ncn specify connections to leafs
 #        2. leafs specify connections to spines
 #        3. spines specify connections to superspines
+# network_v2 is full systems with agg/leaf switches
+# network_v2_tds is where NCNs plug directly into the spines
+# network_v1 is Dell/Mellanox
+
+# architecture_type: lookup_mapper[*]lookup_name.architecture_type should match components[*]name.model
 network_v2:
   name: "Version 2"
   description: "Aruba Hardware"
@@ -64,6 +72,11 @@ network_v2:
       connections:
         - name: "river_ncn_leaf"
           speed: 25
+    - name: "slingshot_hsn_switch"
+      model: "slingshot_hsn_switch"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
     - name: "river_ncn_node_2_port"
       model: "river_ncn_node_2_port"
       connections:
@@ -117,7 +130,7 @@ network_v2:
     - lookup_name: ["sn"]
       shasta_name: "ncn-s"
       architecture_type: "river_ncn_node_4_port"
-    - lookup_name: ["uan"]
+    - lookup_name: ["uan", "slurm"]
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port"
     - lookup_name: ["Ln", "ln"]
@@ -129,6 +142,9 @@ network_v2:
     - lookup_name: ["cdu"]
       shasta_name: "sw-cdu"
       architecture_type: "mountain_compute_leaf"
+    - lookup_name: ["sw-hsn"]
+      shasta_name: "sw-hsn"
+      architecture_type: "slingshot_hsn_switch"
     - lookup_name: ["sw-smn"]
       shasta_name: "sw-leaf-bmc"
       architecture_type: "river_bmc_leaf"
@@ -150,7 +166,7 @@ network_v2:
     - lookup_name: ["cmm"]
       shasta_name: "cmm"
       architecture_type: "cmm"
-    - lookup_name: ["cn"]
+    - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"
 network_v2_tds:
@@ -191,6 +207,11 @@ network_v2_tds:
         - name: "spine"
           speed: 10
           number: 2
+    - name: "slingshot_hsn_switch"
+      model: "slingshot_hsn_switch"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
     - name: "river_ncn_node_2_port"
       model: "river_ncn_node_2_port"
       connections:
@@ -249,12 +270,17 @@ network_v2_tds:
       architecture_type: "river_ncn_node_4_port"
     - lookup_name:
         - "uan"
+        - "slurm"
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port"
     - lookup_name:
         - "cdu"
       shasta_name: "sw-cdu"
       architecture_type: "mountain_compute_leaf"
+    - lookup_name:
+        - "sw-hsn"
+      shasta_name: "sw-hsn"
+      architecture_type: "slingshot_hsn_switch"
     - lookup_name:
         - "sw-smn"
       shasta_name: "sw-leaf-bmc"
@@ -275,7 +301,7 @@ network_v2_tds:
         - "cmm"
       shasta_name: "cmm"
       architecture_type: "cmm"
-    - lookup_name: ["cn"]
+    - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"
 network_v1:
@@ -296,6 +322,11 @@ network_v1:
       connections:
         - name: "spine"
           speed: 40
+    - name: "slingshot_hsn_switch"
+      model: "slingshot_hsn_switch"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
     - name: "mountain_compute_leaf"
       model: "S4148T-ON"
       connections:
@@ -356,6 +387,7 @@ network_v1:
       architecture_type: "river_ncn_node_2_port_gigabyte"
     - lookup_name:
         - "uan"
+        - "slurm"
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port_gigabyte"
     - lookup_name:
@@ -370,6 +402,10 @@ network_v1:
         - "sw-cdu"
       shasta_name: "sw-cdu"
       architecture_type: "mountain_compute_leaf"
+    - lookup_name:
+        - "sw-hsn"
+      shasta_name: "sw-hsn"
+      architecture_type: "slingshot_hsn_switch"
     - lookup_name:
         - "sw-smn"
         - "sw-leaf"
@@ -389,6 +425,6 @@ network_v1:
     - lookup_name: ["cmm"]
       shasta_name: "cmm"
       architecture_type: "cmm"
-    - lookup_name: ["cn"]
+    - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"

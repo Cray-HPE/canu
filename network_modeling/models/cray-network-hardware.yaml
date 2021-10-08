@@ -1,4 +1,6 @@
---- # Definition of network components: model, size, speeds, etc...
+--- 
+# This file defines the hardware components that make up a shasta system
+# name.ports[*]count is how may BMC ports there are
 network_hardware:
   - name: "Aruba 8325-48Y8C JL625A"
     vendor: "aruba"
@@ -170,6 +172,17 @@ network_hardware:
       - count: 1
         speed: 1
         slot: "mgmt"
+  - name: "SLINGSHOT 200G 64P"
+    vendor: "cray"
+    model: "slingshot_hsn_switch"
+    type: "switch"
+    deprecated: False
+    ports:
+      - count: 1
+        speed: 1
+        slot: "bmc"
+      - count: 64
+        speed: 200
   - name: "River NCN Node - Generic 2 port stub Gigabyte"
     vendor: "gigabyte"
     type: "server"

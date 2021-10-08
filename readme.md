@@ -880,7 +880,6 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 - Added an `--override` option to `canu generate switch config` and `canu generate network config`, this allows users to ignore custom configuration so CANU does not overwrite it.
 - Known Limitations:
   - PDUs are not yet properly handled in the generated switch configurations.
-  - Slingshot switches (sw-hsn) are not yet properly handled in the model or generated switch configurations.
   - Switch and SNMP passwords have been removed from generated configurations until the handling code is secure.
 
 ## [0.0.5] - 2021-5-14
