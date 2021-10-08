@@ -968,7 +968,6 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 - Fixed multiple templates to match what is on the Aruba switch, these include, UANs, Loopbacks, VLAN interfaces, ACLs.
 - Known Limitations:
   - PDUs are not yet properly handled in the generated switch configurations.
-  - Slingshot switches (sw-hsn) are not yet properly handled in the model or generated switch configurations.
   - Switch and SNMP passwords have been removed from generated configurations until the handling code is secure.
 
 ## [0.0.5] - 2021-5-14
