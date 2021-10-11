@@ -1,6 +1,27 @@
+# MIT License
+#
+# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
 """Test CANU validate shcd commands."""
 
-import click.testing
+from click import testing
 from openpyxl import Workbook
 
 from canu.cli import cli
@@ -11,7 +32,7 @@ architecture = "tds"
 tabs = "25G_10G"
 corners = "I14,S48"
 cache_minutes = 0
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 
 
 def test_validate_shcd():
@@ -242,7 +263,7 @@ def test_validate_shcd_corners_too_high():
         assert result.exit_code == 1
         assert "On tab 25G_10G, header column Source not found." in str(result.output)
         assert "On tab 25G_10G, the header is formatted incorrectly." in str(
-            result.output
+            result.output,
         )
 
 
@@ -296,7 +317,7 @@ def test_validate_shcd_not_enough_corners():
         )
         assert result.exit_code == 0
         assert "There were 1 corners entered, but there should be 2." in str(
-            result.output
+            result.output,
         )
 
 
@@ -350,7 +371,7 @@ def test_validate_shcd_bad_architectural_definition():
         )
         assert result.exit_code == 1
         assert "No architectural definition found to allow connection between" in str(
-            result.output
+            result.output,
         )
 
 
@@ -380,14 +401,8 @@ def test_validate_shcd_port_reuse():
             ],
         )
         assert result.exit_code == 1
-        # assert "Node 1: port 51 in slot None already connected to Node 0: port 52 in slot None" in str(
-        #     result.output
-        # )
-        # assert "Node 0: port 52 in slot None already connected to Node 1: port 51 in slot None" in str(
-        #     result.output
-        # )
         assert "Failed to connect sw-spine-001 to sw-spine-002 bi-directionally" in str(
-            result.output
+            result.output,
         )
 
 
@@ -889,7 +904,7 @@ def generate_test_file(file_name):
     ws2["I14"] = "Source"
     ws2["J14"] = "Rack"
     ws2["K14"] = "Location"
-    # ws2["L14"] = "Slot" # Missing Header
+    # Missing Header
     # None
     ws2["M14"] = "Port"
     ws2["N14"] = "Destination"

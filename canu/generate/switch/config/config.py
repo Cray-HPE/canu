@@ -35,13 +35,13 @@ import netaddr
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from openpyxl import load_workbook
 import requests
-import ruamel.yaml
+from ruamel.yaml import YAML
 import urllib3
 
 from canu.utils.cache import cache_directory
 from canu.validate.shcd.shcd import node_model_from_shcd
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 # To disable warnings about unsecured HTTPS requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -82,7 +82,6 @@ architecture_spec_file = path.join(
 
 canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
-
 
 # Import templates
 network_templates_folder = path.join(
@@ -233,7 +232,8 @@ def config(
         if len(tabs.split(",")) * 2 != len(corners.split(",")):
             click.secho("Not enough corners.\n", fg="red")
             click.secho(
-                f"Make sure each tab: {tabs.split(',')} has 2 corners.\n", fg="red"
+                f"Make sure each tab: {tabs.split(',')} has 2 corners.\n",
+                fg="red",
             )
             click.secho(
                 f"There were {len(corners.split(','))} corners entered, but there should be {len(tabs.split(',')) * 2}.",
@@ -256,7 +256,7 @@ def config(
                     tabs.split(",")[i],
                     corners.split(",")[i * 2].strip(),
                     corners.split(",")[i * 2 + 1].strip(),
-                )
+                ),
             )
     else:
         for tab in tabs.split(","):
@@ -266,7 +266,8 @@ def config(
                 type=str,
             )
             range_end = click.prompt(
-                "Enter the cell of the lower right corner", type=str
+                "Enter the cell of the lower right corner",
+                type=str,
             )
             sheets.append((tab, range_start, range_end))
 
@@ -281,7 +282,9 @@ def config(
 
     # Get nodes from SHCD
     shcd_node_list, shcd_warnings = node_model_from_shcd(
-        factory=factory, spreadsheet=shcd, sheets=sheets
+        factory=factory,
+        spreadsheet=shcd,
+        sheets=sheets,
     )
 
     # Parse SLS input file.
@@ -412,14 +415,14 @@ def generate_switch_config(
             click.secho(
                 f"For switch {switch_name}, the type cannot be determined. Please check the switch name and try again.",
                 fg="red",
-            )
+            ),
         )
     elif node_shasta_name not in ["sw-cdu", "sw-leaf-bmc", "sw-leaf", "sw-spine"]:
         return Exception(
             click.secho(
                 f"{switch_name} is not a switch. Only switch config can be generated.",
                 fg="red",
-            )
+            ),
         )
 
     is_primary, primary, secondary = switch_is_primary(switch_name)
@@ -482,9 +485,13 @@ def generate_switch_config(
         "NMN_MTN_CABINETS": sls_variables["NMN_MTN_CABINETS"],
         "HMN_MTN_CABINETS": sls_variables["HMN_MTN_CABINETS"],
     }
-
     cabling = {}
-    cabling["nodes"] = get_switch_nodes(switch_name, shcd_node_list, factory)
+    cabling["nodes"] = get_switch_nodes(
+        switch_name,
+        shcd_node_list,
+        factory,
+        sls_variables,
+    )
 
     if switch_name not in sls_variables["HMN_IPs"].keys():
         click.secho(f"Cannot find {switch_name} in CSI / SLS nodes.", fg="red")
@@ -504,6 +511,56 @@ def generate_switch_config(
         variables["VSX_KEEPALIVE"] = pair_connections[0]
         variables["VSX_ISL_PORT1"] = pair_connections[1]
         variables["VSX_ISL_PORT2"] = pair_connections[2]
+
+    # get VLANs and IPs for CDU switches
+    if "sw-cdu" in node_shasta_name:
+        nodes_by_name = {}
+        nodes_by_id = {}
+        destination_rack_list = []
+        variables["NMN_MTN_VLANS"] = []
+        variables["HMN_MTN_VLANS"] = []
+
+        for node in shcd_node_list:
+            node_tmp = node.serialize()
+            name = node_tmp["common_name"]
+            nodes_by_name[name] = node_tmp
+            nodes_by_id[node_tmp["id"]] = node_tmp
+        for port in nodes_by_name[switch_name]["ports"]:
+            destination_rack = nodes_by_id[port["destination_node_id"]]["location"][
+                "rack"
+            ]
+
+            destination_rack_list.append(int(re.search(r"\d+", destination_rack)[0]))
+        for cabinets in (
+            sls_variables["NMN_MTN_CABINETS"] + sls_variables["HMN_MTN_CABINETS"]
+        ):
+            ip_address = netaddr.IPNetwork(cabinets["CIDR"])
+            is_primary = switch_is_primary(switch_name)
+            sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
+            if sls_rack_int in destination_rack_list:
+                if cabinets in sls_variables["NMN_MTN_CABINETS"]:
+                    variables["NMN_MTN_VLANS"].append(cabinets)
+                    variables["NMN_MTN_VLANS"][-1][
+                        "PREFIX_LENGTH"
+                    ] = ip_address.prefixlen
+                    if is_primary[0]:
+                        ip = str(ip_address[2])
+                        variables["NMN_MTN_VLANS"][-1]["IP"] = ip
+                    else:
+                        ip = str(ip_address[3])
+                        variables["NMN_MTN_VLANS"][-1]["IP"] = ip
+
+                if cabinets in sls_variables["HMN_MTN_CABINETS"]:
+                    variables["HMN_MTN_VLANS"].append(cabinets)
+                    variables["HMN_MTN_VLANS"][-1][
+                        "PREFIX_LENGTH"
+                    ] = ip_address.prefixlen
+                    if is_primary[0]:
+                        ip = str(ip_address[2])
+                        variables["HMN_MTN_VLANS"][-1]["IP"] = ip
+                    else:
+                        ip = str(ip_address[3])
+                        variables["HMN_MTN_VLANS"][-1]["IP"] = ip
 
     switch_config = template.render(
         variables=variables,
@@ -542,13 +599,14 @@ def get_pair_connections(nodes, switch_name):
     return connections
 
 
-def get_switch_nodes(switch_name, shcd_node_list, factory):
+def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
     """Get the nodes connected to the switch ports.
 
     Args:
         switch_name: Switch hostname
         shcd_node_list: List of nodes from the SHCD
         factory: Node factory object
+        sls_variables: Dictionary containing SLS variables.
 
     Returns:
         List of nodes connected to the switch
@@ -575,6 +633,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
     for port in nodes_by_name[switch_name]["ports"]:
         destination_node_id = port["destination_node_id"]
         destination_node_name = nodes_by_id[port["destination_node_id"]]["common_name"]
+        destination_rack = nodes_by_id[port["destination_node_id"]]["location"]["rack"]
         source_port = port["port"]
         destination_port = port["destination_port"]
         destination_slot = port["destination_slot"]
@@ -597,7 +656,10 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
         elif shasta_name == "ncn-s":
             # ncn-s also needs destination_port to find the match
             primary_port_ncn_s = get_primary_port(
-                nodes_by_name, switch_name, destination_node_id, destination_port
+                nodes_by_name,
+                switch_name,
+                destination_node_id,
+                destination_port,
             )
             new_node = {
                 "subtype": "storage",
@@ -623,16 +685,31 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
             }
             nodes.append(new_node)
         elif shasta_name == "cec":
+            destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
+            for cabinets in sls_variables["HMN_MTN_CABINETS"]:
+                sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
+                if destination_rack_int == sls_rack_int:
+                    hmn_mtn_vlan = cabinets["VlanID"]
             new_node = {
                 "subtype": "cec",
                 "slot": None,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "INTERFACE_NUMBER": f"1/1/{source_port}",
+                    "NATIVE_VLAN": hmn_mtn_vlan,
                 },
             }
             nodes.append(new_node)
         elif shasta_name == "cmm":
+            destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
+            for cabinets in sls_variables["NMN_MTN_CABINETS"]:
+                sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
+                if destination_rack_int == sls_rack_int:
+                    nmn_mtn_vlan = cabinets["VlanID"]
+            for cabinets in sls_variables["HMN_MTN_CABINETS"]:
+                sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
+                if destination_rack_int == sls_rack_int:
+                    hmn_mtn_vlan = cabinets["VlanID"]
             new_node = {
                 "subtype": "cmm",
                 "slot": None,
@@ -640,6 +717,8 @@ def get_switch_nodes(switch_name, shcd_node_list, factory):
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "PORT": f"1/1/{source_port}",
                     "LAG_NUMBER": primary_port,
+                    "NATIVE_VLAN": nmn_mtn_vlan,
+                    "TAGGED_VLAN": hmn_mtn_vlan,
                 },
             }
             nodes.append(new_node)
@@ -798,7 +877,7 @@ def switch_is_primary(switch):
 
 
 def parse_sls_for_config(input_json):
-    """Parse the `sls_input_file.json` file or the JSON from SLS `/networks` API for config variables.
+    """Parse the `sls_file.json` file or the JSON from SLS `/networks` API for config variables.
 
     Args:
         input_json: JSON from the SLS `/networks` API
@@ -959,8 +1038,7 @@ def parse_sls_for_config(input_json):
             vlan = subnets.get("VlanID", "")
             networks_list.append([name, vlan])
 
-    networks_list = set(tuple(x) for x in networks_list)
-
+    networks_list = {tuple(x) for x in networks_list}
     return sls_variables
 
 
@@ -1011,7 +1089,10 @@ def rename_sls_hostnames(sls_variables):
 
 
 def get_primary_port(
-    nodes_by_name, switch_name, destination_node_id, destination_port=None
+    nodes_by_name,
+    switch_name,
+    destination_node_id,
+    destination_port=None,
 ):
     """Return the primary switch port number for a connection to a node.
 

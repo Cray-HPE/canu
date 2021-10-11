@@ -1,15 +1,36 @@
+# MIT License
+#
+# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
 """Test CANU report switch cabling commands."""
 from unittest.mock import patch
 
-import click.testing
+from click import testing
 from netmiko import ssh_exception
 import pytest
 import requests
 import responses
 
-from canu.cache import remove_switch_from_cache
 from canu.cli import cli
 from canu.report.switch.cabling.cabling import get_lldp
+from canu.utils.cache import remove_switch_from_cache
 
 
 username = "admin"
@@ -19,7 +40,7 @@ ip_dell = "192.168.1.2"
 ip_mellanox = "192.168.1.3"
 credentials = {"username": username, "password": password}
 cache_minutes = 0
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 
 
 def test_switch_cli():
@@ -69,7 +90,7 @@ def test_get_lldp_function(switch_vendor):
             f"https://{ip}/rest/v10.04/logout",
         )
 
-        switch_info, switch_dict, arp = get_lldp(ip, credentials, True)
+        switch_info, switch_dict, arp = get_lldp(ip, credentials, return_error=True)
 
         assert switch_dict.keys() == {"1/1/1", "1/1/2", "1/1/3", "1/1/4"}
         assert switch_dict["1/1/1"][0]["chassis_id"] == "aa:bb:cc:88:99:00"
@@ -96,12 +117,12 @@ def test_get_lldp_function_bad_ip(switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
         with pytest.raises(requests.exceptions.ConnectionError) as connection_error:
-            get_lldp(bad_ip, credentials, True)
+            get_lldp(bad_ip, credentials, return_error=True)
 
         assert "Failed to establish a new connection" in str(connection_error.value)
 
@@ -121,7 +142,7 @@ def test_get_lldp_function_bad_credentials(switch_vendor):
         bad_credentials = {"username": "foo", "password": "foo"}
 
         with pytest.raises(requests.exceptions.HTTPError) as http_error:
-            get_lldp(ip, bad_credentials, True)
+            get_lldp(ip, bad_credentials, return_error=True)
         assert "Unauthorized for url" in str(http_error.value)
     remove_switch_from_cache(ip)
 
@@ -240,7 +261,7 @@ def test_switch_cabling_bad_ip(switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -325,8 +346,15 @@ def test_switch_cabling_dell(netmiko_commands, switch_vendor):
         )
         assert result.exit_code == 0
         assert (
-            "1/1/1   ==> sw-test01      Eth1/15            sw-test01                                             Test Switch 1\n"
-            "1/1/2   ==> sw-test02      Eth1/15            sw-test02                                             Test Switch 2\n"
+            "Switch: sw-test-dell (192.168.1.2)                       \n"
+            + "Dell S3048-ON\n"
+            + "---------------------------------------------------------------------------------------------------------------"
+            + "---------------------------------------\n"
+            + "PORT        NEIGHBOR       NEIGHBOR PORT      PORT DESCRIPTION                                      DESCRIPTION\n"
+            + "---------------------------------------------------------------------------------------------------------------"
+            + "---------------------------------------\n"
+            + "1/1/1   ==> sw-test01      1/1/15             sw-test01                                             Test Switch 1\n"
+            + "1/1/2   ==> sw-test02      1/1/15             sw-test02                                             Test Switch 2\n"
         ) in str(result.output)
         remove_switch_from_cache(ip)
 
@@ -448,10 +476,10 @@ def test_switch_cabling_mellanox(switch_vendor):
         )
         assert result.exit_code == 0
         assert (
-            "1/1/1   ==> sw-test03      Eth1/11            sw-test03                                             Test Switch 3\n"
-            "1/1/2   ==> sw-test04      Eth1/12            sw-test04                                             Test Switch 4\n"
+            "1/1/1   ==> sw-test03      1/1/11             sw-test03                                             Test Switch 3\n"
+            + "1/1/2   ==> sw-test04      1/1/12             sw-test04                                             Test Switch 4\n"
         ) in str(result.output)
-        remove_switch_from_cache(ip)
+        remove_switch_from_cache(ip_mellanox)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -514,14 +542,14 @@ def test_switch_cabling_mellanox_no_neighbors(switch_vendor):
         assert result.exit_code == 0
         assert (
             "Switch: sw-test03 (192.168.1.3)                       \n"
-            "Mellanox MSN2100\n"
-            "---------------------------------------------------------------------------------------------------------------"
-            "---------------------------------------\n"
-            "PORT        NEIGHBOR       NEIGHBOR PORT      PORT DESCRIPTION                                      DESCRIPTION\n"
-            "---------------------------------------------------------------------------------------------------------------"
-            "---------------------------------------\n"
-            "\n"
-            "\n"
+            + "Mellanox MSN2100\n"
+            + "---------------------------------------------------------------------------------------------------------------"
+            + "---------------------------------------\n"
+            + "PORT        NEIGHBOR       NEIGHBOR PORT      PORT DESCRIPTION                                      DESCRIPTION\n"
+            + "---------------------------------------------------------------------------------------------------------------"
+            + "---------------------------------------\n"
+            + "\n"
+            + "\n"
         ) in str(result.output)
         remove_switch_from_cache(ip)
 
@@ -657,7 +685,7 @@ def test_switch_cabling_vendor_error(switch_vendor):
         )
         assert result.exit_code == 0
         assert "Error connecting to switch 192.168.1.1, HTTPError ." in str(
-            result.output
+            result.output,
         )
 
 
@@ -673,7 +701,7 @@ lldp_neighbors_json = {
                 "port_id_subtype": "if_name",
             },
             "port_id": "1/1/1",
-        }
+        },
     },
     "1%2F1%2F2": {
         "aa:bb:cc:88:00:00,1/1/2": {
@@ -686,7 +714,7 @@ lldp_neighbors_json = {
                 "port_id_subtype": "if_name",
             },
             "port_id": "1/1/2",
-        }
+        },
     },
     "1%2F1%2F3": {
         "00:00:00:00:00:00,00:00:00:00:00:00": {
@@ -723,7 +751,7 @@ lldp_neighbors_json = {
                 "port_id_subtype": "link_local_addr",
             },
             "port_id": "aa:aa:aa:aa:aa:aa",
-        }
+        },
     },
 }
 
@@ -751,7 +779,7 @@ netmiko_commands_dell = [
     + "Remote System Desc: Test Switch 1\n"
     + "--------------------------------------------------------------------------- \n"
     + "Remote Chassis ID: 11:22:33:44:55:66\n"
-    + "Remote Port ID: Eth1/15\n"
+    + "Remote Port ID: ethernet1/1/15\n"
     + "Remote Port Description: sw-test02\n"
     + "Local Port ID: ethernet1/1/2\n"
     + "Remote System Name: sw-test02\n"
@@ -768,7 +796,7 @@ netmiko_commands_dell = [
     + "Local Port ID: ethernet1/1/4\n"
     + "--------------------------------------------------------------------------- \n",
     "OS Version: 10.5.1.4\nSystem Type: S3048-ON\n",
-    "hostname sw-test-dell",
+    "sw-test-dell",
     "Address        Hardware address    Interface                     Egress Interface    \n"
     + "------------------------------------------------------------------------------------------\n"
     + "192.168.1.1    aa:bb:cc:dd:ee:ff   vlan2                         port-channel100     \n"
@@ -790,7 +818,7 @@ lldp_json_mellanox = {
                     "Remote port description": "sw-test03",
                     "Remote system name": "sw-test03",
                 },
-            ]
+            ],
         },
         {
             "Eth1/2 (Po100)": [
@@ -798,11 +826,11 @@ lldp_json_mellanox = {
                     "port id subtype": "Interface Name (5)",
                     "Remote chassis id": "11:22:33:44:55:66",
                     "Remote system description": "Test Switch 4",
-                    "Remote port-id": "Eth1/12",
+                    "Remote port-id": "ethernet1/1/12",
                     "Remote port description": "sw-test04",
                     "Remote system name": "sw-test04",
                 },
-            ]
+            ],
         },
         {
             "Eth1/3 (Po100)": [
@@ -814,7 +842,7 @@ lldp_json_mellanox = {
                     "Remote port description": "Not Advertised",
                     "Remote system name": "Not Advertised",
                 },
-            ]
+            ],
         },
         {
             "Eth1/4 (Po100)": [
@@ -822,7 +850,7 @@ lldp_json_mellanox = {
                     "port id subtype": "Interface Name (5)",
                     "Remote port-id": "Not Advertised",
                 },
-            ]
+            ],
         },
     ],
 }
@@ -837,13 +865,19 @@ arp_neighbors_mellanox = {
             "VRF Name default": [
                 {
                     "192.168.1.9": [
-                        {"Hardware Address": "aa:bb:cc:dd:ee:ff", "Interface": "vlan 7"}
+                        {
+                            "Hardware Address": "aa:bb:cc:dd:ee:ff",
+                            "Interface": "vlan 7",
+                        },
                     ],
                     "192.168.1.10": [
-                        {"Hardware Address": "11:22:33:44:55:66", "Interface": "vlan 4"}
+                        {
+                            "Hardware Address": "11:22:33:44:55:66",
+                            "Interface": "vlan 4",
+                        },
                     ],
-                }
-            ]
+                },
+            ],
         },
     ],
 }

@@ -1,13 +1,34 @@
+# MIT License
+#
+# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
 """Test CANU report network firmware commands."""
 from unittest.mock import patch
 
-import click.testing
+from click import testing
 from netmiko import ssh_exception
 import requests
 import responses
 
-from canu.cache import remove_switch_from_cache
 from canu.cli import cli
+from canu.utils.cache import remove_switch_from_cache
 
 
 shasta = "1.4"
@@ -18,7 +39,7 @@ ips = "192.168.1.1"
 ip_dell = "192.168.1.2"
 ip_mellanox = "192.168.1.3"
 cache_minutes = 0
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 
 
 def test_network_cli():
@@ -327,7 +348,7 @@ def test_network_firmware_bad_ip(switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -368,7 +389,7 @@ def test_network_firmware_bad_ip_file(switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -583,9 +604,46 @@ def test_network_firmware_dell(get_firmware_dell, switch_vendor):
         )
         assert result.exit_code == 0
         assert "Pass    192.168.1.2     test-dell           10.5.1.4" in str(
-            result.output
+            result.output,
         )
         remove_switch_from_cache(ip_dell)
+
+
+@patch("canu.report.network.firmware.firmware.switch_vendor")
+@responses.activate
+def test_network_firmware_dell_timeout(switch_vendor):
+    """Test that the `canu network firmware` command errors on ssh timeout."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "dell"
+        responses.add(
+            responses.GET,
+            f"https://{ip_dell}/restconf/data/system-sw-state/sw-version",
+            body=requests.exceptions.HTTPError(),
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "report",
+                "network",
+                "firmware",
+                "--shasta",
+                shasta,
+                "--ips",
+                ip_dell,
+                "--username",
+                username,
+                "--password",
+                password,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "192.168.1.2     - HTTP Error. Check the IP, username, or password"
+            in str(result.output)
+        )
 
 
 # Mellanox
@@ -612,6 +670,8 @@ def test_network_firmware_mellanox(get_firmware_mellanox, switch_vendor):
                 "firmware",
                 "--shasta",
                 shasta,
+                "--shasta",
+                shasta,
                 "--ips",
                 ip_mellanox,
                 "--username",
@@ -622,6 +682,104 @@ def test_network_firmware_mellanox(get_firmware_mellanox, switch_vendor):
         )
         assert result.exit_code == 0
         assert "Pass    192.168.1.3     test-mellanox       3.9.1014" in str(
-            result.output
+            result.output,
         )
         remove_switch_from_cache(ip_mellanox)
+
+
+@patch("canu.report.network.firmware.firmware.switch_vendor")
+@patch("canu.report.switch.firmware.firmware.netmiko_commands")
+def test_network_firmware_mellanox_timeout_error(netmiko_commands, switch_vendor):
+    """Test that the `canu network firmware` command errors on timeout error."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "mellanox"
+        netmiko_commands.side_effect = ssh_exception.NetmikoTimeoutException
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "report",
+                "network",
+                "firmware",
+                "--shasta",
+                shasta,
+                "--ips",
+                ip_mellanox,
+                "--username",
+                username,
+                "--password",
+                password,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "192.168.1.3     - Timeout error. Check the IP address and try again."
+            in str(result.output)
+        )
+
+
+@patch("canu.report.network.firmware.firmware.switch_vendor")
+@patch("canu.report.switch.firmware.firmware.netmiko_commands")
+def test_network_firmware_mellanox_auth_error(netmiko_commands, switch_vendor):
+    """Test that the `canu network firmware` command errors on authentication error."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "mellanox"
+        netmiko_commands.side_effect = ssh_exception.NetmikoAuthenticationException
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "report",
+                "network",
+                "firmware",
+                "--shasta",
+                shasta,
+                "--ips",
+                ip_mellanox,
+                "--username",
+                username,
+                "--password",
+                password,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "192.168.1.3     - Authentication error. Check the credentials or IP address and try again"
+            in str(result.output)
+        )
+
+
+# Vendor None
+@patch("canu.report.network.firmware.firmware.switch_vendor")
+@responses.activate
+def test_network_firmware_no_vendor(switch_vendor):
+    """Test that the `canu report network firmware` command errors on no vendor."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = None
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "report",
+                "network",
+                "firmware",
+                "--shasta",
+                shasta,
+                "--ips",
+                ips,
+                "--username",
+                username,
+                "--password",
+                password,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "192.168.1.1     - Could not determine the vendor of the switch." in str(
+            result.output,
+        )

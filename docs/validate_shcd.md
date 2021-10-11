@@ -32,6 +32,8 @@ Node type could not be determined for the following
 CAN switch
 ```
 
+![](images/canu_validate_shcd.png)
+
 ## Flags
 
 | Option                | Description                                                                |

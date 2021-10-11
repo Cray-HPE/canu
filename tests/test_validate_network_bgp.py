@@ -1,7 +1,28 @@
+# MIT License
+#
+# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
 """Test CANU validate network bgp commands."""
 from unittest.mock import patch
 
-import click.testing
+from click import testing
 import requests
 import responses
 
@@ -17,7 +38,7 @@ ip_dell = "192.168.1.2"
 ip_mellanox = "192.168.1.3"
 cache_minutes = 0
 asn = 65533
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 
 
 @patch("canu.validate.network.bgp.bgp.switch_vendor")
@@ -109,6 +130,54 @@ def test_validate_bgp_full_architecture(switch_vendor):
                 password,
                 "--architecture",
                 full_architecture,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "PASS - IP: 192.168.1.1 Hostname: test-leaf" in str(result.output)
+
+
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
+@responses.activate
+def test_validate_bgp_v1_architecture(switch_vendor):
+    """Test that the `canu validate network bgp` command runs and returns PASS with full architecture."""
+    v1_architecture = "v1"
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/login",
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system/vrfs/default/bgp_routers/{asn}/bgp_neighbors?depth=2",
+            json=all_established,
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
+            json={"hostname": "test-leaf", "platform_name": "X86-64"},
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/logout",
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "network",
+                "bgp",
+                "--ips",
+                ips,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--architecture",
+                v1_architecture,
             ],
         )
         assert result.exit_code == 0
@@ -339,7 +408,7 @@ def test_validate_bgp_bad_ip(switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -383,7 +452,7 @@ def test_validate_bgp_bad_ip_file(switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -446,7 +515,7 @@ def test_validate_bgp_bad_password(switch_vendor):
         )
         assert result.exit_code == 0
         assert (
-            "Error connecting to switch 192.168.1.1, check that this IP is an Aruba switch, or check the username or password"
+            "Error connecting to switch 192.168.1.1, check the username or password"
             in str(result.output)
         )
 
@@ -911,7 +980,7 @@ def test_validate_bgp_mellanox(switch_vendor):
         )
         assert result.exit_code == 0
         assert "PASS - IP: 192.168.1.3 Hostname: sw-spine-mellanox" in str(
-            result.output
+            result.output,
         )
 
 
@@ -1050,7 +1119,7 @@ dell_firmware_mock = {
     "dell-system-software:sw-version": {
         "sw-version": "10.5.1.4",
         "sw-platform": "S4048T-ON",
-    }
+    },
 }
 
 dell_hostname_mock = {"dell-system:hostname": "test-dell"}
@@ -1067,7 +1136,7 @@ bgp_status_mellanox = {
             "192.168.1.9": [
                 {
                     "State/PfxRcd": "ESTABLISHED/13",
-                }
+                },
             ],
         },
     ],

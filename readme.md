@@ -17,7 +17,7 @@ CANU can be used to:
 To checkout a fresh system using CSI:
 
 1. Make a new directory to save switch IP addresses: `mkdir ips_folder`, `cd ips_folder`
-2. Parse CSI files and save switch IP addresses: `canu init --csi-folder /var/www/prep/SYSTEMNAME/ --out ips.txt`
+2. Parse CSI files and save switch IP addresses: `canu init --sls-file sls_input_file.json --out ips.txt`
 3. Check network firmware: `canu report network firmware -s 1.5 --ips-file ips.txt`
 4. Check network cabling: `canu report network cabling --ips-file ips.txt`
 5. Validate BGP status: `canu validate network bgp --ips-file ips.txt --verbose`
@@ -27,7 +27,7 @@ If you have the system's SHCD, there are even more commands that can be run
 
 7. Validate the SHCD: `canu validate shcd --shcd SHCD.xlsx`
 8. Validate the SHCD against network cabling: `canu validate shcd-cabling --shcd SHCD.xlsx --ips-file ips.txt`
-9. Generate switch config for the network: `canu generate network config --shcd SHCD.xlsx --csi-folder /var/www/prep/SYSTEMNAME/ --folder configs`
+9. Generate switch config for the network: `canu generate network config --shcd SHCD.xlsx --sls-file sls_input_file.json --folder configs`
 
 # Table of Contents
 
@@ -46,6 +46,7 @@ If you have the system's SHCD, there are even more commands that can be run
 **[Generate Network Config](#generate-network-config)**<br>
 **[Validate Switch Config](#validate-switch-config)**<br>
 **[Validate Network Config](#validate-network-config)**<br>
+**[Cache](#cache)**<br>
 **[Uninstallation](#uninstallation)**<br>
 **[Road Map](#road-map)**<br>
 **[Testing](#testing)**<br>
@@ -59,17 +60,55 @@ In order to run CANU, both python3 and pip3 need to be installed.
 
 ## Installation
 
-To install the development build of CANU type:
+- To run CANU inside a container:
 
-```bash
-python3 setup.py develop --user
-```
+  - Prequisites:
+    - docker
+    - docker-compose
 
-If that doesn't work, try:
+  ```bash
+    sh canu_docker.sh up
+  ```
 
-```bash
-pip3 install --editable .
-```
+  - CANU source files can be found inside the container at /app/canu
+  - shared folder between local disk is call `files` and is mounted in the container at `/files`
+  - When you are finished with the container and `exit` the container:
+
+  ```bash
+    sh canu_docker.sh down
+  ```
+
+- To run CANU in a Python Virtualenv:
+
+  - Prerequisites
+    - python3
+    - pip3
+    - Python Virtualenv
+
+  ```bash
+    python3 -m venv .venv
+    source ./.venv/bin/activate
+    pip3 install ./canu
+  ```
+
+  - When you are done working in the Python Virtualenv.
+    Use the following command to exit out of the Python Virtualenv:
+
+  ```bash
+  deactivate
+  ```
+
+- To install the development build of CANU type:
+
+  ```bash
+  python3 setup.py develop --user
+  ```
+
+  If that doesn't work, try:
+
+  ```bash
+  pip3 install --editable .
+  ```
 
 ## Usage
 
@@ -79,21 +118,22 @@ To run, just type `canu`, it should run and display help. To see a list of comma
 
 **[Details](docs/init.md)**<br>
 
-To help make switch setup a breeze. CANU can automatically parse CSI output or the Shasta SLS API for switch IPv4 addresses.
+To help make switch setup a breeze. CANU can automatically parse SLS JSON data - including CSI sls_input_file.json output or the Shasta SLS API for switch IPv4 addresses.
 
 #### CSI Input
 
-- In order to parse CSI output, use the `--csi-folder FOLDER` flag to pass in the folder where the _sls_input_file.json_ file is located.
+- In order to parse CSI output, use the `--sls-file FILE` flag to pass in the folder where an SLS JSON file is located.
 
-The _sls_input_file.json_ file is generally stored in one of two places depending on how far the system is in the install process.
+The CSI _sls_input_file.json_ file is generally stored in one of two places depending on how far the system is in the install process.
 
-- Early in the install process, when running off of the LiveCD the _sls_input_file.json_ file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
-- Later in the install process, the _sls_input_file.json_ file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
+- Early in the install process, when running off of the LiveCD the CSI _sls_input_file.json_ file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
+- Later in the install process, the CSI _sls_input_file.json_ file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
+- The switch IPs will be read from the 'NMN' network, if a different network is desired, use the `--network` flag to choose a different one e.g. (CAN, MTL, NMN).
 
 To get the switch IP addresses from CSI output, run the command:
 
 ```bash
-$ canu init --csi-folder /CSI/OUTPUT/FOLDER/ADDRESS --out output.txt
+$ canu init --sls-file SLS_FILE --out output.txt
 8 IP addresses saved to output.txt
 ```
 
@@ -107,6 +147,8 @@ To get the switch IP addresses from the Shasta SLS API, run the command:
 $ canu init --auth-token ~./config/cray/tokens/ --sls-address 1.2.3.4 --out output.txt
 8 IP addresses saved to output.txt
 ```
+
+![](docs/images/canu_init.png)
 
 The output file for the `canu init` command is set with the `--out FILENAME` flag.
 
@@ -122,8 +164,10 @@ To check the firmware of a single switch run: `canu report switch firmware --sha
 
 ```bash
 $ canu report switch firmware --shasta 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD
-🛶 - Pass - IP: 192.168.1.1 Hostname:test-switch-spine01 Firmware: GL.10.06.0001
+🛶 - Pass - IP: 192.168.1.1 Hostname:sw-spine-001 Firmware: GL.10.06.0010
 ```
+
+![](docs/images/canu_report_switch_firmware.png)
 
 ### Report Network Firmware
 
@@ -160,6 +204,8 @@ GL.10.06.0010 - 1 switches
 FL.10.06.0010 - 1 switches
 FL.10.05.0010 - 1 switches
 ```
+
+![](docs/images/canu_report_network_firmware.png)
 
 When using the _network firmware_ commands, the table will show either: 🛶 Pass, ❌ Fail, or 🔺 Error. The switch will **pass** or **fail** based on if the switch firmware matches the _canu.yaml_
 
@@ -224,6 +270,8 @@ PORT        NEIGHBOR       NEIGHBOR PORT      PORT DESCRIPTION                  
 1/1/51  ==> test-spine02   1/1/51                                                                   Aruba JL635A  GL.10.06.0010
 1/1/52  ==> test-spine02   1/1/52                                                                   Aruba JL635A  GL.10.06.0010
 ```
+
+![](docs/images/canu_report_switch_cabling.png)
 
 Sometimes when checking cabling using LLDP, the neighbor does not return any information except a MAC address. When that is the case, CANU looks up the MAC in the ARP table and displays the IP addresses and vlan information associated with the MAC.
 
@@ -305,6 +353,8 @@ Node type could not be determined for the following
 ------------------------------------------------------------
 CAN switch
 ```
+
+![](docs/images/canu_validate_shcd.png)
 
 ### Validate Network Cabling
 
@@ -431,6 +481,8 @@ sw-leaf-bmc-001 : Found in SHCD but not found on the network.
 uan001          : Found in SHCD but not found on the network.
 ```
 
+![](docs/images/canu_validate_shcd_cabling.png)
+
 The output of the `validate shcd-cabling` command will show the results for `validate shcd`, `validate cabling`, and then a comparison of the two results. If there are nodes found on the SHCD, or on the network that are not found in the other one, it will be displayed in _blue_. If a node is found on both the network and in the SHCD, but the connections are not the same, it will be shown in _green_, and the missing connections will be shown.
 
 ### Validate Network BGP
@@ -468,19 +520,19 @@ CANU can be used to configure BGP for a pair of switches.
 This command will remove previous configuration (BGP, Prefix Lists, Route Maps), then add prefix lists, create
 route maps, and update BGP neighbors, then write it all to the switch memory.
 
-The network and NCN data can be read from one of two sources, the SLS API, or using CSI.
+The network and NCN data can be read from one of two sources, the SLS API, or using any SLS File - including CSI-generated sls_input_file.json.
 
 To access SLS, a token must be passed in using the `--auth-token` flag.
 Tokens are typically stored in ~./config/cray/tokens/
 Instead of passing in a token file, the environmental variable SLS_TOKEN can be used.
 
-To get the network data using CSI, pass in the CSI folder containing the sls_input_file.json file using the `--csi-folder` flag
+To get the network data using CSI, pass in the CSI folder containing the SLS JSON file using the `--sls-file` flag
 
-The sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.
+The CSI SLS JSON file is generally stored in one of two places depending on how far the system is in the install process.
 
-- Early in the install process, when running off of the LiveCD the sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
+- Early in the install process, when running off of the LiveCD the CSI sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
 
-- Later in the install process, the sls_input_file.json file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
+- Later in the install process, the CSI sls_input_file.json file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
 
 To configure BGP run: `canu config bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
@@ -503,11 +555,11 @@ To see all the lags that are generated, see [lags](docs/lags.md)
 
 CANU can be used to generate switch config.
 
-In order to generate switch config, a valid SHCD must be passed in and system variables must be read in from either CSI output or the SLS API.
+In order to generate switch config, a valid SHCD must be passed in and system variables must be read in from any SLS data, including CSI output or the SLS API.
 
 #### CSI Input
 
-- In order to parse CSI output, use the `--csi-folder FOLDER` flag to pass in the folder where the _sls_input_file.json_ file is located.
+- In order to parse CSI output, use the `--sls-file FILE` flag to pass in the folder where the _sls_file.json_ file is located.
 
 The sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.
 
@@ -528,10 +580,10 @@ The sls_input_file.json file is generally stored in one of two places depending 
 
 To generate config for a specific switch, a hostname must also be passed in using the `--name HOSTNAME` flag. To output the config to a file, append the `--out FILENAME` flag.
 
-To generate switch config run: `canu generate switch config -s 1.5 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --csi-folder /CSI/OUTPUT/FOLDER/ADDRESS --name SWITCH_HOSTNAME --out FILENAME`
+To generate switch config run: `canu generate switch config -s 1.5 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --sls-file SLS_FILE --name SWITCH_HOSTNAME --out FILENAME`
 
 ```bash
-$ canu generate switch config -s 1.5 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --csi-folder /CSI/OUTPUT/FOLDER/ADDRESS --name sw-spine-001
+$ canu generate switch config -s 1.5 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --name sw-spine-001
 
 hostname sw-spine-001
 user admin group administrators password plaintext
@@ -552,10 +604,10 @@ CANU can also generate switch config for all the switches on a network.
 
 In order to generate network config, a valid SHCD must be passed in and system variables must be read in from either CSI output or the SLS API. The instructions are exactly the same as the above **[Generate Switch Config](#generate-switch-config)** except there will not be a hostname and a folder must be specified for config output using the `--folder FOLDERNAME` flag.
 
-To generate switch config run: `canu generate network config -s 1.5 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --csi-folder /CSI/OUTPUT/FOLDER/ADDRESS --folder FOLDERNAME`
+To generate switch config run: `canu generate network config -s 1.5 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --sls-file SLS_FILE --folder FOLDERNAME`
 
 ```bash
-$ canu generate network config -s 1.5 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --csi-folder /CSI/OUTPUT/FOLDER/ADDRESS --folder switch_config
+$ canu generate network config -s 1.5 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config
 
 sw-spine-001 Config Generated
 sw-spine-002 Config Generated
@@ -573,16 +625,21 @@ sw-leaf-bmc-001 Config Generated
 
 **[Details](docs/validate_switch_config.md)**<br>
 
-After config has been generated, CANU can validate the generated config against running switch config. After running the `validate switch config` command, you will be shown a line by line comparison of the currently running switch config against the config file that was passed in. You will also be given a list of remediation commands that can be typed into the switch to get the running config to match the config file. There will be a summary table at the end highlighting the most important differences between the configs.
+After config has been generated, CANU can validate the generated config against running switch config. The running config can be from either an IP address, or a config file.
+
+- To get running config from an IP address, use the flags `--ip 192.168.1.1 --username USERNAME --password PASSWORD`.
+- To get running config from a file, use the flag `--running RUNNING_CONFIG.cfg` instead.
+
+After running the `validate switch config` command, you will be shown a line by line comparison of the currently running switch config against the config file that was passed in. You will also be given a list of remediation commands that can be typed into the switch to get the running config to match the config file. There will be a summary table at the end highlighting the most important differences between the configs.
 
 - Lines that are red and start with a `-` are in the running config, but not in the config file
 - Lines that are green and start with a `+` are not in the running config, but are in the config file
 - Lines that are blue and start with a `?` are attempting to point out specific line differences
 
-To validate switch config run: `canu validate switch config --ip 192.168.1.1 --username USERNAME --password PASSWORD --config SWITCH_CONFIG.cfg`
+To validate switch config run: `canu validate switch config --ip 192.168.1.1 --username USERNAME --password PASSWORD --generated SWITCH_CONFIG.cfg`
 
 ```bash
-$ canu validate switch config --ip 192.168.1.1 --config sw-spine-001.cfg
+$ canu validate switch config --ip 192.168.1.1 --generated sw-spine-001.cfg
 
 hostname sw-spine-001
 - ntp server 192.168.1.10
@@ -612,16 +669,28 @@ Router:                          1  |
 
 ```
 
+![](docs/images/canu_validate_switch_config.png)
+
+#### File Output and JSON
+
+To output the results of the config validation command to a file, append the `--out FILENAME` flag. To get the results as JSON, use the `--json` flag.
+
 ### Validate Network Config
 
 **[Details](docs/validate_network_config.md)**<br>
 
-The `validate network config` command works almost the same as thh above `validate switch config` command. Pass in a list of ips, or a file of ip addresses and a directory of generated config files and there will be a summary table for each switch highlighting the most important differences between the runnig switch config and the config files.
+The `validate network config` command works almost the same as the above `validate switch config` command. There are three options for passing in the running config:
 
-To validate switch config run: `canu validate network config --ips-file ips.txt --username USERNAME --password PASSWORD --config /CONFIG/FOLDER`
+- A comma separated list of ips using `--ips 192.168.1.1,192.168.1.`
+- A file of ip addresses, one per line using the flag `--ips-file ips.txt`
+- A directory containing the running configuration `--running RUNNING/CONFIG/DIRECTORY`
+
+A directory of generated config files will also need to be passed in using `--generated GENERATED/CONFIG/DIRECTORY`. There will be a summary table for each switch highlighting the most important differences between the running switch config and the generated config files.
+
+To validate switch config run: `canu validate network config --ips-file ips.txt --username USERNAME --password PASSWORD --generated /CONFIG/FOLDER`
 
 ```bash
-$ canu validate network config -s 1.5 --ips-file ips.txt --config /CONFIG/FOLDER
+$ canu validate network config -s 1.5 --ips-file ips.txt --generated /CONFIG/FOLDER
 
 Switch: sw-leaf-001 (192.168.1.1)
 Differences
@@ -651,6 +720,18 @@ Errors
 192.168.1.3      - Timeout error connecting to switch 192.168.1.3, check the IP address and try again.
 ```
 
+#### File Output and JSON
+
+To output the results of the config validation command to a file, append the `--out FILENAME` flag. To get the results as JSON, use the `--json` flag.
+
+### Cache
+
+There are several commands to help with the canu cache:
+
+- `canu cache location` will tell you the folder where your cache is located
+- `canu cache print` will print a colored version of your cache to the screen
+- `canu cache delete` will delete your cache file, the file will be created again on the next canu command
+
 ## Uninstallation
 
 `pip3 uninstall canu`
@@ -673,15 +754,45 @@ $ nox
 
 To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. To rerun a session without reinstalling all testing dependencies use the `-rs` flag instead of `-s`.
 
+To run a specific test, like `test_report_switch_firmware.py` :
+
+```bash
+$ nox -s tests -- tests/test_report_switch_firmware.py
+```
+
 # Changelog
+
+## [development]
+
+- Command line option --csi-folder has changed to --sls-file. Any SLS JSON file can be used.
+- Installation via pip now supports non-developer modes. Pyinstaller binary and RPM now work as advertised.
+- The directory of canu_cache.yaml is now dynamically configured in the user's home directory (preferred), or the system temporary directory depending on filesystem permissions.
+- Added `canu cache location` print the folder where your cache is located
+- Added `canu cache print` to print a colored version of your cache to the screen
+- Added `canu cache delete` to delete the cache file, the file will be created again on the next canu command
+- Added Dell and Mellanox support to the `canu validate switch config` command
+- Added Dell and Mellanox support to the `canu validate network config` command
+- Added ability to compare two config files with `canu validate switch config`
+- Added ability to compare two config folders with `canu validate network config`
 
 ## [unreleased]
 
-- Added `canu generate switch config` to generate switch configuration.
-- Added `canu generate network config` to generate network configuration.
-- Added `canu validate switch config` to compare running switch config to a file.
-- Added `canu validate network config` to compare running network config to files.
-- Update naming conventions to `canu <verb> switch/network <noun>`
+## [0.0.6] - 2021-9-23
+
+- Added alpha version of schema-checked JSON output in `validate shcd` as a machine-readable exchange for SHCD data.
+- Add ability to run CANU in a container, and update Python virtual environment documentation.
+- Added `canu generate switch config` to generate switch configuration for Aruba systems.
+- Added `canu generate network config` to generate network configuration for Aruba systems.
+- Added `canu validate switch config` to compare running switch config to a file for Aruba systems.
+- Added `canu validate network config` to compare running network config to files for Aruba systems.
+- Updated naming conventions to `canu <verb> switch/network <noun>`
+- Added the ability to fully track device slot and port assignments.
+- Mountain hardware (CMM, CEC) is now being generated in the switch configurations.
+- Fixed multiple templates to match what is on the Aruba switch, these include, UANs, Loopbacks, VLAN interfaces, ACLs.
+- Known Limitations:
+  - PDUs are not yet properly handled in the generated switch configurations.
+  - Slingshot switches (sw-hsn) are not yet properly handled in the model or generated switch configurations.
+  - Switch and SNMP passwords have been removed from generated configurations until the handling code is secure.
 
 ## [0.0.5] - 2021-5-14
 
@@ -727,9 +838,11 @@ To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. T
 - Ability for CANU to get the firmware of a single or multiple Aruba switches
 - Standardized the canu.yaml file to show currently supported switch firmware versions.
 
-[unreleased]: https://stash.us.cray.com/projects/CSM/repos/canu/compare/commits?targetBranch=refs%2Ftags%2F0.0.5&sourceBranch=refs%2Fheads%2Fmaster&targetRepoId=12732
-[0.0.5]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.5
-[0.0.4]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.4
-[0.0.3]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.3
-[0.0.2]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.2
-[0.0.1]: https://stash.us.cray.com/projects/CSM/repos/canu/browse?at=refs%2Ftags%2F0.0.1
+[development]: https://github.com/Cray-HPE/canu/tree/develop
+[unreleased]: https://github.com/Cray-HPE/canu/tree/main
+[0.0.6]: https://github.com/Cray-HPE/canu/tree/0.0.6
+[0.0.5]: https://github.com/Cray-HPE/canu/tree/0.0.5
+[0.0.4]: https://github.com/Cray-HPE/canu/tree/0.0.4
+[0.0.3]: https://github.com/Cray-HPE/canu/tree/0.0.3
+[0.0.2]: https://github.com/Cray-HPE/canu/tree/0.0.2
+[0.0.1]: https://github.com/Cray-HPE/canu/tree/0.0.1

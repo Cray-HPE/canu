@@ -55,10 +55,10 @@ network_v2:
           speed: 100
           number: 2
           comment: "isl"
-        - name: "river_ncn_leaf"
-          speed: 10
-          number: 1
-          comment: "keepalive"
+        # - name: "river_ncn_leaf"
+        #   speed: 10
+        #   number: 1
+        #   comment: "keepalive"
     - name: "river_bmc_leaf"
       model: "6300M_JL762A"
       connections:
@@ -83,6 +83,10 @@ network_v2:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
+          comment: "onboard nmn"
+        - name: "river_bmc_leaf"
+          speed: 1
+          comment: "bmc"
     - name: "mountain_compute_cabinet"
       model: "mountain_compute_cabinet"
       connections:
@@ -211,6 +215,10 @@ network_v2_tds:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
+          comment: "onboard nmn"
+        - name: "river_bmc_leaf"
+          speed: 1
+          comment: "bmc"
     - name: "mountain_compute_cabinet"
       model: "mountain_compute_cabinet"
       connections:
@@ -259,11 +267,11 @@ network_v2_tds:
         - "sw-100g"
       shasta_name: "sw-edge"
       architecture_type: "customer_edge_router"
-    - lookup_name: 
+    - lookup_name:
         - "cec"
       shasta_name: "cec"
       architecture_type: "cec"
-    - lookup_name: 
+    - lookup_name:
         - "cmm"
       shasta_name: "cmm"
       architecture_type: "cmm"
@@ -329,6 +337,10 @@ network_v1:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
+          comment: "onboard nmn"
+        - name: "river_bmc_leaf"
+          speed: 1
+          comment: "bmc"
   lookup_mapper:
     - lookup_name:
         - "mn"
@@ -360,6 +372,7 @@ network_v1:
       architecture_type: "mountain_compute_leaf"
     - lookup_name:
         - "sw-smn"
+        - "sw-leaf"
       shasta_name: "sw-leaf-bmc"
       architecture_type: "river_bmc_leaf"
     - lookup_name:

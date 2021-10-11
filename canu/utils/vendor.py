@@ -1,15 +1,37 @@
-"""CANU utils."""
+# MIT License
+#
+# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
+"""CANU vendor utils."""
 import datetime
 import re
 
 import click
-from netmiko import ConnectHandler, ssh_exception, SSHDetect
+from netmiko import ssh_exception, SSHDetect
 import requests
 
-from canu.cache import (
+from canu.utils.cache import (
     cache_switch,
     get_switch_from_cache,
 )
+from canu.utils.ssh import netmiko_command
 
 
 def switch_vendor(
@@ -28,8 +50,6 @@ def switch_vendor(
         vendor: The switch vendor.
 
     Raises:
-        timeout: Bad IP address.
-        auth_err: Bad credentials
         Exception: Unknown error
         NetmikoTimeoutException: Could not determine switch vendor
     """
@@ -77,12 +97,15 @@ def switch_vendor(
 
             # could not determine, check if Aruba
             remote_version = netmiko_command(
-                ip, credentials, "show version", "autodetect"
+                ip,
+                credentials,
+                "show version",
+                "autodetect",
             )
 
-            aruba_match = re.search(r"ArubaOS", remote_version)
-            dell_match = re.search(r"Dell EMC Networking", remote_version)
-            mellanox_match = re.search(r"Mellanox", remote_version)
+            aruba_match = re.search("ArubaOS", remote_version)
+            dell_match = re.search("Dell EMC Networking", remote_version)
+            mellanox_match = re.search("Mellanox", remote_version)
 
             if aruba_match:
                 vendor = "aruba"
@@ -104,32 +127,26 @@ def switch_vendor(
         }
 
         cache_switch(switch_cache)
-    except ssh_exception.NetmikoTimeoutException as timeout:
+
+    except (
+        ssh_exception.NetmikoTimeoutException,
+        ssh_exception.NetmikoAuthenticationException,
+        Exception,
+    ) as err:
         if return_error:
-            raise timeout
+            raise err
+
+        exception_type = type(err).__name__
+
+        if exception_type == "NetmikoTimeoutException":
+            error_message = f"Timeout error connecting to switch {ip}, check the IP address and try again."
+        elif exception_type == "NetmikoAuthenticationException":
+            error_message = f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again."
         else:
-            click.secho(
-                f"Timeout error connecting to switch {ip}, check the IP address and try again.",
-                fg="white",
-                bg="red",
-            )
-            return None
-    except ssh_exception.NetmikoAuthenticationException as auth_err:
-        if return_error:
-            raise auth_err
-        click.secho(
-            f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again.",
-            fg="white",
-            bg="red",
-        )
-        return None
-    except Exception as error:  # pragma: no cover
-        if return_error:
-            raise error
-        exception_type = type(error).__name__
+            error_message = f"{exception_type}, {err}."
 
         click.secho(
-            f"{exception_type} {error}",
+            error_message,
             fg="white",
             bg="red",
         )
@@ -151,20 +168,14 @@ def check_aruba(ip, credentials):
     try:
         # Login
         login = session.post(
-            f"https://{ip}/rest/v10.04/login", data=credentials, verify=False
+            f"https://{ip}/rest/v10.04/login",
+            data=credentials,
+            verify=False,
         )
         login.raise_for_status()
         # Logout
         session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
 
-        # Put vendor in cache
-        switch_cache = {
-            "ip_address": ip,
-            "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "vendor": "aruba",
-        }
-
-        cache_switch(switch_cache)
     except (
         requests.exceptions.HTTPError,
         requests.exceptions.ConnectionError,
@@ -172,8 +183,16 @@ def check_aruba(ip, credentials):
     ):
         return False
 
-    else:
-        return True
+    # Put vendor in cache
+    switch_cache = {
+        "ip_address": str(ip),
+        "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "vendor": "aruba",
+    }
+
+    cache_switch(switch_cache)
+
+    return True
 
 
 def check_dell(ip, credentials):
@@ -193,14 +212,6 @@ def check_dell(ip, credentials):
         response = session.get(url, auth=auth, verify=False)
         response.raise_for_status()
 
-        # Put vendor in cache
-        switch_cache = {
-            "ip_address": ip,
-            "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "vendor": "dell",
-        }
-
-        cache_switch(switch_cache)
     except (
         requests.exceptions.HTTPError,
         requests.exceptions.ConnectionError,
@@ -208,8 +219,16 @@ def check_dell(ip, credentials):
     ):
         return False
 
-    else:
-        return True
+    # Put vendor in cache
+    switch_cache = {
+        "ip_address": str(ip),
+        "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "vendor": "dell",
+    }
+
+    cache_switch(switch_cache)
+
+    return True
 
 
 def check_mellanox(ip, credentials):
@@ -228,14 +247,6 @@ def check_mellanox(ip, credentials):
         response = session.get(url, json=credentials, verify=False)
         response.raise_for_status()
 
-        # Put vendor in cache
-        switch_cache = {
-            "ip_address": ip,
-            "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "vendor": "mellanox",
-        }
-
-        cache_switch(switch_cache)
     except (
         requests.exceptions.HTTPError,
         requests.exceptions.ConnectionError,
@@ -243,73 +254,13 @@ def check_mellanox(ip, credentials):
     ):
         return False
 
-    else:
-        return True
-
-
-def netmiko_command(ip, credentials, command, device_type="autodetect"):
-    """Send a single command to a switch using netmiko.
-
-    Args:
-        ip: Switch ip
-        credentials: Switch credentials
-        command: Command to be run on the switch
-        device_type: The switch type
-
-    Returns:
-        output: Text output from the command run.
-    """
-    type = {
-        "aruba": "aruba_os",
-        "dell": "dell_os10",
-        "mellanox": "mellanox_mlnxos",
-        "autodetect": "autodetect",
-    }
-    switch = {
-        "device_type": type[device_type],
-        "host": ip,
-        "username": credentials["username"],
-        "password": credentials["password"],
+    # Put vendor in cache
+    switch_cache = {
+        "ip_address": str(ip),
+        "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "vendor": "mellanox",
     }
 
-    with ConnectHandler(**switch) as net_connect:
-        output = net_connect.send_command(command)
-        net_connect.disconnect()
+    cache_switch(switch_cache)
 
-    return output
-
-
-def netmiko_commands(ip, credentials, commands, device_type="autodetect"):
-    """Send a list of commands to a switch using netmiko.
-
-    Args:
-        ip: Switch ip
-        credentials: Switch credentials
-        commands: List of commands to be run on the switch
-        device_type: The switch type
-
-    Returns:
-        output: Text output from the command run.
-    """
-    type = {
-        "aruba": "aruba_os",
-        "dell": "dell_os10",
-        "mellanox": "mellanox_mlnxos",
-        "autodetect": "autodetect",
-    }
-    switch = {
-        "device_type": type[device_type],
-        "host": ip,
-        "username": credentials["username"],
-        "password": credentials["password"],
-        "session_log": "netmiko_session.log",
-    }
-    output = []
-    with ConnectHandler(**switch) as net_connect:
-        net_connect.enable()
-        for command in commands:
-            command_output = net_connect.send_command(command)
-            output.append(command_output)
-        net_connect.disconnect()
-
-    return output
+    return True

@@ -1,6 +1,27 @@
+# MIT License
+#
+# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that generate the config of the entire Shasta network."""
 import json
-import os
+from os import environ, makedirs, path
 from pathlib import Path
 import sys
 
@@ -10,7 +31,7 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from openpyxl import load_workbook
 import requests
-import ruamel.yaml
+from ruamel.yaml import YAML
 import urllib3
 
 from canu.generate.switch.config.config import (
@@ -19,9 +40,10 @@ from canu.generate.switch.config.config import (
     parse_sls_for_config,
     rename_sls_hostnames,
 )
+from canu.utils.cache import cache_directory
 from canu.validate.shcd.shcd import node_model_from_shcd
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 # To disable warnings about unsecured HTTPS requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -35,29 +57,43 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
 # Schema and Data files
-hardware_schema_file = os.path.join(
-    project_root, "network_modeling", "schema", "cray-network-hardware-schema.yaml"
+hardware_schema_file = path.join(
+    project_root,
+    "network_modeling",
+    "schema",
+    "cray-network-hardware-schema.yaml",
 )
-hardware_spec_file = os.path.join(
-    project_root, "network_modeling", "models", "cray-network-hardware.yaml"
+hardware_spec_file = path.join(
+    project_root,
+    "network_modeling",
+    "models",
+    "cray-network-hardware.yaml",
 )
-architecture_schema_file = os.path.join(
-    project_root, "network_modeling", "schema", "cray-network-architecture-schema.yaml"
+architecture_schema_file = path.join(
+    project_root,
+    "network_modeling",
+    "schema",
+    "cray-network-architecture-schema.yaml",
 )
-architecture_spec_file = os.path.join(
-    project_root, "network_modeling", "models", "cray-network-architecture.yaml"
+architecture_spec_file = path.join(
+    project_root,
+    "network_modeling",
+    "models",
+    "cray-network-architecture.yaml",
 )
 
-canu_cache_file = os.path.join(project_root, "canu", "canu_cache.yaml")
-canu_config_file = os.path.join(project_root, "canu", "canu.yaml")
+canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
+canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
 # Import templates
-network_templates_folder = os.path.join(
-    project_root, "network_modeling", "configs", "templates"
+network_templates_folder = path.join(
+    project_root,
+    "network_modeling",
+    "configs",
+    "templates",
 )
 env = Environment(
     loader=FileSystemLoader(network_templates_folder),
-    # trim_blocks=True,
     undefined=StrictUndefined,
 )
 
@@ -104,7 +140,11 @@ shasta_options = canu_config["shasta_versions"]
     "--corners",
     help="The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.",
 )
-@click.option("--csi-folder", help="Directory containing the CSI json file")
+@click.option(
+    "--sls-file",
+    help="File containing system SLS JSON data.",
+    type=click.File("r"),
+)
 @click.option(
     "--auth-token",
     envvar="SLS_TOKEN",
@@ -125,7 +165,7 @@ def config(
     shcd,
     tabs,
     corners,
-    csi_folder,
+    sls_file,
     auth_token,
     sls_address,
     folder,
@@ -146,7 +186,7 @@ def config(
         shcd: SHCD file
         tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
         corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
-        csi_folder: Directory containing the CSI json file
+        sls_file: Directory containing the CSI json file
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         folder: Folder to store config files
@@ -183,7 +223,8 @@ def config(
         if len(tabs.split(",")) * 2 != len(corners.split(",")):
             click.secho("Not enough corners.\n", fg="red")
             click.secho(
-                f"Make sure each tab: {tabs.split(',')} has 2 corners.\n", fg="red"
+                f"Make sure each tab: {tabs.split(',')} has 2 corners.\n",
+                fg="red",
             )
             click.secho(
                 f"There were {len(corners.split(','))} corners entered, but there should be {len(tabs.split(',')) * 2}.",
@@ -206,7 +247,7 @@ def config(
                     tabs.split(",")[i],
                     corners.split(",")[i * 2].strip(),
                     corners.split(",")[i * 2 + 1].strip(),
-                )
+                ),
             )
     else:
         for tab in tabs.split(","):
@@ -216,7 +257,8 @@ def config(
                 type=str,
             )
             range_end = click.prompt(
-                "Enter the cell of the lower right corner", type=str
+                "Enter the cell of the lower right corner",
+                type=str,
             )
             sheets.append((tab, range_start, range_end))
 
@@ -231,31 +273,30 @@ def config(
 
     # Get nodes from SHCD
     shcd_node_list, shcd_warnings = node_model_from_shcd(
-        factory=factory, spreadsheet=shcd, sheets=sheets
+        factory=factory,
+        spreadsheet=shcd,
+        sheets=sheets,
     )
 
-    # Parse sls_input_file.json file from CSI
-    if csi_folder:
+    # Parse SLS input file.
+    if sls_file:
         try:
-            with open(os.path.join(csi_folder, "sls_input_file.json"), "r") as f:
-                input_json = json.load(f)
-
-                # Format the input to be like the SLS JSON
-                sls_json = [
-                    network[x]
-                    for network in [input_json.get("Networks", {})]
-                    for x in network
-                ]
-
-        except FileNotFoundError:
+            input_json = json.load(sls_file)
+        except (json.JSONDecodeError, UnicodeDecodeError):
             click.secho(
-                "The file sls_input_file.json was not found, check that this is the correct CSI directory.",
+                f"The file {sls_file.name} is not valid JSON.",
                 fg="red",
             )
             return
+
+        # Format the input to be like the SLS JSON
+        sls_json = [
+            network[x] for network in [input_json.get("Networks", {})] for x in network
+        ]
+
     else:
         # Get SLS config
-        token = os.environ.get("SLS_TOKEN")
+        token = environ.get("SLS_TOKEN")
 
         # Token file takes precedence over the environmental variable
         if auth_token != token:
@@ -312,8 +353,8 @@ def config(
             sls_variables = rename_sls_hostnames(sls_variables)
 
     # make folder
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    if not path.exists(folder):
+        makedirs(folder)
     all_devices = {
         "cdu",
         "cec",
@@ -352,15 +393,15 @@ def config(
         click.secho("\nWarning", fg="red")
 
         click.secho(
-            "\nThe following devices were not found in the configurations.",
+            "\nThe following devices typically exist, but were not found in the current configuration.",
             fg="red",
         )
         click.secho(
-            "If the network contains these devices, check the SHCD to ensure all tabs were included.",
+            "If the network is supposed to have these devices, check the SHCD to ensure all tabs were included.",
             fg="red",
         )
         click.secho(
-            "If the network does not contain these devices, disregard this warning."
+            "If the network does not contain these devices, disregard this warning.",
         )
         click.secho(dash)
         for x in missing_devices:

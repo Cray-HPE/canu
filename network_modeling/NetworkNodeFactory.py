@@ -1,14 +1,35 @@
+# MIT License
+#
+# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
 """NetworkNodeFactory to create a new network."""
 import logging
 
 import click
-import ruamel.yaml
+from ruamel.yaml import YAML
 import yamale
 
 from .NetworkNode import NetworkNode
 
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 log = logging.getLogger(__name__)
 
@@ -92,7 +113,7 @@ class NetworkNodeFactory:
                 click.secho(
                     f"Error validating {data_file} with {schema_file}: {err}",
                     fg="red",
-                )
+                ),
             ) from err
 
     # For convenience to users the yamale schema allows port speeds as int or list.
@@ -117,7 +138,7 @@ class NetworkNodeFactory:
                 click.secho(
                     f"Error finding version {architecture_version} in the architecture definition",
                     fg="red",
-                )
+                ),
             )
         log.debug(f"Using architecture version: {architecture_version}")
 
@@ -139,17 +160,18 @@ class NetworkNodeFactory:
             if arch_model not in hw_models:
                 log.error(
                     "Architecture model {} for {} not found in hardware data".format(
-                        arch_component["model"], arch_name
-                    )
+                        arch_component["model"],
+                        arch_name,
+                    ),
                 )
                 log.error(
-                    "    Models in the architectural definition must be represented in the hardware definition"
+                    "    Models in the architectural definition must be represented in the hardware definition",
                 )
                 raise Exception(
                     click.secho(
                         f"Architecture model {arch_component['model']} for {arch_name} not found in hardware data",
                         fg="red",
-                    )
+                    ),
                 )
 
     # Port speeds listed in the architectural definition must actually exist on the hardware.
@@ -181,10 +203,10 @@ class NetworkNodeFactory:
                         click.secho(
                             f"Validation of {arch_model} architecture against hardware failed for speeds",
                             fg="red",
-                        )
+                        ),
                     )
                 log.debug(
-                    f"Validated {arch_model} architecture against hardware for speeds"
+                    f"Validated {arch_model} architecture against hardware for speeds",
                 )
 
     def __validate_lookup_mapper(self):
@@ -205,10 +227,10 @@ class NetworkNodeFactory:
                     click.secho(
                         f"Device {lookup_name} in lookup_mapper not found in architecture components",
                         fg="red",
-                    )
+                    ),
                 )
             log.debug(
-                f"Validated lookup_mapper device {lookup_name} in architecture definition"
+                f"Validated lookup_mapper device {lookup_name} in architecture definition",
             )
 
     def __warn_architecture_deprecation(self):
@@ -216,7 +238,7 @@ class NetworkNodeFactory:
         architecture_version = self.__architecture_version
         name = architecture_data[architecture_version]["name"]
         if "deprecated" in architecture_data[architecture_version]:
-            log.warn(f"Architecture {name} is deprecated")
+            log.warning(f"Architecture {name} is deprecated")
 
     def __generate_node_id(self):
         self.__node_id += 1
@@ -241,7 +263,7 @@ class NetworkNodeFactory:
                 click.secho(
                     f"Error finding node architecture definition {node_type} in version {version_name}",
                     fg="red",
-                )
+                ),
             )
 
         # The architectural "model" is the "primary key" for hardware
@@ -258,18 +280,21 @@ class NetworkNodeFactory:
                 click.secho(
                     f"Error finding node hardware definition {node_hardware} in hardware",
                     fg="red",
-                )
+                ),
             )
 
         # Create a Network Node object based on the above definitions
         node_id = self.__generate_node_id()
         node = NetworkNode(
-            id=node_id, hardware=node_hardware, architecture=node_architecture
+            id=node_id,
+            hardware=node_hardware,
+            architecture=node_architecture,
         )
         log.debug(
             "Successfully generated node {} of type {}".format(
-                node_id, node.arch_type()
-            )
+                node_id,
+                node.arch_type(),
+            ),
         )
 
         return node
@@ -288,6 +313,6 @@ class NetworkNodeFactory:
                     lookup["lookup_name"] + [lookup["shasta_name"]],
                     lookup["shasta_name"],
                     lookup["architecture_type"],
-                )
+                ),
             )
         return lookup_mapper_as_tuple

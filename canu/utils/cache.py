@@ -36,7 +36,9 @@ yaml = YAML()
 
 def cache_directory():
     """Create and return the cache directory location.
+
     Prefer the user home directory, otherwise OS temporary directory.
+
     Returns:
         cachedir: Location of the canu cache.
     """
@@ -96,9 +98,12 @@ else:  # pragma: no cover
 
 def cache_switch(switch):
     """Cache a switch.
+
     The switch that is passed in will either be added to the cache, or updated in the cache, depending on if it existed before.
+
     Args:
         switch: The JSON switch object to be added to the cache.
+
     The updated cache is immediately written to a file.
     """
     if ip_exists_in_cache(str(switch["ip_address"])):
@@ -112,9 +117,11 @@ def cache_switch(switch):
 
 def firmware_cached_recently(ip, max_cache_time=10):
     """Check if a switch has recently been cached and return True or False.
+
     Args:
         ip: The IPv4 address to check in the cache.
         max_cache_time: Optional parameter (defaults to 10) to determine the maximum cache time in minutes.
+
     Returns:
         True or False depending on if the IP address has been cached less than the max_cache_time parameter.
     """
@@ -141,10 +148,13 @@ def firmware_cached_recently(ip, max_cache_time=10):
 
 def get_switch_from_cache(ip):
     """Return an existing switch from the cache by IP lookup.
+
     Args:
         ip: The IPv4 address of the switch to be retrieved from the cache.
+
     Returns:
         The JSON switch from the cache.
+
     Raises:
         Exception: If ip address not in cache.
     """
@@ -157,9 +167,11 @@ def get_switch_from_cache(ip):
 
 def update_switch_in_cache(cache, switch):
     """Update an existing switch in the cache.
+
     Args:
         cache: The JSON representation of the current YAML cache file.
         switch: The JSON switch object to be added to the cache.
+
     Returns:
         The updated JSON cache with the switch updated.
     """
@@ -174,9 +186,11 @@ def update_switch_in_cache(cache, switch):
 
 def add_switch_to_cache(cache, switch):
     """Add a switch to the cache.
+
     Args:
         cache: The JSON representation of the current YAML cache file.
         switch: The JSON switch object to be added to the cache.
+
     Returns:
         The updated JSON cache with the switch appended
     """
@@ -191,7 +205,9 @@ def add_switch_to_cache(cache, switch):
 
 def remove_switch_from_cache(ip):
     """Remove a switch from the cache.
+
     This function is useful for removing a test switch from the cache.
+
     Args:
         ip: The IPv4 address to remove from the cache.
     """
@@ -209,8 +225,10 @@ def remove_switch_from_cache(ip):
 
 def ip_exists_in_cache(ip):
     """Check if a switch already exists in the cache.
+
     Args:
         ip: The IPv4 address to check.
+
     Returns:
         True or False depending on if the IP address is in the cache.
     """

@@ -1,3 +1,24 @@
+# MIT License
+#
+# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that report the cabling of an individual switch."""
 from collections import defaultdict, OrderedDict
 import datetime
@@ -11,8 +32,9 @@ from netmiko import ssh_exception
 import requests
 import urllib3
 
-from canu.cache import cache_switch
-from canu.utils.utils import netmiko_commands, switch_vendor
+from canu.utils.cache import cache_switch
+from canu.utils.ssh import netmiko_commands
+from canu.utils.vendor import switch_vendor
 
 # To disable warnings about unsecured HTTPS requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -33,7 +55,10 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     help="Switch password",
 )
 @click.option(
-    "--out", help="Output results to a file", type=click.File("w"), default="-"
+    "--out",
+    help="Output results to a file",
+    type=click.File("w"),
+    default="-",
 )
 @click.pass_context
 def cabling(ctx, ip, username, password, out):
@@ -67,7 +92,7 @@ def cabling(ctx, ip, username, password, out):
 
 
 def get_lldp(ip, credentials, return_error=False):
-    """Get lldp of an Aruba switch using v10.04 API.
+    """Get lldp of an Aruba, Dell, or Mellanox switch.
 
     Args:
         ip: IPv4 address of the switch
@@ -86,13 +111,17 @@ def get_lldp(ip, credentials, return_error=False):
             return None, None, None
         elif vendor == "aruba":
             switch_info, switch_dict, arp = get_lldp_aruba(
-                ip, credentials, return_error
+                ip,
+                credentials,
+                return_error,
             )
         elif vendor == "dell":
             switch_info, switch_dict, arp = get_lldp_dell(ip, credentials, return_error)
         elif vendor == "mellanox":
             switch_info, switch_dict, arp = get_lldp_mellanox(
-                ip, credentials, return_error
+                ip,
+                credentials,
+                return_error,
             )
 
     except (
@@ -104,14 +133,14 @@ def get_lldp(ip, credentials, return_error=False):
     ) as error:
         if return_error:
             raise error
-        else:
-            exception_type = type(error).__name__
-            click.secho(
-                f"Error connecting to switch {ip}, {exception_type} {error}.",
-                fg="white",
-                bg="red",
-            )
-            return None, None, None
+
+        exception_type = type(error).__name__
+        click.secho(
+            f"Error connecting to switch {ip}, {exception_type} {error}.",
+            fg="white",
+            bg="red",
+        )
+        return None, None, None
 
     return switch_info, switch_dict, arp
 
@@ -130,48 +159,46 @@ def get_lldp_aruba(ip, credentials, return_error=False):
         arp: ARP dictionary
 
     Raises:
-        http_error: IP not Aruba switch, or credentials bad.
-        connection_error: Bad ip address.
         error: Error
     """
     session = requests.Session()
     try:
         # Login
         login = session.post(
-            f"https://{ip}/rest/v10.04/login", data=credentials, verify=False
+            f"https://{ip}/rest/v10.04/login",
+            data=credentials,
+            verify=False,
         )
         login.raise_for_status()
 
-    except requests.exceptions.HTTPError as http_error:
+    except (
+        requests.exceptions.HTTPError,
+        requests.exceptions.ConnectionError,
+        requests.exceptions.RequestException,
+    ) as err:
         if return_error:
-            raise http_error
-        else:
-            click.secho(
-                f"Error connecting to switch {ip}, check that this IP is an Aruba switch, or check the username or password.",
-                fg="white",
-                bg="red",
+            raise err
+
+        exception_type = type(err).__name__
+
+        if exception_type == "HTTPError":
+            error_message = (
+                f"Error connecting to switch {ip}, check the username or password."
             )
-            return None, None, None
-    except requests.exceptions.ConnectionError as connection_error:
-        if return_error:
-            raise connection_error
-        else:
-            click.secho(
-                f"Error connecting to switch {ip}, check the IP address and try again.",
-                fg="white",
-                bg="red",
+        elif exception_type == "ConnectionError":
+            error_message = (
+                f"Error connecting to switch {ip}, check the IP address and try again."
             )
-            return None, None, None
-    except requests.exceptions.RequestException as error:  # pragma: no cover
-        if return_error:
-            raise error
         else:
-            click.secho(
-                f"Error connecting to switch {ip}.",
-                fg="white",
-                bg="red",
-            )
-            return None, None, None
+            error_message = f"Error connecting to switch {ip}."
+
+        click.secho(
+            str(error_message),
+            fg="white",
+            bg="red",
+        )
+
+        return None, None, None
 
     try:
         # GET switch info
@@ -183,6 +210,7 @@ def get_lldp_aruba(ip, credentials, return_error=False):
         switch_info = switch_info_response.json()
         switch_info["ip"] = ip
         switch_info["vendor"] = "aruba"
+        switch_info["hostname"] = switch_info["hostname"]
 
         # GET LLDP neighbors
         neighbors = session.get(
@@ -200,29 +228,22 @@ def get_lldp_aruba(ip, credentials, return_error=False):
         arp = arp_response.json()
 
         lldp_dict = defaultdict(list)
-        for port in neighbors_dict:
-            interface = unquote(port)
+        for port_number, port in neighbors_dict.items():
+            interface = unquote(port_number)
 
-            for x in neighbors_dict[port]:
-                neighbor = {
-                    "chassis_id": neighbors_dict[port][x]["chassis_id"],
-                    "mac_addr": neighbors_dict[port][x]["mac_addr"],
-                    "chassis_description": neighbors_dict[port][x]["neighbor_info"][
-                        "chassis_description"
-                    ],
-                    "chassis_name": neighbors_dict[port][x]["neighbor_info"][
-                        "chassis_name"
-                    ],
-                    "port_description": neighbors_dict[port][x]["neighbor_info"][
-                        "port_description"
-                    ],
-                    "port_id_subtype": neighbors_dict[port][x]["neighbor_info"][
-                        "port_id_subtype"
-                    ],
-                    "port_id": neighbors_dict[port][x]["port_id"],
+            for _mac, lldp_info in port.items():
+                neighbor_info = lldp_info["neighbor_info"]
+                lldp_neighbor = {
+                    "chassis_id": lldp_info["chassis_id"],
+                    "mac_addr": lldp_info["mac_addr"],
+                    "chassis_description": neighbor_info["chassis_description"],
+                    "chassis_name": neighbor_info["chassis_name"],
+                    "port_description": neighbor_info["port_description"],
+                    "port_id_subtype": neighbor_info["port_id_subtype"],
+                    "port_id": lldp_info["port_id"],
                 }
 
-                lldp_dict[interface].append(neighbor)
+                lldp_dict[interface].append(lldp_neighbor)
 
         # Logout
         session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
@@ -237,13 +258,13 @@ def get_lldp_aruba(ip, credentials, return_error=False):
     except requests.exceptions.RequestException as error:  # pragma: no cover
         if return_error:
             raise error
-        else:
-            click.secho(
-                f"Error getting cabling information from switch {ip}",
-                fg="white",
-                bg="red",
-            )
-            return None, None, None
+
+        click.secho(
+            f"Error getting cabling information from switch {ip}",
+            fg="white",
+            bg="red",
+        )
+        return None, None, None
 
 
 def get_lldp_dell(ip, credentials, return_error):
@@ -260,8 +281,6 @@ def get_lldp_dell(ip, credentials, return_error):
         arp: ARP dictionary
 
     Raises:
-        timeout: Bad IP address.
-        auth_err: Bad credentials
         Exception: Unknown error
     """
     try:
@@ -271,7 +290,7 @@ def get_lldp_dell(ip, credentials, return_error):
             "terminal length 0",
             "show lldp neighbors detail",
             "show version",
-            'show running-configuration | grep "hostname"',
+            "system hostname",
             "show ip arp",
         ]
         command_output = netmiko_commands(ip, credentials, commands, "dell")
@@ -302,6 +321,10 @@ def get_lldp_dell(ip, credentials, return_error):
                 neighbors_dict[port]["chassis_name"] = chassis_name
             elif line.startswith("Remote Port ID: "):
                 port_id = line[16:]
+                if port_id.startswith("Eth"):
+                    port_id = "1/" + port_id[3:]
+                if port_id.startswith("ethernet"):
+                    port_id = port_id[8:]
                 neighbors_dict[port]["port_id"] = port_id
             elif line.startswith("Local Port ID: "):
                 if line.startswith("Local Port ID: ethernet"):
@@ -311,20 +334,22 @@ def get_lldp_dell(ip, credentials, return_error):
 
         lldp_dict = defaultdict(list)
         for port in neighbors_dict:
-            if "chassis_id" not in neighbors_dict[port].keys():
+            port_dict = neighbors_dict[port]
+
+            if "chassis_id" not in port_dict.keys():
                 neighbors_dict[port]["chassis_id"] = ""
-            if "chassis_description" not in neighbors_dict[port].keys():
+            if "chassis_description" not in port_dict.keys():
                 neighbors_dict[port]["chassis_description"] = ""
-            if "mac_addr" not in neighbors_dict[port].keys():
-                neighbors_dict[port]["mac_addr"] = neighbors_dict[port].get(
-                    "chassis_id", ""
-                )
-            if "port_description" not in neighbors_dict[port].keys():
+            if "mac_addr" not in port_dict.keys():
+                neighbors_dict[port]["mac_addr"] = port_dict.get("chassis_id", "")
+            if "port_description" not in port_dict.keys():
                 neighbors_dict[port]["port_description"] = ""
-            if "chassis_name" not in neighbors_dict[port].keys():
+            if "chassis_name" not in port_dict.keys():
                 neighbors_dict[port]["chassis_name"] = ""
+
             neighbors_dict[port]["port_id_subtype"] = "if_name"
             interface = neighbors_dict[port]["local_port_id"]
+
             lldp_dict[interface].append(neighbors_dict[port])
 
         # Order the ports in natural order
@@ -345,10 +370,7 @@ def get_lldp_dell(ip, credentials, return_error):
                 platform_name = line[13:]
 
         # Switch Hostname
-        hostname = ""
-        for line in command_output[3].splitlines():
-            if line.startswith("hostname"):
-                hostname = line.split()[1]
+        hostname = command_output[3]
 
         switch_info = {
             "platform_name": platform_name,
@@ -385,34 +407,29 @@ def get_lldp_dell(ip, credentials, return_error):
 
         cache_lldp(switch_json, lldp_dict, arp)
 
-    except ssh_exception.NetmikoTimeoutException as timeout:
+    except (
+        ssh_exception.NetmikoTimeoutException,
+        ssh_exception.NetmikoAuthenticationException,
+        Exception,
+    ) as err:
         if return_error:
-            raise timeout
+            raise err
+
+        exception_type = type(err).__name__
+
+        if exception_type == "NetmikoTimeoutException":
+            error_message = f"Timeout error connecting to switch {ip}, check the IP address and try again."
+        elif exception_type == "NetmikoAuthenticationException":
+            error_message = f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again."
         else:
-            click.secho(
-                f"Timeout error connecting to switch {ip}, check the IP address and try again.",
-                fg="white",
-                bg="red",
-            )
-            return None, None, None
-    except ssh_exception.NetmikoAuthenticationException as auth_err:
-        if return_error:
-            raise auth_err
+            error_message = f"{exception_type}, {err}."
+
         click.secho(
-            f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again.",
+            error_message,
             fg="white",
             bg="red",
         )
-        return None, None, None
-    except Exception as error:  # pragma: no cover
-        if return_error:
-            raise error
-        exception_type = type(error).__name__
-        click.secho(
-            f"{exception_type} {error}",
-            fg="white",
-            bg="red",
-        )
+
         return None, None, None
 
     return switch_json, lldp_dict, arp
@@ -447,23 +464,23 @@ def get_lldp_mellanox(ip, credentials, return_error):
     if login.status_code == 404:
         if return_error:
             raise requests.exceptions.ConnectionError
-        else:
-            click.secho(
-                f"Error connecting to switch {ip}, check the IP address and try again.",
-                fg="white",
-                bg="red",
-            )
-            return None, None, None
+
+        click.secho(
+            f"Error connecting to switch {ip}, check the IP address and try again.",
+            fg="white",
+            bg="red",
+        )
+        return None, None, None
     if login.json()["status"] != "OK":
         if return_error:
             raise requests.exceptions.HTTPError
-        else:
-            click.secho(
-                f"Error connecting to switch {ip}, check the username or password.",
-                fg="white",
-                bg="red",
-            )
-            return None, None, None
+
+        click.secho(
+            f"Error connecting to switch {ip}, check the username or password.",
+            fg="white",
+            bg="red",
+        )
+        return None, None, None
 
     try:
         lldp_remote = session.post(
@@ -477,62 +494,62 @@ def get_lldp_mellanox(ip, credentials, return_error):
         neighbors_dict = defaultdict(dict)
         for x in lldp_json["data"]:
             for port in x:
-                if x.get("Lines") == [
-                    "",
-                    "No lldp remote information.",
-                    "",
-                ]:
+                neighbor_dict = defaultdict()
+
+                if x.get("Lines") == ["", "No lldp remote information.", ""]:
                     break
                 local_port_id = "1/" + port.strip("Eth").split()[0]
 
-                neighbors_dict[port]["local_port_id"] = local_port_id
+                neighbor_dict["local_port_id"] = local_port_id
                 for prop in x[port]:
                     if "Remote chassis id" in prop:
                         chassis_id = prop.get("Remote chassis id")
                         if chassis_id == "Not Advertised":
                             chassis_id = ""
-                        neighbors_dict[port]["chassis_id"] = chassis_id
-                        neighbors_dict[port]["mac_addr"] = chassis_id
+                        neighbor_dict["chassis_id"] = chassis_id
+                        neighbor_dict["mac_addr"] = chassis_id
                     if "Remote system description" in prop:
                         chassis_description = prop.get("Remote system description")
                         if chassis_description == "Not Advertised":
                             chassis_description = ""
-                        neighbors_dict[port][
-                            "chassis_description"
-                        ] = chassis_description
+                        neighbor_dict["chassis_description"] = chassis_description
                     if "Remote system name" in prop:
                         chassis_name = prop.get("Remote system name")
                         if chassis_name == "Not Advertised":
                             chassis_name = ""
-                        neighbors_dict[port]["chassis_name"] = chassis_name
+                        neighbor_dict["chassis_name"] = chassis_name
                     if "Remote port description" in prop:
                         port_description = prop.get("Remote port description")
                         if port_description == "Not Advertised":
                             port_description = ""
-                        neighbors_dict[port]["port_description"] = port_description
+                        neighbor_dict["port_description"] = port_description
                     if "Remote port-id" in prop:
                         port_id = prop.get("Remote port-id")
                         if port_id == "Not Advertised":
                             port_id = ""
-                        neighbors_dict[port]["port_id"] = port_id
+                        if port_id.startswith("Eth"):
+                            port_id = "1/" + port_id[3:]
+                        if port_id.startswith("ethernet"):
+                            port_id = port_id[8:]
+                        neighbor_dict["port_id"] = port_id
+
+                neighbors_dict[port] = neighbor_dict
 
         lldp_dict = defaultdict(list)
-        for port in neighbors_dict:
-            if "chassis_id" not in neighbors_dict[port].keys():
-                neighbors_dict[port]["chassis_id"] = ""
-            if "mac_addr" not in neighbors_dict[port].keys():
-                neighbors_dict[port]["mac_addr"] = neighbors_dict[port].get(
-                    "chassis_id", ""
-                )
-            if "chassis_description" not in neighbors_dict[port].keys():
-                neighbors_dict[port]["chassis_description"] = ""
-            if "port_description" not in neighbors_dict[port].keys():
-                neighbors_dict[port]["port_description"] = ""
-            if "chassis_name" not in neighbors_dict[port].keys():
-                neighbors_dict[port]["chassis_name"] = ""
-            neighbors_dict[port]["port_id_subtype"] = "if_name"
-            interface = neighbors_dict[port]["local_port_id"]
-            lldp_dict[interface].append(neighbors_dict[port])
+        for _port_number, port_info in neighbors_dict.items():
+            if "chassis_id" not in port_info.keys():
+                port_info["chassis_id"] = ""
+            if "mac_addr" not in port_info.keys():
+                port_info["mac_addr"] = port_info.get("chassis_id", "")
+            if "chassis_description" not in port_info.keys():
+                port_info["chassis_description"] = ""
+            if "port_description" not in port_info.keys():
+                port_info["port_description"] = ""
+            if "chassis_name" not in port_info.keys():
+                port_info["chassis_name"] = ""
+            port_info["port_id_subtype"] = "if_name"
+            interface = port_info["local_port_id"]
+            lldp_dict[interface].append(port_info)
 
         # Order the ports in natural order
         lldp_dict = OrderedDict(natsort.natsorted(lldp_dict.items()))
@@ -586,9 +603,9 @@ def get_lldp_mellanox(ip, credentials, return_error):
                 arp_json = entry
 
         arp = defaultdict(dict)
-        for arp_ip in arp_json:
-            arp_mac = arp_json[arp_ip][0].get("Hardware Address")
-            arp_port = arp_json[arp_ip][0].get("Interface")
+        for arp_ip, arp_info in arp_json.items():
+            arp_mac = arp_info[0].get("Hardware Address")
+            arp_port = arp_info[0].get("Interface")
             arp_dict = {
                 "ip_address": arp_ip,
                 "mac": arp_mac,
@@ -641,33 +658,32 @@ def cache_lldp(switch_info, lldp_dict, arp):
         "vendor": switch_info["vendor"],
     }
 
-    for port in lldp_dict:
-        for entry in range(len(lldp_dict[port])):
+    for port_number, port in lldp_dict.items():
+
+        for index, _entry in enumerate(port):
             arp_list = []
-            if lldp_dict[port][entry]["chassis_name"] == "":
+            if port[index]["chassis_name"] == "":
                 arp_list = [
                     f"{arp[mac]['ip_address']}:{list(arp[mac]['port'])[0]}"
                     for mac in arp
-                    if arp[mac]["mac"] == lldp_dict[port][entry]["mac_addr"]
+                    if arp[mac]["mac"] == port[index]["mac_addr"]
                 ]
             arp_list = ", ".join(arp_list)
 
             port_info = {
-                "neighbor": lldp_dict[port][entry]["chassis_name"],
-                "neighbor_description": lldp_dict[port][entry]["chassis_description"][
-                    :54
-                ]
+                "neighbor": port[index]["chassis_name"],
+                "neighbor_description": port[index]["chassis_description"][:54]
                 + str(arp_list),
-                "neighbor_port": lldp_dict[port][entry]["port_id"],
+                "neighbor_port": port[index]["port_id"],
                 "neighbor_port_description": re.sub(
                     r"(Interface\s+[0-9]+ as )",
                     "",
-                    lldp_dict[port][entry]["port_description"],
+                    port[index]["port_description"],
                 ),
-                "neighbor_chassis_id": lldp_dict[port][entry]["chassis_id"],
+                "neighbor_chassis_id": port[index]["chassis_id"],
             }
 
-            switch["cabling"][port].append(port_info)
+            switch["cabling"][port_number].append(port_info)
     switch["cabling"] = dict(switch["cabling"])
     cache_switch(switch)
 
@@ -692,47 +708,45 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
     ]
 
     table = []
-    for port in lldp_dict:
-        for entry in range(len(lldp_dict[port])):
+    for port_number, port in lldp_dict.items():
+        for index, _entry in enumerate(port):
+
             # If the device cannot be discovered by lldp, look it up in the ARP.
             arp_list = []
-            if lldp_dict[port][entry]["chassis_name"] == "":
+            if port[index]["chassis_name"] == "":
                 arp_list = [
                     f"{arp[mac]['ip_address']}:{list(arp[mac]['port'])[0]}"
                     for mac in arp
-                    if arp[mac]["mac"] == lldp_dict[port][entry]["mac_addr"]
+                    if arp[mac]["mac"] == port[index]["mac_addr"]
                 ]
             arp_list = ", ".join(arp_list)
-
-            if (
-                lldp_dict[port][entry]["port_description"]
-                == lldp_dict[port][entry]["port_id"]
-            ):
-                neighbor_port = lldp_dict[port][entry]["port_id"]
+            description = port[index]["port_description"]
+            if description == port[index]["port_id"]:
+                neighbor_port = port[index]["port_id"]
                 neighbor_description = ""
             else:
-                neighbor_port = lldp_dict[port][entry]["port_id"]
+                neighbor_port = port[index]["port_id"]
                 neighbor_description = re.sub(
                     r"(Interface\s+[0-9]+ as )",
                     "",
-                    lldp_dict[port][entry]["port_description"],
+                    description,
                 )
             if len(arp_list) > 0 and neighbor_description == "":
                 neighbor_description = "No LLDP data, check ARP vlan info."
             duplicate = False
-            if len(lldp_dict[port]) > 1:
+            if len(lldp_dict[port_number]) > 1:
                 duplicate = True
 
             table.append(
                 [
-                    port,
-                    lldp_dict[port][entry]["chassis_name"],
+                    port_number,
+                    port[index]["chassis_name"],
                     neighbor_port,
                     neighbor_description,
-                    lldp_dict[port][entry]["chassis_description"][:54] + str(arp_list),
-                    lldp_dict[port][entry]["port_id_subtype"],
+                    port[index]["chassis_description"][:54] + str(arp_list),
+                    port[index]["port_id_subtype"],
                     duplicate,
-                ]
+                ],
             )
 
     click.secho(
@@ -760,25 +774,26 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
     )
     click.echo(dash, file=out)
 
-    for i in range(len(table)):
+    for i, _value in enumerate(table):
+        row = table[i]
         text_color = ""
-        if table[i][5] == "if_name":
+        if row[5] == "if_name":
             text_color = "green"
-        elif "ncn" in table[i][1]:
+        elif "ncn" in row[1]:
             text_color = "blue"
-        if table[i][6] is True:
+        if row[6] is True:
             text_color = "bright_white"
 
         click.secho(
             "{:<7s}{:^5s}{:<15s}{:<19s}{:<54s}{}".format(
-                table[i][0],
+                row[0],
                 "==>",
-                table[i][1],
-                table[i][2],
-                table[i][3],
-                table[i][4],
+                row[1],
+                row[2],
+                row[3],
+                row[4],
             ),
             fg=text_color,
             file=out,
         )
-    print("\n")
+    click.echo("\n")

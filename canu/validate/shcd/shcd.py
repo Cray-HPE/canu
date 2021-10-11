@@ -1,16 +1,40 @@
+# MIT License
+#
+# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate the shcd."""
 from collections import defaultdict
+import json
 import logging
-import os
+from os import path
 from pathlib import Path
 import re
 import sys
 
 import click
 from click_help_colors import HelpColorsCommand
+import jsonschema
 import natsort
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from network_modeling.NetworkPort import NetworkPort
+from network_modeling.NodeLocation import NodeLocation
 from openpyxl import load_workbook
 
 
@@ -22,17 +46,35 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent.parent
 
 # Schema and Data files
-hardware_schema_file = os.path.join(
-    project_root, "network_modeling", "schema", "cray-network-hardware-schema.yaml"
+json_schema_file = path.join(
+    project_root,
+    "network_modeling",
+    "schema",
+    "cray-system-topology-schema.json",
 )
-hardware_spec_file = os.path.join(
-    project_root, "network_modeling", "models", "cray-network-hardware.yaml"
+hardware_schema_file = path.join(
+    project_root,
+    "network_modeling",
+    "schema",
+    "cray-network-hardware-schema.yaml",
 )
-architecture_schema_file = os.path.join(
-    project_root, "network_modeling", "schema", "cray-network-architecture-schema.yaml"
+hardware_spec_file = path.join(
+    project_root,
+    "network_modeling",
+    "models",
+    "cray-network-hardware.yaml",
 )
-architecture_spec_file = os.path.join(
-    project_root, "network_modeling", "models", "cray-network-architecture.yaml"
+architecture_schema_file = path.join(
+    project_root,
+    "network_modeling",
+    "schema",
+    "cray-network-architecture-schema.yaml",
+)
+architecture_spec_file = path.join(
+    project_root,
+    "network_modeling",
+    "models",
+    "cray-network-architecture.yaml",
 )
 
 log = logging.getLogger("validate_shcd")
@@ -64,18 +106,17 @@ log = logging.getLogger("validate_shcd")
 @click.option(
     "--corners",
     help="The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.",
-    # required=True,
 )
+@click.option("--out", help="Output JSON model to a file", type=click.File("w"))
 @click.option(
     "--log",
     "log_",
     help="Level of logging.",
     type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
-    # required=True,
     default="ERROR",
 )
 @click.pass_context
-def shcd(ctx, architecture, shcd, tabs, corners, log_):
+def shcd(ctx, architecture, shcd, tabs, corners, out, log_):
     """Validate a SHCD file.
 
     Pass in a SHCD file to validate that it works architecturally. The validation will ensure that spine switches,
@@ -90,6 +131,7 @@ def shcd(ctx, architecture, shcd, tabs, corners, log_):
         shcd: SHCD file
         tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
         corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
+        out: Filename for the JSON Topology if requested.
         log_: Level of logging.
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
@@ -120,7 +162,8 @@ def shcd(ctx, architecture, shcd, tabs, corners, log_):
             log.error("")
             click.secho("Not enough corners.\n", fg="red")
             click.secho(
-                f"Make sure each tab: {tabs.split(',')} has 2 corners.\n", fg="red"
+                f"Make sure each tab: {tabs.split(',')} has 2 corners.\n",
+                fg="red",
             )
             click.secho(
                 f"There were {len(corners.split(','))} corners entered, but there should be {len(tabs.split(',')) * 2}.",
@@ -143,7 +186,7 @@ def shcd(ctx, architecture, shcd, tabs, corners, log_):
                     tabs.split(",")[i],
                     corners.split(",")[i * 2].strip(),
                     corners.split(",")[i * 2 + 1].strip(),
-                )
+                ),
             )
     else:
         for tab in tabs.split(","):
@@ -153,7 +196,8 @@ def shcd(ctx, architecture, shcd, tabs, corners, log_):
                 type=str,
             )
             range_end = click.prompt(
-                "Enter the cell of the lower right corner", type=str
+                "Enter the cell of the lower right corner",
+                type=str,
             )
             sheets.append((tab, range_start, range_end))
 
@@ -167,19 +211,26 @@ def shcd(ctx, architecture, shcd, tabs, corners, log_):
     )
 
     node_list, warnings = node_model_from_shcd(
-        factory=factory, spreadsheet=shcd, sheets=sheets
+        factory=factory,
+        spreadsheet=shcd,
+        sheets=sheets,
     )
 
     print_node_list(node_list, "SHCD")
 
     node_list_warnings(node_list, warnings)
 
+    if out:
+        json_output(node_list, out, json_schema_file)
 
-def get_node_common_name(name, mapper):
+
+def get_node_common_name(name, rack_number, rack_elevation, mapper):
     """Map SHCD device names to hostname.
 
     Args:
         name: A string from SHCD representing the device name
+        rack_number: A string for rack the device is in (e.g. x1001)
+        rack_elevation: A string for the position of the device in the rack (e.g. u19)
         mapper: An array of tuples (SHCD name, hostname, device type)
 
     Returns:
@@ -193,6 +244,12 @@ def get_node_common_name(name, mapper):
                 tmp_name = None
                 if node[1].find("sw-") != -1:
                     tmp_name = node[1] + "-"
+                elif node[1].find("cmm") != -1:
+                    tmp_name = node[1] + "-" + rack_number + "-"
+                elif node[1].find("cec") != -1:
+                    tmp_name = node[1] + "-" + rack_number + "-"
+                elif node[1].find("pdu") != -1:
+                    tmp_name = node[1] + "-" + rack_number + "-"
                 else:
                     tmp_name = node[1]
                 if tmp_name == "sw-cdu-" and not name.startswith("sw-cdu"):
@@ -206,7 +263,9 @@ def get_node_common_name(name, mapper):
                     tmp_id = int(digits[0]) * 2 + int(digits[1])
                 else:
                     tmp_id = re.sub(
-                        "^({})0*([1-9]*)".format(lookup_name), r"\2", name
+                        "^({})0*([1-9]*)".format(lookup_name),
+                        r"\2",
+                        name,
                     ).strip("-")
                 common_name = f"{tmp_name}{tmp_id:0>3}"
                 return common_name
@@ -255,21 +314,21 @@ def validate_shcd_slot_data(cell, sheet, warnings, is_src_slot=False):
             warnings["shcd_slot_data"].append(sheet + ":" + location)
             log.warning(
                 'Prepending the character "s" to a slot will not be allowed in the future. '
-                f"Please correct cell {sheet}:{location} in the SHCD with value {slot} and prefer pcie-slot1."
+                + f"Please correct cell {sheet}:{location} in the SHCD with value {slot} and prefer pcie-slot1.",
             )
             slot = "pcie-slot" + slot[1:]
         if slot and slot == "pci":
             warnings["shcd_slot_data"].append(sheet + ":" + location)
             log.warning(
                 "The name pcie alone as a slot will not be allowed in the future"
-                f"Please correct cell {sheet}:{location} in the SHCD with value {slot} and prefer pcie-slot1."
+                + f"Please correct cell {sheet}:{location} in the SHCD with value {slot} and prefer pcie-slot1.",
             )
             slot = "pcie-slot1"
         if slot not in valid_slot_names:
             warnings["shcd_slot_data"].append(sheet + ":" + location)
             log.warning(
                 f"Slots must be named from the following list {valid_slot_names}."
-                f"Please correct cell {sheet}:{location} in the SHCD with value {slot}."
+                + f"Please correct cell {sheet}:{location} in the SHCD with value {slot}.",
             )
         if not slot:
             slot = None
@@ -281,7 +340,7 @@ def validate_shcd_slot_data(cell, sheet, warnings, is_src_slot=False):
             warnings["shcd_slot_data"].append(f"{sheet}:{location}")
             log.warning(
                 'A source slot of type "bmc" for servers or "mgmt" for switches must be specified in the HMN tab. '
-                f"Please correct the SHCD for {sheet}:{location} with an empty value."
+                + f"Please correct the SHCD for {sheet}:{location} with an empty value.",
             )
             slot = "bmc"
 
@@ -309,26 +368,26 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False):
         if not port:
             log.fatal(
                 "A port number must be specified. "
-                f"Please correct the SHCD for {sheet}:{location} with an empty value"
+                + f"Please correct the SHCD for {sheet}:{location} with an empty value",
             )
             exit(1)
         if port[0] == "j":
             warnings["shcd_port_data"].append(f"{sheet}:{location}")
             log.warning(
                 'Prepending the character "j" to a port will not be allowed in the future. '
-                f"Please correct cell {sheet}:{location} in the SHCD with value {port}"
+                + f"Please correct cell {sheet}:{location} in the SHCD with value {port}",
             )
             port = port[1:]
         if re.search(r"\D", port) is not None:
             log.fatal(
                 "Port numbers must be integers. "
-                f'Please correct in the SHCD for cell {sheet}:{location} with value "{port}"'
+                + f'Please correct in the SHCD for cell {sheet}:{location} with value "{port}"',
             )
             sys.exit(1)
         if int(port) < 1:
             log.fatal(
                 "Ports numbers must be greater than 1. Port numbering must begin at 1. "
-                f'Please correct in the SHCD for cell {sheet}:{location} with value "{port}"'
+                + f'Please correct in the SHCD for cell {sheet}:{location} with value "{port}"',
             )
             sys.exit(1)
         if is_src_port:
@@ -339,14 +398,14 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False):
                 warnings["shcd_port_conventions"].append(f"{sheet}:{location}")
                 log.warning(
                     f'Bad slot/port convention for port "j{port}" in location {sheet}:{location}.'
-                    f'This should be slot "bmc" for servers and "mgmt" for switches, and port "1".'
+                    + 'This should be slot "bmc" for servers and "mgmt" for switches, and port "1".',
                 )
                 port = 1
 
     if port is None:
         log.fatal(
             "A port number must be specified. "
-            f"Please correct the SHCD for {sheet}:{location} with an empty value"
+            + f"Please correct the SHCD for {sheet}:{location} with an empty value",
         )
         exit(1)
 
@@ -402,9 +461,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             )
             sys.exit(1)
 
-        #
         # Process Headers
-        #
         required_header = [
             "Source",
             "Rack",
@@ -434,10 +491,10 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             sys.exit(1)
 
         log.info(
-            f"Expecting header with {len(required_header):>2} columns: {required_header}"
+            f"Expecting header with {len(required_header):>2} columns: {required_header}",
         )
         log.info(
-            f"Found header with     {len(header):>2} columns: {[x.value for x in header]}"
+            f"Found header with     {len(header):>2} columns: {[x.value for x in header]}",
         )
         log.info("Mapping required columns to actual.")
 
@@ -454,7 +511,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             if found is not None:
                 log.info(
                     f"Required header column {required_header[required_index]} "
-                    f"found in spreadsheet cell {header[current_index].coordinate}"
+                    f"found in spreadsheet cell {header[current_index].coordinate}",
                 )
                 required_header[required_index] = found
                 start_index = current_index + 1
@@ -475,37 +532,56 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 )
                 sys.exit(1)
 
-        #
         # Process Data
-        #
         block = block[1:]
         for row in block:
             # Cable source
             try:
-                src_name = row[required_header[0]].value.strip()
                 current_row = row[required_header[0]].row
                 log.debug(f"---- Working in sheet {sheet} on row {current_row} ----")
+                src_name = row[required_header[0]].value.strip()
+                tmp_slot = row[required_header[3]]
+                tmp_port = row[required_header[4]]
+                src_rack = None
+                if row[required_header[1]].value:
+                    src_rack = row[required_header[1]].value.strip()
+                src_elevation = None
+                if row[required_header[2]].value:
+                    src_elevation = row[required_header[2]].value.strip()
+                src_location = NodeLocation(src_rack, src_elevation)
             except AttributeError:
                 log.fatal("")
-                click.secho(f"Bad range of cells entered for tab {sheet}.", fg="red")
-                click.secho(f"{range_start}:{range_end}\n", fg="red")
                 click.secho(
-                    "Ensure the range entered does not contain a row of empty cells.",
+                    f"Bad cell data or range of cells entered for sheet {sheet} in row {current_row} for source data.",
+                    fg="red",
+                )
+                click.secho(
+                    "Ensure the range entered does not contain empty cells.",
                     fg="red",
                 )
                 sys.exit(1)
 
-            tmp_slot = row[required_header[3]]
-            tmp_port = row[required_header[4]]
             src_slot = validate_shcd_slot_data(
-                tmp_slot, sheet, warnings, is_src_slot=True
+                tmp_slot,
+                sheet,
+                warnings,
+                is_src_slot=True,
             )
             src_port = validate_shcd_port_data(
-                tmp_port, sheet, warnings, is_src_port=True
+                tmp_port,
+                sheet,
+                warnings,
+                is_src_port=True,
             )
             log.debug(f"Source Data:  {src_name} {src_slot} {src_port}")
-            node_name = get_node_common_name(src_name, factory.lookup_mapper())
+            node_name = get_node_common_name(
+                src_name,
+                src_rack,
+                src_elevation,
+                factory.lookup_mapper(),
+            )
             log.debug(f"Source Name Lookup:  {node_name}")
+            log.debug(f"Source rack {src_rack} in location {src_elevation}")
             node_type = get_node_type(src_name, factory.lookup_mapper())
             log.debug(f"Source Node Type Lookup:  {node_type}")
 
@@ -522,34 +598,60 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                         sys.exit(1)
 
                     src_node.common_name(node_name)
+                    src_node.location(src_location)
 
                     node_list.append(src_node)
                     node_name_list.append(node_name)
                 else:
                     log.debug(
-                        f"Node {node_name} already exists, skipping node creation."
+                        f"Node {node_name} already exists, skipping node creation.",
                     )
 
                 src_index = node_name_list.index(node_name)
             else:
                 warnings["node_type"].append(src_name)
                 log.warning(
-                    f"Node type for {src_name} cannot be determined by node type ({node_type}) or node name ({node_name})"
+                    f"Node type for {src_name} cannot be determined by node type ({node_type}) or node name ({node_name})",
                 )
 
-            # src_xname = row[1].value + row[2].value
             # Create the source port for the node
             src_node_port = NetworkPort(number=src_port, slot=src_slot)
-            # src_node_port = None
 
             # Cable destination
-            dst_name = row[required_header[5]].value.strip()
-            # dst_xname = row[7].value + row[8].value
-            # Create the destination slot and port for the node
-            dst_slot = None  # There is no spreadsheet data and dst is always a switch
-            dst_port = validate_shcd_port_data(row[required_header[8]], sheet, warnings)
+            try:
+                dst_name = row[required_header[5]].value.strip()
+                dst_slot = None  # dst is always a switch
+                dst_port = validate_shcd_port_data(
+                    row[required_header[8]],
+                    sheet,
+                    warnings,
+                )
+                dst_rack = None
+                if row[required_header[6]].value:
+                    dst_rack = row[required_header[6]].value.strip()
+                dst_elevation = None
+                if row[required_header[7]].value:
+                    dst_elevation = row[required_header[7]].value.strip()
+                dst_location = NodeLocation(dst_rack, dst_elevation)
+            except AttributeError:
+                log.fatal("")
+                click.secho(
+                    f"Bad cell data or range of cells entered for sheet {sheet} in row {current_row} for destination data.",
+                    fg="red",
+                )
+                click.secho(
+                    "Ensure the range entered does not contain empty cells.",
+                    fg="red",
+                )
+                sys.exit(1)
+
             log.debug(f"Destination Data:  {dst_name} {dst_slot} {dst_port}")
-            node_name = get_node_common_name(dst_name, factory.lookup_mapper())
+            node_name = get_node_common_name(
+                dst_name,
+                dst_rack,
+                dst_elevation,
+                factory.lookup_mapper(),
+            )
             log.debug(f"Destination Name Lookup:  {node_name}")
             node_type = get_node_type(dst_name, factory.lookup_mapper())
             log.debug(f"Destination Node Type Lookup:  {node_type}")
@@ -567,12 +669,13 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                         sys.exit(1)
 
                     dst_node.common_name(node_name)
+                    dst_node.location(dst_location)
 
                     node_list.append(dst_node)
                     node_name_list.append(node_name)
                 else:
                     log.debug(
-                        f"Node {node_name} already exists, skipping node creation"
+                        f"Node {node_name} already exists, skipping node creation",
                     )
 
                 dst_index = node_name_list.index(node_name)
@@ -581,12 +684,11 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 warnings["node_type"].append(dst_name)
 
                 log.warning(
-                    f"Node type for {dst_name} cannot be determined by node type ({node_type}) or node name ({node_name})"
+                    f"Node type for {dst_name} cannot be determined by node type ({node_type}) or node name ({node_name})",
                 )
 
             # Create the destination port
             dst_node_port = NetworkPort(number=dst_port, slot=dst_slot)
-            # dst_node_port = None
 
             # Connect src_node and dst_node if possible
             if src_index is not None and dst_index is not None:
@@ -604,33 +706,33 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     log.fatal(
                         click.secho(
                             f"Failed to connect {src_node.common_name()} "
-                            f"to {dst_node.common_name()} bi-directionally "
-                            f"while working on sheet {sheet}, row {current_row}.",
+                            + f"to {dst_node.common_name()} bi-directionally "
+                            + f"while working on sheet {sheet}, row {current_row}.",
                             fg="red",
-                        )
+                        ),
                     )
                     exit(1)
 
                 if connected:
                     log.info(
-                        f"Connected {src_node.common_name()} to {dst_node.common_name()} bi-directionally"
+                        f"Connected {src_node.common_name()} to {dst_node.common_name()} bi-directionally",
                     )
                 else:
                     log.error(
                         click.secho(
                             f"Failed to connect {src_node.common_name()}"
-                            f" to {dst_node.common_name()} bi-directionally",
+                            + f" to {dst_node.common_name()} bi-directionally",
                             fg="red",
-                        )
+                        ),
                     )
                     for node in node_list:
                         click.secho(
                             f"Node {node.id()} named {node.common_name()} connects "
-                            f"to {len(node.edges())} ports on nodes: {node.edges()}"
+                            + f"to {len(node.edges())} ports on nodes: {node.edges()}",
                         )
                     log.fatal(
                         f"Failed to connect {src_node.common_name()} "
-                        f"to {dst_node.common_name()} bi-directionally"
+                        + f"to {dst_node.common_name()} bi-directionally",
                     )
                     sys.exit(1)  # TODO: this should probably be an exception
     wb.close()
@@ -658,8 +760,8 @@ def node_list_warnings(node_list, warnings):
         if warnings["node_type"]:
             click.secho(
                 "\nNode type could not be determined for the following."
-                "\nThese nodes are not currently included in the model."
-                "\n(This may be a missing architectural definition/lookup or a spelling error)",
+                + "\nThese nodes are not currently included in the model."
+                + "\n(This may be a missing architectural definition/lookup or a spelling error)",
                 fg="red",
             )
             click.secho(dash)
@@ -673,12 +775,12 @@ def node_list_warnings(node_list, warnings):
                 click.secho(node, fg="bright_white")
             if has_mac is True:
                 click.secho(
-                    "Nodes that show up as MAC addresses might need to have LLDP enabled."
+                    "Nodes that show up as MAC addresses might need to have LLDP enabled.",
                 )
         if warnings["zero_connections"]:
             click.secho(
                 "\nThe following nodes have zero connections"
-                "\n(The node type may not have been found or no connections are present)",
+                + "\n(The node type may not have been found or no connections are present)",
                 fg="red",
             )
             click.secho(dash)
@@ -704,7 +806,7 @@ def node_list_warnings(node_list, warnings):
         if warnings["shcd_port_data"]:
             click.secho(
                 '\nSHCD port definitions are using a deprecated "j" prefix'
-                '\n(Remove the prepended "j" in each cell to correct)',
+                + '\n(Remove the prepended "j" in each cell to correct)',
                 fg="red",
             )
             click.secho(dash)
@@ -721,8 +823,8 @@ def node_list_warnings(node_list, warnings):
         if warnings["shcd_port_conventions"]:
             click.secho(
                 "\nSHCD port convention in the HMN tab is to use port 3 to represent BMCs."
-                '\n(Correct the values in the following cells to use a Slot of "bmc" and a port of "1" for servers)'
-                '\n(Correct the values in the following cells to use a Slot of "mgmt" and a port of "1" for switches)',
+                + '\n(Correct the values in the following cells to use a Slot of "bmc" and a port of "1" for servers)'
+                + '\n(Correct the values in the following cells to use a Slot of "mgmt" and a port of "1" for switches)',
                 fg="red",
             )
             click.secho(dash)
@@ -739,7 +841,7 @@ def node_list_warnings(node_list, warnings):
         if warnings["shcd_slot_data"]:
             click.secho(
                 "\nSHCD slot definitions used are either deprecated, missing or incorrect."
-                '\n(Correct values in the following cells to be appropriate values of ["bmc", "ocp", "pcie-slot1, "mgmt", None]',
+                + '\n(Correct values in the following cells to be appropriate values of ["bmc", "ocp", "pcie-slot1, "mgmt", None]',
                 fg="red",
             )
             click.secho(dash)
@@ -769,7 +871,7 @@ def print_node_list(node_list, title):
 
     for node in node_list:
         click.echo(
-            f"{node.id()}: {node.common_name()} connects to {len(node.edges())} nodes: {node.edges()}"
+            f"{node.id()}: {node.common_name()} connects to {len(node.edges())} nodes: {node.edges()}",
         )
 
     dash = "-" * 60
@@ -813,3 +915,35 @@ def print_node_list(node_list, title):
                 port_string = f'{port["slot"]}:{port["port"]}==>{destination_node_name}:{destination_port_slot}'
             click.echo(f"        {port_string}")
             logical_index += 1
+
+
+def json_output(node_list, out, json_schema_file):
+    """Create a schema-validated JSON Topology file from the model."""
+    model = []
+    for node in node_list:
+        model.append(node.serialize())
+
+    with open(json_schema_file, "r") as file:
+        json_schema = json.load(file)
+
+    validator = jsonschema.Draft7Validator(json_schema)
+
+    try:
+        validator.check_schema(json_schema)
+    except jsonschema.exceptions.SchemaError as err:
+        click.secho(
+            f"Schema {json_schema_file} is invalid: {[x.message for x in err.context]}\n"
+            + "Cannot generate and write Topology JSON file.",
+            fg="red",
+        )
+        exit(1)
+
+    errors = sorted(validator.iter_errors(model), key=str)
+    if errors:
+        click.secho("Topology JSON failed schema checks:", fg="red")
+        for error in errors:
+            click.secho(f"    {error.message} in {error.absolute_path}", fg="red")
+        exit(1)
+
+    json_model = json.dumps(model, indent=2)
+    click.echo(json_model, file=out)

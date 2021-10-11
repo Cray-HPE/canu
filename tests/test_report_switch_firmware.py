@@ -1,16 +1,37 @@
+# MIT License
+#
+# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
 """Test CANU report switch firmware commands."""
 import json
 from unittest.mock import patch
 
-import click.testing
+from click import testing
 from netmiko import ssh_exception
 import pytest
 import requests
 import responses
 
-from canu.cache import get_switch_from_cache, remove_switch_from_cache
 from canu.cli import cli
 from canu.report.switch.firmware.firmware import get_firmware_aruba
+from canu.utils.cache import get_switch_from_cache, remove_switch_from_cache
 
 
 username = "admin"
@@ -21,7 +42,7 @@ ip_mellanox = "192.168.1.3"
 credentials = {"username": username, "password": password}
 shasta = "1.4"
 cache_minutes = 0
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 
 
 def test_switch_cli():
@@ -68,7 +89,10 @@ def test_get_firmware_aruba_function(switch_vendor):
         )
 
         switch_firmware, switch_info = get_firmware_aruba(
-            ip, credentials, True, cache_minutes
+            ip,
+            credentials,
+            True,
+            cache_minutes,
         )
         assert switch_firmware["current_version"] == "Virtual.10.06.0001"
         assert switch_info["hostname"] == "test-switch"
@@ -87,7 +111,7 @@ def test_get_firmware_aruba_function_bad_ip(switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -289,7 +313,7 @@ def test_switch_firmware_bad_ip(switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -618,7 +642,7 @@ def test_switch_firmware_dell(switch_vendor):
         )
         assert result.exit_code == 0
         assert "Pass - IP: 192.168.1.2 Hostname: test-dell Firmware: 10.5.1.4" in str(
-            result.output
+            result.output,
         )
         remove_switch_from_cache(ip_dell)
 
@@ -728,7 +752,7 @@ def test_switch_firmware_dell_exception(switch_vendor):
         )
         assert result.exit_code == 0
         assert "Error getting firmware version from Dell switch 192.168.1.2" in str(
-            result.output
+            result.output,
         )
 
 
@@ -904,7 +928,7 @@ dell_firmware_mock = {
     "dell-system-software:sw-version": {
         "sw-version": "10.5.1.4",
         "sw-platform": "S4048T-ON",
-    }
+    },
 }
 
 dell_hostname_mock = {"dell-system:hostname": "test-dell"}

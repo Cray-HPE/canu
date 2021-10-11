@@ -1,8 +1,29 @@
+# MIT License
+#
+# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
 """Test CANU config BGP."""
 from collections import defaultdict
 import json
 
-import click.testing
+from click import testing
 import requests
 import responses
 
@@ -18,7 +39,7 @@ ip2 = "192.168.1.2"
 ips = "192.168.1.1,192.168.1.2"
 cache_minutes = 0
 asn = 65533
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 token = "123abc"
 
 
@@ -76,7 +97,7 @@ def test_config_bgp():
             )
 
             # Route Maps
-            # ncn_names = ['ncn-w001', 'ncn-w002', 'ncn-w003', 'ncn-w004', 'ncn-w005']
+            # ncn_names are ['ncn-w001', 'ncn-w002', 'ncn-w003', 'ncn-w004', 'ncn-w005']
             responses.add(
                 responses.POST,
                 f"https://{ip}/rest/v10.04/system/route_maps",
@@ -183,14 +204,14 @@ def test_config_bgp():
 def test_config_bgp_file():
     """Test that the `canu config bgp` command runs from CSI input."""
     with runner.isolated_filesystem():
-        # format sls_networks to be like sls_input_file.json
+        # format sls_networks to be like sls_file.json
         sls_json = defaultdict()
         for network in sls_networks:
             name = network["Name"]
             sls_json[name] = network
         sls_json = {"Networks": sls_json}
 
-        with open("sls_input_file.json", "w") as f:
+        with open("sls_file.json", "w") as f:
             f.write(json.dumps(sls_json))
 
         responses.add(
@@ -243,7 +264,7 @@ def test_config_bgp_file():
             )
 
             # Route Maps
-            # ncn_names = ['ncn-w001', 'ncn-w002', 'ncn-w003', 'ncn-w004', 'ncn-w005']
+            # ncn_names are ['ncn-w001', 'ncn-w002', 'ncn-w003', 'ncn-w004', 'ncn-w005']
             responses.add(
                 responses.POST,
                 f"https://{ip}/rest/v10.04/system/route_maps",
@@ -338,8 +359,8 @@ def test_config_bgp_file():
                 password,
                 "--ips",
                 ips,
-                "--csi-folder",
-                ".",
+                "--sls-file",
+                "sls_file.json",
             ],
         )
         assert result.exit_code == 0
@@ -402,7 +423,7 @@ def test_config_bgp_verbose():
             )
 
             # Route Maps
-            # ncn_names = ['ncn-w001', 'ncn-w002', 'ncn-w003', 'ncn-w004', 'ncn-w005']
+            # ncn_names are ['ncn-w001', 'ncn-w002', 'ncn-w003', 'ncn-w004', 'ncn-w005']
             responses.add(
                 responses.POST,
                 f"https://{ip}/rest/v10.04/system/route_maps",
@@ -628,14 +649,14 @@ def test_config_bgp_bad_ip():
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
         responses.add(
             responses.POST,
             f"https://{bad_ip2}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -682,14 +703,14 @@ def test_config_bgp_bad_ip_file():
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
         responses.add(
             responses.POST,
             f"https://{bad_ip2}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -887,7 +908,7 @@ def test_config_bgp_sls_token_bad():
             responses.GET,
             f"https://{sls_address}/apis/sls/v1/networks",
             body=requests.exceptions.HTTPError(
-                "503 Server Error: Service Unavailable for url"
+                "503 Server Error: Service Unavailable for url",
             ),
         )
 
@@ -939,7 +960,7 @@ def test_config_bgp_sls_token_missing():
     )
     assert result.exit_code == 0
     assert "Invalid token file, generate another token or try again." in str(
-        result.output
+        result.output,
     )
 
 
@@ -952,7 +973,7 @@ def test_config_bgp_sls_address_bad():
         responses.GET,
         f"https://{bad_sls_address}/apis/sls/v1/networks",
         body=requests.exceptions.ConnectionError(
-            "Failed to establish a new connection: [Errno 51] Network is unreachable"
+            "Failed to establish a new connection: [Errno 51] Network is unreachable",
         ),
     )
 
@@ -979,8 +1000,8 @@ def test_config_bgp_sls_address_bad():
 
 
 def test_config_bgp_csi_file_missing():
-    """Test that the `canu config bgp` command errors on sls_input_file.json file missing."""
-    bad_csi_folder = "/bad_folder"
+    """Test that the `canu config bgp` command errors on sls_file.json file missing."""
+    bad_sls_file = "/bad_folder"
     with runner.isolated_filesystem():
         result = runner.invoke(
             cli,
@@ -993,15 +1014,12 @@ def test_config_bgp_csi_file_missing():
                 password,
                 "--ips",
                 ips,
-                "--csi-folder",
-                bad_csi_folder,
+                "--sls-file",
+                bad_sls_file,
             ],
         )
-        assert result.exit_code == 0
-        assert (
-            "The file sls_input_file.json was not found, check that this is the correct CSI directory"
-            in str(result.output)
-        )
+        assert result.exit_code == 2
+        assert "No such file or directory" in str(result.output)
 
 
 sls_networks = [
@@ -1017,7 +1035,7 @@ sls_networks = [
                     "IPReservations": [
                         {"IPAddress": "192.168.7.60", "Name": "cray-tftp"},
                     ],
-                }
+                },
             ],
         },
     },
@@ -1057,7 +1075,7 @@ sls_networks = [
                         {"IPAddress": "192.168.5.28", "Name": "ncn-w004"},
                         {"IPAddress": "192.168.5.29", "Name": "ncn-w005"},
                     ],
-                }
+                },
             ],
         },
     },
@@ -1070,7 +1088,7 @@ sls_networks = [
                 {
                     "CIDR": "192.168.6.0/24",
                     "FullName": "HMN MetalLB",
-                }
+                },
             ],
         },
     },
@@ -1090,7 +1108,7 @@ sls_networks = [
                         {"IPAddress": "192.168.20.47", "Name": "ncn-w004"},
                         {"IPAddress": "192.168.20.48", "Name": "ncn-w005"},
                     ],
-                }
+                },
             ],
         },
     },

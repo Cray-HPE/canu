@@ -13,6 +13,7 @@ ntp enable
 
 
 ssh server vrf default
+ssh server vrf keepalive
 ssh server vrf mgmt
 {%- include 'aruba/common/acl.j2' %}
 
@@ -65,31 +66,31 @@ interface {{ variables.VSX_ISL_PORT2 }}
     description vsx isl
     lag 256
 interface loopback 0
-    ip address {{ variables.LOOPBACK_IP }}
+    ip address {{ variables.LOOPBACK_IP }}/32
     ip ospf 1 area 0.0.0.0
 interface vlan 1
     ip mtu 9198
-    ip address {{ variables.MTL_IP }}
+    ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.MTL_IP_GATEWAY }}
     ip helper-address 10.92.100.222
 interface vlan 2
     ip mtu 9198
-    ip address {{ variables.NMN_IP }}
+    ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.NMN_IP_GATEWAY }}
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
 interface vlan 4
     ip mtu 9198
-    ip address {{ variables.HMN_IP }}
+    ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.HMN_IP_GATEWAY }}
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
 interface vlan 7
     ip mtu 9198
-    ip address {{ variables.CAN_IP_SECONDARY }}
+    ip address {{ variables.CAN_IP_SECONDARY }}/{{ variables.CAN_PREFIX_LEN }}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.CAN_IP_GATEWAY }}
     ip helper-address 10.92.100.222

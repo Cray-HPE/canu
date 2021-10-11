@@ -1,7 +1,28 @@
+# MIT License
+#
+# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that configure BGP."""
 import ipaddress
 import json
-import os
+from os import environ
 
 import click
 from click_help_colors import HelpColorsCommand
@@ -16,7 +37,11 @@ import requests
     help_headers_color="yellow",
     help_options_color="blue",
 )
-@click.option("--csi-folder", help="Directory containing the CSI json file")
+@click.option(
+    "--sls-file",
+    help="File containing system SLS JSON data.",
+    type=click.File("r"),
+)
 @click.option(
     "--auth-token",
     envvar="SLS_TOKEN",
@@ -55,7 +80,7 @@ import requests
 @click.pass_context
 def bgp(
     ctx,
-    csi_folder,
+    sls_file,
     auth_token,
     sls_address,
     ips,
@@ -64,7 +89,7 @@ def bgp(
     password,
     asn,
     verbose,
-):
+):  # noqa:WPS211
     """Configure BGP for a pair of switches.
 
     This command will remove previous configuration (BGP, Prefix Lists, Route Maps), then add prefix lists, create
@@ -76,9 +101,9 @@ def bgp(
     Tokens are typically stored in ~./config/cray/tokens/
     Instead of passing in a token file, the environmental variable SLS_TOKEN can be used.
 
-    To get the network data using CSI, pass in the CSI folder containing the sls_input_file.json file using the `--csi-folder` flag
+    To initialize using any SLS data, pass in the file containing SLS JSON data (sometimes sls_input_file.json) the --sls-file flag
 
-    The sls_input_file.json file is generally stored in one of two places
+    If used, CSI-generated sls_file.json file is generally stored in one of two places
     depending on how far the system is in the install process.
 
 
@@ -95,7 +120,7 @@ def bgp(
 
     Args:
         ctx: CANU context settings
-        csi_folder: Directory containing the CSI json file
+        sls_file: Directory containing the CSI json file
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         ips: Comma separated list of IPv4 addresses of switches
@@ -122,35 +147,32 @@ def bgp(
         )
         return
 
-    # Parse sls_input_file.json file from CSI
-    if csi_folder:
+    # Parse SLS input file.
+    if sls_file:
         try:
-            with open(os.path.join(csi_folder, "sls_input_file.json"), "r") as f:
-                input_json = json.load(f)
-
-                # Format the input to be like the SLS JSON
-                sls_json = [
-                    network[x]
-                    for network in [input_json.get("Networks", {})]
-                    for x in network
-                ]
-
-        except FileNotFoundError:
+            input_json = json.load(sls_file)
+        except (json.JSONDecodeError, UnicodeDecodeError):
             click.secho(
-                "The file sls_input_file.json was not found, check that this is the correct CSI directory.",
+                f"The file {sls_file.name} is not valid JSON.",
                 fg="red",
             )
             return
+
+        # Format the input to be like the SLS JSON
+        sls_json = [
+            network[x] for network in [input_json.get("Networks", {})] for x in network
+        ]
+
     else:
         # Get SLS config
-        token = os.environ.get("SLS_TOKEN")
+        token = environ.get("SLS_TOKEN")
 
         # Token file takes precedence over the environmental variable
         if auth_token != token:
             try:
-                with open(auth_token) as f:
-                    data = json.load(f)
-                    token = data["access_token"]
+                with open(auth_token) as auth_f:
+                    auth_data = json.load(auth_f)
+                    token = auth_data["access_token"]
 
             except Exception:
                 click.secho(
@@ -220,7 +242,7 @@ def bgp(
                             str(ip),
                             f"Error connecting to switch {ip}, check that this IP is an Aruba switch, or check the "
                             + "username or password.",
-                        ]
+                        ],
                     )
                     continue
 
@@ -229,7 +251,7 @@ def bgp(
                         [
                             str(ip),
                             f"Error connecting to switch {ip}, check the IP address and try again.",
-                        ]
+                        ],
                     )
                     continue
 
@@ -238,7 +260,7 @@ def bgp(
                         [
                             str(ip),
                             f"Error connecting to switch {ip}.",
-                        ]
+                        ],
                     )
                     continue
 
@@ -268,15 +290,13 @@ def bgp(
 
     dash = "-" * 50
 
-    click.echo("\n")
-    click.secho("BGP Updated", fg="bright_white")
+    click.secho("\nBGP Updated", fg="bright_white")
     click.echo(dash)
-    for ip in ips:
-        click.echo(ip)
+    for bgp_ip in ips:
+        click.echo(bgp_ip)
 
     if verbose:
-        click.echo("\n")
-        click.secho("Details", fg="bright_white")
+        click.secho("\nDetails", fg="bright_white")
         click.echo(dash)
         click.echo(f"CAN Prefix: {prefix['can']}")
         click.echo(f"HMN Prefix: {prefix['hmn']}")
@@ -288,8 +308,7 @@ def bgp(
         click.echo(f"NCN HMN IPs: {ncn['hmn']}")
 
     if len(errors) > 0:
-        click.echo("\n")
-        click.secho("Errors", fg="red")
+        click.secho("\nErrors", fg="red")
         click.echo(dash)
         for error in errors:
             click.echo("{:<15s} - {}".format(error[0], error[1]))
@@ -317,7 +336,7 @@ def parse_sls(sls_json):
 
             # get CAN prefix
             if "CAN Bootstrap DHCP Subnet" in full_name:
-                CAN_prefix = subnets["CIDR"]
+                can_prefix = subnets["CIDR"]
 
                 # CAN NCN IPs
                 ncn_can_ips = [
@@ -328,45 +347,45 @@ def parse_sls(sls_json):
 
             # get HMN prefix
             if "HMN MetalLB" in full_name:
-                HMN_prefix = subnets["CIDR"]
+                hmn_prefix = subnets["CIDR"]
 
             # get NMN prefix
             if "NMN MetalLB" in full_name:
-                NMN_prefix = subnets["CIDR"]
+                nmn_prefix = subnets["CIDR"]
 
                 # get TFTP prefix
                 for ip in subnets["IPReservations"]:
                     if "cray-tftp" in ip["Name"]:
-                        TFTP_prefix = ip["IPAddress"] + "/32"
+                        tftp_prefix = ip["IPAddress"] + "/32"
 
             # NCN Names
             if "NMN Bootstrap DHCP Subnet" in full_name:
                 ncn_names = [
-                    ip.get("Name", None)
-                    for ip in subnets.get("IPReservations", {})
-                    if "ncn-w" in ip.get("Name", "")
+                    ncn_name_ip.get("Name", None)
+                    for ncn_name_ip in subnets.get("IPReservations", {})
+                    if "ncn-w" in ncn_name_ip.get("Name", "")
                 ]
 
                 # NCN NMN IPs
                 ncn_nmn_ips = [
-                    ip.get("IPAddress", None)
-                    for ip in subnets.get("IPReservations", {})
-                    if "ncn-w" in ip.get("Name", "")
+                    nmn_ip.get("IPAddress", None)
+                    for nmn_ip in subnets.get("IPReservations", {})
+                    if "ncn-w" in nmn_ip.get("Name", "")
                 ]
 
             # NMN NCN IPs
             if "HMN Bootstrap DHCP Subnet" in full_name:
                 ncn_hmn_ips = [
-                    ip.get("IPAddress", None)
-                    for ip in subnets.get("IPReservations", {})
-                    if "ncn-w" in ip.get("Name", "")
+                    hmn_ip.get("IPAddress", None)
+                    for hmn_ip in subnets.get("IPReservations", {})
+                    if "ncn-w" in hmn_ip.get("Name", "")
                 ]
 
     prefix = {
-        "can": CAN_prefix,
-        "hmn": HMN_prefix,
-        "nmn": NMN_prefix,
-        "tftp": TFTP_prefix,
+        "can": can_prefix,
+        "hmn": hmn_prefix,
+        "nmn": nmn_prefix,
+        "tftp": tftp_prefix,
     }
     ncn = {
         "names": ncn_names,
@@ -404,10 +423,10 @@ def add_prefix_list(ip, session, prefix):
         session: Switch login session
         prefix: Dict containing prefix for ("can", "hmn", "nmn", "tftp")
     """
-    CAN_prefix = prefix["can"]
-    HMN_prefix = prefix["hmn"]
-    NMN_prefix = prefix["nmn"]
-    TFTP_prefix = prefix["tftp"]
+    can_prefix = prefix["can"]
+    hmn_prefix = prefix["hmn"]
+    nmn_prefix = prefix["nmn"]
+    tftp_prefix = prefix["tftp"]
 
     prefix_list_template = {
         "action": "permit",
@@ -424,7 +443,7 @@ def add_prefix_list(ip, session, prefix):
         json=prefix_list_pl_can,
         verify=False,
     )
-    prefix_list_template["prefix"] = CAN_prefix
+    prefix_list_template["prefix"] = can_prefix
     prefix_list_template["preference"] = 10
     session.post(
         f"https://{ip}/rest/v10.04/system/prefix_lists/pl-can/prefix_list_entries",
@@ -439,7 +458,7 @@ def add_prefix_list(ip, session, prefix):
         json=prefix_list_pl_hmn,
         verify=False,
     )
-    prefix_list_template["prefix"] = HMN_prefix
+    prefix_list_template["prefix"] = hmn_prefix
     prefix_list_template["preference"] = 20
     session.post(
         f"https://{ip}/rest/v10.04/system/prefix_lists/pl-hmn/prefix_list_entries",
@@ -454,7 +473,7 @@ def add_prefix_list(ip, session, prefix):
         json=prefix_list_pl_nmn,
         verify=False,
     )
-    prefix_list_template["prefix"] = NMN_prefix
+    prefix_list_template["prefix"] = nmn_prefix
     prefix_list_template["preference"] = 30
     session.post(
         f"https://{ip}/rest/v10.04/system/prefix_lists/pl-nmn/prefix_list_entries",
@@ -469,7 +488,7 @@ def add_prefix_list(ip, session, prefix):
         json=prefix_list_tftp,
         verify=False,
     )
-    prefix_list_template["prefix"] = TFTP_prefix
+    prefix_list_template["prefix"] = tftp_prefix
     prefix_list_template["ge"] = 32
     prefix_list_template["le"] = 32
     prefix_list_template["preference"] = 10
@@ -505,7 +524,9 @@ def create_route_maps(ip, session, ncn):
     for name in ncn_names:
         route_map = {"name": name}
         session.post(
-            f"https://{ip}/rest/v10.04/system/route_maps", json=route_map, verify=False
+            f"https://{ip}/rest/v10.04/system/route_maps",
+            json=route_map,
+            verify=False,
         )
 
         route_map_entry_tftp["preference"] = 10
@@ -547,8 +568,6 @@ def create_route_maps(ip, session, ncn):
         "set": {"ipv4_next_hop_address": ""},
     }
     add_route_entry(ip, session, ncn_nmn_ips, ncn_names, route_map_entry_nmn)
-
-    return
 
 
 def add_route_entry(ip, session, ips, ncn_names, route_map_entry):
@@ -637,8 +656,8 @@ def update_bgp_neighbors(ip, ips, session, asn, ncn):
         if x != ip:
             vsx_neighbor = dict(bgp_neighbor)
             vsx_neighbor["ip_or_ifname_or_group_name"] = x
-            del vsx_neighbor["route_maps"]
-            del vsx_neighbor["passive"]
+            vsx_neighbor.pop("route_maps")
+            vsx_neighbor.pop("passive")
             session.post(
                 f"https://{ip}/rest/v10.04/system/vrfs/default/bgp_routers/{asn}/bgp_neighbors",
                 json=vsx_neighbor,

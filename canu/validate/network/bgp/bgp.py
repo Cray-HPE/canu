@@ -1,3 +1,24 @@
+# MIT License
+#
+# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate the network bgp."""
 from collections import defaultdict
 import ipaddress
@@ -11,7 +32,7 @@ import natsort
 from netmiko import ssh_exception
 import requests
 
-from canu.utils.utils import switch_vendor
+from canu.utils.vendor import switch_vendor
 
 
 @click.command(
@@ -103,14 +124,16 @@ def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
                 )
 
                 bgp_neighbors, switch_info = get_bgp_neighbors(
-                    str(ip), credentials, asn
+                    str(ip),
+                    credentials,
+                    asn,
                 )
                 if switch_info is None:
                     errors.append(
                         [
                             str(ip),
                             "Connection Error",
-                        ]
+                        ],
                     )
                 else:
                     data[ip] = {
@@ -162,7 +185,7 @@ def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
                         [
                             str(ip),
                             f"{hostname} not a spine switch, with TDS architecture BGP config only allowed with spine switches",
-                        ]
+                        ],
                     )
             if architecture == "full":
                 if "agg" not in str(hostname) and "leaf" not in str(hostname):
@@ -171,7 +194,7 @@ def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
                             str(ip),
                             f"{hostname} not an agg or leaf switch, with Full architecture BGP config only allowed"
                             + "with agg and leaf switches",
-                        ]
+                        ],
                     )
 
     click.echo("\n")
@@ -197,7 +220,7 @@ def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
         )
 
     if len(errors) > 0:
-        errors = set(tuple(x) for x in errors)
+        errors = {tuple(x) for x in errors}
         errors = natsort.natsorted(errors)
         click.echo("\n")
         click.secho("Errors", fg="red")
@@ -268,32 +291,36 @@ def get_bgp_neighbors_aruba(ip, credentials, asn):
     try:
         # Login
         login = session.post(
-            f"https://{ip}/rest/v10.04/login", data=credentials, verify=False
+            f"https://{ip}/rest/v10.04/login",
+            data=credentials,
+            verify=False,
         )
         login.raise_for_status()
 
-    except requests.exceptions.HTTPError:
-        click.secho(
-            f"Error connecting to switch {ip}, check that this IP is an Aruba switch, or check the username or password",
-            fg="white",
-            bg="red",
-        )
-        return None, None
-    except requests.exceptions.ConnectionError:
-        click.secho(
-            f"Error connecting to switch {ip}, check the IP address and try again",
-            fg="white",
-            bg="red",
-        )
-        return None, None
-    except requests.exceptions.RequestException:  # pragma: no cover
-        click.secho(
-            f"Error connecting to switch  {ip}.",
-            fg="white",
-            bg="red",
-        )
-        return None, None
+    except (
+        requests.exceptions.HTTPError,
+        requests.exceptions.ConnectionError,
+        requests.exceptions.RequestException,
+    ) as err:
+        exception_type = type(err).__name__
 
+        if exception_type == "HTTPError":
+            error_message = (
+                f"Error connecting to switch {ip}, check the username or password"
+            )
+        elif exception_type == "ConnectionError":
+            error_message = (
+                f"Error connecting to switch {ip}, check the IP address and try again."
+            )
+        else:
+            error_message = f"Error connecting to switch {ip}."
+
+        click.secho(
+            str(error_message),
+            fg="white",
+            bg="red",
+        )
+        return None, None
     # Get neighbors
     try:
         bgp_neighbors_response = session.get(
@@ -461,7 +488,6 @@ def get_bgp_neighbors_mellanox(ip, credentials):
             "hostname": switch_info["hostname"],
             "platform_name": switch_info["platform_name"],
             "vendor": "mellanox",
-            # "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
 
     except (

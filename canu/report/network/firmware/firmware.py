@@ -1,9 +1,30 @@
+# MIT License
+#
+# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that report the firmware of the entire Shasta network."""
 from collections import defaultdict
 import datetime
 import ipaddress
 import json
-import os.path
+from os import path
 from pathlib import Path
 import sys
 
@@ -15,19 +36,19 @@ import click_spinner
 import emoji
 from netmiko import ssh_exception
 import requests
-import ruamel.yaml
+from ruamel.yaml import YAML
 
 
-from canu.cache import cache_switch
 from canu.report.switch.firmware.firmware import (
     get_firmware_aruba,
     get_firmware_dell,
     get_firmware_mellanox,
 )
-from canu.utils.utils import switch_vendor
+from canu.utils.cache import cache_switch
+from canu.utils.vendor import switch_vendor
 
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 
 # Get project root directory
@@ -37,7 +58,7 @@ else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
-canu_config_file = os.path.join(project_root, "canu", "canu.yaml")
+canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
 # Get Shasta versions from canu.yaml
 with open(canu_config_file, "r") as file:
@@ -84,7 +105,10 @@ shasta_options = canu_config["shasta_versions"]
 )
 @click.option("--json", "json_", is_flag=True, help="Output JSON")
 @click.option(
-    "--out", help="Output results to a file", type=click.File("w"), default="-"
+    "--out",
+    help="Output results to a file",
+    type=click.File("w"),
+    default="-",
 )
 # @click.option("--verbose", "-v", is_flag=True, help="Verbose mode")
 @click.pass_context
@@ -147,15 +171,22 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
 
                     if vendor == "aruba":
                         switch_firmware, switch_info = get_firmware_aruba(
-                            str(ip), credentials, True, cache_minutes=cache_minutes
+                            str(ip),
+                            credentials,
+                            True,
+                            cache_minutes=cache_minutes,
                         )
                     elif vendor == "dell":
                         switch_firmware, switch_info = get_firmware_dell(
-                            str(ip), credentials
+                            str(ip),
+                            credentials,
+                            True,
                         )
                     elif vendor == "mellanox":
                         switch_firmware, switch_info = get_firmware_mellanox(
-                            str(ip), credentials
+                            str(ip),
+                            credentials,
+                            True,
                         )
 
                     firmware_range = config["shasta"][shasta][vendor][
@@ -176,7 +207,7 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
                         "platform_name": switch_info["platform_name"],
                         "firmware": switch_firmware,
                         "updated_at": datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
+                            "%Y-%m-%d %H:%M:%S",
                         ),
                     }
                     data.append(
@@ -187,7 +218,7 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
                             switch_info["hostname"],
                             switch_firmware["current_version"],
                             firmware_error,
-                        ]
+                        ],
                     )
                     cache_switch(switch_json[str(ip)])
 
@@ -202,7 +233,9 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
                     exception_type = type(err).__name__
 
                     if exception_type == "HTTPError":
-                        error_message = "HTTP Error. Check that this IP is an Aruba switch, or check the username and password"
+                        error_message = (
+                            "HTTP Error. Check the IP, username, or password"
+                        )
                     elif exception_type == "ConnectionError":
                         error_message = (
                             "Connection Error. Check that the IP address is valid"
@@ -226,21 +259,23 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
                         "ip_address": str(ip),
                         "status": "Error",
                         "updated_at": datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
+                            "%Y-%m-%d %H:%M:%S",
                         ),
                     }
                     data.append([error_emoji, "Error", str(ip), "", "", ""])
                     errors.append([str(ip), error_message])
 
-                except Exception:  # pragma: no cover
-                    error_message = "Unknown error connecting to switch."
+                except Exception as error:  # pragma: no cover
+                    exception_type = type(error).__name__
+
+                    error_message = f"Error connecting to switch, {exception_type}."
                     error_emoji = emoji.emojize(":red_triangle_pointed_up:")
 
                     switch_json[str(ip)] = {
                         "ip_address": str(ip),
                         "status": "Error",
                         "updated_at": datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
+                            "%Y-%m-%d %H:%M:%S",
                         ),
                     }
                     data.append([error_emoji, "Error", str(ip), "", "", ""])
@@ -276,7 +311,12 @@ def firmware_table(data, out="-"):
     click.echo(dash, file=out)
     click.echo(
         "{:^4s}{:<8s}{:<16s}{:<20s}{:<20s}{}".format(
-            heading[0], heading[1], heading[2], heading[3], heading[4], heading[5]
+            heading[0],
+            heading[1],
+            heading[2],
+            heading[3],
+            heading[4],
+            heading[5],
         ),
         file=out,
     )

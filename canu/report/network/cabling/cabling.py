@@ -1,3 +1,24 @@
+# MIT License
+#
+# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that report the cabling of the entire Shasta network."""
 from collections import defaultdict
 import ipaddress
@@ -42,7 +63,10 @@ from canu.report.switch.cabling.cabling import get_lldp, print_lldp
     help="Switch password",
 )
 @click.option(
-    "--out", help="Output results to a file", type=click.File("w"), default="-"
+    "--out",
+    help="Output results to a file",
+    type=click.File("w"),
+    default="-",
 )
 @click.option(
     "--view",
@@ -115,49 +139,44 @@ def cabling(ctx, ips, ips_file, username, password, out, view):
                     end="\r",
                 )
                 try:
-                    switch_info, switch_dict, arp = get_lldp(str(ip), credentials, True)
+                    switch_info, switch_dict, arp = get_lldp(
+                        str(ip),
+                        credentials,
+                        return_error=True,
+                    )
 
                     switch_data.append(
                         [
                             switch_info,
                             switch_dict,
                             arp,
-                        ]
+                        ],
                     )
-                except requests.exceptions.HTTPError:
+                except (
+                    requests.exceptions.HTTPError,
+                    requests.exceptions.ConnectionError,
+                    requests.exceptions.RequestException,
+                    ssh_exception.NetmikoTimeoutException,
+                    ssh_exception.NetmikoAuthenticationException,
+                ) as err:
+                    exception_type = type(err).__name__
+
+                    if exception_type == "HTTPError":
+                        error_message = f"Error connecting to switch {ip}, check the IP address and try again."
+                    if exception_type == "ConnectionError":
+                        error_message = f"Error connecting to switch {ip}, check the IP address and try again."
+                    if exception_type == "RequestException":
+                        error_message = f"Error connecting to switch {ip}."
+                    if exception_type == "NetmikoTimeoutException":
+                        error_message = f"Timeout error connecting to switch {ip}, check the IP address and try again."
+                    if exception_type == "NetmikoAuthenticationException":
+                        error_message = f"Auth error connecting to switch {ip}, check the credentials or IP address and try again."
+
                     errors.append(
                         [
                             str(ip),
-                            f"Error connecting to switch {ip}, check the IP address and try again.",
-                        ]
-                    )
-                except requests.exceptions.ConnectionError:
-                    errors.append(
-                        [
-                            str(ip),
-                            f"Error connecting to switch {ip}, check the IP address and try again.",
-                        ]
-                    )
-                except requests.exceptions.RequestException:  # pragma: no cover
-                    errors.append(
-                        [
-                            str(ip),
-                            f"Error connecting to switch {ip}.",
-                        ]
-                    )
-                except ssh_exception.NetmikoTimeoutException:
-                    errors.append(
-                        [
-                            str(ip),
-                            f"Timeout error connecting to switch {ip}, check the IP address and try again.",
-                        ]
-                    )
-                except ssh_exception.NetmikoAuthenticationException:
-                    errors.append(
-                        [
-                            str(ip),
-                            f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again.",
-                        ]
+                            error_message,
+                        ],
                     )
 
         if view == "switch":
@@ -168,8 +187,7 @@ def cabling(ctx, ips, ips_file, username, password, out, view):
 
         dash = "-" * 100
         if len(errors) > 0:
-            click.echo("\n", file=out)
-            click.secho("Errors", fg="red", file=out)
+            click.secho("\nErrors", fg="red", file=out)
             click.echo(dash, file=out)
             for error in errors:
                 click.echo("{:<15s} - {}".format(error[0], error[1]), file=out)
@@ -193,7 +211,7 @@ def equipment_table(switch_data):
     for i in range(len(switch_data)):
         # Add the mac address to equipment_json
         equipment_json[switch_data[i][0]["system_mac"]].update(
-            {"hostname": switch_data[i][0]["hostname"]}
+            {"hostname": switch_data[i][0]["hostname"]},
         )
 
         for port in switch_data[i][1]:
@@ -239,7 +257,7 @@ def equipment_table(switch_data):
                 }
 
                 equipment_json[neighbor_mac]["connections_from"].update(
-                    {neighbor_port: connection_dict}
+                    {neighbor_port: connection_dict},
                 )
 
     # Go through a third time to add all ARP info to equipment_json
@@ -355,11 +373,11 @@ def print_equipment(equipment_json, out="-"):
                     port_description = ""
                 text_color = ""
                 if "ncn" in str(
-                    equipment_json[equipment]["connections_from"][port]["hostname"]
+                    equipment_json[equipment]["connections_from"][port]["hostname"],
                 ):  # pragma: no cover
                     text_color = "blue"
                 if "sw-" in str(
-                    equipment_json[equipment]["connections_from"][port]["hostname"]
+                    equipment_json[equipment]["connections_from"][port]["hostname"],
                 ):
                     text_color = "green"
 
@@ -373,7 +391,7 @@ def print_equipment(equipment_json, out="-"):
                         str(
                             equipment_json[equipment]["connections_from"][port][
                                 "hostname"
-                            ]
+                            ],
                         ),
                         equipment_json[equipment]["connections_from"][port]["port"],
                         description,

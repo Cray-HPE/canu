@@ -1,9 +1,30 @@
+# MIT License
+#
+# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
 """NetworkDrawing creates network diagram image files."""
 
 # Skip Testing this page, not currently used in CANU
 # This creates network diagram image files.
 # TODO: requires much work!
-# import matplotlib.image as pltimg
+# import matplotlib.image as pltimg # noqa
 import matplotlib.pyplot as plt  # pragma: no cover
 import networkx as nx  # pragma: no cover
 
@@ -54,7 +75,7 @@ class NetworkDrawing:  # pragma: no cover
         # Convert the generated to a graph
         #    MultiGraph allows multiple edges (cables) between nodes.
         #
-        G = nx.MultiGraph()
+        G = nx.MultiGraph()  # noqa
 
         # Edges first - will implicitly create graph nodes
         # Quick hack is that the leafs will show both self, spine and node connections
@@ -72,7 +93,7 @@ class NetworkDrawing:  # pragma: no cover
                 G.add_edge(node.id(), edge)
         print()
 
-        # node_list = spines + leafs + nodes
+        # node_list is = spines + leafs + nodes
         # Quick hack - this should be autodiscovered
         for node in node_list:
             if node.arch_type().find("spine") != -1:
@@ -98,7 +119,10 @@ class NetworkDrawing:  # pragma: no cover
         # Graph layout - generate coordinates for the graph
         #
         pos = nx.multipartite_layout(
-            G, subset_key="tier", align="horizontal", scale=3
+            G,
+            subset_key="tier",
+            align="horizontal",
+            scale=3,
         )  # scale positions
 
         #
@@ -109,6 +133,6 @@ class NetworkDrawing:  # pragma: no cover
         # Connections (with calcs for labels) (edges)
         #
         nx.draw(G, pos=pos)
-        # nx.draw_networkx(G, pos=pos, with_labels=False, width=0.5)
-        # nx.draw_networkx(G, pos=pos, node_color=node_color, with_labels=True)
+        # nx.draw_networkx(G, pos=pos, with_labels=False, width=0.5) # noqa
+        # nx.draw_networkx(G, pos=pos, node_color=node_color, with_labels=True) # noqa
         plt.savefig("fig2.png")

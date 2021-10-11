@@ -101,8 +101,8 @@ textfsm==1.1.0
 toml==0.10.2
 typed-ast==1.4.2
 typing-extensions==3.7.4.3
-urllib3==1.26.3
+urllib3==1.26.5
 validators==0.14.2
 virtualenv==20.4.2
 wrapt==1.12.1
-yamale==3.0.4
+yamale==3.0.8

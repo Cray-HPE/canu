@@ -1,6 +1,6 @@
 name = canu
 
-version := $(shell cat .version)
+version := $(shell cat canu/.version)
 
 build_image := cdrx/pyinstaller-linux:python3
 

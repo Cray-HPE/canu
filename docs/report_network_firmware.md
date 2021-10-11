@@ -43,6 +43,8 @@ FL.10.06.0010 - 1 switches
 FL.10.05.0010 - 1 switches
 ```
 
+![](docs/images/canu_report_network_firmware.png)
+
 When using the _network firmware_ commands, the table will show either: 🛶 Pass, ❌ Fail, or 🔺 Error. The switch will **pass** or **fail** based on if the switch firmware matches the _canu.yaml_
 
 ### 1. Network Firmware JSON
