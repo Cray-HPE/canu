@@ -862,10 +862,11 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 - Added Dell and Mellanox support to the `canu validate network config` command
 - Added ability to compare two config files with `canu validate switch config`
 - Added ability to compare two config folders with `canu validate network config`
+- Added an `--override` option to `canu generate switch config` and `canu generate network config`, this allows users to ignore custom configuration so CANU does not overwrite it.
 
 ## [unreleased]
 
-## [0.0.6] - 2021-10-4
+## [0.0.6] - 2021-9-23
 
 - Added alpha version of schema-checked JSON output in `validate shcd` as a machine-readable exchange for SHCD data.
 - Add ability to run CANU in a container, and update Python virtual environment documentation.
@@ -877,7 +878,6 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 - Added the ability to fully track device slot and port assignments.
 - Mountain hardware (CMM, CEC) is now being generated in the switch configurations.
 - Fixed multiple templates to match what is on the Aruba switch, these include, UANs, Loopbacks, VLAN interfaces, ACLs.
-- Added an `--override` option to `canu generate switch config` and `canu generate network config`, this allows users to ignore custom configuration so CANU does not overwrite it.
 - Known Limitations:
   - PDUs are not yet properly handled in the generated switch configurations.
   - Switch and SNMP passwords have been removed from generated configurations until the handling code is secure.
