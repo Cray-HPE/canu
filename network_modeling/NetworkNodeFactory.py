@@ -90,9 +90,10 @@ class NetworkNodeFactory:
         except Exception as err:
             raise Exception(
                 click.secho(
-                    f"Error validating {data_file} with {schema_file}: {err}", fg="red"
+                    f"Error validating {data_file} with {schema_file}: {err}",
+                    fg="red",
                 )
-            )
+            ) from err
 
     # For convenience to users the yamale schema allows port speeds as int or list.
     # Convert integers to lists here for consistency.

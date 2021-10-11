@@ -154,12 +154,15 @@ def config(
     if architecture.lower() == "full":
         architecture = "network_v2"
         template_folder = "full"
+        vendor_folder = "aruba"
     elif architecture.lower() == "tds":
         architecture = "network_v2_tds"
         template_folder = "tds"
+        vendor_folder = "aruba"
     elif architecture.lower() == "v1":
         architecture = "network_v1"
         template_folder = "full"
+        vendor_folder = "dellmellanox"
 
     # SHCD Parsing
     sheets = []
@@ -336,6 +339,7 @@ def config(
                 switch_name,
                 sls_variables,
                 template_folder,
+                vendor_folder,
             )
             config_devices.update(devices)
             with open(f"{folder}/{switch_name}.cfg", "w+") as f:

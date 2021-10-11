@@ -1,5 +1,5 @@
 {#- sw-leaf-bmc #}
-{%- include 'common/unknown.j2' %}
+{%- include 'aruba/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
 no ip icmp redirect
 ntp server {{ variables.NCN_W001 }}
@@ -11,7 +11,7 @@ ntp enable
 
 ssh server vrf default
 ssh server vrf mgmt
-{%- include 'common/acl.j2' %}
+{%- include 'aruba/common/acl.j2' %}
 
 vlan 1
 vlan 2
@@ -31,8 +31,8 @@ spanning-tree config-revision 1
 interface mgmt
     shutdown
 
-{% include 'full/leaf-bmc-to-leaf.lag.j2' %}
-{% include 'common/bmc.j2' %}
+{% include 'aruba/full/leaf-bmc-to-leaf.lag.j2' %}
+{% include 'aruba/common/bmc.j2' %}
 
 interface loopback 0
     ip address {{ variables.LOOPBACK_IP }}

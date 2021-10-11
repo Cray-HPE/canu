@@ -1,5 +1,5 @@
 {#- sw-leaf-bmc #}
-{%- include 'common/unknown.j2' %}
+{%- include 'dellmellanox/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
 no ip icmp redirect
 ntp server {{ variables.NCN_W001 }}
@@ -7,36 +7,38 @@ ntp server {{ variables.NCN_W002 }}
 ntp server {{ variables.NCN_W003 }}
 ntp enable
 
+{%- include 'dellmellanox/common/acl.j2' %}
+
 interface loopback 0
     ip address {{ variables.LOOPBACK_IP }}
     ip ospf 1 area 0.0.0.0
 
 interface vlan1
- Description MMN
- no shutdown
- ip address {{ variables.MTL_IP }}
+    Description MMN
+    no shutdown
+    ip address {{ variables.MTL_IP }}
 
 interface vlan2
- description RIVER_NMN
- no shutdown
- ip address {{ variables.NMN_IP }}
- ip ospf 1 area 0.0.0.2
+    description RIVER_NMN
+    no shutdown
+    ip address {{ variables.NMN_IP }}
+    ip ospf 1 area 0.0.0.2
 
 interface vlan4
- description RIVER_HMN
- no shutdown
- ip address {{ variables.HMN_IP }}
- ip ospf 1 area 0.0.0.4
+    description RIVER_HMN
+    no shutdown
+    ip address {{ variables.HMN_IP }}
+    ip ospf 1 area 0.0.0.4
 
 interface vlan7
- description CAN
- no shutdown
- ip address {{ variables.CAN_IP }}
+    description CAN
+    no shutdown
+{# ip address {{ variables.CAN_IP }}#}
 
 interface vlan10
- Description SUN
- no shutdown
- IP address {{ variables.SUN_IP }}
+    Description SUN
+    no shutdown
+{# IP address {{ variables.SUN_IP }}#}
 
 spanning-tree mode mst
 spanning-tree port type edge default
@@ -44,8 +46,8 @@ spanning-tree mst revision 1
 spanning-tree mst name MST0
 
 
-{% include 'full/leaf-bmc-to-leaf.lag.j2' %}
-{% include 'common/dellmellanox_bmc.j2' %}
+{% include 'dellmellanox/full/leaf-bmc-to-leaf.lag.j2' %}
+{% include 'dellmellanox/common/bmc.j2' %}
 
 interface loopback 0
     ip address {{ variables.LOOPBACK_IP }}

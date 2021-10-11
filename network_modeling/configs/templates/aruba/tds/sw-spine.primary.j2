@@ -1,5 +1,5 @@
 {#- sw-spine.primary #}
-{%- include 'common/unknown.j2' %}
+{%- include 'aruba/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
 bfd
 no ip icmp redirect
@@ -14,7 +14,7 @@ ntp enable
 
 ssh server vrf default
 ssh server vrf mgmt
-{%- include 'common/acl.j2' %}
+{%- include 'aruba/common/acl.j2' %}
 
 vlan 1
 vlan 2
@@ -36,8 +36,12 @@ spanning-tree config-revision 1
 interface mgmt
     shutdown
 
-{% include 'full/spine-to-leaf.lag.j2' %}
-{% include 'common/spine-to-cdu.lag.j2' %}
+{% include 'aruba/common/ncn-m.lag.j2' %}
+{% include 'aruba/common/ncn-w.lag.j2' %}
+{% include 'aruba/common/ncn-s.lag.j2' %}
+{% include 'aruba/common/uan.j2' %}
+{% include 'aruba/tds/spine-to-leaf-bmc.lag.j2' %}
+{% include 'aruba/common/spine-to-cdu.lag.j2' %}
 
 interface lag 256
     no shutdown

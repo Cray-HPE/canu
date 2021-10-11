@@ -1,7 +1,28 @@
+# MIT License
+#
+# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
 """CANU generate switch config commands."""
 from collections import defaultdict
 import json
-import os
+from os import environ, path
 from pathlib import Path
 import re
 import sys
@@ -10,12 +31,14 @@ import click
 from click_help_colors import HelpColorsCommand
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 import natsort
+import netaddr
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from openpyxl import load_workbook
 import requests
 import ruamel.yaml
 import urllib3
 
+from canu.utils.cache import cache_directory
 from canu.validate.shcd.shcd import node_model_from_shcd
 
 yaml = ruamel.yaml.YAML()
@@ -32,29 +55,44 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
 # Schema and Data files
-hardware_schema_file = os.path.join(
-    project_root, "network_modeling", "schema", "cray-network-hardware-schema.yaml"
+hardware_schema_file = path.join(
+    project_root,
+    "network_modeling",
+    "schema",
+    "cray-network-hardware-schema.yaml",
 )
-hardware_spec_file = os.path.join(
-    project_root, "network_modeling", "models", "cray-network-hardware.yaml"
+hardware_spec_file = path.join(
+    project_root,
+    "network_modeling",
+    "models",
+    "cray-network-hardware.yaml",
 )
-architecture_schema_file = os.path.join(
-    project_root, "network_modeling", "schema", "cray-network-architecture-schema.yaml"
+architecture_schema_file = path.join(
+    project_root,
+    "network_modeling",
+    "schema",
+    "cray-network-architecture-schema.yaml",
 )
-architecture_spec_file = os.path.join(
-    project_root, "network_modeling", "models", "cray-network-architecture.yaml"
+architecture_spec_file = path.join(
+    project_root,
+    "network_modeling",
+    "models",
+    "cray-network-architecture.yaml",
 )
 
-canu_cache_file = os.path.join(project_root, "canu", "canu_cache.yaml")
-canu_config_file = os.path.join(project_root, "canu", "canu.yaml")
+canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
+canu_config_file = path.join(project_root, "canu", "canu.yaml")
+
 
 # Import templates
-network_templates_folder = os.path.join(
-    project_root, "network_modeling", "configs", "templates"
+network_templates_folder = path.join(
+    project_root,
+    "network_modeling",
+    "configs",
+    "templates",
 )
 env = Environment(
     loader=FileSystemLoader(network_templates_folder),
-    # trim_blocks=True,
     undefined=StrictUndefined,
 )
 
@@ -108,7 +146,11 @@ shasta_options = canu_config["shasta_versions"]
     help="The name of the switch to generate config e.g. 'sw-spine-001'",
     prompt="Switch Name",
 )
-@click.option("--csi-folder", help="Directory containing the CSI json file")
+@click.option(
+    "--sls-file",
+    help="File containing system SLS JSON data.",
+    type=click.File("r"),
+)
 @click.option(
     "--auth-token",
     envvar="SLS_TOKEN",
@@ -116,7 +158,10 @@ shasta_options = canu_config["shasta_versions"]
 )
 @click.option("--sls-address", default="api-gw-service-nmn.local", show_default=True)
 @click.option(
-    "--out", help="Output results to a file", type=click.File("w"), default="-"
+    "--out",
+    help="Output results to a file",
+    type=click.File("w"),
+    default="-",
 )
 @click.pass_context
 def config(
@@ -127,7 +172,7 @@ def config(
     tabs,
     corners,
     switch_name,
-    csi_folder,
+    sls_file,
     auth_token,
     sls_address,
     out,
@@ -151,7 +196,7 @@ def config(
         tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
         corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
         switch_name: Switch name
-        csi_folder: Directory containing the CSI json file
+        sls_file: JSON file containing SLS data
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         out: Name of the output file
@@ -159,12 +204,15 @@ def config(
     if architecture.lower() == "full":
         architecture = "network_v2"
         template_folder = "full"
+        vendor_folder = "aruba"
     elif architecture.lower() == "tds":
         architecture = "network_v2_tds"
         template_folder = "tds"
+        vendor_folder = "aruba"
     elif architecture.lower() == "v1":
         architecture = "network_v1"
         template_folder = "full"
+        vendor_folder = "dellmellanox"
 
     # SHCD Parsing
     sheets = []
@@ -236,28 +284,25 @@ def config(
         factory=factory, spreadsheet=shcd, sheets=sheets
     )
 
-    # Parse sls_input_file.json file from CSI
-    if csi_folder:
+    # Parse SLS input file.
+    if sls_file:
         try:
-            with open(os.path.join(csi_folder, "sls_input_file.json"), "r") as f:
-                input_json = json.load(f)
-
-                # Format the input to be like the SLS JSON
-                sls_json = [
-                    network[x]
-                    for network in [input_json.get("Networks", {})]
-                    for x in network
-                ]
-
-        except FileNotFoundError:
+            input_json = json.load(sls_file)
+        except (json.JSONDecodeError, UnicodeDecodeError):
             click.secho(
-                "The file sls_input_file.json was not found, check that this is the correct CSI directory.",
+                f"The file {sls_file.name} is not valid JSON.",
                 fg="red",
             )
             return
+
+        # Format the input to be like the SLS JSON
+        sls_json = [
+            network[x] for network in [input_json.get("Networks", {})] for x in network
+        ]
+
     else:
         # Get SLS config
-        token = os.environ.get("SLS_TOKEN")
+        token = environ.get("SLS_TOKEN")
 
         # Token file takes precedence over the environmental variable
         if auth_token != token:
@@ -314,7 +359,12 @@ def config(
             sls_variables = rename_sls_hostnames(sls_variables)
 
     switch_config, devices = generate_switch_config(
-        shcd_node_list, factory, switch_name, sls_variables, template_folder
+        shcd_node_list,
+        factory,
+        switch_name,
+        sls_variables,
+        template_folder,
+        vendor_folder,
     )
 
     dash = "-" * 60
@@ -335,7 +385,12 @@ def get_shasta_name(name, mapper):
 
 
 def generate_switch_config(
-    shcd_node_list, factory, switch_name, sls_variables, template_folder
+    shcd_node_list,
+    factory,
+    switch_name,
+    sls_variables,
+    template_folder,
+    vendor_folder,
 ):
     """Generate switch config.
 
@@ -345,6 +400,7 @@ def generate_switch_config(
         switch_name: Switch hostname
         sls_variables: Dictionary containing SLS variables
         template_folder: Architecture folder contaning the switch templates
+        vendor_folder: Vendor folder contaning the template_folder
 
     Returns:
         switch_config: The generated switch configuration
@@ -370,20 +426,20 @@ def generate_switch_config(
 
     templates = {
         "sw-spine": {
-            "primary": f"{template_folder}/sw-spine.primary.j2",
-            "secondary": f"{template_folder}/sw-spine.secondary.j2",
+            "primary": f"{vendor_folder}/{template_folder}/sw-spine.primary.j2",
+            "secondary": f"{vendor_folder}/{template_folder}/sw-spine.secondary.j2",
         },
         "sw-cdu": {
-            "primary": "common/sw-cdu.primary.j2",
-            "secondary": "common/sw-cdu.secondary.j2",
+            "primary": f"{vendor_folder}/common/sw-cdu.primary.j2",
+            "secondary": f"{vendor_folder}/common/sw-cdu.secondary.j2",
         },
         "sw-leaf": {
-            "primary": f"{template_folder}/sw-leaf.primary.j2",
-            "secondary": f"{template_folder}/sw-leaf.secondary.j2",
+            "primary": f"{vendor_folder}/{template_folder}/sw-leaf.primary.j2",
+            "secondary": f"{vendor_folder}/{template_folder}/sw-leaf.secondary.j2",
         },
         "sw-leaf-bmc": {
-            "primary": f"{template_folder}/sw-leaf-bmc.j2",
-            "secondary": f"{template_folder}/sw-leaf-bmc.j2",
+            "primary": f"{vendor_folder}/{template_folder}/sw-leaf-bmc.j2",
+            "secondary": f"{vendor_folder}/{template_folder}/sw-leaf-bmc.j2",
         },
     }
     template_name = templates[node_shasta_name][
@@ -395,10 +451,28 @@ def generate_switch_config(
         "NCN_W001": sls_variables["ncn_w001"],
         "NCN_W002": sls_variables["ncn_w002"],
         "NCN_W003": sls_variables["ncn_w003"],
+        "CAN": sls_variables["CAN"],
+        "CAN_NETMASK": sls_variables["CAN_NETMASK"],
+        "CAN_NETWORK_IP": sls_variables["CAN_NETWORK_IP"],
+        "CAN_PREFIX_LEN": sls_variables["CAN_PREFIX_LEN"],
+        "MTL_NETMASK": sls_variables["MTL_NETMASK"],
+        "MTL_PREFIX_LEN": sls_variables["MTL_PREFIX_LEN"],
         "NMN": sls_variables["NMN"],
+        "NMN_NETMASK": sls_variables["NMN_NETMASK"],
+        "NMN_NETWORK_IP": sls_variables["NMN_NETWORK_IP"],
+        "NMN_PREFIX_LEN": sls_variables["NMN_PREFIX_LEN"],
         "HMN": sls_variables["HMN"],
+        "HMN_NETMASK": sls_variables["HMN_NETMASK"],
+        "HMN_NETWORK_IP": sls_variables["HMN_NETWORK_IP"],
+        "HMN_PREFIX_LEN": sls_variables["HMN_PREFIX_LEN"],
         "HMN_MTN": sls_variables["HMN_MTN"],
+        "HMN_MTN_NETMASK": sls_variables["HMN_MTN_NETMASK"],
+        "HMN_MTN_NETWORK_IP": sls_variables["HMN_MTN_NETWORK_IP"],
+        "HMN__MTN_PREFIX_LEN": sls_variables["HMN_MTN_PREFIX_LEN"],
         "NMN_MTN": sls_variables["NMN_MTN"],
+        "NMN_MTN_NETMASK": sls_variables["NMN_MTN_NETMASK"],
+        "NMN_MTN_NETWORK_IP": sls_variables["NMN_MTN_NETWORK_IP"],
+        "NMN__MTN_PREFIX_LEN": sls_variables["NMN_MTN_PREFIX_LEN"],
         "HMN_IP_GATEWAY": sls_variables["HMN_IP_GATEWAY"],
         "MTL_IP_GATEWAY": sls_variables["MTL_IP_GATEWAY"],
         "NMN_IP_GATEWAY": sls_variables["NMN_IP_GATEWAY"],
@@ -736,11 +810,29 @@ def parse_sls_for_config(input_json):
 
     sls_variables = {
         "CAN": None,
+        "CAN_NETMASK": None,
+        "CAN_PREFIX_LEN": None,
+        "CAN_NETWORK_IP": None,
         "HMN": None,
+        "HMN_NETMASK": None,
+        "HMN_NETWORK_IP": None,
+        "HMN_PREFIX_LEN": None,
         "MTL": None,
+        "MTL_NETMASK": None,
+        "MTL_NETWORK_IP": None,
+        "MTL_PREFIX_LEN": None,
         "NMN": None,
+        "NMN_NETMASK": None,
+        "NMN_NETWORK_IP": None,
+        "NMN_PREFIX_LEN": None,
         "HMN_MTN": None,
+        "HMN_MTN_NETMASK": None,
+        "HMN_MTN_NETWORK_IP": None,
+        "HMN_MTN_PREFIX_LEN": None,
         "NMN_MTN": None,
+        "NMN_MTN_NETMASK": None,
+        "NMN_MTN_NETWORK_IP": None,
+        "NMN_MTN_PREFIX_LEN": None,
         "CAN_IP_GATEWAY": None,
         "HMN_IP_GATEWAY": None,
         "MTL_IP_GATEWAY": None,
@@ -761,9 +853,15 @@ def parse_sls_for_config(input_json):
         name = sls_network.get("Name", "")
 
         if name == "CAN":
-            sls_variables["CAN"] = sls_network.get("ExtraProperties", {}).get(
-                "CIDR", ""
+            sls_variables["CAN"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
             )
+            sls_variables["CAN_NETMASK"] = sls_variables["CAN"].netmask
+            sls_variables["CAN_PREFIX_LEN"] = sls_variables["CAN"].prefixlen
+            sls_variables["CAN_NETWORK_IP"] = sls_variables["CAN"].ip
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 if subnets["Name"] == "bootstrap_dhcp":
                     sls_variables["CAN_IP_GATEWAY"] = subnets["Gateway"]
@@ -774,9 +872,15 @@ def parse_sls_for_config(input_json):
                             sls_variables["CAN_IP_SECONDARY"] = ip["IPAddress"]
 
         elif name == "HMN":
-            sls_variables["HMN"] = sls_network.get("ExtraProperties", {}).get(
-                "CIDR", ""
+            sls_variables["HMN"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
             )
+            sls_variables["HMN_NETMASK"] = sls_variables["HMN"].netmask
+            sls_variables["HMN_PREFIX_LEN"] = sls_variables["HMN"].prefixlen
+            sls_variables["HMN_NETWORK_IP"] = sls_variables["HMN"].ip
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 if subnets["Name"] == "network_hardware":
                     sls_variables["HMN_IP_GATEWAY"] = subnets["Gateway"]
@@ -784,9 +888,15 @@ def parse_sls_for_config(input_json):
                         sls_variables["HMN_IPs"][ip["Name"]] = ip["IPAddress"]
 
         elif name == "MTL":
-            sls_variables["MTL"] = sls_network.get("ExtraProperties", {}).get(
-                "CIDR", ""
+            sls_variables["MTL"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
             )
+            sls_variables["MTL_NETMASK"] = sls_variables["MTL"].netmask
+            sls_variables["MTL_PREFIX_LEN"] = sls_variables["MTL"].prefixlen
+            sls_variables["MTL_NETWORK_IP"] = sls_variables["MTL"].ip
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 if subnets["Name"] == "network_hardware":
                     sls_variables["MTL_IP_GATEWAY"] = subnets["Gateway"]
@@ -794,9 +904,15 @@ def parse_sls_for_config(input_json):
                         sls_variables["MTL_IPs"][ip["Name"]] = ip["IPAddress"]
 
         elif name == "NMN":
-            sls_variables["NMN"] = sls_network.get("ExtraProperties", {}).get(
-                "CIDR", ""
+            sls_variables["NMN"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
             )
+            sls_variables["NMN_NETMASK"] = sls_variables["NMN"].netmask
+            sls_variables["NMN_PREFIX_LEN"] = sls_variables["NMN"].prefixlen
+            sls_variables["NMN_NETWORK_IP"] = sls_variables["NMN"].ip
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 if subnets["Name"] == "bootstrap_dhcp":
                     for ip in subnets["IPReservations"]:
@@ -812,22 +928,32 @@ def parse_sls_for_config(input_json):
                         sls_variables["NMN_IPs"][ip["Name"]] = ip["IPAddress"]
 
         elif name == "NMN_MTN":
-            sls_variables["NMN_MTN"] = sls_network.get("ExtraProperties", {}).get(
-                "CIDR", ""
+            sls_variables["NMN_MTN"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
             )
-            sls_variables["NMN_MTN_CABINETS"] = [
-                subnet
-                for subnet in sls_network.get("ExtraProperties", {}).get("Subnets", {})
-            ]
-        elif name == "HMN_MTN":
-            sls_variables["HMN_MTN"] = sls_network.get("ExtraProperties", {}).get(
-                "CIDR", ""
+            sls_variables["NMN_MTN_NETMASK"] = sls_variables["NMN_MTN"].netmask
+            sls_variables["NMN_MTN_PREFIX_LEN"] = sls_variables["NMN_MTN"].prefixlen
+            sls_variables["NMN_MTN_NETWORK_IP"] = sls_variables["NMN_MTN"].ip
+            sls_variables["NMN_MTN_CABINETS"] = list(
+                sls_network.get("ExtraProperties", {}).get("Subnets", {}),
             )
-            sls_variables["HMN_MTN_CABINETS"] = [
-                subnet
-                for subnet in sls_network.get("ExtraProperties", {}).get("Subnets", {})
-            ]
 
+        elif name == "HMN_MTN":
+            sls_variables["HMN_MTN"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
+            )
+            sls_variables["HMN_MTN_NETMASK"] = sls_variables["HMN_MTN"].netmask
+            sls_variables["HMN_MTN_PREFIX_LEN"] = sls_variables["HMN_MTN"].prefixlen
+            sls_variables["HMN_MTN_NETWORK_IP"] = sls_variables["HMN_MTN"].ip
+            sls_variables["HMN_MTN_CABINETS"] = list(
+                sls_network.get("ExtraProperties", {}).get("Subnets", {}),
+            )
         for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
 
             vlan = subnets.get("VlanID", "")

@@ -1,5 +1,5 @@
-{#- sw-spine.primary #}
-{%- include 'common/unknown.j2' %}
+{#- sw-spine.secondary #}
+{%- include 'aruba/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
 bfd
 no ip icmp redirect
@@ -14,7 +14,7 @@ ntp enable
 
 ssh server vrf default
 ssh server vrf mgmt
-{%- include 'common/acl.j2' %}
+{%- include 'aruba/common/acl.j2' %}
 
 vlan 1
 vlan 2
@@ -36,12 +36,8 @@ spanning-tree config-revision 1
 interface mgmt
     shutdown
 
-{% include 'common/ncn-m.lag.j2' %}
-{% include 'common/ncn-w.lag.j2' %}
-{% include 'common/ncn-s.lag.j2' %}
-{% include 'common/uan.j2' %}
-{% include 'tds/spine-to-leaf-bmc.lag.j2' %}
-{% include 'common/spine-to-cdu.lag.j2' %}
+{% include 'aruba/full/spine-to-leaf.lag.j2' %}
+{% include 'aruba/common/spine-to-cdu.lag.j2' %}
 
 interface lag 256
     no shutdown
@@ -53,8 +49,8 @@ interface lag 256
 interface {{ variables.VSX_KEEPALIVE }}
     no shutdown
     vrf attach keepalive
-    ip address 192.168.255.0/31
-interface 
+    ip address 192.168.255.1/31
+interface {{ variables.VSX_ISL_PORT1 }}
     no shutdown
     mtu 9198
     description vsx isl
@@ -89,15 +85,15 @@ interface vlan 4
     ip ospf 1 area 0.0.0.0
 interface vlan 7
     ip mtu 9198
-    ip address {{ variables.CAN_IP_PRIMARY }}
+    ip address {{ variables.CAN_IP_SECONDARY }}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.CAN_IP_GATEWAY }}
     ip helper-address 10.92.100.222
 vsx
     system-mac 02:00:00:00:6b:00
     inter-switch-link lag 256
-    role primary
-    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive
+    role secondary
+    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive
     linkup-delay-timer 600
     vsx-sync vsx-global
 router ospf 1
@@ -109,4 +105,4 @@ router ospfv3 1
 https-server vrf default
 https-server vrf mgmt
 https-server vrf CAN
-{# end sw-spine.primary #}
+{# end sw-spine.secondary #}
