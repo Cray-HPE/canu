@@ -89,10 +89,7 @@ def test_cli_init_sls_file_missing():
             ],
         )
         assert result.exit_code == 2
-        assert "Error: Invalid value for '--sls-file': Could not open file:" in str(
-            result.output,
-        )
-        assert "No such file or directory" in str(result.output)
+        assert "Error: Invalid value for '--sls-file':" in str(result.output)
 
 
 def test_cli_init_sls_invalid_json():
@@ -194,7 +191,7 @@ def test_cli_init_sls_token_flag_missing():
         ],
     )
     assert result.exit_code == 2
-    assert "--auth-token option requires an argument" in str(result.output)
+    assert "requires an argument" in str(result.output)
 
 
 @responses.activate
