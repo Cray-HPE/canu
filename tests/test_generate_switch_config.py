@@ -2454,10 +2454,7 @@ def test_switch_config_bad_file():
             ],
         )
         assert result.exit_code == 2
-        assert (
-            "Error: Invalid value for '--shcd': Could not open file: does_not_exist.xlsx: No such file or directory"
-            in str(result.output)
-        )
+        assert "Error: Invalid value for '--shcd':" in str(result.output)
 
 
 def test_switch_config_missing_tabs():
