@@ -61,7 +61,7 @@ def lint(session):
     """Run flake8 linter and plugins."""
     args = session.posargs or locations
     session.install(
-        "flake8",
+        "flake8==3.9.2",
         "flake8-black",
         "flake8-bugbear",
         "flake8-commas",
