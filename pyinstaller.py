@@ -24,41 +24,64 @@
 block_cipher = None
 
 added_files = [
-               ('canu/.version', 'canu'),
-               ('canu/canu.yaml', 'canu'),
-               ('canu/validate/switch/config/*.yaml', 'canu/validate/switch/config'),
-               ('network_modeling/models/*', 'network_modeling/models'),
-               ('network_modeling/schema/*', 'network_modeling/schema'),
-               ('network_modeling/configs/templates/*.j2', 'network_modeling/configs/templates'),
-               ('network_modeling/configs/templates/common/*.j2', 'network_modeling/configs/templates/common'),
-               ('network_modeling/configs/templates/full/*.j2', 'network_modeling/configs/templates/full'),
-               ('network_modeling/configs/templates/tds/*.j2', 'network_modeling/configs/templates/tds'),
-             ]
-a = Analysis(['canu/cli.py'],
-             pathex=['canu', '/workspace'],
-             binaries=[],
-             datas=added_files,
-             hiddenimports=['network_modeling'],
-             hookspath=[],
-             runtime_hooks=[],
-             excludes=['tests'],
-             win_no_prefer_redirects=False,
-             win_private_assemblies=False,
-             cipher=block_cipher,
-             noarchive=False)
-pyz = PYZ(a.pure, a.zipped_data,
-             cipher=block_cipher)
-exe = EXE(pyz,
-          a.scripts,
-          a.binaries,
-          a.zipfiles,
-          a.datas,
-          [],
-          name='canu',
-          debug=False,
-          bootloader_ignore_signals=False,
-          strip=False,
-          upx=True,
-          upx_exclude=[],
-          runtime_tmpdir=None,
-          console=True )
+    ("canu/.version", "canu"),
+    ("canu/canu.yaml", "canu"),
+    ("canu/validate/switch/config/*.yaml", "canu/validate/switch/config"),
+    ("network_modeling/models/*", "network_modeling/models"),
+    ("network_modeling/schema/*", "network_modeling/schema"),
+    (
+        "network_modeling/configs/templates/aruba/common/*.j2",
+        "network_modeling/configs/templates/aruba/common",
+    ),
+    (
+        "network_modeling/configs/templates/aruba/full/*.j2",
+        "network_modeling/configs/templates/aruba/full",
+    ),
+    (
+        "network_modeling/configs/templates/aruba/tds/*.j2",
+        "network_modeling/configs/templates/aruba/tds",
+    ),
+    (
+        "network_modeling/configs/templates/dellmellanox/common/*.j2",
+        "network_modeling/configs/templates/dellmellanox/common",
+    ),
+    (
+        "network_modeling/configs/templates/dellmellanox/full/*.j2",
+        "network_modeling/configs/templates/dellmellanox/full",
+    ),
+    (
+        "network_modeling/configs/templates/dellmellanox/tds/*.j2",
+        "network_modeling/configs/templates/dellmellanox/tds",
+    ),
+]
+a = Analysis(
+    ["canu/cli.py"],
+    pathex=["canu", "/workspace"],
+    binaries=[],
+    datas=added_files,
+    hiddenimports=["network_modeling"],
+    hookspath=[],
+    runtime_hooks=[],
+    excludes=["tests"],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
+    noarchive=False,
+)
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+exe = EXE(
+    pyz,
+    a.scripts,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    [],
+    name="canu",
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    runtime_tmpdir=None,
+    console=True,
+)
