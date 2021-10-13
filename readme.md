@@ -598,32 +598,18 @@ vrf keepalive
 #### Generate Switch Config With Overrides
 This option allows you to pass in a file that contains switch configuration that CANU will ignore on config generation.  A use case would be to ignore the site connection on spine01, or an edge device that CANU does not recognize.
 
-<<<<<<< HEAD
-The override file type is yaml and a single file can be used for multiple switches.  You will need to specify the switch name and what config to ignore.
-=======
 The override file type is yaml and a single file can be used for multiple switches.  You will need to specify the switch name and what config to ignore.  The override file will only match the parent config, we can not match subconfig yet.  The override feature is using the hierarchical configuration library, documentation can be found here https://netdevops.io/hier_config/.
->>>>>>> origin/develop
 
 Override file example
 ```
 ---
 sw-spine-001:
 - lineage:
-<<<<<<< HEAD
-  - equals:
-    - ssh server vrf mgmt
-=======
   - equals: ssh server vrf mgmt
->>>>>>> origin/develop
   add_tags: override
 #you can use equals to directly match the config line
 - lineage:
   - startswith: vsx
-<<<<<<< HEAD
-  - startswith:
-    - inter-switch-link
-=======
->>>>>>> origin/develop
   add_tags: override
 #You can ignore nested config, here we are ignoring only the inter-switch-link config inside #the vsx configuration
 - lineage:
@@ -634,11 +620,6 @@ sw-spine-001:
 sw-spine-002:
 - lineage:
   - startswith: interface 
-<<<<<<< HEAD
-  - startswith:
-    - description
-=======
->>>>>>> origin/develop
   add_tags: override
 #you can use startswith to match multiple lines of config.
 #here we are ignoring descriptions on all interfaces
