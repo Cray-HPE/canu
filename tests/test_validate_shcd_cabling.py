@@ -593,10 +593,7 @@ def test_validate_shcd_cabling_bad_file():
             ],
         )
         assert result.exit_code == 2
-        assert (
-            "Error: Invalid value for '--shcd': Could not open file: does_not_exist.xlsx: No such file or directory"
-            in str(result.output)
-        )
+        assert "Error: Invalid value for '--shcd':" in str(result.output)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
