@@ -595,6 +595,69 @@ vrf keepalive
 
 ```
 
+#### Generate Switch Config With Overrides
+This option allows you to pass in a file that contains switch configuration that CANU will ignore on config generation.  A use case would be to ignore the site connection on spine01, or an edge device that CANU does not recognize.
+
+The override file type is yaml and a single file can be used for multiple switches.  You will need to specify the switch name and what config to ignore.  The override file will only match the parent config, we can not match subconfig yet.  The override feature is using the hierarchical configuration library, documentation can be found here https://netdevops.io/hier_config/.
+
+Override file example
+```
+---
+sw-spine-001:
+- lineage:
+  - equals: ssh server vrf mgmt
+  add_tags: override
+#you can use equals to directly match the config line
+- lineage:
+  - startswith: vsx
+  add_tags: override
+#You can ignore nested config, here we are ignoring only the inter-switch-link config inside #the vsx configuration
+- lineage:
+  - startswith: interface 1/1/36
+  add_tags: override
+#This will ignore the entire config block for 1/1/36
+
+sw-spine-002:
+- lineage:
+  - startswith: interface 
+  add_tags: override
+#you can use startswith to match multiple lines of config.
+#here we are ignoring descriptions on all interfaces
+- lineage:
+  - startswith: interface 1/1/36
+  add_tags: override
+- lineage:
+  - contains: ssh
+  add_tags: override
+#you can use contains to match multiple lines of config.
+
+sw-leaf-bmc-001:
+- lineage:
+  - startswith: interface 1/1/32
+  add_tags: override
+- lineage: 
+  - equals: ssh server vrf mgmt
+  add_tags: override
+```
+To generate switch configuration with overrides run
+```bash
+$ canu generate switch config -s 1.5 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --name sw-spine-001 --override OVERRIDE_FILE.yaml
+
+sw-spine-001 Override Switch Config
+sw-spine-001 Switch Config
+# OVERRIDE CONFIG
+# The configuration below has been ignored and is not included in the GENERATED CONFIG
+
+#vsx
+#  role primary
+#https-server vrf CAN
+# GENERATED CONFIG
+# 
+...
+
+```
+The output will display the config that has been ignored.
+
 ### Generate Network Config
 
 **[Details](docs/generate_network_config.md)**<br>
@@ -618,6 +681,26 @@ sw-leaf-004 Config Generated
 sw-cdu-001 Config Generated
 sw-cdu-002 Config Generated
 sw-leaf-bmc-001 Config Generated
+
+```
+#### Generate Network Config With Overrides
+This option allows you to give pass in a override file and apply it to the desired switches on the network.
+
+The instructions are exactly the same as **[Generate Switch Config with overrides](#generate-switch-config-with-overrides)**
+
+To generate network configuration with overrides run
+```bash
+$ canu generate network config -s 1.5 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config --override OVERRIDE_FILE.yaml
+
+sw-spine-001 Override Config Generated
+sw-spine-002 Override Config Generated
+sw-leaf-001 Override Config Generated
+sw-leaf-002 Override Config Generated
+sw-leaf-003 Config Generated
+sw-leaf-004 Config Generated
+sw-cdu-001 Override Config Generated
+sw-cdu-002 Override Config Generated
+sw-leaf-bmc-001 Override Config Generated
 
 ```
 
@@ -670,6 +753,99 @@ Router:                          1  |
 ```
 
 ![](docs/images/canu_validate_switch_config.png)
+
+#### Validate Switch Config With Overrides
+
+This option allows you to pass in a file that contains config that CANU will ignore on config validation.  A use case would be to ignore the site connection on spine01, or an edge device that CANU does not recognize.
+
+The override file type is yaml and a single file can be used for multiple switches.  You will need to specify the switch name and what config to ignore.  The override file will only match the parent config, we can not match subconfig yet.  The override feature is using the hierarchical configuration library, documentation can be found here https://netdevops.io/hier_config/.
+
+Override file example
+```
+---
+sw-spine-001:
+- lineage:
+  - equals: ssh server vrf mgmt
+  add_tags: override
+#you can use equals to directly match the config line
+- lineage:
+  - startswith: vsx
+  add_tags: override
+#You can ignore nested config, here we are ignoring only the inter-switch-link config inside #the vsx configuration
+- lineage:
+  - startswith: interface 1/1/36
+  add_tags: override
+#This will ignore the entire config block for 1/1/36
+
+sw-spine-002:
+- lineage:
+  - startswith: interface 
+  add_tags: override
+#you can use startswith to match multiple lines of config.
+#here we are ignoring descriptions on all interfaces
+- lineage:
+  - startswith: interface 1/1/36
+  add_tags: override
+- lineage:
+  - contains: ssh
+  add_tags: override
+#you can use contains to match multiple lines of config.
+
+sw-leaf-bmc-001:
+- lineage:
+  - startswith: interface 1/1/32
+  add_tags: override
+- lineage: 
+  - equals: ssh server vrf mgmt
+  add_tags: override
+```
+To validate switch config with overrides run 
+```bash
+To validate switch config with overrides run: `canu validate switch config --ip 192.168.1.1 --username USERNAME --password PASSWORD --generated SWITCH_CONFIG.cfg --override OVERRIDE.YAML`
+
+Ignored config
+The commands below come from the override file that was provided.
+-------------------------------------------------------------------------
+allow-unsupported-transceiver
+user admin group administrators password ciphertext AQBapWcbqh2GB9yAT6oln21BOY+3jKy2nth07vZLpzNwXNBVYgAAADGyXE3TJ7+ez0DzF/NNBCsaMXTyBJgqvtIvLd907Jr2JCIB9xgJ0R4qhp4Mf24L7aMJ0rXZ0DqDFS3vvz5aZ4Cj2wVu4h4kt/JV6RBpSk/j3QPSCCpj85BMUaSK11ECjXRM
+system interface-group 3 speed 10g
+interface lag 151 multi-chassis
+  no shutdown
+  description sw-spine-002:48==>sw-leaf-bmc-001:50
+  no routing
+  vlan trunk native 1
+  vlan trunk allowed 1-2,4,7
+  lacp mode active
+interface 1/1/36
+  no shutdown
+  ip address 10.103.15.210/30
+
+Safe Commands
+These commands should be safe to run while the system is running.
+-------------------------------------------------------------------------
+no ntp server 10.252.1.7
+no ntp server 10.252.1.8
+no ntp server 10.252.1.9
+
+Manual Commands
+These commands may cause disruption to the system and should be done only during a maintenance period.
+It is recommended to have an out of band connection while running these commands.
+-------------------------------------------------------------------------
+no interface lag 24 multi-chassis
+access-list ip nmn-hmn
+  no 10 deny any 10.252.0.0/255.255.128.0 10.254.0.0/255.255.128.0
+  no 20 deny any 10.254.0.0/255.255.128.0 10.252.0.0/255.255.128.0
+
+Commands NOT classified as Safe or Manual
+These commands include authentication as well as unique commands for the system.
+These should be looked over carefully before keeping/applying.
+-------------------------------------------------------------------------
+no ssh server vrf keepalive
+no mac-address-table age-time 60
+interface mgmt
+  no ip dhcp
+
+```
 
 #### File Output and JSON
 
@@ -774,6 +950,7 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 - Added Dell and Mellanox support to the `canu validate network config` command
 - Added ability to compare two config files with `canu validate switch config`
 - Added ability to compare two config folders with `canu validate network config`
+- Added an `--override` option to `canu generate switch config` and `canu generate network config`, this allows users to ignore custom configuration so CANU does not overwrite it.
 
 ## [unreleased]
 

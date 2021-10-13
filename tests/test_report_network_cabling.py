@@ -590,7 +590,6 @@ def test_network_cabling_bad_password(switch_vendor):
                 bad_password,
             ],
         )
-        print(result.output)
         assert result.exit_code == 0
         assert (
             "Error connecting to switch 192.168.1.1, check the IP address and try again."

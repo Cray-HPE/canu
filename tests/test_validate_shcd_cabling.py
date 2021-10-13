@@ -100,7 +100,6 @@ def test_validate_shcd_cabling(switch_vendor):
                 "DEBUG",
             ],
         )
-        print(result.output)
         assert result.exit_code == 0
         # sw-spine-001:  Found in SHCD, but missing network connections:
         assert (

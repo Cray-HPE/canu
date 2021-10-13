@@ -1,7 +1,6 @@
 {#- sw-spine.secondary #}
 {%- include 'aruba/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
-bfd
 no ip icmp redirect
 vrf CAN
 vrf keepalive
@@ -36,6 +35,7 @@ spanning-tree config-name MST0
 spanning-tree config-revision 1
 interface mgmt
     shutdown
+    ip dhcp
 
 {% include 'aruba/full/spine-to-leaf.lag.j2' %}
 {% include 'aruba/common/spine-to-cdu.lag.j2' %}
@@ -99,6 +99,7 @@ vsx
     vsx-sync vsx-global
 router ospf 1
     router-id {{ variables.LOOPBACK_IP }}
+    redistribute bgp
     area 0.0.0.0
 router ospfv3 1
     router-id {{ variables.LOOPBACK_IP }}

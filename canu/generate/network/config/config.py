@@ -21,6 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that generate the config of the entire Shasta network."""
 import json
+import os
 from os import environ, makedirs, path
 from pathlib import Path
 import sys
@@ -157,6 +158,11 @@ shasta_options = canu_config["shasta_versions"]
     required=True,
     prompt="Folder for configs",
 )
+@click.option(
+    "--override",
+    help="Switch configuration override",
+    type=click.Path(),
+)
 @click.pass_context
 def config(
     ctx,
@@ -169,6 +175,7 @@ def config(
     auth_token,
     sls_address,
     folder,
+    override,
 ):
     """Generate the config of all Aruba switches (API v10.04) on the network using the SHCD.
 
@@ -190,6 +197,7 @@ def config(
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         folder: Folder to store config files
+        override: Input file that defines what config should be ignored
     """
     if architecture.lower() == "full":
         architecture = "network_v2"
@@ -352,6 +360,17 @@ def config(
         if float(shasta) < 1.6:
             sls_variables = rename_sls_hostnames(sls_variables)
 
+    if override:
+        try:
+            with open(os.path.join(override), "r") as f:
+                override = yaml.load(f)
+        except FileNotFoundError:
+            click.secho(
+                "The override yaml file was not found, check that you entered the right file name and path.",
+                fg="red",
+            )
+            exit(1)
+
     # make folder
     if not path.exists(folder):
         makedirs(folder)
@@ -381,12 +400,15 @@ def config(
                 sls_variables,
                 template_folder,
                 vendor_folder,
+                override,
             )
             config_devices.update(devices)
             with open(f"{folder}/{switch_name}.cfg", "w+") as f:
                 f.write(switch_config)
-
-            click.secho(f"{switch_name} Config Generated", fg="bright_white")
+            if "# OVERRIDE" in switch_config:
+                click.secho(f"{switch_name} Override Config Generated", fg="yellow")
+            else:
+                click.secho(f"{switch_name} Config Generated", fg="bright_white")
     missing_devices = all_devices.difference(config_devices)
     if len(missing_devices) > 0:
         dash = "-" * 60

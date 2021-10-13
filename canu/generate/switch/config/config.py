@@ -22,6 +22,7 @@
 """CANU generate switch config commands."""
 from collections import defaultdict
 import json
+import os
 from os import environ, path
 from pathlib import Path
 import re
@@ -29,6 +30,7 @@ import sys
 
 import click
 from click_help_colors import HelpColorsCommand
+from hier_config import HConfig, Host
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 import natsort
 import netaddr
@@ -162,6 +164,11 @@ shasta_options = canu_config["shasta_versions"]
     type=click.File("w"),
     default="-",
 )
+@click.option(
+    "--override",
+    help="Switch configuration override",
+    type=click.Path(),
+)
 @click.pass_context
 def config(
     ctx,
@@ -175,6 +182,7 @@ def config(
     auth_token,
     sls_address,
     out,
+    override,
 ):
     """Switch config commands.
 
@@ -199,6 +207,7 @@ def config(
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         out: Name of the output file
+        override: Input file to ignore switch configuration
     """
     if architecture.lower() == "full":
         architecture = "network_v2"
@@ -361,6 +370,17 @@ def config(
         if float(shasta) < 1.6:
             sls_variables = rename_sls_hostnames(sls_variables)
 
+    if override:
+        try:
+            with open(os.path.join(override), "r") as f:
+                override = yaml.load(f)
+        except FileNotFoundError:
+            click.secho(
+                "The override yaml file was not found, check that you entered the right file name and path.",
+                fg="red",
+            )
+            exit(1)
+
     switch_config, devices = generate_switch_config(
         shcd_node_list,
         factory,
@@ -368,13 +388,17 @@ def config(
         sls_variables,
         template_folder,
         vendor_folder,
+        override,
     )
 
     dash = "-" * 60
     click.echo("\n")
-    click.secho(f"{switch_name} Config", fg="bright_white")
     click.echo(dash)
 
+    if override:
+        click.secho(f"{switch_name} Override Switch Config", fg="yellow")
+    else:
+        click.secho(f"{switch_name} Switch Config", fg="bright_white")
     click.echo(switch_config, file=out)
     return
 
@@ -394,6 +418,7 @@ def generate_switch_config(
     sls_variables,
     template_folder,
     vendor_folder,
+    override,
 ):
     """Generate switch config.
 
@@ -404,6 +429,7 @@ def generate_switch_config(
         sls_variables: Dictionary containing SLS variables
         template_folder: Architecture folder contaning the switch templates
         vendor_folder: Vendor folder contaning the template_folder
+        override: Input file that defines what config should be ignored
 
     Returns:
         switch_config: The generated switch configuration
@@ -570,6 +596,45 @@ def generate_switch_config(
     for node in cabling["nodes"]:
         devices.add(node["subtype"])
 
+    if override:
+        options_file = os.path.join(
+            project_root,
+            "canu",
+            "validate",
+            "switch",
+            "config",
+            "options.yaml",
+        )
+        if switch_name in override:
+            options = yaml.load(open(options_file))
+            host = Host(switch_name, "aoscx", options)
+            override_config = (
+                "# OVERRIDE CONFIG\n"
+                + "# The configuration below has been ignored and is not included in the GENERATED CONFIG\n"
+            )
+            override_config_hier = HConfig(host=host)
+            override_config_hier.load_from_string(switch_config).add_tags(
+                override[switch_name],
+            )
+            for line in override_config_hier.all_children_sorted_by_tags(
+                "override",
+                None,
+            ):
+                override_config = override_config + "\n" + "#" + line.cisco_style_text()
+            override_config = override_config + "\n# GENERATED CONFIG\n"
+            for line in override_config_hier.all_children_sorted_by_tags(
+                None,
+                "override",
+            ):
+                # add two spaces to indented config to match aruba formatting.
+                if line.cisco_style_text().startswith("  "):
+                    override_config = (
+                        override_config + "\n" + "  " + line.cisco_style_text()
+                    )
+                else:
+                    override_config = override_config + "\n" + line.cisco_style_text()
+
+            return override_config, devices
     return switch_config, devices
 
 
