@@ -400,7 +400,6 @@ def test_switch_config_spine_primary_override():
             + "    description sw-spine-001:4==>sw-leaf-004:53\n"
             + "    lag 103\n"
         )
-
         assert sw_spine_to_leaf in str(result.output)
         spine_to_cdu = (
             "interface lag 201 multi-chassis\n"
@@ -580,7 +579,7 @@ def test_switch_config_spine_secondary():
             + "    description spine_to_leaf_lag\n"
             + "    no routing\n"
             + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 1-2,4,7\n"
+            + "    vlan trunk allowed 2,4,7\n"
             + "    lacp mode active\n"
             + "    spanning-tree root-guard\n"
             + "\n"
@@ -601,7 +600,7 @@ def test_switch_config_spine_secondary():
             + "    description spine_to_leaf_lag\n"
             + "    no routing\n"
             + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 1-2,4,7\n"
+            + "    vlan trunk allowed 2,4,7\n"
             + "    lacp mode active\n"
             + "    spanning-tree root-guard\n"
             + "\n"
@@ -811,7 +810,7 @@ def test_switch_config_spine_secondary_override():
             + "    description spine_to_leaf_lag\n"
             + "    no routing\n"
             + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 1-2,4,7\n"
+            + "    vlan trunk allowed 2,4,7\n"
             + "    lacp mode active\n"
             + "    spanning-tree root-guard\n"
             + "interface 1/1/1\n"
@@ -829,7 +828,7 @@ def test_switch_config_spine_secondary_override():
             + "    description spine_to_leaf_lag\n"
             + "    no routing\n"
             + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 1-2,4,7\n"
+            + "    vlan trunk allowed 2,4,7\n"
             + "    lacp mode active\n"
             + "    spanning-tree root-guard\n"
             + "interface 1/1/3\n"
@@ -1299,7 +1298,6 @@ def test_switch_config_leaf_primary_override():
             + "#vsx\n"
             + "#  inter-switch-link lag 256\n"
         ) in str(result.output)
-
         assert (
             "hostname sw-leaf-001\n"
             + "no ip icmp redirect\n"
@@ -2022,24 +2020,6 @@ def test_switch_config_leaf_primary_to_uan_override():
             + "    lacp mode active\n"
             + "    lacp fallback\n"
             + "    spanning-tree bpdu-guard\n"
-            + "    spanning-tree port-type admin-edge\n"
-            + "interface 1/1/6\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-leaf-003:6==>ncn-s003:ocp:2\n"
-            + "    lag 6\n"
-        )
-        assert ncn_s in str(result.output)
-
-        uan = (
-            "interface 1/1/7\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-leaf-003:7==>uan001:ocp:1\n"
-            + "    no routing\n"
-            + "    vlan access 2\n"
-            + "    spanning-tree bpdu-guard\n"
-            + "    spanning-tree port-type admin-edge\n"
             + "interface lag 7 multi-chassis\n"
             + "    no shutdown\n"
             + "    description uan_can_lag\n"
@@ -2429,10 +2409,6 @@ def test_switch_config_leaf_secondary():
             + "vsx\n"
             + "    system-mac 02:00:00:00:65:00\n"
             + "    inter-switch-link lag 256\n"
-            + "    role secondary\n"
-            + "    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive\n"
-            + "    linkup-delay-timer 600\n"
-            + "    vsx-sync vsx-global\n"
         ) in str(result.output)
 
         assert (
@@ -7049,6 +7025,7 @@ def test_switch_config_tds_cdu_primary():
             ],
         )
         assert result.exit_code == 0
+
         assert (
             "hostname sw-cdu-001\n"
             + "no ip icmp redirect\n"
@@ -7073,7 +7050,6 @@ def test_switch_config_tds_cdu_primary():
             + "    70 deny any 192.168.200.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
             + "    80 deny any 192.168.200.0/255.255.128.0 192.168.100.0/255.255.128.0\n"
             + "    90 permit any any any\n"
-            + "\n"
             + "vlan 1\n"
             + "vlan 2\n"
             + "    name NMN\n"
@@ -7214,6 +7190,16 @@ def test_switch_config_tds_cdu_primary():
             + "    ip address 10.2.0.16/32\n"
             + "    ip ospf 1 area 0.0.0.0\n"
             + "interface vlan 1\n"
+            + "    shutdown\n"
+        ) in str(result.output)
+
+        mtn_hmn_vlan = (
+            "vlan 3000\n"
+            + "    name cabinet_3002\n"
+            + "    apply access-list ip nmn-hmn in\n"
+            + "    apply access-list ip nmn-hmn out\n"
+            + "\n"
+            + "interface vlan 3000\n"
             + "    ip mtu 9198\n"
             + "    ip address 192.168.1.16/16\n"
         ) in str(result.output)
@@ -7469,6 +7455,15 @@ def test_switch_config_tds_cdu_primary_override():
             + "interface loopback 0\n"
             + "    ip ospf 1 area 0.0.0.0\n"
             + "interface vlan 1\n"
+            + "    shutdown\n"
+        ) in str(result.output)
+
+        mtn_hmn_vlan = (
+            "vlan 3000\n"
+            + "    name cabinet_3002\n"
+            + "    apply access-list ip nmn-hmn in\n"
+            + "    apply access-list ip nmn-hmn out\n"
+            + "interface vlan 3000\n"
             + "    ip mtu 9198\n"
             + "    ip address 192.168.1.16/16\n"
         ) in str(result.output)

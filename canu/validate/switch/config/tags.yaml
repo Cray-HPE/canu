@@ -1,146 +1,137 @@
 ---
-#equals safe
-- lineage:
-  - equals:
-    - ssh server vrf default
-    - ssh server vrf mgmt
-    - no ip icmp redirect
-    - https-server vrf default
-    - https-server vrf mgmt
-  add_tags: safe
-#equals manual
-# - lineage:
-#   - equals:
-#     - interface mgmt
-#   add_tags: mgmt
-
-#interface starts with safe
-- lineage:
-  - startswith: interface 1
-  - startswith:
-    - description
-    - no description
-    - routing
-    - mtu
-    - no mtu
-    - no shutdown
-    - shutdown
-    - no shutdown
-    - spanning-tree
-    - vlan
-    - no routing
-    - speed
-    - no speed
-  add_tags: safe
-#interface starts with manual
-- lineage:
-  - startswith: interface 1
-  - startswith:
-    - lag
-    - ip address
-    - no ip address
-    - no lag
-    - vrf
-    - no vrf
-    - no spanning-tree
-  add_tags: manual
-- lineage:
-  - startswith: no interface 1
-  add_tags: no interface
-
-#interface vlan starts with safe
-- lineage:
-  - startswith: interface vlan
-  - startswith:
-    - ip mtu
-    - ipv6
-    - ip helper
-    - ip ospf
-    - description
-    - ip helper
-    - no ip helper
-  add_tags: safe
-#interface vlan starts with manual
-- lineage:
-  - startswith: interface vlan
-  - startswith:
-    - ip address
-    - no ip address
-    - ip access-group
-    - no ip access-group
-    - shutdown
-    - no shutdown
-    - no vsx-sync
-    - no active-gateway
-    - active-gateway
-    - vsx-sync
-  add_tags: manual
-
-#interface lag safe
-- lineage:
-  - startswith: interface lag
-  - startswith:
-    - description
-    - mtu
-    - no shutdown
-    - shutdown
-    - spanning-tree
-    - no spanning-tree
-    - lacp fallback
-  add_tags: safe
-#interface lag manual
-- lineage:
-  - startswith: interface lag
-  - startswith:
-    - lacp mode
-    - vlan
-    - no vlan
-    - no routing
-    - lacp rate
-    - no lacp rate
-  add_tags: manual
-- lineage:
-  - startswith: no interface lag
-  add_tags: manual
-
-#vlan starts with safe
-- lineage:
-  - startswith: vlan
-  - startswith:
-    - name
-    - apply
-  add_tags: safe
-
-#safe starts with
-- lineage:
-  - startswith:
-    - interface loopback
-    - ntp
-    - router ospf
-    - hostname
-    - no ip dns
-    - ip dns
-    - no ntp
-  add_tags: safe
-#manual starts with
-- lineage:
-  - startswith:
-    - ip access-list
-    - no ip access-list
-    - access-list
-    - no access-list
-    - vsx
-    - spanning-tree
-    - no spanning-tree
-    - vrf
-    - no vrf
-    - no spanning-tree
-    - no interface vlan
-  add_tags: manual
-
-# - lineage:
-#   - startswith:
-#     - no snmp
-#     - no user admin
-#   add_tags: creds
-
+  #equals safe
+  - lineage:
+    - equals:
+      - ssh server vrf default
+      - ssh server vrf mgmt
+      - no ip icmp redirect
+      - https-server vrf default
+      - https-server vrf mgmt
+    add_tags: safe
+  
+  #interface starts with safe
+  - lineage:
+    - startswith: interface 1
+    - startswith:
+      - description
+      - no description
+      - routing
+      - mtu
+      - no mtu
+      - no shutdown
+      - shutdown
+      - no shutdown
+      - spanning-tree
+      - vlan
+      - no routing
+      - speed
+      - no speed
+    add_tags: safe
+  
+  #interface starts with manual
+  - lineage:
+    - startswith: interface 1
+    - startswith:
+      - lag
+      - ip address
+      - no ip address
+      - no lag
+      - vrf
+      - no vrf
+      - no spanning-tree
+    add_tags: manual
+  - lineage:
+    - startswith: no interface 1
+    add_tags: no interface
+  
+  #interface vlan starts with safe
+  - lineage:
+    - startswith: interface vlan
+    - startswith:
+      - ip mtu
+      - ipv6
+      - ip helper
+      - ip ospf
+      - description
+      - ip helper
+      - no ip helper
+    add_tags: safe
+  
+  #interface vlan starts with manual
+  - lineage:
+    - startswith: interface vlan
+    - startswith:
+      - ip address
+      - no ip address
+      - ip access-group
+      - no ip access-group
+      - shutdown
+      - no shutdown
+      - no vsx-sync
+      - no active-gateway
+      - active-gateway
+      - vsx-sync
+    add_tags: manual
+  
+  #interface lag safe
+  - lineage:
+    - startswith: interface lag
+    - startswith:
+      - description
+      - mtu
+      - no shutdown
+      - shutdown
+      - spanning-tree
+      - no spanning-tree
+      - lacp fallback
+    add_tags: safe
+  
+  #interface lag manual
+  - lineage:
+    - startswith: interface lag
+    - startswith:
+      - lacp mode
+      - vlan
+      - no vlan
+      - no routing
+      - lacp rate
+      - no lacp rate
+    add_tags: manual
+  - lineage:
+    - startswith: no interface lag
+    add_tags: manual
+  
+  #vlan starts with safe
+  - lineage:
+    - startswith: vlan
+    - startswith:
+      - name
+      - apply
+    add_tags: safe
+  
+  #safe starts with
+  - lineage:
+    - startswith:
+      - interface loopback
+      - ntp
+      - router ospf
+      - hostname
+      - no ip dns
+      - ip dns
+      - no ntp
+    add_tags: safe
+  #manual starts with
+  - lineage:
+    - startswith:
+      - ip access-list
+      - no ip access-list
+      - access-list
+      - no access-list
+      - vsx
+      - spanning-tree
+      - no spanning-tree
+      - vrf
+      - no vrf
+      - no spanning-tree
+      - no interface vlan
+    add_tags: manual

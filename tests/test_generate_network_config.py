@@ -167,6 +167,10 @@ def test_network_config_override_file_missing():
             ],
         )
         assert result.exit_code == 1
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/develop
         assert (
             "The override yaml file was not found, check that you entered the right file name and path"
             in str(result.output)

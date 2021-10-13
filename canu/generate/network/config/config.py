@@ -21,6 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that generate the config of the entire Shasta network."""
 import json
+import os
 from os import environ, makedirs, path
 from pathlib import Path
 import sys
@@ -355,6 +356,17 @@ def config(
     if shasta:
         if float(shasta) < 1.6:
             sls_variables = rename_sls_hostnames(sls_variables)
+
+    if override:
+        try:
+            with open(os.path.join(override), "r") as f:
+                override = yaml.load(f)
+        except FileNotFoundError:
+            click.secho(
+                "The override yaml file was not found, check that you entered the right file name and path.",
+                fg="red",
+            )
+            exit(1)
 
     # make folder
     if not path.exists(folder):
