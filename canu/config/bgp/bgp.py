@@ -31,6 +31,8 @@ from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
 import requests
 
+from canu.utils.vendor import switch_vendor
+
 
 @click.command(
     cls=HelpColorsCommand,
@@ -226,22 +228,14 @@ def bgp(
                     end="\r",
                 )
                 ip = str(ip)
-                session = requests.Session()
-                # Login
                 try:
-                    login = session.post(
-                        f"https://{ip}/rest/v10.04/login",
-                        data=credentials,
-                        verify=False,
-                    )
-                    login.raise_for_status()
+                    config_bgp(ip, credentials, prefix, ncn, asn, ips)
 
                 except requests.exceptions.HTTPError:
                     errors.append(
                         [
                             str(ip),
-                            f"Error connecting to switch {ip}, check that this IP is an Aruba switch, or check the "
-                            + "username or password.",
+                            f"Error connecting to switch {ip}, check the IP, username, or password.",
                         ],
                     )
                     continue
@@ -263,30 +257,6 @@ def bgp(
                         ],
                     )
                     continue
-
-                # Remove: BGP, Prefix Lists, Route Maps
-                remove_config(ip, session, asn)
-
-                # Add Prefix Lists
-                add_prefix_list(ip, session, prefix)
-
-                # Create Route Maps
-                create_route_maps(ip, session, ncn)
-
-                # Add BGP and Router ID
-                add_bgp_asn_router_id(ip, session, asn)
-
-                # Update BGP Neighbors
-                update_bgp_neighbors(ip, ips, session, asn, ncn)
-
-                # Write Memory
-                session.put(
-                    f"https://{ip}/rest/v10.04/fullconfigs/startup-config?from=/rest/v10.04/fullconfigs/running-config",
-                    verify=False,
-                )
-
-                # Logout
-                session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
 
     dash = "-" * 50
 
@@ -312,7 +282,6 @@ def bgp(
         click.echo(dash)
         for error in errors:
             click.echo("{:<15s} - {}".format(error[0], error[1]))
-    return
 
 
 def parse_sls(sls_json):
@@ -397,7 +366,114 @@ def parse_sls(sls_json):
     return prefix, ncn
 
 
-def remove_config(ip, session, asn):
+def config_bgp(ip, credentials, prefix, ncn, asn, ips):
+    """Configure BGP for Shasta switches.
+
+    Args:
+        ip: Switch IP
+        credentials: Dictionary with username and password of the switch
+        prefix: Dict containing prefix for ("can", "hmn", "nmn", "tftp")
+        ncn: Dict containing (NCN Names, NCN CAN IPs, NCN NMN IPs, NCN HMN IPs)
+        asn: Switch ASN
+        ips: List of switch IPs
+    """
+    try:
+        vendor = switch_vendor(ip, credentials, return_error=True)
+
+        if vendor is None:
+            click.secho(
+                "Could not determine the vendor of the switch",
+                fg="white",
+                bg="red",
+            )
+
+        elif vendor == "aruba":
+            config_bgp_aruba(
+                ip,
+                credentials,
+                prefix,
+                ncn,
+                asn,
+                ips,
+            )
+        elif vendor == "dell":
+            click.secho(
+                "BGP peering against Dell switch not allowed by CSM architecture.",
+                fg="white",
+                bg="red",
+            )
+
+        elif vendor == "mellanox":
+            config_bgp_mellanox(
+                ip,
+                credentials,
+                prefix,
+                ncn,
+                asn,
+            )
+
+    except (
+        requests.exceptions.HTTPError,
+        requests.exceptions.RequestException,
+        requests.exceptions.ConnectionError,
+    ) as error:
+        raise error
+
+
+def config_bgp_aruba(ip, credentials, prefix, ncn, asn, ips):
+    """Configure BGP for an Aruba switch.
+
+    Args:
+        ip: Switch IP
+        credentials: Dictionary with username and password of the switch
+        prefix: Dict containing prefix for ("can", "hmn", "nmn", "tftp")
+        ncn: Dict containing (NCN Names, NCN CAN IPs, NCN NMN IPs, NCN HMN IPs)
+        asn: Switch ASN
+        ips: List of switch IPs
+    """
+    session = requests.Session()
+    # Login
+    try:
+        login = session.post(
+            f"https://{ip}/rest/v10.04/login",
+            data=credentials,
+            verify=False,
+        )
+        login.raise_for_status()
+
+    except (
+        requests.exceptions.HTTPError,
+        requests.exceptions.ConnectionError,
+        requests.exceptions.RequestException,
+    ) as error:
+        raise error
+
+    # Remove: BGP, Prefix Lists, Route Maps
+    remove_config_aruba(ip, session, asn)
+
+    # Add Prefix Lists
+    add_prefix_list_aruba(ip, session, prefix)
+
+    # Create Route Maps
+    create_route_maps_aruba(ip, session, ncn)
+
+    # Add BGP and Router ID
+    add_bgp_asn_router_id_aruba(ip, session, asn)
+
+    # Update BGP Neighbors
+    update_bgp_neighbors_aruba(ip, ips, session, asn, ncn)
+
+    # Write Memory
+    session.put(
+        f"https://{ip}/rest/v10.04/fullconfigs/startup-config?from=/rest/v10.04/fullconfigs/running-config",
+        verify=False,
+    )
+
+    # Logout
+    session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
+
+
+def remove_config_aruba(ip, session, asn):
     """Remove config for BGP, prefix lists, and route maps.
 
     Args:
@@ -415,7 +491,7 @@ def remove_config(ip, session, asn):
     session.delete(f"https://{ip}/rest/v10.04/system/route_maps/*")
 
 
-def add_prefix_list(ip, session, prefix):
+def add_prefix_list_aruba(ip, session, prefix):
     """Add prefix lists to a switch.
 
     Args:
@@ -499,7 +575,7 @@ def add_prefix_list(ip, session, prefix):
     )
 
 
-def create_route_maps(ip, session, ncn):
+def create_route_maps_aruba(ip, session, ncn):
     """Create route maps for a switch.
 
     Args:
@@ -597,7 +673,7 @@ def add_route_entry(ip, session, ips, ncn_names, route_map_entry):
         )
 
 
-def add_bgp_asn_router_id(ip, session, asn):
+def add_bgp_asn_router_id_aruba(ip, session, asn):
     """Add BGP ASN and router id.
 
     Args:
@@ -618,7 +694,7 @@ def add_bgp_asn_router_id(ip, session, asn):
     )
 
 
-def update_bgp_neighbors(ip, ips, session, asn, ncn):
+def update_bgp_neighbors_aruba(ip, ips, session, asn, ncn):
     """Update BGP neighbors for a switch.
 
     Args:
@@ -663,3 +739,131 @@ def update_bgp_neighbors(ip, ips, session, asn, ncn):
                 json=vsx_neighbor,
                 verify=False,
             )
+
+
+def config_bgp_mellanox(ip, credentials, prefix, ncn, asn):
+    """Configure BGP for a Mellanox switch.
+
+    Args:
+        ip: Switch IP
+        credentials: Dictionary with username and password of the switch
+        prefix: Dict containing prefix for ("can", "hmn", "nmn", "tftp")
+        ncn: Dict containing (NCN Names, NCN CAN IPs, NCN NMN IPs, NCN HMN IPs)
+        asn: Switch ASN
+    """
+    can_prefix = prefix["can"]
+    hmn_prefix = prefix["hmn"]
+    nmn_prefix = prefix["nmn"]
+
+    ncn_names = ncn["names"]
+    ncn_can_ips = ncn["can"]
+    ncn_hmn_ips = ncn["hmn"]
+    ncn_nmn_ips = ncn["nmn"]
+
+    login_url = (
+        f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login"
+    )
+
+    # default url to post commands
+    command_url = (
+        login_url + "/admin/launch?script=rh&template=json-request&action=json-login"
+    )
+
+    session = requests.Session()
+    # Login
+    try:
+        login = session.post(
+            login_url,
+            json=credentials,
+            verify=False,
+        )
+        login.raise_for_status()
+
+    except (
+        requests.exceptions.HTTPError,
+        requests.exceptions.ConnectionError,
+        requests.exceptions.RequestException,
+    ) as error:
+        raise error
+
+    # get route-map configuration
+    route_map_response = session.post(
+        url=command_url,
+        json={"cmd": "show route-map"},
+        verify=False,
+    )
+
+    # create command to delete previous route-map configuration.
+    route_map_response_json = json.loads(route_map_response.text)
+    cmd_no_route_map_list = [f"no router bgp {asn}"]
+
+    for route in route_map_response_json["data"]:
+        for key in route:
+            new_route = f"no {key.split(',')[0]}"
+            if new_route not in cmd_no_route_map_list:
+                cmd_no_route_map_list.append(new_route)
+
+    # posts NO route maps to the switch
+    session.post(
+        url=command_url,
+        json={"commands": cmd_no_route_map_list},
+        verify=False,
+    )
+
+    # create command to delete previous prefix list configuration.
+    # these are hard coded, the API does not return prefix lists when called...
+    # delete prefix lists
+    get_prefix_list = [
+        "no ip prefix-list pl-can",
+        "no ip prefix-list pl-hmn",
+        "no ip prefix-list pl-nmn",
+    ]
+    session.post(
+        url=command_url,
+        json={"commands": get_prefix_list},
+        verify=False,
+    )
+
+    # define the switch prefix list commands
+    cmd_list = [
+        f"ip prefix-list pl-nmn seq 10 permit {nmn_prefix[:-3]} /24 ge 24",
+        f"ip prefix-list pl-hmn seq 20 permit {hmn_prefix[:-3]} /24 ge 24",
+        f"ip prefix-list pl-can seq 30 permit {can_prefix[:-3]} /24 ge 24",
+    ]
+
+    # create route_map commands
+    for nmn_name, nmn_ip in zip(ncn_names, ncn_nmn_ips):
+        cmd_list.append(f"route-map {nmn_name} permit 10 match ip address pl-nmn")
+        cmd_list.append(f"route-map {nmn_name} permit 10 set ip next-hop {nmn_ip}")
+
+    for hmn_name, hmn_ip in zip(ncn_names, ncn_hmn_ips):
+        cmd_list.append(f"route-map {hmn_name} permit 20 match ip address pl-hmn")
+        cmd_list.append(f"route-map {hmn_name} permit 20 set ip next-hop {hmn_ip}")
+
+    for can_name, can_ip in zip(ncn_names, ncn_can_ips):
+        cmd_list.append(f"route-map {can_name} permit 30 match ip address pl-can")
+        cmd_list.append(f"route-map {can_name} permit 30 set ip next-hop {can_ip}")
+
+    # BGP commands
+    cmd_list.append(f"router bgp {asn} vrf default")
+    cmd_list.append(f"router-id {ip} force")
+
+    for ncn_ip, name in zip(ncn_nmn_ips, ncn_names):
+        cmd_list.append(f"neighbor {ncn_ip} remote-as 65533")
+        cmd_list.append(f"neighbor {ncn_ip} route-map {name}")
+        cmd_list.append(f"neighbor {ncn_ip} transport connection-mode passive")
+
+    cmd_list.append("maximum-paths ibgp 32")
+
+    # post all the bgp configuration commands
+    session.post(
+        url=command_url,
+        json={"commands": cmd_list},
+        verify=False,
+    )
+
+    session.post(
+        url=command_url,
+        json={"cmd": "write memory"},
+        verify=False,
+    )

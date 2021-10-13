@@ -22,6 +22,7 @@
 """Test CANU config BGP."""
 from collections import defaultdict
 import json
+from unittest.mock import patch
 
 from click import testing
 import requests
@@ -43,10 +44,12 @@ runner = testing.CliRunner()
 token = "123abc"
 
 
+@patch("canu.config.bgp.bgp.switch_vendor")
 @responses.activate
-def test_config_bgp():
+def test_config_bgp(switch_vendor):
     """Test that the `canu config bgp` command runs."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.GET,
             f"https://{sls_address}/apis/sls/v1/networks",
@@ -200,10 +203,12 @@ def test_config_bgp():
         assert "192.168.1.2" in str(result.output)
 
 
+@patch("canu.config.bgp.bgp.switch_vendor")
 @responses.activate
-def test_config_bgp_file():
+def test_config_bgp_file(switch_vendor):
     """Test that the `canu config bgp` command runs from CSI input."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         # format sls_networks to be like sls_file.json
         sls_json = defaultdict()
         for network in sls_networks:
@@ -369,10 +374,12 @@ def test_config_bgp_file():
         assert "192.168.1.2" in str(result.output)
 
 
+@patch("canu.config.bgp.bgp.switch_vendor")
 @responses.activate
-def test_config_bgp_verbose():
+def test_config_bgp_verbose(switch_vendor):
     """Test that the `canu config bgp` command runs with verbose output."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.GET,
             f"https://{sls_address}/apis/sls/v1/networks",
@@ -632,13 +639,15 @@ def test_config_bgp_invalid_ip_file():
         assert "Error: Invalid value:" in str(result.output)
 
 
+@patch("canu.config.bgp.bgp.switch_vendor")
 @responses.activate
-def test_config_bgp_bad_ip():
+def test_config_bgp_bad_ip(switch_vendor):
     """Test that the `canu config bgp` command errors on bad IPs."""
     bad_ip = "192.168.1.98"
     bad_ip2 = "192.168.1.99"
 
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.GET,
             f"https://{sls_address}/apis/sls/v1/networks",
@@ -680,13 +689,15 @@ def test_config_bgp_bad_ip():
         assert "Error connecting to switch 192.168.1.99" in str(result.output)
 
 
+@patch("canu.config.bgp.bgp.switch_vendor")
 @responses.activate
-def test_config_bgp_bad_ip_file():
+def test_config_bgp_bad_ip_file(switch_vendor):
     """Test that the `canu config bgp` command errors on bad IPs from a file."""
     bad_ip = "192.168.1.98"
     bad_ip2 = "192.168.1.99"
 
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         with open("test.txt", "w") as f:
             f.write(bad_ip)
             f.write("\n")
@@ -734,12 +745,14 @@ def test_config_bgp_bad_ip_file():
         assert "Error connecting to switch 192.168.1.99" in str(result.output)
 
 
+@patch("canu.config.bgp.bgp.switch_vendor")
 @responses.activate
-def test_config_bgp_bad_password():
+def test_config_bgp_bad_password(switch_vendor):
     """Test that the `canu config bgp` command errors on bad credentials."""
     bad_password = "foo"
 
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.GET,
             f"https://{sls_address}/apis/sls/v1/networks",
@@ -775,11 +788,11 @@ def test_config_bgp_bad_password():
         )
         assert result.exit_code == 0
         assert (
-            "Error connecting to switch 192.168.1.1, check that this IP is an Aruba switch, or check the username or password"
+            "Error connecting to switch 192.168.1.1, check the IP, username, or password"
             in str(result.output)
         )
         assert (
-            "Error connecting to switch 192.168.1.2, check that this IP is an Aruba switch, or check the username or password"
+            "Error connecting to switch 192.168.1.2, check the IP, username, or password"
             in str(result.output)
         )
 
@@ -896,11 +909,13 @@ def test_config_bgp_not_enough_ips_file():
         )
 
 
+@patch("canu.config.bgp.bgp.switch_vendor")
 @responses.activate
-def test_config_bgp_sls_token_bad():
+def test_config_bgp_sls_token_bad(switch_vendor):
     """Test that the `canu config bgp` command errors on bad token file."""
     bad_token = "bad_token.token"
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         with open(bad_token, "w") as f:
             f.write('{"access_token": "123"}')
 
@@ -964,9 +979,11 @@ def test_config_bgp_sls_token_missing():
     )
 
 
+@patch("canu.config.bgp.bgp.switch_vendor")
 @responses.activate
-def test_config_bgp_sls_address_bad():
+def test_config_bgp_sls_address_bad(switch_vendor):
     """Test that the `canu config bgp` command errors with bad SLS address."""
+    switch_vendor.return_value = "aruba"
     bad_sls_address = "192.168.254.254"
 
     responses.add(
