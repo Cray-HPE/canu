@@ -5,7 +5,7 @@ interface lag {{ node.config.LAG_NUMBER }} multi-chassis
     description {{ node.config.DESCRIPTION }}
     no routing
     vlan trunk native 1
-    vlan trunk allowed 2,4
+    vlan trunk allowed 1-2,4
     lacp mode active
 
 interface {{ node.config.PORT }}
