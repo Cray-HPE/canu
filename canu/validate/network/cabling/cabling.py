@@ -179,8 +179,7 @@ def cabling(ctx, architecture, ips, ips_file, username, password, log_):
                     errors.append(
                         [
                             str(ip),
-                            f"Error connecting to switch {ip}, "
-                            + "check that this IP is an Aruba switch, or check the username or password.",
+                            f"Error connecting to switch {ip}, check the IP, username, or password.",
                         ],
                     )
                 except requests.exceptions.ConnectionError:

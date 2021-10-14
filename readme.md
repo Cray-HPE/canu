@@ -4,7 +4,7 @@ CANU (CSM Automatic Network Utility) will float through a Shasta network and mak
 
 CANU can be used to:
 
-- Check if Aruba switches on a Shasta network meet the firmware version requirements
+- Check if switches (Aruba, Dell, or Mellanox) on a Shasta network meet the firmware version requirements
 - Check network cabling status using LLDP
 - Validate BGP status
 - Configure BGP
@@ -173,7 +173,7 @@ $ canu report switch firmware --shasta 1.4 --ip 192.168.1.1 --username USERNAME 
 
 **[Details](docs/report_network_firmware.md)**<br>
 
-Multiple Aruba switches on a network can be checked for their firmware versions. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
+Multiple switches on a network (Aruba, Dell, or Mellanox) can be checked for their firmware versions. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
 
 The Shasta version is required to determine the firmware to validate against, you can pass it in with either `-s` or `--shasta` like `-s 1.4`.
 
@@ -281,7 +281,7 @@ Entries in the table will be colored based on what they are. Neighbors that have
 
 **[Details](docs/report_network_cabling.md)**<br>
 
-The cabling of multiple Aruba switches on a network can be checked at the same time using LLDP. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
+The cabling of multiple switches (Aruba, Dell, or Mellanox) on a network can be checked at the same time using LLDP. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
 
 An example of checking the cabling of multiple switches: `canu report network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
@@ -596,11 +596,13 @@ vrf keepalive
 ```
 
 #### Generate Switch Config With Overrides
-This option allows you to pass in a file that contains switch configuration that CANU will ignore on config generation.  A use case would be to ignore the site connection on spine01, or an edge device that CANU does not recognize.
 
-The override file type is yaml and a single file can be used for multiple switches.  You will need to specify the switch name and what config to ignore.  The override file will only match the parent config, we can not match subconfig yet.  The override feature is using the hierarchical configuration library, documentation can be found here https://netdevops.io/hier_config/.
+This option allows you to pass in a file that contains switch configuration that CANU will ignore on config generation. A use case would be to ignore the site connection on spine01, or an edge device that CANU does not recognize.
+
+The override file type is yaml and a single file can be used for multiple switches. You will need to specify the switch name and what config to ignore. The override file will only match the parent config, we can not match subconfig yet. The override feature is using the hierarchical configuration library, documentation can be found here https://netdevops.io/hier_config/.
 
 Override file example
+
 ```
 ---
 sw-spine-001:
@@ -619,7 +621,7 @@ sw-spine-001:
 
 sw-spine-002:
 - lineage:
-  - startswith: interface 
+  - startswith: interface
   add_tags: override
 #you can use startswith to match multiple lines of config.
 #here we are ignoring descriptions on all interfaces
@@ -635,11 +637,13 @@ sw-leaf-bmc-001:
 - lineage:
   - startswith: interface 1/1/32
   add_tags: override
-- lineage: 
+- lineage:
   - equals: ssh server vrf mgmt
   add_tags: override
 ```
+
 To generate switch configuration with overrides run
+
 ```bash
 $ canu generate switch config -s 1.5 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --name sw-spine-001 --override OVERRIDE_FILE.yaml
 
@@ -652,10 +656,11 @@ sw-spine-001 Switch Config
 #  role primary
 #https-server vrf CAN
 # GENERATED CONFIG
-# 
+#
 ...
 
 ```
+
 The output will display the config that has been ignored.
 
 ### Generate Network Config
@@ -683,12 +688,15 @@ sw-cdu-002 Config Generated
 sw-leaf-bmc-001 Config Generated
 
 ```
+
 #### Generate Network Config With Overrides
+
 This option allows you to give pass in a override file and apply it to the desired switches on the network.
 
 The instructions are exactly the same as **[Generate Switch Config with overrides](#generate-switch-config-with-overrides)**
 
 To generate network configuration with overrides run
+
 ```bash
 $ canu generate network config -s 1.5 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config --override OVERRIDE_FILE.yaml
 
@@ -756,11 +764,12 @@ Router:                          1  |
 
 #### Validate Switch Config With Overrides
 
-This option allows you to pass in a file that contains config that CANU will ignore on config validation.  A use case would be to ignore the site connection on spine01, or an edge device that CANU does not recognize.
+This option allows you to pass in a file that contains config that CANU will ignore on config validation. A use case would be to ignore the site connection on spine01, or an edge device that CANU does not recognize.
 
-The override file type is yaml and a single file can be used for multiple switches.  You will need to specify the switch name and what config to ignore.  The override file will only match the parent config, we can not match subconfig yet.  The override feature is using the hierarchical configuration library, documentation can be found here https://netdevops.io/hier_config/.
+The override file type is yaml and a single file can be used for multiple switches. You will need to specify the switch name and what config to ignore. The override file will only match the parent config, we can not match subconfig yet. The override feature is using the hierarchical configuration library, documentation can be found here https://netdevops.io/hier_config/.
 
 Override file example
+
 ```
 ---
 sw-spine-001:
@@ -779,7 +788,7 @@ sw-spine-001:
 
 sw-spine-002:
 - lineage:
-  - startswith: interface 
+  - startswith: interface
   add_tags: override
 #you can use startswith to match multiple lines of config.
 #here we are ignoring descriptions on all interfaces
@@ -795,11 +804,13 @@ sw-leaf-bmc-001:
 - lineage:
   - startswith: interface 1/1/32
   add_tags: override
-- lineage: 
+- lineage:
   - equals: ssh server vrf mgmt
   add_tags: override
 ```
-To validate switch config with overrides run 
+
+To validate switch config with overrides run
+
 ```bash
 To validate switch config with overrides run: `canu validate switch config --ip 192.168.1.1 --username USERNAME --password PASSWORD --generated SWITCH_CONFIG.cfg --override OVERRIDE.YAML`
 
@@ -911,14 +922,6 @@ There are several commands to help with the canu cache:
 ## Uninstallation
 
 `pip3 uninstall canu`
-
-# Road Map
-
-CANU is under active development, therefore things are changing on a daily basis. Expect commands to change and tests to fail while CANU trends towards stability.
-
-Currently CANU can check the firmware version of a single Aruba switch, or the firmware version of multiple Aruba switches on the network. CANU can also check the cabling of a single switch using LLDP.
-
-Future versions will allow CANU to check switch configurations and network wiring.
 
 # Testing
 

@@ -177,10 +177,10 @@ def config(
     folder,
     override,
 ):
-    """Generate the config of all Aruba switches (API v10.04) on the network using the SHCD.
+    """Generate the config of all switches (Aruba, Dell, or Mellanox) on the network using the SHCD.
 
     In order to generate network switch config, a valid SHCD must be passed in and system variables must be read in from either
-    CSI output or the SLS API.
+    an SLS output file or the SLS API.
 
     Use the `--folder FOLDERNAME` flag to output all the switch configs to a folder.
     \f

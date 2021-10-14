@@ -531,7 +531,7 @@ def test_validate_shcd_cabling_bad_password(switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert "check the username or password" in str(result.output)
+        assert "IP, username, or password" in str(result.output)
 
 
 def test_validate_shcd_cabling_missing_file():

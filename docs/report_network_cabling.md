@@ -1,6 +1,6 @@
 # Report Network Cabling
 
-Report the cabling of all Aruba switches (API v10.04) on the network by using LLDP.
+Report the cabling of all switches (Aruba, Dell, or Mellanox) on the network by using LLDP.
 
 To check out the LLDP neighbor status of switches and their neighboring devices on the network either pass in a comma separated list of IP addresses using the `--ips` option or pass in a file of IP addresses with one address per line using the `--ips-file` option.
 

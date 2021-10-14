@@ -1,6 +1,6 @@
 # Report Switch Cabling
 
-Report the cabling of an Aruba switch (API v10.04) on the network by using LLDP.
+Report the cabling of a switch (Aruba, Dell, or Mellanox) on the network by using LLDP.
 
 Sometimes when checking cabling using LLDP, the neighbor does not return any information except a MAC address. When that is the case, CANU looks up the MAC in the ARP table and displays the IP addresses and vlan information associated with the MAC.
 
