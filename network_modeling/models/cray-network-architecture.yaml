@@ -120,6 +120,11 @@ network_v2:
       connections:
         - name: "mountain_compute_leaf"
           speed: 10
+    - name: "pdu"
+      model: "pdu"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
   lookup_mapper:
     - lookup_name: ["mn"]
       shasta_name: "ncn-m"
@@ -169,6 +174,12 @@ network_v2:
     - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"
+    - lookup_name: 
+        - '^x\d+p\d+$'
+        - '^pdu\d+$'
+      shasta_name: "pdu"
+      architecture_type: "pdu"
+      regex: true
 network_v2_tds:
   name: "Version 2 TDS"
   description: "Aruba Hardware"
@@ -255,6 +266,11 @@ network_v2_tds:
       connections:
         - name: "mountain_compute_leaf"
           speed: 10
+    - name: "pdu"
+      model: "pdu"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
   lookup_mapper:
     - lookup_name:
         - "mn"
@@ -372,6 +388,11 @@ network_v1:
         - name: "river_bmc_leaf"
           speed: 1
           comment: "bmc"
+    - name: "pdu"
+      model: "pdu"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
   lookup_mapper:
     - lookup_name:
         - "mn"
@@ -428,3 +449,9 @@ network_v1:
     - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"
+    - lookup_name: 
+        - '^x\d+p\d+$'
+        - '^pdu\d+$'
+      shasta_name: "pdu"
+      architecture_type: "pdu"
+      regex: true

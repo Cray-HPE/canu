@@ -225,3 +225,12 @@ network_hardware:
     ports:
       - count: 2
         speed: 10
+  - name: "HPE G2 Mtrd/Swtd 3P 17.3kVA/C13 NA/J PDU"
+    vendor: "hpe"
+    model: "pdu"
+    type: "none"
+    deprecated: False
+    ports:
+      - count: 1
+        speed: 1        
+        slot: "bmc"
