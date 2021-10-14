@@ -48,8 +48,8 @@ interface vlan 1 ip address {{ variables.MTL_IP }} primary
 interface vlan 2 ip address {{ variables.NMN_IP }} primary
 interface vlan 4 ip address {{ variables.HMN_IP }} primary
 interface vlan 7 ip address {{ variables.CAN_IP_PRIMARY }} primary
-interface vlan 10 ip address {{ variables.SUN_IP }} primary
-interface vlan 4000 ip address {{ variables.MLAG_IP }} primary
+{#interface vlan 10 ip address {{ variables.SUN_IP }} primary
+interface vlan 4000 ip address {{ variables.MLAG_IP }} primary#}
 interface vlan 10 mtu 9216 
 interface vlan 4000 mtu 9216 
 ip load-sharing source-ip-port
@@ -99,15 +99,15 @@ interface vlan 10 magp 10
 interface vlan 1 magp 1 ip virtual-router address {{ variables.MTL_IP_GATEWAY }}
 interface vlan 2 magp 2 ip virtual-router address {{ variables.NMN_IP_GATEWAY }}
 interface vlan 4 magp 4 ip virtual-router address  {{ variables.HMN_IP_GATEWAY }}
-interface vlan 7 magp 7 ip virtual-router address {{ variables.CAN_IP_GATEWAY }}1
-interface vlan 10 magp 10 ip virtual-router address {{ variables.SUN_IP_GATEWAY }}
+interface vlan 7 magp 7 ip virtual-router address {{ variables.CAN_IP_GATEWAY }}
+{#interface vlan 10 magp 10 ip virtual-router address {{ variables.SUN_IP_GATEWAY }}#}
 interface vlan 1 magp 1 ip virtual-router mac-address 00:00:5E:00:01:01
 interface vlan 2 magp 2 ip virtual-router mac-address 00:00:5E:00:01:01
 interface vlan 4 magp 4 ip virtual-router mac-address 00:00:5E:00:01:01
 interface vlan 7 magp 7 ip virtual-router mac-address 00:00:5E:00:01:01
 interface vlan 10 magp 10 ip virtual-router mac-address 00:00:5E:00:01:01
 
-mlag-vip shandy-mlag-domain ip 192.168.255.242 /29 force
+mlag-vip mlag-domain ip 192.168.255.242 /29 force
 no mlag shutdown
 mlag system-mac 00:00:5E:00:01:5D
 interface port-channel 100 ipl 1

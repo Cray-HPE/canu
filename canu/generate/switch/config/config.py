@@ -534,9 +534,16 @@ def generate_switch_config(
     if node_shasta_name in ["sw-spine", "sw-leaf", "sw-cdu"]:
         # Get connections to switch pair
         pair_connections = get_pair_connections(cabling["nodes"], switch_name)
-        variables["VSX_KEEPALIVE"] = pair_connections[0]
-        variables["VSX_ISL_PORT1"] = pair_connections[1]
-        variables["VSX_ISL_PORT2"] = pair_connections[2]
+        length_connections = len(pair_connections)
+
+        if length_connections == 3:
+            variables["VSX_KEEPALIVE"] = pair_connections[0]
+            variables["VSX_ISL_PORT1"] = pair_connections[1]
+            variables["VSX_ISL_PORT2"] = pair_connections[2]
+        elif length_connections == 2:
+            variables["VSX_KEEPALIVE"] = "mgmt0"
+            variables["VSX_ISL_PORT1"] = pair_connections[0]
+            variables["VSX_ISL_PORT2"] = pair_connections[1]
 
     # get VLANs and IPs for CDU switches
     if "sw-cdu" in node_shasta_name:
