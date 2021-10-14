@@ -23,7 +23,6 @@
 import json
 from os import path
 from pathlib import Path
-import re
 
 from click import testing
 import requests
