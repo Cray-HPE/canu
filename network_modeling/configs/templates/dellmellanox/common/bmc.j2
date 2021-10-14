@@ -1,15 +1,15 @@
 {#- bmc #}
 {%- for node in cabling.nodes if node.slot == "bmc" %}
 interface ethernet{{ node.config.PORT }}
-    no shutdown
-    switchport access vlan 4
-    mtu 9216
-    description {{ node.config.DESCRIPTION }}
-    flowcontrol receive on
-    flowcontrol transmit off
-    spanning-tree bpduguard enable
-    spanning-tree port type edge
-
+  description {{ node.config.DESCRIPTION }}
+  no shutdown
+  switchport access vlan 4
+  mtu 9216
+  flowcontrol receive off
+  flowcontrol transmit off
+  spanning-tree bpduguard enable
+  spanning-tree port type edge
+!
 {%- endfor %}
 {#- end bmc #}
 

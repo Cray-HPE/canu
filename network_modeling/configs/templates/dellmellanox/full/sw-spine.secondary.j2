@@ -11,7 +11,7 @@ ntp server {{ variables.NCN_W001 }}
 ntp server {{ variables.NCN_W002 }}
 ntp server {{ variables.NCN_W003 }}
 
-{%- include 'dellmellanox/common/acl.j2' %}
+{%- include 'dellmellanox/common/acl-mellanox.j2' %}
 
 protocol mlag
    
