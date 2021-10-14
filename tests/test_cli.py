@@ -89,9 +89,7 @@ def test_cli_init_sls_file_missing():
             ],
         )
         assert result.exit_code == 2
-        assert "Error: Invalid value for '--sls-file':" in str(
-            result.output,
-        )
+        assert "Error: Invalid value for '--sls-file':" in str(result.output)
 
 
 def test_cli_init_sls_invalid_json():

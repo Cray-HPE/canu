@@ -1,6 +1,6 @@
 {#- cmm #}
 {%- for node in cabling.nodes if node.subtype == "cmm" %}
-interface lag {{ node.config.LAG_NUMBER }} static
+interface lag {{ node.config.LAG_NUMBER }} multi-chassis static
     no shutdown
     description {{ node.config.DESCRIPTION }}
     no routing
