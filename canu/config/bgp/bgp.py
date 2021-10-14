@@ -396,6 +396,7 @@ def config_bgp(ip, credentials, prefix, ncn, asn, ips):
                 asn,
                 ips,
             )
+
         elif vendor == "dell":
             click.secho(
                 "BGP peering against Dell switch not allowed by CSM architecture.",
