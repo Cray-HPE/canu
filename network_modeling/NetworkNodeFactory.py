@@ -218,29 +218,29 @@ class NetworkNodeFactory:
         for lookup in lookup_mapper:
             lookup_name = lookup["architecture_type"]
             found = False
-            print(lookup["regex"])
-            if lookup["regex"] == True:
-                for component in components:
-                  if not bool(re.search(component["name"], lookup_name)):
-                      continue
-                  found = True
-                  break
-            else:
-                for component in components:
-                  if component["name"] != lookup_name:
-                      continue
-                  found = True
-                  break
-            if not found:
-                raise Exception(
-                    click.secho(
-                        f"Device {lookup_name} in lookup_mapper not found in architecture components",
-                        fg="red",
-                    ),
-                )
-            log.debug(
-                f"Validated lookup_mapper device {lookup_name} in architecture definition",
-            )
+            try:
+              if lookup["regex"] == True:
+                  print('regex detected')
+
+              for component in components:
+                if component["name"] != lookup_name:
+                    continue
+                found = True
+                break
+              
+              if not found:
+                  raise Exception(
+                      click.secho(
+                          f"Device {lookup_name} in lookup_mapper not found in architecture components",
+                          fg="red",
+                      ),
+                  )
+              log.debug(
+                  f"Validated lookup_mapper device {lookup_name} in architecture definition",
+              )
+            except KeyError:
+                # it's ok if there's no regex
+                pass
 
     def __warn_architecture_deprecation(self):
         architecture_data = self.__architecture_data

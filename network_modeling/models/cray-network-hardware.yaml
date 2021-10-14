@@ -232,5 +232,5 @@ network_hardware:
     deprecated: False
     ports:
       - count: 1
-        speed: 1
+        speed: 1        
         slot: "bmc"
