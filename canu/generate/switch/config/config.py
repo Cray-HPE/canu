@@ -720,7 +720,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "destination_port": destination_port,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
-                    "PORT": f"1/1/{source_port}",
+                    "PORT": f"{source_port}",
                     "LAG_NUMBER": primary_port,
                 },
             }
@@ -739,7 +739,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "destination_port": destination_port,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
-                    "PORT": f"1/1/{source_port}",
+                    "PORT": f"{source_port}",
                     "LAG_NUMBER": primary_port_ncn_s,
                 },
             }
@@ -751,7 +751,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "destination_port": destination_port,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
-                    "PORT": f"1/1/{source_port}",
+                    "PORT": f"{source_port}",
                     "LAG_NUMBER": primary_port,
                 },
             }
@@ -767,7 +767,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "slot": None,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
-                    "INTERFACE_NUMBER": f"1/1/{source_port}",
+                    "INTERFACE_NUMBER": f"{source_port}",
                     "NATIVE_VLAN": hmn_mtn_vlan,
                 },
             }
@@ -787,7 +787,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "slot": None,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
-                    "PORT": f"1/1/{source_port}",
+                    "PORT": f"{source_port}",
                     "LAG_NUMBER": primary_port,
                     "NATIVE_VLAN": nmn_mtn_vlan,
                     "TAGGED_VLAN": hmn_mtn_vlan,
@@ -801,7 +801,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "destination_port": destination_port,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
-                    "PORT": f"1/1/{source_port}",
+                    "PORT": f"{source_port}",
                     "LAG_NUMBER": primary_port,
                 },
             }
@@ -830,7 +830,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "LAG_NUMBER": lag_number,
-                    "PORT": f"1/1/{source_port}",
+                    "PORT": f"{source_port}",
                 },
             }
             nodes.append(new_node)
@@ -851,7 +851,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "LAG_NUMBER": lag_number,
-                    "PORT": f"1/1/{source_port}",
+                    "PORT": f"{source_port}",
                 },
             }
             nodes.append(new_node)
@@ -876,7 +876,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "LAG_NUMBER": lag_number,
-                    "PORT": f"1/1/{source_port}",
+                    "PORT": f"{source_port}",
                 },
             }
             nodes.append(new_node)
@@ -896,7 +896,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "LAG_NUMBER": lag_number,
-                    "PORT": f"1/1/{source_port}",
+                    "PORT": f"{source_port}",
                 },
             }
             nodes.append(new_node)

@@ -8,7 +8,7 @@ interface lag {{ node.config.LAG_NUMBER }} multi-chassis static
     vlan trunk allowed {{ node.config.NATIVE_VLAN}},{{ node.config.TAGGED_VLAN }}
     spanning-tree root-guard
 
-interface {{ node.config.PORT }}
+interface 1/1/{{ node.config.PORT }}
     no shutdown
     mtu 9198
     description {{ node.config.DESCRIPTION }}

@@ -43,9 +43,9 @@ spanning-tree port type edge default
 spanning-tree mst revision 1
 spanning-tree mst name MST0
 
-{% include 'dellmellanox/full/leaf-bmc-to-leaf.lag.j2' %}
+{% include 'dellmellanox/full/leaf-bmc-to-spine.lag.j2' %}
 {% include 'dellmellanox/common/bmc.j2' %}
-
+{% include 'dellmellanox/common/uan-nmn.j2' %}
 router ospf 1
  router-id {{ variables.LOOPBACK_IP }}
 

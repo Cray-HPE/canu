@@ -1,4 +1,4 @@
-{#- leaf-bmc-to-leaf #}
+{#- leaf-bmc-to-spine #}
 {%- set ns = namespace(lag_displayed=false) %}
 {%- for node in cabling.nodes if node.subtype == "spine" %}
 {%- if ns.lag_displayed == false %}
@@ -15,7 +15,7 @@ interface port-channel100
 
 {%- for node in cabling.nodes if node.subtype == "spine"%}
 
-interface ethernet{{ node.config.PORT }}
+interface ethernet 1/1/{{ node.config.PORT }}
  no shutdown
  channel-group 100 mode active
  no switchport
@@ -25,4 +25,4 @@ interface ethernet{{ node.config.PORT }}
  flowcontrol transmit off
 
 {%- endfor %}
-{#- end leaf-bmc-to-leaf #}
+{#- end leaf-bmc-to-spine #}
