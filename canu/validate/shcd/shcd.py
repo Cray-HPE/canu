@@ -32,6 +32,7 @@ import click
 from click_help_colors import HelpColorsCommand
 import jsonschema
 import natsort
+from shcd.HmnRow import HmnRow
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from network_modeling.NetworkPort import NetworkPort
 from network_modeling.NodeLocation import NodeLocation
@@ -461,21 +462,11 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             )
             sys.exit(1)
 
-        # Process Headers
-        required_header = [
-            "Source",
-            "Rack",
-            "Location",
-            "Slot",
-            "Port",
-            "Destination",
-            "Rack",
-            "Location",
-            "Port",
-        ]
-
+        # Check that the required headers exist
         header = block[0]
-        if len(header) == 0 or len(header) < len(required_header):
+        # Instansiate it as a new HmnRow class
+        hmn_headers = HmnRow(row=header)
+        if len(header) == 0 or len(header) < len(hmn_headers.required_header):
             log.fatal("")
             click.secho(
                 f"Bad range of cells entered for tab {sheet}:{range_start}:{range_end}.",
@@ -484,14 +475,14 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             click.secho(
                 "Not enough columns exist.\n"
                 "Columns must exist in the following order, but may have other columns in between:\n"
-                f"{required_header}\n"
+                f"{hmn_row.required_header}\n"
                 "Ensure that the upper left corner (Labeled 'Source'), and the lower right corner of the table is entered.",
                 fg="red",
             )
             sys.exit(1)
 
         log.info(
-            f"Expecting header with {len(required_header):>2} columns: {required_header}",
+            f"Expecting header with {len(hmn_headers.required_header):>2} columns: {hmn_headers.required_header}",
         )
         log.info(
             f"Found header with     {len(header):>2} columns: {[x.value for x in header]}",
@@ -499,10 +490,12 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
         log.info("Mapping required columns to actual.")
 
         start_index = 0
-        for required_index in range(len(required_header)):
+        # loop through the required headers that we need
+        for required_index in range(len(hmn_headers.required_header)):
             found = None
+            # for each column in the spreadsheet
             for current_index in range(start_index, len(header)):
-                if header[current_index].value == required_header[required_index]:
+                if header[current_index].value == hmn_headers.required_header[required_index]:
                     found = current_index
                     break
                 else:
@@ -510,45 +503,101 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     continue
             if found is not None:
                 log.info(
-                    f"Required header column {required_header[required_index]} "
+                    f"Required header column {hmn_headers.required_header[required_index]} "
                     f"found in spreadsheet cell {header[current_index].coordinate}",
                 )
-                required_header[required_index] = found
+                # Map the correct index
+                hmn_headers.required_header[required_index] = found
                 start_index = current_index + 1
                 found = None
                 continue
             else:
                 log.error("")
                 click.secho(
-                    f"On tab {sheet}, header column {required_header[required_index]} not found.",
+                    f"On tab {sheet}, header column {hmn_headers.required_header[required_index]} not found.",
                     fg="red",
                 )
                 log.fatal("")
                 click.secho(
                     f"On tab {sheet}, the header is formatted incorrectly.\n"
                     "Columns must exist in the following order, but may have other columns in between:\n"
-                    f"{required_header}",
+                    f"{hmn_headers.required_header}",
                     fg="red",
                 )
                 sys.exit(1)
 
-        # Process Data
-        block = block[1:]
-        for row in block:
+        # Process the rest of the remaining data (sans headers)
+        hmn_data = block[1:]
+        for row in hmn_data:
+            # instantiate a hmn row so we can access its attributes
+            hmn_row = HmnRow(row=row) 
+
+            # The current row 
+            current_row = hmn_row.row
+
+            # Override the default index and set it to the mapped value calculated earlier
+            # This is a little crazy until more development work is done, but this code
+            # takes the default indicies 0-8 found in the class, and overrides them
+            # by setting them equal to the required header indices mapped out in the earlier
+            # for loop 
+            log.debug(f'Using these indices as the map: {hmn_headers.required_header}')
+            log.debug(
+                f'Class default row selections: \n{hmn_row.source_name},' 
+                f'\n{hmn_row.source_rack},'
+                f'\n{hmn_row.source_loc},'
+                f'\n{hmn_row.source_slot},'
+                f'\n{hmn_row.source_port},'
+                f'\n{hmn_row.dest},'
+                f'\n{hmn_row.dest_rack},'
+                f'\n{hmn_row.dest_loc},'
+                f'\n{hmn_row.dest_port}'
+              )
+            hmn_row.source_name = hmn_row.list[hmn_headers.required_header[0]]
+            hmn_row.source_rack = hmn_row.list[hmn_headers.required_header[1]]
+            hmn_row.source_loc = hmn_row.list[hmn_headers.required_header[2]]
+            hmn_row.source_slot = hmn_row.list[hmn_headers.required_header[3]]
+            hmn_row.source_port = hmn_row.list[hmn_headers.required_header[4]]
+            hmn_row.dest = hmn_row.list[hmn_headers.required_header[5]]
+            hmn_row.dest_rack = hmn_row.list[hmn_headers.required_header[6]]
+            hmn_row.dest_loc = hmn_row.list[hmn_headers.required_header[7]]
+            hmn_row.dest_port = hmn_row.list[hmn_headers.required_header[8]]
+            log.debug(
+                f'Class mapped row selections:\n{hmn_row.source_name},' 
+                f'\n{hmn_row.source_rack},'
+                f'\n{hmn_row.source_loc},'
+                f'\n{hmn_row.source_slot},'
+                f'\n{hmn_row.source_port},'
+                f'\n{hmn_row.dest},'
+                f'\n{hmn_row.dest_rack},'
+                f'\n{hmn_row.dest_loc},'
+                f'\n{hmn_row.dest_port}'
+              )
             # Cable source
             try:
-                current_row = row[required_header[0]].row
-                log.debug(f"---- Working in sheet {sheet} on row {current_row} ----")
-                src_name = row[required_header[0]].value.strip()
-                tmp_slot = row[required_header[3]]
-                tmp_port = row[required_header[4]]
+                log.info(f"---- Working in sheet {sheet} on row {current_row} ----")
+
+                src_name = hmn_row.source_name.value.strip()
+                log.info(f"---- Source: {src_name} ({hmn_row.source_name.coordinate})")
+
+                tmp_slot = hmn_row.source_slot
+                log.info(f"---- Slot: {tmp_slot.value} ({hmn_row.source_slot.coordinate})")
+
+                tmp_port = hmn_row.source_port
+                log.info(f"---- Port: {tmp_port.value} ({hmn_row.source_port.coordinate})")
+
                 src_rack = None
-                if row[required_header[1]].value:
-                    src_rack = row[required_header[1]].value.strip()
+                if hmn_row.source_rack.value:
+                    src_rack = hmn_row.source_rack.value.strip()
+                log.info(f"---- Rack: {src_rack} ({hmn_row.source_rack.coordinate})")
+
                 src_elevation = None
-                if row[required_header[2]].value:
-                    src_elevation = row[required_header[2]].value.strip()
+                if hmn_row.source_loc.value:
+                    src_elevation = hmn_row.source_loc.value.strip()
+                log.info(f"---- Elevation: {src_elevation} ({hmn_row.source_loc.coordinate})")
+
                 src_location = NodeLocation(src_rack, src_elevation)
+                log.info(f"---- Source Location: {src_location.serialize()}")
+
             except AttributeError:
                 log.fatal("")
                 click.secho(
@@ -619,20 +668,24 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
 
             # Cable destination
             try:
-                dst_name = row[required_header[5]].value.strip()
+                dst_name = hmn_row.dest.value.strip()
                 dst_slot = None  # dst is always a switch
                 dst_port = validate_shcd_port_data(
-                    row[required_header[8]],
+                    hmn_row.dest_port,
                     sheet,
                     warnings,
                 )
                 dst_rack = None
-                if row[required_header[6]].value:
-                    dst_rack = row[required_header[6]].value.strip()
-                dst_elevation = None
-                if row[required_header[7]].value:
-                    dst_elevation = row[required_header[7]].value.strip()
+                if hmn_row.dest_rack.value:
+                    dst_rack = hmn_row.dest_rack.value.strip()
+                log.info(f"---- Dest Rack: {dst_rack} ({hmn_row.dest_rack.coordinate})")
+
+                if hmn_row.dest_loc.value:
+                   dst_elevation = hmn_row.dest_loc.value.strip()
+                log.info(f"---- Dest Elevation: {dst_elevation} ({hmn_row.dest_loc.coordinate})")
+
                 dst_location = NodeLocation(dst_rack, dst_elevation)
+                log.info(f"---- Dest Location: {src_location.serialize()}")
             except AttributeError:
                 log.fatal("")
                 click.secho(
