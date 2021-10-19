@@ -1,18 +1,18 @@
 {#- mtn_nmn_vlan #}
 {%- for cabinet in variables.NMN_MTN_VLANS %}
-vlan {{ cabinet.VlanID }}
-    name {{ cabinet.Name }}
-    apply access-list ip nmn-hmn in
-    apply access-list ip nmn-hmn out
-
-interface vlan {{ cabinet.VlanID }}
-    ip mtu 9198
-    ip address {{ cabinet.IP }}/{{ cabinet.PREFIX_LENGTH }}
-    active-gateway ip mac 12:00:00:00:73:00
-    active-gateway ip {{ cabinet.Gateway }}
-    ip helper-address 10.92.100.222
-    ip ospf 1 area 0.0.0.0
-    ip ospf passive
+interface vlan{{ cabinet.VlanID }}
+ mode L3
+ description {{ cabinet.Name }}
+ no shutdown
+ mtu 9216
+ ip address {{ cabinet.IP }}/{{ cabinet.PREFIX_LENGTH }}
+ ip ospf 1 area 0.0.0.0
+ ip ospf passive
+ ip helper-address 10.92.100.222
+{% set vrrp_id = cabinet.VlanID|string %}
+ !
+ vrrp-group {{ vrrp_id[:1] }}{{ vrrp_id[-1:] }}
+  virtual-address {{ cabinet.Gateway }}
 
 {%- endfor %}
 {#- end mtn_nmn_vlan #}

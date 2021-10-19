@@ -37,7 +37,7 @@ test_file = path.join(test_file_directory, "data", test_file_name)
 override_file_name = "override.yaml"
 override_file = path.join(test_file_directory, "data", override_file_name)
 architecture = "full"
-tabs = "INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
+tabs = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners = "J14,T44,J14,T48,J14,T28,J14,T27"
 sls_file = "sls_file.json"
 shasta = "1.4"
@@ -48,7 +48,7 @@ sls_address = "api-gw-service-nmn.local"
 test_file_name_tds = "TDS_Architecture_Golden_Config_0.0.6.xlsx"
 test_file_tds = path.join(test_file_directory, "data", test_file_name_tds)
 architecture_tds = "TDS"
-tabs_tds = "INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
+tabs_tds = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners_tds = "J14,T30,J14,T48,J14,T28,J14,T27"
 
 runner = testing.CliRunner()
@@ -4853,7 +4853,7 @@ def test_switch_config_missing_tabs():
                 "--sls-file",
                 sls_file,
             ],
-            input="INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES\n",
+            input="SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES\n",
         )
         assert result.exit_code == 0
         assert "hostname sw-spine-001" in str(result.output)

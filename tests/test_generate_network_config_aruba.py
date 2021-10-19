@@ -29,7 +29,7 @@ import requests
 import responses
 
 from canu.cli import cli
-from .test_generate_switch_config import sls_input, sls_networks
+from .test_generate_switch_config_aruba import sls_input, sls_networks
 
 test_file_directory = Path(__file__).resolve().parent
 
@@ -38,7 +38,7 @@ test_file = path.join(test_file_directory, "data", test_file_name)
 override_file_name = "override.yaml"
 override_file = path.join(test_file_directory, "data", override_file_name)
 architecture = "full"
-tabs = "INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
+tabs = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners = "J14,T44,J14,T48,J14,T28,J14,T27"
 sls_file = "sls_file.json"
 shasta = "1.4"

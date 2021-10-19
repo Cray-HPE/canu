@@ -1,18 +1,24 @@
 {#- cmm #}
 {%- for node in cabling.nodes if node.subtype == "cmm" %}
-interface lag {{ node.config.LAG_NUMBER }} multi-chassis static
-    no shutdown
-    description {{ node.config.DESCRIPTION }}
-    no routing
-    vlan trunk native {{ node.config.NATIVE_VLAN }}
-    vlan trunk allowed {{ node.config.NATIVE_VLAN}},{{ node.config.TAGGED_VLAN }}
-    spanning-tree root-guard
 
-interface {{ node.config.PORT }}
-    no shutdown
-    mtu 9198
-    description {{ node.config.DESCRIPTION }}
-    lag {{ node.config.LAG_NUMBER }}
+interface port-channel{{ node.config.LAG_NUMBER }}
+ description {{ node.config.DESCRIPTION }}
+ no shutdown
+ switchport mode trunk
+ switchport access vlan {{ node.config.NATIVE_VLAN }}
+ switchport trunk allowed vlan {{ node.config.TAGGED_VLAN }}
+ mtu 9216
+ vlt-port-channel {{ node.config.LAG_NUMBER }}
+ spanning-tree guard root
+
+interface ethernet1/1/{{ node.config.PORT }}
+ description {{ node.config.DESCRIPTION }}
+ no shutdown
+ channel-group {{ node.config.LAG_NUMBER }}
+ no switchport
+ mtu 9216
+ flowcontrol receive on
+ flowcontrol transmit on
 
 {%- endfor %}
 {#- end cmm #}

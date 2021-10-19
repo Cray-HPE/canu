@@ -3,22 +3,27 @@
 {%- for node in cabling.nodes if node.subtype == "spine" %}
 {%- if ns.lag_displayed == false %}
 {%- set ns.lag_displayed = true %}
-interface lag 255 multi-chassis
-    no shutdown
-    description cdu_to_spines_lag
-    no routing
-    vlan trunk native 1
-    vlan trunk allowed 1-2,4
-    lacp mode active
+
+interface port-channel100
+ description {{ node.config.DESCRIPTION }}
+ no shutdown
+ switchport mode trunk
+ switchport access vlan 1
+ switchport trunk allowed vlan 2,4
+ mtu 9216
+ vlt-port-channel 100
+ !
 {%- endif %}
 {%- endfor %}
 
 {%- for node in cabling.nodes if node.subtype == "spine"%}
-
-interface {{ node.config.PORT }}
-    no shutdown
-    mtu 9198
-    description {{ node.config.DESCRIPTION }}
-    lag 255
+interface ethernet1/1/{{ node.config.PORT }}
+ no shutdown
+ channel-group 100 mode active
+ no switchport
+ mtu 9216
+ flowcontrol receive off
+ flowcontrol transmit off
+!
 {%- endfor %}
 {#- end cdu-to-spine.lag #}

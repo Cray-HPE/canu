@@ -38,10 +38,8 @@ interface mgmt1/1/1
  ip address dhcp
  ipv6 address autoconfig
 
-spanning-tree mode mst
-spanning-tree port type edge default
-spanning-tree mst revision 1
-spanning-tree mst name MST0
+spanning-tree mst configuration
+ instance 1 vlan 1-4093
 
 {% include 'dellmellanox/full/leaf-bmc-to-spine.lag.j2' %}
 {% include 'dellmellanox/common/bmc.j2' %}
