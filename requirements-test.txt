@@ -24,6 +24,7 @@ flake8-polyfill==1.0.2
 flake8-quotes==3.3.0
 flake8-rst-docstrings==0.2.3
 flake8-string-format==0.3.0
+mac-vendor-lookup==0.1.11
 natsort==7.1.1
 nox==2021.10.1
 openpyxl==3.0.9
