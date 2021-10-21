@@ -27,13 +27,13 @@ from urllib.parse import unquote
 
 import click
 from click_help_colors import HelpColorsCommand
-from mac_vendor_lookup import MacLookup
 import natsort
 from netmiko import ssh_exception
 import requests
 import urllib3
 
 from canu.utils.cache import cache_switch
+from canu.utils.mac import find_mac
 from canu.utils.ssh import netmiko_command, netmiko_commands
 from canu.utils.vendor import switch_vendor
 
@@ -235,7 +235,7 @@ def get_lldp_aruba(ip, credentials, return_error=False):
             for _mac, lldp_info in port.items():
                 neighbor_info = lldp_info["neighbor_info"]
                 if neighbor_info["chassis_description"] == "":
-                    description = MacLookup().lookup(lldp_info["mac_addr"])
+                    description = find_mac(lldp_info["mac_addr"])
                 else:
                     description = neighbor_info["chassis_description"]
                 lldp_neighbor = {
@@ -273,7 +273,7 @@ def get_lldp_aruba(ip, credentials, return_error=False):
                     {
                         "chassis_id": "",
                         "mac_addr": mac,
-                        "chassis_description": MacLookup().lookup(mac),
+                        "chassis_description": find_mac(mac),
                         "port_description": "",
                         "chassis_name": "",
                         "port_id": mac,
@@ -348,7 +348,7 @@ def get_lldp_dell(ip, credentials, return_error):
                 if port_description == "Not Advertised":
                     port_description = ""
                 if port_description == "":
-                    port_description = MacLookup().lookup(
+                    port_description = find_mac(
                         neighbors_dict[port]["mac_addr"],
                     )
                 neighbors_dict[port]["port_description"] = port_description
@@ -409,7 +409,7 @@ def get_lldp_dell(ip, credentials, return_error):
                     {
                         "chassis_id": "",
                         "mac_addr": mac,
-                        "chassis_description": MacLookup().lookup(mac),
+                        "chassis_description": find_mac(mac),
                         "port_description": "",
                         "chassis_name": "",
                         "port_id": mac,
@@ -663,7 +663,7 @@ def get_lldp_mellanox(ip, credentials, return_error):
                         {
                             "chassis_id": "",
                             "mac_addr": mac,
-                            "chassis_description": MacLookup().lookup(mac),
+                            "chassis_description": find_mac(mac),
                             "port_description": "",
                             "chassis_name": "",
                             "port_id": mac,
