@@ -383,13 +383,14 @@ def config(
         "worker",
     }
     config_devices = set()
+    all_unknown = []
     for node in shcd_node_list:
         switch_name = node.common_name()
         node_shasta_name = get_shasta_name(switch_name, factory.lookup_mapper())
 
         if node_shasta_name in ["sw-cdu", "sw-leaf-bmc", "sw-leaf", "sw-spine"]:
 
-            switch_config, devices = generate_switch_config(
+            switch_config, devices, unknown = generate_switch_config(
                 shcd_node_list,
                 factory,
                 switch_name,
@@ -397,6 +398,7 @@ def config(
                 template_folder,
                 override,
             )
+            all_unknown.extend(unknown)
             config_devices.update(devices)
             with open(f"{folder}/{switch_name}.cfg", "w+") as f:
                 f.write(switch_config)
@@ -405,8 +407,8 @@ def config(
             else:
                 click.secho(f"{switch_name} Config Generated", fg="bright_white")
     missing_devices = all_devices.difference(config_devices)
+    dash = "-" * 60
     if len(missing_devices) > 0:
-        dash = "-" * 60
         click.secho("\nWarning", fg="red")
 
         click.secho(
@@ -422,6 +424,20 @@ def config(
         )
         click.secho(dash)
         for x in missing_devices:
+            click.secho(x, fg="bright_white")
+
+    if len(all_unknown) > 0:
+        click.secho("\nWarning", fg="red")
+
+        click.secho(
+            "\nThe following devices were discovered in the input data, but the CANU model cannot determine "
+            + "the type and generate a configuration.\nApplying this configuration without considering these "
+            + "devices will likely result in loss of contact with these devices."
+            + "\nEnsure valid input, submit a bug to CANU and manually add these devices to the configuration.",
+            fg="red",
+        )
+        click.secho(dash)
+        for x in all_unknown:
             click.secho(x, fg="bright_white")
 
     return
