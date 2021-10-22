@@ -22,7 +22,7 @@ In order to generate switch config, a valid SHCD must be passed in and system va
 
 #### SHCD Input
 
-- The `--shasta / -s` flag is used to set the Shasta version of the system.
+- The `--csm` flag is used to set the CSM version of the system.
 - The `--architecture / -a` flag is used to set the architecture of the system, either **TDS**, or **Full**.
 - Use the `--tabs` flag to select which tabs on the spreadsheet will be included.
 - The `--corners` flag is used to input the upper left and lower right corners of the table on each tab of the worksheet. The table should contain the 11 headers: **Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port**. If the corners are not specified, you will be prompted to enter them for each tab.
@@ -33,10 +33,10 @@ To generate network config, a folder must also be passed in using the `--folder 
 
 ### 1. Generate network config from SLS API
 
-To generate network config run: `canu generate network config -s 1.5 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --auth_token TOKEN_FILE --folder SWITCH_CONFIG`
+To generate network config run: `canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --auth_token TOKEN_FILE --folder SWITCH_CONFIG`
 
 ```bash
-$ canu generate network config -s 1.5 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --auth_token TOKEN_FILE --folder SWITCH_CONFIG
+$ canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --auth_token TOKEN_FILE --folder SWITCH_CONFIG
 
 sw-spine-001 Config Generated
 sw-spine-002 Config Generated
@@ -52,10 +52,10 @@ sw-leaf-bmc-001 Config Generated
 
 ### 2. Generate network config from CSI
 
-To generate network config run: `canu generate network config -s 1.5 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --sls-file SLS_FILE --folder SWITCH_CONFIG`
+To generate network config run: `canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --sls-file SLS_FILE --folder SWITCH_CONFIG`
 
 ```bash
-$ canu generate network config -s 1.5 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder SWITCH_CONFIG
+$ canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder SWITCH_CONFIG
 
 sw-spine-001 Config Generated
 sw-spine-002 Config Generated
@@ -73,8 +73,8 @@ sw-leaf-bmc-001 Config Generated
 
 | Option                | Description                                                                |
 | --------------------- | -------------------------------------------------------------------------- |
-| `-s / --shasta`       | Shasta version                                                             |
-| `-a / --architecture` | Shasta architecture ("Full", or "TDS")                                     |
+| `--csm`               | CSM version                                                                |
+| `-a / --architecture` | CSM architecture ("Full", or "TDS")                                        |
 | `--shcd`              | SHCD File                                                                  |
 | `--tabs`              | The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.         |
 | `--corners`           | The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'. |

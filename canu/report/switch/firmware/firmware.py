@@ -54,11 +54,11 @@ else:
 
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
-# Get Shasta versions from canu.yaml
+# Get CSM versions from canu.yaml
 with open(canu_config_file, "r") as config_file:
     canu_config = yaml.load(config_file)
 
-shasta_options = canu_config["shasta_versions"]
+csm_options = canu_config["csm_versions"]
 
 
 # To disable warnings about unsecured HTTPS requests
@@ -71,11 +71,10 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     help_options_color="blue",
 )
 @click.option(
-    "--shasta",
-    "-s",
-    type=click.Choice(shasta_options),
-    help="Shasta network version",
-    prompt="Shasta network version",
+    "--csm",
+    type=click.Choice(csm_options),
+    help="CSM network version",
+    prompt="CSM network version",
     required=True,
     show_choices=True,
 )
@@ -97,7 +96,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     default="-",
 )
 @click.pass_context
-def firmware(ctx, shasta, ip, username, password, json_, verbose, out):
+def firmware(ctx, csm, ip, username, password, json_, verbose, out):
     """Report the firmware of an Aruba switch (API v10.04) on the network.
 
     There are two different statuses that might be indicated.\n
@@ -109,7 +108,7 @@ def firmware(ctx, shasta, ip, username, password, json_, verbose, out):
 
     Args:
         ctx: CANU context settings
-        shasta: Shasta version
+        csm: CSM version
         ip: Switch IPv4 address
         username: Switch username
         password: Switch password
@@ -152,7 +151,7 @@ def firmware(ctx, shasta, ip, username, password, json_, verbose, out):
         return
 
     # Get the firmware range from the canu.yaml file and the switch info
-    firmware_range = config["shasta"][shasta][vendor][switch_info["platform_name"]]
+    firmware_range = config["csm"][csm][vendor][switch_info["platform_name"]]
 
     if switch_firmware["current_version"] in firmware_range:
         match_emoji = emoji.emojize(":canoe:")

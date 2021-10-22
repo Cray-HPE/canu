@@ -89,7 +89,7 @@ log = logging.getLogger("validate_shcd")
     "--architecture",
     "-a",
     type=click.Choice(["Full", "TDS", "V1"], case_sensitive=False),
-    help="Shasta architecture",
+    help="CSM architecture",
     required=True,
     prompt="Architecture type",
 )
@@ -127,7 +127,7 @@ def shcd(ctx, architecture, shcd, tabs, corners, out, log_):
 
     Args:
         ctx: CANU context settings
-        architecture: Shasta architecture
+        architecture: CSM architecture
         shcd: SHCD file
         tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
         corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.

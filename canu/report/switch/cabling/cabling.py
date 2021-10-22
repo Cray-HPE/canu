@@ -436,7 +436,7 @@ def get_lldp_dell(ip, credentials, return_error):
 
 
 def get_lldp_mellanox(ip, credentials, return_error):
-    """Get lldp of a Shasta switch using the API.
+    """Get lldp of a Mellanox switch using the API.
 
     Args:
         ip: IPv4 address of the switch

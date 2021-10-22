@@ -98,11 +98,11 @@ env = Environment(
     undefined=StrictUndefined,
 )
 
-# Get Shasta versions from canu.yaml
+# Get CSM versions from canu.yaml
 with open(canu_config_file, "r") as file:
     canu_config = yaml.load(file)
 
-shasta_options = canu_config["shasta_versions"]
+csm_options = canu_config["csm_versions"]
 
 
 @click.command(
@@ -111,11 +111,10 @@ shasta_options = canu_config["shasta_versions"]
     help_options_color="blue",
 )
 @click.option(
-    "--shasta",
-    "-s",
-    type=click.Choice(shasta_options),
-    help="Shasta network version",
-    prompt="Shasta network version",
+    "--csm",
+    type=click.Choice(csm_options),
+    help="CSM network version",
+    prompt="CSM network version",
     required=True,
     show_choices=True,
 )
@@ -123,7 +122,7 @@ shasta_options = canu_config["shasta_versions"]
     "--architecture",
     "-a",
     type=click.Choice(["Full", "TDS", "V1"], case_sensitive=False),
-    help="Shasta architecture",
+    help="CSM architecture",
     required=True,
     prompt="Architecture type",
 )
@@ -166,7 +165,7 @@ shasta_options = canu_config["shasta_versions"]
 @click.pass_context
 def config(
     ctx,
-    shasta,
+    csm,
     architecture,
     shcd,
     tabs,
@@ -188,8 +187,8 @@ def config(
 
     Args:
         ctx: CANU context settings
-        shasta: Shasta version
-        architecture: Shasta architecture
+        csm: CSM version
+        architecture: CSM architecture
         shcd: SHCD file
         tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
         corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
@@ -352,9 +351,9 @@ def config(
             )
     sls_variables = parse_sls_for_config(sls_json)
 
-    # For versions of Shasta < 1.6, the SLS Hostnames need to be renamed
-    if shasta:
-        if float(shasta) < 1.6:
+    # For versions of csm < 1.2, the SLS Hostnames need to be renamed
+    if csm:
+        if float(csm) < 1.2:
             sls_variables = rename_sls_hostnames(sls_variables)
 
     if override:

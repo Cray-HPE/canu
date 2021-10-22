@@ -72,7 +72,7 @@ from canu.utils.vendor import switch_vendor
     "--architecture",
     "-a",
     type=click.Choice(["Full", "TDS", "V1"], case_sensitive=False),
-    help="Shasta architecture",
+    help="CSM architecture",
     required=True,
     prompt="Architecture type",
 )
@@ -94,7 +94,7 @@ def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
         username: Switch username
         password: Switch password
         asn: Switch ASN
-        architecture: Shasta architecture
+        architecture: CSM architecture
         verbose: Bool indicating verbose output
     """
     if architecture.lower() == "full":
