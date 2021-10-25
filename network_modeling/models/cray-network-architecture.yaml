@@ -332,6 +332,15 @@ network_v1:
       connections:
         - name: "spine"
           speed: 100
+          number: 2
+        - name: "mountain_compute_leaf"
+          speed: 100
+          number: 4
+          comment: "isl"
+        - name: "mountain_compute_leaf"
+          speed: 1
+          number: 1
+          comment: "keepalive"
     - name: "river_ncn_node_2_port_gigabyte"
       model: "river_ncn_node_2_port_gigabyte"
       connections:

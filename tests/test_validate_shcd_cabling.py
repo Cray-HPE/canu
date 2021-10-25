@@ -100,7 +100,6 @@ def test_validate_shcd_cabling(switch_vendor):
                 "DEBUG",
             ],
         )
-        print(result.output)
         assert result.exit_code == 0
         # sw-spine-001:  Found in SHCD, but missing network connections:
         assert (
@@ -532,7 +531,7 @@ def test_validate_shcd_cabling_bad_password(switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert "check the username or password" in str(result.output)
+        assert "IP, username, or password" in str(result.output)
 
 
 def test_validate_shcd_cabling_missing_file():

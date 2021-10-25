@@ -1,0 +1,38 @@
+{#- uan #}
+{%- for node in cabling.nodes if node.subtype == "uan" %}
+{%- if node.destination_port == 1%}
+interface 1/1/{{ node.config.PORT }}
+{%- if node.slot == 'ocp' %}
+    no shutdown
+{%- else %}
+
+{%- endif %}
+    mtu 9198
+    description {{ node.config.DESCRIPTION }}
+    no routing
+    vlan access 2
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+{%- endif %}
+{%- if node.destination_port == 2%}
+
+interface lag {{ node.config.LAG_NUMBER }} multi-chassis
+    no shutdown
+    description uan_can_lag
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 7
+    lacp mode active
+    lacp fallback
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+
+interface 1/1/{{ node.config.PORT }}
+    no shutdown
+    mtu 9198
+    description {{ node.config.DESCRIPTION }}
+    lag {{ node.config.LAG_NUMBER }}
+
+{%- endif %}
+{%- endfor %}
+{#- end-uan #}

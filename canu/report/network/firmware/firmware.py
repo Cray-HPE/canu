@@ -112,7 +112,7 @@ csm_options = canu_config["csm_versions"]
 # @click.option("--verbose", "-v", is_flag=True, help="Verbose mode")
 @click.pass_context
 def firmware(ctx, csm, ips, ips_file, username, password, json_, out):
-    """Report the firmware versions of all Aruba switches (API v10.04) on the network.
+    """Report the firmware versions of all switches (Aruba, Dell, or Mellanox) on the network.
 
     Pass in either a comma separated list of IP addresses using the --ips option
 
