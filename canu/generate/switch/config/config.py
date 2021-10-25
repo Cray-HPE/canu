@@ -763,8 +763,11 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 if destination_rack_int == sls_rack_int:
                     hmn_mtn_vlan = cabinets["VlanID"]
                 else:
-                    #add more descriptive error message
-                    click.secho(f"Mountain Cabinets in SLS do not match the SHCD", fg="red")
+                    # add more descriptive error message
+                    click.secho(
+                        "Mountain Cabinets in SLS do not match the SHCD",
+                        fg="red",
+                    )
                     exit(1)
             new_node = {
                 "subtype": "cec",
@@ -783,14 +786,14 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 if destination_rack_int == sls_rack_int:
                     nmn_mtn_vlan = cabinets["VlanID"]
                 else:
-                    click.secho(f"Mountain Cabinets in SLS do match the SHCD", fg="red")
+                    click.secho("Mountain Cabinets in SLS do match the SHCD", fg="red")
                     exit(1)
             for cabinets in sls_variables["HMN_MTN_CABINETS"]:
                 sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
                 if destination_rack_int == sls_rack_int:
                     hmn_mtn_vlan = cabinets["VlanID"]
                 else:
-                    click.secho(f"Mountain Cabinets in SLS do match the SHCD", fg="red")
+                    click.secho("Mountain Cabinets in SLS do match the SHCD", fg="red")
                     exit(1)
             new_node = {
                 "subtype": "cmm",

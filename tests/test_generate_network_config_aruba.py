@@ -339,7 +339,7 @@ def test_network_config_missing_tabs():
                 "--folder",
                 folder_name,
             ],
-            input="INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES\n",
+            input="SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES\n",
         )
         assert result.exit_code == 0
         assert "sw-spine-001 Config Generated" in str(result.output)
