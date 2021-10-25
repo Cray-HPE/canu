@@ -1,6 +1,6 @@
 # Report Network Firmware
 
-Multiple Aruba switches on a network can be checked for their firmware versions. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
+Multiple switches on a network (Aruba, Dell, or Mellanox) can be checked for their firmware versions. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
 
 There are three different statuses found in the report.
 
@@ -31,7 +31,7 @@ $ canu report network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2,192.168.1
 
 Errors
 ------------------------------------------------------------------
-192.168.1.4     - HTTP Error. Check that this IP is an Aruba switch, or check the username and password
+192.168.1.4     - HTTP Error. Check that the IP, username, or password
 
 Summary
 ------------------------------------------------------------------

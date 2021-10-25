@@ -1,6 +1,6 @@
 # Report Switch Firmware
 
-Report the firmware of an Aruba switch (API v10.04) on the network.
+Report the firmware of a switch (Aruba, Dell, or Mellanox) on the network.
 
 The CSM version is required to determine the firmware to validate against, you can pass it in with `--csm` like `--csm 1.2`.
 

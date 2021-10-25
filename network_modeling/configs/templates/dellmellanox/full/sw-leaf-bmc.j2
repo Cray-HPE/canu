@@ -1,0 +1,50 @@
+{#- sw-leaf-bmc #}
+{%- include 'dellmellanox/common/unknown.j2' %}
+hostname {{ variables.HOSTNAME }}
+rest api restconf
+ntp server {{ variables.NCN_W001 }}
+ntp server {{ variables.NCN_W002 }}
+ntp server {{ variables.NCN_W003 }}
+
+{%- include 'dellmellanox/common/acl-dell.j2' %}
+
+interface vlan1
+ Description MTL
+ no shutdown
+ ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}}
+
+interface vlan2
+ description RIVER_NMN
+ no shutdown
+ ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}}
+ ip access-group nmn-hmn in
+ ip access-group nmn-hmn out
+ ip ospf 1 area 0.0.0.0
+
+interface vlan4
+ description RIVER_HMN
+ no shutdown
+ ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
+ ip access-group nmn-hmn in
+ ip access-group nmn-hmn out
+ ip ospf 1 area 0.0.0.0
+
+interface loopback 0
+ ip address {{ variables.LOOPBACK_IP }}/32
+ ip ospf 1 area 0.0.0.0
+
+interface mgmt1/1/1
+ shutdown
+ ip address dhcp
+ ipv6 address autoconfig
+
+spanning-tree mst configuration
+ instance 1 vlan 1-4093
+
+{% include 'dellmellanox/full/leaf-bmc-to-spine.lag.j2' %}
+{% include 'dellmellanox/common/bmc.j2' %}
+{% include 'dellmellanox/common/uan-nmn.j2' %}
+router ospf 1
+ router-id {{ variables.LOOPBACK_IP }}
+
+{# end sw-leaf-bmc #}
