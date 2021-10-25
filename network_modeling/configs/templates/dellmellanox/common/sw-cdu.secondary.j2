@@ -1,0 +1,84 @@
+{#- sw-cdu.secondary #}
+{%- include 'dellmellanox/common/unknown.j2' %}
+hostname {{ variables.HOSTNAME }}
+
+rest api restconf
+ip name-server 10.92.100.225
+
+{%- include 'dellmellanox/common/mtn_hmn_vlan.j2' %}
+{%- include 'dellmellanox/common/mtn_nmn_vlan.j2' %}
+
+ntp server {{ variables.NCN_W001 }}
+ntp server {{ variables.NCN_W002 }}
+ntp server {{ variables.NCN_W003 }}
+
+{%- include 'dellmellanox/common/acl-dell.j2' %}
+
+interface vlan1
+ Description MTL
+ no shutdown
+ ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}}
+
+interface vlan2
+ description RIVER_NMN
+ no shutdown
+ mtu 9216
+ ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}}
+ ip access-group nmn-hmn in
+ ip access-group nmn-hmn out
+ ip ospf 1 area 0.0.0.0
+
+interface vlan4
+ description RIVER_HMN
+ no shutdown
+ mtu 9216
+ ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
+ ip access-group nmn-hmn in
+ ip access-group nmn-hmn out
+ ip ospf 1 area 0.0.0.0
+
+{%- include 'dellmellanox/common/mtn_hmn_vlan.j2' %}
+{%- include 'dellmellanox/common/mtn_nmn_vlan.j2' %}
+
+interface loopback 0
+ ip address {{ variables.LOOPBACK_IP }}/32
+ ip ospf 1 area 0.0.0.0
+
+spanning-tree mst configuration
+ instance 1 vlan 1-4093
+
+
+{% include 'dellmellanox/common/cmm.j2' %}
+
+{% include 'dellmellanox/common/cec.j2' %}
+
+{% include 'dellmellanox/common/cdu-to-spine.lag.j2' %}
+
+interface mgmt1/1/1
+ no shutdown
+ no ip address dhcp
+ ip address 192.168.255.243/29
+ ipv6 address autoconfig
+
+router ospf 1
+ router-id {{ variables.LOOPBACK_IP }}
+
+interface ethernet 1/1/{{ variables.VSX_ISL_PORT1 }}
+ no shutdown
+ no switchport
+ flowcontrol receive off
+ flowcontrol transmit off
+!
+interface ethernet 1/1/{{ variables.VSX_ISL_PORT2 }}
+ no shutdown
+ no switchport
+ flowcontrol receive off
+ flowcontrol transmit off
+
+vlt-domain 1
+ backup destination 192.168.255.242
+ discovery-interface ethernet1/1/{{ variables.VSX_ISL_PORT1 }},1/1/{{ variables.VSX_ISL_PORT2 }}
+ peer-routing
+ primary-priority 8192
+ vlt-mac 00:11:22:aa:bb:cc
+{# end sw-cdu.secondary #}

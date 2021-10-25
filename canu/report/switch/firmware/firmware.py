@@ -98,7 +98,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 )
 @click.pass_context
 def firmware(ctx, shasta, ip, username, password, json_, verbose, out):
-    """Report the firmware of an Aruba switch (API v10.04) on the network.
+    """Report the firmware of a switch (Aruba, Dell, or Mellanox) on the network.
 
     There are two different statuses that might be indicated.\n
     🛶 - Pass: Indicates that the switch passed the firmware verification.\n

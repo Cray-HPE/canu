@@ -62,7 +62,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 )
 @click.pass_context
 def cabling(ctx, ip, username, password, out):
-    """Report the cabling of an Aruba switch (API v10.04) on the network by using LLDP.
+    """Report the cabling of a switch (Aruba, Dell, or Mellanox) on the network by using LLDP.
 
     If the neighbor name is not in LLDP, the IP and vlan information are displayed
     by looking up the MAC address in the ARP table.
@@ -449,7 +449,7 @@ def get_lldp_mellanox(ip, credentials, return_error):
         arp: ARP dictionary
 
     Raises:
-        HTTPError: IP not Aruba switch, or credentials bad.
+        HTTPError: IP not Mellanox switch, or credentials bad.
         ConnectionError: Bad IP address.
     """
     session = requests.Session()

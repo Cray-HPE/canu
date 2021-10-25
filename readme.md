@@ -4,7 +4,7 @@ CANU (CSM Automatic Network Utility) will float through a Shasta network and mak
 
 CANU can be used to:
 
-- Check if Aruba switches on a Shasta network meet the firmware version requirements
+- Check if switches (Aruba, Dell, or Mellanox) on a Shasta network meet the firmware version requirements
 - Check network cabling status using LLDP
 - Validate BGP status
 - Configure BGP
@@ -173,7 +173,7 @@ $ canu report switch firmware --shasta 1.4 --ip 192.168.1.1 --username USERNAME 
 
 **[Details](docs/report_network_firmware.md)**<br>
 
-Multiple Aruba switches on a network can be checked for their firmware versions. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
+Multiple switches on a network (Aruba, Dell, or Mellanox) can be checked for their firmware versions. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
 
 The Shasta version is required to determine the firmware to validate against, you can pass it in with either `-s` or `--shasta` like `-s 1.4`.
 
@@ -281,7 +281,7 @@ Entries in the table will be colored based on what they are. Neighbors that have
 
 **[Details](docs/report_network_cabling.md)**<br>
 
-The cabling of multiple Aruba switches on a network can be checked at the same time using LLDP. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
+The cabling of multiple switches (Aruba, Dell, or Mellanox) on a network can be checked at the same time using LLDP. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
 
 An example of checking the cabling of multiple switches: `canu report network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
@@ -922,14 +922,6 @@ There are several commands to help with the canu cache:
 ## Uninstallation
 
 `pip3 uninstall canu`
-
-# Road Map
-
-CANU is under active development, therefore things are changing on a daily basis. Expect commands to change and tests to fail while CANU trends towards stability.
-
-Currently CANU can check the firmware version of a single Aruba switch, or the firmware version of multiple Aruba switches on the network. CANU can also check the cabling of a single switch using LLDP.
-
-Future versions will allow CANU to check switch configurations and network wiring.
 
 # Testing
 
