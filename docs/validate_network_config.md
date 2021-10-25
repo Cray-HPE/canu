@@ -13,7 +13,7 @@ A directory of generated config files will also need to be passed in using `--ge
 To validate switch config run: `canu validate network config --ips-file ips.txt --username USERNAME --password PASSWORD --generated /CONFIG/FOLDER`
 
 ```bash
-$ canu validate network config -s 1.5 --ips-file ips.txt --generated /CONFIG/FOLDER
+$ canu validate network config --csm 1.2 --ips-file ips.txt --generated /CONFIG/FOLDER
 
 Switch: sw-leaf-001 (192.168.1.1)
 Differences
@@ -47,17 +47,17 @@ Errors
 
 ## Flags
 
-| Option          | Description                                        |
-| --------------- | -------------------------------------------------- |
-| `-s / --shasta` | Shasta version                                     |
-| `--ips`         | Comma separated list of IPv4 addresses of switches |
-| `--ips-file`    | File with one IPv4 address per line                |
-| `--running`     | Directory containing running config files          |
-| `--username`    | Switch username                                    |
-| `--password`    | Switch password                                    |
-| `--generated`   | Folder containing generated config files           |
-| `--json`        | Bool indicating json output                        |
-| `--out`         | Name of the output file                            |
+| Option        | Description                                        |
+| ------------- | -------------------------------------------------- |
+| `--csm`       | CSM version                                        |
+| `--ips`       | Comma separated list of IPv4 addresses of switches |
+| `--ips-file`  | File with one IPv4 address per line                |
+| `--running`   | Directory containing running config files          |
+| `--username`  | Switch username                                    |
+| `--password`  | Switch password                                    |
+| `--generated` | Folder containing generated config files           |
+| `--json`      | Bool indicating json output                        |
+| `--out`       | Name of the output file                            |
 
 ---
 

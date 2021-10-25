@@ -48,7 +48,7 @@ If there are any nodes that cannot be determined or should be renamed, there wil
 
 | Option                | Description                                             |
 | --------------------- | ------------------------------------------------------- |
-| `-a / --architecture` | Shasta architecture ("Full", or "TDS")                  |
+| `-a / --architecture` | CSM architecture ("Full", or "TDS")                     |
 | `--ips`               | Comma separated list of IPv4 addresses of switches      |
 | `--ips-file`          | File with one IPv4 address per line                     |
 | `--username`          | Switch username                                         |

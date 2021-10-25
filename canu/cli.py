@@ -19,7 +19,7 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-"""CANU (CSM Automatic Network Utility) floats through a new Shasta network and makes setup a breeze."""
+"""CANU (CSM Automatic Network Utility) floats through a Shasta network and makes setup and config breeze."""
 from collections import defaultdict
 import json
 from os import environ, path
@@ -81,7 +81,7 @@ CONTEXT_SETTING = {
 @click.version_option(version)
 @click.pass_context
 def cli(ctx, cache_minutes):
-    """CANU (CSM Automatic Network Utility) floats through a new Shasta network and makes setup a breeze."""
+    """CANU (CSM Automatic Network Utility) floats through a Shasta network and makes setup and config breeze."""
     ctx.ensure_object(dict)
 
     ctx.obj["cache_minutes"] = cache_minutes
@@ -207,9 +207,9 @@ def init(ctx, sls_file, auth_token, sls_address, network, out):
                 verify=False,
             )
             networks_response.raise_for_status()
-            shasta_networks = networks_response.json()
+            csm_networks = networks_response.json()
             switch_addresses, switch_dict = parse_sls_json_for_ips(
-                shasta_networks,
+                csm_networks,
                 network,
             )
 
@@ -223,8 +223,8 @@ def init(ctx, sls_file, auth_token, sls_address, network, out):
                 verify=False,
             )
             hardware_response.raise_for_status()
-            shasta_hardware = hardware_response.json()
-            parse_sls_json_for_vendor(shasta_hardware[0], switch_dict)
+            csm_hardware = hardware_response.json()
+            parse_sls_json_for_vendor(csm_hardware[0], switch_dict)
 
         except requests.exceptions.ConnectionError:
             return click.secho(
@@ -253,13 +253,13 @@ def init(ctx, sls_file, auth_token, sls_address, network, out):
     )
 
 
-def parse_sls_json_for_ips(shasta, network="NMN"):
+def parse_sls_json_for_ips(csm, network="NMN"):
     """Parse SLS JSON and return IPv4 addresses.
 
     Defaults to the "NMN" network, but another network can be passed in. Cache the switch IP and hostname.
 
     Args:
-        shasta: The SLS JSON to be parsed.
+        csm: The SLS JSON to be parsed.
         network: Switch network e.g. (CAN, MTL, NMN).
 
     Returns:
@@ -269,7 +269,7 @@ def parse_sls_json_for_ips(shasta, network="NMN"):
     """
     switch_addresses = []
     switch_dict = defaultdict()
-    for sls_network in shasta:
+    for sls_network in csm:
         if sls_network["Name"] == network:
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 for ip in subnets.get("IPReservations", {}):
@@ -289,15 +289,15 @@ def parse_sls_json_for_ips(shasta, network="NMN"):
     return switch_addresses, switch_dict
 
 
-def parse_sls_json_for_vendor(shasta, switch_dict):
+def parse_sls_json_for_vendor(csm, switch_dict):
     """Parse SLS JSON for switch vendor and cache the results.
 
     Args:
-        shasta: The SLS JSON to be parsed.
+        csm: The SLS JSON to be parsed.
         switch_dict: Dictionary of IP addresses and hostnames
     """
-    # for device in shasta:
-    for _key, device in shasta.items():
+    # for device in csm:
+    for _key, device in csm.items():
         alias_list = device.get("ExtraProperties", {}).get("Aliases", [])
 
         for alias in alias_list:
