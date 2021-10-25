@@ -177,10 +177,10 @@ def config(
     folder,
     override,
 ):
-    """Generate the config of all Aruba switches (API v10.04) on the network using the SHCD.
+    """Generate the config of all switches (Aruba, Dell, or Mellanox) on the network using the SHCD.
 
     In order to generate network switch config, a valid SHCD must be passed in and system variables must be read in from either
-    CSI output or the SLS API.
+    an SLS output file or the SLS API.
 
     Use the `--folder FOLDERNAME` flag to output all the switch configs to a folder.
     \f
@@ -202,12 +202,15 @@ def config(
     if architecture.lower() == "full":
         architecture = "network_v2"
         template_folder = "full"
+        vendor_folder = "aruba"
     elif architecture.lower() == "tds":
         architecture = "network_v2_tds"
         template_folder = "tds"
+        vendor_folder = "aruba"
     elif architecture.lower() == "v1":
         architecture = "network_v1"
         template_folder = "full"
+        vendor_folder = "dellmellanox"
 
     # SHCD Parsing
     sheets = []
@@ -396,6 +399,7 @@ def config(
                 switch_name,
                 sls_variables,
                 template_folder,
+                vendor_folder,
                 override,
             )
             config_devices.update(devices)

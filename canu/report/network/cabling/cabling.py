@@ -77,7 +77,7 @@ from canu.report.switch.cabling.cabling import get_lldp, print_lldp
 )
 @click.pass_context
 def cabling(ctx, ips, ips_file, username, password, out, view):
-    """Report the cabling of all Aruba switches (API v10.04) on the network by using LLDP.
+    """Report the cabling of all switches (Aruba, Dell, or Mellanox) on the network by using LLDP.
 
     Pass in either a comma separated list of IP addresses using the --ips option
 
