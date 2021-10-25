@@ -39,7 +39,7 @@ username = "admin"
 password = "admin"
 ip = "192.168.1.1"
 credentials = {"username": username, "password": password}
-shasta = "1.4"
+csm = "1.0"
 cache_minutes = 10
 runner = testing.CliRunner()
 
@@ -83,8 +83,8 @@ def test_switch_caching(switch_vendor):
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 ip,
                 "--username",
@@ -104,8 +104,8 @@ def test_switch_caching(switch_vendor):
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 ip,
                 "--username",

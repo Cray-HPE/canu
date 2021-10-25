@@ -29,7 +29,7 @@ import requests
 import responses
 
 from canu.cli import cli
-from .test_generate_switch_config import sls_input, sls_networks
+from .test_generate_switch_config_aruba import sls_input, sls_networks
 
 test_file_directory = Path(__file__).resolve().parent
 
@@ -38,10 +38,10 @@ test_file = path.join(test_file_directory, "data", test_file_name)
 override_file_name = "override.yaml"
 override_file = path.join(test_file_directory, "data", override_file_name)
 architecture = "full"
-tabs = "INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
+tabs = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners = "J14,T44,J14,T48,J14,T28,J14,T27"
 sls_file = "sls_file.json"
-shasta = "1.4"
+csm = "1.0"
 folder_name = "test_config"
 cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
@@ -62,8 +62,8 @@ def test_network_config():
                 "generate",
                 "network",
                 "config",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -104,8 +104,8 @@ def test_network_override_config():
                 "generate",
                 "network",
                 "config",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -148,8 +148,8 @@ def test_network_config_override_file_missing():
                 "generate",
                 "network",
                 "config",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -188,8 +188,8 @@ def test_network_config_folder_prompt():
                 "generate",
                 "network",
                 "config",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -227,8 +227,8 @@ def test_network_config_csi_file_missing():
                 "generate",
                 "network",
                 "config",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -261,8 +261,8 @@ def test_network_config_missing_file():
                 "generate",
                 "network",
                 "config",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--tabs",
@@ -292,8 +292,8 @@ def test_network_config_bad_file():
                 "generate",
                 "network",
                 "config",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -326,8 +326,8 @@ def test_network_config_missing_tabs():
                 "generate",
                 "network",
                 "config",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -339,7 +339,7 @@ def test_network_config_missing_tabs():
                 "--folder",
                 folder_name,
             ],
-            input="INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES\n",
+            input="SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES\n",
         )
         assert result.exit_code == 0
         assert "sw-spine-001 Config Generated" in str(result.output)
@@ -369,8 +369,8 @@ def test_network_config_bad_tab():
                 "generate",
                 "network",
                 "config",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -403,8 +403,8 @@ def test_network_config_corner_prompt():
                 "generate",
                 "network",
                 "config",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -445,8 +445,8 @@ def test_network_config_not_enough_corners():
                 "generate",
                 "network",
                 "config",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -485,8 +485,8 @@ def test_network_config_sls():
                 "generate",
                 "network",
                 "config",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -535,8 +535,8 @@ def test_network_config_sls_token_bad():
                 "generate",
                 "network",
                 "config",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--shcd",
@@ -571,8 +571,8 @@ def test_network_config_sls_token_missing():
             "generate",
             "network",
             "config",
-            "--shasta",
-            shasta,
+            "--csm",
+            csm,
             "--architecture",
             architecture,
             "--shcd",
@@ -614,8 +614,8 @@ def test_network_config_sls_address_bad():
             "generate",
             "network",
             "config",
-            "--shasta",
-            shasta,
+            "--csm",
+            csm,
             "--architecture",
             architecture,
             "--shcd",

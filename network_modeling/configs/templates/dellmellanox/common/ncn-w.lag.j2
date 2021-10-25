@@ -1,21 +1,25 @@
 {#- worker #}
 {%- for node in cabling.nodes if node.subtype == "worker" %}
 
-interface lag {{ node.config.LAG_NUMBER }} multi-chassis
-    no shutdown
-    description {{ node.config.DESCRIPTION }}
-    no routing
-    vlan trunk native 1
-    vlan trunk allowed 1-2,4,7
-    lacp mode active
-    lacp fallback
-    spanning-tree bpdu-guard
-    spanning-tree port-type admin-edge
+interface mlag-port-channel {{ node.config.LAG_NUMBER }}
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} mtu 9216 force
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport mode hybrid
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} description {{ node.config.DESCRIPTION }}
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} no shutdown
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} lacp-individual enable force
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} spanning-tree port type edge
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} spanning-tree bpduguard enable
 
-interface {{ node.config.PORT }}
-    no shutdown
-    mtu 9198
-    description {{ node.config.DESCRIPTION }}
-    lag {{ node.config.LAG_NUMBER }}
+interface ethernet 1/{{ node.config.PORT }} switchport mode hybrid
+interface ethernet 1/{{ node.config.PORT }} speed 40G force
+interface ethernet 1/{{ node.config.PORT }} mtu 9216 force
+interface ethernet 1/{{ node.config.PORT }} mlag-channel-group {{ node.config.LAG_NUMBER }} mode active
+interface ethernet 1/{{ node.config.PORT }} description {{ node.config.DESCRIPTION }}
+interface ethernet 1/{{ node.config.PORT }} spanning-tree port type edge
+interface ethernet 1/{{ node.config.PORT }} spanning-tree bpduguard enable
+
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport hybrid allowed-vlan add 2
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport hybrid allowed-vlan add 4
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport hybrid allowed-vlan add 7
 {%- endfor %}
 {#- end worker #}

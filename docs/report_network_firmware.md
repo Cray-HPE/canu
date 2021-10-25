@@ -15,10 +15,10 @@ There are three different statuses found in the report.
 
 ### 1. Network Firmware
 
-An example of checking the firmware of multiple switches: `canu report network firmware --shasta 1.4 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD` Or to load IP addresses from a file run: `canu report network firmware --shasta 1.4 --ips-file ip_file.txt --username USERNAME --password PASSWORD`
+An example of checking the firmware of multiple switches: `canu report network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD` Or to load IP addresses from a file run: `canu report network firmware --csm 1.2 --ips-file ip_file.txt --username USERNAME --password PASSWORD`
 
 ```bash
-$ canu report network firmware --shasta 1.4 --ips 192.168.1.1,192.168.1.2,192.168.1.3,192.168.1.4 --username USERNAME --password PASSWORD
+$ canu report network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2,192.168.1.3,192.168.1.4 --username USERNAME --password PASSWORD
 
 ------------------------------------------------------------------
     STATUS  IP              HOSTNAME            FIRMWARE
@@ -52,7 +52,7 @@ When using the _network firmware_ commands, the table will show either: 🛶 Pas
 To get the JSON output from multiple switches, make sure to use the `--json` flag. An example json output is below.
 
 ```bash
-$ canu report network firmware --shasta 1.4 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --json
+$ canu report network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --json
 
 {
     "192.168.1.1": {
@@ -88,15 +88,15 @@ To output the results of the network firmware commands to a file, append the `--
 
 ## Flags
 
-| Option          | Description                         |
-| --------------- | ----------------------------------- |
-| `-s / --shasta` | Shasta version                      |
-| `--ips`         | Switch IPv4 address                 |
-| `--ips-file`    | File with one IPv4 address per line |
-| `--username`    | Switch username                     |
-| `--password`    | Switch password                     |
-| `--json`        | Bool indicating json output         |
-| `--out`         | Name of the output file             |
+| Option       | Description                         |
+| ------------ | ----------------------------------- |
+| `--csm`      | CSM version                         |
+| `--ips`      | Switch IPv4 address                 |
+| `--ips-file` | File with one IPv4 address per line |
+| `--username` | Switch username                     |
+| `--password` | Switch password                     |
+| `--json`     | Bool indicating json output         |
+| `--out`      | Name of the output file             |
 
 ---
 

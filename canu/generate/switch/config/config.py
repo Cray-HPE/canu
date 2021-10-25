@@ -97,11 +97,11 @@ env = Environment(
     undefined=StrictUndefined,
 )
 
-# Get Shasta versions from canu.yaml
+# Get CSM versions from canu.yaml
 with open(canu_config_file, "r") as file:
     canu_config = yaml.load(file)
 
-shasta_options = canu_config["shasta_versions"]
+csm_options = canu_config["csm_versions"]
 
 
 @click.command(
@@ -110,11 +110,10 @@ shasta_options = canu_config["shasta_versions"]
     help_options_color="blue",
 )
 @click.option(
-    "--shasta",
-    "-s",
-    type=click.Choice(shasta_options),
-    help="Shasta network version",
-    prompt="Shasta network version",
+    "--csm",
+    type=click.Choice(csm_options),
+    help="CSM network version",
+    prompt="CSM network version",
     required=True,
     show_choices=True,
 )
@@ -122,7 +121,7 @@ shasta_options = canu_config["shasta_versions"]
     "--architecture",
     "-a",
     type=click.Choice(["Full", "TDS", "V1"], case_sensitive=False),
-    help="Shasta architecture",
+    help="CSM architecture",
     required=True,
     prompt="Architecture type",
 )
@@ -172,7 +171,7 @@ shasta_options = canu_config["shasta_versions"]
 @click.pass_context
 def config(
     ctx,
-    shasta,
+    csm,
     architecture,
     shcd,
     tabs,
@@ -197,8 +196,8 @@ def config(
 
     Args:
         ctx: CANU context settings
-        shasta: Shasta version
-        architecture: Shasta architecture
+        csm: CSM version
+        architecture: CSM architecture
         shcd: SHCD file
         tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
         corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
@@ -365,9 +364,9 @@ def config(
             )
     sls_variables = parse_sls_for_config(sls_json)
 
-    # For versions of Shasta < 1.6, the SLS Hostnames need to be renamed
-    if shasta:
-        if float(shasta) < 1.6:
+    # For versions of csm < 1.2, the SLS Hostnames need to be renamed
+    if csm:
+        if float(csm) < 1.2:
             sls_variables = rename_sls_hostnames(sls_variables)
 
     if override:
@@ -497,11 +496,11 @@ def generate_switch_config(
         "HMN_MTN": sls_variables["HMN_MTN"],
         "HMN_MTN_NETMASK": sls_variables["HMN_MTN_NETMASK"],
         "HMN_MTN_NETWORK_IP": sls_variables["HMN_MTN_NETWORK_IP"],
-        "HMN__MTN_PREFIX_LEN": sls_variables["HMN_MTN_PREFIX_LEN"],
+        "HMN_MTN_PREFIX_LEN": sls_variables["HMN_MTN_PREFIX_LEN"],
         "NMN_MTN": sls_variables["NMN_MTN"],
         "NMN_MTN_NETMASK": sls_variables["NMN_MTN_NETMASK"],
         "NMN_MTN_NETWORK_IP": sls_variables["NMN_MTN_NETWORK_IP"],
-        "NMN__MTN_PREFIX_LEN": sls_variables["NMN_MTN_PREFIX_LEN"],
+        "NMN_MTN_PREFIX_LEN": sls_variables["NMN_MTN_PREFIX_LEN"],
         "HMN_IP_GATEWAY": sls_variables["HMN_IP_GATEWAY"],
         "MTL_IP_GATEWAY": sls_variables["MTL_IP_GATEWAY"],
         "NMN_IP_GATEWAY": sls_variables["NMN_IP_GATEWAY"],
@@ -720,7 +719,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "destination_port": destination_port,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
-                    "PORT": f"1/1/{source_port}",
+                    "PORT": f"{source_port}",
                     "LAG_NUMBER": primary_port,
                 },
             }
@@ -739,7 +738,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "destination_port": destination_port,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
-                    "PORT": f"1/1/{source_port}",
+                    "PORT": f"{source_port}",
                     "LAG_NUMBER": primary_port_ncn_s,
                 },
             }
@@ -751,7 +750,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "destination_port": destination_port,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
-                    "PORT": f"1/1/{source_port}",
+                    "PORT": f"{source_port}",
                     "LAG_NUMBER": primary_port,
                 },
             }
@@ -762,12 +761,19 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
                 if destination_rack_int == sls_rack_int:
                     hmn_mtn_vlan = cabinets["VlanID"]
+                else:
+                    # add more descriptive error message
+                    click.secho(
+                        "Mountain Cabinets in SLS do not match the SHCD",
+                        fg="red",
+                    )
+                    exit(1)
             new_node = {
                 "subtype": "cec",
                 "slot": None,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
-                    "INTERFACE_NUMBER": f"1/1/{source_port}",
+                    "INTERFACE_NUMBER": f"{source_port}",
                     "NATIVE_VLAN": hmn_mtn_vlan,
                 },
             }
@@ -778,16 +784,22 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
                 if destination_rack_int == sls_rack_int:
                     nmn_mtn_vlan = cabinets["VlanID"]
+                else:
+                    click.secho("Mountain Cabinets in SLS do match the SHCD", fg="red")
+                    exit(1)
             for cabinets in sls_variables["HMN_MTN_CABINETS"]:
                 sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
                 if destination_rack_int == sls_rack_int:
                     hmn_mtn_vlan = cabinets["VlanID"]
+                else:
+                    click.secho("Mountain Cabinets in SLS do match the SHCD", fg="red")
+                    exit(1)
             new_node = {
                 "subtype": "cmm",
                 "slot": None,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
-                    "PORT": f"1/1/{source_port}",
+                    "PORT": f"{source_port}",
                     "LAG_NUMBER": primary_port,
                     "NATIVE_VLAN": nmn_mtn_vlan,
                     "TAGGED_VLAN": hmn_mtn_vlan,
@@ -801,7 +813,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "destination_port": destination_port,
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
-                    "PORT": f"1/1/{source_port}",
+                    "PORT": f"{source_port}",
                     "LAG_NUMBER": primary_port,
                 },
             }
@@ -830,7 +842,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "LAG_NUMBER": lag_number,
-                    "PORT": f"1/1/{source_port}",
+                    "PORT": f"{source_port}",
                 },
             }
             nodes.append(new_node)
@@ -851,7 +863,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "LAG_NUMBER": lag_number,
-                    "PORT": f"1/1/{source_port}",
+                    "PORT": f"{source_port}",
                 },
             }
             nodes.append(new_node)
@@ -876,7 +888,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "LAG_NUMBER": lag_number,
-                    "PORT": f"1/1/{source_port}",
+                    "PORT": f"{source_port}",
                 },
             }
             nodes.append(new_node)
@@ -896,7 +908,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
                     "LAG_NUMBER": lag_number,
-                    "PORT": f"1/1/{source_port}",
+                    "PORT": f"{source_port}",
                 },
             }
             nodes.append(new_node)

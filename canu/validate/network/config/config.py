@@ -57,11 +57,11 @@ else:
 canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
-# Get Shasta versions from canu.yaml
+# Get CSM versions from canu.yaml
 with open(canu_config_file, "r") as canu_f:
     canu_config = yaml.load(canu_f)
 
-shasta_options = canu_config["shasta_versions"]
+csm_options = canu_config["csm_versions"]
 
 options_file = path.join(
     project_root,
@@ -83,11 +83,10 @@ host = Host("example.rtr", "aoscx", options)
     help_options_color="blue",
 )
 @click.option(
-    "--shasta",
-    "-s",
-    type=click.Choice(shasta_options),
-    help="Shasta network version",
-    prompt="Shasta network version",
+    "--csm",
+    type=click.Choice(csm_options),
+    help="CSM network version",
+    prompt="CSM network version",
     required=True,
     show_choices=True,
 )
@@ -132,7 +131,7 @@ host = Host("example.rtr", "aoscx", options)
 @click.pass_context
 def config(
     ctx,
-    shasta,
+    csm,
     ips,
     ips_file,
     running,
@@ -153,7 +152,7 @@ def config(
 
     Args:
         ctx: CANU context settings
-        shasta: Shasta version
+        csm: csm version
         ips: Comma separated list of IPv4 addresses of switches
         ips_file: File with one IPv4 address per line
         running: The running switch config file folder
@@ -196,9 +195,9 @@ def config(
                         return_error=True,
                     )
 
-                    # For versions of Shasta < 1.6, the hostname might need to be renamed
-                    if shasta:
-                        if float(shasta) < 1.6:
+                    # For versions of csm < 1.2, the hostname might need to be renamed
+                    if csm:
+                        if float(csm) < 1.2:
                             hostname = hostname.replace("-leaf-", "-leaf-bmc-")
                             hostname = hostname.replace("-agg-", "-leaf-")
 
@@ -278,12 +277,12 @@ def config(
                     ],
                 )
                 continue
-            # For versions of Shasta < 1.6, the hostname might need to be renamed
+            # For versions of CSM < 1.2, the hostname might need to be renamed
             # If the hostname contains "-leaf-bmc-", set the version to 1.6 so nothing will be renamed
-            if shasta:
-                if float(shasta) < 1.6:
+            if csm:
+                if float(csm) < 1.2:
                     if "-leaf-bmc-" in hostname:
-                        shasta = 1.6
+                        csm = 1.2
                     else:
                         hostname = hostname.replace("-leaf-", "-leaf-bmc-")
                         hostname = hostname.replace("-agg-", "-leaf-")

@@ -18,7 +18,7 @@ interface lag {{ ns.lag1 }} multi-chassis
 {%- endfor %}
 {%- for node in cabling.nodes if node.subtype == "spine"%}
 
-interface {{ node.config.PORT }}
+interface 1/1/{{ node.config.PORT }}
     no shutdown
     mtu 9198
     description {{ node.config.DESCRIPTION }}

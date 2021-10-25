@@ -92,7 +92,7 @@ log = logging.getLogger("validate_shcd")
     "--architecture",
     "-a",
     type=click.Choice(["Full", "TDS", "v1"], case_sensitive=False),
-    help="Shasta architecture",
+    help="CSM architecture",
     required=True,
     prompt="Architecture type",
 )
@@ -138,7 +138,7 @@ def cabling(ctx, architecture, ips, ips_file, username, password, log_):
 
     Args:
         ctx: CANU context settings
-        architecture: Shasta architecture
+        architecture: CSM architecture
         ips: Comma separated list of IPv4 addresses of switches
         ips_file: File with one IPv4 address per line
         username: Switch username
