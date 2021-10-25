@@ -39,10 +39,6 @@ mac_vendors_file = path.join(project_root, "network_modeling", "mac_vendors")
 
 BaseMacLookup.cache_path = mac_vendors_file
 mac = MacLookup()
-try:
-    mac.update_vendors()  # This can take a few seconds for the download and it will be stored in the new path
-except client_exceptions.ClientConnectorError:
-    pass
 
 
 def find_mac(mac_address):
@@ -55,3 +51,17 @@ def find_mac(mac_address):
         String containing the mac vendor name
     """
     return mac.lookup(mac_address)
+
+
+def update_mac_vendors():
+    """Update the mac address vendor file.
+
+    If the mac vendor file needs to get updated, run this function.
+    """
+    try:
+        mac.update_vendors()  # This can take a few seconds for the download and it will be stored in the new path
+    except (
+        client_exceptions.ClientConnectorError,
+        client_exceptions.ClientPayloadError,
+    ):
+        pass
