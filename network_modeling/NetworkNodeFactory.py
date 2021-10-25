@@ -21,6 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """NetworkNodeFactory to create a new network."""
 import logging
+import re
 
 import click
 from ruamel.yaml import YAML
@@ -215,23 +216,38 @@ class NetworkNodeFactory:
         lookup_mapper = self.__architecture_data[version]["lookup_mapper"]
         # Ensure that all mapped devices actually have an architectural component definition
         for lookup in lookup_mapper:
-            lookup_name = lookup["architecture_type"]
+            lookup_type = lookup["architecture_type"]
+            lookup_name = lookup["lookup_name"]
             found = False
-            for component in components:
-                if component["name"] != lookup_name:
-                    continue
-                found = True
-                break
-            if not found:
-                raise Exception(
-                    click.secho(
-                        f"Device {lookup_name} in lookup_mapper not found in architecture components",
-                        fg="red",
-                    ),
-                )
-            log.debug(
-                f"Validated lookup_mapper device {lookup_name} in architecture definition",
+            try:
+                for component in components:
+                    if lookup["regex"]:
+                        log.debug(f"Using regex search for component {lookup_type}")
+                        for pattern in lookup_name:
+                            if not bool(re.search(pattern, lookup_type)):
+                                continue
+                            found = True
+                            break
+                        if found:
+                            break
+
+                    if component["name"] != lookup_type:
+                        continue
+                    found = True
+                    break
+
+            except KeyError:
+                pass
+        if not found:
+            raise Exception(
+                click.secho(
+                    f"Device {lookup_type} in lookup_mapper not found in architecture components",
+                    fg="red",
+                ),
             )
+        log.debug(
+            f"Validated lookup_mapper device {lookup_type} in architecture definition",
+        )
 
     def __warn_architecture_deprecation(self):
         architecture_data = self.__architecture_data
@@ -303,9 +319,7 @@ class NetworkNodeFactory:
     # there is a map required.  Convert architecture yaml data to tuple.
     def lookup_mapper(self):
         """Convert architecture yaml data to tuple."""
-        lookup_mapper = self.__architecture_data[self.__architecture_version][
-            "lookup_mapper"
-        ]
+        lookup_mapper = self.__architecture_data[self.__architecture_version]["lookup_mapper"]
         lookup_mapper_as_tuple = []
         for lookup in lookup_mapper:
             lookup_mapper_as_tuple.append(

@@ -239,17 +239,17 @@ def get_node_common_name(name, rack_number, rack_elevation, mapper):
     common_name = None
     for node in mapper:
         for lookup_name in node[0]:
-            if re.match("^{}".format(lookup_name.strip()), name):
+            tmp_name = None
+            if re.match("{}".format(lookup_name.strip()), name):
                 # One naming convention for switches, another for else.
-                tmp_name = None
                 if node[1].find("sw-") != -1:
                     tmp_name = node[1] + "-"
                 elif node[1].find("cmm") != -1:
                     tmp_name = node[1] + "-" + rack_number + "-"
                 elif node[1].find("cec") != -1:
                     tmp_name = node[1] + "-" + rack_number + "-"
-                elif node[1].find("pdu") != -1:
-                    tmp_name = node[1] + "-" + rack_number + "-"
+                if node[1].find("pdu") != -1:
+                    tmp_name = node[1] + rack_elevation
                 else:
                     tmp_name = node[1]
                 if tmp_name == "sw-cdu-" and not name.startswith("sw-cdu"):
@@ -261,13 +261,19 @@ def get_node_common_name(name, rack_number, rack_elevation, mapper):
                     # cdu2sw2 --> sw-cdu-006
                     digits = re.findall(r"\d+", name)
                     tmp_id = int(digits[0]) * 2 + int(digits[1])
+                    common_name = f"{tmp_name}{tmp_id:0>3}"
+                elif tmp_name.startswith("pdu"):
+                    digits = re.findall(r"\d+", name)
+                    digit = digits[1]
+                    # The name becomes pdu-nnn
+                    common_name = f"{node[1]}-{digit:0>3}"
                 else:
                     tmp_id = re.sub(
                         "^({})0*([1-9]*)".format(lookup_name),
                         r"\2",
                         name,
                     ).strip("-")
-                common_name = f"{tmp_name}{tmp_id:0>3}"
+                    common_name = f"{tmp_name}{tmp_id:0>3}"
                 return common_name
     return common_name
 
