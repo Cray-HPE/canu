@@ -954,6 +954,7 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 - Added ability to compare two config files with `canu validate switch config`
 - Added ability to compare two config folders with `canu validate network config`
 - Added an `--override` option to `canu generate switch config` and `canu generate network config`, this allows users to ignore custom configuration so CANU does not overwrite it.
+- Added Mellanox support to the `canu config bgp` command
 
 ## [unreleased]
 
