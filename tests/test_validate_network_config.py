@@ -37,7 +37,7 @@ ips = "192.168.1.1"
 credentials = {"username": username, "password": password}
 cache_minutes = 0
 running_config_file = "running_switch.cfg"
-shasta = "1.4"
+csm = "1.0"
 runner = testing.CliRunner()
 
 
@@ -70,8 +70,8 @@ def test_validate_network_config(netmiko_command, switch_vendor):
                 password,
                 "--generated",
                 "generated/",
-                "-s",
-                shasta,
+                "--csm",
+                csm,
             ],
         )
         assert result.exit_code == 0
@@ -110,8 +110,8 @@ def test_validate_network_config_running_file():
                 "running/",
                 "--generated",
                 "generated/",
-                "-s",
-                shasta,
+                "--csm",
+                csm,
             ],
         )
         assert result.exit_code == 0
@@ -156,8 +156,8 @@ def test_validate_network_config_json(netmiko_command, switch_vendor):
                 password,
                 "--generated",
                 "generated/",
-                "-s",
-                shasta,
+                "--csm",
+                csm,
                 "--json",
             ],
         )
@@ -215,8 +215,8 @@ def test_validate_network_config_json_file():
                 "running/",
                 "--generated",
                 "generated/",
-                "-s",
-                shasta,
+                "--csm",
+                csm,
                 "--json",
             ],
         )
@@ -283,8 +283,8 @@ def test_validate_network_config_file(netmiko_command, switch_vendor):
                 password,
                 "--generated",
                 "generated/",
-                "-s",
-                shasta,
+                "--csm",
+                csm,
             ],
         )
         assert result.exit_code == 0
@@ -327,8 +327,8 @@ def test_validate_network_config_password_prompt(netmiko_command, switch_vendor)
                 username,
                 "--generated",
                 "generated/",
-                "-s",
-                shasta,
+                "--csm",
+                csm,
             ],
             input=password,
         )
@@ -373,8 +373,8 @@ def test_validate_network_config_timeout(netmiko_command, switch_vendor):
                 password,
                 "--generated",
                 "generated/",
-                "-s",
-                shasta,
+                "--csm",
+                csm,
             ],
         )
         assert result.exit_code == 0
@@ -413,8 +413,8 @@ def test_validate_network_config_authentication(netmiko_command, switch_vendor):
                 password,
                 "--generated",
                 "generated/",
-                "-s",
-                shasta,
+                "--csm",
+                csm,
             ],
         )
         assert result.exit_code == 0
@@ -452,8 +452,8 @@ def test_validate_network_config_bad_config_file():
                 "running/",
                 "--generated",
                 "generated/",
-                "-s",
-                shasta,
+                "--csm",
+                csm,
             ],
         )
         assert result.exit_code == 0
@@ -495,8 +495,8 @@ def test_validate_network_config_bad_config_file_json():
                 "running/",
                 "--generated",
                 "generated/",
-                "-s",
-                shasta,
+                "--csm",
+                csm,
                 "--json",
             ],
         )

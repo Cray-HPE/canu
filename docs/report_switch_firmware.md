@@ -2,7 +2,7 @@
 
 Report the firmware of a switch (Aruba, Dell, or Mellanox) on the network.
 
-The Shasta version is required to determine the firmware to validate against, you can pass it in with either `-s` or `--shasta` like `-s 1.4`.
+The CSM version is required to determine the firmware to validate against, you can pass it in with `--csm` like `--csm 1.2`.
 
 There are two different statuses that might be indicated.
 
@@ -13,10 +13,10 @@ There are two different statuses that might be indicated.
 
 ### 1. Firmware
 
-To check the firmware of a single switch run: `canu report switch firmware --shasta 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD`
+To check the firmware of a single switch run: `canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD`
 
 ```bash
-$ canu report switch firmware --shasta 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD
+$ canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD
 
 🛶 - Pass - IP: 192.168.1.1 Hostname: test-switch-spine01 Firmware: GL.10.06.0001
 ```
@@ -25,10 +25,10 @@ $ canu report switch firmware --shasta 1.4 --ip 192.168.1.1 --username USERNAME 
 
 ### 2. Firmware Verbose
 
-To get verbose firmware details of a single switch: `canu report switch firmware --shasta 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD --verbose`
+To get verbose firmware details of a single switch: `canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD --verbose`
 
 ```bash
-$ canu report switch firmware --shasta 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD --verbose
+$ canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD --verbose
 
 🛶 - Pass - IP: 192.168.1.1 Hostname: test-switch-spine01
 Current Version: GL.10.06.0010
@@ -42,7 +42,7 @@ Booted Image: primary
 
 ### 3. Firmware JSON
 
-To get firmware details of a single switch with JSON output: `canu report switch firmware -s 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD --json`
+To get firmware details of a single switch with JSON output: `canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD --json`
 
 ```bash
 $ canu report switch firmware - 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD --json
@@ -58,10 +58,10 @@ $ canu report switch firmware - 1.4 --ip 192.168.1.1 --username USERNAME --passw
 
 ### 4. Firmware JSON Verbose
 
-To get firmware details of a single switch with JSON output: `canu report switch firmware -s 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD --json --verbose`
+To get firmware details of a single switch with JSON output: `canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD --json --verbose`
 
 ```bash
-$ canu report switch firmware -s 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD --json --verbose
+$ canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD --json --verbose
 {
   "ip_address": "192.168.1.1",
   "status": "Pass",
@@ -86,15 +86,15 @@ Any combination of commands can also be run with the `--out FILENAME` flag to ou
 
 ## Flags
 
-| Option          | Description                    |
-| --------------- | ------------------------------ |
-| `-s / --shasta` | Shasta version                 |
-| `--ip`          | Switch IPv4 address            |
-| `--username`    | Switch username                |
-| `--password`    | Switch password                |
-| `--json`        | Bool indicating json output    |
-| `--verbose`     | Bool indicating verbose output |
-| `--out`         | Name of the output file        |
+| Option       | Description                    |
+| ------------ | ------------------------------ |
+| `--csm`      | CSM version                    |
+| `--ip`       | Switch IPv4 address            |
+| `--username` | Switch username                |
+| `--password` | Switch password                |
+| `--json`     | Bool indicating json output    |
+| `--verbose`  | Bool indicating verbose output |
+| `--out`      | Name of the output file        |
 
 ---
 

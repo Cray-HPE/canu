@@ -60,11 +60,11 @@ else:
 
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
-# Get Shasta versions from canu.yaml
+# Get CSM versions from canu.yaml
 with open(canu_config_file, "r") as file:
     canu_config = yaml.load(file)
 
-shasta_options = canu_config["shasta_versions"]
+csm_options = canu_config["csm_versions"]
 
 
 @click.command(
@@ -73,11 +73,10 @@ shasta_options = canu_config["shasta_versions"]
     help_options_color="blue",
 )
 @click.option(
-    "--shasta",
-    "-s",
-    type=click.Choice(shasta_options),
-    help="Shasta network version",
-    prompt="Shasta network version",
+    "--csm",
+    type=click.Choice(csm_options),
+    help="CSM network version",
+    prompt="CSM network version",
     required=True,
     show_choices=True,
 )
@@ -112,7 +111,7 @@ shasta_options = canu_config["shasta_versions"]
 )
 # @click.option("--verbose", "-v", is_flag=True, help="Verbose mode")
 @click.pass_context
-def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
+def firmware(ctx, csm, ips, ips_file, username, password, json_, out):
     """Report the firmware versions of all switches (Aruba, Dell, or Mellanox) on the network.
 
     Pass in either a comma separated list of IP addresses using the --ips option
@@ -134,7 +133,7 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
 
     Args:
         ctx: CANU context settings
-        shasta: Shasta version
+        csm: CSM version
         ips: Comma separated list of IPv4 addresses of switches
         ips_file: File with one IPv4 address per line
         username: Switch username
@@ -189,7 +188,7 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
                             True,
                         )
 
-                    firmware_range = config["shasta"][shasta][vendor][
+                    firmware_range = config["csm"][csm][vendor][
                         switch_info["platform_name"]
                     ]
                     if switch_firmware["current_version"] in firmware_range:

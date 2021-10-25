@@ -18,7 +18,7 @@ To checkout a fresh system using CSI:
 
 1. Make a new directory to save switch IP addresses: `mkdir ips_folder`, `cd ips_folder`
 2. Parse CSI files and save switch IP addresses: `canu init --sls-file sls_input_file.json --out ips.txt`
-3. Check network firmware: `canu report network firmware -s 1.5 --ips-file ips.txt`
+3. Check network firmware: `canu report network firmware --csm 1.2 --ips-file ips.txt`
 4. Check network cabling: `canu report network cabling --ips-file ips.txt`
 5. Validate BGP status: `canu validate network bgp --ips-file ips.txt --verbose`
 6. Validate cabling: `canu validate network cabling --ips-file ips.txt`
@@ -62,7 +62,7 @@ In order to run CANU, both python3 and pip3 need to be installed.
 
 - To run CANU inside a container:
 
-  - Prequisites:
+  - Prerequisites:
     - docker
     - docker-compose
 
@@ -158,12 +158,12 @@ The output file for the `canu init` command is set with the `--out FILENAME` fla
 
 CANU checks the switch firmware version against the standard in the _canu.yaml_ file found in the root directory.
 
-The Shasta version is required to determine the firmware to validate against, you can pass it in with either `-s` or `--shasta` like `-s 1.4`.
+The CSM version is required to determine the firmware to validate against, you can pass it in with `--csm` like `--csm 1.2`.
 
-To check the firmware of a single switch run: `canu report switch firmware --shasta 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD`
+To check the firmware of a single switch run: `canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD`
 
 ```bash
-$ canu report switch firmware --shasta 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD
+$ canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD
 🛶 - Pass - IP: 192.168.1.1 Hostname:sw-spine-001 Firmware: GL.10.06.0010
 ```
 
@@ -175,12 +175,12 @@ $ canu report switch firmware --shasta 1.4 --ip 192.168.1.1 --username USERNAME 
 
 Multiple switches on a network (Aruba, Dell, or Mellanox) can be checked for their firmware versions. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
 
-The Shasta version is required to determine the firmware to validate against, you can pass it in with either `-s` or `--shasta` like `-s 1.4`.
+The CSM version is required to determine the firmware to validate against, you can pass it in with `--csm` like `--csm 1.2`.
 
-An example of checking the firmware of multiple switches: `canu report network firmware --shasta 1.4 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
+An example of checking the firmware of multiple switches: `canu report network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
 ```bash
-$ canu report network firmware --shasta 1.4 --ips 192.168.1.1,192.168.1.2,192.168.1.3,192.168.1.4 --username USERNAME --password PASSWORD
+$ canu report network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2,192.168.1.3,192.168.1.4 --username USERNAME --password PASSWORD
 
 ------------------------------------------------------------------
     STATUS  IP              HOSTNAME            FIRMWARE
@@ -218,7 +218,7 @@ To output the results of the switch firmware or network firmware commands to a f
 To get the JSON output from a single switch, or from multiple switches, make sure to use the `--json` flag. An example json output is below.
 
 ```bash
-$ canu network firmware --shasta 1.4 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --json
+$ canu network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --json
 
 {
     "192.168.1.1": {
@@ -573,17 +573,17 @@ The sls_input_file.json file is generally stored in one of two places depending 
 
 #### SHCD Input
 
-- The `--shasta / -s` flag is used to set the Shasta version of the system.
+- The `--csm` flag is used to set the CSM version of the system.
 - The `--architecture / -a` flag is used to set the architecture of the system, either **TDS**, or **Full**.
 - Use the `--tabs` flag to select which tabs on the spreadsheet will be included.
 - The `--corners` flag is used to input the upper left and lower right corners of the table on each tab of the worksheet. The table should contain the 11 headers: **Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port**. If the corners are not specified, you will be prompted to enter them for each tab.
 
 To generate config for a specific switch, a hostname must also be passed in using the `--name HOSTNAME` flag. To output the config to a file, append the `--out FILENAME` flag.
 
-To generate switch config run: `canu generate switch config -s 1.5 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --sls-file SLS_FILE --name SWITCH_HOSTNAME --out FILENAME`
+To generate switch config run: `canu generate switch config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --sls-file SLS_FILE --name SWITCH_HOSTNAME --out FILENAME`
 
 ```bash
-$ canu generate switch config -s 1.5 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --name sw-spine-001
+$ canu generate switch config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --name sw-spine-001
 
 hostname sw-spine-001
 user admin group administrators password plaintext
@@ -645,7 +645,7 @@ sw-leaf-bmc-001:
 To generate switch configuration with overrides run
 
 ```bash
-$ canu generate switch config -s 1.5 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --name sw-spine-001 --override OVERRIDE_FILE.yaml
+$ canu generate switch config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --name sw-spine-001 --override OVERRIDE_FILE.yaml
 
 sw-spine-001 Override Switch Config
 sw-spine-001 Switch Config
@@ -672,10 +672,10 @@ CANU can also generate switch config for all the switches on a network.
 
 In order to generate network config, a valid SHCD must be passed in and system variables must be read in from either CSI output or the SLS API. The instructions are exactly the same as the above **[Generate Switch Config](#generate-switch-config)** except there will not be a hostname and a folder must be specified for config output using the `--folder FOLDERNAME` flag.
 
-To generate switch config run: `canu generate network config -s 1.5 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --sls-file SLS_FILE --folder FOLDERNAME`
+To generate switch config run: `canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --sls-file SLS_FILE --folder FOLDERNAME`
 
 ```bash
-$ canu generate network config -s 1.5 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config
+$ canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config
 
 sw-spine-001 Config Generated
 sw-spine-002 Config Generated
@@ -698,7 +698,7 @@ The instructions are exactly the same as **[Generate Switch Config with override
 To generate network configuration with overrides run
 
 ```bash
-$ canu generate network config -s 1.5 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config --override OVERRIDE_FILE.yaml
+$ canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config --override OVERRIDE_FILE.yaml
 
 sw-spine-001 Override Config Generated
 sw-spine-002 Override Config Generated
@@ -877,7 +877,7 @@ A directory of generated config files will also need to be passed in using `--ge
 To validate switch config run: `canu validate network config --ips-file ips.txt --username USERNAME --password PASSWORD --generated /CONFIG/FOLDER`
 
 ```bash
-$ canu validate network config -s 1.5 --ips-file ips.txt --generated /CONFIG/FOLDER
+$ canu validate network config --csm 1.2 --ips-file ips.txt --generated /CONFIG/FOLDER
 
 Switch: sw-leaf-001 (192.168.1.1)
 Differences
@@ -954,6 +954,7 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 - Added ability to compare two config files with `canu validate switch config`
 - Added ability to compare two config folders with `canu validate network config`
 - Added an `--override` option to `canu generate switch config` and `canu generate network config`, this allows users to ignore custom configuration so CANU does not overwrite it.
+- Changed the `-s --shasta` flag to `--csm`
 - Added Mellanox support to the `canu config bgp` command
 
 ## [unreleased]
