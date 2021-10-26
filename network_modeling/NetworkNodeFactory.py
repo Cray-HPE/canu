@@ -21,6 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """NetworkNodeFactory to create a new network."""
 import logging
+import re
 
 import click
 from ruamel.yaml import YAML
@@ -213,24 +214,37 @@ class NetworkNodeFactory:
         version = self.__architecture_version
         components = self.__architecture_data[version]["components"]
         lookup_mapper = self.__architecture_data[version]["lookup_mapper"]
+        found = False
         # Ensure that all mapped devices actually have an architectural component definition
         for lookup in lookup_mapper:
-            lookup_name = lookup["architecture_type"]
-            found = False
+            lookup_type = lookup["architecture_type"]
+            # If there is a regex key, then we need to check for a match
+            if "regex" in lookup:
+                regex_search = True
+            else:
+                regex_search = False
             for component in components:
-                if component["name"] != lookup_name:
-                    continue
-                found = True
-                break
+                if regex_search:
+                    for pattern in lookup["lookup_name"]:
+                        # check each pattern against the component name
+                        if not bool(re.search(pattern, lookup_type)):
+                            continue
+                        found = True
+                        break
+                else:
+                    if component["name"] != lookup_type:
+                        continue
+                    found = True
+                    break
             if not found:
                 raise Exception(
                     click.secho(
-                        f"Device {lookup_name} in lookup_mapper not found in architecture components",
+                        f"Device {lookup_type} in lookup_mapper not found in architecture components",
                         fg="red",
                     ),
                 )
             log.debug(
-                f"Validated lookup_mapper device {lookup_name} in architecture definition",
+                f"Validated lookup_mapper device {lookup_type} in architecture definition",
             )
 
     def __warn_architecture_deprecation(self):
