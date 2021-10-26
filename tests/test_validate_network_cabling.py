@@ -43,11 +43,13 @@ runner = testing.CliRunner()
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_cabling(switch_vendor):
+def test_validate_cabling(netmiko_command, switch_vendor):
     """Test that the `canu validate network cabling` command runs and returns valid cabling."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -99,12 +101,14 @@ def test_validate_cabling(switch_vendor):
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_cabling_full_architecture(switch_vendor):
+def test_validate_cabling_full_architecture(netmiko_command, switch_vendor):
     """Test that the `canu validate network cabling` command runs and returns valid cabling with full architecture."""
     full_architecture = "full"
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -154,12 +158,14 @@ def test_validate_cabling_full_architecture(switch_vendor):
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_cabling_v1_architecture(switch_vendor):
+def test_validate_cabling_v1_architecture(netmiko_command, switch_vendor):
     """Test that the `canu validate network cabling` command runs and returns valid cabling with v1 architecture."""
     v1_architecture = "v1"
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -209,11 +215,13 @@ def test_validate_cabling_v1_architecture(switch_vendor):
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_cabling_file(switch_vendor):
+def test_validate_cabling_file(netmiko_command, switch_vendor):
     """Test that the `canu validate network cabling` command runs and returns valid cabling with IPs from file."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         with open("test.txt", "w") as f:
             f.write("192.168.1.1")
 
@@ -496,10 +504,14 @@ def test_validate_cabling_bad_password(switch_vendor):
         assert "IP, username, or password" in str(result.output)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_cabling_rename():
+def test_validate_cabling_rename(netmiko_command, switch_vendor):
     """Test that the `canu validate network cabling` command runs and finds bad naming."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -607,6 +619,16 @@ def test_switch_cabling_mellanox(switch_vendor):
             responses.POST,
             f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
             json=lldp_json_mellanox,
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json=mlag_mellanox,
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json=mac_address_table_mellanox,
         )
         responses.add(
             responses.POST,
@@ -839,21 +861,22 @@ netmiko_commands_dell = [
     + "Remote System Name: sw-leaf01\n"
     + "Remote System Desc: Test Switch 1\n"
     + "--------------------------------------------------------------------------- \n"
-    + "Remote Chassis ID: 11:22:33:44:55:66\n"
+    + "Remote Chassis ID: 00:40:a6:00:00:00\n"
     + "Remote Port ID: ethernet1/1/15\n"
     + "Remote Port Description: sw-leaf02\n"
     + "Local Port ID: ethernet1/1/2\n"
     + "Remote System Name: sw-leaf02\n"
     + "Remote System Desc: Test Switch 2\n"
     + "--------------------------------------------------------------------------- \n"
-    + "Remote Chassis ID: Not Advertised\n"
-    + "Remote Port ID: Not Advertised\n"
+    + "Remote Chassis ID: 00:40:a6:00:00:02\n"
+    + "Remote Port ID: 00:40:a6:00:00:02\n"
     + "Remote Port Description: Not Advertised\n"
     + "Local Port ID: mgmt1/1/3\n"
     + "Remote System Name: Not Advertised\n"
     + "Remote System Desc: Not Advertised\n"
     + "--------------------------------------------------------------------------- \n"
-    + "Remote Port ID: Not Advertised\n"
+    + "Remote Chassis ID: 00:40:a6:00:00:01\n"
+    + "Remote Port ID: 00:40:a6:00:00:01\n"
     + "Local Port ID: ethernet1/1/4\n"
     + "--------------------------------------------------------------------------- \n",
     "OS Version: 10.5.1.4\nSystem Type: S3048-ON\n",
@@ -862,6 +885,8 @@ netmiko_commands_dell = [
     + "------------------------------------------------------------------------------------------\n"
     + "192.168.1.1    aa:bb:cc:dd:ee:ff   vlan2                         port-channel100     \n"
     + "192.168.1.2    11:22:33:44:55:66   vlan7                         port-channel100     \n",
+    "VlanId Mac Address      Type      Interface\n"
+    + "1   00:40:a6:00:00:00    dynamic    ethernet1/1/3\n",
 ]
 
 
@@ -943,3 +968,94 @@ arp_neighbors_mellanox = {
         },
     ],
 }
+
+mlag_mellanox = {
+    "status": "OK",
+    "executed_command": "show interfaces mlag-port-channel summary | include LACP",
+    "status_message": "",
+    "data": [
+        {
+            "Lines": [
+                "  1 Mpo1(U)          LACP     Eth1/1(P)                 N/A                     ",
+                "  2 Mpo2(U)          LACP     Eth1/2(P)                 N/A                     ",
+                "  3 Mpo3(U)          LACP     Eth1/3(P)                 N/A                     ",
+                "  4 Mpo4(U)          LACP     Eth1/4(P)                 N/A                     ",
+            ],
+        },
+    ],
+}
+
+mac_address_table_mellanox = {
+    "status": "OK",
+    "executed_command": "show mac-address-table",
+    "status_message": "",
+    "data": {
+        "Number of unicast(local)": "45",
+        "Number of NVE": "0",
+        "2": [
+            {
+                "Port\\Next Hop": "Mpo2",
+                "Type": "Dynamic",
+                "Mac Address": "00:40:a6:00:00:33",
+            },
+            {
+                "Port\\Next Hop": "Mpo3",
+                "Type": "Dynamic",
+                "Mac Address": "00:40:a6:00:00:00",
+            },
+            {
+                "Port\\Next Hop": "Mpo1",
+                "Type": "Dynamic",
+                "Mac Address": "00:40:a6:00:44:55",
+            },
+            {
+                "Port\\Next Hop": "Mpo4",
+                "Type": "Dynamic",
+                "Mac Address": "00:40:a6:00:00:02",
+            },
+        ],
+        "4": [
+            {
+                "Port\\Next Hop": "Mpo1",
+                "Type": "Dynamic",
+                "Mac Address": "00:40:a6:00:44:55",
+            },
+            {
+                "Port\\Next Hop": "Mpo4",
+                "Type": "Dynamic",
+                "Mac Address": "00:40:a6:00:00:02",
+            },
+        ],
+        "7": [
+            {
+                "Port\\Next Hop": "Mpo2",
+                "Type": "Dynamic",
+                "Mac Address": "00:40:a6:00:00:33",
+            },
+            {
+                "Port\\Next Hop": "Mpo3",
+                "Type": "Dynamic",
+                "Mac Address": "00:40:a6:00:00:00",
+            },
+            {
+                "Port\\Next Hop": "Mpo1",
+                "Type": "Dynamic",
+                "Mac Address": "00:40:a6:00:44:55",
+            },
+            {
+                "Port\\Next Hop": "Mpo4",
+                "Type": "Dynamic",
+                "Mac Address": "00:40:a6:00:00:02",
+            },
+        ],
+    },
+}
+
+mac_address_table = (
+    "MAC age-time            : 300 seconds\n"
+    + "Number of MAC addresses : 90\n"
+    + "\n"
+    + "MAC Address          VLAN     Type                      Port\n"
+    + "--------------------------------------------------------------\n"
+    + "00:40:a6:00:00:00    2        dynamic                   1/1/3\n"
+)

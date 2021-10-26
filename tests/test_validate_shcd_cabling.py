@@ -45,11 +45,13 @@ runner = testing.CliRunner()
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_shcd_cabling(switch_vendor):
+def test_validate_shcd_cabling(netmiko_command, switch_vendor):
     """Test that the `canu validate shcd-cabling` command runs and returns valid cabling."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         generate_test_file(test_file)
         responses.add(
             responses.POST,
@@ -117,12 +119,14 @@ def test_validate_shcd_cabling(switch_vendor):
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_shcd_cabling_full_architecture(switch_vendor):
+def test_validate_shcd_cabling_full_architecture(netmiko_command, switch_vendor):
     """Test that the `canu validate shcd-cabling` command runs and returns valid cabling with full architecture."""
     full_architecture = "full"
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         generate_test_file(test_file)
         responses.add(
             responses.POST,
@@ -191,11 +195,13 @@ def test_validate_shcd_cabling_full_architecture(switch_vendor):
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_shcd_cabling_file(switch_vendor):
+def test_validate_shcd_cabling_file(netmiko_command, switch_vendor):
     """Test that the `canu validate shcd-cabling` command runs and returns valid cabling with IPs from file."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         with open("test.txt", "w") as f:
             f.write("192.168.1.1")
 
@@ -405,13 +411,15 @@ def test_validate_shcd_cabling_invalid_ip_file():
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_shcd_cabling_bad_ip(switch_vendor):
+def test_validate_shcd_cabling_bad_ip(netmiko_command, switch_vendor):
     """Test that the `canu validate shcd-cabling` command errors on bad IP address."""
     bad_ip = "192.168.1.99"
 
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         responses.add(
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
@@ -448,13 +456,15 @@ def test_validate_shcd_cabling_bad_ip(switch_vendor):
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_shcd_cabling_bad_ip_file(switch_vendor):
+def test_validate_shcd_cabling_bad_ip_file(netmiko_command, switch_vendor):
     """Test that the `canu validate shcd-cabling` command errors on a bad IP from a file."""
     bad_ip = "192.168.1.99"
 
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         with open("test.txt", "w") as f:
             f.write(bad_ip)
 
@@ -494,13 +504,15 @@ def test_validate_shcd_cabling_bad_ip_file(switch_vendor):
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_shcd_cabling_bad_password(switch_vendor):
+def test_validate_shcd_cabling_bad_password(netmiko_command, switch_vendor):
     """Test that the `canu validate shcd-cabling` command errors on bad credentials."""
     bad_password = "foo"
 
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -596,11 +608,13 @@ def test_validate_shcd_cabling_bad_file():
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_shcd_cabling_missing_tabs(switch_vendor):
+def test_validate_shcd_cabling_missing_tabs(netmiko_command, switch_vendor):
     """Test that the `canu validate shcd-cabling` command prompts for missing tabs."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         generate_test_file(test_file)
         responses.add(
             responses.POST,
@@ -655,12 +669,14 @@ def test_validate_shcd_cabling_missing_tabs(switch_vendor):
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_shcd_cabling_bad_tab(switch_vendor):
+def test_validate_shcd_cabling_bad_tab(netmiko_command, switch_vendor):
     """Test that the `canu validate shcd-cabling` command fails on bad tab name."""
     bad_tab = "BAD_TAB"
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         generate_test_file(test_file)
         responses.add(
             responses.POST,
@@ -713,10 +729,14 @@ def test_validate_shcd_cabling_bad_tab(switch_vendor):
         assert "Tab BAD_TAB not found in test_file.xlsx" in str(result.output)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_shcd_cabling_corner_prompt():
+def test_validate_shcd_cabling_corner_prompt(netmiko_command, switch_vendor):
     """Test that the `canu validate shcd-cabling` command prompts for corner input and runs."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -780,11 +800,15 @@ def test_validate_shcd_cabling_corner_prompt():
         remove_switch_from_cache(ip)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_shcd_cabling_corners_too_narrow():
+def test_validate_shcd_cabling_corners_too_narrow(netmiko_command, switch_vendor):
     """Test that the `canu validate shcd cabling` command fails on too narrow area."""
     corners_too_narrow = "I16,P48"
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -838,11 +862,15 @@ def test_validate_shcd_cabling_corners_too_narrow():
         remove_switch_from_cache(ip)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_shcd_cabling_corners_too_high():
+def test_validate_shcd_cabling_corners_too_high(netmiko_command, switch_vendor):
     """Test that the `canu validate shcd-cabling` command fails on empty cells."""
     corners_too_high = "H16,S48"
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -899,11 +927,15 @@ def test_validate_shcd_cabling_corners_too_high():
         remove_switch_from_cache(ip)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_shcd_cabling_corners_bad_cell():
+def test_validate_shcd_cabling_corners_bad_cell(netmiko_command, switch_vendor):
     """Test that the `canu validate shcd-cabling` command fails on bad cell."""
     corners_bad_cell = "16,S48"
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -957,35 +989,10 @@ def test_validate_shcd_cabling_corners_bad_cell():
         remove_switch_from_cache(ip)
 
 
-@responses.activate
 def test_validate_shcd_cabling_not_enough_corners():
     """Test that the `canu validate shcd-cabling` command fails on not enough corners."""
     not_enough_corners = "H16"
     with runner.isolated_filesystem():
-        responses.add(
-            responses.POST,
-            f"https://{ip}/rest/v10.04/login",
-        )
-        responses.add(
-            responses.GET,
-            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname,system_mac",
-            json=switch_info1,
-        )
-        responses.add(
-            responses.GET,
-            f"https://{ip}/rest/v10.04/system/interfaces/*/lldp_neighbors?depth=2",
-            json=lldp_neighbors_json1,
-        )
-        responses.add(
-            responses.GET,
-            f"https://{ip}/rest/v10.04/system/vrfs/default/neighbors?depth=2",
-            json=arp_neighbors_json1,
-        )
-
-        responses.add(
-            responses.POST,
-            f"https://{ip}/rest/v10.04/logout",
-        )
         generate_test_file(test_file)
         result = runner.invoke(
             cli,
@@ -1017,11 +1024,15 @@ def test_validate_shcd_cabling_not_enough_corners():
         remove_switch_from_cache(ip)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_shcd_cabling_bad_headers():
+def test_validate_shcd_cabling_bad_headers(netmiko_command, switch_vendor):
     """Test that the `canu validate shcd-cabling` command fails on bad headers."""
     bad_header_tab = "Bad_Headers"
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -1075,11 +1086,18 @@ def test_validate_shcd_cabling_bad_headers():
         remove_switch_from_cache(ip)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_shcd_cabling_bad_architectural_definition():
+def test_validate_shcd_cabling_bad_architectural_definition(
+    netmiko_command,
+    switch_vendor,
+):
     """Test that the `canu validate shcd-cabling` command fails with bad connections."""
     corners_bad_row = "I14,S31"
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -1135,10 +1153,14 @@ def test_validate_shcd_cabling_bad_architectural_definition():
         remove_switch_from_cache(ip)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_shcd_cabling_rename():
+def test_validate_shcd_cabling_rename(netmiko_command, switch_vendor):
     """Test that the `canu validate shcd-cabling` command runs and finds bad naming."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -1193,10 +1215,14 @@ def test_validate_shcd_cabling_rename():
         remove_switch_from_cache(ip)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_validate_shcd_missing_connections():
+def test_validate_shcd_missing_connections(netmiko_command, switch_vendor):
     """Test that the `canu validate shcd-cabling` command runs and finds missing connections."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -1816,3 +1842,13 @@ def generate_test_file(file_name):
             ws3.cell(column=col + 9, row=row + 15, value=f"{test_data3[row][col]}")
 
     wb.save(filename=test_file)
+
+
+mac_address_table = (
+    "MAC age-time            : 300 seconds\n"
+    + "Number of MAC addresses : 90\n"
+    + "\n"
+    + "MAC Address          VLAN     Type                      Port\n"
+    + "--------------------------------------------------------------\n"
+    + "00:40:a6:00:00:00    2        dynamic                   1/1/3\n"
+)
