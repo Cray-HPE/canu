@@ -13,6 +13,7 @@ interface ethernet 1/{{ node.config.PORT }} mtu 9216 force
 interface ethernet 1/{{ node.config.PORT }} description {{ node.config.DESCRIPTION }}
 interface ethernet 1/{{ node.config.PORT }} mlag-channel-group {{ node.config.LAG_NUMBER }} mode active
 interface mlag-port-channel {{ node.config.LAG_NUMBER }} description {{ node.config.DESCRIPTION }}
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} no shutdown
 interface mlag-port-channel {{ node.config.LAG_NUMBER }} spanning-tree port type network
 interface mlag-port-channel {{ node.config.LAG_NUMBER }} spanning-tree guard root
 

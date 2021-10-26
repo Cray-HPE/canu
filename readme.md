@@ -956,6 +956,7 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 - Added an `--override` option to `canu generate switch config` and `canu generate network config`, this allows users to ignore custom configuration so CANU does not overwrite it.
 - Changed the `-s --shasta` flag to `--csm`
 - Added Mellanox support to the `canu config bgp` command
+- Added Dell/Mellanox support to the `canu generate network config` & `canu generate switch config` commands
 
 ## [unreleased]
 

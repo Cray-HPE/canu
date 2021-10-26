@@ -168,17 +168,41 @@
       - equals: interface ethernet 1/20 mtu 9216 force
       order: 79
     - lineage:
-      - equals: interface ethernet 1/114 mtu 9216 force
+      - equals: interface ethernet 1/21 mtu 9216 force
       order: 80
     - lineage:
-      - equals: interface ethernet 1/115 mtu 9216 force
+      - equals: interface ethernet 1/22 mtu 9216 force
       order: 81
     - lineage:
-      - equals: interface ethernet 1/151 mtu 9216 force
+      - equals: interface ethernet 1/23 mtu 9216 force
       order: 82
     - lineage:
-      - equals: interface ethernet 1/152 mtu 9216 force
+      - equals: interface ethernet 1/24 mtu 9216 force
       order: 83
+    - lineage:
+      - equals: interface ethernet 1/25 mtu 9216 force
+      order: 84
+    - lineage:
+      - equals: interface ethernet 1/26 mtu 9216 force
+      order: 85
+    - lineage:
+      - equals: interface ethernet 1/27 mtu 9216 force
+      order: 86
+    - lineage:
+      - equals: interface ethernet 1/28 mtu 9216 force
+      order: 87
+    - lineage:
+      - equals: interface ethernet 1/29 mtu 9216 force
+      order: 88
+    - lineage:
+      - equals: interface ethernet 1/30 mtu 9216 force
+      order: 89
+    - lineage:
+      - equals: interface ethernet 1/31 mtu 9216 force
+      order: 90
+    - lineage:
+      - equals: interface ethernet 1/32 mtu 9216 force
+      order: 91
     - lineage:
       - equals: interface mlag-port-channel 1 mtu 9216 force
       order: 160
@@ -425,6 +449,21 @@
     - lineage:
       - startswith: interface mlag-port-channel 152 switchport mode hybrid
       order: 383
+    - lineage:
+      - startswith: interface mlag-port-channel 153 switchport mode hybrid
+      order: 384
+    - lineage:
+      - startswith: interface mlag-port-channel 154 switchport mode hybrid
+      order: 385
+    - lineage:
+      - startswith: interface mlag-port-channel 201 switchport mode hybrid
+      order: 386
+    - lineage:
+      - startswith: interface mlag-port-channel 202 switchport mode hybrid
+      order: 387
+    - lineage:
+      - startswith: interface mlag-port-channel 203 switchport mode hybrid
+      order: 388
     - lineage:
       - startswith: interface ethernet 1/1 description
       order: 400

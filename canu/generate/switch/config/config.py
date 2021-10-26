@@ -424,6 +424,7 @@ def generate_switch_config(
     """Generate switch config.
 
     Args:
+        architecture: CSM architecture
         shcd_node_list: List of nodes from the SHCD
         factory: Node factory object
         switch_name: Switch hostname
@@ -628,14 +629,14 @@ def generate_switch_config(
             dell_config_hier = HConfig(host=dell_switch)
             dell_config_hier.load_from_string(switch_config).set_order_weight()
             for line in dell_config_hier.all_children_sorted():
-                v1_config  = v1_config + line.cisco_style_text() + "\n"
+                v1_config = v1_config + line.cisco_style_text() + "\n"
         if "sw-spine" in node_shasta_name:
             v1_config = ""
             mellanox_switch = Host(node_shasta_name, "onyx", mellanox_options)
             mellanox_config_hier = HConfig(host=mellanox_switch)
             mellanox_config_hier.load_from_string(switch_config).set_order_weight()
             for line in mellanox_config_hier.all_children_sorted():
-                v1_config  = v1_config + line.cisco_style_text() + "\n"
+                v1_config = v1_config + line.cisco_style_text() + "\n"
         return v1_config, devices
 
     if override:
@@ -776,7 +777,7 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "PORT": f"{source_port}",
                     "LAG_NUMBER": primary_port_ncn_s,
-                    "LAG_NUMBER_V1": primary_port
+                    "LAG_NUMBER_V1": primary_port,
                 },
             }
             nodes.append(new_node)
