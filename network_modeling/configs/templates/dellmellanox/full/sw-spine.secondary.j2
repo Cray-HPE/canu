@@ -5,6 +5,7 @@ hostname {{ variables.HOSTNAME }}
 no cli default prefix-modes enable
 
    protocol mlag
+   protocol bgp
 
 vlan 2 name "RVR_NMN"
 vlan 4 name "RVR_HMN"

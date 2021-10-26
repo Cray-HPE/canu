@@ -4,20 +4,17 @@
 interface mlag-port-channel {{ node.config.LAG_NUMBER }}
 interface mlag-port-channel {{ node.config.LAG_NUMBER }}  mtu 9216 force
 interface mlag-port-channel {{ node.config.LAG_NUMBER }}  switchport mode hybrid
-interface mlag-port-channel {{ node.config.LAG_NUMBER }}  lacp-individual enable force
 interface mlag-port-channel {{ node.config.LAG_NUMBER }}  switchport hybrid allowed-vlan add 2
 interface mlag-port-channel {{ node.config.LAG_NUMBER }}  switchport hybrid allowed-vlan add 4
 
-interface ethernet 1/{{ node.config.PORT }} switchport mode hybrid
 interface ethernet 1/{{ node.config.PORT }} mlag-channel-group {{ node.config.LAG_NUMBER }} mode active
-interface ethernet 1/{{ node.config.PORT }} mtu 9216 force
-interface mlag-port-channel {{ node.config.PORT }} description {{ node.config.DESCRIPTION }}
 
 interface ethernet 1/{{ node.config.PORT }} mtu 9216 force
+interface ethernet 1/{{ node.config.PORT }} description {{ node.config.DESCRIPTION }}
 interface ethernet 1/{{ node.config.PORT }} mlag-channel-group {{ node.config.LAG_NUMBER }} mode active
-interface mlag-port-channel {{ node.config.PORT }} description {{ node.config.DESCRIPTION }}
-interface ethernet 1/{{ node.config.PORT }} spanning-tree port type network
-interface ethernet 1/{{ node.config.PORT }} spanning-tree guard root
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} description {{ node.config.DESCRIPTION }}
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} spanning-tree port type network
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} spanning-tree guard root
 
 {%- endfor %}
 {#- end spine-to-leaf-bmc #}

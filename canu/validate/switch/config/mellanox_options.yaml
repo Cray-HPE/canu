@@ -148,7 +148,7 @@
       order: 72
     - lineage:
       - equals: interface ethernet 1/14 mtu 9216 force
-      order: 77
+      order: 73
     - lineage:
       - equals: interface ethernet 1/15 mtu 9216 force
       order: 74
@@ -220,7 +220,7 @@
       order: 172
     - lineage:
       - equals: interface mlag-port-channel 14 mtu 9216 force
-      order: 177
+      order: 173
     - lineage:
       - equals: interface mlag-port-channel 15 mtu 9216 force
       order: 174
@@ -298,7 +298,7 @@
       order: 272
     - lineage:
       - startswith: interface ethernet 1/14 mlag-channel-group
-      order: 277
+      order: 273
     - lineage:
       - startswith: interface ethernet 1/15 mlag-channel-group
       order: 274
@@ -394,7 +394,7 @@
       order: 372
     - lineage:
       - startswith: interface mlag-port-channel 14 switchport mode hybrid
-      order: 377
+      order: 373
     - lineage:
       - startswith: interface mlag-port-channel 15 switchport mode hybrid
       order: 374
