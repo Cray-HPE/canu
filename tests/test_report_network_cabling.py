@@ -32,6 +32,8 @@ from canu.utils.cache import remove_switch_from_cache
 from .test_report_switch_cabling import (
     arp_neighbors_mellanox,
     lldp_json_mellanox,
+    mac_address_table_mellanox,
+    mlag_mellanox,
     netmiko_commands_dell,
 )
 
@@ -48,11 +50,13 @@ runner = testing.CliRunner()
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_network_cabling(switch_vendor):
+def test_network_cabling(netmiko_command, switch_vendor):
     """Test that the `canu report network cabling` command runs and returns valid cabling."""
-    switch_vendor.return_value = "aruba"
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -99,10 +103,14 @@ def test_network_cabling(switch_vendor):
         remove_switch_from_cache(ip)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_network_cabling_file():
+def test_network_cabling_file(netmiko_command, switch_vendor):
     """Test that the `canu report network cabling` command runs from a file input and returns valid cabling."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         with open("test.txt", "w") as f:
             f.write("192.168.1.1")
 
@@ -152,11 +160,15 @@ def test_network_cabling_file():
         remove_switch_from_cache(ip)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_network_cabling_file_bidirectional():
+def test_network_cabling_file_bidirectional(netmiko_command, switch_vendor):
     """Test that the `canu report network cabling` command runs from a file input and returns valid cabling."""
     ip2 = "192.168.1.2"
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         with open("test.txt", "w") as f:
             f.write("192.168.1.1\n")
             f.write(ip2)
@@ -234,10 +246,14 @@ def test_network_cabling_file_bidirectional():
         remove_switch_from_cache(ip)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_network_cabling_equipment_view():
+def test_network_cabling_equipment_view(netmiko_command, switch_vendor):
     """Test that the `canu report network cabling` command runs and returns valid cabling."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -288,11 +304,18 @@ def test_network_cabling_equipment_view():
         remove_switch_from_cache(ip)
 
 
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
-def test_network_cabling_file_equipment_view_bidirectional():
+def test_network_cabling_file_equipment_view_bidirectional(
+    netmiko_command,
+    switch_vendor,
+):
     """Test that the `canu report network cabling` command runs from a file input and returns valid cabling."""
     ip2 = "192.168.1.2"
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
         with open("test.txt", "w") as f:
             f.write("192.168.1.1\n")
             f.write(ip2)
@@ -715,6 +738,16 @@ def test_network_cabling_mellanox(switch_vendor):
         responses.add(
             responses.POST,
             f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json=mlag_mellanox,
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
+            json=mac_address_table_mellanox,
+        )
+        responses.add(
+            responses.POST,
+            f"https://{ip_mellanox}/admin/launch?script=rh&template=json-request&action=json-login",
             json={"data": [{"Hostname": "sw-test03"}]},
         )
         responses.add(
@@ -901,16 +934,16 @@ lldp_neighbors_json1 = {
         },
     },
     "1%2F1%2F3": {
-        "00:00:00:00:00:00,00:00:00:00:00:00": {
-            "chassis_id": "00:00:00:00:00:00",
-            "mac_addr": "00:00:00:00:00:00",
+        "00:40:a6:00:00:00,00:40:a6:00:00:00": {
+            "chassis_id": "00:40:a6:00:00:00",
+            "mac_addr": "00:40:a6:00:00:00",
             "neighbor_info": {
                 "chassis_description": "",
                 "chassis_name": "",
                 "port_description": "",
                 "port_id_subtype": "link_local_addr",
             },
-            "port_id": "00:00:00:00:00:00",
+            "port_id": "00:40:a6:00:00:00",
         },
         "11:11:11:11:11:11,11:11:11:11:11:11": {
             "chassis_id": "11:11:11:11:11:11",
@@ -941,7 +974,7 @@ lldp_neighbors_json1 = {
 
 arp_neighbors_json1 = {
     "192.168.1.2,vlan1": {
-        "mac": "00:00:00:00:00:00",
+        "mac": "00:40:a6:00:00:00",
         "ip_address": "192.168.1.2",
         "port": {"vlan1": "/rest/v10.04/system/interfaces/vlan1"},
     },
@@ -951,7 +984,7 @@ arp_neighbors_json1 = {
         "port": {"vlan2": "/rest/v10.04/system/interfaces/vlan2"},
     },
     "192.168.2.2,vlan3": {
-        "mac": "00:00:00:00:00:00",
+        "mac": "00:40:a6:00:00:00",
         "ip_address": "192.168.2.2",
         "port": {"vlan3": "/rest/v10.04/system/interfaces/vlan3"},
     },
@@ -995,7 +1028,7 @@ lldp_neighbors_json2 = {
 
 arp_neighbors_json2 = {
     "192.168.1.2,vlan1": {
-        "mac": "00:00:00:00:00:00",
+        "mac": "00:40:a6:00:00:00",
         "ip_address": "192.168.1.2",
         "port": {"vlan1": "/rest/v10.04/system/interfaces/vlan1"},
     },
@@ -1005,8 +1038,17 @@ arp_neighbors_json2 = {
         "port": {"vlan2": "/rest/v10.04/system/interfaces/vlan2"},
     },
     "192.168.2.2,vlan3": {
-        "mac": "00:00:00:00:00:00",
+        "mac": "00:40:a6:00:00:00",
         "ip_address": "192.168.2.2",
         "port": {"vlan3": "/rest/v10.04/system/interfaces/vlan3"},
     },
 }
+
+mac_address_table = (
+    "MAC age-time            : 300 seconds\n"
+    + "Number of MAC addresses : 90\n"
+    + "\n"
+    + "MAC Address          VLAN     Type                      Port\n"
+    + "--------------------------------------------------------------\n"
+    + "00:40:a6:00:00:00    2        dynamic                   1/1/3\n"
+)
