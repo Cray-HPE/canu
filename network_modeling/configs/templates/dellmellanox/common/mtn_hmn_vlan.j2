@@ -12,6 +12,6 @@ interface vlan{{ cabinet.VlanID }}
  !
 {% set vrrp_id = cabinet.VlanID|string %} vrrp-group {{ vrrp_id[:1] }}{{ vrrp_id[-1:] }}
   virtual-address {{ cabinet.Gateway }}
-
+!
 {%- endfor %}
 {#- end mtn_hmn_vlan #}

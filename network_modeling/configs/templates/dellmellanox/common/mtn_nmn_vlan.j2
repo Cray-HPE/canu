@@ -9,9 +9,8 @@ interface vlan{{ cabinet.VlanID }}
  ip ospf 1 area 0.0.0.0
  ip ospf passive
  ip helper-address 10.92.100.222
-{% set vrrp_id = cabinet.VlanID|string %}
  !
- vrrp-group {{ vrrp_id[:1] }}{{ vrrp_id[-1:] }}
+{% set vrrp_id = cabinet.VlanID|string %} vrrp-group {{ vrrp_id[:1] }}{{ vrrp_id[-1:] }}
   virtual-address {{ cabinet.Gateway }}
 
 {%- endfor %}

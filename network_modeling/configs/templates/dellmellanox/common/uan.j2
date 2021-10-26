@@ -10,7 +10,6 @@ interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport hybrid allow
 interface mlag-port-channel {{ node.config.LAG_NUMBER }} spanning-tree port type edge
 interface mlag-port-channel {{ node.config.LAG_NUMBER }} spanning-tree bpduguard enable
 
-interface ethernet 1/{{ node.config.PORT }} speed 40G force
 interface ethernet 1/{{ node.config.PORT }} mtu 9216 force
 interface ethernet 1/{{ node.config.PORT }} flowcontrol receive on force
 interface ethernet 1/{{ node.config.PORT }} flowcontrol send on force
