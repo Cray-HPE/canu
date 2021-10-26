@@ -33,7 +33,8 @@ import requests
 import urllib3
 
 from canu.utils.cache import cache_switch
-from canu.utils.ssh import netmiko_commands
+from canu.utils.mac import find_mac
+from canu.utils.ssh import netmiko_command, netmiko_commands
 from canu.utils.vendor import switch_vendor
 
 # To disable warnings about unsecured HTTPS requests
@@ -233,10 +234,14 @@ def get_lldp_aruba(ip, credentials, return_error=False):
 
             for _mac, lldp_info in port.items():
                 neighbor_info = lldp_info["neighbor_info"]
+                if neighbor_info["chassis_description"] == "":
+                    description = find_mac(lldp_info["mac_addr"])
+                else:
+                    description = neighbor_info["chassis_description"]
                 lldp_neighbor = {
                     "chassis_id": lldp_info["chassis_id"],
                     "mac_addr": lldp_info["mac_addr"],
-                    "chassis_description": neighbor_info["chassis_description"],
+                    "chassis_description": description,
                     "chassis_name": neighbor_info["chassis_name"],
                     "port_description": neighbor_info["port_description"],
                     "port_id_subtype": neighbor_info["port_id_subtype"],
@@ -247,6 +252,34 @@ def get_lldp_aruba(ip, credentials, return_error=False):
 
         # Logout
         session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
+
+        # Get the mac-address-table to help fill in port data if not reported over LLDP
+        command = "show mac-address-table"
+        command_output = netmiko_command(ip, credentials, command, "aruba")
+        mac_address_table = defaultdict()
+
+        # Start parsing after the header
+        for line in command_output.splitlines()[5:]:
+            line = line.split()
+            table_mac = line[0]
+            table_port = line[3]
+            if "lag" not in table_port:
+                mac_address_table[table_port] = table_mac
+
+        # Add the mac-address-table data to the lldp_dict
+        for device_port, mac in mac_address_table.items():
+            if device_port not in lldp_dict.keys():
+                lldp_dict[device_port] = [
+                    {
+                        "chassis_id": "",
+                        "mac_addr": mac,
+                        "chassis_description": find_mac(mac),
+                        "port_description": "",
+                        "chassis_name": "",
+                        "port_id": mac,
+                        "port_id_subtype": "link_local_addr",
+                    },
+                ]
 
         # Order the ports in natural order
         lldp_dict = OrderedDict(natsort.natsorted(lldp_dict.items()))
@@ -292,6 +325,7 @@ def get_lldp_dell(ip, credentials, return_error):
             "show version",
             "system hostname",
             "show ip arp",
+            "show mac address-table",
         ]
         command_output = netmiko_commands(ip, credentials, commands, "dell")
 
@@ -313,6 +347,10 @@ def get_lldp_dell(ip, credentials, return_error):
                 port_description = line[25:]
                 if port_description == "Not Advertised":
                     port_description = ""
+                if port_description == "":
+                    port_description = find_mac(
+                        neighbors_dict[port]["mac_addr"],
+                    )
                 neighbors_dict[port]["port_description"] = port_description
             elif line.startswith("Remote System Name:"):
                 chassis_name = line[20:]
@@ -351,6 +389,33 @@ def get_lldp_dell(ip, credentials, return_error):
             interface = neighbors_dict[port]["local_port_id"]
 
             lldp_dict[interface].append(neighbors_dict[port])
+
+        # Get the mac-address-table to help fill in port data if not reported over LLDP
+        mac_address_table = defaultdict()
+
+        # Start parsing mac address-table after the header
+        for line in command_output[5].splitlines()[1:]:
+            line = line.split()
+            table_mac = line[1]
+            table_port = line[3]
+            if "ethernet" in table_port:
+                table_port = table_port.replace("ethernet", "")
+                mac_address_table[table_port] = table_mac
+
+        # Add the mac-address-table data to the lldp_dict
+        for device_port, mac in mac_address_table.items():
+            if device_port not in lldp_dict.keys():
+                lldp_dict[device_port] = [
+                    {
+                        "chassis_id": "",
+                        "mac_addr": mac,
+                        "chassis_description": find_mac(mac),
+                        "port_description": "",
+                        "chassis_name": "",
+                        "port_id": mac,
+                        "port_id_subtype": "link_local_addr",
+                    },
+                ]
 
         # Order the ports in natural order
         lldp_dict = OrderedDict(natsort.natsorted(lldp_dict.items()))
@@ -550,6 +615,61 @@ def get_lldp_mellanox(ip, credentials, return_error):
             port_info["port_id_subtype"] = "if_name"
             interface = port_info["local_port_id"]
             lldp_dict[interface].append(port_info)
+
+        # Get the mac-address-table to help fill in port data if not reported over LLDP
+        # On Mellanox this is a two step process,
+        # First get the mlags and what port each one is associated with
+        mlag_remote = session.post(
+            f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"cmd": "show interfaces mlag-port-channel summary | include LACP"},
+            verify=False,
+        )
+
+        mlag_json = mlag_remote.json()
+
+        mlag_dict = defaultdict()
+        for entry in list(mlag_json["data"][0].items())[0][1]:
+            mlag_line = entry.split()
+            mpo_line = mlag_line[1].split("(")[0]
+            port_line = mlag_line[3].split("(")[0].replace("Eth", "1/")
+            mlag_dict[mpo_line] = port_line
+
+        # Second get the mac-address-table and use the associated ports
+        mat_remote = session.post(
+            f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
+            json={"cmd": "show mac-address-table"},
+            verify=False,
+        )
+
+        mat_json = mat_remote.json()
+
+        address_table_dict = defaultdict(list)
+        for _vlan, info in mat_json["data"].items():
+            for x in info:
+                try:
+                    port_mat = x.get("Port\\Next Hop").replace("Eth", "1/")
+                    mac_mat = x.get("Mac Address")
+                    if "Mpo" in port_mat:
+                        port = mlag_dict[port_mat]
+                        address_table_dict[port].append(mac_mat)
+                except AttributeError:
+                    pass
+
+        # Add the mac-address-table data to the lldp_dict
+        for device_port, mac_list in address_table_dict.items():
+            if device_port not in lldp_dict.keys():
+                for mac in mac_list:
+                    lldp_dict[device_port] = [
+                        {
+                            "chassis_id": "",
+                            "mac_addr": mac,
+                            "chassis_description": find_mac(mac),
+                            "port_description": "",
+                            "chassis_name": "",
+                            "port_id": mac,
+                            "port_id_subtype": "link_local_addr",
+                        },
+                    ]
 
         # Order the ports in natural order
         lldp_dict = OrderedDict(natsort.natsorted(lldp_dict.items()))

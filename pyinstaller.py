@@ -28,6 +28,7 @@ added_files = [
     ("canu/canu.yaml", "canu"),
     ("canu/validate/switch/config/*.yaml", "canu/validate/switch/config"),
     ("network_modeling/models/*", "network_modeling/models"),
+    ("network_modeling/mac_vendors", "network_modeling"),
     ("network_modeling/schema/*", "network_modeling/schema"),
     (
         "network_modeling/configs/templates/aruba/common/*.j2",
