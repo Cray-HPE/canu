@@ -380,7 +380,6 @@ def config(
             )
             exit(1)
 
-
     switch_config, devices, unknown = generate_switch_config(
         architecture,
         shcd_node_list,
@@ -652,7 +651,7 @@ def generate_switch_config(
             mellanox_config_hier.load_from_string(switch_config).set_order_weight()
             for line in mellanox_config_hier.all_children_sorted():
                 v1_config = v1_config + line.cisco_style_text() + "\n"
-        return v1_config, devices
+        return v1_config, devices, unknown
 
     if override:
         options_file = os.path.join(
