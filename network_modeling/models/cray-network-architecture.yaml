@@ -408,6 +408,12 @@ network_v1:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
+    - name: "dense_compute_node"
+      model: "dense_compute_node"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
+          comment: "bmc"
   lookup_mapper:
     - lookup_name:
         - "mn"
@@ -464,6 +470,11 @@ network_v1:
     - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"
+    - lookup_name: 
+        - '^SubRack-\d+-\w+$'
+      shasta_name: "cn"
+      architecture_type: "dense_compute_node"
+      regex: true
     - lookup_name: 
         - '^x\d+p\d+$'
         - '^pdu\d+$'

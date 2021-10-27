@@ -250,6 +250,13 @@ def get_node_common_name(name, rack_number, rack_elevation, mapper):
                     tmp_name = node[1] + "-" + rack_number + "-"
                 elif node[1].find("pdu") != -1:
                     tmp_name = node[1] + rack_elevation
+                elif node[1].find("cn") != -1:
+                    # The dense nodes SubRack names can stay as they are
+                    if node[2].find("dense") != -1:
+                        tmp_name = name
+                    else:
+                        # Othwerwise, the normal computes follow the normal naming convention
+                        tmp_name = node[1]
                 else:
                     tmp_name = node[1]
                 if tmp_name == "sw-cdu-" and not name.startswith("sw-cdu"):
@@ -262,6 +269,9 @@ def get_node_common_name(name, rack_number, rack_elevation, mapper):
                     digits = re.findall(r"\d+", name)
                     tmp_id = int(digits[0]) * 2 + int(digits[1])
                     common_name = f"{tmp_name}{tmp_id:0>3}"
+                elif tmp_name.startswith("SubRack"):
+                    # The name stays the same here, too: SubRack-00N-{CMC,RMC}
+                    common_name = name
                 elif tmp_name.startswith("pdu"):
                     digits = re.findall(r"\d+", name)
                     digit = digits[1]

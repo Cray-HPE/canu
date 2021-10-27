@@ -233,4 +233,15 @@ network_hardware:
     ports:
       - count: 1
         speed: 1
+        slot: "bmc" 
+  - name: "HPE ProLiant XL225n Gen10 Plus Server"
+    vendor: "hpe"
+    model: "dense_compute_node"
+    type: "server"
+    deprecated: False
+    ports:
+      - count: 1
+        speed: 1
+      - count: 1
+        speed: 1
         slot: "bmc"
