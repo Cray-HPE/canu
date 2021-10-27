@@ -58,11 +58,11 @@ no interface mgmt0 dhcp
 interface mgmt0 ip address 192.168.255.243 /29
 
 spanning-tree mode mst
+spanning-tree port type edge default
 spanning-tree priority 4096
 spanning-tree mst 1 vlan 1
 spanning-tree mst 1 vlan 4
 spanning-tree mst 1 vlan 7
-spanning-tree port type edge bpduguard default
 
 interface port-channel 100 dcb priority-flow-control mode on force
 
