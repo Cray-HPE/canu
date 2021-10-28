@@ -576,12 +576,12 @@ def print_combined_nodes(combined_nodes, out="-"):
             elevation = node_info.get("location").get("elevation")
 
             click.secho(
-                "Rack: {:<7s}  Elevation: {}".format(rack, elevation),
+                f"Rack: {rack:<7s}  Elevation: {elevation}",
                 file=out,
             )
         click.secho(dash, file=out)
         click.secho(
-            f"{'Port':<7s}{'SHCD':<25s}{'Cabling':<25s}",
+            f"{'Port':<7s}{'SHCD':<25s}{'Cabling'}",
             fg="bright_white",
             file=out,
         )
@@ -592,7 +592,7 @@ def print_combined_nodes(combined_nodes, out="-"):
             if port_info["shcd"] == port_info["cabling"]:
                 text_color = None
             click.secho(
-                f"{str(port_number):<7s}{str(port_info['shcd']):<25s}{str(port_info['cabling']):<25s}",
+                f"{str(port_number):<7s}{str(port_info['shcd']):<25s}{str(port_info['cabling'])}",
                 fg=text_color,
                 file=out,
             )
