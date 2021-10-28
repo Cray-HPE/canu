@@ -380,7 +380,7 @@ def config(
             )
             exit(1)
 
-    switch_config, devices = generate_switch_config(
+    switch_config, devices, unknown = generate_switch_config(
         shcd_node_list,
         factory,
         switch_name,
@@ -399,6 +399,20 @@ def config(
     else:
         click.secho(f"{switch_name} Switch Config", fg="bright_white")
     click.echo(switch_config, file=out)
+
+    if len(unknown) > 0:
+        click.secho("\nWarning", fg="red")
+
+        click.secho(
+            "\nThe following devices were discovered in the input data, but the CANU model cannot determine "
+            + "the type and generate a configuration.\nApplying this configuration without considering these "
+            + "devices will likely result in loss of contact with these devices."
+            + "\nEnsure valid input, submit a bug to CANU and manually add these devices to the configuration.",
+            fg="red",
+        )
+        click.secho(dash)
+        for x in unknown:
+            click.secho(x, fg="bright_white")
     return
 
 
@@ -511,7 +525,7 @@ def generate_switch_config(
         "HMN_MTN_CABINETS": sls_variables["HMN_MTN_CABINETS"],
     }
     cabling = {}
-    cabling["nodes"] = get_switch_nodes(
+    cabling["nodes"], unknown = get_switch_nodes(
         switch_name,
         shcd_node_list,
         factory,
@@ -640,8 +654,8 @@ def generate_switch_config(
                 else:
                     override_config = override_config + "\n" + line.cisco_style_text()
 
-            return override_config, devices
-    return switch_config, devices
+            return override_config, devices, unknown
+    return switch_config, devices, unknown
 
 
 def get_pair_connections(nodes, switch_name):
@@ -681,10 +695,12 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
 
     Returns:
         List of nodes connected to the switch
+        List of unknown nodes
     """
     nodes = []
     nodes_by_name = {}
     nodes_by_id = {}
+    unknown = []
 
     # Make 2 dictionaries for easy node lookup
     for node in shcd_node_list:
@@ -922,15 +938,17 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
             print("Destination: ", destination_node_name)
             print("shasta_name", shasta_name)
             print("*********************************")
+            unknown_description = f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}"
             new_node = {
                 "subtype": "unknown",
                 "slot": None,
                 "config": {
-                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "DESCRIPTION": unknown_description,
                 },
             }
             nodes.append(new_node)
-    return nodes
+            unknown.append(unknown_description)
+    return nodes, unknown
 
 
 def switch_is_primary(switch):

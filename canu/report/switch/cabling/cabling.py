@@ -351,6 +351,10 @@ def get_lldp_dell(ip, credentials, return_error):
                 port_description = line[25:]
                 if port_description == "Not Advertised":
                     port_description = ""
+                if port_description == "":
+                    port_description = find_mac(
+                        neighbors_dict[port]["mac_addr"],
+                    )
                 neighbors_dict[port]["port_description"] = port_description
             elif line.startswith("Remote System Name:"):
                 chassis_name = line[20:]

@@ -40,3 +40,5 @@ lookup_map:
   lookup_name: list(str(min=1, exclude=' '))
   shasta_name: str(min=1, exclude=' ')
   architecture_type: str(min=1, exclude=' ')
+  regex: bool(required=False)
+  
