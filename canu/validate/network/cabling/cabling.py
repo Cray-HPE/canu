@@ -33,6 +33,7 @@ from click_help_colors import HelpColorsCommand
 from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
+from netmiko import ssh_exception
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from network_modeling.NetworkPort import NetworkPort
 import requests
@@ -125,8 +126,14 @@ log = logging.getLogger("validate_shcd")
     type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
     default="ERROR",
 )
+@click.option(
+    "--out",
+    help="Output results to a file",
+    type=click.File("w"),
+    default="-",
+)
 @click.pass_context
-def cabling(ctx, architecture, ips, ips_file, username, password, log_):
+def cabling(ctx, architecture, ips, ips_file, username, password, log_, out):
     """Validate the network.
 
     This command will use LLDP to determine the neighbors of the IP addresses passed in to validate that the network
@@ -144,6 +151,7 @@ def cabling(ctx, architecture, ips, ips_file, username, password, log_):
         username: Switch username
         password: Switch password
         log_: Level of logging.
+        out: Name of the output file
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
@@ -175,28 +183,27 @@ def cabling(ctx, architecture, ips, ips_file, username, password, log_):
                     # Get LLDP info (stored in cache)
                     get_lldp(str(ip), credentials, return_error=True)
 
-                except requests.exceptions.HTTPError:
-                    errors.append(
-                        [
-                            str(ip),
-                            f"Error connecting to switch {ip}, check the IP, username, or password.",
-                        ],
-                    )
-                except requests.exceptions.ConnectionError:
-                    errors.append(
-                        [
-                            str(ip),
-                            f"Error connecting to switch {ip},"
-                            + " check the IP address and try again.",
-                        ],
-                    )
-                except requests.exceptions.RequestException:  # pragma: no cover
-                    errors.append(
-                        [
-                            str(ip),
-                            f"Error connecting to switch {ip}.",
-                        ],
-                    )
+                except (
+                    requests.exceptions.HTTPError,
+                    requests.exceptions.ConnectionError,
+                    requests.exceptions.RequestException,
+                    ssh_exception.NetmikoTimeoutException,
+                    ssh_exception.NetmikoAuthenticationException,
+                ) as err:
+                    exception_type = type(err).__name__
+
+                    if exception_type == "HTTPError":
+                        error_message = f"Error connecting to switch {ip}, check the IP, username, or password."
+                    elif exception_type == "ConnectionError":
+                        error_message = f"Error connecting to switch {ip}, check the IP address and try again."
+                    elif exception_type == "NetmikoTimeoutException":
+                        error_message = f"Timeout error connecting to {ip}. Check the IP address and try again."
+                    elif exception_type == "NetmikoAuthenticationException":
+                        error_message = f"Auth error connecting to {ip}. Check the credentials or IP address and try again"
+                    else:
+                        error_message = f"Error connecting to switch {ip}."
+
+                    errors.append([str(ip), error_message])
 
     # Create Node factory
     factory = NetworkNodeFactory(
@@ -213,17 +220,17 @@ def cabling(ctx, architecture, ips, ips_file, username, password, log_):
 
     node_list, warnings = node_model_from_canu(factory, canu_cache, ips)
 
-    print_node_list(node_list, "Cabling")
+    print_node_list(node_list, "Cabling", out)
 
-    node_list_warnings(node_list, warnings)
+    node_list_warnings(node_list, warnings, out)
 
     dash = "-" * 100
     if len(errors) > 0:
-        click.echo("\n")
-        click.secho("Errors", fg="red")
-        click.echo(dash)
+        click.echo("\n", file=out)
+        click.secho("Errors", fg="red", file=out)
+        click.echo(dash, file=out)
         for error in errors:
-            click.echo("{:<15s} - {}".format(error[0], error[1]))
+            click.echo("{:<15s} - {}".format(error[0], error[1]), file=out)
 
 
 def get_node_type_yaml(name, mapper):
