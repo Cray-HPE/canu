@@ -40,6 +40,7 @@ credentials = {"username": username, "password": password}
 test_file = "test_file.xlsx"
 tabs = "25G_10G"
 corners = "I14,S30"
+csm = "1.2"
 cache_minutes = 0
 runner = testing.CliRunner()
 
@@ -84,6 +85,8 @@ def test_validate_shcd_cabling(netmiko_command, switch_vendor):
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--ips",
@@ -103,18 +106,60 @@ def test_validate_shcd_cabling(netmiko_command, switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        # sw-spine-001:  Found in SHCD, but missing network connections:
+
         assert (
-            "['port 4 ==> sw-leaf-bmc-099', 'port 9 ==> ncn-w003', 'port 15 ==> ncn-s003', "
-            + "'port 16 ==> uan001', 'port 17 ==> uan001', 'port 47 ==> sw-spine-002', 'port 48 ==> sw-leaf-bmc-001']"
-            in str(result.output)
-        )
-        # sw-spine-001:  Found in SHCD, but missing network connections:
+            "sw-spine-001\n"
+            + "Rack: x3000    Elevation: u12\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "Port   SHCD                     Cabling\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "1      sw-spine-002:1           sw-spine-002:1\n"
+            + "2      sw-spine-002:2           sw-spine-002:2\n"
+            + "4      sw-leaf-bmc-099:2        ncn-m88:ocp:2\n"
+            + "9      ncn-w003:ocp:1           None\n"
+            + "15     ncn-s003:ocp:1           None\n"
+            + "16     uan001:ocp:1             None\n"
+            + "17     uan001:ocp:2             None\n"
+            + "47     sw-spine-002:47          None\n"
+            + "48     sw-leaf-bmc-001:49       None\n"
+            + "5      None                     sw-leaf-bmc-099:5\n"
+            + "\n"
+            + "sw-spine-002\n"
+            + "Rack: x3000    Elevation: u13\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "Port   SHCD                     Cabling\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "1      sw-spine-001:1           sw-spine-001:1\n"
+            + "2      sw-spine-001:2           sw-spine-001:2\n"
+            + "9      ncn-w003:ocp:2           None\n"
+            + "16     uan001:pcie-slot1:1      None\n"
+            + "17     uan001:pcie-slot1:2      None\n"
+            + "47     sw-spine-001:47          None\n"
+            + "48     sw-leaf-bmc-001:50       None\n"
+        ) in str(result.output)
+
         assert (
-            "['port 9 ==> ncn-w003', 'port 16 ==> uan001', 'port 17 ==> uan001', "
-            "'port 47 ==> sw-spine-001', 'port 48 ==> sw-leaf-bmc-001']"
-            in str(result.output)
-        )
+            "Sheet: 25G_10G\n"
+            + "Cell: I30      Name: CAN switch\n"
+            + "Cell: O17      Name: junk\n"
+            + "Cell: O19      Name: junk\n"
+        ) in str(result.output)
+
+        assert (
+            "Node type could not be determined for the following.\n"
+            + "These nodes are not currently included in the model.\n"
+            + "(This may be a missing architectural definition/lookup or a spelling error)\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "sw-spine-001     1/1/3     ===> 00:00:00:00:00:00  XEROX CORPORATION 192.168.1.2:vlan1, 192.168.2.2:vlan3\n"
+            + "Nodes that show up as MAC addresses might need to have LLDP enabled.\n"
+            + "\n"
+            + "The following nodes should be renamed\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "sw-leaf-bmc99 should be renamed sw-leaf-bmc-099\n"
+            + "sw-spine01 should be renamed sw-spine-001\n"
+            + "sw-spine02 should be renamed sw-spine-002\n"
+        ) in str(result.output)
+
         remove_switch_from_cache(ip)
 
 
@@ -160,6 +205,8 @@ def test_validate_shcd_cabling_full_architecture(netmiko_command, switch_vendor)
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 full_architecture,
                 "--ips",
@@ -177,20 +224,57 @@ def test_validate_shcd_cabling_full_architecture(netmiko_command, switch_vendor)
             ],
         )
         assert result.exit_code == 0
-        # sw-leaf-001: Found in SHCD but not on the network
+
         assert (
-            "['port 2 ==> sw-leaf-002', 'port 4 ==> sw-leaf-bmc-099', 'port 9 ==> ncn-w003', 'port 15 ==> ncn-s003', "
-            + "'port 16 ==> uan001', 'port 17 ==> uan001', 'port 47 ==> sw-leaf-002', 'port 48 ==> sw-leaf-bmc-001']"
-            in str(result.output)
-        )
-        # sw-leaf-002: Found in SHCD but not on the network
+            "sw-leaf-001\n"
+            + "Rack: x3000    Elevation: u12\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "Port   SHCD                     Cabling\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "1      sw-leaf-002:1            sw-leaf-002:1\n"
+            + "2      sw-leaf-002:2            None\n"
+            + "4      sw-leaf-bmc-099:2        None\n"
+            + "9      ncn-w003:ocp:1           None\n"
+            + "15     ncn-s003:ocp:1           None\n"
+            + "16     uan001:ocp:1             None\n"
+            + "17     uan001:ocp:2             None\n"
+            + "47     sw-leaf-002:47           None\n"
+            + "48     sw-leaf-bmc-001:49       None\n"
+            + "\n"
+            + "sw-leaf-002\n"
+            + "Rack: x3000    Elevation: u13\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "Port   SHCD                     Cabling\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "1      sw-leaf-001:1            sw-leaf-001:1\n"
+            + "2      sw-leaf-001:2            None\n"
+            + "9      ncn-w003:ocp:2           None\n"
+            + "16     uan001:pcie-slot1:1      None\n"
+            + "17     uan001:pcie-slot1:2      None\n"
+            + "47     sw-leaf-001:47           None\n"
+            + "48     sw-leaf-bmc-001:50       None\n"
+        ) in str(result.output)
+
         assert (
-            "['port 2 ==> sw-leaf-001', 'port 9 ==> ncn-w003', 'port 16 ==> uan001', 'port 17 ==> uan001', "
-            + "'port 47 ==> sw-leaf-001', 'port 48 ==> sw-leaf-bmc-001']"
-            in str(result.output)
-        )
-        assert "sw-leaf-001 connects to 9 nodes" in str(result.output)
-        assert "sw-leaf-002 connects to 7 nodes" in str(result.output)
+            "Sheet: 25G_10G\n"
+            + "Cell: I30      Name: CAN switch\n"
+            + "Cell: O17      Name: junk\n"
+            + "Cell: O19      Name: junk\n"
+        ) in str(result.output)
+
+        assert (
+            "Node type could not be determined for the following.\n"
+            + "These nodes are not currently included in the model.\n"
+            + "(This may be a missing architectural definition/lookup or a spelling error)\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "sw-leaf-002      1/1/3     ===> 00:40:a6:00:00:00  Cray, Inc. \n"
+            + "Nodes that show up as MAC addresses might need to have LLDP enabled.\n"
+            + "\n"
+            + "The following nodes should be renamed\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "sw-leaf01 should be renamed sw-leaf-001\n"
+            + "sw-leaf02 should be renamed sw-leaf-002\n"
+        ) in str(result.output)
         remove_switch_from_cache(ip)
 
 
@@ -238,6 +322,8 @@ def test_validate_shcd_cabling_file(netmiko_command, switch_vendor):
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--ips-file",
@@ -254,19 +340,61 @@ def test_validate_shcd_cabling_file(netmiko_command, switch_vendor):
                 corners,
             ],
         )
+
         assert result.exit_code == 0
-        # sw-spine-001: Found in SHCD but not on the network
+
         assert (
-            "['port 4 ==> sw-leaf-bmc-099', 'port 9 ==> ncn-w003', 'port 15 ==> ncn-s003', 'port 16 ==> uan001', "
-            + "'port 17 ==> uan001', 'port 47 ==> sw-spine-002', 'port 48 ==> sw-leaf-bmc-001']"
-            in str(result.output)
-        )
-        # sw-spine-002: Found in SHCD but not on the network
+            "sw-spine-001\n"
+            + "Rack: x3000    Elevation: u12\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "Port   SHCD                     Cabling\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "1      sw-spine-002:1           sw-spine-002:1\n"
+            + "2      sw-spine-002:2           sw-spine-002:2\n"
+            + "4      sw-leaf-bmc-099:2        ncn-m88:ocp:2\n"
+            + "9      ncn-w003:ocp:1           None\n"
+            + "15     ncn-s003:ocp:1           None\n"
+            + "16     uan001:ocp:1             None\n"
+            + "17     uan001:ocp:2             None\n"
+            + "47     sw-spine-002:47          None\n"
+            + "48     sw-leaf-bmc-001:49       None\n"
+            + "5      None                     sw-leaf-bmc-099:5\n"
+            + "\n"
+            + "sw-spine-002\n"
+            + "Rack: x3000    Elevation: u13\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "Port   SHCD                     Cabling\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "1      sw-spine-001:1           sw-spine-001:1\n"
+            + "2      sw-spine-001:2           sw-spine-001:2\n"
+            + "9      ncn-w003:ocp:2           None\n"
+            + "16     uan001:pcie-slot1:1      None\n"
+            + "17     uan001:pcie-slot1:2      None\n"
+            + "47     sw-spine-001:47          None\n"
+            + "48     sw-leaf-bmc-001:50       None\n"
+        ) in str(result.output)
+
         assert (
-            "['port 9 ==> ncn-w003', 'port 16 ==> uan001', 'port 17 ==> uan001', 'port 47 ==> sw-spine-001', "
-            + "'port 48 ==> sw-leaf-bmc-001']"
-            in str(result.output)
-        )
+            "Sheet: 25G_10G\n"
+            + "Cell: I30      Name: CAN switch\n"
+            + "Cell: O17      Name: junk\n"
+            + "Cell: O19      Name: junk\n"
+        ) in str(result.output)
+
+        assert (
+            "Node type could not be determined for the following.\n"
+            + "These nodes are not currently included in the model.\n"
+            + "(This may be a missing architectural definition/lookup or a spelling error)\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "sw-spine-001     1/1/3     ===> 00:00:00:00:00:00  XEROX CORPORATION 192.168.1.2:vlan1, 192.168.2.2:vlan3\n"
+            + "Nodes that show up as MAC addresses might need to have LLDP enabled.\n"
+            + "\n"
+            + "The following nodes should be renamed\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "sw-leaf-bmc99 should be renamed sw-leaf-bmc-099\n"
+            + "sw-spine01 should be renamed sw-spine-001\n"
+            + "sw-spine02 should be renamed sw-spine-002\n"
+        ) in str(result.output)
         remove_switch_from_cache(ip)
 
 
@@ -281,6 +409,8 @@ def test_validate_shcd_cabling_missing_ips():
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--username",
@@ -313,6 +443,8 @@ def test_validate_shcd_cabling_mutually_exclusive_ips_and_file():
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--username",
@@ -351,6 +483,8 @@ def test_validate_shcd_cabling_invalid_ip():
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--ips",
@@ -390,6 +524,8 @@ def test_validate_shcd_cabling_invalid_ip_file():
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--ips-file",
@@ -435,6 +571,8 @@ def test_validate_shcd_cabling_bad_ip(netmiko_command, switch_vendor):
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--ips",
@@ -483,6 +621,8 @@ def test_validate_shcd_cabling_bad_ip_file(netmiko_command, switch_vendor):
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--ips-file",
@@ -526,6 +666,8 @@ def test_validate_shcd_cabling_bad_password(netmiko_command, switch_vendor):
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--ips",
@@ -557,6 +699,8 @@ def test_validate_shcd_cabling_missing_file():
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--ips",
@@ -587,6 +731,8 @@ def test_validate_shcd_cabling_bad_file():
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--ips",
@@ -648,6 +794,8 @@ def test_validate_shcd_cabling_missing_tabs(netmiko_command, switch_vendor):
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--ips",
@@ -664,7 +812,60 @@ def test_validate_shcd_cabling_missing_tabs(netmiko_command, switch_vendor):
             input="25G_10G\n",
         )
         assert result.exit_code == 0
-        assert "sw-spine-001 connects to 4 nodes:" in str(result.output)
+
+        assert (
+            "sw-spine-001\n"
+            + "Rack: x3000    Elevation: u12\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "Port   SHCD                     Cabling\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "1      sw-spine-002:1           sw-spine-002:1\n"
+            + "2      sw-spine-002:2           sw-spine-002:2\n"
+            + "4      sw-leaf-bmc-099:2        ncn-m88:ocp:2\n"
+            + "9      ncn-w003:ocp:1           None\n"
+            + "15     ncn-s003:ocp:1           None\n"
+            + "16     uan001:ocp:1             None\n"
+            + "17     uan001:ocp:2             None\n"
+            + "47     sw-spine-002:47          None\n"
+            + "48     sw-leaf-bmc-001:49       None\n"
+            + "5      None                     sw-leaf-bmc-099:5\n"
+            + "\n"
+            + "sw-spine-002\n"
+            + "Rack: x3000    Elevation: u13\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "Port   SHCD                     Cabling\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "1      sw-spine-001:1           sw-spine-001:1\n"
+            + "2      sw-spine-001:2           sw-spine-001:2\n"
+            + "9      ncn-w003:ocp:2           None\n"
+            + "16     uan001:pcie-slot1:1      None\n"
+            + "17     uan001:pcie-slot1:2      None\n"
+            + "47     sw-spine-001:47          None\n"
+            + "48     sw-leaf-bmc-001:50       None\n"
+        ) in str(result.output)
+
+        assert (
+            "Sheet: 25G_10G\n"
+            + "Cell: I30      Name: CAN switch\n"
+            + "Cell: O17      Name: junk\n"
+            + "Cell: O19      Name: junk\n"
+        ) in str(result.output)
+
+        assert (
+            "Node type could not be determined for the following.\n"
+            + "These nodes are not currently included in the model.\n"
+            + "(This may be a missing architectural definition/lookup or a spelling error)\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "sw-spine-001     1/1/3     ===> 00:00:00:00:00:00  XEROX CORPORATION 192.168.1.2:vlan1, 192.168.2.2:vlan3\n"
+            + "Nodes that show up as MAC addresses might need to have LLDP enabled.\n"
+            + "\n"
+            + "The following nodes should be renamed\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "sw-leaf-bmc99 should be renamed sw-leaf-bmc-099\n"
+            + "sw-spine01 should be renamed sw-spine-001\n"
+            + "sw-spine02 should be renamed sw-spine-002\n"
+        ) in str(result.output)
+
         remove_switch_from_cache(ip)
 
 
@@ -709,6 +910,8 @@ def test_validate_shcd_cabling_bad_tab(netmiko_command, switch_vendor):
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--ips",
@@ -769,6 +972,8 @@ def test_validate_shcd_cabling_corner_prompt(netmiko_command, switch_vendor):
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--ips",
@@ -785,18 +990,59 @@ def test_validate_shcd_cabling_corner_prompt(netmiko_command, switch_vendor):
             input="I14\nS30",
         )
         assert result.exit_code == 0
-        # sw-spine-001: Found in SHCD but not on the network
+
         assert (
-            "['port 4 ==> sw-leaf-bmc-099', 'port 9 ==> ncn-w003', 'port 15 ==> ncn-s003', 'port 16 ==> uan001', "
-            + "'port 17 ==> uan001', 'port 47 ==> sw-spine-002', 'port 48 ==> sw-leaf-bmc-001']"
-            in str(result.output)
-        )
-        # sw-spine-002: Found in SHCD but not on the network
+            "sw-spine-001\n"
+            + "Rack: x3000    Elevation: u12\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "Port   SHCD                     Cabling\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "1      sw-spine-002:1           sw-spine-002:1\n"
+            + "2      sw-spine-002:2           sw-spine-002:2\n"
+            + "4      sw-leaf-bmc-099:2        ncn-m88:ocp:2\n"
+            + "9      ncn-w003:ocp:1           None\n"
+            + "15     ncn-s003:ocp:1           None\n"
+            + "16     uan001:ocp:1             None\n"
+            + "17     uan001:ocp:2             None\n"
+            + "47     sw-spine-002:47          None\n"
+            + "48     sw-leaf-bmc-001:49       None\n"
+            + "5      None                     sw-leaf-bmc-099:5\n"
+            + "\n"
+            + "sw-spine-002\n"
+            + "Rack: x3000    Elevation: u13\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "Port   SHCD                     Cabling\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "1      sw-spine-001:1           sw-spine-001:1\n"
+            + "2      sw-spine-001:2           sw-spine-001:2\n"
+            + "9      ncn-w003:ocp:2           None\n"
+            + "16     uan001:pcie-slot1:1      None\n"
+            + "17     uan001:pcie-slot1:2      None\n"
+            + "47     sw-spine-001:47          None\n"
+            + "48     sw-leaf-bmc-001:50       None\n"
+        ) in str(result.output)
+
         assert (
-            "['port 9 ==> ncn-w003', 'port 16 ==> uan001', 'port 17 ==> uan001', 'port 47 ==> sw-spine-001', "
-            + "'port 48 ==> sw-leaf-bmc-001']"
-            in str(result.output)
-        )
+            "Sheet: 25G_10G\n"
+            + "Cell: I30      Name: CAN switch\n"
+            + "Cell: O17      Name: junk\n"
+            + "Cell: O19      Name: junk\n"
+        ) in str(result.output)
+
+        assert (
+            "Node type could not be determined for the following.\n"
+            + "These nodes are not currently included in the model.\n"
+            + "(This may be a missing architectural definition/lookup or a spelling error)\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "sw-spine-001     1/1/3     ===> 00:00:00:00:00:00  XEROX CORPORATION 192.168.1.2:vlan1, 192.168.2.2:vlan3\n"
+            + "Nodes that show up as MAC addresses might need to have LLDP enabled.\n"
+            + "\n"
+            + "The following nodes should be renamed\n"
+            + "--------------------------------------------------------------------------------\n"
+            + "sw-leaf-bmc99 should be renamed sw-leaf-bmc-099\n"
+            + "sw-spine01 should be renamed sw-spine-001\n"
+            + "sw-spine02 should be renamed sw-spine-002\n"
+        ) in str(result.output)
         remove_switch_from_cache(ip)
 
 
@@ -841,6 +1087,8 @@ def test_validate_shcd_cabling_corners_too_narrow(netmiko_command, switch_vendor
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--ips",
@@ -903,6 +1151,8 @@ def test_validate_shcd_cabling_corners_too_high(netmiko_command, switch_vendor):
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--ips",
@@ -968,6 +1218,8 @@ def test_validate_shcd_cabling_corners_bad_cell(netmiko_command, switch_vendor):
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--ips",
@@ -1001,6 +1253,8 @@ def test_validate_shcd_cabling_not_enough_corners():
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--ips",
@@ -1065,6 +1319,8 @@ def test_validate_shcd_cabling_bad_headers(netmiko_command, switch_vendor):
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--ips",
@@ -1130,6 +1386,8 @@ def test_validate_shcd_cabling_bad_architectural_definition(
                 cache_minutes,
                 "validate",
                 "shcd-cabling",
+                "--csm",
+                csm,
                 "--architecture",
                 architecture,
                 "--ips",
@@ -1149,151 +1407,6 @@ def test_validate_shcd_cabling_bad_architectural_definition(
         assert result.exit_code == 1
         assert "No architectural definition found to allow connection between" in str(
             result.output,
-        )
-        remove_switch_from_cache(ip)
-
-
-@patch("canu.report.switch.cabling.cabling.switch_vendor")
-@patch("canu.report.switch.cabling.cabling.netmiko_command")
-@responses.activate
-def test_validate_shcd_cabling_rename(netmiko_command, switch_vendor):
-    """Test that the `canu validate shcd-cabling` command runs and finds bad naming."""
-    with runner.isolated_filesystem():
-        switch_vendor.return_value = "aruba"
-        netmiko_command.return_value = mac_address_table
-        responses.add(
-            responses.POST,
-            f"https://{ip}/rest/v10.04/login",
-        )
-        responses.add(
-            responses.GET,
-            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname,system_mac",
-            json=switch_info1,
-        )
-        responses.add(
-            responses.GET,
-            f"https://{ip}/rest/v10.04/system/interfaces/*/lldp_neighbors?depth=2",
-            json=lldp_neighbors_json1,
-        )
-        responses.add(
-            responses.GET,
-            f"https://{ip}/rest/v10.04/system/vrfs/default/neighbors?depth=2",
-            json=arp_neighbors_json1,
-        )
-
-        responses.add(
-            responses.POST,
-            f"https://{ip}/rest/v10.04/logout",
-        )
-        generate_test_file(test_file)
-        result = runner.invoke(
-            cli,
-            [
-                "--cache",
-                cache_minutes,
-                "validate",
-                "shcd-cabling",
-                "--architecture",
-                architecture,
-                "--ips",
-                ips,
-                "--username",
-                username,
-                "--password",
-                password,
-                "--shcd",
-                test_file,
-                "--tabs",
-                tabs,
-                "--corners",
-                corners,
-            ],
-        )
-        assert result.exit_code == 0
-        assert "sw-leaf-bmc99 should be renamed sw-leaf-bmc-099" in str(result.output)
-        assert "sw-spine01 should be renamed sw-spine-001" in str(result.output)
-        remove_switch_from_cache(ip)
-
-
-@patch("canu.report.switch.cabling.cabling.switch_vendor")
-@patch("canu.report.switch.cabling.cabling.netmiko_command")
-@responses.activate
-def test_validate_shcd_missing_connections(netmiko_command, switch_vendor):
-    """Test that the `canu validate shcd-cabling` command runs and finds missing connections."""
-    with runner.isolated_filesystem():
-        switch_vendor.return_value = "aruba"
-        netmiko_command.return_value = mac_address_table
-        responses.add(
-            responses.POST,
-            f"https://{ip}/rest/v10.04/login",
-        )
-        responses.add(
-            responses.GET,
-            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname,system_mac",
-            json=switch_info1,
-        )
-        responses.add(
-            responses.GET,
-            f"https://{ip}/rest/v10.04/system/interfaces/*/lldp_neighbors?depth=2",
-            json=lldp_neighbors_json1,
-        )
-        responses.add(
-            responses.GET,
-            f"https://{ip}/rest/v10.04/system/vrfs/default/neighbors?depth=2",
-            json=arp_neighbors_json1,
-        )
-
-        responses.add(
-            responses.POST,
-            f"https://{ip}/rest/v10.04/logout",
-        )
-        generate_test_file(test_file)
-        result = runner.invoke(
-            cli,
-            [
-                "--cache",
-                cache_minutes,
-                "validate",
-                "shcd-cabling",
-                "--architecture",
-                architecture,
-                "--ips",
-                ips,
-                "--username",
-                username,
-                "--password",
-                password,
-                "--shcd",
-                test_file,
-                "--tabs",
-                tabs,
-                "--corners",
-                corners,
-            ],
-        )
-        assert result.exit_code == 0
-        assert (
-            "Found in SHCD and on the network, but missing the following connections on the network"
-            in str(result.output)
-        )
-        # sw-spine-001: Found in SHCD but not on the network
-        assert (
-            "['port 4 ==> sw-leaf-bmc-099', 'port 9 ==> ncn-w003', 'port 15 ==> ncn-s003', 'port 16 ==> uan001', "
-            + "'port 17 ==> uan001', 'port 47 ==> sw-spine-002', 'port 48 ==> sw-leaf-bmc-001']"
-            in str(result.output)
-        )
-        # sw-spine-002: Found in SHCD but not on the network
-        assert (
-            "['port 9 ==> ncn-w003', 'port 16 ==> uan001', 'port 17 ==> uan001', 'port 47 ==> sw-spine-001', "
-            + "'port 48 ==> sw-leaf-bmc-001']"
-            in str(result.output)
-        )
-        assert "uan001          : Found in SHCD but not found on the network." in str(
-            result.output,
-        )
-        assert (
-            "ncn-m88         : Found on the network but not found in the SHCD."
-            in str(result.output)
         )
         remove_switch_from_cache(ip)
 
@@ -1469,12 +1582,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j1",
+            "1",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j1",
+            "1",
         ],
         [
             "sw-25g01",
@@ -1482,12 +1595,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j2",
+            "2",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j2",
+            "2",
         ],
         [
             "sw-25g01",
@@ -1495,12 +1608,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j3",
+            "3",
             "junk",
             "x3000",
             "u13",
             "-",
-            "j2",
+            "2",
         ],
         [
             "sw-25g01",
@@ -1508,12 +1621,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j4",
+            "4",
             "sw-smn99",
             "x3000",
             "u13",
             "-",
-            "j2",
+            "2",
         ],
         [
             "sw-25g01",
@@ -1521,12 +1634,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j5",
+            "5",
             "junk",
             "x3000",
             "u13",
             "-",
-            "j2",
+            "2",
         ],
         [
             "sw-smn01",
@@ -1534,12 +1647,12 @@ def generate_test_file(file_name):
             "U14",
             "",
             "-",
-            "j49",
+            "49",
             "sw-25g01",
             "x3000",
             "u12",
             "-",
-            "j48",
+            "48",
         ],
         [
             "sw-smn01",
@@ -1547,12 +1660,12 @@ def generate_test_file(file_name):
             "U14",
             "",
             "",
-            "j50",
+            "50",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j48",
+            "48",
         ],
         [
             "sw-25g01",
@@ -1560,12 +1673,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j47",
+            "47",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j47",
+            "47",
         ],
         [
             "uan01",
@@ -1573,12 +1686,12 @@ def generate_test_file(file_name):
             "u19",
             "ocp",
             "-",
-            "j1",
+            "1",
             "sw-25g01",
             "x3000",
             "u12",
             "-",
-            "j16",
+            "16",
         ],
         [
             "uan01",
@@ -1586,38 +1699,38 @@ def generate_test_file(file_name):
             "u19",
             "ocp",
             "-",
-            "j2",
+            "2",
             "sw-25g01",
             "x3000",
             "u12",
             "-",
-            "j17",
+            "17",
         ],
         [
             "uan01",
             "x3000",
             "u19",
-            "s1",
+            "pcie-slot1",
             "-",
-            "j1",
+            "1",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j16",
+            "16",
         ],
         [
             "uan01",
             "x3000",
             "u19",
-            "s1",
+            "pcie-slot1",
             "-",
-            "j2",
+            "2",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j17",
+            "17",
         ],
         [
             "sn03",
@@ -1625,12 +1738,12 @@ def generate_test_file(file_name):
             "u09",
             "ocp",
             "-",
-            "j1",
+            "1",
             "sw-25g01",
             "x3000",
             "u12",
             "-",
-            "j15",
+            "15",
         ],
         [
             "wn03",
@@ -1638,12 +1751,12 @@ def generate_test_file(file_name):
             "u06",
             "ocp",
             "-",
-            "j1",
+            "1",
             "sw-25g01",
             "x3000",
             "u12",
             "-",
-            "j9",
+            "9",
         ],
         [
             "wn03",
@@ -1651,12 +1764,12 @@ def generate_test_file(file_name):
             "u06",
             "ocp",
             "-",
-            "j2	",
+            "2",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j9",
+            "9",
         ],
         [
             "CAN switch",
@@ -1669,7 +1782,7 @@ def generate_test_file(file_name):
             "x3000",
             "u12",
             "-",
-            "j36",
+            "36",
         ],
         # BAD ROW, do not include in normal run
         [
@@ -1678,12 +1791,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j1",
+            "1",
             "mn98",
             "x3000",
             "u13",
             "-",
-            "j1",
+            "1",
         ],
     ]
     for row in range(0, 17):
@@ -1725,12 +1838,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j51",
+            "51",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j51",
+            "51",
         ],
         [
             "sw-25g01",
@@ -1738,12 +1851,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j52",
+            "52",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j52",
+            "52",
         ],
         [
             "sw-25g01",
@@ -1751,12 +1864,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j52",
+            "52",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j51",
+            "51",
         ],
         [
             "sw-cdu01",
@@ -1764,12 +1877,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j52",
+            "52",
             "sw-smn99",
             "x3000",
             "u13",
             "-",
-            "j52",
+            "52",
         ],
         [
             "mn-99",
@@ -1777,12 +1890,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j52",
+            "52",
             "sw-25g01",
             "x3000",
             "u13",
             "-",
-            "j52",
+            "52",
         ],
         [
             "mn-99",
@@ -1790,12 +1903,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j50",
+            "50",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j52",
+            "52",
         ],
         [
             "mn-99",
@@ -1803,12 +1916,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j51",
+            "51",
             "sw-smn98",
             "x3000",
             "u13",
             "-",
-            "j52",
+            "52",
         ],
         [
             "mn-99",
@@ -1816,12 +1929,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j52",
+            "52",
             "sw-smn99",
             "x3000",
             "u13",
             "-",
-            "j52",
+            "52",
         ],
         [
             "sw-100g01",
@@ -1829,12 +1942,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j52",
+            "52",
             "sw-smn99",
             "x3000",
             "u13",
             "-",
-            "j52",
+            "52",
         ],
     ]
     for row in range(0, 9):

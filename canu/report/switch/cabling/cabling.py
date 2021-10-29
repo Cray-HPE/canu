@@ -342,6 +342,10 @@ def get_lldp_dell(ip, credentials, return_error):
                 chassis_description = line[20:]
                 if chassis_description == "Not Advertised":
                     chassis_description = ""
+                if chassis_description == "":
+                    chassis_description = find_mac(
+                        neighbors_dict[port]["mac_addr"],
+                    )
                 neighbors_dict[port]["chassis_description"] = chassis_description
             elif line.startswith("Remote Port Description:"):
                 port_description = line[25:]
@@ -577,6 +581,10 @@ def get_lldp_mellanox(ip, credentials, return_error):
                         chassis_description = prop.get("Remote system description")
                         if chassis_description == "Not Advertised":
                             chassis_description = ""
+                        if chassis_description == "":
+                            chassis_description = find_mac(
+                                neighbor_dict["mac_addr"],
+                            )
                         neighbor_dict["chassis_description"] = chassis_description
                     if "Remote system name" in prop:
                         chassis_name = prop.get("Remote system name")
@@ -789,11 +797,12 @@ def cache_lldp(switch_info, lldp_dict, arp):
                     if arp[mac]["mac"] == port[index]["mac_addr"]
                 ]
             arp_list = ", ".join(arp_list)
-
+            neighbor_description = (
+                f"{port[index]['chassis_description'][:54]} {str(arp_list)}"
+            )
             port_info = {
                 "neighbor": port[index]["chassis_name"],
-                "neighbor_description": port[index]["chassis_description"][:54]
-                + str(arp_list),
+                "neighbor_description": neighbor_description,
                 "neighbor_port": port[index]["port_id"],
                 "neighbor_port_description": re.sub(
                     r"(Interface\s+[0-9]+ as )",
