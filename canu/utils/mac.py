@@ -25,7 +25,7 @@ from pathlib import Path
 import sys
 
 from aiohttp import client_exceptions
-from mac_vendor_lookup import BaseMacLookup, MacLookup
+from mac_vendor_lookup import BaseMacLookup, InvalidMacError, MacLookup
 
 # Get project root directory
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
@@ -50,7 +50,13 @@ def find_mac(mac_address):
     Returns:
         String containing the mac vendor name
     """
-    return mac.lookup(mac_address)
+    try:
+        mac_vendor = mac.lookup(str(mac_address))
+    except (KeyError, ValueError, InvalidMacError):
+        # When the vendor can't be found, send back an empty string
+        mac_vendor = ""
+
+    return mac_vendor
 
 
 def update_mac_vendors():

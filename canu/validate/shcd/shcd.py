@@ -107,7 +107,13 @@ log = logging.getLogger("validate_shcd")
     "--corners",
     help="The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.",
 )
-@click.option("--out", help="Output JSON model to a file", type=click.File("w"))
+@click.option(
+    "--out",
+    help="Output results to a file",
+    type=click.File("w"),
+    default="-",
+)
+@click.option("--json", "json_", is_flag=True, help="Output JSON model to a file")
 @click.option(
     "--log",
     "log_",
@@ -116,7 +122,7 @@ log = logging.getLogger("validate_shcd")
     default="ERROR",
 )
 @click.pass_context
-def shcd(ctx, architecture, shcd, tabs, corners, out, log_):
+def shcd(ctx, architecture, shcd, tabs, corners, out, json_, log_):
     """Validate a SHCD file.
 
     Pass in a SHCD file to validate that it works architecturally. The validation will ensure that spine switches,
@@ -132,6 +138,7 @@ def shcd(ctx, architecture, shcd, tabs, corners, out, log_):
         tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
         corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
         out: Filename for the JSON Topology if requested.
+        json_: Bool indicating json output
         log_: Level of logging.
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
@@ -216,12 +223,12 @@ def shcd(ctx, architecture, shcd, tabs, corners, out, log_):
         sheets=sheets,
     )
 
-    print_node_list(node_list, "SHCD")
-
-    node_list_warnings(node_list, warnings)
-
-    if out:
+    if json_:
         json_output(node_list, out, json_schema_file)
+    else:
+        print_node_list(node_list, "SHCD", out)
+
+        node_list_warnings(node_list, warnings, out)
 
 
 def get_node_common_name(name, rack_number, rack_elevation, mapper):
@@ -343,10 +350,10 @@ def validate_shcd_slot_data(cell, sheet, warnings, is_src_slot=False):
     # NOTE: This is required for the port to get fixed.
     if is_src_slot:
         if sheet == "HMN" and slot is None:
-            warnings["shcd_slot_data"].append(f"{sheet}:{location}")
+            warnings["shcd_slot_data"].append(f"{sheet}:{cell.coordinate}")
             log.warning(
                 'A source slot of type "bmc" for servers or "mgmt" for switches must be specified in the HMN tab. '
-                + f"Please correct the SHCD for {sheet}:{location} with an empty value.",
+                + f"Please correct the SHCD for {sheet}:{cell.coordinate} with an empty value.",
             )
             slot = "bmc"
 
@@ -615,7 +622,9 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
 
                 src_index = node_name_list.index(node_name)
             else:
-                warnings["node_type"].append(src_name)
+                warnings["node_type"].append(
+                    f"{src_name}@@{sheet}@@{row[required_header[0]].coordinate}",
+                )
                 log.warning(
                     f"Node type for {src_name} cannot be determined by node type ({node_type}) or node name ({node_name})",
                 )
@@ -687,7 +696,9 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 dst_index = node_name_list.index(node_name)
 
             else:
-                warnings["node_type"].append(dst_name)
+                warnings["node_type"].append(
+                    f"{dst_name}@@{sheet}@@{row[required_header[5]].coordinate}",
+                )
 
                 log.warning(
                     f"Node type for {dst_name} cannot be determined by node type ({node_type}) or node name ({node_name})",
@@ -746,14 +757,15 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
     return node_list, warnings
 
 
-def node_list_warnings(node_list, warnings):
+def node_list_warnings(node_list, warnings, out="-"):
     """Print the warnings found while validating the SHCD.
 
     Args:
         node_list: A list of nodes
         warnings: A dictionary of warnings
+        out: Defaults to stdout, but will print to the file name passed in
     """
-    dash = "-" * 60
+    dash = "-" * 80
     # Generate warnings
     # Additional warnings about the data will be entered here
     for node in node_list:
@@ -762,44 +774,63 @@ def node_list_warnings(node_list, warnings):
 
     # Print Warnings
     if warnings:
-        click.secho("\nWarnings", fg="red")
+        click.secho("\nWarnings", fg="red", file=out)
         if warnings["node_type"]:
             click.secho(
                 "\nNode type could not be determined for the following."
                 + "\nThese nodes are not currently included in the model."
                 + "\n(This may be a missing architectural definition/lookup or a spelling error)",
                 fg="red",
+                file=out,
             )
-            click.secho(dash)
+            click.secho(dash, file=out)
             nodes = set(warnings["node_type"])
             nodes = natsort.natsorted(nodes)
             has_mac = False
+            node_type_warnings = defaultdict(list)
             for node in nodes:
-                # If the string has a mac address in it, set to True
-                if bool(re.search(r"(?:[0-9a-fA-F]:?){12}", str(node))):
-                    has_mac = True
-                click.secho(node, fg="bright_white")
+                # Missing nodes with '@@' are from the SHCD
+                if "@@" in node:
+                    name = node.split("@@")[0]
+                    sheet = node.split("@@")[1]
+                    cell = node.split("@@")[2]
+                    node_type_warnings[sheet].append(f"Cell: {cell:<8s} Name: {name}")
+
+                else:
+                    # If the string has a mac address in it, set to True
+                    if bool(re.search(r"(?:[0-9a-fA-F]:?){12}", str(node))):
+                        has_mac = True
+                    click.secho(node, fg="bright_white", file=out)
+            if len(node_type_warnings) > 0:
+                for sheet, cell_list in node_type_warnings.items():
+                    click.secho(f"Sheet: {sheet}", fg="bright_white", file=out)
+                    for cell in cell_list:
+                        click.secho(cell, file=out)
+                    click.secho("", file=out)
             if has_mac is True:
                 click.secho(
                     "Nodes that show up as MAC addresses might need to have LLDP enabled.",
+                    file=out,
                 )
         if warnings["zero_connections"]:
             click.secho(
                 "\nThe following nodes have zero connections"
                 + "\n(The node type may not have been found or no connections are present)",
                 fg="red",
+                file=out,
             )
-            click.secho(dash)
+            click.secho(dash, file=out)
             nodes = set(warnings["zero_connections"])
             nodes = natsort.natsorted(nodes)
             for node in nodes:
-                click.secho(node, fg="bright_white")
+                click.secho(node, fg="bright_white", file=out)
         if warnings["rename"]:
             click.secho(
                 "\nThe following nodes should be renamed",
                 fg="red",
+                file=out,
             )
-            click.secho(dash)
+            click.secho(dash, file=out)
             nodes = set()
             for x in warnings["rename"]:
                 new_name = x[1]
@@ -808,85 +839,96 @@ def node_list_warnings(node_list, warnings):
                 nodes.add((x[0], new_name))
             nodes = natsort.natsorted(nodes)
             for node in nodes:
-                click.secho(f"{node[0]} should be renamed {node[1]}", fg="bright_white")
+                click.secho(
+                    f"{node[0]} should be renamed {node[1]}",
+                    fg="bright_white",
+                    file=out,
+                )
         if warnings["shcd_port_data"]:
             click.secho(
                 '\nSHCD port definitions are using a deprecated "j" prefix'
-                + '\n(Remove the prepended "j" in each cell to correct)',
+                + '\n(Ports should be an integer, remove the "j" in each cell)',
                 fg="red",
+                file=out,
             )
-            click.secho(dash)
-            port_warnings = {}
+            click.secho(dash, file=out)
+            port_warnings = defaultdict(list)
             for x in warnings["shcd_port_data"]:
                 sheet = x.split(":")[0]
                 cell = x.split(":")[1]
-                if sheet not in port_warnings:
-                    port_warnings[sheet] = []
                 port_warnings[sheet].append(cell)
-            for entry in port_warnings:
-                click.secho(f"{entry}:{port_warnings[entry]}", fg="bright_white")
-                click.secho("")
+
+            for sheet, cell_list in port_warnings.items():
+                click.secho(f"Sheet: {sheet}", fg="bright_white", file=out)
+                click.secho(f"{', '.join(cell_list)}\n", file=out)
+
         if warnings["shcd_port_conventions"]:
             click.secho(
                 "\nSHCD port convention in the HMN tab is to use port 3 to represent BMCs."
-                + '\n(Correct the values in the following cells to use a Slot of "bmc" and a port of "1" for servers)'
-                + '\n(Correct the values in the following cells to use a Slot of "mgmt" and a port of "1" for switches)',
+                + '\n(For servers, correct the following cells to use a Slot of "bmc" and a port of "1")'
+                + '\n(For Switches, correct the following cells to use a Slot of "mgmt" and a port of "1")',
                 fg="red",
+                file=out,
             )
-            click.secho(dash)
-            slot_warnings = {}
+            click.secho(dash, file=out)
+            slot_warnings = defaultdict(list)
             for x in warnings["shcd_port_conventions"]:
                 sheet = x.split(":")[0]
                 cell = x.split(":")[1]
-                if sheet not in slot_warnings:
-                    slot_warnings[sheet] = []
                 slot_warnings[sheet].append(cell)
-            for entry in slot_warnings:
-                click.secho(f"{entry}:{slot_warnings[entry]}", fg="bright_white")
-                click.secho("")
+
+            for sheet, cell_list in slot_warnings.items():
+                click.secho(f"Sheet: {sheet}", fg="bright_white", file=out)
+                click.secho(f"{', '.join(cell_list)}\n", file=out)
+
         if warnings["shcd_slot_data"]:
             click.secho(
                 "\nSHCD slot definitions used are either deprecated, missing or incorrect."
-                + '\n(Correct values in the following cells to be appropriate values of ["bmc", "ocp", "pcie-slot1, "mgmt", None]',
+                + '\n(The cells below should only be one of the following ["bmc", "ocp", "pcie-slot1, "mgmt", None])',
                 fg="red",
+                file=out,
             )
-            click.secho(dash)
-            slot_warnings = {}
+            click.secho(dash, file=out)
+            def_warnings = defaultdict(list)
             for x in warnings["shcd_slot_data"]:
                 sheet = x.split(":")[0]
                 cell = x.split(":")[1]
-                if sheet not in slot_warnings:
-                    slot_warnings[sheet] = []
-                slot_warnings[sheet].append(cell)
-            for entry in slot_warnings:
-                click.secho(f"{entry}:{slot_warnings[entry]}", fg="bright_white")
-                click.secho("")
+                def_warnings[sheet].append(cell)
+
+            for sheet, cell_list in def_warnings.items():
+                click.secho(f"Sheet: {sheet}", fg="bright_white", file=out)
+                click.secho(f"{', '.join(cell_list)}\n", file=out)
 
 
-def print_node_list(node_list, title):
+def print_node_list(node_list, title, out="-"):
     """Print the nodes found in the SHCD.
 
     Args:
         node_list: A list of nodes
         title: Title to be printed
+        out: Defaults to stdout, but will print to the file name passed in
     """
     dash = "-" * 60
-    click.echo("\n")
-    click.secho(f"{title} Node Connections", fg="bright_white")
-    click.echo(dash)
+    click.echo("\n", file=out)
+    click.secho(f"{title} Node Connections", fg="bright_white", file=out)
+    click.echo(dash, file=out)
 
     for node in node_list:
         click.echo(
             f"{node.id()}: {node.common_name()} connects to {len(node.edges())} nodes: {node.edges()}",
+            file=out,
         )
 
     dash = "-" * 60
-    click.echo("\n")
-    click.secho(f"{title} Port Usage", fg="bright_white")
-    click.echo(dash)
+    click.echo("\n", file=out)
+    click.secho(f"{title} Port Usage", fg="bright_white", file=out)
+    click.echo(dash, file=out)
 
     for node in node_list:
-        click.echo(f"{node.id()}: {node.common_name()} has the following port usage:")
+        click.echo(
+            f"{node.id()}: {node.common_name()} has the following port usage:",
+            file=out,
+        )
 
         unused_block = []
         logical_index = 1
@@ -901,7 +943,7 @@ def print_node_list(node_list, title):
                 else:
                     port_string = f"{unused_block[0]:02}-{unused_block[len(unused_block)-1]:02}==>UNUSED"
                 unused_block = []  # reset
-                click.secho(f"        {port_string}", fg="green")
+                click.secho(f"        {port_string}", fg="green", file=out)
             destination_node_name = [
                 x.common_name()
                 for x in node_list
@@ -919,7 +961,7 @@ def print_node_list(node_list, title):
                 port_string = f'{port["port"]:>02}==>{destination_node_name}:{destination_port_slot}'
             else:
                 port_string = f'{port["slot"]}:{port["port"]}==>{destination_node_name}:{destination_port_slot}'
-            click.echo(f"        {port_string}")
+            click.echo(f"        {port_string}", file=out)
             logical_index += 1
 
 
