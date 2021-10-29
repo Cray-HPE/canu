@@ -350,10 +350,10 @@ def validate_shcd_slot_data(cell, sheet, warnings, is_src_slot=False):
     # NOTE: This is required for the port to get fixed.
     if is_src_slot:
         if sheet == "HMN" and slot is None:
-            warnings["shcd_slot_data"].append(f"{sheet}:{location}")
+            warnings["shcd_slot_data"].append(f"{sheet}:{cell.coordinate}")
             log.warning(
                 'A source slot of type "bmc" for servers or "mgmt" for switches must be specified in the HMN tab. '
-                + f"Please correct the SHCD for {sheet}:{location} with an empty value.",
+                + f"Please correct the SHCD for {sheet}:{cell.coordinate} with an empty value.",
             )
             slot = "bmc"
 
