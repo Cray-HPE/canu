@@ -34,6 +34,10 @@ CAN switch
 
 ![](images/canu_validate_shcd.png)
 
+### File Out
+
+To output the results of the `validate shcd` command to a file, append the `--out FILENAME` flag
+
 ## Flags
 
 | Option                | Description                                                                |
@@ -42,6 +46,7 @@ CAN switch
 | `--shcd`              | SHCD File                                                                  |
 | `--tabs`              | The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.         |
 | `--corners`           | The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'. |
+| `--out`               | Name of the output file                                                    |
 | `--log`               | Level of logging. ("DEBUG", "INFO", "WARNING", "ERROR")                    |
 
 ---

@@ -44,6 +44,10 @@ sw-spine02 should be renamed sw-spine-002
 
 If there are any nodes that cannot be determined or should be renamed, there will be warning tables that show the details.
 
+### File Out
+
+To output the results of the `validate network cabling` command to a file, append the `--out FILENAME` flag
+
 ## Flags
 
 | Option                | Description                                             |
@@ -53,6 +57,7 @@ If there are any nodes that cannot be determined or should be renamed, there wil
 | `--ips-file`          | File with one IPv4 address per line                     |
 | `--username`          | Switch username                                         |
 | `--password`          | Switch password                                         |
+| `--out`               | Name of the output file                                 |
 | `--log`               | Level of logging. ("DEBUG", "INFO", "WARNING", "ERROR") |
 
 ---
