@@ -978,6 +978,7 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 - Added Mellanox support to the `canu config bgp` command
 - Added Dell/Mellanox support to the `canu generate network config` & `canu generate switch config` commands
 - Updated `canu validate shcd-cabling` to show port by port differences.
+- Added support for CMN (Customer Management Network) on Aruba and Dellanox.
 
 ## [unreleased]
 
