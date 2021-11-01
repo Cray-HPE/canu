@@ -1,9 +1,9 @@
 {#- sw-cdu.primary #}
 {%- include 'dellmellanox/common/unknown.j2' %}
-hostname {{ variables.HOSTNAME }}
-
-rest api restconf
 ip name-server 10.92.100.225
+hostname {{ variables.HOSTNAME }}
+rest api restconf
+spanning-tree mode mst
 
 {%- include 'dellmellanox/common/mtn_hmn_vlan.j2' %}
 {%- include 'dellmellanox/common/mtn_nmn_vlan.j2' %}

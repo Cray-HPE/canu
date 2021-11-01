@@ -12,6 +12,12 @@ interface vlan{{ cabinet.VlanID }}
  !
 {% set vrrp_id = cabinet.VlanID|string %} vrrp-group {{ vrrp_id[:1] }}{{ vrrp_id[-1:] }}
   virtual-address {{ cabinet.Gateway }}
-
+{%- endfor %}
+{%- for node in cabling.nodes if node.subtype == "cdu" %}
+{%- if node.primary == false %}
+  priority 110
+{%- else %}
+  priority 90
+{%- endif %}
 {%- endfor %}
 {#- end mtn_hmn_vlan #}
