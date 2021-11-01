@@ -4,6 +4,9 @@ hostname {{ variables.HOSTNAME }}
 
 no cli default prefix-modes enable
 
+   protocol mlag
+   protocol bgp
+
 vlan 2 name "RVR_NMN"
 vlan 4 name "RVR_HMN"
 vlan 7 name "CAN"
@@ -16,8 +19,6 @@ ntp server {{ variables.NCN_W003 }}
 
 {%- include 'dellmellanox/common/acl-mellanox.j2' %}
 
-protocol mlag
-   
 interface port-channel 100
 interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} channel-group 100 mode active
 interface ethernet 1/{{ variables.VSX_ISL_PORT2 }} channel-group 100 mode active
@@ -56,14 +57,12 @@ ip load-sharing type consistent
 no interface mgmt0 dhcp
 interface mgmt0 ip address 192.168.255.241 /29
 
-   spanning-tree mode mst
-   spanning-tree priority 4096
-   spanning-tree mst 1 vlan 1
-   spanning-tree mst 1 vlan 4
-   spanning-tree mst 1 vlan 7
-   spanning-tree mst 1 vlan 10
-   spanning-tree port type edge bpduguard default
-
+spanning-tree mode mst
+spanning-tree port type edge default
+spanning-tree priority 4096
+spanning-tree mst 1 vlan 1
+spanning-tree mst 1 vlan 4
+spanning-tree mst 1 vlan 7
 
 interface port-channel 100 dcb priority-flow-control mode on force
 

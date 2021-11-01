@@ -7,16 +7,10 @@ interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport mode hybrid
 interface mlag-port-channel {{ node.config.LAG_NUMBER }} description {{ node.config.DESCRIPTION }}
 interface mlag-port-channel {{ node.config.LAG_NUMBER }} no shutdown
 interface mlag-port-channel {{ node.config.LAG_NUMBER }} lacp-individual enable force
-interface mlag-port-channel {{ node.config.LAG_NUMBER }} spanning-tree port type edge
-interface mlag-port-channel {{ node.config.LAG_NUMBER }} spanning-tree bpduguard enable
 
-interface ethernet 1/{{ node.config.PORT }} switchport mode hybrid
-interface ethernet 1/{{ node.config.PORT }} speed 40G force
 interface ethernet 1/{{ node.config.PORT }} mtu 9216 force
 interface ethernet 1/{{ node.config.PORT }} mlag-channel-group {{ node.config.LAG_NUMBER }} mode active
 interface ethernet 1/{{ node.config.PORT }} description {{ node.config.DESCRIPTION }}
-interface ethernet 1/{{ node.config.PORT }} spanning-tree port type edge
-interface ethernet 1/{{ node.config.PORT }} spanning-tree bpduguard enable
 
 interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport hybrid allowed-vlan add 2
 interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport hybrid allowed-vlan add 4
