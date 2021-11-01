@@ -210,6 +210,7 @@ def test_switch_config_spine_primary():
         assert (
             'vlan 2 name "RVR_NMN"\n'
             + 'vlan 4 name "RVR_HMN"\n'
+            + 'vlan 6 name "CMN"\n'
             + 'vlan 7 name "CAN"\n'
             + 'vlan 4000 name "MLAG"\n'
         ) in str(result.output)
@@ -253,17 +254,20 @@ def test_switch_config_spine_primary():
             "interface vlan 1\n"
             + "interface vlan 2\n"
             + "interface vlan 4\n"
+            + "interface vlan 6\n"
             + "interface vlan 7\n"
             + "interface vlan 10\n"
             + "interface vlan 4000\n"
             + "interface vlan 1 mtu 9216\n"
             + "interface vlan 2 mtu 9216\n"
             + "interface vlan 4 mtu 9216\n"
+            + "interface vlan 6 mtu 9216\n"
             + "interface vlan 7 mtu 9216\n"
             + "interface vlan 4000 mtu 9216\n"
             + "interface vlan 1 ip address 192.168.1.2/16 primary\n"
             + "interface vlan 2 ip address 192.168.3.2/17 primary\n"
             + "interface vlan 4 ip address 192.168.0.2/17 primary\n"
+            + "interface vlan 6 ip address 192.168.12.2/24 primary\n"
             + "interface vlan 7 ip address 192.168.11.2/24 primary\n"
             + "interface vlan 4000 ip address 192.168.255.253/30 primary\n"
         ) in str(result.output)
@@ -275,6 +279,7 @@ def test_switch_config_spine_primary():
             + "spanning-tree priority 4096\n"
             + "spanning-tree mst 1 vlan 1\n"
             + "spanning-tree mst 1 vlan 4\n"
+            + "spanning-tree mst 1 vlan 6\n"
             + "spanning-tree mst 1 vlan 7\n"
             + "interface mlag-port-channel 151 spanning-tree port type network\n"
             + "interface mlag-port-channel 151 spanning-tree guard root\n"
@@ -317,14 +322,17 @@ def test_switch_config_spine_primary():
             + "interface vlan 1 magp 1\n"
             + "interface vlan 2 magp 2\n"
             + "interface vlan 4 magp 4\n"
+            + "interface vlan 6 magp 6\n"
             + "interface vlan 7 magp 7\n"
             + "interface vlan 1 magp 1 ip virtual-router address 192.168.1.1\n"
             + "interface vlan 2 magp 2 ip virtual-router address 192.168.3.1\n"
             + "interface vlan 4 magp 4 ip virtual-router address 192.168.0.1\n"
+            + "interface vlan 6 magp 6 ip virtual-router address 192.168.12.1\n"
             + "interface vlan 7 magp 7 ip virtual-router address 192.168.11.1\n"
             + "interface vlan 1 magp 1 ip virtual-router mac-address 00:00:5E:00:01:01\n"
             + "interface vlan 2 magp 2 ip virtual-router mac-address 00:00:5E:00:01:01\n"
             + "interface vlan 4 magp 4 ip virtual-router mac-address 00:00:5E:00:01:01\n"
+            + "interface vlan 6 magp 6 ip virtual-router mac-address 00:00:5E:00:01:01\n"
             + "interface vlan 7 magp 7 ip virtual-router mac-address 00:00:5E:00:01:01\n"
             + "mlag-vip mlag-domain ip 192.168.255.242 /29 force\n"
             + "no mlag shutdown\n"
@@ -505,6 +513,7 @@ def test_switch_config_spine_secondary():
         assert (
             'vlan 2 name "RVR_NMN"\n'
             + 'vlan 4 name "RVR_HMN"\n'
+            + 'vlan 6 name "CMN"\n'
             + 'vlan 7 name "CAN"\n'
             + 'vlan 4000 name "MLAG"\n'
         ) in str(result.output)
@@ -548,17 +557,20 @@ def test_switch_config_spine_secondary():
             "interface vlan 1\n"
             + "interface vlan 2\n"
             + "interface vlan 4\n"
+            + "interface vlan 6\n"
             + "interface vlan 7\n"
             + "interface vlan 10\n"
             + "interface vlan 4000\n"
             + "interface vlan 1 mtu 9216\n"
             + "interface vlan 2 mtu 9216\n"
             + "interface vlan 4 mtu 9216\n"
+            + "interface vlan 6 mtu 9216\n"
             + "interface vlan 7 mtu 9216\n"
             + "interface vlan 4000 mtu 9216\n"
             + "interface vlan 1 ip address 192.168.1.3/16 primary\n"
             + "interface vlan 2 ip address 192.168.3.3/17 primary\n"
             + "interface vlan 4 ip address 192.168.0.3/17 primary\n"
+            + "interface vlan 6 ip address 192.168.12.3/24 primary\n"
             + "interface vlan 7 ip address 192.168.11.3/24 primary\n"
             + "interface vlan 4000 ip address 192.168.255.254/30 primary\n"
         ) in str(result.output)
@@ -570,6 +582,7 @@ def test_switch_config_spine_secondary():
             + "spanning-tree priority 4096\n"
             + "spanning-tree mst 1 vlan 1\n"
             + "spanning-tree mst 1 vlan 4\n"
+            + "spanning-tree mst 1 vlan 6\n"
             + "spanning-tree mst 1 vlan 7\n"
             + "interface mlag-port-channel 151 spanning-tree port type network\n"
             + "interface mlag-port-channel 151 spanning-tree guard root\n"
@@ -612,14 +625,17 @@ def test_switch_config_spine_secondary():
             + "interface vlan 1 magp 1\n"
             + "interface vlan 2 magp 2\n"
             + "interface vlan 4 magp 4\n"
+            + "interface vlan 6 magp 6\n"
             + "interface vlan 7 magp 7\n"
             + "interface vlan 1 magp 1 ip virtual-router address 192.168.1.1\n"
             + "interface vlan 2 magp 2 ip virtual-router address 192.168.3.1\n"
             + "interface vlan 4 magp 4 ip virtual-router address 192.168.0.1\n"
+            + "interface vlan 6 magp 6 ip virtual-router address 192.168.12.1\n"
             + "interface vlan 7 magp 7 ip virtual-router address 192.168.11.1\n"
             + "interface vlan 1 magp 1 ip virtual-router mac-address 00:00:5E:00:01:01\n"
             + "interface vlan 2 magp 2 ip virtual-router mac-address 00:00:5E:00:01:01\n"
             + "interface vlan 4 magp 4 ip virtual-router mac-address 00:00:5E:00:01:01\n"
+            + "interface vlan 6 magp 6 ip virtual-router mac-address 00:00:5E:00:01:01\n"
             + "interface vlan 7 magp 7 ip virtual-router mac-address 00:00:5E:00:01:01\n"
             + "mlag-vip mlag-domain ip 192.168.255.242 /29 force\n"
             + "no mlag shutdown\n"
@@ -1323,6 +1339,24 @@ sls_input = {
                         ],
                         "VlanID": 7,
                         "Gateway": "192.168.11.1",
+                    },
+                ],
+            },
+        },
+        "CMN": {
+            "Name": "CMN",
+            "ExtraProperties": {
+                "CIDR": "192.168.12.0/24",
+                "Subnets": [
+                    {
+                        "Name": "bootstrap_dhcp",
+                        "CIDR": "192.168.12.0/24",
+                        "IPReservations": [
+                            {"Name": "cmn-switch-1", "IPAddress": "192.168.12.2"},
+                            {"Name": "cmn-switch-2", "IPAddress": "192.168.12.3"},
+                        ],
+                        "VlanID": 6,
+                        "Gateway": "192.168.12.1",
                     },
                 ],
             },

@@ -7,7 +7,7 @@ interface lag {{ node.config.LAG_NUMBER }} multi-chassis
     description spine_to_leaf_lag
     no routing
     vlan trunk native 1
-    vlan trunk allowed 1-2,4,7
+    vlan trunk allowed 1-2,4,6,7
     lacp mode active
     spanning-tree root-guard
 {%- endif %}

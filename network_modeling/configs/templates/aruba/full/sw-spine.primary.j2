@@ -25,6 +25,8 @@ vlan 4
     name HMN
     apply access-list ip nmn-hmn in
     apply access-list ip nmn-hmn out
+vlan 6
+    name CMN
 vlan 7
     name CAN
 vlan 10
@@ -84,6 +86,11 @@ interface vlan 4
     active-gateway ip {{ variables.HMN_IP_GATEWAY }}
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
+interface vlan 6
+    ip mtu 9198
+    ip address {{ variables.CMN_IP_PRIMARY }}/{{ variables.CMN_PREFIX_LEN }}
+    active-gateway ip mac 12:00:00:00:6b:00
+    active-gateway ip {{ variables.CMN_IP_GATEWAY }}
 interface vlan 7
     ip mtu 9198
     ip address {{ variables.CAN_IP_PRIMARY }}/{{ variables.CAN_PREFIX_LEN }}

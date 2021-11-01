@@ -500,6 +500,9 @@ def generate_switch_config(
         "CAN_NETMASK": sls_variables["CAN_NETMASK"],
         "CAN_NETWORK_IP": sls_variables["CAN_NETWORK_IP"],
         "CAN_PREFIX_LEN": sls_variables["CAN_PREFIX_LEN"],
+        "CMN_NETMASK": sls_variables["CMN_NETMASK"],
+        "CMN_NETWORK_IP": sls_variables["CMN_NETWORK_IP"],
+        "CMN_PREFIX_LEN": sls_variables["CMN_PREFIX_LEN"],
         "MTL_NETMASK": sls_variables["MTL_NETMASK"],
         "MTL_PREFIX_LEN": sls_variables["MTL_PREFIX_LEN"],
         "NMN": sls_variables["NMN"],
@@ -524,6 +527,9 @@ def generate_switch_config(
         "CAN_IP_GATEWAY": sls_variables["CAN_IP_GATEWAY"],
         "CAN_IP_PRIMARY": sls_variables["CAN_IP_PRIMARY"],
         "CAN_IP_SECONDARY": sls_variables["CAN_IP_SECONDARY"],
+        "CMN_IP_GATEWAY": sls_variables["CMN_IP_GATEWAY"],
+        "CMN_IP_PRIMARY": sls_variables["CMN_IP_PRIMARY"],
+        "CMN_IP_SECONDARY": sls_variables["CMN_IP_SECONDARY"],
         "NMN_MTN_CABINETS": sls_variables["NMN_MTN_CABINETS"],
         "HMN_MTN_CABINETS": sls_variables["HMN_MTN_CABINETS"],
     }
@@ -1019,6 +1025,10 @@ def parse_sls_for_config(input_json):
         "CAN_NETMASK": None,
         "CAN_PREFIX_LEN": None,
         "CAN_NETWORK_IP": None,
+        "CMN": None,
+        "CMN_NETMASK": None,
+        "CMN_PREFIX_LEN": None,
+        "CMN_NETWORK_IP": None,
         "HMN": None,
         "HMN_NETMASK": None,
         "HMN_NETWORK_IP": None,
@@ -1040,6 +1050,7 @@ def parse_sls_for_config(input_json):
         "NMN_MTN_NETWORK_IP": None,
         "NMN_MTN_PREFIX_LEN": None,
         "CAN_IP_GATEWAY": None,
+        "CMN_IP_GATEWAY": None,
         "HMN_IP_GATEWAY": None,
         "MTL_IP_GATEWAY": None,
         "NMN_IP_GATEWAY": None,
@@ -1048,6 +1059,8 @@ def parse_sls_for_config(input_json):
         "ncn_w003": None,
         "CAN_IP_PRIMARY": None,
         "CAN_IP_SECONDARY": None,
+        "CMN_IP_PRIMARY": None,
+        "CMN_IP_SECONDARY": None,
         "HMN_IPs": defaultdict(),
         "MTL_IPs": defaultdict(),
         "NMN_IPs": defaultdict(),
@@ -1076,6 +1089,25 @@ def parse_sls_for_config(input_json):
                             sls_variables["CAN_IP_PRIMARY"] = ip["IPAddress"]
                         elif ip["Name"] == "can-switch-2":
                             sls_variables["CAN_IP_SECONDARY"] = ip["IPAddress"]
+
+        elif name == "CMN":
+            sls_variables["CMN"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
+            )
+            sls_variables["CMN_NETMASK"] = sls_variables["CMN"].netmask
+            sls_variables["CMN_PREFIX_LEN"] = sls_variables["CMN"].prefixlen
+            sls_variables["CMN_NETWORK_IP"] = sls_variables["CMN"].ip
+            for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
+                if subnets["Name"] == "bootstrap_dhcp":
+                    sls_variables["CMN_IP_GATEWAY"] = subnets["Gateway"]
+                    for ip in subnets["IPReservations"]:
+                        if ip["Name"] == "cmn-switch-1":
+                            sls_variables["CMN_IP_PRIMARY"] = ip["IPAddress"]
+                        elif ip["Name"] == "cmn-switch-2":
+                            sls_variables["CMN_IP_SECONDARY"] = ip["IPAddress"]
 
         elif name == "HMN":
             sls_variables["HMN"] = netaddr.IPNetwork(
