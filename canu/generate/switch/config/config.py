@@ -500,6 +500,7 @@ def generate_switch_config(
         "CAN_NETMASK": sls_variables["CAN_NETMASK"],
         "CAN_NETWORK_IP": sls_variables["CAN_NETWORK_IP"],
         "CAN_PREFIX_LEN": sls_variables["CAN_PREFIX_LEN"],
+        "CMN": sls_variables["CMN"],
         "CMN_NETMASK": sls_variables["CMN_NETMASK"],
         "CMN_NETWORK_IP": sls_variables["CMN_NETWORK_IP"],
         "CMN_PREFIX_LEN": sls_variables["CMN_PREFIX_LEN"],
@@ -521,6 +522,14 @@ def generate_switch_config(
         "NMN_MTN_NETMASK": sls_variables["NMN_MTN_NETMASK"],
         "NMN_MTN_NETWORK_IP": sls_variables["NMN_MTN_NETWORK_IP"],
         "NMN_MTN_PREFIX_LEN": sls_variables["NMN_MTN_PREFIX_LEN"],
+        "HMNLB": sls_variables["HMNLB"],
+        "HMNLB_NETMASK": sls_variables["HMNLB_NETMASK"],
+        "HMNLB_NETWORK_IP": sls_variables["HMNLB_NETWORK_IP"],
+        "HMNLB_PREFIX_LEN": sls_variables["HMNLB_PREFIX_LEN"],
+        "NMNLB": sls_variables["NMNLB"],
+        "NMNLB_NETMASK": sls_variables["NMNLB_NETMASK"],
+        "NMNLB_NETWORK_IP": sls_variables["NMNLB_NETWORK_IP"],
+        "NMNLB_PREFIX_LEN": sls_variables["NMNLB_PREFIX_LEN"],
         "HMN_IP_GATEWAY": sls_variables["HMN_IP_GATEWAY"],
         "MTL_IP_GATEWAY": sls_variables["MTL_IP_GATEWAY"],
         "NMN_IP_GATEWAY": sls_variables["NMN_IP_GATEWAY"],
@@ -1049,6 +1058,14 @@ def parse_sls_for_config(input_json):
         "NMN_MTN_NETMASK": None,
         "NMN_MTN_NETWORK_IP": None,
         "NMN_MTN_PREFIX_LEN": None,
+        "HMNLB": None,
+        "HMNLB_NETMASK": None,
+        "HMNLB_NETWORK_IP": None,
+        "HMNLB_PREFIX_LEN": None,
+        "NMNLB": None,
+        "NMNLB_NETMASK": None,
+        "NMNLB_NETWORK_IP": None,
+        "NMNLB_PREFIX_LEN": None,
         "CAN_IP_GATEWAY": None,
         "CMN_IP_GATEWAY": None,
         "HMN_IP_GATEWAY": None,
@@ -1190,6 +1207,32 @@ def parse_sls_for_config(input_json):
             sls_variables["HMN_MTN_PREFIX_LEN"] = sls_variables["HMN_MTN"].prefixlen
             sls_variables["HMN_MTN_NETWORK_IP"] = sls_variables["HMN_MTN"].ip
             sls_variables["HMN_MTN_CABINETS"] = list(
+                sls_network.get("ExtraProperties", {}).get("Subnets", {}),
+            )
+        elif name == "HMNLB":
+            sls_variables["HMNLB"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
+            )
+            sls_variables["HMNLB_NETMASK"] = sls_variables["HMNLB"].netmask
+            sls_variables["HMNLB_PREFIX_LEN"] = sls_variables["HMNLB"].prefixlen
+            sls_variables["HMNLB_NETWORK_IP"] = sls_variables["HMNLB"].ip
+            sls_variables["HMNLB_CABINETS"] = list(
+                sls_network.get("ExtraProperties", {}).get("Subnets", {}),
+            )
+        elif name == "NMNLB":
+            sls_variables["NMNLB"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
+            )
+            sls_variables["NMNLB_NETMASK"] = sls_variables["NMNLB"].netmask
+            sls_variables["NMNLB_PREFIX_LEN"] = sls_variables["NMNLB"].prefixlen
+            sls_variables["NMNLB_NETWORK_IP"] = sls_variables["NMNLB"].ip
+            sls_variables["NMNLB_CABINETS"] = list(
                 sls_network.get("ExtraProperties", {}).get("Subnets", {}),
             )
         for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
