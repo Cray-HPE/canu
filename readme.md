@@ -328,7 +328,7 @@ bb:bb:bb:bb:bb:bb mgmt1   <=== sw-spine01      1/1/4
 
 CANU can be used to validate that an SHCD (SHasta Cabling Diagram) passes basic validation checks.
 
-- The `--architecture / -a` flag is used to set the architecture of the system, either **TDS**, or **Full**.
+- The `--architecture / -a` flag is used to set the architecture of the system, either **TDS**, **Full**, or **V1**..
 - Use the `--tabs` flag to select which tabs on the spreadsheet will be included.
 - The `--corners` flag is used to input the upper left and lower right corners of the table on each tab of the worksheet. The table should contain the 11 headers: **Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port**. If the corners are not specified, you will be prompted to enter them for each tab.
 
@@ -362,7 +362,7 @@ CAN switch
 
 CANU can be used to validate that network cabling passes basic validation checks.
 
-- The `--architecture / -a` flag is used to set the architecture of the system, either **TDS**, or **Full**.
+- The `--architecture / -a` flag is used to set the architecture of the system, either **TDS**, **Full**, or **V1**.
 - To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
 
 To validate the cabling run: `canu validate network cabling -a tds --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
@@ -406,84 +406,104 @@ If there are any nodes that cannot be determined or should be renamed, there wil
 
 CANU can be used to validate an SHCD against the current network cabling.
 
-- The `--architecture / -a` flag is used to set the architecture of the system, either **TDS**, or **Full**.
+- The `--csm` flag is used to set the CSM version of the system.
+- The `--architecture / -a` flag is used to set the architecture of the system, either **TDS**, **Full**, or **V1**.
 - Use the `--tabs` flag to select which tabs on the spreadsheet will be included.
 - The `--corners` flag is used to input the upper left and lower right corners of the table on each tab of the worksheet. The table should contain the 11 headers: **Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port**. If the corners are not specified, you will be prompted to enter them for each tab.
 - To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
 
-To validate an SHCD against the cabling run: `canu validate shcd-cabling -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN --corners I14,S49,I16,S22 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
+To validate an SHCD against the cabling run: `canu validate shcd-cabling --csm 1.2 -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN --corners I14,S49,I16,S22 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
 ```bash
-$ canu validate shcd-cabling -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN --corners I14,S49,I16,S22 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
-
-====================================================================================================
-SHCD
-====================================================================================================
-
-SHCD Node Connections
-------------------------------------------------------------
-0: sw-spine-001 connects to 6 nodes: [1, 2, 3, 4, 5, 6]
-1: sw-spine-002 connects to 6 nodes: [0, 2, 3, 4, 5, 6]
-2: sw-leaf-bmc-001 connects to 2 nodes: [0, 1]
-3: uan001 connects to 2 nodes: [0, 1]
-4: ncn-s001 connects to 2 nodes: [0, 1]
-5: ncn-w001 connects to 2 nodes: [0, 1]
-6: ncn-m001 connects to 2 nodes: [0, 1]
-
-Warnings
-
-Node type could not be determined for the following
-------------------------------------------------------------
-CAN switch
-
-====================================================================================================
-Cabling
-====================================================================================================
-
-Cabling Node Connections
-------------------------------------------------------------
-0: sw-spine-001 connects to 10 nodes: [1, 2, 3, 4]
-1: ncn-m001 connects to 2 nodes: [0, 4]
-2: ncn-w001 connects to 2 nodes: [0, 4]
-3: ncn-s001 connects to 2 nodes: [0, 4]
-4: sw-spine-002 connects to 10 nodes: [0, 1, 2, 3 ]
-
-Warnings
-
-Node type could not be determined for the following
-------------------------------------------------------------
-sw-leaf-001
-sw-spine-001     1/1/1     ===> aa:aa:aa:aa:aa:aa
-sw-spine-001     1/1/2     ===> 1/1/1 CFCANB4S1 Aruba JL479A  TL.10.03.0081
-sw-spine-001     1/1/3     ===> 1/1/3 sw-leaf-001 Aruba JL663A  FL.10.06.0010
-sw-spine-002     1/1/4     ===> bb:bb:bb:bb:bb:bb
-sw-spine-002     1/1/5     ===> 1/1/2 CFCANB4S1 Aruba JL479A  TL.10.03.0081
-sw-spine-002     1/1/6     ===> 1/1/6 sw-leaf-001 Aruba JL663A  FL.10.06.0010
-Nodes that show up as MAC addresses might need to have LLDP enabled.
-
-The following nodes should be renamed
-------------------------------------------------------------
-sw-leaf01 should be renamed (could not identify node)
-sw-spine01 should be renamed sw-spine-001
-sw-spine02 should be renamed sw-spine-002
+$ canu validate shcd-cabling --csm 1.2 -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN --corners I14,S49,I16,S22 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
 
 ====================================================================================================
 SHCD vs Cabling
 ====================================================================================================
 
-SHCD / Cabling Comparison
+ncn-m001
+Rack: x3000    Elevation: u14
+--------------------------------------------------------------------------------
+Port   SHCD                     Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-001:5           sw-spine-001:5
+2      sw-spine-002:5           sw-spine-002:5
+
+ncn-s001
+Rack: x3000    Elevation: u15
+--------------------------------------------------------------------------------
+Port   SHCD                     Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-001:6           None
+2      sw-spine-002:6           None
+
+ncn-w001
+Rack: x3000    Elevation: u16
+--------------------------------------------------------------------------------
+Port   SHCD                     Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-001:7           sw-spine-001:7
+2      sw-spine-002:7           sw-spine-002:7
+
+sw-spine-001
+Rack: x3000    Elevation: u17
+--------------------------------------------------------------------------------
+Port   SHCD                     Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-002:1           sw-spine-002:1
+2      sw-spine-002:2           sw-spine-002:2
+3      uan001:pcie-slot1:1      aa:aa:aa:aa:aa:aa Cray, Inc.
+5      ncn-m001:pcie-slot1:1    ncn-m001:pcie-slot1:1
+6      ncn-s001:pcie-slot1:1    b4:2e:99:aa:bb:cc GIGA-BYTE TECHNOLOGY CO.,LTD.
+7      ncn-w001:pcie-slot1:1    ncn-w001:pcie-slot1:1
+
+sw-spine-002
+Rack: x3000    Elevation: u18
+--------------------------------------------------------------------------------
+Port   SHCD                     Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-001:1           sw-spine-001:1
+2      sw-spine-001:2           sw-spine-001:2
+3      uan001:pcie-slot1:2      bb:bb:bb:bb:bb:bb Cray, Inc.
+5      ncn-m001:pcie-slot1:2    ncn-m001:pcie-slot1:2
+6      ncn-s001:pcie-slot1:2    b8:59:9f:aa:bb:cc Mellanox Technologies, Inc.
+7      ncn-w001:pcie-slot1:2    ncn-w001:pcie-slot1:2
+
+uan001
+Rack: x3000    Elevation: u19
+--------------------------------------------------------------------------------
+Port   SHCD                     Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-001:3           None
+2      sw-spine-002:3           None
+
+
+====================================================================================================
+SHCD Warnings
+====================================================================================================
+
+Warnings
+
+Node type could not be determined for the following
 ------------------------------------------------------------
-sw-spine-001    : Found in SHCD and on the network, but missing the following connections on the network that were found in the SHCD:
-                ['sw-leaf-bmc-001', 'uan001']
-sw-spine-002    : Found in SHCD and on the network, but missing the following connections on the network that were found in the SHCD:
-                ['sw-leaf-bmc-001', 'uan001']
-sw-leaf-bmc-001 : Found in SHCD but not found on the network.
-uan001          : Found in SHCD but not found on the network.
+Sheet: HMN
+Cell: R21      Name: SITE
+
+
+====================================================================================================
+Cabling Warnings
+====================================================================================================
+
+Node type could not be determined for the following
+------------------------------------------------------------
+sw-spine-001     1/1/3     ===> aa:aa:aa:aa:aa:aa Cray, Inc.
+sw-spine-002     1/1/3     ===> bb:bb:bb:bb:bb:bb Cray, Inc.
+Nodes that show up as MAC addresses might need to have LLDP enabled.
 ```
 
 ![](docs/images/canu_validate_shcd_cabling.png)
 
-The output of the `validate shcd-cabling` command will show the results for `validate shcd`, `validate cabling`, and then a comparison of the two results. If there are nodes found on the SHCD, or on the network that are not found in the other one, it will be displayed in _blue_. If a node is found on both the network and in the SHCD, but the connections are not the same, it will be shown in _green_, and the missing connections will be shown.
+The output of the `validate shcd-cabling` command will show a port by port comparison between the devices found in the SHCD and devices found on the network. If there is a difference in what is found connected to a devices port in SHCD and Cabling, the line will be highlighted in red.
 
 ### Validate Network BGP
 
@@ -574,7 +594,7 @@ The sls_input_file.json file is generally stored in one of two places depending 
 #### SHCD Input
 
 - The `--csm` flag is used to set the CSM version of the system.
-- The `--architecture / -a` flag is used to set the architecture of the system, either **TDS**, or **Full**.
+- The `--architecture / -a` flag is used to set the architecture of the system, either **TDS**, **Full**, or **V1**..
 - Use the `--tabs` flag to select which tabs on the spreadsheet will be included.
 - The `--corners` flag is used to input the upper left and lower right corners of the table on each tab of the worksheet. The table should contain the 11 headers: **Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port**. If the corners are not specified, you will be prompted to enter them for each tab.
 
@@ -957,6 +977,7 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 - Changed the `-s --shasta` flag to `--csm`
 - Added Mellanox support to the `canu config bgp` command
 - Added Dell/Mellanox support to the `canu generate network config` & `canu generate switch config` commands
+- Updated `canu validate shcd-cabling` to show port by port differences.
 
 ## [unreleased]
 
