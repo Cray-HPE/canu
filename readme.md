@@ -981,6 +981,7 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 - Added support for CMN (Customer Management Network) on Aruba and Dellanox.
 - Added mgmt plane ACL on Aruba Switches
 - Added Metallb networks to ACLs
+- Removed the hardcoded VLAN variables, these are now being pulled in from SLS.
 
 ## [unreleased]
 

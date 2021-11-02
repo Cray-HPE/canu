@@ -1041,7 +1041,6 @@ def switch_is_primary(switch):
     return is_primary, primary, secondary
 
 
-# takes a vlan list and formats it to match switch configuration
 def groupby_vlan_range(vlan_list):
     """Reorders a list of VLANS to match switch format.
 
