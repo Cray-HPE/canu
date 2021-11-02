@@ -4,8 +4,8 @@
 interface mlag-port-channel {{ node.config.LAG_NUMBER }}
 interface mlag-port-channel {{ node.config.LAG_NUMBER }}  mtu 9216 force
 interface mlag-port-channel {{ node.config.LAG_NUMBER }}  switchport mode hybrid
-interface mlag-port-channel {{ node.config.LAG_NUMBER }}  switchport hybrid allowed-vlan add 2
-interface mlag-port-channel {{ node.config.LAG_NUMBER }}  switchport hybrid allowed-vlan add 4
+interface mlag-port-channel {{ node.config.LAG_NUMBER }}  switchport hybrid allowed-vlan add {{ variables.NMN_VLAN }}
+interface mlag-port-channel {{ node.config.LAG_NUMBER }}  switchport hybrid allowed-vlan add {{ variables.HMN_VLAN }}
 
 interface ethernet 1/{{ node.config.PORT }} mlag-channel-group {{ node.config.LAG_NUMBER }} mode active
 

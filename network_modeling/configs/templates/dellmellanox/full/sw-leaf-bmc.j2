@@ -11,12 +11,12 @@ ntp server {{ variables.NCN_W003 }}
 
 {%- include 'dellmellanox/common/acl-dell.j2' %}
 
-interface vlan1
+interface vlan{{ variables.NATIVE_VLAN }}
  Description MTL
  no shutdown
  ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}}
 
-interface vlan2
+interface vlan{{ variables.NMN_VLAN }}
  description RIVER_NMN
  no shutdown
  ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}}
@@ -24,7 +24,7 @@ interface vlan2
  ip access-group nmn-hmn out
  ip ospf 1 area 0.0.0.0
 
-interface vlan4
+interface vlan{{ variables.HMN_VLAN }}
  description RIVER_HMN
  no shutdown
  ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}

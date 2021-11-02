@@ -6,9 +6,9 @@ interface mlag-port-channel {{ node.config.LAG_NUMBER }}
 interface mlag-port-channel {{ node.config.LAG_NUMBER }}  mtu 9216 force
 interface mlag-port-channel {{ node.config.LAG_NUMBER }}  switchport mode hybrid
 interface mlag-port-channel {{ node.config.LAG_NUMBER }}  lacp-individual enable force
-interface mlag-port-channel {{ node.config.LAG_NUMBER }}  switchport hybrid allowed-vlan add 2
-interface mlag-port-channel {{ node.config.LAG_NUMBER }}  switchport hybrid allowed-vlan add 4
-interface mlag-port-channel {{ node.config.LAG_NUMBER }}  switchport hybrid allowed-vlan add 7
+interface mlag-port-channel {{ node.config.LAG_NUMBER }}  switchport hybrid allowed-vlan add {{ variables.NMN_VLAN }}
+interface mlag-port-channel {{ node.config.LAG_NUMBER }}  switchport hybrid allowed-vlan add {{ variables.HMN_VLAN }}
+interface mlag-port-channel {{ node.config.LAG_NUMBER }}  switchport hybrid allowed-vlan add {{ variables.CAN_VLAN }}
 interface mlag-port-channel {{ node.config.LAG_NUMBER }}  switchport hybrid allowed-vlan add 10
 
 {%- endif %}
