@@ -11,8 +11,8 @@ interface lag {{ ns.lag1 }} multi-chassis
     no shutdown
     description leaf_to_spines_lag
     no routing
-    vlan trunk native 1
-    vlan trunk allowed 1-2,4,6,7,10
+    vlan trunk native {{ variables.NATIVE_VLAN }}
+    vlan trunk allowed {{ variables.SPINE_LEAF_VLANS }}
     lacp mode active
 {%- endif %}
 {%- endfor %}

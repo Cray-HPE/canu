@@ -5,7 +5,7 @@ interface 1/1/{{ node.config.PORT }}
     mtu 9198
     description {{ node.config.DESCRIPTION }}
     no routing
-    vlan access 4
+    vlan access {{ variables.HMN_VLAN }}
     spanning-tree bpdu-guard
     spanning-tree port-type admin-edge
 
