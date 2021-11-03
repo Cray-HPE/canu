@@ -29,7 +29,7 @@ import requests
 import responses
 
 from canu.cli import cli
-from .test_generate_switch_config_aruba import sls_input, sls_networks
+from .test_generate_switch_config_aruba_csm_1_0 import sls_input, sls_networks
 
 test_file_directory = Path(__file__).resolve().parent
 

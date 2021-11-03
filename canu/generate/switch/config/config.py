@@ -382,6 +382,7 @@ def config(
             exit(1)
 
     switch_config, devices, unknown = generate_switch_config(
+        csm,
         architecture,
         shcd_node_list,
         factory,
@@ -427,6 +428,7 @@ def get_shasta_name(name, mapper):
 
 
 def generate_switch_config(
+    csm,
     architecture,
     shcd_node_list,
     factory,
@@ -439,6 +441,7 @@ def generate_switch_config(
     """Generate switch config.
 
     Args:
+        csm: CSM version
         architecture: CSM architecture
         shcd_node_list: List of nodes from the SHCD
         factory: Node factory object
@@ -472,20 +475,20 @@ def generate_switch_config(
 
     templates = {
         "sw-spine": {
-            "primary": f"{vendor_folder}/{template_folder}/sw-spine.primary.j2",
-            "secondary": f"{vendor_folder}/{template_folder}/sw-spine.secondary.j2",
+            "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-spine.primary.j2",
+            "secondary": f"{csm}/{vendor_folder}/{template_folder}/sw-spine.secondary.j2",
         },
         "sw-cdu": {
-            "primary": f"{vendor_folder}/common/sw-cdu.primary.j2",
-            "secondary": f"{vendor_folder}/common/sw-cdu.secondary.j2",
+            "primary": f"{csm}/{vendor_folder}/common/sw-cdu.primary.j2",
+            "secondary": f"{csm}/{vendor_folder}/common/sw-cdu.secondary.j2",
         },
         "sw-leaf": {
-            "primary": f"{vendor_folder}/{template_folder}/sw-leaf.primary.j2",
-            "secondary": f"{vendor_folder}/{template_folder}/sw-leaf.secondary.j2",
+            "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf.primary.j2",
+            "secondary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf.secondary.j2",
         },
         "sw-leaf-bmc": {
-            "primary": f"{vendor_folder}/{template_folder}/sw-leaf-bmc.j2",
-            "secondary": f"{vendor_folder}/{template_folder}/sw-leaf-bmc.j2",
+            "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf-bmc.j2",
+            "secondary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf-bmc.j2",
         },
     }
     template_name = templates[node_shasta_name][

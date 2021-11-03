@@ -1,0 +1,112 @@
+{#- dm-sw-spine.secondary #}
+{%- include 'dellmellanox/common/unknown.j2' %}
+hostname {{ variables.HOSTNAME }}
+
+no cli default prefix-modes enable
+
+   protocol mlag
+   protocol bgp
+
+vlan 2 name "RVR_NMN"
+vlan 4 name "RVR_HMN"
+vlan 7 name "CAN"
+vlan 4000 name "MLAG" 
+
+ntp enable
+ntp server {{ variables.NCN_W001 }}
+ntp server {{ variables.NCN_W002 }}
+ntp server {{ variables.NCN_W003 }}
+
+{%- include 'dellmellanox/common/acl-mellanox.j2' %}
+
+interface port-channel 100
+interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} channel-group 100 mode active
+interface ethernet 1/{{ variables.VSX_ISL_PORT2 }} channel-group 100 mode active
+interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} description mlag-isl
+interface ethernet 1/{{ variables.VSX_ISL_PORT2 }} description mlag-isl
+interface port-channel 100 description mlag-isl
+   
+lacp
+port-channel load-balance ethernet source-destination-ip ingress-port
+
+vlan 2 name "RVR_NMN"
+vlan 4 name "RVR_HMN"
+vlan 7 name "CAN"
+vlan 4000 name "MLAG" 
+   
+ip routing vrf default
+interface vlan 1
+interface vlan 2
+interface vlan 4
+interface vlan 7
+interface vlan 10
+interface vlan 4000
+interface vlan 1 ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}} primary
+interface vlan 2 ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}} primary
+interface vlan 4 ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}} primary
+interface vlan 7 ip address {{ variables.CAN_IP_SECONDARY }}/{{ variables.CAN_PREFIX_LEN }} primary
+interface vlan 4000 ip address 192.168.255.254/30 primary
+interface vlan 1 mtu 9216
+interface vlan 2 mtu 9216
+interface vlan 4 mtu 9216
+interface vlan 7 mtu 9216
+interface vlan 4000 mtu 9216 
+ip load-sharing source-ip-port
+ip load-sharing type consistent
+   
+no interface mgmt0 dhcp
+interface mgmt0 ip address 192.168.255.243 /29
+
+spanning-tree mode mst
+spanning-tree port type edge default
+spanning-tree priority 4096
+spanning-tree mst 1 vlan 1
+spanning-tree mst 1 vlan 4
+spanning-tree mst 1 vlan 7
+
+interface port-channel 100 dcb priority-flow-control mode on force
+
+{% include 'dellmellanox/common/ncn-m.lag.j2' %}
+{% include 'dellmellanox/common/ncn-w.lag.j2' %}
+{% include 'dellmellanox/common/ncn-s.lag.j2' %}
+{% include 'dellmellanox/common/uan.j2' %}
+{% include 'dellmellanox/full/spine-to-leaf-bmc.lag.j2' %}
+{% include 'dellmellanox/common/spine-to-cdu.lag.j2' %}
+      
+protocol ospf
+router ospf 1 vrf default
+router ospf 1 vrf default router-id {{ variables.LOOPBACK_IP }}
+interface vlan 2 ip ospf area 0.0.0.0
+interface vlan 4 ip ospf area 0.0.0.0
+router ospf 1 vrf default redistribute ibgp
+
+ip dhcp relay instance 2 vrf default
+ip dhcp relay instance 4 vrf default
+ip dhcp relay instance 2 address 10.92.100.222
+ip dhcp relay instance 4 address 10.94.100.222
+interface vlan 1 ip dhcp relay instance 2 downstream
+interface vlan 2 ip dhcp relay instance 2 downstream
+interface vlan 4 ip dhcp relay instance 4 downstream
+interface vlan 7 ip dhcp relay instance 2 downstream
+
+protocol magp
+interface vlan 1 magp 1
+interface vlan 2 magp 2
+interface vlan 4 magp 4
+interface vlan 7 magp 7
+interface vlan 1 magp 1 ip virtual-router address {{ variables.MTL_IP_GATEWAY }}
+interface vlan 2 magp 2 ip virtual-router address {{ variables.NMN_IP_GATEWAY }}
+interface vlan 4 magp 4 ip virtual-router address  {{ variables.HMN_IP_GATEWAY }}
+interface vlan 7 magp 7 ip virtual-router address {{ variables.CAN_IP_GATEWAY }}
+interface vlan 1 magp 1 ip virtual-router mac-address 00:00:5E:00:01:01
+interface vlan 2 magp 2 ip virtual-router mac-address 00:00:5E:00:01:01
+interface vlan 4 magp 4 ip virtual-router mac-address 00:00:5E:00:01:01
+interface vlan 7 magp 7 ip virtual-router mac-address 00:00:5E:00:01:01
+
+mlag-vip mlag-domain ip 192.168.255.242 /29 force
+no mlag shutdown
+mlag system-mac 00:00:5E:00:01:01
+interface port-channel 100 ipl 1
+interface vlan 4000 ipl 1 peer-address 192.168.255.253
+   
+{# end dm-sw-spine.secondary #}

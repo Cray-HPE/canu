@@ -1,0 +1,19 @@
+{#- uan #}
+{%- for node in cabling.nodes if node.subtype == "uan" %}
+
+interface mlag-port-channel {{ node.config.LAG_NUMBER }}
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} mtu 9216 force
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport mode hybrid
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} description {{ node.config.DESCRIPTION }}
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} no shutdown
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} lacp-individual enable force
+
+interface ethernet 1/{{ node.config.PORT }} mtu 9216 force
+interface ethernet 1/{{ node.config.PORT }} mlag-channel-group {{ node.config.LAG_NUMBER }} mode active
+interface ethernet 1/{{ node.config.PORT }} description {{ node.config.DESCRIPTION }}
+
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport hybrid allowed-vlan add 2
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport hybrid allowed-vlan add 4
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport hybrid allowed-vlan add 7
+{%- endfor %}
+{#- end-uan #}
