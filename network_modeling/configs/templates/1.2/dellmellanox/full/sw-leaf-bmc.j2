@@ -1,5 +1,5 @@
 {#- sw-leaf-bmc #}
-{%- include 'dellmellanox/common/unknown.j2' %}
+{%- include '1.2/dellmellanox/common/unknown.j2' %}
 ip name-server 10.92.100.225
 hostname {{ variables.HOSTNAME }}
 rest api restconf
@@ -9,7 +9,7 @@ ntp server {{ variables.NCN_W001 }}
 ntp server {{ variables.NCN_W002 }}
 ntp server {{ variables.NCN_W003 }}
 
-{%- include 'dellmellanox/common/acl-dell.j2' %}
+{%- include '1.2/dellmellanox/common/acl-dell.j2' %}
 
 interface vlan{{ variables.NATIVE_VLAN }}
  Description MTL
@@ -44,9 +44,9 @@ interface mgmt1/1/1
 spanning-tree mst configuration
  instance 1 vlan 1-4093
 
-{% include 'dellmellanox/full/leaf-bmc-to-spine.lag.j2' %}
-{% include 'dellmellanox/common/bmc.j2' %}
-{% include 'dellmellanox/common/uan-nmn.j2' %}
+{% include '1.2/dellmellanox/full/leaf-bmc-to-spine.lag.j2' %}
+{% include '1.2/dellmellanox/common/bmc.j2' %}
+{% include '1.2/dellmellanox/common/uan-nmn.j2' %}
 router ospf 1
  router-id {{ variables.LOOPBACK_IP }}
 

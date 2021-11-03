@@ -982,6 +982,7 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 - Added mgmt plane ACL on Aruba Switches
 - Added Metallb networks to ACLs
 - Removed the hardcoded VLAN variables, these are now being pulled in from SLS.
+- Added 1.2 Aruba templates
 
 ## [unreleased]
 

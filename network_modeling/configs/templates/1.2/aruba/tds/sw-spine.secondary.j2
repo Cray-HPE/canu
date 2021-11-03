@@ -14,7 +14,7 @@ ntp enable
 ssh server vrf default
 ssh server vrf keepalive
 ssh server vrf mgmt
-{%- include 'aruba/common/acl.j2' %}
+{%- include '1.2/aruba/common/acl.j2' %}
 
 vlan 1
 vlan {{ variables.NMN_VLAN }}

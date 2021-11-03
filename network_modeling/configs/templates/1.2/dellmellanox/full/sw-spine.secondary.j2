@@ -1,5 +1,5 @@
 {#- dm-sw-spine.secondary #}
-{%- include 'dellmellanox/common/unknown.j2' %}
+{%- include '1.2/dellmellanox/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
 
 no cli default prefix-modes enable
@@ -18,7 +18,7 @@ ntp server {{ variables.NCN_W001 }}
 ntp server {{ variables.NCN_W002 }}
 ntp server {{ variables.NCN_W003 }}
 
-{%- include 'dellmellanox/common/acl-mellanox.j2' %}
+{%- include '1.2/dellmellanox/common/acl-mellanox.j2' %}
 
 interface port-channel 100
 interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} channel-group 100 mode active
@@ -68,12 +68,12 @@ spanning-tree mst 1 vlan {{ variables.CAN_VLAN }}
 
 interface port-channel 100 dcb priority-flow-control mode on force
 
-{% include 'dellmellanox/common/ncn-m.lag.j2' %}
-{% include 'dellmellanox/common/ncn-w.lag.j2' %}
-{% include 'dellmellanox/common/ncn-s.lag.j2' %}
-{% include 'dellmellanox/common/uan.j2' %}
-{% include 'dellmellanox/full/spine-to-leaf-bmc.lag.j2' %}
-{% include 'dellmellanox/common/spine-to-cdu.lag.j2' %}
+{% include '1.2/dellmellanox/common/ncn-m.lag.j2' %}
+{% include '1.2/dellmellanox/common/ncn-w.lag.j2' %}
+{% include '1.2/dellmellanox/common/ncn-s.lag.j2' %}
+{% include '1.2/dellmellanox/common/uan.j2' %}
+{% include '1.2/dellmellanox/full/spine-to-leaf-bmc.lag.j2' %}
+{% include '1.2/dellmellanox/common/spine-to-cdu.lag.j2' %}
       
 protocol ospf
 router ospf 1 vrf default

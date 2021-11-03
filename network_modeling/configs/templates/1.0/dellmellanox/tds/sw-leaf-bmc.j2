@@ -1,5 +1,5 @@
 {#- sw-leaf-bmc #}
-{%- include 'dellmellanox/common/unknown.j2' %}
+{%- include '1.0/dellmellanox/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
 
 rest api restconf
@@ -26,8 +26,8 @@ ntp server {{ variables.NCN_W003 }}
 router ospf 1
 router-id {{ variables.LOOPBACK_IP }}
    
-{% include 'dellmellanox/tds/leaf-bmc-to-spine.lag.j2' %}
-{% include 'dellmellanox/common/bmc.j2' %}
+{% include '1.0/dellmellanox/tds/leaf-bmc-to-spine.lag.j2' %}
+{% include '1.0/dellmellanox/common/bmc.j2' %}
 
 interface loopback 0
     ip address {{ variables.LOOPBACK_IP }}

@@ -1,5 +1,5 @@
 {#- dm-sw-spine.primary #}
-{%- include 'dellmellanox/common/unknown.j2' %}
+{%- include '1.2/dellmellanox/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
 ip dhcp send-hostname
 ip domain-list local
@@ -64,13 +64,13 @@ spanning-tree mst name MST0
 dcb priority-flow-control enable force
 interface port-channel 100 dcb priority-flow-control mode on force
    
-{% include 'dellmellanox/common/acl-mellanox.j2' %}
-{% include 'dellmellanox/common/ncn-m.lag.j2' %}
-{% include 'dellmellanox/common/ncn-w.lag.j2' %}
-{% include 'dellmellanox/common/ncn-s.lag.j2' %}
-{% include 'dellmellanox/common/uan.j2' %}
-{% include 'dellmellanox/tds/spine-to-leaf-bmc.lag.j2' %}
-{% include 'dellmellanox/common/spine-to-cdu.lag.j2' %}
+{% include '1.2/dellmellanox/common/acl-mellanox.j2' %}
+{% include '1.2/dellmellanox/common/ncn-m.lag.j2' %}
+{% include '1.2/dellmellanox/common/ncn-w.lag.j2' %}
+{% include '1.2/dellmellanox/common/ncn-s.lag.j2' %}
+{% include '1.2/dellmellanox/common/uan.j2' %}
+{% include '1.2/dellmellanox/tds/spine-to-leaf-bmc.lag.j2' %}
+{% include '1.2/dellmellanox/common/spine-to-cdu.lag.j2' %}
 
 protocol ospf
 router ospf 1 vrf default
