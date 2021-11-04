@@ -143,12 +143,25 @@ def config(
 ):
     """Validate network config.
 
-    Compare the current running switch config with a generated switch config.
-    The running config for the network can be read from multiple IP addresses
-    using `--ips` or `--ips-file` or it can be read from a directory using `--running`.
+    For each switch, this command will compare the current running switch config with a generated switch config.
 
+    ## Running Config
+    There are three options for passing in the running config:
+
+    - A comma separated list of ips using '--ips 192.168.1.1,192.168.1.'
+
+    - A file of ip addresses, one per line using the flag '--ips-file ips.txt'
+
+    - A directory containing the running configuration '--running RUNNING/CONFIG/DIRECTORY'
+
+    ## Generated Config
+    A directory of generated config files will also need to be passed in using '--generated GENERATED/CONFIG/DIRECTORY'.
+
+    There will be a summary table for each switch highlighting the most important differences between the running switch config and the generated config files.
+
+    --------
     \f
-    # noqa: D301
+    # noqa: D301, B950
 
     Args:
         ctx: CANU context settings

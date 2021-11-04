@@ -1,14 +1,62 @@
-# Initialization
+# CANU Init
 
-To help make switch setup a breeze. CANU can automatically parse CSI output or the Shasta SLS API for switch IPv4 addresses. In order to parse CSI output, use the `--sls-file SLS_FILE` flag to pass in the folder where the _sls_file.json_ file is located. To parse the Shasta SLS API for IP addresses, ensure that you have a valid token. The token file can either be passed in with the `--auth-token TOKEN_FILE` flag, or it can be automatically read if the environmental variable **SLS_TOKEN** is set. The SLS address is default set to _api-gw-service-nmn.local_, if you are operating on a system with a different address, you can set it with the `--sls-address SLS_ADDRESS` flag.
+## canu init
 
-If used, the CSI-generated sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.
+Initialize CANU by extracting all the switch IPs from CSI generated json, or by getting IPs from SLS.
+
+To access the SLS API, a token must be passed in using the ‘–auth-token’ flag.
+- Tokens are typically stored in ‘~./config/cray/tokens/’
+- Instead of passing in a token file, the environmental variable SLS_TOKEN can be used.
+
+To initialize using JSON instead of the SLS API, pass in the file containing SLS JSON data (normally sls_input_file.json) using the ‘–sls-file’ flag
+
+If used, CSI-generated sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.
+- Early in the install process, when running off of the LiveCD the CSI sls_input_file.json file is normally found in the the directory ‘/var/www/ephemeral/prep/SYSTEMNAME/’
+- Later in the install process, the CSI sls_input_file.json file is generally in ‘/mnt/pitdata/prep/SYSTEMNAME/’
+
+The output file for the canu init command is set with the –out FILENAME flag.
+
+```
+canu init [OPTIONS]
+```
+
+### Options
 
 
-- Early in the install process, when running off of the LiveCD the _sls_input_file.json_ file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
-- Later in the install process, the _sls_input_file.json_ file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
+### --sls-file( <sls_file>)
+File containing system SLS JSON data.
 
-The output file for the `canu init` command is set with the `--out FILENAME` flag.
+
+### --auth-token( <auth_token>)
+Token for SLS authentication
+
+
+### --sls-address( <sls_address>)
+
+* **Default**
+
+    api-gw-service-nmn.local
+
+
+
+### --network( <network>)
+Switch network e.g. (CAN, MTL, NMN)
+
+
+* **Default**
+
+    NMN
+
+
+
+### --out( <out>)
+**Required** Output file with CSI IP addresses
+
+### Environment variables
+
+
+### SLS_TOKEN()
+> Provide a default for `--auth-token`
 
 ## Examples
 
@@ -16,31 +64,26 @@ The output file for the `canu init` command is set with the `--out FILENAME` fla
 
 To get the switch IP addresses from CSI output, run the command:
 
-```bash
+```
 $ canu init --sls-file SLS_FILE --out output.txt
 8 IP addresses saved to output.txt
 ```
 
-![](images/canu_init.png)
+
+
+![image](docs/images/canu_init.png)
+
 
 ### 2. SLS Shasta API
 
 To get the switch IP addresses from the Shasta SLS API, run the command:
 
-```bash
+```
 $ canu init --auth-token ~./config/cray/tokens/ --sls-address 1.2.3.4 --out output.txt
 8 IP addresses saved to output.txt
 ```
 
-## Flags
-
-| Option          | Description                            |
-| --------------- | -------------------------------------- |
-| `--sls_file`    | File containing the CSI json           |
-| `--auth_token`  | Token for SLS authentication           |
-| `--sls_address` | The address of SLS                     |
-| `--out`         | Name of the output file                |
 
 ---
 
-**[Back To Readme](/readme.md)**<br>
+<a href="/readme.md">Back To Readme</a><br>

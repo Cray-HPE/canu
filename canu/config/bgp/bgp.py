@@ -99,26 +99,23 @@ def bgp(
 
     The network and NCN data can be read from one of two sources, the SLS API, or using CSI.
 
-    To access SLS, a token must be passed in using the `--auth-token` flag.
+    To access SLS, a token must be passed in using the '--auth-token' flag.
     Tokens are typically stored in ~./config/cray/tokens/
-    Instead of passing in a token file, the environmental variable SLS_TOKEN can be used.
+    Instead of passing in a token file, the environmental variable 'SLS_TOKEN' can be used.
 
-    To initialize using any SLS data, pass in the file containing SLS JSON data (sometimes sls_input_file.json) the --sls-file flag
+    To initialize using SLS data, pass in the file containing SLS JSON data (typically sls_input_file.json) using the '--sls-file' flag
 
     If used, CSI-generated sls_file.json file is generally stored in one of two places
     depending on how far the system is in the install process.
 
+    - Early in the install process, when running off of the LiveCD the sls_input_file.json file is normally found in the the directory '/var/www/ephemeral/prep/SYSTEMNAME/'
 
-        - Early in the install process, when running off of the LiveCD the
-        sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
+    - Later in the install process, the sls_input_file.json file is generally in '/mnt/pitdata/prep/SYSTEMNAME/'
 
-        - Later in the install process, the sls_input_file.json file is
-        generally in `/mnt/pitdata/prep/SYSTEMNAME/`
-
-    To print extra details (prefixes, NCN names, IPs), add the `--verbose` flag
+    To print extra details (prefixes, NCN names, IPs), add the '--verbose' flag
 
     \f
-    # noqa: D301
+    # noqa: D301, B950
 
     Args:
         ctx: CANU context settings
