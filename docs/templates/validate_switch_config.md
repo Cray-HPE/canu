@@ -40,7 +40,7 @@ Router:                          1  |
 
 ```
 
-![](docs/images/canu_validate_switch_config.png)
+![](images/canu_validate_switch_config.png)
 
 ---
 

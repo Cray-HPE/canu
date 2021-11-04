@@ -16,7 +16,7 @@ $ canu init --sls-file SLS_FILE --out output.txt
 8 IP addresses saved to output.txt
 ```
 
-![](docs/images/canu_init.png)
+![](images/canu_init.png)
 
 ### 2. SLS Shasta API
 

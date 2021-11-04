@@ -17,7 +17,7 @@ $ canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --p
 🛶 - Pass - IP: 192.168.1.1 Hostname: test-switch-spine01 Firmware: GL.10.06.0001
 ```
 
-![](docs/images/canu_report_switch_firmware.png)
+![](images/canu_report_switch_firmware.png)
 
 ### 2. Firmware Verbose
 
@@ -34,7 +34,7 @@ Default Image: primary
 Booted Image: primary
 ```
 
-![](docs/images/canu_report_switch_firmware_verbose.png)
+![](images/canu_report_switch_firmware_verbose.png)
 
 ### 3. Firmware JSON
 
@@ -50,7 +50,7 @@ $ canu report switch firmware - 1.4 --ip 192.168.1.1 --username USERNAME --passw
 }
 ```
 
-![](docs/images/canu_report_switch_firmware_json.png)
+![](images/canu_report_switch_firmware_json.png)
 
 ### 4. Firmware JSON Verbose
 
@@ -74,7 +74,7 @@ $ canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --p
 }
 ```
 
-![](docs/images/canu_report_switch_firmware_json_verbose.png)
+![](images/canu_report_switch_firmware_json_verbose.png)
 
 ---
 
