@@ -90,7 +90,7 @@ CAN switch
 
 
 
-![image](docs/images/canu_validate_shcd.png)
+![image](images/canu_validate_shcd.png)
 
 
 

@@ -71,7 +71,7 @@ $ canu init --sls-file SLS_FILE --out output.txt
 
 
 
-![image](docs/images/canu_init.png)
+![image](images/canu_init.png)
 
 
 ### 2. SLS Shasta API

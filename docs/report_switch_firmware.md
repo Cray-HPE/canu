@@ -75,7 +75,7 @@ $ canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --p
 
 
 
-![image](docs/images/canu_report_switch_firmware.png)
+![image](images/canu_report_switch_firmware.png)
 
 
 ### 2. Firmware Verbose
@@ -95,7 +95,7 @@ Booted Image: primary
 
 
 
-![image](docs/images/canu_report_switch_firmware_verbose.png)
+![image](images/canu_report_switch_firmware_verbose.png)
 
 
 ### 3. Firmware JSON
@@ -114,7 +114,7 @@ $ canu report switch firmware - 1.4 --ip 192.168.1.1 --username USERNAME --passw
 
 
 
-![image](docs/images/canu_report_switch_firmware_json.png)
+![image](images/canu_report_switch_firmware_json.png)
 
 
 ### 4. Firmware JSON Verbose
@@ -141,7 +141,7 @@ $ canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --p
 
 
 
-![image](docs/images/canu_report_switch_firmware_json_verbose.png)
+![image](images/canu_report_switch_firmware_json_verbose.png)
 
 
 

@@ -29,7 +29,7 @@ Node type could not be determined for the following
 CAN switch
 ```
 
-![](docs/images/canu_validate_shcd.png)
+![](/images/canu_validate_shcd.png)
 
 ---
 

@@ -66,7 +66,7 @@ PORT        NEIGHBOR       NEIGHBOR PORT      PORT DESCRIPTION                  
 
 
 
-![image](docs/images/canu_report_switch_cabling.png)
+![image](images/canu_report_switch_cabling.png)
 
 
 

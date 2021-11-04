@@ -90,7 +90,7 @@ sw-spine-002     1/1/3     ===> bb:bb:bb:bb:bb:bb Cray, Inc.
 Nodes that show up as MAC addresses might need to have LLDP enabled.
 ```
 
-![](images/canu_validate_shcd_cabling.png)
+![](/images/canu_validate_shcd_cabling.png)
 
 ---
 

@@ -173,7 +173,7 @@ Nodes that show up as MAC addresses might need to have LLDP enabled.
 
 
 
-![image](docs/images/canu_validate_shcd_cabling.png)
+![image](images/canu_validate_shcd_cabling.png)
 
 
 

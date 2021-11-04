@@ -104,7 +104,7 @@ FL.10.05.0010 - 1 switches
 
 
 
-![image](docs/images/canu_report_network_firmware.png)
+![image](images/canu_report_network_firmware.png)
 
 
 ### 2. Network Firmware JSON

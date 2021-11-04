@@ -25,7 +25,7 @@ PORT        NEIGHBOR       NEIGHBOR PORT      PORT DESCRIPTION                  
 1/1/52  ==> test-spine02   1/1/52                                                                   Aruba JL635A  GL.10.06.0010
 ```
 
-![](images/canu_report_switch_cabling.png)
+![](/images/canu_report_switch_cabling.png)
 
 ---
 

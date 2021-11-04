@@ -107,7 +107,7 @@ Router:                          1  |
 
 
 
-![image](docs/images/canu_validate_switch_config.png)
+![image](images/canu_validate_switch_config.png)
 
 
 
