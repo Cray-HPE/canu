@@ -31,29 +31,54 @@ added_files = [
     ("network_modeling/mac_vendors", "network_modeling"),
     ("network_modeling/schema/*", "network_modeling/schema"),
     (
-        "network_modeling/configs/templates/aruba/common/*.j2",
-        "network_modeling/configs/templates/aruba/common",
+        "network_modeling/configs/templates/1.0/aruba/common/*.j2",
+        "network_modeling/configs/templates/1.0/aruba/common",
     ),
     (
-        "network_modeling/configs/templates/aruba/full/*.j2",
-        "network_modeling/configs/templates/aruba/full",
+        "network_modeling/configs/templates/1.0/aruba/full/*.j2",
+        "network_modeling/configs/templates/1.0/aruba/full",
     ),
     (
-        "network_modeling/configs/templates/aruba/tds/*.j2",
-        "network_modeling/configs/templates/aruba/tds",
+        "network_modeling/configs/templates/1.0/aruba/tds/*.j2",
+        "network_modeling/configs/templates/1.0/aruba/tds",
     ),
     (
-        "network_modeling/configs/templates/dellmellanox/common/*.j2",
-        "network_modeling/configs/templates/dellmellanox/common",
+        "network_modeling/configs/templates/1.0/dellmellanox/common/*.j2",
+        "network_modeling/configs/templates/1.0/dellmellanox/common",
     ),
     (
-        "network_modeling/configs/templates/dellmellanox/full/*.j2",
-        "network_modeling/configs/templates/dellmellanox/full",
+        "network_modeling/configs/templates/1.0/dellmellanox/full/*.j2",
+        "network_modeling/configs/templates/1.0/dellmellanox/full",
     ),
     (
-        "network_modeling/configs/templates/dellmellanox/tds/*.j2",
-        "network_modeling/configs/templates/dellmellanox/tds",
+        "network_modeling/configs/templates/1.0/dellmellanox/tds/*.j2",
+        "network_modeling/configs/templates/1.0/dellmellanox/tds",
     ),
+    (
+        "network_modeling/configs/templates/1.2/aruba/common/*.j2",
+        "network_modeling/configs/templates/1.2/aruba/common",
+    ),
+    (
+        "network_modeling/configs/templates/1.2/aruba/full/*.j2",
+        "network_modeling/configs/templates/1.2/aruba/full",
+    ),
+    (
+        "network_modeling/configs/templates/1.2/aruba/tds/*.j2",
+        "network_modeling/configs/templates/1.2/aruba/tds",
+    ),
+    (
+        "network_modeling/configs/templates/1.2/dellmellanox/common/*.j2",
+        "network_modeling/configs/templates/1.2/dellmellanox/common",
+    ),
+    (
+        "network_modeling/configs/templates/1.2/dellmellanox/full/*.j2",
+        "network_modeling/configs/templates/1.2/dellmellanox/full",
+    ),
+    (
+        "network_modeling/configs/templates/1.2/dellmellanox/tds/*.j2",
+        "network_modeling/configs/templates/1.2/dellmellanox/tds",
+    ),
+
 ]
 a = Analysis(
     ["canu/cli.py"],
