@@ -945,19 +945,31 @@ There are several commands to help with the canu cache:
 
 # Testing
 
-To run the full set of tests, linting, and coverage map run:
+To run the full set of tests, linting, coverage map, and docs building run:
 
 ```bash
 $ nox
 ```
 
-To run just tests run `nox -s tests` or to just run linting use `nox -s lint`. To rerun a session without reinstalling all testing dependencies use the `-rs` flag instead of `-s`.
+To just run tests:
 
-To run a specific test, like `test_report_switch_firmware.py` :
+```bash
+$ nox -s tests
+```
+
+To just run linting:
+
+```bash
+$ nox -s lint
+```
+
+To run a specific test file:
 
 ```bash
 $ nox -s tests -- tests/test_report_switch_firmware.py
 ```
+
+To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
 
@@ -978,6 +990,7 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 - Added Mellanox support to the `canu config bgp` command
 - Added Dell/Mellanox support to the `canu generate network config` & `canu generate switch config` commands
 - Updated `canu validate shcd-cabling` to show port by port differences.
+- Updated the docs in the `/docs` folder to build automatically with nox
 
 ## [unreleased]
 
