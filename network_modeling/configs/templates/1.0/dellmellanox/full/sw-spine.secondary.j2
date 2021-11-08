@@ -4,18 +4,26 @@ hostname {{ variables.HOSTNAME }}
 
 no cli default prefix-modes enable
 
-   protocol mlag
-   protocol bgp
+protocol mlag
+protocol bgp
 
 vlan {{ variables.NMN_VLAN }} name "RVR_NMN"
 vlan {{ variables.HMN_VLAN }} name "RVR_HMN"
 vlan {{ variables.CAN_VLAN }} name "CAN"
 vlan 4000 name "MLAG" 
 
-ntp enable
-ntp server {{ variables.NCN_W001 }}
-ntp server {{ variables.NCN_W002 }}
-ntp server {{ variables.NCN_W003 }}
+no ntp server {{ variables.NCN_W001 }} disable
+ntp server {{ variables.NCN_W001 }} keyID 0
+no ntp server {{ variables.NCN_W001 }} trusted-enable
+ntp server {{ variables.NCN_W001 }} version 4
+no ntp server {{ variables.NCN_W002 }} disable
+ntp server {{ variables.NCN_W002 }} keyID 0
+no ntp server {{ variables.NCN_W002 }} trusted-enable
+ntp server {{ variables.NCN_W002 }} version 4
+no ntp server {{ variables.NCN_W003 }} disable
+ntp server {{ variables.NCN_W003 }} keyID 0
+no ntp server {{ variables.NCN_W003 }} trusted-enable
+ntp server {{ variables.NCN_W003 }} version 4
 
 {%- include '1.2/dellmellanox/common/acl-mellanox.j2' %}
 

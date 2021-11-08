@@ -885,6 +885,7 @@ To output the results of the config validation command to a file, append the `--
 ### Validate Network Config
 
 **[Details](docs/validate_network_config.md)**<br>
+Aruba support only.
 
 The `validate network config` command works almost the same as the above `validate switch config` command. There are three options for passing in the running config:
 
@@ -983,6 +984,7 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 - Added Metallb networks to ACLs
 - Removed the hardcoded VLAN variables, these are now being pulled in from SLS.
 - Added 1.2 Aruba templates
+- Added CANU validate switch config support for dellanox.
 
 ## [unreleased]
 

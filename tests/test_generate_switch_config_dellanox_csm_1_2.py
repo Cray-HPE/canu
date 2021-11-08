@@ -80,8 +80,8 @@ def test_switch_config_spine_primary():
         assert (
             "hostname sw-spine-001\n"
             + "no cli default prefix-modes enable\n"
-            + "  protocol mlag\n"
-            + "  protocol bgp\n"
+            + "protocol mlag\n"
+            + "protocol bgp\n"
             + "lacp\n"
             + "interface mlag-port-channel 1\n"
             + "interface mlag-port-channel 2\n"
@@ -208,7 +208,12 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 13 lacp-individual enable force\n"
         ) in str(result.output)
         assert (
-            'vlan 2 name "RVR_NMN"\n'
+            "vlan 2\n"
+            + "vlan 4\n"
+            + "vlan 6\n"
+            + "vlan 7\n"
+            + "vlan 4000\n"
+            + 'vlan 2 name "RVR_NMN"\n'
             + 'vlan 4 name "RVR_HMN"\n'
             + 'vlan 6 name "CMN"\n'
             + 'vlan 7 name "CAN"\n'
@@ -251,11 +256,15 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 201 switchport hybrid allowed-vlan add 4\n"
         ) in str(result.output)
         assert (
-            "interface vlan 1\n"
+            "vrf definition CAN\n"
+            + "vrf definition CAN rd 7:7\n"
+            + "ip routing vrf CAN\n"
+            + "ip routing vrf default\n"
+            + "interface vlan 1\n"
             + "interface vlan 2\n"
             + "interface vlan 4\n"
-            + "interface vlan 6\n"
-            + "interface vlan 7\n"
+            + "interface vlan 6 vrf forwarding CAN\n"
+            + "interface vlan 7 vrf forwarding CAN\n"
             + "interface vlan 10\n"
             + "interface vlan 4000\n"
             + "interface vlan 1 mtu 9216\n"
@@ -290,15 +299,15 @@ def test_switch_config_spine_primary():
         assert (
             "ipv4 access-list nmn-hmn\n"
             + "ipv4 access-list nmn-hmn bind-point rif\n"
-            + "  ipv4 access-list nmn-hmn seq 10 deny ip 192.168.3.0 mask 255.255.128.0 192.168.0.0 mask 255.255.128.0\n"
-            + "  ipv4 access-list nmn-hmn seq 20 deny ip 192.168.0.0 mask 255.255.128.0 192.168.3.0 mask 255.255.128.0\n"
-            + "  ipv4 access-list nmn-hmn seq 30 deny ip 192.168.3.0 mask 255.255.128.0 192.168.200.0 mask 255.255.128.0\n"
-            + "  ipv4 access-list nmn-hmn seq 40 deny ip 192.168.0.0 mask 255.255.128.0 192.168.100.0 mask 255.255.128.0\n"
-            + "  ipv4 access-list nmn-hmn seq 50 deny ip 192.168.100.0 mask 255.255.128.0 192.168.0.0 mask 255.255.128.0\n"
-            + "  ipv4 access-list nmn-hmn seq 60 deny ip 192.168.100.0 mask 255.255.128.0 192.168.200.0 mask 255.255.128.0\n"
-            + "  ipv4 access-list nmn-hmn seq 70 deny ip 192.168.200.0 mask 255.255.128.0 192.168.3.0 mask 255.255.128.0\n"
-            + "  ipv4 access-list nmn-hmn seq 80 deny ip 192.168.200.0 mask 255.255.128.0 192.168.100.0 mask 255.255.128.0\n"
-            + "  ipv4 access-list nmn-hmn seq 90 permit ip any any\n"
+            + "ipv4 access-list nmn-hmn seq-number 10 deny ip 192.168.3.0 mask 255.255.128.0 192.168.0.0 mask 255.255.128.0\n"
+            + "ipv4 access-list nmn-hmn seq-number 20 deny ip 192.168.0.0 mask 255.255.128.0 192.168.3.0 mask 255.255.128.0\n"
+            + "ipv4 access-list nmn-hmn seq-number 30 deny ip 192.168.3.0 mask 255.255.128.0 192.168.200.0 mask 255.255.128.0\n"
+            + "ipv4 access-list nmn-hmn seq-number 40 deny ip 192.168.0.0 mask 255.255.128.0 192.168.100.0 mask 255.255.128.0\n"
+            + "ipv4 access-list nmn-hmn seq-number 50 deny ip 192.168.100.0 mask 255.255.128.0 192.168.0.0 mask 255.255.128.0\n"
+            + "ipv4 access-list nmn-hmn seq-number 60 deny ip 192.168.100.0 mask 255.255.128.0 192.168.200.0 mask 255.255.128.0\n"
+            + "ipv4 access-list nmn-hmn seq-number 70 deny ip 192.168.200.0 mask 255.255.128.0 192.168.3.0 mask 255.255.128.0\n"
+            + "ipv4 access-list nmn-hmn seq-number 80 deny ip 192.168.200.0 mask 255.255.128.0 192.168.100.0 mask 255.255.128.0\n"
+            + "ipv4 access-list nmn-hmn seq-number 90 permit ip any any\n"
         ) in str(result.output)
         assert (
             "protocol ospf\n"
@@ -316,7 +325,6 @@ def test_switch_config_spine_primary():
             + "interface vlan 1 ip dhcp relay instance 2 downstream\n"
             + "interface vlan 2 ip dhcp relay instance 2 downstream\n"
             + "interface vlan 4 ip dhcp relay instance 4 downstream\n"
-            + "interface vlan 7 ip dhcp relay instance 2 downstream\n"
         ) in str(result.output)
         assert (
             "protocol magp\n"
@@ -342,10 +350,18 @@ def test_switch_config_spine_primary():
             + "interface vlan 4000 ipl 1 peer-address 192.168.255.254\n"
             + "no interface mgmt0 dhcp\n"
             + "interface mgmt0 ip address 192.168.255.241 /29\n"
-            + "ntp enable\n"
-            + "ntp server 192.168.4.4\n"
-            + "ntp server 192.168.4.5\n"
-            + "ntp server 192.168.4.6\n"
+            + "no ntp server 192.168.4.4 disable\n"
+            + "ntp server 192.168.4.4 keyID 0\n"
+            + "no ntp server 192.168.4.4 trusted-enable\n"
+            + "ntp server 192.168.4.4 version 4\n"
+            + "no ntp server 192.168.4.5 disable\n"
+            + "ntp server 192.168.4.5 keyID 0\n"
+            + "no ntp server 192.168.4.5 trusted-enable\n"
+            + "ntp server 192.168.4.5 version 4\n"
+            + "no ntp server 192.168.4.6 disable\n"
+            + "ntp server 192.168.4.6 keyID 0\n"
+            + "no ntp server 192.168.4.6 trusted-enable\n"
+            + "ntp server 192.168.4.6 version 4\n"
         ) in str(result.output)
 
 
@@ -384,8 +400,8 @@ def test_switch_config_spine_secondary():
         assert (
             "hostname sw-spine-002\n"
             + "no cli default prefix-modes enable\n"
-            + "  protocol mlag\n"
-            + "  protocol bgp\n"
+            + "protocol mlag\n"
+            + "protocol bgp\n"
             + "lacp\n"
             + "interface mlag-port-channel 1\n"
             + "interface mlag-port-channel 2\n"
@@ -478,6 +494,7 @@ def test_switch_config_spine_secondary():
             + "interface mlag-port-channel 201 description sw-spine-002:29==>sw-cdu-001:28\n"
             + "interface mlag-port-channel 201 description sw-spine-002:30==>sw-cdu-002:28\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "interface port-channel 100\n"
             + "interface ethernet 1/31 channel-group 100 mode active\n"
@@ -512,7 +529,12 @@ def test_switch_config_spine_secondary():
             + "interface mlag-port-channel 13 lacp-individual enable force\n"
         ) in str(result.output)
         assert (
-            'vlan 2 name "RVR_NMN"\n'
+            "vlan 2\n"
+            + "vlan 4\n"
+            + "vlan 6\n"
+            + "vlan 7\n"
+            + "vlan 4000\n"
+            + 'vlan 2 name "RVR_NMN"\n'
             + 'vlan 4 name "RVR_HMN"\n'
             + 'vlan 6 name "CMN"\n'
             + 'vlan 7 name "CAN"\n'
@@ -555,11 +577,15 @@ def test_switch_config_spine_secondary():
             + "interface mlag-port-channel 201 switchport hybrid allowed-vlan add 4\n"
         ) in str(result.output)
         assert (
-            "interface vlan 1\n"
+            "vrf definition CAN\n"
+            + "vrf definition CAN rd 7:7\n"
+            + "ip routing vrf CAN\n"
+            + "ip routing vrf default\n"
+            + "interface vlan 1\n"
             + "interface vlan 2\n"
             + "interface vlan 4\n"
-            + "interface vlan 6\n"
-            + "interface vlan 7\n"
+            + "interface vlan 6 vrf forwarding CAN\n"
+            + "interface vlan 7 vrf forwarding CAN\n"
             + "interface vlan 10\n"
             + "interface vlan 4000\n"
             + "interface vlan 1 mtu 9216\n"
@@ -594,15 +620,15 @@ def test_switch_config_spine_secondary():
         assert (
             "ipv4 access-list nmn-hmn\n"
             + "ipv4 access-list nmn-hmn bind-point rif\n"
-            + "  ipv4 access-list nmn-hmn seq 10 deny ip 192.168.3.0 mask 255.255.128.0 192.168.0.0 mask 255.255.128.0\n"
-            + "  ipv4 access-list nmn-hmn seq 20 deny ip 192.168.0.0 mask 255.255.128.0 192.168.3.0 mask 255.255.128.0\n"
-            + "  ipv4 access-list nmn-hmn seq 30 deny ip 192.168.3.0 mask 255.255.128.0 192.168.200.0 mask 255.255.128.0\n"
-            + "  ipv4 access-list nmn-hmn seq 40 deny ip 192.168.0.0 mask 255.255.128.0 192.168.100.0 mask 255.255.128.0\n"
-            + "  ipv4 access-list nmn-hmn seq 50 deny ip 192.168.100.0 mask 255.255.128.0 192.168.0.0 mask 255.255.128.0\n"
-            + "  ipv4 access-list nmn-hmn seq 60 deny ip 192.168.100.0 mask 255.255.128.0 192.168.200.0 mask 255.255.128.0\n"
-            + "  ipv4 access-list nmn-hmn seq 70 deny ip 192.168.200.0 mask 255.255.128.0 192.168.3.0 mask 255.255.128.0\n"
-            + "  ipv4 access-list nmn-hmn seq 80 deny ip 192.168.200.0 mask 255.255.128.0 192.168.100.0 mask 255.255.128.0\n"
-            + "  ipv4 access-list nmn-hmn seq 90 permit ip any any\n"
+            + "ipv4 access-list nmn-hmn seq-number 10 deny ip 192.168.3.0 mask 255.255.128.0 192.168.0.0 mask 255.255.128.0\n"
+            + "ipv4 access-list nmn-hmn seq-number 20 deny ip 192.168.0.0 mask 255.255.128.0 192.168.3.0 mask 255.255.128.0\n"
+            + "ipv4 access-list nmn-hmn seq-number 30 deny ip 192.168.3.0 mask 255.255.128.0 192.168.200.0 mask 255.255.128.0\n"
+            + "ipv4 access-list nmn-hmn seq-number 40 deny ip 192.168.0.0 mask 255.255.128.0 192.168.100.0 mask 255.255.128.0\n"
+            + "ipv4 access-list nmn-hmn seq-number 50 deny ip 192.168.100.0 mask 255.255.128.0 192.168.0.0 mask 255.255.128.0\n"
+            + "ipv4 access-list nmn-hmn seq-number 60 deny ip 192.168.100.0 mask 255.255.128.0 192.168.200.0 mask 255.255.128.0\n"
+            + "ipv4 access-list nmn-hmn seq-number 70 deny ip 192.168.200.0 mask 255.255.128.0 192.168.3.0 mask 255.255.128.0\n"
+            + "ipv4 access-list nmn-hmn seq-number 80 deny ip 192.168.200.0 mask 255.255.128.0 192.168.100.0 mask 255.255.128.0\n"
+            + "ipv4 access-list nmn-hmn seq-number 90 permit ip any any\n"
         ) in str(result.output)
         assert (
             "protocol ospf\n"
@@ -620,7 +646,6 @@ def test_switch_config_spine_secondary():
             + "interface vlan 1 ip dhcp relay instance 2 downstream\n"
             + "interface vlan 2 ip dhcp relay instance 2 downstream\n"
             + "interface vlan 4 ip dhcp relay instance 4 downstream\n"
-            + "interface vlan 7 ip dhcp relay instance 2 downstream\n"
         ) in str(result.output)
         assert (
             "protocol magp\n"
@@ -646,10 +671,18 @@ def test_switch_config_spine_secondary():
             + "interface vlan 4000 ipl 1 peer-address 192.168.255.253\n"
             + "no interface mgmt0 dhcp\n"
             + "interface mgmt0 ip address 192.168.255.243 /29\n"
-            + "ntp enable\n"
-            + "ntp server 192.168.4.4\n"
-            + "ntp server 192.168.4.5\n"
-            + "ntp server 192.168.4.6\n"
+            + "no ntp server 192.168.4.4 disable\n"
+            + "ntp server 192.168.4.4 keyID 0\n"
+            + "no ntp server 192.168.4.4 trusted-enable\n"
+            + "ntp server 192.168.4.4 version 4\n"
+            + "no ntp server 192.168.4.5 disable\n"
+            + "ntp server 192.168.4.5 keyID 0\n"
+            + "no ntp server 192.168.4.5 trusted-enable\n"
+            + "ntp server 192.168.4.5 version 4\n"
+            + "no ntp server 192.168.4.6 disable\n"
+            + "ntp server 192.168.4.6 keyID 0\n"
+            + "no ntp server 192.168.4.6 trusted-enable\n"
+            + "ntp server 192.168.4.6 version 4\n"
         ) in str(result.output)
 
 

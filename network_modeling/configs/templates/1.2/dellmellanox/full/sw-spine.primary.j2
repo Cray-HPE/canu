@@ -4,19 +4,32 @@ hostname {{ variables.HOSTNAME }}
 
 no cli default prefix-modes enable
 
-   protocol mlag
-   protocol bgp
+protocol mlag
+protocol bgp
 
+vlan {{ variables.NMN_VLAN }}
+vlan {{ variables.HMN_VLAN }}
+vlan {{ variables.CMN_VLAN }}
+vlan {{ variables.CAN_VLAN }}
+vlan 4000
 vlan {{ variables.NMN_VLAN }} name "RVR_NMN"
 vlan {{ variables.HMN_VLAN }} name "RVR_HMN"
 vlan {{ variables.CMN_VLAN }} name "CMN"
 vlan {{ variables.CAN_VLAN }} name "CAN"
 vlan 4000 name "MLAG" 
 
-ntp enable
-ntp server {{ variables.NCN_W001 }}
-ntp server {{ variables.NCN_W002 }}
-ntp server {{ variables.NCN_W003 }}
+no ntp server {{ variables.NCN_W001 }} disable
+ntp server {{ variables.NCN_W001 }} keyID 0
+no ntp server {{ variables.NCN_W001 }} trusted-enable
+ntp server {{ variables.NCN_W001 }} version 4
+no ntp server {{ variables.NCN_W002 }} disable
+ntp server {{ variables.NCN_W002 }} keyID 0
+no ntp server {{ variables.NCN_W002 }} trusted-enable
+ntp server {{ variables.NCN_W002 }} version 4
+no ntp server {{ variables.NCN_W003 }} disable
+ntp server {{ variables.NCN_W003 }} keyID 0
+no ntp server {{ variables.NCN_W003 }} trusted-enable
+ntp server {{ variables.NCN_W003 }} version 4
 
 {%- include '1.2/dellmellanox/common/acl-mellanox.j2' %}
 
@@ -30,13 +43,15 @@ interface port-channel 100 description mlag-isl
 lacp
 port-channel load-balance ethernet source-destination-ip ingress-port
 
-   
+vrf definition CAN
+vrf definition CAN rd 7:7
+ip routing vrf CAN
 ip routing vrf default
 interface vlan {{ variables.NATIVE_VLAN }}
 interface vlan {{ variables.NMN_VLAN }}
 interface vlan {{ variables.HMN_VLAN }}
-interface vlan {{ variables.CMN_VLAN }}
-interface vlan {{ variables.CAN_VLAN }}
+interface vlan {{ variables.CMN_VLAN }} vrf forwarding CAN
+interface vlan {{ variables.CAN_VLAN }} vrf forwarding CAN
 interface vlan 10
 interface vlan 4000
 interface vlan 1 ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}} primary
@@ -89,7 +104,6 @@ ip dhcp relay instance 4 address 10.94.100.222
 interface vlan 1 ip dhcp relay instance 2 downstream
 interface vlan {{ variables.NMN_VLAN }} ip dhcp relay instance 2 downstream
 interface vlan {{ variables.HMN_VLAN }} ip dhcp relay instance 4 downstream
-interface vlan {{ variables.CAN_VLAN }} ip dhcp relay instance 2 downstream
 
 protocol magp
 interface vlan {{ variables.NATIVE_VLAN }} magp 1
