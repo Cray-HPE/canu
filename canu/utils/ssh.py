@@ -57,7 +57,7 @@ def netmiko_command(ip, credentials, command, device_type="autodetect"):
     return output
 
 
-def netmiko_commands(ip, credentials, commands, device_type="mellanox"):
+def netmiko_commands(ip, credentials, commands, device_type="autodetect"):
     """Send a list of commands to a switch using netmiko.
 
     Args:
