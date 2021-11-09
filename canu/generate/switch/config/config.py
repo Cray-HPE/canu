@@ -21,6 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU generate switch config commands."""
 from collections import defaultdict
+from itertools import groupby
 import json
 import os
 from os import environ, path
@@ -381,6 +382,7 @@ def config(
             exit(1)
 
     switch_config, devices, unknown = generate_switch_config(
+        csm,
         architecture,
         shcd_node_list,
         factory,
@@ -426,6 +428,7 @@ def get_shasta_name(name, mapper):
 
 
 def generate_switch_config(
+    csm,
     architecture,
     shcd_node_list,
     factory,
@@ -438,6 +441,7 @@ def generate_switch_config(
     """Generate switch config.
 
     Args:
+        csm: CSM version
         architecture: CSM architecture
         shcd_node_list: List of nodes from the SHCD
         factory: Node factory object
@@ -471,42 +475,65 @@ def generate_switch_config(
 
     templates = {
         "sw-spine": {
-            "primary": f"{vendor_folder}/{template_folder}/sw-spine.primary.j2",
-            "secondary": f"{vendor_folder}/{template_folder}/sw-spine.secondary.j2",
+            "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-spine.primary.j2",
+            "secondary": f"{csm}/{vendor_folder}/{template_folder}/sw-spine.secondary.j2",
         },
         "sw-cdu": {
-            "primary": f"{vendor_folder}/common/sw-cdu.primary.j2",
-            "secondary": f"{vendor_folder}/common/sw-cdu.secondary.j2",
+            "primary": f"{csm}/{vendor_folder}/common/sw-cdu.primary.j2",
+            "secondary": f"{csm}/{vendor_folder}/common/sw-cdu.secondary.j2",
         },
         "sw-leaf": {
-            "primary": f"{vendor_folder}/{template_folder}/sw-leaf.primary.j2",
-            "secondary": f"{vendor_folder}/{template_folder}/sw-leaf.secondary.j2",
+            "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf.primary.j2",
+            "secondary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf.secondary.j2",
         },
         "sw-leaf-bmc": {
-            "primary": f"{vendor_folder}/{template_folder}/sw-leaf-bmc.j2",
-            "secondary": f"{vendor_folder}/{template_folder}/sw-leaf-bmc.j2",
+            "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf-bmc.j2",
+            "secondary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf-bmc.j2",
         },
     }
     template_name = templates[node_shasta_name][
         "primary" if is_primary else "secondary"
     ]
     template = env.get_template(template_name)
+
+    native_vlan = 1
+    leaf_bmc_vlan = groupby_vlan_range(
+        [native_vlan, sls_variables["NMN_VLAN"], sls_variables["HMN_VLAN"]],
+    )
+    spine_leaf_vlan = [
+        native_vlan,
+        sls_variables["NMN_VLAN"],
+        sls_variables["HMN_VLAN"],
+        sls_variables["CAN_VLAN"],
+    ]
+    if sls_variables["CMN_VLAN"]:
+        spine_leaf_vlan.append(sls_variables["CMN_VLAN"])
+    spine_leaf_vlan = groupby_vlan_range(spine_leaf_vlan)
+
     variables = {
         "HOSTNAME": switch_name,
         "NCN_W001": sls_variables["ncn_w001"],
         "NCN_W002": sls_variables["ncn_w002"],
         "NCN_W003": sls_variables["ncn_w003"],
         "CAN": sls_variables["CAN"],
+        "CAN_VLAN": sls_variables["CAN_VLAN"],
         "CAN_NETMASK": sls_variables["CAN_NETMASK"],
         "CAN_NETWORK_IP": sls_variables["CAN_NETWORK_IP"],
         "CAN_PREFIX_LEN": sls_variables["CAN_PREFIX_LEN"],
+        "CMN": sls_variables["CMN"],
+        "CMN_VLAN": sls_variables["CMN_VLAN"],
+        "CMN_NETMASK": sls_variables["CMN_NETMASK"],
+        "CMN_NETWORK_IP": sls_variables["CMN_NETWORK_IP"],
+        "CMN_PREFIX_LEN": sls_variables["CMN_PREFIX_LEN"],
         "MTL_NETMASK": sls_variables["MTL_NETMASK"],
         "MTL_PREFIX_LEN": sls_variables["MTL_PREFIX_LEN"],
         "NMN": sls_variables["NMN"],
+        "NMN_VLAN": sls_variables["NMN_VLAN"],
         "NMN_NETMASK": sls_variables["NMN_NETMASK"],
         "NMN_NETWORK_IP": sls_variables["NMN_NETWORK_IP"],
         "NMN_PREFIX_LEN": sls_variables["NMN_PREFIX_LEN"],
         "HMN": sls_variables["HMN"],
+        "HMN_VLAN": sls_variables["HMN_VLAN"],
         "HMN_NETMASK": sls_variables["HMN_NETMASK"],
         "HMN_NETWORK_IP": sls_variables["HMN_NETWORK_IP"],
         "HMN_PREFIX_LEN": sls_variables["HMN_PREFIX_LEN"],
@@ -518,14 +545,28 @@ def generate_switch_config(
         "NMN_MTN_NETMASK": sls_variables["NMN_MTN_NETMASK"],
         "NMN_MTN_NETWORK_IP": sls_variables["NMN_MTN_NETWORK_IP"],
         "NMN_MTN_PREFIX_LEN": sls_variables["NMN_MTN_PREFIX_LEN"],
+        "HMNLB": sls_variables["HMNLB"],
+        "HMNLB_NETMASK": sls_variables["HMNLB_NETMASK"],
+        "HMNLB_NETWORK_IP": sls_variables["HMNLB_NETWORK_IP"],
+        "HMNLB_PREFIX_LEN": sls_variables["HMNLB_PREFIX_LEN"],
+        "NMNLB": sls_variables["NMNLB"],
+        "NMNLB_NETMASK": sls_variables["NMNLB_NETMASK"],
+        "NMNLB_NETWORK_IP": sls_variables["NMNLB_NETWORK_IP"],
+        "NMNLB_PREFIX_LEN": sls_variables["NMNLB_PREFIX_LEN"],
         "HMN_IP_GATEWAY": sls_variables["HMN_IP_GATEWAY"],
         "MTL_IP_GATEWAY": sls_variables["MTL_IP_GATEWAY"],
         "NMN_IP_GATEWAY": sls_variables["NMN_IP_GATEWAY"],
         "CAN_IP_GATEWAY": sls_variables["CAN_IP_GATEWAY"],
         "CAN_IP_PRIMARY": sls_variables["CAN_IP_PRIMARY"],
         "CAN_IP_SECONDARY": sls_variables["CAN_IP_SECONDARY"],
+        "CMN_IP_GATEWAY": sls_variables["CMN_IP_GATEWAY"],
+        "CMN_IP_PRIMARY": sls_variables["CMN_IP_PRIMARY"],
+        "CMN_IP_SECONDARY": sls_variables["CMN_IP_SECONDARY"],
         "NMN_MTN_CABINETS": sls_variables["NMN_MTN_CABINETS"],
         "HMN_MTN_CABINETS": sls_variables["HMN_MTN_CABINETS"],
+        "LEAF_BMC_VLANS": leaf_bmc_vlan,
+        "SPINE_LEAF_VLANS": spine_leaf_vlan,
+        "NATIVE_VLAN": native_vlan,
     }
     cabling = {}
     cabling["nodes"], unknown = get_switch_nodes(
@@ -1003,6 +1044,35 @@ def switch_is_primary(switch):
     return is_primary, primary, secondary
 
 
+def groupby_vlan_range(vlan_list):
+    """Reorders a list of VLANS to match switch format.
+
+    Args:
+        vlan_list: list of vlans
+
+    Returns:
+        list of vlans formatted
+    """
+    if not len(vlan_list):
+        return ""
+
+    def _group_id(item):
+        return item[0] - item[1]
+
+    values = []
+    vlan_list.sort()
+    for _group_id, members in groupby(enumerate(vlan_list), key=_group_id):
+        members = list(members)
+        first, last = members[0][1], members[-1][1]
+
+        if first == last:
+            values.append(str(first))
+        else:
+            values.append(f"{first}-{last}")
+
+    return ",".join(values)
+
+
 def parse_sls_for_config(input_json):
     """Parse the `sls_file.json` file or the JSON from SLS `/networks` API for config variables.
 
@@ -1016,10 +1086,17 @@ def parse_sls_for_config(input_json):
 
     sls_variables = {
         "CAN": None,
+        "CAN_VLAN": None,
         "CAN_NETMASK": None,
         "CAN_PREFIX_LEN": None,
         "CAN_NETWORK_IP": None,
+        "CMN": None,
+        "CMN_VLAN": None,
+        "CMN_NETMASK": None,
+        "CMN_PREFIX_LEN": None,
+        "CMN_NETWORK_IP": None,
         "HMN": None,
+        "HMN_VLAN": None,
         "HMN_NETMASK": None,
         "HMN_NETWORK_IP": None,
         "HMN_PREFIX_LEN": None,
@@ -1028,6 +1105,7 @@ def parse_sls_for_config(input_json):
         "MTL_NETWORK_IP": None,
         "MTL_PREFIX_LEN": None,
         "NMN": None,
+        "NMN_VLAN": None,
         "NMN_NETMASK": None,
         "NMN_NETWORK_IP": None,
         "NMN_PREFIX_LEN": None,
@@ -1039,7 +1117,16 @@ def parse_sls_for_config(input_json):
         "NMN_MTN_NETMASK": None,
         "NMN_MTN_NETWORK_IP": None,
         "NMN_MTN_PREFIX_LEN": None,
+        "HMNLB": None,
+        "HMNLB_NETMASK": None,
+        "HMNLB_NETWORK_IP": None,
+        "HMNLB_PREFIX_LEN": None,
+        "NMNLB": None,
+        "NMNLB_NETMASK": None,
+        "NMNLB_NETWORK_IP": None,
+        "NMNLB_PREFIX_LEN": None,
         "CAN_IP_GATEWAY": None,
+        "CMN_IP_GATEWAY": None,
         "HMN_IP_GATEWAY": None,
         "MTL_IP_GATEWAY": None,
         "NMN_IP_GATEWAY": None,
@@ -1048,6 +1135,8 @@ def parse_sls_for_config(input_json):
         "ncn_w003": None,
         "CAN_IP_PRIMARY": None,
         "CAN_IP_SECONDARY": None,
+        "CMN_IP_PRIMARY": None,
+        "CMN_IP_SECONDARY": None,
         "HMN_IPs": defaultdict(),
         "MTL_IPs": defaultdict(),
         "NMN_IPs": defaultdict(),
@@ -1071,11 +1160,32 @@ def parse_sls_for_config(input_json):
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 if subnets["Name"] == "bootstrap_dhcp":
                     sls_variables["CAN_IP_GATEWAY"] = subnets["Gateway"]
+                    sls_variables["CAN_VLAN"] = subnets["VlanID"]
                     for ip in subnets["IPReservations"]:
                         if ip["Name"] == "can-switch-1":
                             sls_variables["CAN_IP_PRIMARY"] = ip["IPAddress"]
                         elif ip["Name"] == "can-switch-2":
                             sls_variables["CAN_IP_SECONDARY"] = ip["IPAddress"]
+
+        elif name == "CMN":
+            sls_variables["CMN"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
+            )
+            sls_variables["CMN_NETMASK"] = sls_variables["CMN"].netmask
+            sls_variables["CMN_PREFIX_LEN"] = sls_variables["CMN"].prefixlen
+            sls_variables["CMN_NETWORK_IP"] = sls_variables["CMN"].ip
+            for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
+                if subnets["Name"] == "bootstrap_dhcp":
+                    sls_variables["CMN_IP_GATEWAY"] = subnets["Gateway"]
+                    sls_variables["CMN_VLAN"] = subnets["VlanID"]
+                    for ip in subnets["IPReservations"]:
+                        if ip["Name"] == "cmn-switch-1":
+                            sls_variables["CMN_IP_PRIMARY"] = ip["IPAddress"]
+                        elif ip["Name"] == "cmn-switch-2":
+                            sls_variables["CMN_IP_SECONDARY"] = ip["IPAddress"]
 
         elif name == "HMN":
             sls_variables["HMN"] = netaddr.IPNetwork(
@@ -1090,9 +1200,9 @@ def parse_sls_for_config(input_json):
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 if subnets["Name"] == "network_hardware":
                     sls_variables["HMN_IP_GATEWAY"] = subnets["Gateway"]
+                    sls_variables["HMN_VLAN"] = subnets["VlanID"]
                     for ip in subnets["IPReservations"]:
                         sls_variables["HMN_IPs"][ip["Name"]] = ip["IPAddress"]
-
         elif name == "MTL":
             sls_variables["MTL"] = netaddr.IPNetwork(
                 sls_network.get("ExtraProperties", {}).get(
@@ -1130,6 +1240,7 @@ def parse_sls_for_config(input_json):
                             sls_variables["ncn_w003"] = ip["IPAddress"]
                 elif subnets["Name"] == "network_hardware":
                     sls_variables["NMN_IP_GATEWAY"] = subnets["Gateway"]
+                    sls_variables["NMN_VLAN"] = subnets["VlanID"]
                     for ip in subnets["IPReservations"]:
                         sls_variables["NMN_IPs"][ip["Name"]] = ip["IPAddress"]
 
@@ -1158,6 +1269,32 @@ def parse_sls_for_config(input_json):
             sls_variables["HMN_MTN_PREFIX_LEN"] = sls_variables["HMN_MTN"].prefixlen
             sls_variables["HMN_MTN_NETWORK_IP"] = sls_variables["HMN_MTN"].ip
             sls_variables["HMN_MTN_CABINETS"] = list(
+                sls_network.get("ExtraProperties", {}).get("Subnets", {}),
+            )
+        elif name == "HMNLB":
+            sls_variables["HMNLB"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
+            )
+            sls_variables["HMNLB_NETMASK"] = sls_variables["HMNLB"].netmask
+            sls_variables["HMNLB_PREFIX_LEN"] = sls_variables["HMNLB"].prefixlen
+            sls_variables["HMNLB_NETWORK_IP"] = sls_variables["HMNLB"].ip
+            sls_variables["HMNLB_CABINETS"] = list(
+                sls_network.get("ExtraProperties", {}).get("Subnets", {}),
+            )
+        elif name == "NMNLB":
+            sls_variables["NMNLB"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
+            )
+            sls_variables["NMNLB_NETMASK"] = sls_variables["NMNLB"].netmask
+            sls_variables["NMNLB_PREFIX_LEN"] = sls_variables["NMNLB"].prefixlen
+            sls_variables["NMNLB_NETWORK_IP"] = sls_variables["NMNLB"].ip
+            sls_variables["NMNLB_CABINETS"] = list(
                 sls_network.get("ExtraProperties", {}).get("Subnets", {}),
             )
         for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):

@@ -162,7 +162,6 @@ def test_validate_network_config_json(netmiko_command, switch_vendor):
             ],
         )
         result_json = json.loads(result.output)
-
         assert result.exit_code == 0
         assert result_json == {
             "sw-spine-001": {
