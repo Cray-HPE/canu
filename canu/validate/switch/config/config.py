@@ -56,6 +56,22 @@ options_file = path.join(
     "config",
     "options.yaml",
 )
+dell_options_file = path.join(
+    project_root,
+    "canu",
+    "validate",
+    "switch",
+    "config",
+    "dell_options.yaml",
+)
+mellanox_options_file = path.join(
+    project_root,
+    "canu",
+    "validate",
+    "switch",
+    "config",
+    "mellanox_options.yaml",
+)
 tags_file = path.join(
     project_root,
     "canu",
@@ -65,13 +81,41 @@ tags_file = path.join(
     "tags.yaml",
 )
 
+dell_tags_file = path.join(
+    project_root,
+    "canu",
+    "validate",
+    "switch",
+    "config",
+    "dell_tags.yaml",
+)
+
+mellanox_tags_file = path.join(
+    project_root,
+    "canu",
+    "validate",
+    "switch",
+    "config",
+    "mellanox_tags.yaml",
+)
+
 with open(tags_file, "r") as tags_f:
     tags = yaml.load(tags_f)
+
+with open(dell_tags_file, "r") as tags_f:
+    dell_tags = yaml.load(tags_f)
+
+with open(mellanox_tags_file, "r") as tags_f:
+    mellanox_tags = yaml.load(tags_f)
 
 with open(options_file, "r") as options_f:
     options = yaml.load(options_f)
 
-host = Host("example.rtr", "aoscx", options)
+with open(dell_options_file, "r") as options_f:
+    dell_options = yaml.load(options_f)
+
+with open(mellanox_options_file, "r") as options_f:
+    mellanox_options = yaml.load(options_f)
 
 
 @click.command(
@@ -91,6 +135,11 @@ host = Host("example.rtr", "aoscx", options)
 @optgroup.option(
     "--running",
     help="The running switch config file",
+)
+@click.option(
+    "--vendor",
+    type=click.Choice(["Aruba", "Dell", "Mellanox"], case_sensitive=False),
+    help="The vendor is needed if passing in the running config from a file",
 )
 @click.option("--username", default="admin", show_default=True, help="Switch username")
 @click.option(
@@ -127,6 +176,7 @@ def config(
     json_,
     out,
     override,
+    vendor,
 ):
     """Validate switch config.
 
@@ -146,8 +196,8 @@ def config(
         json_: Bool indicating json output
         out: Name of the output file
         override: Input file to ignore switch configuration
+        vendor: Switch vendor. Aruba, Dell, or Mellanox
     """
-    running_config_hier = HConfig(host=host)
     if ip:
         ip = str(ip)
         if not password:
@@ -165,12 +215,11 @@ def config(
                     f"  Connecting to {ip}...",
                     end="\r",
                 )
-            hostname, switch_config = get_switch_config(ip, credentials)
+            hostname, switch_config, vendor = get_switch_config(ip, credentials)
         print(
             "                                                             ",
             end="\r",
         )
-
         if not hostname:
             click.secho(
                 "There wan an error determining the vendor of the switch.",
@@ -178,11 +227,30 @@ def config(
                 bg="red",
             )
             return
-
+        if vendor == "dell":
+            host = Host("example.rtr", "dellOS10", dell_options)
+        elif vendor == "mellanox":
+            host = Host("example.rtr", "onyx", mellanox_options)
+        elif vendor == "aruba":
+            host = Host("example.rtr", "aoscx", options)
+        running_config_hier = HConfig(host=host)
         running_config_hier.load_from_string(switch_config)
     else:
+        if not vendor:
+            vendor = click.prompt(
+                "Please enter the vendor",
+                type=click.Choice(["Aruba", "Dell", "Mellanox"], case_sensitive=False),
+            )
         try:
             # Load config from file and parse hostname
+            vendor = vendor.lower()
+            if vendor == "dell":
+                host = Host("example.rtr", "dellOS10", dell_options)
+            elif vendor == "mellanox":
+                host = Host("example.rtr", "onyx", mellanox_options)
+            elif vendor == "aruba":
+                host = Host("example.rtr", "aoscx", options)
+            running_config_hier = HConfig(host=host)
             running_config_hier.load_from_file(running)
         except UnicodeDecodeError:
             click.secho(
@@ -274,15 +342,24 @@ def config(
         file=out,
     )
 
-    remediation_config_hier.add_tags(tags)
-    port_reset_cmds = ["no mtu", "shutdown", "no description", "routing", "no speed"]
-    for line in remediation_config_hier.with_tags({"no interface"}).all_children():
-        interface = str(line)
-        remediation_config_hier.del_child_by_text(interface)
-        for x in port_reset_cmds:
-            remediation_config_hier.add_child(interface[3:]).add_child(x)
-    remediation_config_hier.add_tags(tags)
-
+    if vendor == "dell":
+        remediation_config_hier.add_tags(dell_tags)
+    elif vendor == "mellanox":
+        remediation_config_hier.add_tags(mellanox_tags)
+    elif vendor == "aruba":
+        port_reset_cmds = [
+            "no mtu",
+            "shutdown",
+            "no description",
+            "routing",
+            "no speed",
+        ]
+        for line in remediation_config_hier.with_tags({"no interface"}).all_children():
+            interface = str(line)
+            remediation_config_hier.del_child_by_text(interface)
+            for x in port_reset_cmds:
+                remediation_config_hier.add_child(interface[3:]).add_child(x)
+        remediation_config_hier.add_tags(tags)
     click.echo(dash, file=out)
     for safe_line in remediation_config_hier.with_tags({"safe"}).all_children():
         click.echo(safe_line.cisco_style_text())
@@ -341,8 +418,8 @@ def get_switch_config(ip, credentials, return_error=False):
         vendor = switch_vendor(ip, credentials, return_error)
 
         if vendor is None:
-            return None, None
-        elif vendor == "aruba":
+            return None, None, None
+        if vendor == "aruba":
             switch_config = netmiko_command(str(ip), credentials, "show running-config")
             hostname = netmiko_command(str(ip), credentials, "sh run | i host")
             hostname = hostname.split()[1]
@@ -357,14 +434,25 @@ def get_switch_config(ip, credentials, return_error=False):
             switch_config = command_output[0]
             hostname = command_output[1]
         elif vendor == "mellanox":
-            mellanox_commands = ["show running-config", "show hosts | include Hostname"]
+            mellanox_commands = [
+                "show running-config expanded",
+                "show hosts | include Hostname",
+            ]
             command_output = netmiko_commands(
                 str(ip),
                 credentials,
                 mellanox_commands,
                 "mellanox",
             )
-            switch_config = command_output[0]
+
+            switch_config_list = []
+            for line in command_output[0].splitlines():
+                if line.startswith("   "):
+                    switch_config_list.append(line.strip())
+                else:
+                    switch_config_list.append(line)
+
+            switch_config = ("\n").join(switch_config_list)
             hostname = command_output[1].split()[1]
 
     except (
@@ -390,9 +478,9 @@ def get_switch_config(ip, credentials, return_error=False):
             fg="white",
             bg="red",
         )
-        return None, None
+        return None, None, None
 
-    return hostname, switch_config
+    return hostname, switch_config, vendor
 
 
 def print_config_diff_summary(hostname, ip, differences, out):

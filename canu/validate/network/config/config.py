@@ -170,6 +170,8 @@ def config(
     config_data = []
     config_json = defaultdict()
     errors = []
+    # validate network config only supports aruba at this time.
+    vendor = "aruba"
 
     if ips:
         if not password:
@@ -189,7 +191,7 @@ def config(
                         end="\r",
                     )
                 try:
-                    hostname, switch_config = get_switch_config(
+                    hostname, switch_config, vendor = get_switch_config(
                         ip,
                         credentials,
                         return_error=True,
