@@ -72,6 +72,10 @@ ip load-sharing type consistent
 no interface mgmt0 dhcp
 interface mgmt0 ip address 192.168.255.241 /29
 
+{%- include '1.2/dellmellanox/common/prefix.list.j2' %}
+{%- include '1.2/dellmellanox/common/route-map.j2' %}
+{%- include '1.2/dellmellanox/common/bgp.j2' %}
+
 spanning-tree mode mst
 spanning-tree port type edge default
 spanning-tree priority 4096

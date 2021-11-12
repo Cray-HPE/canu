@@ -858,9 +858,6 @@
       - contains: no switchport
       order: 607
     - lineage:
-      - contains: ip address
-      order: 608
-    - lineage:
       - startswith: ip load-sharing
       order: 609
     - lineage:
@@ -899,6 +896,15 @@
     - lineage:
       - contains: mgmt0
       order: 660
+    - lineage:
+      - contains: prefix-list
+      order: 661
+    - lineage:
+      - contains: route-map
+      order: 662
+    - lineage:
+      - contains: router bgp
+      order: 663
     - lineage:
       - contains: ntp
       order: 665
