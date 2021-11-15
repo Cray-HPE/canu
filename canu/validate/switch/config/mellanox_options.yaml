@@ -27,8 +27,11 @@
       - startswith: protocol mlag
       order: 15
     - lineage:
-      - equals: lacp
+      - startswith: protocol bgp
       order: 16
+    - lineage:
+      - equals: lacp
+      order: 17
     - lineage:
       - equals: interface mlag-port-channel 1
       order: 20
@@ -844,6 +847,9 @@
       order: 600
     - lineage:
       - contains: switchport hybrid allowed-vlan
+      order: 604
+    - lineage:
+      - contains: vrf
       order: 605
     - lineage:
       - contains: interface vlan
@@ -961,6 +967,8 @@
       replace: ''
     - search: ^crypto key generate rsa general-keys.*$
       replace: ''
+    - search: /^ +/gm, ''
+      replace: ''
     
     idempotent_commands_blacklist: []
     
@@ -974,10 +982,7 @@
       - startswith: vlan
       - startswith: name
     - lineage:
-      - startswith: interface
-      - startswith:
-        - description
-        - ip address
+      - contains: description
     
     # Default when expression: list of expressions
     negation_default_when: []

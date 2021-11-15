@@ -1,0 +1,27 @@
+{#- leaf-to-spine.lag #}
+{%- set ns = namespace(lag1='') %}
+{%- for node in cabling.nodes if node.subtype == "spine" %}
+{#- Use the namespace to set the first of the two connections from the leaf to a single spine
+They need to be on a single lag 
+Two Separate interfaces e.g. (1/1/53, 1/1/54) #}
+{%- if ns.lag1 == '' %}
+{%- set ns.lag1 = node.config.LAG_NUMBER %}
+
+interface lag {{ ns.lag1 }} multi-chassis
+    no shutdown
+    description leaf_to_spines_lag
+    no routing
+    vlan trunk native {{ variables.NATIVE_VLAN }}
+    vlan trunk allowed 1-2,4,7,10
+    lacp mode active
+{%- endif %}
+{%- endfor %}
+{%- for node in cabling.nodes if node.subtype == "spine"%}
+
+interface 1/1/{{ node.config.PORT }}
+    no shutdown
+    mtu 9198
+    description {{ node.config.DESCRIPTION }}
+    lag {{ ns.lag1 }}
+{%- endfor %}
+{#- end leaf-to-spine.lag #}
