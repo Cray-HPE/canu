@@ -72,6 +72,9 @@
                     },
                     "sub_location": {
                         "type": "string"
+                    },
+                    "parent": {
+                        "type": "string"
                     }
                 },
                 "minProperties": 2,
