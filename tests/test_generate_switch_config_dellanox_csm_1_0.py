@@ -207,14 +207,12 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 9 lacp-individual enable force\n"
             + "interface mlag-port-channel 13 lacp-individual enable force\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             'vlan 2 name "RVR_NMN"\n'
             + 'vlan 4 name "RVR_HMN"\n'
             + 'vlan 7 name "CAN"\n'
             + 'vlan 4000 name "MLAG"\n'
         ) in str(result.output)
-        print(result.output)
         assert (
             "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 2\n"
             + "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 4\n"
@@ -258,18 +256,17 @@ def test_switch_config_spine_primary():
             + "interface vlan 7\n"
             + "interface vlan 10\n"
             + "interface vlan 4000\n"
-            + "interface vlan 1 mtu 9216\n"
-            + "interface vlan 2 mtu 9216\n"
-            + "interface vlan 4 mtu 9216\n"
-            + "interface vlan 7 mtu 9216\n"
-            + "interface vlan 4000 mtu 9216\n"
             + "interface vlan 1 ip address 192.168.1.2/16 primary\n"
             + "interface vlan 2 ip address 192.168.3.2/17 primary\n"
             + "interface vlan 4 ip address 192.168.0.2/17 primary\n"
             + "interface vlan 7 ip address 192.168.11.2/24 primary\n"
             + "interface vlan 4000 ip address 192.168.255.253/30 primary\n"
+            + "interface vlan 1 mtu 9216\n"
+            + "interface vlan 2 mtu 9216\n"
+            + "interface vlan 4 mtu 9216\n"
+            + "interface vlan 7 mtu 9216\n"
+            + "interface vlan 4000 mtu 9216\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "ip load-sharing source-ip-port\n"
             + "ip load-sharing type consistent\n"
@@ -563,16 +560,16 @@ def test_switch_config_spine_secondary():
             + "interface vlan 7\n"
             + "interface vlan 10\n"
             + "interface vlan 4000\n"
-            + "interface vlan 1 mtu 9216\n"
-            + "interface vlan 2 mtu 9216\n"
-            + "interface vlan 4 mtu 9216\n"
-            + "interface vlan 7 mtu 9216\n"
-            + "interface vlan 4000 mtu 9216\n"
             + "interface vlan 1 ip address 192.168.1.3/16 primary\n"
             + "interface vlan 2 ip address 192.168.3.3/17 primary\n"
             + "interface vlan 4 ip address 192.168.0.3/17 primary\n"
             + "interface vlan 7 ip address 192.168.11.3/24 primary\n"
             + "interface vlan 4000 ip address 192.168.255.254/30 primary\n"
+            + "interface vlan 1 mtu 9216\n"
+            + "interface vlan 2 mtu 9216\n"
+            + "interface vlan 4 mtu 9216\n"
+            + "interface vlan 7 mtu 9216\n"
+            + "interface vlan 4000 mtu 9216\n"
         ) in str(result.output)
         assert (
             "ip load-sharing source-ip-port\n"
@@ -654,7 +651,6 @@ def test_switch_config_spine_secondary():
             + "no ntp server 192.168.4.6 trusted-enable\n"
             + "ntp server 192.168.4.6 version 4\n"
         ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_leaf_bmc():

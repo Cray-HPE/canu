@@ -1,0 +1,25 @@
+{#- bgp #}
+router bgp 65533
+    bgp router-id {{ variables.LOOPBACK_IP }}
+    maximum-paths 8
+    timers bgp 1 3
+    distance bgp 20 70
+    {%- for name, ip in variables.NMN_IPs.items() if "sw-spine-002" in name %}
+    neighbor {{ ip }} remote-as 65533
+    {%- endfor %}
+    {%- for name, ip in variables.NMN_IPs.items() if "ncn-w" in name %}
+    neighbor {{ ip }} remote-as 65533
+    neighbor {{ ip }} passive
+    {%- endfor %}
+    address-family ipv4 unicast
+        {%- for name, ip in variables.NMN_IPs.items() if "sw-spine-002" in name %}
+        neighbor {{ ip }} activate
+        {%- endfor %}
+        {%- for name, ip in variables.NMN_IPs.items() if "ncn-w" in name %}
+        neighbor {{ ip }} activate
+        neighbor {{ ip }} route-map in {{ name }}
+        {%- endfor %}
+    exit-address-family
+
+
+{#- end bgp #}
