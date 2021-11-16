@@ -190,11 +190,6 @@ network_v2:
       shasta_name: "pdu"
       architecture_type: "pdu"
       regex: true
-    - lookup_name: 
-        - '^cn\d+$'
-      shasta_name: "cn"
-      architecture_type: "river_compute_node"
-      regex: true
 network_v2_tds:
   name: "Version 2 TDS"
   description: "Aruba Hardware"
