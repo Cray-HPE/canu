@@ -31,10 +31,16 @@ class NodeLocation:
         elevation: The position of the device in the rack (e.g. u19)
     """
 
-    def __init__(self, rack=None, elevation=None):
+    def __init__(self, rack=None, elevation=None, parent=None):
         """Initialize location of equipment in the datacenter."""
         self.__rack = rack
-        self.__elevation = elevation
+        self.__parent = parent
+        if elevation is not None and elevation.upper().endswith(("L", "R")):
+            self.__elevation = elevation[:-1]
+            self.__sub_location = elevation[-1].upper()
+        else:
+            self.__elevation = elevation
+            self.__sub_location = None
 
     def rack(self, setrack=None):
         """Get or set the rack location of the device."""
@@ -48,7 +54,25 @@ class NodeLocation:
             self.__elevation = setelevation
         return self.__elevation
 
+    def sub_location(self, setsub_location=None):
+        """Get or set the rack sub_location of the device  ("L", "R")."""
+        if setsub_location is not None:
+            self.__sub_location = setsub_location
+        return self.__sub_location
+
+    def parent(self, setparent=None):
+        """Get or set the rack parent of the device."""
+        if setparent is not None:
+            self.__parent = setparent
+        return self.__parent
+
     def serialize(self):
         """Resolve the datacenter information as a JSON object."""
         serialized = {"rack": self.__rack, "elevation": self.__elevation}
+
+        if self.__sub_location is not None:
+            serialized["sub_location"] = self.__sub_location
+        if self.__parent is not None:
+            serialized["parent"] = self.__parent
+
         return serialized
