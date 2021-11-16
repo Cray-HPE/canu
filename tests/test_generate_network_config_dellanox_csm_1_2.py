@@ -78,7 +78,6 @@ def test_network_config():
                 folder_name,
             ],
         )
-        print(result.output)
         assert result.exit_code == 0
         assert "sw-spine-001 Config Generated" in str(result.output)
         assert "sw-spine-002 Config Generated" in str(result.output)

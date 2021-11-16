@@ -180,6 +180,8 @@ def test_switch_config_spine_primary():
             + "interface ethernet 1/32 channel-group 100 mode active\n"
             + "interface port-channel 100 description mlag-isl\n"
             + "port-channel load-balance ethernet source-destination-ip ingress-port\n"
+            + "ip name-server 10.92.100.225\n"
+            + "interface port-channel 100 dcb priority-flow-control mode on force\n"
         ) in str(result.output)
         assert (
             "interface mlag-port-channel 1 no shutdown\n"
@@ -260,6 +262,8 @@ def test_switch_config_spine_primary():
             + "vrf definition CAN rd 7:7\n"
             + "ip routing vrf CAN\n"
             + "ip routing vrf default\n"
+            + "interface loopback 0\n"
+            + "interface loopback 0 10.2.0.2/32\n"
             + "interface vlan 1\n"
             + "interface vlan 2\n"
             + "interface vlan 4\n"
@@ -267,18 +271,23 @@ def test_switch_config_spine_primary():
             + "interface vlan 7 vrf forwarding CAN\n"
             + "interface vlan 10\n"
             + "interface vlan 4000\n"
-            + "interface vlan 1 mtu 9216\n"
-            + "interface vlan 2 mtu 9216\n"
-            + "interface vlan 4 mtu 9216\n"
-            + "interface vlan 6 mtu 9216\n"
-            + "interface vlan 7 mtu 9216\n"
-            + "interface vlan 4000 mtu 9216\n"
             + "interface vlan 1 ip address 192.168.1.2/16 primary\n"
             + "interface vlan 2 ip address 192.168.3.2/17 primary\n"
             + "interface vlan 4 ip address 192.168.0.2/17 primary\n"
             + "interface vlan 6 ip address 192.168.12.2/24 primary\n"
             + "interface vlan 7 ip address 192.168.11.2/24 primary\n"
             + "interface vlan 4000 ip address 192.168.255.253/30 primary\n"
+            + "no interface vlan 1 ip icmp redirect\n"
+            + "interface vlan 1 mtu 9216\n"
+            + "no interface vlan 2 ip icmp redirect\n"
+            + "interface vlan 2 mtu 9216\n"
+            + "no interface vlan 4 ip icmp redirect\n"
+            + "interface vlan 4 mtu 9216\n"
+            + "no interface vlan 6 ip icmp redirect\n"
+            + "interface vlan 6 mtu 9216\n"
+            + "no interface vlan 7 ip icmp redirect\n"
+            + "interface vlan 7 mtu 9216\n"
+            + "interface vlan 4000 mtu 9216\n"
         ) in str(result.output)
         assert (
             "ip load-sharing source-ip-port\n"
@@ -313,9 +322,10 @@ def test_switch_config_spine_primary():
             "protocol ospf\n"
             + "router ospf 1 vrf default\n"
             + "router ospf 1 vrf default router-id 10.2.0.2\n"
+            + "interface loopback 0 ip ospf area 0.0.0.0\n"
             + "interface vlan 2 ip ospf area 0.0.0.0\n"
             + "interface vlan 4 ip ospf area 0.0.0.0\n"
-            + "router ospf 1 vrf default redistribute ibgp\n"
+            + "router ospf 1 vrf default redistribute bgp\n"
         ) in str(result.output)
         assert (
             "ip dhcp relay instance 2 vrf default\n"
@@ -350,6 +360,59 @@ def test_switch_config_spine_primary():
             + "interface vlan 4000 ipl 1 peer-address 192.168.255.254\n"
             + "no interface mgmt0 dhcp\n"
             + "interface mgmt0 ip address 192.168.255.241 /29\n"
+            + "ip prefix-list pl-can\n"
+            + "ip prefix-list pl-can seq 10 permit 192.168.11.0 /24 ge 24\n"
+            + "ip prefix-list pl-hmn\n"
+            + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0 /24 ge 24\n"
+            + "ip prefix-list pl-nmn\n"
+            + "ip prefix-list pl-nmn seq 30 permit 10.92.100.0 /24 ge 24\n"
+            + "route-map ncn-w001 permit 10 match ip address pl-can\n"
+            + "route-map ncn-w001 permit 10 set ip next-hop 192.168.11.4\n"
+            + "route-map ncn-w001 permit 20 match ip address pl-hmn\n"
+            + "route-map ncn-w001 permit 20 set ip next-hop 192.168.0.4\n"
+            + "route-map ncn-w001 permit 30 match ip address pl-nmn\n"
+            + "route-map ncn-w001 permit 30 set ip next-hop 192.168.4.4\n"
+            + "route-map ncn-w002 permit 10 match ip address pl-can\n"
+            + "route-map ncn-w002 permit 10 set ip next-hop 192.168.11.5\n"
+            + "route-map ncn-w002 permit 20 match ip address pl-hmn\n"
+            + "route-map ncn-w002 permit 20 set ip next-hop 192.168.0.5\n"
+            + "route-map ncn-w002 permit 30 match ip address pl-nmn\n"
+            + "route-map ncn-w002 permit 30 set ip next-hop 192.168.4.5\n"
+            + "route-map ncn-w003 permit 10 match ip address pl-can\n"
+            + "route-map ncn-w003 permit 10 set ip next-hop 192.168.11.6\n"
+            + "route-map ncn-w003 permit 20 match ip address pl-hmn\n"
+            + "route-map ncn-w003 permit 20 set ip next-hop 192.168.0.6\n"
+            + "route-map ncn-w003 permit 30 match ip address pl-nmn\n"
+            + "route-map ncn-w003 permit 30 set ip next-hop 192.168.4.6\n"
+            + "router bgp 65533 vrf CAN\n"
+            + "router bgp 65533 vrf default\n"
+            + "router bgp 65533 vrf CAN router-id 10.2.0.2 force\n"
+            + "router bgp 65533 vrf default router-id 10.2.0.2 force\n"
+            + "router bgp 65533 vrf CAN distance 20 70 20\n"
+            + "router bgp 65533 vrf default distance 20 70 20\n"
+            + "router bgp 65533 vrf CAN maximum-paths ibgp 32\n"
+            + "router bgp 65533 vrf default maximum-paths ibgp 32\n"
+            + "router bgp 65533 vrf CAN neighbor 192.168.11.4 remote-as 65536\n"
+            + "router bgp 65533 vrf CAN neighbor 192.168.11.5 remote-as 65536\n"
+            + "router bgp 65533 vrf CAN neighbor 192.168.11.6 remote-as 65536\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.4 remote-as 65533\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.4 route-map ncn-w001\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.5 remote-as 65533\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.5 route-map ncn-w002\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.6 remote-as 65533\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.6 route-map ncn-w003\n"
+            + "router bgp 65533 vrf CAN neighbor 192.168.11.4 timers 1 3\n"
+            + "router bgp 65533 vrf CAN neighbor 192.168.11.5 timers 1 3\n"
+            + "router bgp 65533 vrf CAN neighbor 192.168.11.6 timers 1 3\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.4 timers 1 3\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.5 timers 1 3\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.6 timers 1 3\n"
+            + "router bgp 65533 vrf CAN neighbor 192.168.11.4 transport connection-mode passive\n"
+            + "router bgp 65533 vrf CAN neighbor 192.168.11.5 transport connection-mode passive\n"
+            + "router bgp 65533 vrf CAN neighbor 192.168.11.6 transport connection-mode passive\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.4 transport connection-mode passive\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.5 transport connection-mode passive\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.6 transport connection-mode passive\n"
             + "no ntp server 192.168.4.4 disable\n"
             + "ntp server 192.168.4.4 keyID 0\n"
             + "no ntp server 192.168.4.4 trusted-enable\n"
@@ -494,13 +557,14 @@ def test_switch_config_spine_secondary():
             + "interface mlag-port-channel 201 description sw-spine-002:29==>sw-cdu-001:28\n"
             + "interface mlag-port-channel 201 description sw-spine-002:30==>sw-cdu-002:28\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "interface port-channel 100\n"
             + "interface ethernet 1/31 channel-group 100 mode active\n"
             + "interface ethernet 1/32 channel-group 100 mode active\n"
             + "interface port-channel 100 description mlag-isl\n"
             + "port-channel load-balance ethernet source-destination-ip ingress-port\n"
+            + "ip name-server 10.92.100.225\n"
+            + "interface port-channel 100 dcb priority-flow-control mode on force\n"
         ) in str(result.output)
         assert (
             "interface mlag-port-channel 1 no shutdown\n"
@@ -581,6 +645,8 @@ def test_switch_config_spine_secondary():
             + "vrf definition CAN rd 7:7\n"
             + "ip routing vrf CAN\n"
             + "ip routing vrf default\n"
+            + "interface loopback 0\n"
+            + "interface loopback 0 10.2.0.3/32\n"
             + "interface vlan 1\n"
             + "interface vlan 2\n"
             + "interface vlan 4\n"
@@ -588,18 +654,23 @@ def test_switch_config_spine_secondary():
             + "interface vlan 7 vrf forwarding CAN\n"
             + "interface vlan 10\n"
             + "interface vlan 4000\n"
-            + "interface vlan 1 mtu 9216\n"
-            + "interface vlan 2 mtu 9216\n"
-            + "interface vlan 4 mtu 9216\n"
-            + "interface vlan 6 mtu 9216\n"
-            + "interface vlan 7 mtu 9216\n"
-            + "interface vlan 4000 mtu 9216\n"
             + "interface vlan 1 ip address 192.168.1.3/16 primary\n"
             + "interface vlan 2 ip address 192.168.3.3/17 primary\n"
             + "interface vlan 4 ip address 192.168.0.3/17 primary\n"
             + "interface vlan 6 ip address 192.168.12.3/24 primary\n"
             + "interface vlan 7 ip address 192.168.11.3/24 primary\n"
             + "interface vlan 4000 ip address 192.168.255.254/30 primary\n"
+            + "no interface vlan 1 ip icmp redirect\n"
+            + "interface vlan 1 mtu 9216\n"
+            + "no interface vlan 2 ip icmp redirect\n"
+            + "interface vlan 2 mtu 9216\n"
+            + "no interface vlan 4 ip icmp redirect\n"
+            + "interface vlan 4 mtu 9216\n"
+            + "no interface vlan 6 ip icmp redirect\n"
+            + "interface vlan 6 mtu 9216\n"
+            + "no interface vlan 7 ip icmp redirect\n"
+            + "interface vlan 7 mtu 9216\n"
+            + "interface vlan 4000 mtu 9216\n"
         ) in str(result.output)
         assert (
             "ip load-sharing source-ip-port\n"
@@ -634,9 +705,10 @@ def test_switch_config_spine_secondary():
             "protocol ospf\n"
             + "router ospf 1 vrf default\n"
             + "router ospf 1 vrf default router-id 10.2.0.3\n"
+            + "interface loopback 0 ip ospf area 0.0.0.0\n"
             + "interface vlan 2 ip ospf area 0.0.0.0\n"
             + "interface vlan 4 ip ospf area 0.0.0.0\n"
-            + "router ospf 1 vrf default redistribute ibgp\n"
+            + "router ospf 1 vrf default redistribute bgp\n"
         ) in str(result.output)
         assert (
             "ip dhcp relay instance 2 vrf default\n"
@@ -671,6 +743,59 @@ def test_switch_config_spine_secondary():
             + "interface vlan 4000 ipl 1 peer-address 192.168.255.253\n"
             + "no interface mgmt0 dhcp\n"
             + "interface mgmt0 ip address 192.168.255.243 /29\n"
+            + "ip prefix-list pl-can\n"
+            + "ip prefix-list pl-can seq 10 permit 192.168.11.0 /24 ge 24\n"
+            + "ip prefix-list pl-hmn\n"
+            + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0 /24 ge 24\n"
+            + "ip prefix-list pl-nmn\n"
+            + "ip prefix-list pl-nmn seq 30 permit 10.92.100.0 /24 ge 24\n"
+            + "route-map ncn-w001 permit 10 match ip address pl-can\n"
+            + "route-map ncn-w001 permit 10 set ip next-hop 192.168.11.4\n"
+            + "route-map ncn-w001 permit 20 match ip address pl-hmn\n"
+            + "route-map ncn-w001 permit 20 set ip next-hop 192.168.0.4\n"
+            + "route-map ncn-w001 permit 30 match ip address pl-nmn\n"
+            + "route-map ncn-w001 permit 30 set ip next-hop 192.168.4.4\n"
+            + "route-map ncn-w002 permit 10 match ip address pl-can\n"
+            + "route-map ncn-w002 permit 10 set ip next-hop 192.168.11.5\n"
+            + "route-map ncn-w002 permit 20 match ip address pl-hmn\n"
+            + "route-map ncn-w002 permit 20 set ip next-hop 192.168.0.5\n"
+            + "route-map ncn-w002 permit 30 match ip address pl-nmn\n"
+            + "route-map ncn-w002 permit 30 set ip next-hop 192.168.4.5\n"
+            + "route-map ncn-w003 permit 10 match ip address pl-can\n"
+            + "route-map ncn-w003 permit 10 set ip next-hop 192.168.11.6\n"
+            + "route-map ncn-w003 permit 20 match ip address pl-hmn\n"
+            + "route-map ncn-w003 permit 20 set ip next-hop 192.168.0.6\n"
+            + "route-map ncn-w003 permit 30 match ip address pl-nmn\n"
+            + "route-map ncn-w003 permit 30 set ip next-hop 192.168.4.6\n"
+            + "router bgp 65533 vrf CAN\n"
+            + "router bgp 65533 vrf default\n"
+            + "router bgp 65533 vrf CAN router-id 10.2.0.3 force\n"
+            + "router bgp 65533 vrf default router-id 10.2.0.3 force\n"
+            + "router bgp 65533 vrf CAN distance 20 70 20\n"
+            + "router bgp 65533 vrf default distance 20 70 20\n"
+            + "router bgp 65533 vrf CAN maximum-paths ibgp 32\n"
+            + "router bgp 65533 vrf default maximum-paths ibgp 32\n"
+            + "router bgp 65533 vrf CAN neighbor 192.168.11.4 remote-as 65536\n"
+            + "router bgp 65533 vrf CAN neighbor 192.168.11.5 remote-as 65536\n"
+            + "router bgp 65533 vrf CAN neighbor 192.168.11.6 remote-as 65536\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.4 remote-as 65533\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.4 route-map ncn-w001\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.5 remote-as 65533\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.5 route-map ncn-w002\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.6 remote-as 65533\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.6 route-map ncn-w003\n"
+            + "router bgp 65533 vrf CAN neighbor 192.168.11.4 timers 1 3\n"
+            + "router bgp 65533 vrf CAN neighbor 192.168.11.5 timers 1 3\n"
+            + "router bgp 65533 vrf CAN neighbor 192.168.11.6 timers 1 3\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.4 timers 1 3\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.5 timers 1 3\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.6 timers 1 3\n"
+            + "router bgp 65533 vrf CAN neighbor 192.168.11.4 transport connection-mode passive\n"
+            + "router bgp 65533 vrf CAN neighbor 192.168.11.5 transport connection-mode passive\n"
+            + "router bgp 65533 vrf CAN neighbor 192.168.11.6 transport connection-mode passive\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.4 transport connection-mode passive\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.5 transport connection-mode passive\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.6 transport connection-mode passive\n"
             + "no ntp server 192.168.4.4 disable\n"
             + "ntp server 192.168.4.4 keyID 0\n"
             + "no ntp server 192.168.4.4 trusted-enable\n"
@@ -728,10 +853,12 @@ def test_switch_config_leaf_bmc():
             "interface vlan1\n"
             + "  Description MTL\n"
             + "  no shutdown\n"
+            + "  mtu 9216\n"
             + "  ip address 192.168.1.12/16\n"
             + "interface vlan2\n"
             + "  description RIVER_NMN\n"
             + "  no shutdown\n"
+            + "  mtu 9216\n"
             + "  ip address 192.168.3.12/17\n"
             + "  ip access-group nmn-hmn in\n"
             + "  ip access-group nmn-hmn out\n"
@@ -739,6 +866,7 @@ def test_switch_config_leaf_bmc():
             + "interface vlan4\n"
             + "  description RIVER_HMN\n"
             + "  no shutdown\n"
+            + "  mtu 9216\n"
             + "  ip address 192.168.0.12/17\n"
             + "  ip access-group nmn-hmn in\n"
             + "  ip access-group nmn-hmn out\n"
@@ -961,6 +1089,7 @@ def test_switch_config_cdu_primary():
             "interface vlan1\n"
             + "  Description MTL\n"
             + "  no shutdown\n"
+            + "  mtu 9216\n"
             + "  ip address 192.168.1.16/16\n"
             + "interface vlan2\n"
             + "  description RIVER_NMN\n"
@@ -1198,6 +1327,7 @@ def test_switch_config_cdu_secondary():
             "interface vlan1\n"
             + "  Description MTL\n"
             + "  no shutdown\n"
+            + "  mtu 9216\n"
             + "  ip address 192.168.1.17/16\n"
             + "interface vlan2\n"
             + "  description RIVER_NMN\n"
@@ -1375,6 +1505,18 @@ sls_input = {
                         "VlanID": 7,
                         "Gateway": "192.168.11.1",
                     },
+                    {
+                        "FullName": "CAN Bootstrap DHCP Subnet",
+                        "CIDR": "192.168.11.0/24",
+                        "IPReservations": [
+                            {"Name": "ncn-w001", "IPAddress": "192.168.11.4"},
+                            {"Name": "ncn-w002", "IPAddress": "192.168.11.5"},
+                            {"Name": "ncn-w003", "IPAddress": "192.168.11.6"},
+                        ],
+                        "Name": "bootstrap_dhcp",
+                        "VlanID": 7,
+                        "Gateway": "192.168.11.1",
+                    },
                 ],
             },
         },
@@ -1411,6 +1553,18 @@ sls_input = {
                             {"Name": "sw-cdu-001", "IPAddress": "192.168.0.16"},
                             {"Name": "sw-cdu-002", "IPAddress": "192.168.0.17"},
                         ],
+                        "VlanID": 4,
+                        "Gateway": "192.168.0.1",
+                    },
+                    {
+                        "FullName": "HMN Bootstrap DHCP Subnet",
+                        "CIDR": "192.168.0.0/17",
+                        "IPReservations": [
+                            {"Name": "ncn-w001", "IPAddress": "192.168.0.4"},
+                            {"Name": "ncn-w002", "IPAddress": "192.168.0.5"},
+                            {"Name": "ncn-w003", "IPAddress": "192.168.0.6"},
+                        ],
+                        "Name": "bootstrap_dhcp",
                         "VlanID": 4,
                         "Gateway": "192.168.0.1",
                     },
@@ -1503,6 +1657,42 @@ sls_input = {
                         "Gateway": "192.168.104.1",
                         "DHCPStart": "192.168.104.10",
                         "DHCPEnd": "192.168.104.254",
+                    },
+                ],
+            },
+        },
+        "HMNLB": {
+            "Name": "HMNLB",
+            "ExtraProperties": {
+                "CIDR": "10.94.100.0/24",
+                "Subnets": [
+                    {
+                        "FullName": "NMN MetalLB",
+                        "CIDR": "10.94.100.0/24",
+                        "IPReservations": [
+                            {"Name": "cray-tftp", "IPAddress": "10.94.100.60"},
+                            {"Name": "unbound", "IPAddress": "10.94.100.225"},
+                        ],
+                        "Name": "hmn_metallb_address_pool",
+                        "Gateway": "10.94.100.1",
+                    },
+                ],
+            },
+        },
+        "NMNLB": {
+            "Name": "NMNLB",
+            "ExtraProperties": {
+                "CIDR": "10.92.100.0/24",
+                "Subnets": [
+                    {
+                        "FullName": "HMN MetalLB",
+                        "CIDR": "10.92.100.0/24",
+                        "IPReservations": [
+                            {"Name": "cray-tftp", "IPAddress": "10.92.100.60"},
+                            {"Name": "unbound", "IPAddress": "10.92.100.225"},
+                        ],
+                        "Name": "nmn_metallb_address_pool",
+                        "Gateway": "10.92.100.1",
                     },
                 ],
             },

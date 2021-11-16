@@ -998,6 +998,8 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Removed the hardcoded VLAN variables, these are now being pulled in from SLS.
 - Added 1.2 Aruba templates
 - Added CANU validate switch config support for dellanox.
+- BGP is now generated during `canu generate` switch/network config. (aruba &Mellanox)
+- Computes/HSN-bmcs/VizNodes/LoginNodes/pdus now have their switch config generated.
 - Added SubRack support for reading in all variations from the SHCD, and added **sub_location** and **parent** to the JSON output
 
 ## [unreleased]
