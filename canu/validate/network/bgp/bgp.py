@@ -79,11 +79,22 @@ from canu.utils.vendor import switch_vendor
 @click.option("--verbose", is_flag=True, help="Verbose mode")
 @click.pass_context
 def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
-    """Validate BGP neighbors..
+    """Validate BGP neighbors.
 
     This command will check the BGP neighbors for the switch IP addresses entered. All of the neighbors of a switch
     must be 'Established', or the verification will fail.
 
+    If a switch that is not a spine switch is tested, it will show in the results table as 'SKIP'.
+
+    - Enter a comma separated list of IP addresses with the '---ips' flag.
+
+    - Or read the IP addresses from a file, one IP address per line, using '--ips-file FILENAME' flag.
+
+    - The default 'asn' is set to 65533 if it needs to be changed, use the '--asn NEW_ASN_NUMBER' flag.
+
+    If you want to see the individual status of all the neighbors of a switch, use the '--verbose' flag.
+
+    --------
     \f
     # noqa: D301
 

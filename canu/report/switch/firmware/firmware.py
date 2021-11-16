@@ -99,12 +99,15 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 def firmware(ctx, csm, ip, username, password, json_, verbose, out):
     """Report the firmware of a switch (Aruba, Dell, or Mellanox) on the network.
 
-    There are two different statuses that might be indicated.\n
-    🛶 - Pass: Indicates that the switch passed the firmware verification.\n
-    ❌ - Fail: Indicates that the switch failed the firmware verification. A list of expected firmware versions will be displayed.\n
+    There are two different statuses that might be indicated.
 
+    - 🛶 - Pass: Indicates that the switch passed the firmware verification.
+
+    - ❌ - Fail: Indicates that the switch failed the firmware verification. A list of expected firmware versions will be displayed.
+
+    --------
     \f
-    # noqa: D301
+    # noqa: D301, B950
 
     Args:
         ctx: CANU context settings

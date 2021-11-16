@@ -125,11 +125,17 @@ log = logging.getLogger("validate_shcd")
 def shcd(ctx, architecture, shcd, tabs, corners, out, json_, log_):
     """Validate a SHCD file.
 
-    Pass in a SHCD file to validate that it works architecturally. The validation will ensure that spine switches,
-    leaf switches, edge switches, and nodes all are connected properly.
+    CANU can be used to validate that an SHCD (SHasta Cabling Diagram) passes basic validation checks.
 
+    - Use the '--tabs' flag to select which tabs on the spreadsheet will be included.
+
+    - The '--corners' flag is used to input the upper left and lower right corners of the table on each tab of the worksheet. If the corners are not specified, you will be prompted to enter them for each tab.
+
+    - The table should contain the 11 headers: Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port.
+
+    --------
     \f
-    # noqa: D301
+    # noqa: D301, B950
 
     Args:
         ctx: CANU context settings

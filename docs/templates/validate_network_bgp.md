@@ -1,79 +1,9 @@
 # Validate Network BGP
 
-## canu validate network bgp
-
-Validate BGP neighbors.
-
-This command will check the BGP neighbors for the switch IP addresses entered. All of the neighbors of a switch
-must be ‘Established’, or the verification will fail.
-
-If a switch that is not a spine switch is tested, it will show in the results table as ‘SKIP’.
-
-
-* Enter a comma separated list of IP addresses with the ‘—ips’ flag.
-
-
-* Or read the IP addresses from a file, one IP address per line, using ‘–ips-file FILENAME’ flag.
-
-
-* The default ‘asn’ is set to 65533 if it needs to be changed, use the ‘–asn NEW_ASN_NUMBER’ flag.
-
-If you want to see the individual status of all the neighbors of a switch, use the ‘–verbose’ flag.
-
-
----
-
+```{eval-rst}
+.. click:: canu.validate.network.bgp.bgp:bgp
+   :prog: canu validate network bgp
 ```
-canu validate network bgp [OPTIONS]
-```
-
-### Options
-
-
-### --ips( <ips>)
-Comma separated list of IPv4 addresses of switches
-
-
-### --ips-file( <ips_file>)
-File with one IPv4 address per line
-
-
-### --username( <username>)
-Switch username
-
-
-* **Default**
-
-    admin
-
-
-
-### --password( <password>)
-Switch password
-
-
-### --asn( <asn>)
-ASN
-
-
-* **Default**
-
-    65533
-
-
-
-### -a(, --architecture( <architecture>)
-**Required** CSM architecture
-
-
-* **Options**
-
-    Full | TDS | V1
-
-
-
-### --verbose()
-Verbose mode
 
 ## Examples
 
@@ -81,7 +11,7 @@ Verbose mode
 
 To validate BGP run: `canu validate network bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
-```
+```bash
 $ canu validate network bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
 
 BGP Neighbors Established
@@ -95,7 +25,7 @@ PASS - IP: 192.168.1.2 Hostname: sw-spine02
 
 To get verbose BGP neighbor details: `canu validate network bgp --ips 192.168.1.1,192.168.1.3,192.168.1.2 --username USERNAME --password PASSWORD --verbose`
 
-```
+```bash
 $ canu validate network bgp --ips 192.168.1.1,192.168.1.3,192.168.1.2 --username USERNAME --password PASSWORD --verbose
 
 --------------------------------------------------
@@ -128,7 +58,6 @@ Errors
 --------------------------------------------------
 192.168.1.3     - sw-leaf01 not a spine switch
 ```
-
 
 ---
 

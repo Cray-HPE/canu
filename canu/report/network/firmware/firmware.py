@@ -114,22 +114,24 @@ csm_options = canu_config["csm_versions"]
 def firmware(ctx, csm, ips, ips_file, username, password, json_, out):
     """Report the firmware versions of all switches (Aruba, Dell, or Mellanox) on the network.
 
-    Pass in either a comma separated list of IP addresses using the --ips option
+    Pass in either a comma separated list of IP addresses using the '--ips' option
 
     OR
 
-    Pass in a file of IP addresses with one address per line
+    Pass in a file of IP addresses with one address per line using the '--ips-file' option
+
+
     There are three different statuses found in the report.
 
-    🛶 Pass: Indicates that the switch passed the firmware verification.
+    - 🛶 Pass: Indicates that the switch passed the firmware verification.
 
-    ❌ Fail: Indicates that the switch failed the firmware verification, in the generated table, a
-    list of expected firmware versions for that switch is displayed.
+    - ❌ Fail: Indicates that the switch failed the firmware verification, in the generated table, a list of expected firmware versions for that switch is displayed.
 
-    🔺 Error: Indicates that there was an error connecting to the switch, check the Errors table for the specific error.
+    - 🔺 Error: Indicates that there was an error connecting to the switch, check the Errors table for the specific error.
 
+    --------
     \f
-    # noqa: D301
+    # noqa: D301, B950
 
     Args:
         ctx: CANU context settings

@@ -179,18 +179,16 @@ def shcd_cabling(
     log_,
     out,
 ):
-    """Validate a SHCD file against the current network cabling .
+    """Validate a SHCD file against the current network cabling.
 
-    Pass in a SHCD file to validate that it works architecturally.
+    Pass in a SHCD file and a list of IP address to compair the connections.
 
-    This command will also use LLDP to determine the neighbors of the IP addresses passed in to validate that the network
-    is properly connected architecturally.
+    The output of the `validate shcd-cabling` command will show a port by port comparison between the devices found in the SHCD and devices found on the network.
+    If there is a difference in what is found connected to a devices port in SHCD and Cabling, the line will be highlighted in 'red'.
 
-    The validation will ensure that spine switches, leaf switches,
-    edge switches, and nodes all are connected properly.
-
+    --------
     \f
-    # noqa: D301
+    # noqa: D301, B950
 
     Args:
         ctx: CANU context settings
