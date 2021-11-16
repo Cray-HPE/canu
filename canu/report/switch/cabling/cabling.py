@@ -66,16 +66,17 @@ def cabling(ctx, ip, username, password, out):
     """Report the cabling of a switch (Aruba, Dell, or Mellanox) on the network by using LLDP.
 
     If the neighbor name is not in LLDP, the IP and vlan information are displayed
-    by looking up the MAC address in the ARP table.
+    by looking up the MAC address in the ARP table or the mac address table.
 
-    If there is a duplicate port, the duplicates will be highlighted in bright white.
+    If there is a duplicate port, the duplicates will be highlighted in 'bright white'.
 
-    Ports highlighted in blue contain the string "ncn" in the hostname.
+    Ports highlighted in 'blue' contain the string "ncn" in the hostname.
 
-    Ports are highlighted in green when the port name is set with the interface name.
+    Ports are highlighted in 'green' when the port name is set with the interface name.
 
+    --------
     \f
-    # noqa: D301
+    # noqa: D301, B950
 
     Args:
         ctx: CANU context settings

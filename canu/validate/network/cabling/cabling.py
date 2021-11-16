@@ -134,14 +134,17 @@ log = logging.getLogger("validate_shcd")
 )
 @click.pass_context
 def cabling(ctx, architecture, ips, ips_file, username, password, log_, out):
-    """Validate the network.
+    """Validate network cabling.
 
-    This command will use LLDP to determine the neighbors of the IP addresses passed in to validate that the network
-    is properly connected architecturally. The validation will ensure that spine switches, leaf switches,
-    edge switches, and nodes all are connected properly.
+    CANU can be used to validate that network cabling passes basic validation checks.
 
+    This command will use LLDP to determine if the network is properly connected architecturally.
+
+    The validation will ensure that spine switches, leaf switches, edge switches, and nodes all are connected properly.
+
+    --------
     \f
-    # noqa: D301
+    # noqa: D301, B950
 
     Args:
         ctx: CANU context settings
