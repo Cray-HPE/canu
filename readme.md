@@ -986,6 +986,7 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 - Added 1.2 Aruba templates
 - Added CANU validate switch config support for dellanox.
 - BGP is now generated during `canu generate` switch/network config. (aruba &Mellanox)
+- Computes/HSN-bmcs/VizNodes/LoginNodes/pdus now have their switch config generated.
 
 ## [unreleased]
 

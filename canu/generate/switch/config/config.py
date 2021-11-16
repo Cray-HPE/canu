@@ -907,6 +907,66 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 },
             }
             nodes.append(new_node)
+        elif shasta_name == "viz":
+            new_node = {
+                "subtype": "uan",
+                "slot": destination_slot,
+                "destination_port": destination_port,
+                "config": {
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
+                    "PORT": f"{source_port}",
+                    "LAG_NUMBER": primary_port,
+                },
+            }
+            nodes.append(new_node)
+        elif shasta_name == "login":
+            new_node = {
+                "subtype": "uan",
+                "slot": destination_slot,
+                "destination_port": destination_port,
+                "config": {
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
+                    "PORT": f"{source_port}",
+                    "LAG_NUMBER": primary_port,
+                },
+            }
+            nodes.append(new_node)
+        elif shasta_name == "cn":
+            new_node = {
+                "subtype": "compute",
+                "slot": destination_slot,
+                "destination_port": destination_port,
+                "config": {
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "PORT": f"{source_port}",
+                    "INTERFACE_NUMBER": f"{source_port}",
+                },
+            }
+            nodes.append(new_node)
+        elif shasta_name == "sw-hsn":
+            new_node = {
+                "subtype": "sw-hsn",
+                "slot": destination_slot,
+                "destination_port": destination_port,
+                "config": {
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "PORT": f"{source_port}",
+                    "INTERFACE_NUMBER": f"{source_port}",
+                },
+            }
+            nodes.append(new_node)
+        elif shasta_name == "pdu":
+            new_node = {
+                "subtype": "pdu",
+                "slot": destination_slot,
+                "destination_port": destination_port,
+                "config": {
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "PORT": f"{source_port}",
+                    "INTERFACE_NUMBER": f"{source_port}",
+                },
+            }
+            nodes.append(new_node)
         elif shasta_name == "sw-spine":
             # sw-leaf ==> sw-spine
             if switch_name.startswith("sw-leaf"):

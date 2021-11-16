@@ -104,6 +104,7 @@ network_hardware:
     ports:
       - count: 1
         speed: 1
+        slot: "onboard"
       - count: 1
         speed: 1
         slot: "bmc"

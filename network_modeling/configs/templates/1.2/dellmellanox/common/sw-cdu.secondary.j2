@@ -17,6 +17,7 @@ ntp server {{ variables.NCN_W003 }}
 interface vlan1
  Description MTL
  no shutdown
+ mtu 9216
  ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}}
 
 interface vlan2

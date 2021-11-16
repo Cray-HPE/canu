@@ -847,10 +847,13 @@
       order: 600
     - lineage:
       - contains: switchport hybrid allowed-vlan
-      order: 604
+      order: 602
     - lineage:
       - contains: vrf
-      order: 605
+      order: 603
+    - lineage:
+      - contains: interface loopback
+      order: 604
     - lineage:
       - contains: interface vlan
       order: 606

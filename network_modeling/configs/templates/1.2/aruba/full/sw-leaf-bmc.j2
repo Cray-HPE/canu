@@ -30,8 +30,9 @@ interface mgmt
     shutdown
     ip dhcp
 
-{% include '1.2/aruba/full/leaf-bmc-to-leaf.lag.j2' %}
+{% include '1.2/aruba/common/compute.j2' %}
 {% include '1.2/aruba/common/bmc.j2' %}
+{% include '1.2/aruba/full/leaf-bmc-to-leaf.lag.j2' %}
 
 interface loopback 0
     ip address {{ variables.LOOPBACK_IP }}/32

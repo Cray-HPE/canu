@@ -138,8 +138,8 @@ network_v2:
     - lookup_name: ["uan", "slurm"]
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port"
-    - lookup_name: ["Ln", "ln"]
-      shasta_name: "ln"
+    - lookup_name: ["Ln", "ln", "login"]
+      shasta_name: "login"
       architecture_type: "river_ncn_node_4_port"
     - lookup_name: ["viz"]
       shasta_name: "viz"
@@ -179,6 +179,11 @@ network_v2:
         - '^pdu\d+$'
       shasta_name: "pdu"
       architecture_type: "pdu"
+      regex: true
+    - lookup_name: 
+        - '^cn\d+$'
+      shasta_name: "cn"
+      architecture_type: "river_compute_node"
       regex: true
 network_v2_tds:
   name: "Version 2 TDS"
@@ -399,7 +404,7 @@ network_v1:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
-          comment: "onboard nmn"
+          comment: "onboard"
         - name: "river_bmc_leaf"
           speed: 1
           comment: "bmc"
@@ -427,7 +432,7 @@ network_v1:
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port_gigabyte"
     - lookup_name:
-        - "Ln"
+        - "ln"
       shasta_name: "ln"
       architecture_type: "river_ncn_node_4_port_gigabyte"
     - lookup_name:

@@ -654,7 +654,6 @@ def test_switch_config_spine_primary_override():
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "route-map ncn-w001 permit seq 10\n"
             + "    match ip address prefix-list tftp\n"
@@ -1361,7 +1360,6 @@ def test_switch_config_spine_secondary_override():
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "route-map ncn-w001 permit seq 10\n"
             + "    match ip address prefix-list tftp\n"
@@ -5224,31 +5222,41 @@ def test_switch_config_leaf_bmc():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
-
-        leaf_bmc_to_leaf = (
-            "interface lag 255\n"
+        compute_leaf_bmc = (
+            "interface 1/1/24\n"
             + "    no shutdown\n"
-            + "    description leaf_bmc_to_leaf_lag\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-bmc-001:24==>cn001:1\n"
             + "    no routing\n"
-            + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 1-2,4\n"
-            + "    lacp mode active\n"
-            + "\n"
-            + "interface 1/1/47\n"
+            + "    vlan access 2\n"
+            + "    spanning-tree bpdu-guard\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "interface 1/1/25\n"
             + "    no shutdown\n"
             + "    mtu 9198\n"
-            + "    description sw-leaf-bmc-001:47==>sw-leaf-002:51\n"
-            + "    lag 255\n"
-            + "\n"
-            + "interface 1/1/48\n"
+            + "    description sw-leaf-bmc-001:25==>cn002:1\n"
+            + "    no routing\n"
+            + "    vlan access 2\n"
+            + "    spanning-tree bpdu-guard\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "interface 1/1/26\n"
             + "    no shutdown\n"
             + "    mtu 9198\n"
-            + "    description sw-leaf-bmc-001:48==>sw-leaf-001:51\n"
-            + "    lag 255\n"
+            + "    description sw-leaf-bmc-001:26==>cn003:1\n"
+            + "    no routing\n"
+            + "    vlan access 2\n"
+            + "    spanning-tree bpdu-guard\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "interface 1/1/27\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-bmc-001:27==>cn004:1\n"
+            + "    no routing\n"
+            + "    vlan access 2\n"
+            + "    spanning-tree bpdu-guard\n"
+            + "    spanning-tree port-type admin-edge\n"
         )
-
-        assert leaf_bmc_to_leaf in str(result.output)
-
+        assert compute_leaf_bmc in str(result.output)
         bmc = (
             "interface 1/1/1\n"
             + "    no shutdown\n"
@@ -5332,7 +5340,28 @@ def test_switch_config_leaf_bmc():
             + "    spanning-tree port-type admin-edge\n"
         )
         assert bmc in str(result.output)
-
+        leaf_bmc_to_leaf = (
+            "interface lag 255\n"
+            + "    no shutdown\n"
+            + "    description leaf_bmc_to_leaf_lag\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 1-2,4\n"
+            + "    lacp mode active\n"
+            + "\n"
+            + "interface 1/1/47\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-bmc-001:47==>sw-leaf-002:51\n"
+            + "    lag 255\n"
+            + "\n"
+            + "interface 1/1/48\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-bmc-001:48==>sw-leaf-001:51\n"
+            + "    lag 255\n"
+        )
+        assert leaf_bmc_to_leaf in str(result.output)
         assert (
             "interface loopback 0\n"
             + "    ip address 10.2.0.12/32\n"
@@ -5491,7 +5520,41 @@ def test_switch_config_leaf_bmc_override():
         )
 
         assert leaf_bmc_to_leaf in str(result.output)
-
+        compute_leaf_bmc = (
+            "interface 1/1/24\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-bmc-001:24==>cn001:1\n"
+            + "    no routing\n"
+            + "    vlan access 2\n"
+            + "    spanning-tree bpdu-guard\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "interface 1/1/25\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-bmc-001:25==>cn002:1\n"
+            + "    no routing\n"
+            + "    vlan access 2\n"
+            + "    spanning-tree bpdu-guard\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "interface 1/1/26\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-bmc-001:26==>cn003:1\n"
+            + "    no routing\n"
+            + "    vlan access 2\n"
+            + "    spanning-tree bpdu-guard\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "interface 1/1/27\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-bmc-001:27==>cn004:1\n"
+            + "    no routing\n"
+            + "    vlan access 2\n"
+            + "    spanning-tree bpdu-guard\n"
+            + "    spanning-tree port-type admin-edge\n"
+        )
+        assert compute_leaf_bmc in str(result.output)
         bmc = (
             "interface 1/1/1\n"
             + "    no shutdown\n"
@@ -7197,7 +7260,6 @@ def test_switch_config_tds_spine_primary_override():
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "route-map ncn-w001 permit seq 10\n"
             + "    match ip address prefix-list tftp\n"
@@ -8318,7 +8380,6 @@ def test_switch_config_tds_spine_secondary_override():
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "route-map ncn-w001 permit seq 10\n"
             + "    match ip address prefix-list tftp\n"
@@ -9605,7 +9666,6 @@ def test_switch_config_tds_leaf_bmc():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
-
         leaf_bmc_to_leaf = (
             "interface lag 255\n"
             + "    no shutdown\n"
@@ -9625,7 +9685,6 @@ def test_switch_config_tds_leaf_bmc():
             + "    description sw-leaf-bmc-001:48==>sw-spine-001:51\n"
             + "    lag 255\n"
         )
-
         assert leaf_bmc_to_leaf in str(result.output)
 
         bmc = (
@@ -9705,6 +9764,38 @@ def test_switch_config_tds_leaf_bmc():
             + "    no shutdown\n"
             + "    mtu 9198\n"
             + "    description sw-leaf-bmc-001:10==>uan001:bmc:1\n"
+            + "    no routing\n"
+            + "    vlan access 4\n"
+            + "    spanning-tree bpdu-guard\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "interface 1/1/11\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-bmc-001:11==>cn001:1\n"
+            + "    no routing\n"
+            + "    vlan access 4\n"
+            + "    spanning-tree bpdu-guard\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "interface 1/1/12\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-bmc-001:12==>cn002:1\n"
+            + "    no routing\n"
+            + "    vlan access 4\n"
+            + "    spanning-tree bpdu-guard\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "interface 1/1/13\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-bmc-001:13==>cn003:1\n"
+            + "    no routing\n"
+            + "    vlan access 4\n"
+            + "    spanning-tree bpdu-guard\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "interface 1/1/14\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-bmc-001:14==>cn004:1\n"
             + "    no routing\n"
             + "    vlan access 4\n"
             + "    spanning-tree bpdu-guard\n"
@@ -9948,6 +10039,38 @@ def test_switch_config_tds_leaf_bmc_override():
             + "    no shutdown\n"
             + "    mtu 9198\n"
             + "    description sw-leaf-bmc-001:10==>uan001:bmc:1\n"
+            + "    no routing\n"
+            + "    vlan access 4\n"
+            + "    spanning-tree bpdu-guard\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "interface 1/1/11\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-bmc-001:11==>cn001:1\n"
+            + "    no routing\n"
+            + "    vlan access 4\n"
+            + "    spanning-tree bpdu-guard\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "interface 1/1/12\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-bmc-001:12==>cn002:1\n"
+            + "    no routing\n"
+            + "    vlan access 4\n"
+            + "    spanning-tree bpdu-guard\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "interface 1/1/13\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-bmc-001:13==>cn003:1\n"
+            + "    no routing\n"
+            + "    vlan access 4\n"
+            + "    spanning-tree bpdu-guard\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "interface 1/1/14\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-bmc-001:14==>cn004:1\n"
             + "    no routing\n"
             + "    vlan access 4\n"
             + "    spanning-tree bpdu-guard\n"
