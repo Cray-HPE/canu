@@ -885,6 +885,7 @@ To output the results of the config validation command to a file, append the `--
 ### Validate Network Config
 
 **[Details](docs/validate_network_config.md)**<br>
+Aruba support only.
 
 The `validate network config` command works almost the same as the above `validate switch config` command. There are three options for passing in the running config:
 
@@ -991,6 +992,12 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Added Dell/Mellanox support to the `canu generate network config` & `canu generate switch config` commands
 - Updated `canu validate shcd-cabling` to show port by port differences.
 - Updated the docs in the `/docs` folder to build automatically with nox
+- Added support for CMN (Customer Management Network) on Aruba and Dellanox.
+- Added mgmt plane ACL on Aruba Switches
+- Added Metallb networks to ACLs
+- Removed the hardcoded VLAN variables, these are now being pulled in from SLS.
+- Added 1.2 Aruba templates
+- Added CANU validate switch config support for dellanox.
 
 ## [unreleased]
 

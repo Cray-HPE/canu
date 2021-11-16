@@ -38,7 +38,9 @@ ip_mellanox = "192.168.1.3"
 credentials = {"username": username, "password": password}
 cache_minutes = 0
 generated_config_file = "switch.cfg"
+mellanox_generated_config_file = "mellanox_switch.cfg"
 running_config_file = "running_switch.cfg"
+mellanox_running_config_file = "mellanox_running_switch.cfg"
 runner = testing.CliRunner()
 
 
@@ -94,6 +96,7 @@ def test_validate_config_json(netmiko_command, switch_vendor):
         switch_vendor.return_value = "aruba"
         netmiko_command.return_value = "sw-spine-001"
         netmiko_command.return_value = switch_config
+        vendor = "aruba"
         with open("switch.cfg", "w") as f:
             f.writelines(switch_config_edit)
 
@@ -114,6 +117,8 @@ def test_validate_config_json(netmiko_command, switch_vendor):
                 "--generated",
                 generated_config_file,
                 "--json",
+                "--vendor",
+                vendor,
             ],
         )
         result_json = json.loads(result.output)
@@ -195,9 +200,10 @@ def test_validate_config_additions(netmiko_command, switch_vendor):
         ) in str(result.output)
 
 
-def test_validate_config_running_file():
+def test_validate_config_running_file_aruba():
     """Test that the `canu validate switch config` command runs and sees an addition."""
     with runner.isolated_filesystem():
+        vendor = "aruba"
         with open("running_switch.cfg", "w") as switch_f:
             switch_f.writelines(switch_config)
         with open("switch.cfg", "w") as switch2_f:
@@ -219,6 +225,8 @@ def test_validate_config_running_file():
                 password,
                 "--generated",
                 generated_config_file,
+                "--vendor",
+                vendor,
             ],
         )
         assert result.exit_code == 0
@@ -239,6 +247,89 @@ def test_validate_config_running_file():
             + "Inter Switch Link:               1  |  Inter Switch Link:               1\n"
             + "Role:                            1  |  Role:                            1\n"
             + "Keepalive:                       1  |  Keepalive:                       1\n"
+        ) in str(result.output)
+
+
+def test_validate_config_running_file_dell():
+    """Test that the `canu validate switch config` command runs and sees an addition."""
+    with runner.isolated_filesystem():
+        vendor = "dell"
+        with open("running_switch.cfg", "w") as switch_f:
+            switch_f.writelines(dell_switch_config)
+        with open("switch.cfg", "w") as switch2_f:
+            switch2_f.writelines(dell_switch_config2)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "switch",
+                "config",
+                "--running",
+                running_config_file,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--generated",
+                generated_config_file,
+                "--vendor",
+                vendor,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "Switch: \n"
+            + "Differences\n"
+            + "-------------------------------------------------------------------------\n"
+            + "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
+            + "-------------------------------------------------------------------------\n"
+            + "Total Additions:                15  |  Total Deletions:                17\n"
+            + "Router:                          1  |  Router:                          1\n"
+        ) in str(result.output)
+
+
+def test_validate_config_running_file_mellanox():
+    """Test that the `canu validate switch config` command runs and sees an addition."""
+    with runner.isolated_filesystem():
+        vendor = "mellanox"
+        with open("running_switch.cfg", "w") as switch_f:
+            switch_f.writelines(mellanox_switch_config)
+        with open("switch.cfg", "w") as switch2_f:
+            switch2_f.writelines(mellanox_switch_config2)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "switch",
+                "config",
+                "--running",
+                running_config_file,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--generated",
+                generated_config_file,
+                "--vendor",
+                vendor,
+            ],
+        )
+        assert result.exit_code == 0
+        print(result.output)
+        assert (
+            "Switch: sw-spine-001\n"
+            + "Differences\n"
+            + "-------------------------------------------------------------------------\n"
+            + "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
+            + "-------------------------------------------------------------------------\n"
+            + "Total Additions:                 1  |  Total Deletions:                 3\n"
+            + "Router:                          1  |  Router:                          1\n"
         ) in str(result.output)
 
 
@@ -281,6 +372,55 @@ def test_validate_config_password_prompt(netmiko_command, switch_vendor):
             + "Total Additions:                 1  |  Total Deletions:                 1\n"
             + "                                    |  Script:                          1\n"
             + "Router:                          1  |                                    \n"
+        ) in str(result.output)
+
+
+def test_validate_config_vendor_prompt():
+    """Test that the `canu validate switch config` command runs and sees an addition."""
+    with runner.isolated_filesystem():
+        vendor = "aruba"
+        with open("running_switch.cfg", "w") as switch_f:
+            switch_f.writelines(switch_config)
+        with open("switch.cfg", "w") as switch2_f:
+            switch2_f.writelines(switch_config2)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "switch",
+                "config",
+                "--running",
+                running_config_file,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--generated",
+                generated_config_file,
+            ],
+            input=vendor,
+        )
+        assert result.exit_code == 0
+        assert (
+            "Switch: sw-spine-001\n"
+            + "Differences\n"
+            + "-------------------------------------------------------------------------\n"
+            + "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
+            + "-------------------------------------------------------------------------\n"
+            + "Total Additions:                13  |  Total Deletions:                13\n"
+            + "Hostname:                        1  |  Hostname:                        1\n"
+            + "Interface:                       1  |  Interface:                       1\n"
+            + "Interface Lag:                   1  |  Interface Lag:                   1\n"
+            + "Spanning Tree:                   1  |  Spanning Tree:                   1\n"
+            + "Script:                          1  |  Script:                          1\n"
+            + "Router:                          1  |  Router:                          1\n"
+            + "System Mac:                      1  |  System Mac:                      1\n"
+            + "Inter Switch Link:               1  |  Inter Switch Link:               1\n"
+            + "Role:                            1  |  Role:                            1\n"
+            + "Keepalive:                       1  |  Keepalive:                       1\n"
         ) in str(result.output)
 
 
@@ -357,6 +497,7 @@ def test_validate_config_auth_exception(netmiko_command, switch_vendor):
 def test_validate_config_bad_config_file():
     """Test that the `canu validate switch config` command fails on bad file."""
     non_config_file = "bad.file"
+    vendor = "aruba"
     switch_config_edit = switch_config[:-15] + "router add\n"
     with runner.isolated_filesystem():
         # Generate random binary file
@@ -381,6 +522,8 @@ def test_validate_config_bad_config_file():
                 password,
                 "--generated",
                 generated_config_file,
+                "--vendor",
+                vendor,
             ],
         )
         assert result.exit_code == 0
@@ -469,11 +612,14 @@ def test_validate_config_dell(netmiko_commands, switch_vendor):
 @patch("canu.validate.switch.config.config.netmiko_commands")
 def test_validate_config_mellanox(netmiko_commands, switch_vendor):
     """Test that the `canu validate switch config` command runs on mellanox switch."""
-    switch_config_edit = switch_config[:-15] + "router add\n"
+    switch_config_edit = mellanox_switch_config[:-15] + "\n" + "router add\n"
     with runner.isolated_filesystem():
         switch_vendor.return_value = "mellanox"
-        netmiko_commands.return_value = [switch_config, "hostname: sw-spine-001"]
-        with open("switch.cfg", "w") as f:
+        netmiko_commands.return_value = [
+            mellanox_switch_config,
+            "hostname: sw-spine-001",
+        ]
+        with open("mellanox_switch.cfg", "w") as f:
             f.writelines(switch_config_edit)
 
         result = runner.invoke(
@@ -491,18 +637,18 @@ def test_validate_config_mellanox(netmiko_commands, switch_vendor):
                 "--password",
                 password,
                 "--generated",
-                generated_config_file,
+                mellanox_generated_config_file,
             ],
         )
         assert result.exit_code == 0
+        print(result.output)
         assert (
             "Switch: sw-spine-001 (192.168.1.3)\n"
             + "Differences\n"
             + "-------------------------------------------------------------------------\n"
             + "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
             + "-------------------------------------------------------------------------\n"
-            + "Total Additions:                 1  |  Total Deletions:                 1\n"
-            + "                                    |  Script:                          1\n"
+            + "Total Additions:                 2  |  Total Deletions:                 1\n"
             + "Router:                          1  |                                    \n"
         ) in str(result.output)
 
@@ -861,4 +1007,620 @@ switch_config2 = (
     + "https-server vrf mgmt\n"
     + "https-server vrf CAN\n"
     + "nae-script 123\n"
+)
+
+mellanox_switch_config = (
+    "hostname sw-spine-001\n"
+    + "no cli default prefix-modes enable\n"
+    + "protocol mlag\n"
+    + "protocol bgp\n"
+    + "lacp\n"
+    + "interface mlag-port-channel 1\n"
+    + "interface mlag-port-channel 2\n"
+    + "interface ethernet 1/1 mtu 9216 force\n"
+    + "interface ethernet 1/2 mtu 9216 force\n"
+    + "interface mlag-port-channel 1 mtu 9216 force\n"
+    + "interface mlag-port-channel 2 mtu 9216 force\n"
+    + "interface ethernet 1/1 mlag-channel-group 1 mode active\n"
+    + "interface ethernet 1/2 mlag-channel-group 2 mode active\n"
+    + "interface mlag-port-channel 1 switchport mode hybrid\n"
+    + "interface mlag-port-channel 2 switchport mode hybrid\n"
+    + "interface ethernet 1/1 description sw-spine-001:1==>ncn-m001:pcie-slot1:1\n"
+    + "interface ethernet 1/2 description sw-spine-001:2==>ncn-m002:pcie-slot1:1\n"
+    + "interface mlag-port-channel 1 description sw-spine-001:1==>ncn-m001:pcie-slot1:1\n"
+    + "interface mlag-port-channel 2 description sw-spine-001:2==>ncn-m002:pcie-slot1:1\n"
+    + "interface mlag-port-channel 1 no shutdown\n"
+    + "interface mlag-port-channel 2 no shutdown\n"
+    + "interface mlag-port-channel 1 lacp-individual enable force\n"
+    + "interface mlag-port-channel 2 lacp-individual enable force\n"
+    + 'vlan 2 name "RVR_NMN"\n'
+    + 'vlan 4 name "RVR_HMN"\n'
+    + 'vlan 7 name "CAN"\n'
+    + 'vlan 4000 name "MLAG"\n'
+    + "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 2\n"
+    + "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 4\n"
+    + "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 7\n"
+    + "interface mlag-port-channel 2 switchport hybrid allowed-vlan add 2\n"
+    + "interface mlag-port-channel 2 switchport hybrid allowed-vlan add 4\n"
+    + "interface mlag-port-channel 2 switchport hybrid allowed-vlan add 7\n"
+    + "interface vlan 1\n"
+    + "interface vlan 2\n"
+    + "interface vlan 4\n"
+    + "interface vlan 7\n"
+    + "interface vlan 10\n"
+    + "interface vlan 4000\n"
+    + "interface vlan 1 mtu 9216\n"
+    + "interface vlan 2 mtu 9216\n"
+    + "interface vlan 4 mtu 9216\n"
+    + "interface vlan 7 mtu 9216\n"
+    + "interface vlan 4000 mtu 9216\n"
+    + "interface vlan 1 ip address 192.168.1.2/16 primary\n"
+    + "interface vlan 2 ip address 192.168.3.2/17 primary\n"
+    + "interface vlan 4 ip address 192.168.0.2/17 primary\n"
+    + "interface vlan 7 ip address 192.168.11.2/24 primary\n"
+    + "interface vlan 4000 ip address 192.168.255.253/30 primary\n"
+    + "ip load-sharing source-ip-port\n"
+    + "ip load-sharing type consistent\n"
+    + "spanning-tree mode mst\n"
+    + "spanning-tree port type edge default\n"
+    + "spanning-tree priority 4096\n"
+    + "spanning-tree mst 1 vlan 1\n"
+    + "spanning-tree mst 1 vlan 2\n"
+    + "spanning-tree mst 1 vlan 4\n"
+    + "spanning-tree mst 1 vlan 7\n"
+    + "interface mlag-port-channel 151 spanning-tree port type network\n"
+    + "interface mlag-port-channel 151 spanning-tree guard root\n"
+    + "interface mlag-port-channel 201 spanning-tree port type network\n"
+    + "interface mlag-port-channel 201 spanning-tree guard root\n"
+    + "ipv4 access-list nmn-hmn\n"
+    + "ipv4 access-list nmn-hmn bind-point rif\n"
+    + "ipv4 access-list nmn-hmn seq-number 10 deny ip 192.168.3.0 mask 255.255.128.0 192.168.0.0 mask 255.255.128.0\n"
+    + "ipv4 access-list nmn-hmn seq-number 20 deny ip 192.168.0.0 mask 255.255.128.0 192.168.3.0 mask 255.255.128.0\n"
+    + "ipv4 access-list nmn-hmn seq-number 30 deny ip 192.168.3.0 mask 255.255.128.0 192.168.200.0 mask 255.255.128.0\n"
+    + "ipv4 access-list nmn-hmn seq-number 40 deny ip 192.168.0.0 mask 255.255.128.0 192.168.100.0 mask 255.255.128.0\n"
+    + "ipv4 access-list nmn-hmn seq-number 50 deny ip 192.168.100.0 mask 255.255.128.0 192.168.0.0 mask 255.255.128.0\n"
+    + "ipv4 access-list nmn-hmn seq-number 60 deny ip 192.168.100.0 mask 255.255.128.0 192.168.200.0 mask 255.255.128.0\n"
+    + "ipv4 access-list nmn-hmn seq-number 70 deny ip 192.168.200.0 mask 255.255.128.0 192.168.3.0 mask 255.255.128.0\n"
+    + "ipv4 access-list nmn-hmn seq-number 80 deny ip 192.168.200.0 mask 255.255.128.0 192.168.100.0 mask 255.255.128.0\n"
+    + "ipv4 access-list nmn-hmn seq-number 90 permit ip any any\n"
+    + "protocol ospf\n"
+    + "router ospf 1 vrf default\n"
+    + "router ospf 1 vrf default router-id 10.2.0.2\n"
+    + "interface vlan 2 ip ospf area 0.0.0.0\n"
+    + "interface vlan 4 ip ospf area 0.0.0.0\n"
+    + "router ospf 1 vrf default redistribute ibgp\n"
+    + "ip dhcp relay instance 2 vrf default\n"
+    + "ip dhcp relay instance 4 vrf default\n"
+    + "ip dhcp relay instance 2 address 10.92.100.222\n"
+    + "ip dhcp relay instance 4 address 10.94.100.222\n"
+    + "interface vlan 1 ip dhcp relay instance 2 downstream\n"
+    + "interface vlan 2 ip dhcp relay instance 2 downstream\n"
+    + "interface vlan 4 ip dhcp relay instance 4 downstream\n"
+    + "interface vlan 7 ip dhcp relay instance 2 downstream\n"
+    + "protocol magp\n"
+    + "interface vlan 1 magp 1\n"
+    + "interface vlan 2 magp 2\n"
+    + "interface vlan 4 magp 4\n"
+    + "interface vlan 7 magp 7\n"
+    + "interface vlan 1 magp 1 ip virtual-router address 192.168.1.1\n"
+    + "interface vlan 2 magp 2 ip virtual-router address 192.168.3.1\n"
+    + "interface vlan 4 magp 4 ip virtual-router address 192.168.0.1\n"
+    + "interface vlan 7 magp 7 ip virtual-router address 192.168.11.1\n"
+    + "interface vlan 1 magp 1 ip virtual-router mac-address 00:00:5E:00:01:01\n"
+    + "interface vlan 2 magp 2 ip virtual-router mac-address 00:00:5E:00:01:01\n"
+    + "interface vlan 4 magp 4 ip virtual-router mac-address 00:00:5E:00:01:01\n"
+    + "interface vlan 7 magp 7 ip virtual-router mac-address 00:00:5E:00:01:01\n"
+    + "mlag-vip mlag-domain ip 192.168.255.242 /29 force\n"
+    + "no mlag shutdown\n"
+    + "mlag system-mac 00:00:5E:00:01:01\n"
+    + "interface port-channel 100 ipl 1\n"
+    + "interface vlan 4000 ipl 1 peer-address 192.168.255.254\n"
+    + "no interface mgmt0 dhcp\n"
+    + "interface mgmt0 ip address 192.168.255.241 /29\n"
+    + "no ntp server 192.168.4.4 disable\n"
+    + "ntp server 192.168.4.4 keyID 0\n"
+    + "no ntp server 192.168.4.4 trusted-enable\n"
+    + "ntp server 192.168.4.4 version 4\n"
+    + "no ntp server 192.168.4.5 disable\n"
+    + "ntp server 192.168.4.5 keyID 0\n"
+    + "no ntp server 192.168.4.5 trusted-enable\n"
+    + "ntp server 192.168.4.5 version 4\n"
+    + "no ntp server 192.168.4.6 disable\n"
+    + "ntp server 192.168.4.6 keyID 0\n"
+    + "no ntp server 192.168.4.6 trusted-enable\n"
+    + "ntp server 192.168.4.6 version 4\n"
+)
+
+mellanox_switch_config2 = (
+    "hostname sw-spine-001\n"
+    + "no cli default prefix-modes enable\n"
+    + "protocol mlag\n"
+    + "protocol bgp\n"
+    + "lacp\n"
+    + "interface mlag-port-channel 1\n"
+    + "interface mlag-port-channel 2\n"
+    + "interface ethernet 1/1 mtu 9216 force\n"
+    + "interface ethernet 1/2 mtu 9216 force\n"
+    + "interface mlag-port-channel 1 mtu 9216 force\n"
+    + "interface mlag-port-channel 2 mtu 9216 force\n"
+    + "interface ethernet 1/1 mlag-channel-group 1 mode active\n"
+    + "interface ethernet 1/2 mlag-channel-group 2 mode active\n"
+    + "interface mlag-port-channel 1 switchport mode hybrid\n"
+    + "interface mlag-port-channel 2 switchport mode hybrid\n"
+    + "interface ethernet 1/1 description sw-spine-001:1==>ncn-m001:pcie-slot1:1\n"
+    + "interface ethernet 1/2 description sw-spine-001:2==>ncn-m002:pcie-slot1:1\n"
+    + "interface mlag-port-channel 1 description sw-spine-001:1==>ncn-m001:pcie-slot1:1\n"
+    + "interface mlag-port-channel 2 description sw-spine-001:2==>ncn-m002:pcie-slot1:1\n"
+    + "interface mlag-port-channel 1 no shutdown\n"
+    + "interface mlag-port-channel 2 no shutdown\n"
+    + "interface mlag-port-channel 1 lacp-individual enable force\n"
+    + "interface mlag-port-channel 2 lacp-individual enable force\n"
+    + 'vlan 2 name "RVR_NMN"\n'
+    + 'vlan 4 name "RVR_HMN"\n'
+    + 'vlan 7 name "CAN"\n'
+    + 'vlan 4000 name "MLAG"\n'
+    + "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 2\n"
+    + "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 4\n"
+    + "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 7\n"
+    + "interface mlag-port-channel 2 switchport hybrid allowed-vlan add 2\n"
+    + "interface mlag-port-channel 2 switchport hybrid allowed-vlan add 4\n"
+    + "interface mlag-port-channel 2 switchport hybrid allowed-vlan add 7\n"
+    + "interface vlan 1\n"
+    + "interface vlan 2\n"
+    + "interface vlan 4\n"
+    + "interface vlan 7\n"
+    + "interface vlan 10\n"
+    + "interface vlan 4000\n"
+    + "interface vlan 1 mtu 9216\n"
+    + "interface vlan 2 mtu 9216\n"
+    + "interface vlan 4 mtu 9216\n"
+    + "interface vlan 7 mtu 9216\n"
+    + "interface vlan 4000 mtu 9216\n"
+    + "interface vlan 1 ip address 192.168.1.2/16 primary\n"
+    + "interface vlan 2 ip address 192.168.3.2/17 primary\n"
+    + "interface vlan 4 ip address 192.168.0.2/17 primary\n"
+    + "interface vlan 7 ip address 192.168.11.2/24 primary\n"
+    + "interface vlan 4000 ip address 192.168.255.253/30 primary\n"
+    + "ip load-sharing source-ip-port\n"
+    + "ip load-sharing type consistent\n"
+    + "spanning-tree mode mst\n"
+    + "spanning-tree port type edge default\n"
+    + "spanning-tree priority 4096\n"
+    + "spanning-tree mst 1 vlan 1\n"
+    + "spanning-tree mst 1 vlan 2\n"
+    + "spanning-tree mst 1 vlan 4\n"
+    + "spanning-tree mst 1 vlan 7\n"
+    + "interface mlag-port-channel 151 spanning-tree port type network\n"
+    + "interface mlag-port-channel 151 spanning-tree guard root\n"
+    + "interface mlag-port-channel 201 spanning-tree port type network\n"
+    + "interface mlag-port-channel 201 spanning-tree guard root\n"
+    + "ipv4 access-list nmn-hmn\n"
+    + "ipv4 access-list nmn-hmn bind-point rif\n"
+    + "ipv4 access-list nmn-hmn seq-number 10 deny ip 192.168.3.0 mask 255.255.128.0 192.168.0.0 mask 255.255.128.0\n"
+    + "ipv4 access-list nmn-hmn seq-number 20 deny ip 192.168.0.0 mask 255.255.128.0 192.168.3.0 mask 255.255.128.0\n"
+    + "ipv4 access-list nmn-hmn seq-number 30 deny ip 192.168.3.0 mask 255.255.128.0 192.168.200.0 mask 255.255.128.0\n"
+    + "ipv4 access-list nmn-hmn seq-number 40 deny ip 192.168.0.0 mask 255.255.128.0 192.168.100.0 mask 255.255.128.0\n"
+    + "ipv4 access-list nmn-hmn seq-number 50 deny ip 192.168.100.0 mask 255.255.128.0 192.168.0.0 mask 255.255.128.0\n"
+    + "ipv4 access-list nmn-hmn seq-number 60 deny ip 192.168.100.0 mask 255.255.128.0 192.168.200.0 mask 255.255.128.0\n"
+    + "ipv4 access-list nmn-hmn seq-number 70 deny ip 192.168.200.0 mask 255.255.128.0 192.168.3.0 mask 255.255.128.0\n"
+    + "ipv4 access-list nmn-hmn seq-number 80 deny ip 192.168.200.0 mask 255.255.128.0 192.168.100.0 mask 255.255.128.0\n"
+    + "ipv4 access-list nmn-hmn seq-number 90 permit ip any any\n"
+    + "protocol ospf\n"
+    + "router ospf 0 vrf default\n"
+    + "router ospf 1 vrf default router-id 10.2.0.2\n"
+    + "interface vlan 2 ip ospf area 0.0.0.0\n"
+    + "interface vlan 4 ip ospf area 0.0.0.0\n"
+    + "router ospf 1 vrf default redistribute ibgp\n"
+    + "ip dhcp relay instance 2 vrf default\n"
+    + "ip dhcp relay instance 4 vrf default\n"
+    + "ip dhcp relay instance 2 address 10.92.100.222\n"
+    + "ip dhcp relay instance 4 address 10.94.100.222\n"
+    + "interface vlan 1 ip dhcp relay instance 2 downstream\n"
+    + "interface vlan 2 ip dhcp relay instance 2 downstream\n"
+    + "interface vlan 4 ip dhcp relay instance 4 downstream\n"
+    + "interface vlan 7 ip dhcp relay instance 2 downstream\n"
+    + "protocol magp\n"
+    + "interface vlan 1 magp 1\n"
+    + "interface vlan 2 magp 2\n"
+    + "interface vlan 4 magp 4\n"
+    + "interface vlan 7 magp 7\n"
+    + "interface vlan 1 magp 1 ip virtual-router address 192.168.1.1\n"
+    + "interface vlan 2 magp 2 ip virtual-router address 192.168.3.1\n"
+    + "interface vlan 4 magp 4 ip virtual-router address 192.168.0.1\n"
+    + "interface vlan 7 magp 7 ip virtual-router address 192.168.11.1\n"
+    + "interface vlan 1 magp 1 ip virtual-router mac-address 00:00:5E:00:01:01\n"
+    + "interface vlan 2 magp 2 ip virtual-router mac-address 00:00:5E:00:01:01\n"
+    + "interface vlan 4 magp 4 ip virtual-router mac-address 00:00:5E:00:01:01\n"
+    + "interface vlan 7 magp 7 ip virtual-router mac-address 00:00:5E:00:01:01\n"
+    + "mlag-vip mlag-domain ip 192.168.255.242 /29 force\n"
+    + "no mlag shutdown\n"
+    + "mlag system-mac 00:00:5E:00:01:01\n"
+    + "interface port-channel 100 ipl 1\n"
+    + "interface vlan 4000 ipl 1 peer-address 192.168.255.254\n"
+    + "no interface mgmt0 dhcp\n"
+    + "interface mgmt0 ip address 192.168.255.241 /29\n"
+    + "no ntp server 192.168.4.4 disable\n"
+    + "ntp server 192.168.4.4 keyID 0\n"
+    + "no ntp server 192.168.4.4 trusted-enable\n"
+    + "ntp server 192.168.4.4 version 4\n"
+    + "no ntp server 192.168.4.5 disable\n"
+    + "ntp server 192.168.4.5 keyID 0\n"
+    + "no ntp server 192.168.4.5 trusted-enable\n"
+    + "ntp server 192.168.4.5 version 4\n"
+)
+
+dell_switch_config = (
+    "interface vlan3000\n"
+    + "  mode L3\n"
+    + "  description cabinet_3002\n"
+    + "  no shutdown\n"
+    + "  mtu 9216\n"
+    + "  ip address 192.168.104.2/22\n"
+    + "  ip ospf 1 area 0.0.0.0\n"
+    + "  ip ospf passive\n"
+    + "  ip helper-address 10.94.100.222\n"
+    + "  vrrp-group 30\n"
+    + "    virtual-address 192.168.104.1\n"
+    + "    priority 110\n"
+    + "interface vlan2000\n"
+    + "  mode L3\n"
+    + "  description cabinet_3002\n"
+    + "  no shutdown\n"
+    + "  mtu 9216\n"
+    + "  ip address 192.168.100.2/22\n"
+    + "  ip ospf 1 area 0.0.0.0\n"
+    + "  ip ospf passive\n"
+    + "  ip helper-address 10.92.100.222\n"
+    + "  vrrp-group 20\n"
+    + "    virtual-address 192.168.100.1\n"
+    + "    priority 110\n"
+    + "interface vlan1\n"
+    + "  Description MTL\n"
+    + "  no shutdown\n"
+    + "  ip address 192.168.1.16/16\n"
+    + "interface vlan2\n"
+    + "  description RIVER_NMN\n"
+    + "  no shutdown\n"
+    + "  mtu 9216\n"
+    + "  ip address 192.168.3.16/17\n"
+    + "  ip access-group nmn-hmn in\n"
+    + "  ip access-group nmn-hmn out\n"
+    + "  ip ospf 1 area 0.0.0.0\n"
+    + "interface vlan4\n"
+    + "  description RIVER_HMN\n"
+    + "  no shutdown\n"
+    + "  mtu 9216\n"
+    + "  ip address 192.168.0.16/17\n"
+    + "  ip access-group nmn-hmn in\n"
+    + "  ip access-group nmn-hmn out\n"
+    + "  ip ospf 1 area 0.0.0.0\n"
+    + "interface port-channel2\n"
+    + "  description sw-cdu-001:2==>cmm-x3002-000:1\n"
+    + "  no shutdown\n"
+    + "  switchport mode trunk\n"
+    + "  switchport access vlan 2000\n"
+    + "  switchport trunk allowed vlan 3000\n"
+    + "  mtu 9216\n"
+    + "  vlt-port-channel 2\n"
+    + "  spanning-tree guard root\n"
+    + "interface port-channel3\n"
+    + "  description sw-cdu-001:3==>cmm-x3002-001:1\n"
+    + "  no shutdown\n"
+    + "  switchport mode trunk\n"
+    + "  switchport access vlan 2000\n"
+    + "  switchport trunk allowed vlan 3000\n"
+    + "  mtu 9216\n"
+    + "  vlt-port-channel 3\n"
+    + "  spanning-tree guard root\n"
+    + "interface port-channel4\n"
+    + "  description sw-cdu-001:4==>cmm-x3002-002:1\n"
+    + "  no shutdown\n"
+    + "  switchport mode trunk\n"
+    + "  switchport access vlan 2000\n"
+    + "  switchport trunk allowed vlan 3000\n"
+    + "  mtu 9216\n"
+    + "  vlt-port-channel 4\n"
+    + "  spanning-tree guard root\n"
+    + "interface port-channel5\n"
+    + "  description sw-cdu-001:5==>cmm-x3002-003:1\n"
+    + "  no shutdown\n"
+    + "  switchport mode trunk\n"
+    + "  switchport access vlan 2000\n"
+    + "  switchport trunk allowed vlan 3000\n"
+    + "  mtu 9216\n"
+    + "  vlt-port-channel 5\n"
+    + "  spanning-tree guard root\n"
+    + "interface port-channel100\n"
+    + "  description sw-cdu-001:27==>sw-spine-001:29\n"
+    + "  no shutdown\n"
+    + "  switchport mode trunk\n"
+    + "  switchport access vlan 1\n"
+    + "  switchport trunk allowed vlan 2,4\n"
+    + "  mtu 9216\n"
+    + "  vlt-port-channel 100\n"
+    + "interface loopback 0\n"
+    + "  ip address 10.2.0.16/32\n"
+    + "  ip ospf 1 area 0.0.0.0\n"
+    + "interface mgmt1/1/1\n"
+    + "  no shutdown\n"
+    + "  dhcp\n"
+    + "  ip address 192.168.255.242/29\n"
+    + "  ipv6 address autoconfig\n"
+    + "interface ethernet1/1/2\n"
+    + "  description sw-cdu-001:2==>cmm-x3002-000:1\n"
+    + "  no shutdown\n"
+    + "  channel-group 2\n"
+    + "  no switchport\n"
+    + "  mtu 9216\n"
+    + "  flowcontrol receive on\n"
+    + "  flowcontrol transmit on\n"
+    + "interface ethernet1/1/3\n"
+    + "  description sw-cdu-001:3==>cmm-x3002-001:1\n"
+    + "  no shutdown\n"
+    + "  channel-group 3\n"
+    + "  no switchport\n"
+    + "  mtu 9216\n"
+    + "  flowcontrol receive on\n"
+    + "  flowcontrol transmit on\n"
+    + "interface ethernet1/1/4\n"
+    + "  description sw-cdu-001:4==>cmm-x3002-002:1\n"
+    + "  no shutdown\n"
+    + "  channel-group 4\n"
+    + "  no switchport\n"
+    + "  mtu 9216\n"
+    + "  flowcontrol receive on\n"
+    + "  flowcontrol transmit on\n"
+    + "interface ethernet1/1/5\n"
+    + "  description sw-cdu-001:5==>cmm-x3002-003:1\n"
+    + "  no shutdown\n"
+    + "  channel-group 5\n"
+    + "  no switchport\n"
+    + "  mtu 9216\n"
+    + "  flowcontrol receive on\n"
+    + "  flowcontrol transmit on\n"
+    + "interface ethernet1/1/1\n"
+    + "  description sw-cdu-001:1==>cec-x3002-000:1\n"
+    + "  no shutdown\n"
+    + "  switchport access vlan 3000\n"
+    + "  mtu 9216\n"
+    + "  flowcontrol receive off\n"
+    + "  flowcontrol transmit off\n"
+    + "  spanning-tree bpduguard enable\n"
+    + "  spanning-tree port type edge\n"
+    + "interface ethernet1/1/27\n"
+    + "  no shutdown\n"
+    + "  channel-group 100 mode active\n"
+    + "  no switchport\n"
+    + "  mtu 9216\n"
+    + "  flowcontrol receive off\n"
+    + "  flowcontrol transmit off\n"
+    + "interface ethernet1/1/28\n"
+    + "  no shutdown\n"
+    + "  channel-group 100 mode active\n"
+    + "  no switchport\n"
+    + "  mtu 9216\n"
+    + "  flowcontrol receive off\n"
+    + "  flowcontrol transmit off\n"
+    + "interface ethernet 1/1/25\n"
+    + "  no shutdown\n"
+    + "  no switchport\n"
+    + "  flowcontrol receive off\n"
+    + "  flowcontrol transmit off\n"
+    + "interface ethernet 1/1/26\n"
+    + "  no shutdown\n"
+    + "  no switchport\n"
+    + "  flowcontrol receive off\n"
+    + "  flowcontrol transmit off\n"
+    + "ip access-list nmn-hmn\n"
+    + "  seq 10 deny ip 192.168.3.0/17 192.168.0.0/17\n"
+    + "  seq 20 deny ip 192.168.0.0/17 192.168.3.0/17\n"
+    + "  seq 30 deny ip 192.168.3.0/17 192.168.200.0/17\n"
+    + "  seq 40 deny ip 192.168.0.0/17 192.168.100.0/17\n"
+    + "  seq 50 deny ip 192.168.100.0/17 192.168.0.0/17\n"
+    + "  seq 60 deny ip 192.168.100.0/17 192.168.200.0/17\n"
+    + "  seq 70 deny ip 192.168.200.0/17 192.168.3.0/17\n"
+    + "  seq 80 deny ip 192.168.200.0/17 192.168.100.0/17\n"
+    + "  seq 90 permit ip any any\n"
+    + "router ospf 1\n"
+    + "  router-id 10.2.0.16\n"
+    + "spanning-tree mode mst\n"
+    + "spanning-tree mst configuration\n"
+    + "  instance 1 vlan 1-4093\n"
+    + "vlt-domain 1\n"
+    + "  backup destination 192.168.255.243\n"
+    + "  discovery-interface ethernet1/1/25,1/1/26\n"
+    + "  peer-routing\n"
+    + "  primary-priority 4096\n"
+    + "  vlt-mac 00:11:22:aa:bb:cc\n"
+    + "ntp server 192.168.4.4\n"
+    + "ntp server 192.168.4.5\n"
+    + "ntp server 192.168.4.6\n"
+)
+
+dell_switch_config2 = (
+    "interface vlan3000\n"
+    + "router bgp\n"
+    + "  mode L3\n"
+    + "  description cabinet_3002\n"
+    + "  no shutdown\n"
+    + "  mtu 9216\n"
+    + "  ip address 192.168.104.2/22\n"
+    + "  ip ospf 1 area 0.0.0.0\n"
+    + "  ip ospf passive\n"
+    + "  ip helper-address 10.94.100.222\n"
+    + "  vrrp-group 30\n"
+    + "    virtual-address 192.168.104.1\n"
+    + "    priority 110\n"
+    + "interface vlan2000\n"
+    + "  mode L3\n"
+    + "  description cabinet_3002\n"
+    + "  no shutdown\n"
+    + "  mtu 9216\n"
+    + "  ip address 192.168.100.2/22\n"
+    + "  ip ospf 1 area 0.0.0.0\n"
+    + "  ip ospf passive\n"
+    + "  ip helper-address 10.92.100.222\n"
+    + "  vrrp-group 20\n"
+    + "    virtual-address 192.168.100.1\n"
+    + "    priority 110\n"
+    + "interface vlan1\n"
+    + "  Description MTL\n"
+    + "  no shutdown\n"
+    + "  ip address 192.168.1.16/16\n"
+    + "interface vlan2\n"
+    + "  description RIVER_NMN\n"
+    + "  no shutdown\n"
+    + "  mtu 9216\n"
+    + "  ip access-group nmn-hmn in\n"
+    + "  ip access-group nmn-hmn out\n"
+    + "  ip ospf 1 area 0.0.0.0\n"
+    + "interface vlan4\n"
+    + "  description RIVER_HMN\n"
+    + "  no shutdown\n"
+    + "  mtu 9216\n"
+    + "  ip address 192.168.0.16/17\n"
+    + "  ip access-group nmn-hmn in\n"
+    + "  ip access-group nmn-hmn out\n"
+    + "  ip ospf 1 area 0.0.0.0\n"
+    + "interface vlan7\n"
+    + "  description CAN\n"
+    + "  no shutdown\n"
+    + "  mtu 9216\n"
+    + "  ip address 192.168.0.16/17\n"
+    + "  ip access-group nmn-hmn in\n"
+    + "  ip access-group nmn-hmn out\n"
+    + "  ip ospf 1 area 0.0.0.0\n"
+    + "interface port-channel2\n"
+    + "  description sw-cdu-001:2==>cmm-x3002-000:1\n"
+    + "  no shutdown\n"
+    + "  switchport mode trunk\n"
+    + "  switchport access vlan 2000\n"
+    + "  switchport trunk allowed vlan 3000\n"
+    + "  mtu 9216\n"
+    + "  vlt-port-channel 2\n"
+    + "  spanning-tree guard root\n"
+    + "interface port-channel3\n"
+    + "  description sw-cdu-001:3==>cmm-x3002-001:1\n"
+    + "  no shutdown\n"
+    + "  switchport mode trunk\n"
+    + "  switchport access vlan 2000\n"
+    + "  switchport trunk allowed vlan 3000\n"
+    + "  mtu 9216\n"
+    + "  vlt-port-channel 3\n"
+    + "  spanning-tree guard root\n"
+    + "interface port-channel4\n"
+    + "  description sw-cdu-001:4==>cmm-x3002-002:1\n"
+    + "  no shutdown\n"
+    + "  switchport mode trunk\n"
+    + "  switchport access vlan 2000\n"
+    + "  switchport trunk allowed vlan 3000\n"
+    + "  mtu 9216\n"
+    + "  vlt-port-channel 4\n"
+    + "  spanning-tree guard root\n"
+    + "interface port-channel5\n"
+    + "  description sw-cdu-001:5==>cmm-x3002-003:1\n"
+    + "  no shutdown\n"
+    + "  switchport mode trunk\n"
+    + "  switchport access vlan 2000\n"
+    + "  switchport trunk allowed vlan 3000\n"
+    + "  mtu 9216\n"
+    + "  spanning-tree guard root\n"
+    + "interface port-channel100\n"
+    + "  description sw-cdu-001:27==>sw-spine-001:29\n"
+    + "  no shutdown\n"
+    + "  switchport mode trunk\n"
+    + "  switchport access vlan 1\n"
+    + "  switchport trunk allowed vlan 2,4\n"
+    + "  mtu 9216\n"
+    + "  vlt-port-channel 100\n"
+    + "interface loopback 0\n"
+    + "  ip address 10.2.0.16/32\n"
+    + "  ip ospf 1 area 0.0.0.0\n"
+    + "interface mgmt1/1/1\n"
+    + "  no shutdown\n"
+    + "  dhcp\n"
+    + "  ip address 192.168.255.242/29\n"
+    + "  ipv6 address autoconfig\n"
+    + "interface ethernet1/1/2\n"
+    + "  description sw-cdu-001:2==>cmm-x3002-000:1\n"
+    + "  no shutdown\n"
+    + "  channel-group 2\n"
+    + "  no switchport\n"
+    + "  mtu 9216\n"
+    + "  flowcontrol receive on\n"
+    + "  flowcontrol transmit on\n"
+    + "interface ethernet1/1/3\n"
+    + "  description sw-cdu-001:3==>cmm-x3002-001:1\n"
+    + "  no shutdown\n"
+    + "  channel-group 3\n"
+    + "  no switchport\n"
+    + "  mtu 9216\n"
+    + "  flowcontrol receive on\n"
+    + "  flowcontrol transmit on\n"
+    + "interface ethernet1/1/4\n"
+    + "  description sw-cdu-001:4==>cmm-x3002-002:1\n"
+    + "  no shutdown\n"
+    + "  channel-group 4\n"
+    + "  no switchport\n"
+    + "  mtu 9216\n"
+    + "  flowcontrol receive on\n"
+    + "  flowcontrol transmit on\n"
+    + "interface ethernet1/1/5\n"
+    + "  description sw-cdu-001:5==>cmm-x3002-003:1\n"
+    + "  no shutdown\n"
+    + "  channel-group 5\n"
+    + "  no switchport\n"
+    + "  mtu 9216\n"
+    + "  flowcontrol receive on\n"
+    + "  flowcontrol transmit on\n"
+    + "interface ethernet1/1/1\n"
+    + "  description sw-cdu-001:1==>cec-x3002-000:1\n"
+    + "  no shutdown\n"
+    + "  switchport access vlan 3000\n"
+    + "  mtu 9216\n"
+    + "  flowcontrol receive off\n"
+    + "  flowcontrol transmit off\n"
+    + "  spanning-tree bpduguard enable\n"
+    + "  spanning-tree port type edge\n"
+    + "interface ethernet1/1/27\n"
+    + "  no shutdown\n"
+    + "  channel-group 100 mode active\n"
+    + "  no switchport\n"
+    + "  mtu 9216\n"
+    + "  flowcontrol receive off\n"
+    + "  flowcontrol transmit off\n"
+    + "interface ethernet1/1/28\n"
+    + "  no switchport\n"
+    + "  mtu 9216\n"
+    + "  flowcontrol receive on\n"
+    + "  flowcontrol transmit on\n"
+    + "interface ethernet 1/1/25\n"
+    + "  no shutdown\n"
+    + "  no switchport\n"
+    + "  flowcontrol receive off\n"
+    + "  flowcontrol transmit off\n"
+    + "interface ethernet 1/1/26\n"
+    + "  no shutdown\n"
+    + "  no switchport\n"
+    + "  flowcontrol receive off\n"
+    + "  flowcontrol transmit off\n"
+    + "ip access-list nmn-hmn\n"
+    + "  seq 10 deny ip 192.168.3.0/17 192.168.0.0/17\n"
+    + "  seq 20 deny ip 192.168.0.0/17 192.168.3.0/17\n"
+    + "  seq 30 deny ip 192.168.3.0/17 192.168.200.0/17\n"
+    + "  seq 60 deny ip 192.168.100.0/17 192.168.200.0/17\n"
+    + "  seq 70 deny ip 192.168.200.0/17 192.168.3.0/17\n"
+    + "  seq 80 deny ip 192.168.200.0/17 192.168.100.0/17\n"
+    + "  seq 85 deny ip 192.168.201.0/17 192.168.101.0/17\n"
+    + "  seq 90 permit ip any any\n"
+    + "spanning-tree mode mst\n"
+    + "spanning-tree mst configuration\n"
+    + "  instance 1 vlan 1-4093\n"
+    + "vlt-domain 1\n"
+    + "  backup destination 192.168.255.243\n"
+    + "  discovery-interface ethernet1/1/25,1/1/26\n"
+    + "  peer-routing\n"
+    + "  primary-priority 4096\n"
+    + "ntp server 192.168.4.5\n"
+    + "ntp server 192.168.4.6\n"
 )
