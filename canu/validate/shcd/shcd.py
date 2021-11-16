@@ -360,7 +360,7 @@ def validate_shcd_slot_data(cell, sheet, warnings, is_src_slot=False):
     return slot
 
 
-def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False):
+def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False, node_type=None):
     """Ensure that a port from the SHCD is a proper integer.
 
     Args:
@@ -368,6 +368,7 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False):
         sheet: SHCD spreadsheet sheet/tab name
         warnings: Existing list of warnings to post to
         is_src_port: (optional) Boolean triggers a hack to work around SHCD inconsistencies
+        node_type: (optional) if node_type is 'subrack' returns a None instead of an Exception
 
     Returns:
         port: A cleaned up integer value from the cell
@@ -379,18 +380,23 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False):
     if isinstance(port, str):
         port = port.strip()
         if not port:
+            if node_type == "subrack":
+                return None
             log.fatal(
                 "A port number must be specified. "
                 + f"Please correct the SHCD for {sheet}:{location} with an empty value",
             )
             exit(1)
-        if port[0] == "j":
+        if port[0].lower() == "j":
             warnings["shcd_port_data"].append(f"{sheet}:{location}")
             log.warning(
                 'Prepending the character "j" to a port will not be allowed in the future. '
                 + f"Please correct cell {sheet}:{location} in the SHCD with value {port}",
             )
             port = port[1:]
+        # For SubRacks
+        if port.upper() == "CMC" or port.upper() == "RCM":
+            port = "1"
         if re.search(r"\D", port) is not None:
             log.fatal(
                 "Port numbers must be integers. "
@@ -416,11 +422,14 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False):
                 port = 1
 
     if port is None:
-        log.fatal(
-            "A port number must be specified. "
-            + f"Please correct the SHCD for {sheet}:{location} with an empty value",
-        )
-        exit(1)
+        if node_type == "subrack":
+            return None
+        else:
+            log.fatal(
+                "A port number must be specified. "
+                + f"Please correct the SHCD for {sheet}:{cell.coordinate} with an empty value",
+            )
+            exit(1)
 
     return int(port)
 
@@ -511,11 +520,14 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
         )
         log.info("Mapping required columns to actual.")
 
+        subrack = None
         start_index = 0
         for required_index in range(len(required_header)):
             found = None
             for current_index in range(start_index, len(header)):
-                if header[current_index].value == required_header[required_index]:
+                if header[current_index].value == "Parent":
+                    subrack = current_index
+                elif header[current_index].value == required_header[required_index]:
                     found = current_index
                     break
                 else:
@@ -580,13 +592,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 warnings,
                 is_src_slot=True,
             )
-            src_port = validate_shcd_port_data(
-                tmp_port,
-                sheet,
-                warnings,
-                is_src_port=True,
-            )
-            log.debug(f"Source Data:  {src_name} {src_slot} {src_port}")
+
             node_name = get_node_common_name(
                 src_name,
                 src_rack,
@@ -601,6 +607,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             # Create src_node if it does not exist
             src_node = None
             src_index = None
+            parent = None
             if node_type is not None and node_name is not None:
                 if node_name not in node_name_list:
                     log.info(f"Creating new node {node_name} of type {node_type}")
@@ -616,11 +623,24 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     node_list.append(src_node)
                     node_name_list.append(node_name)
                 else:
+                    # If the src is a subrack, add location info
+                    if node_type == "subrack":
+                        node_list[node_name_list.index(node_name)].location(
+                            src_location,
+                        )
                     log.debug(
                         f"Node {node_name} already exists, skipping node creation.",
                     )
 
                 src_index = node_name_list.index(node_name)
+
+                # update the node with parent location if it exists
+                if subrack is not None:
+                    parent = row[subrack].value
+                    if parent is not None:
+                        src_node = node_list[src_index]
+                        src_location.parent(parent)
+                        src_node.location(src_location)
             else:
                 warnings["node_type"].append(
                     f"{src_name}@@{sheet}@@{row[required_header[0]].coordinate}",
@@ -629,6 +649,86 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     f"Node type for {src_name} cannot be determined by node type ({node_type}) or node name ({node_name})",
                 )
 
+            # If a parent is specified, need to make a connection between the src and the parent
+            if parent:
+                src_parent_port = 1
+                src_parent_slot = "cmc"
+                src_node_port = NetworkPort(
+                    number=src_parent_port,
+                    slot=src_parent_slot,
+                )
+
+                parent_slot = "cmc"
+                parent_rack = None
+                parent_elevation = None
+                node_name_parent = get_node_common_name(
+                    parent,
+                    parent_rack,
+                    parent_elevation,
+                    factory.lookup_mapper(),
+                )
+
+                node_type_parent = get_node_type(parent, factory.lookup_mapper())
+
+                parent_location = None
+                parent_index = create_dst_node(
+                    node_type_parent,
+                    node_name_parent,
+                    node_name_list,
+                    parent_location,
+                    node_list,
+                    factory,
+                )
+
+                # We do not know what port numbers to connect to on the SubRack,
+                # Get the next_free_port, and use that as the port number
+                parent_port = node_list[parent_index].available_ports(
+                    speed=1,
+                    slot="cmc",
+                    next_free_port=True,
+                )
+
+                parent_node_port = NetworkPort(number=parent_port, slot=parent_slot)
+                src_node = node_list[src_index]
+                parent_node = node_list[parent_index]
+                try:
+                    connect_src_dst(
+                        src_node,
+                        parent_node,
+                        src_node_port,
+                        parent_node_port,
+                    )
+                except Exception as err:
+                    log.fatal(err)
+                    log.fatal(
+                        click.secho(
+                            f"Failed to connect {src_node.common_name()} "
+                            + f"to parent {parent_node.common_name()} bi-directionally "
+                            + f"while working on sheet {sheet}, row {current_row}.",
+                            fg="red",
+                        ),
+                    )
+                    exit(1)
+                # If the tmp_port is None, make one connection:
+                #   src ==> parent
+                # Continue to connect the rest of the nodes
+                if tmp_port.value is None:
+                    continue
+
+            src_port = validate_shcd_port_data(
+                tmp_port,
+                sheet,
+                warnings,
+                is_src_port=True,
+                node_type=node_type,
+            )
+
+            # Sometimes a CMC is in the SHCD with no destination
+            # If this is the case, continue to connect the other nodes
+            if node_type == "subrack" and src_port is None:
+                continue
+
+            log.debug(f"Source Data:  {src_name} {src_slot} {src_port}")
             # Create the source port for the node
             src_node_port = NetworkPort(number=src_port, slot=src_slot)
 
@@ -672,30 +772,16 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             log.debug(f"Destination Node Type Lookup:  {node_type}")
 
             # Create dst_node if it does not exist
-            dst_node = None
-            dst_index = None
-            if node_type is not None and node_name is not None:
-                if node_name not in node_name_list:
-                    log.info(f"Creating new node {node_name} of type {node_type}")
-                    try:
-                        dst_node = factory.generate_node(node_type)
-                    except Exception as e:
-                        print(e)
-                        sys.exit(1)
-
-                    dst_node.common_name(node_name)
-                    dst_node.location(dst_location)
-
-                    node_list.append(dst_node)
-                    node_name_list.append(node_name)
-                else:
-                    log.debug(
-                        f"Node {node_name} already exists, skipping node creation",
-                    )
-
-                dst_index = node_name_list.index(node_name)
-
-            else:
+            try:
+                dst_index = create_dst_node(
+                    node_type,
+                    node_name,
+                    node_name_list,
+                    dst_location,
+                    node_list,
+                    factory,
+                )
+            except Exception:
                 warnings["node_type"].append(
                     f"{dst_name}@@{sheet}@@{row[required_header[5]].coordinate}",
                 )
@@ -703,20 +789,20 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 log.warning(
                     f"Node type for {dst_name} cannot be determined by node type ({node_type}) or node name ({node_name})",
                 )
+                dst_index = None
 
             # Create the destination port
             dst_node_port = NetworkPort(number=dst_port, slot=dst_slot)
 
-            # Connect src_node and dst_node if possible
             if src_index is not None and dst_index is not None:
                 src_node = node_list[src_index]
                 dst_node = node_list[dst_index]
                 try:
-                    connected = src_node.connect(
+                    connect_src_dst(
+                        src_node,
                         dst_node,
-                        src_port=src_node_port,
-                        dst_port=dst_node_port,
-                        strict=True,
+                        src_node_port,
+                        dst_node_port,
                     )
                 except Exception as err:
                     log.fatal(err)
@@ -730,31 +816,104 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     )
                     exit(1)
 
-                if connected:
-                    log.info(
-                        f"Connected {src_node.common_name()} to {dst_node.common_name()} bi-directionally",
-                    )
-                else:
-                    log.error(
-                        click.secho(
-                            f"Failed to connect {src_node.common_name()}"
-                            + f" to {dst_node.common_name()} bi-directionally",
-                            fg="red",
-                        ),
-                    )
-                    for node in node_list:
-                        click.secho(
-                            f"Node {node.id()} named {node.common_name()} connects "
-                            + f"to {len(node.edges())} ports on nodes: {node.edges()}",
-                        )
-                    log.fatal(
-                        f"Failed to connect {src_node.common_name()} "
-                        + f"to {dst_node.common_name()} bi-directionally",
-                    )
-                    sys.exit(1)  # TODO: this should probably be an exception
     wb.close()
 
     return node_list, warnings
+
+
+def create_dst_node(
+    node_type,
+    node_name,
+    node_name_list,
+    dst_location,
+    node_list,
+    factory,
+):
+    """Create a destination node.
+
+    Args:
+        node_type: Type of node
+        node_name: Node name
+        node_name_list: List of node names
+        dst_location: Location object for the destination node
+        node_list: A list of nodes
+        factory: Node factory object
+
+    Returns:
+        dst_index: Index in the node_name_list of the destination
+
+    Raises:
+        Exception: If a node cannot be determined
+    """
+    dst_node = None
+    dst_index = None
+    if node_type is not None and node_name is not None:
+        if node_name not in node_name_list:
+            log.info(f"Creating new node {node_name} of type {node_type}")
+            try:
+                dst_node = factory.generate_node(node_type)
+            except Exception as e:
+                print(e)
+                sys.exit(1)
+
+            dst_node.common_name(node_name)
+            dst_node.location(dst_location)
+
+            node_list.append(dst_node)
+            node_name_list.append(node_name)
+        else:
+            log.debug(
+                f"Node {node_name} already exists, skipping node creation",
+            )
+
+        dst_index = node_name_list.index(node_name)
+
+    else:
+        raise Exception
+
+    return dst_index
+
+
+def connect_src_dst(
+    src_node,
+    dst_node,
+    src_node_port,
+    dst_node_port,
+):
+    """Connect a source node to a destination node.
+
+    Args:
+        src_node: Source node
+        dst_node: Destination node
+        src_node_port: Source node port
+        dst_node_port: Destination node port
+
+    Raises:
+        Exception: If nodes cannot be connected
+    """
+    try:
+        connected = src_node.connect(
+            dst_node,
+            src_port=src_node_port,
+            dst_port=dst_node_port,
+            strict=True,
+        )
+    except Exception as err:
+        raise err
+
+    if connected:
+        log.info(
+            f"Connected {src_node.common_name()} to {dst_node.common_name()} bi-directionally",
+        )
+    else:
+        log.error(
+            click.secho(
+                f"Failed to connect {src_node.common_name()}"
+                + f" to {dst_node.common_name()} bi-directionally",
+                fg="red",
+            ),
+        )
+        raise Exception
 
 
 def node_list_warnings(node_list, warnings, out="-"):

@@ -43,10 +43,7 @@
                             "minimum": 1
                         },
                         "slot": {
-                            "type": [
-                                "string",
-                                "null"
-                            ]
+                            "type": ["string", "null"]
                         },
                         "destination_node_id": {
                             "type": "integer",
@@ -57,10 +54,7 @@
                             "minimum": 0
                         },
                         "destination_slot": {
-                            "type": [
-                                "string",
-                                "null"
-                            ]
+                            "type": ["string", "null"]
                         }
                     },
                     "minProperties": 6,
@@ -74,6 +68,12 @@
                         "type": "string"
                     },
                     "elevation": {
+                        "type": "string"
+                    },
+                    "sub_location": {
+                        "type": "string"
+                    },
+                    "parent": {
                         "type": "string"
                     }
                 },

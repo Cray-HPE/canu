@@ -1,4 +1,4 @@
---- 
+---
 # This file defines how hardware connects to the network
 # Models here must be represented cray-network-hardware.yaml
 # Definition of network components: model, size, speeds, etc...
@@ -94,9 +94,9 @@ network_v2:
     - name: "river_compute_node"
       model: "river_compute_node"
       connections:
-        - name: "river_bmc_leaf"
+        - name: "subrack"
           speed: 1
-          comment: "onboard nmn"
+          comment: "cmc"
         - name: "river_bmc_leaf"
           speed: 1
           comment: "bmc"
@@ -125,7 +125,17 @@ network_v2:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
+    - name: "subrack"
+      model: "subrack"
+      connections:
+        - name: "river_compute_node"
+          speed: 1
+        - name: "river_bmc_leaf"
+          speed: 1
   lookup_mapper:
+    - lookup_name: ["SubRack", "subrack"]
+      shasta_name: "SubRack"
+      architecture_type: "subrack"
     - lookup_name: ["mn"]
       shasta_name: "ncn-m"
       architecture_type: "river_ncn_node_4_port"
@@ -174,7 +184,7 @@ network_v2:
     - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"
-    - lookup_name: 
+    - lookup_name:
         - '^x\d+p\d+$'
         - '^pdu\d+$'
       shasta_name: "pdu"
@@ -320,7 +330,7 @@ network_v2_tds:
     - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"
-    - lookup_name: 
+    - lookup_name:
         - '^x\d+p\d+$'
         - '^pdu\d+$'
       shasta_name: "pdu"
@@ -408,6 +418,13 @@ network_v1:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
+    - name: "subrack"
+      model: "subrack"
+      connections:
+        - name: "river_compute_node"
+          speed: 1
+        - name: "river_bmc_leaf"
+          speed: 1
   lookup_mapper:
     - lookup_name:
         - "mn"
@@ -464,9 +481,12 @@ network_v1:
     - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"
-    - lookup_name: 
+    - lookup_name:
         - '^x\d+p\d+$'
         - '^pdu\d+$'
       shasta_name: "pdu"
       architecture_type: "pdu"
       regex: true
+    - lookup_name: ["SubRack", "subrack"]
+      shasta_name: "SubRack"
+      architecture_type: "subrack"
