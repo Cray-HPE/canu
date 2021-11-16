@@ -1,54 +1,15 @@
 # Report Switch Cabling
 
-## canu report switch cabling
-
-Report the cabling of a switch (Aruba, Dell, or Mellanox) on the network by using LLDP.
-
-If the neighbor name is not in LLDP, the IP and vlan information are displayed
-by looking up the MAC address in the ARP table or the mac address table.
-
-If there is a duplicate port, the duplicates will be highlighted in ‘bright white’.
-
-Ports highlighted in ‘blue’ contain the string “ncn” in the hostname.
-
-Ports are highlighted in ‘green’ when the port name is set with the interface name.
-
-
----
-
+```{eval-rst}
+.. click:: canu.report.switch.cabling.cabling:cabling
+   :prog: canu report switch cabling
 ```
-canu report switch cabling [OPTIONS]
-```
-
-### Options
-
-
-### --ip( <ip>)
-**Required** The IP address of the switch
-
-
-### --username( <username>)
-Switch username
-
-
-* **Default**
-
-    admin
-
-
-
-### --password( <password>)
-Switch password
-
-
-### --out( <out>)
-Output results to a file
 
 ## Example
 
 To check the cabling of a single switch run: `canu report switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD`
 
-```
+```bash
 $ canu report switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD
 
 Switch: test-switch-spine01 (192.168.1.1)
@@ -64,11 +25,7 @@ PORT        NEIGHBOR       NEIGHBOR PORT      PORT DESCRIPTION                  
 1/1/52  ==> test-spine02   1/1/52                                                                   Aruba JL635A  GL.10.06.0010
 ```
 
-
-
-![image](images/canu_report_switch_cabling.png)
-
-
+![](/images/canu_report_switch_cabling.png)
 
 ---
 

@@ -102,13 +102,13 @@ def cabling(ctx, ips, ips_file, username, password, out, view):
     and switches will both display incoming and outgoing connections.
 
     If the neighbor name is not in LLDP, the IP and vlan information are displayed
-    by looking up the MAC address in the ARP table.
+    by looking up the MAC address in the ARP table and mac address table.
 
-    If there is a duplicate port, the duplicates will be highlighted in bright white.
+    If there is a duplicate port, the duplicates will be highlighted in 'bright white'.
 
-    Ports highlighted in blue contain the string "ncn" in the hostname.
+    Ports highlighted in 'blue' contain the string "ncn" in the hostname.
 
-    Ports are highlighted in green when the port name is set with the interface name.
+    Ports are highlighted in 'green' when the port name is set with the interface name.
 
     \f
     # noqa: D301

@@ -1,74 +1,9 @@
 # Report Network Firmware
 
-## canu report network firmware
-
-Report the firmware versions of all switches (Aruba, Dell, or Mellanox) on the network.
-
-Pass in either a comma separated list of IP addresses using the ‘–ips’ option
-
-OR
-
-Pass in a file of IP addresses with one address per line using the ‘–ips-file’ option
-
-There are three different statuses found in the report.
-
-
-* 🛶 Pass: Indicates that the switch passed the firmware verification.
-
-
-* ❌ Fail: Indicates that the switch failed the firmware verification, in the generated table, a list of expected firmware versions for that switch is displayed.
-
-
-* 🔺 Error: Indicates that there was an error connecting to the switch, check the Errors table for the specific error.
-
-
----
-
+```{eval-rst}
+.. click:: canu.report.network.firmware.firmware:firmware
+   :prog: canu report network firmware
 ```
-canu report network firmware [OPTIONS]
-```
-
-### Options
-
-
-### --csm( <csm>)
-**Required** CSM network version
-
-
-* **Options**
-
-    0.9 | 1.0 | 1.2
-
-
-
-### --ips( <ips>)
-Comma separated list of IPv4 addresses of switches
-
-
-### --ips-file( <ips_file>)
-File with one IPv4 address per line
-
-
-### --username( <username>)
-Switch username
-
-
-* **Default**
-
-    admin
-
-
-
-### --password( <password>)
-Switch password
-
-
-### --json()
-Output JSON
-
-
-### --out( <out>)
-Output results to a file
 
 ## Examples
 
@@ -76,7 +11,7 @@ Output results to a file
 
 An example of checking the firmware of multiple switches: `canu report network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD` Or to load IP addresses from a file run: `canu report network firmware --csm 1.2 --ips-file ip_file.txt --username USERNAME --password PASSWORD`
 
-```
+```bash
 $ canu report network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2,192.168.1.3,192.168.1.4 --username USERNAME --password PASSWORD
 
 ------------------------------------------------------------------
@@ -102,16 +37,13 @@ FL.10.06.0010 - 1 switches
 FL.10.05.0010 - 1 switches
 ```
 
-
-
-![image](images/canu_report_network_firmware.png)
-
+![](/images/canu_report_network_firmware.png)
 
 ### 2. Network Firmware JSON
 
 To get the JSON output from multiple switches, make sure to use the `--json` flag. An example json output is below.
 
-```
+```bash
 $ canu report network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --json
 
 {
@@ -141,7 +73,6 @@ $ canu report network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2 --usernam
     },
 }
 ```
-
 
 ---
 
