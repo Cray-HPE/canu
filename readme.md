@@ -885,6 +885,7 @@ To output the results of the config validation command to a file, append the `--
 ### Validate Network Config
 
 **[Details](docs/validate_network_config.md)**<br>
+Aruba support only.
 
 The `validate network config` command works almost the same as the above `validate switch config` command. There are three options for passing in the running config:
 
@@ -976,7 +977,14 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 - Added an `--override` option to `canu generate switch config` and `canu generate network config`, this allows users to ignore custom configuration so CANU does not overwrite it.
 - Changed the `-s --shasta` flag to `--csm`
 - Added Mellanox support to the `canu config bgp` command
+- Added Dell/Mellanox support to the `canu generate network config` & `canu generate switch config` commands
 - Updated `canu validate shcd-cabling` to show port by port differences.
+- Added support for CMN (Customer Management Network) on Aruba and Dellanox.
+- Added mgmt plane ACL on Aruba Switches
+- Added Metallb networks to ACLs
+- Removed the hardcoded VLAN variables, these are now being pulled in from SLS.
+- Added 1.2 Aruba templates
+- Added CANU validate switch config support for dellanox.
 
 ## [unreleased]
 

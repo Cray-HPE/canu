@@ -394,6 +394,8 @@ def config(
         if node_shasta_name in ["sw-cdu", "sw-leaf-bmc", "sw-leaf", "sw-spine"]:
 
             switch_config, devices, unknown = generate_switch_config(
+                csm,
+                architecture,
                 shcd_node_list,
                 factory,
                 switch_name,

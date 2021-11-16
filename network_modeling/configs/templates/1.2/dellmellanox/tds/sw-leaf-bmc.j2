@@ -1,0 +1,74 @@
+{#- sw-leaf-bmc #}
+{%- include '1.2/dellmellanox/common/unknown.j2' %}
+hostname {{ variables.HOSTNAME }}
+
+rest api restconf
+
+load-balancing ingress-port enable
+no load-balancing mac-selection destination-mac
+no load-balancing mac-selection ethertype
+no load-balancing mac-selection source-mac
+no load-balancing mac-selection vlan-id
+no load-balancing tcp-udp-selection l4-destination-port
+no load-balancing tcp-udp-selection l4-source-port
+enhanced-hashing resilient-hashing ecmp
+
+spanning-tree mode mst
+spanning-tree port type edge default
+spanning-tree mst revision 1
+spanning-tree mst name MST0
+
+ntp enable
+ntp server {{ variables.NCN_W001 }}
+ntp server {{ variables.NCN_W002 }}
+ntp server {{ variables.NCN_W003 }}
+
+router ospf 1
+router-id {{ variables.LOOPBACK_IP }}
+   
+{% include '1.2/dellmellanox/tds/leaf-bmc-to-spine.lag.j2' %}
+{% include '1.2/dellmellanox/common/bmc.j2' %}
+
+interface loopback 0
+    ip address {{ variables.LOOPBACK_IP }}
+    ip ospf 1 area 0.0.0.0
+
+interface vlan1
+ Description MMN
+ no shutdown
+ ip address {{ variables.MTL_IP }}
+
+interface vlan2
+ description RIVER_NMN
+ no shutdown
+ ip address {{ variables.NMN_IP }}
+ ip ospf 1 area 0.0.0.2
+
+interface vlan4
+ description RIVER_HMN
+ no shutdown
+ ip address {{ variables.HMN_IP }}
+ ip ospf 1 area 0.0.0.4
+
+interface vlan2000
+ description CAB_1000_MTN_NMN
+ no shutdown
+ ip address {{ variables.MTN_NMN }}
+ ip ospf 1 area 0.0.0.2
+ ip ospf authentication-key !nitial0
+ ip ospf passive
+
+interface vlan3000
+ description CAB_1000_MTN_HMN
+ no shutdown
+ ip address {{ variables.MTN_HMN }}
+ ip ospf 1 area 0.0.0.4
+ ip ospf authentication-key !nitial0
+ ip ospf passive
+ ip helper-address 10.94.100.222
+
+interface vlan4091
+ description CMM_RECOVERY
+ shutdown
+
+{# end sw-leaf-bmc #}
