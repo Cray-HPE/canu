@@ -45,10 +45,6 @@ class NetworkNode:
     -------
     available_ports(speed=None, slot=None, port=None):
         Return number of available ports
-    get_hw():
-        Return hardware
-    get_arch():
-        Return architecture
     id():
         Return unique node ID
     arch_type():
@@ -294,7 +290,7 @@ class NetworkNode:
         # Returns list
         return self.__architecture["connections"]
 
-    def available_ports(self, speed=None, slot=None, port=None):
+    def available_ports(self, speed=None, slot=None, port=None, next_free_port=False):
         """Return number of available ports."""
         available = self.__select_port_block(speed=speed, slot=slot, port=port)
 
@@ -306,7 +302,10 @@ class NetworkNode:
                     fg="red",
                 ),
             )
-        return available["count"]
+        if next_free_port:
+            return int(available["total"]) - int(available["count"]) + 1
+        else:
+            return available["count"]
 
     # Connect one device to another.
     # From a mathematical node-edge perspective, not physical ports
