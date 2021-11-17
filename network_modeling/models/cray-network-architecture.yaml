@@ -281,6 +281,13 @@ network_v2_tds:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
+    - name: "subrack"
+      model: "subrack"
+      connections:
+        - name: "river_compute_node"
+          speed: 1
+        - name: "river_bmc_leaf"
+          speed: 1
   lookup_mapper:
     - lookup_name:
         - "mn"
@@ -336,6 +343,9 @@ network_v2_tds:
       shasta_name: "pdu"
       architecture_type: "pdu"
       regex: true
+    - lookup_name: ["SubRack", "subrack"]
+      shasta_name: "SubRack"
+      architecture_type: "subrack"
 network_v1:
   name: "Dell and Mellanox Architecture"
   description: "Dell and Mellanox Hardware"
