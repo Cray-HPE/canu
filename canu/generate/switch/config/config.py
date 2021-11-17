@@ -1001,6 +1001,17 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                     "INTERFACE_NUMBER": f"{source_port}",
                 },
             }
+        elif shasta_name == "SubRack":
+            new_node = {
+                "subtype": "bmc",
+                "slot": destination_slot,
+                "destination_port": destination_port,
+                "config": {
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "PORT": f"{source_port}",
+                    "INTERFACE_NUMBER": f"{source_port}",
+                },
+            }
             nodes.append(new_node)
         elif shasta_name == "sw-spine":
             # sw-leaf ==> sw-spine
