@@ -460,6 +460,7 @@ def test_switch_config_spine_secondary():
             ],
         )
         assert result.exit_code == 0
+        print(result.output)
         assert (
             "hostname sw-spine-002\n"
             + "no cli default prefix-modes enable\n"

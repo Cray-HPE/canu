@@ -931,6 +931,12 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
             }
             nodes.append(new_node)
         elif shasta_name == "uan":
+            primary_port_uan = get_primary_port(
+                nodes_by_name,
+                switch_name,
+                destination_node_id,
+                destination_port,
+            )
             new_node = {
                 "subtype": "uan",
                 "slot": destination_slot,
@@ -938,11 +944,18 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "PORT": f"{source_port}",
-                    "LAG_NUMBER": primary_port,
+                    "LAG_NUMBER": primary_port_uan,
+                    "LAG_NUMBER_V1": primary_port,
                 },
             }
             nodes.append(new_node)
         elif shasta_name == "viz":
+            primary_port_viz = get_primary_port(
+                nodes_by_name,
+                switch_name,
+                destination_node_id,
+                destination_port,
+            )
             new_node = {
                 "subtype": "uan",
                 "slot": destination_slot,
@@ -950,11 +963,18 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "PORT": f"{source_port}",
-                    "LAG_NUMBER": primary_port,
+                    "LAG_NUMBER": primary_port_viz,
+                    "LAG_NUMBER_V1": primary_port,
                 },
             }
             nodes.append(new_node)
         elif shasta_name == "login":
+            primary_port_login = get_primary_port(
+                nodes_by_name,
+                switch_name,
+                destination_node_id,
+                destination_port,
+            )
             new_node = {
                 "subtype": "uan",
                 "slot": destination_slot,
@@ -962,7 +982,8 @@ def get_switch_nodes(switch_name, shcd_node_list, factory, sls_variables):
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "PORT": f"{source_port}",
-                    "LAG_NUMBER": primary_port,
+                    "LAG_NUMBER": primary_port_login,
+                    "LAG_NUMBER_V1": primary_port,
                 },
             }
             nodes.append(new_node)

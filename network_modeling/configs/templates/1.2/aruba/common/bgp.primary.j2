@@ -17,7 +17,7 @@ router bgp 65533
         {%- endfor %}
         {%- for name, ip in variables.NMN_IPs.items() if "ncn-w" in name %}
         neighbor {{ ip }} activate
-        neighbor {{ ip }} route-map in {{ name }}
+        neighbor {{ ip }} route-map {{ name }} in
         {%- endfor %}
     exit-address-family
 

@@ -1746,7 +1746,7 @@ def test_switch_config_leaf_primary_to_uan():
             + "    spanning-tree bpdu-guard\n"
             + "    spanning-tree port-type admin-edge\n"
             + "\n"
-            + "interface lag 7 multi-chassis\n"
+            + "interface lag 8 multi-chassis\n"
             + "    no shutdown\n"
             + "    description uan_can_lag\n"
             + "    no routing\n"
@@ -1761,7 +1761,7 @@ def test_switch_config_leaf_primary_to_uan():
             + "    no shutdown\n"
             + "    mtu 9198\n"
             + "    description sw-leaf-003:8==>uan001:ocp:2\n"
-            + "    lag 7\n"
+            + "    lag 8\n"
         )
         assert uan in str(result.output)
 
@@ -2037,7 +2037,7 @@ def test_switch_config_leaf_primary_to_uan_override():
             + "    vlan access 2\n"
             + "    spanning-tree bpdu-guard\n"
             + "    spanning-tree port-type admin-edge\n"
-            + "interface lag 7 multi-chassis\n"
+            + "interface lag 8 multi-chassis\n"
             + "    no shutdown\n"
             + "    description uan_can_lag\n"
             + "    no routing\n"
@@ -2051,7 +2051,7 @@ def test_switch_config_leaf_primary_to_uan_override():
             + "    no shutdown\n"
             + "    mtu 9198\n"
             + "    description sw-leaf-003:8==>uan001:ocp:2\n"
-            + "    lag 7\n"
+            + "    lag 8\n"
         )
         assert uan in str(result.output)
 
@@ -2928,7 +2928,7 @@ def test_switch_config_leaf_secondary_to_uan():
             + "    spanning-tree bpdu-guard\n"
             + "    spanning-tree port-type admin-edge\n"
             + "\n"
-            + "interface lag 7 multi-chassis\n"
+            + "interface lag 8 multi-chassis\n"
             + "    no shutdown\n"
             + "    description uan_can_lag\n"
             + "    no routing\n"
@@ -2943,7 +2943,7 @@ def test_switch_config_leaf_secondary_to_uan():
             + "    no shutdown\n"
             + "    mtu 9198\n"
             + "    description sw-leaf-004:8==>uan001:pcie-slot1:2\n"
-            + "    lag 7\n"
+            + "    lag 8\n"
         )
         assert uan in str(result.output)
 
@@ -3214,7 +3214,7 @@ def test_switch_config_leaf_secondary_to_uan_override():
             + "    vlan access 2\n"
             + "    spanning-tree bpdu-guard\n"
             + "    spanning-tree port-type admin-edge\n"
-            + "interface lag 7 multi-chassis\n"
+            + "interface lag 8 multi-chassis\n"
             + "    no shutdown\n"
             + "    description uan_can_lag\n"
             + "    no routing\n"
@@ -3228,7 +3228,7 @@ def test_switch_config_leaf_secondary_to_uan_override():
             + "    no shutdown\n"
             + "    mtu 9198\n"
             + "    description sw-leaf-004:8==>uan001:pcie-slot1:2\n"
-            + "    lag 7\n"
+            + "    lag 8\n"
         )
         assert uan in str(result.output)
 
@@ -5607,7 +5607,7 @@ def test_switch_config_tds_spine_primary():
             + "    spanning-tree bpdu-guard\n"
             + "    spanning-tree port-type admin-edge\n"
             + "\n"
-            + "interface lag 13 multi-chassis\n"
+            + "interface lag 14 multi-chassis\n"
             + "    no shutdown\n"
             + "    description uan_can_lag\n"
             + "    no routing\n"
@@ -5622,7 +5622,7 @@ def test_switch_config_tds_spine_primary():
             + "    no shutdown\n"
             + "    mtu 9198\n"
             + "    description sw-spine-001:14==>uan001:ocp:2\n"
-            + "    lag 13\n"
+            + "    lag 14\n"
         )
         assert uan in str(result.output)
 
@@ -6029,7 +6029,7 @@ def test_switch_config_tds_spine_primary_override():
             + "    vlan access 2\n"
             + "    spanning-tree bpdu-guard\n"
             + "    spanning-tree port-type admin-edge\n"
-            + "interface lag 13 multi-chassis\n"
+            + "interface lag 14 multi-chassis\n"
             + "    no shutdown\n"
             + "    description uan_can_lag\n"
             + "    no routing\n"
@@ -6043,7 +6043,7 @@ def test_switch_config_tds_spine_primary_override():
             + "    no shutdown\n"
             + "    mtu 9198\n"
             + "    description sw-spine-001:14==>uan001:ocp:2\n"
-            + "    lag 13\n"
+            + "    lag 14\n"
         )
         assert uan in str(result.output)
 
@@ -6460,7 +6460,7 @@ def test_switch_config_tds_spine_secondary():
             + "    spanning-tree bpdu-guard\n"
             + "    spanning-tree port-type admin-edge\n"
             + "\n"
-            + "interface lag 13 multi-chassis\n"
+            + "interface lag 14 multi-chassis\n"
             + "    no shutdown\n"
             + "    description uan_can_lag\n"
             + "    no routing\n"
@@ -6475,7 +6475,7 @@ def test_switch_config_tds_spine_secondary():
             + "    no shutdown\n"
             + "    mtu 9198\n"
             + "    description sw-spine-002:14==>uan001:pcie-slot1:2\n"
-            + "    lag 13\n"
+            + "    lag 14\n"
         )
         assert uan in str(result.output)
 
@@ -6886,7 +6886,7 @@ def test_switch_config_tds_spine_secondary_override():
             + "    vlan access 2\n"
             + "    spanning-tree bpdu-guard\n"
             + "    spanning-tree port-type admin-edge\n"
-            + "interface lag 13 multi-chassis\n"
+            + "interface lag 14 multi-chassis\n"
             + "    no shutdown\n"
             + "    description uan_can_lag\n"
             + "    no routing\n"
@@ -6900,7 +6900,7 @@ def test_switch_config_tds_spine_secondary_override():
             + "    no shutdown\n"
             + "    mtu 9198\n"
             + "    description sw-spine-002:14==>uan001:pcie-slot1:2\n"
-            + "    lag 13\n"
+            + "    lag 14\n"
         )
         assert uan in str(result.output)
 
