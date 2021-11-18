@@ -94,12 +94,14 @@ interface vlan {{ variables.HMN_VLAN }}
     ip ospf 1 area 0.0.0.0
 {%- if variables.CMN != None %}
 interface vlan {{ variables.CMN_VLAN }}
+    vrf attach CAN
     ip mtu 9198
     ip address {{ variables.CMN_IP_SECONDARY }}/{{ variables.CMN_PREFIX_LEN }}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.CMN_IP_GATEWAY }}
 {%- endif %}
 interface vlan {{ variables.CAN_VLAN }}
+    vrf attach CAN
     ip mtu 9198
     ip address {{ variables.CAN_IP_SECONDARY }}/{{ variables.CAN_PREFIX_LEN }}
     active-gateway ip mac 12:00:00:00:6b:00
