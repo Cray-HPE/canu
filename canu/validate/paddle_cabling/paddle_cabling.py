@@ -223,13 +223,13 @@ def paddle_cabling(
     click.echo("\n", file=out)
     click.echo(double_dash, file=out)
     click.secho(
-        "SHCD vs Cabling",
+        "CCJ vs Cabling",
         fg="bright_white",
         file=out,
     )
     click.echo(double_dash, file=out)
 
-    # Combine the SHCD and Cabling nodes
+    # Combine the Paddle and Cabling nodes
     combined_nodes = combine_shcd_cabling(
         paddle_node_list,
         cabling_node_list,
@@ -238,12 +238,12 @@ def paddle_cabling(
         csm,
     )
 
-    print_combined_nodes(combined_nodes, out)
+    print_combined_nodes(combined_nodes, out, input_type="CCJ")
 
     click.echo("\n", file=out)
     click.echo(double_dash, file=out)
     click.secho(
-        "SHCD Warnings",
+        "CCJ Warnings",
         fg="bright_white",
         file=out,
     )

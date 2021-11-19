@@ -1,11 +1,79 @@
 # Validate Network BGP
 
-CANU can be used to validate BGP neighbors. All neighbors of a switch must return status **Established** or the verification will fail.
+## canu validate network bgp
 
-- To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
-- The default **asn** is set to _65533_ if it needs to be changed, use the flag `--asn NEW_ASN_NUMBER` to set the new number
+Validate BGP neighbors.
 
-If you want to see the individual status of all the neighbors of a switch, use the `--verbose` flag.
+This command will check the BGP neighbors for the switch IP addresses entered. All of the neighbors of a switch
+must be ‘Established’, or the verification will fail.
+
+If a switch that is not a spine switch is tested, it will show in the results table as ‘SKIP’.
+
+
+* Enter a comma separated list of IP addresses with the ‘—ips’ flag.
+
+
+* Or read the IP addresses from a file, one IP address per line, using ‘–ips-file FILENAME’ flag.
+
+
+* The default ‘asn’ is set to 65533 if it needs to be changed, use the ‘–asn NEW_ASN_NUMBER’ flag.
+
+If you want to see the individual status of all the neighbors of a switch, use the ‘–verbose’ flag.
+
+
+---
+
+```
+canu validate network bgp [OPTIONS]
+```
+
+### Options
+
+
+### --ips( <ips>)
+Comma separated list of IPv4 addresses of switches
+
+
+### --ips-file( <ips_file>)
+File with one IPv4 address per line
+
+
+### --username( <username>)
+Switch username
+
+
+* **Default**
+
+    admin
+
+
+
+### --password( <password>)
+Switch password
+
+
+### --asn( <asn>)
+ASN
+
+
+* **Default**
+
+    65533
+
+
+
+### -a(, --architecture( <architecture>)
+**Required** CSM architecture
+
+
+* **Options**
+
+    Full | TDS | V1
+
+
+
+### --verbose()
+Verbose mode
 
 ## Examples
 
@@ -13,7 +81,7 @@ If you want to see the individual status of all the neighbors of a switch, use t
 
 To validate BGP run: `canu validate network bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
-```bash
+```
 $ canu validate network bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
 
 BGP Neighbors Established
@@ -27,7 +95,7 @@ PASS - IP: 192.168.1.2 Hostname: sw-spine02
 
 To get verbose BGP neighbor details: `canu validate network bgp --ips 192.168.1.1,192.168.1.3,192.168.1.2 --username USERNAME --password PASSWORD --verbose`
 
-```bash
+```
 $ canu validate network bgp --ips 192.168.1.1,192.168.1.3,192.168.1.2 --username USERNAME --password PASSWORD --verbose
 
 --------------------------------------------------
@@ -61,20 +129,7 @@ Errors
 192.168.1.3     - sw-leaf01 not a spine switch
 ```
 
-If any of the spine switch neighbors for a connection other than **Established**, the switch will **FAIL** validation.
-
-If a switch that is not a **spine** switch is tested, it will show in the results table as **SKIP**.
-
-## Flags
-
-| Option       | Description                         |
-| ------------ | ----------------------------------- |
-| `--ips`      | Switch IPv4 address                 |
-| `--ips-file` | File with one IPv4 address per line |
-| `--username` | Switch username                     |
-| `--password` | Switch password                     |
-| `--asn`      | Switch ASN (Default: 65533)         |
 
 ---
 
-**[Back To Readme](/readme.md)**<br>
+<a href="/readme.md">Back To Readme</a><br>

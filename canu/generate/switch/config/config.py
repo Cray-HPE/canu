@@ -169,16 +169,47 @@ def config(
     out,
     override,
 ):
-    """Switch config commands.
+    """Generate switch config using the SHCD.
 
     In order to generate switch config, a valid SHCD must be passed in and system variables must be read in from either
-    CSI output or the SLS API.
+    an SLS output file or the SLS API.
 
-    To generate config for a specific switch, a hostname must also be passed in using the `--name HOSTNAME` flag.
-    To output the config to a file, append the `--out FILENAME` flag.
+    ## CSI Input
 
+    - In order to parse network data using SLS, pass in the file containing SLS JSON data (normally sls_file.json) using the '--sls-file' flag
+
+    - If used, CSI-generated sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.
+
+    - Early in the install process, when running off of the LiveCD the sls_input_file.json file is normally found in the the directory '/var/www/ephemeral/prep/SYSTEMNAME/'
+
+    - Later in the install process, the sls_file.json file is generally in '/mnt/pitdata/prep/SYSTEMNAME/'
+
+
+    ## SLS API Input
+
+    - To parse the Shasta SLS API for IP addresses, ensure that you have a valid token.
+
+    - The token file can either be passed in with the '--auth-token TOKEN_FILE' flag, or it can be automatically read if the environmental variable 'SLS_TOKEN' is set.
+
+    - The SLS address is default set to 'api-gw-service-nmn.local'.
+
+    - if you are operating on a system with a different address, you can set it with the '--sls-address SLS_ADDRESS' flag.
+
+
+    ## SHCD Input
+
+    - Use the '--tabs' flag to select which tabs on the spreadsheet will be included.
+
+    - The '--corners' flag is used to input the upper left and lower right corners of the table on each tab of the worksheet. If the corners are not specified, you will be prompted to enter them for each tab.
+
+    - The table should contain the 11 headers: Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port.
+
+
+    Use the '--folder FOLDERNAME' flag to output all the switch configs to a folder.
+
+    ----------
     \f
-    # noqa: D301
+    # noqa: D301, B950
 
     Args:
         ctx: CANU context settings
@@ -493,10 +524,14 @@ def generate_switch_config(
         "NMN_MTN_NETWORK_IP": sls_variables["NMN_MTN_NETWORK_IP"],
         "NMN_MTN_PREFIX_LEN": sls_variables["NMN_MTN_PREFIX_LEN"],
         "HMNLB": sls_variables["HMNLB"],
+        "HMNLB_TFTP": sls_variables["HMNLB_TFTP"],
+        "HMNLB_DNS": sls_variables["HMNLB_DNS"],
         "HMNLB_NETMASK": sls_variables["HMNLB_NETMASK"],
         "HMNLB_NETWORK_IP": sls_variables["HMNLB_NETWORK_IP"],
         "HMNLB_PREFIX_LEN": sls_variables["HMNLB_PREFIX_LEN"],
         "NMNLB": sls_variables["NMNLB"],
+        "NMNLB_TFTP": sls_variables["NMNLB_TFTP"],
+        "NMNLB_DNS": sls_variables["NMNLB_DNS"],
         "NMNLB_NETMASK": sls_variables["NMNLB_NETMASK"],
         "NMNLB_NETWORK_IP": sls_variables["NMNLB_NETWORK_IP"],
         "NMNLB_PREFIX_LEN": sls_variables["NMNLB_PREFIX_LEN"],
@@ -514,6 +549,9 @@ def generate_switch_config(
         "LEAF_BMC_VLANS": leaf_bmc_vlan,
         "SPINE_LEAF_VLANS": spine_leaf_vlan,
         "NATIVE_VLAN": native_vlan,
+        "CAN_IPs": sls_variables["CAN_IPs"],
+        "NMN_IPs": sls_variables["NMN_IPs"],
+        "HMN_IPs": sls_variables["HMN_IPs"],
     }
     cabling = {}
     cabling["nodes"], unknown = get_switch_nodes(
@@ -754,6 +792,10 @@ def get_switch_nodes(switch_name, network_node_list, factory, sls_variables):
 
         primary_port = get_primary_port(nodes_by_name, switch_name, destination_node_id)
         if shasta_name == "ncn-m":
+            print("\nport", port)
+            print("switch_name", switch_name)
+            print("dest", nodes_by_id[port["destination_node_id"]])
+            print("primary_port", primary_port)
             new_node = {
                 "subtype": "master",
                 "slot": destination_slot,
@@ -844,6 +886,77 @@ def get_switch_nodes(switch_name, network_node_list, factory, sls_variables):
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "PORT": f"{source_port}",
                     "LAG_NUMBER": primary_port,
+                },
+            }
+            nodes.append(new_node)
+        elif shasta_name == "viz":
+            new_node = {
+                "subtype": "uan",
+                "slot": destination_slot,
+                "destination_port": destination_port,
+                "config": {
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
+                    "PORT": f"{source_port}",
+                    "LAG_NUMBER": primary_port,
+                },
+            }
+            nodes.append(new_node)
+        elif shasta_name == "login":
+            new_node = {
+                "subtype": "uan",
+                "slot": destination_slot,
+                "destination_port": destination_port,
+                "config": {
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
+                    "PORT": f"{source_port}",
+                    "LAG_NUMBER": primary_port,
+                },
+            }
+            nodes.append(new_node)
+        elif shasta_name == "cn":
+            new_node = {
+                "subtype": "compute",
+                "slot": destination_slot,
+                "destination_port": destination_port,
+                "config": {
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "PORT": f"{source_port}",
+                    "INTERFACE_NUMBER": f"{source_port}",
+                },
+            }
+            nodes.append(new_node)
+        elif shasta_name == "sw-hsn":
+            new_node = {
+                "subtype": "sw-hsn",
+                "slot": destination_slot,
+                "destination_port": destination_port,
+                "config": {
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "PORT": f"{source_port}",
+                    "INTERFACE_NUMBER": f"{source_port}",
+                },
+            }
+            nodes.append(new_node)
+        elif shasta_name == "pdu":
+            new_node = {
+                "subtype": "pdu",
+                "slot": destination_slot,
+                "destination_port": destination_port,
+                "config": {
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "PORT": f"{source_port}",
+                    "INTERFACE_NUMBER": f"{source_port}",
+                },
+            }
+        elif shasta_name == "SubRack":
+            new_node = {
+                "subtype": "bmc",
+                "slot": destination_slot,
+                "destination_port": destination_port,
+                "config": {
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "PORT": f"{source_port}",
+                    "INTERFACE_NUMBER": f"{source_port}",
                 },
             }
             nodes.append(new_node)
@@ -1068,10 +1181,14 @@ def parse_sls_for_config(input_json):
         "HMNLB_NETMASK": None,
         "HMNLB_NETWORK_IP": None,
         "HMNLB_PREFIX_LEN": None,
+        "HMNLB_TFTP": None,
+        "HMNLB_DNS": None,
         "NMNLB": None,
         "NMNLB_NETMASK": None,
         "NMNLB_NETWORK_IP": None,
         "NMNLB_PREFIX_LEN": None,
+        "NMNLB_TFTP": None,
+        "NMNLB_DNS": None,
         "CAN_IP_GATEWAY": None,
         "CMN_IP_GATEWAY": None,
         "HMN_IP_GATEWAY": None,
@@ -1084,6 +1201,7 @@ def parse_sls_for_config(input_json):
         "CAN_IP_SECONDARY": None,
         "CMN_IP_PRIMARY": None,
         "CMN_IP_SECONDARY": None,
+        "CAN_IPs": defaultdict(),
         "HMN_IPs": defaultdict(),
         "MTL_IPs": defaultdict(),
         "NMN_IPs": defaultdict(),
@@ -1113,7 +1231,10 @@ def parse_sls_for_config(input_json):
                             sls_variables["CAN_IP_PRIMARY"] = ip["IPAddress"]
                         elif ip["Name"] == "can-switch-2":
                             sls_variables["CAN_IP_SECONDARY"] = ip["IPAddress"]
-
+                if subnets["Name"] == "bootstrap_dhcp":
+                    for ip in subnets["IPReservations"]:
+                        if "ncn-w" in ip["Name"]:
+                            sls_variables["CAN_IPs"][ip["Name"]] = ip["IPAddress"]
         elif name == "CMN":
             sls_variables["CMN"] = netaddr.IPNetwork(
                 sls_network.get("ExtraProperties", {}).get(
@@ -1150,6 +1271,10 @@ def parse_sls_for_config(input_json):
                     sls_variables["HMN_VLAN"] = subnets["VlanID"]
                     for ip in subnets["IPReservations"]:
                         sls_variables["HMN_IPs"][ip["Name"]] = ip["IPAddress"]
+                if subnets["Name"] == "bootstrap_dhcp":
+                    for ip in subnets["IPReservations"]:
+                        if "ncn-w" in ip["Name"]:
+                            sls_variables["HMN_IPs"][ip["Name"]] = ip["IPAddress"]
         elif name == "MTL":
             sls_variables["MTL"] = netaddr.IPNetwork(
                 sls_network.get("ExtraProperties", {}).get(
@@ -1185,12 +1310,15 @@ def parse_sls_for_config(input_json):
                             sls_variables["ncn_w002"] = ip["IPAddress"]
                         elif ip["Name"] == "ncn-w003":
                             sls_variables["ncn_w003"] = ip["IPAddress"]
+                if subnets["Name"] == "bootstrap_dhcp":
+                    for ip in subnets["IPReservations"]:
+                        if "ncn-w" in ip["Name"]:
+                            sls_variables["NMN_IPs"][ip["Name"]] = ip["IPAddress"]
                 elif subnets["Name"] == "network_hardware":
                     sls_variables["NMN_IP_GATEWAY"] = subnets["Gateway"]
                     sls_variables["NMN_VLAN"] = subnets["VlanID"]
                     for ip in subnets["IPReservations"]:
                         sls_variables["NMN_IPs"][ip["Name"]] = ip["IPAddress"]
-
         elif name == "NMN_MTN":
             sls_variables["NMN_MTN"] = netaddr.IPNetwork(
                 sls_network.get("ExtraProperties", {}).get(
@@ -1225,6 +1353,13 @@ def parse_sls_for_config(input_json):
                     "",
                 ),
             )
+            for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
+                if subnets["Name"] == "hmn_metallb_address_pool":
+                    for ip in subnets["IPReservations"]:
+                        if ip["Name"] == "cray-tftp":
+                            sls_variables["HMNLB_TFTP"] = ip["IPAddress"]
+                        elif ip["Name"] == "unbound":
+                            sls_variables["HMNLB_DNS"] = ip["IPAddress"]
             sls_variables["HMNLB_NETMASK"] = sls_variables["HMNLB"].netmask
             sls_variables["HMNLB_PREFIX_LEN"] = sls_variables["HMNLB"].prefixlen
             sls_variables["HMNLB_NETWORK_IP"] = sls_variables["HMNLB"].ip
@@ -1238,6 +1373,13 @@ def parse_sls_for_config(input_json):
                     "",
                 ),
             )
+            for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
+                if subnets["Name"] == "nmn_metallb_address_pool":
+                    for ip in subnets["IPReservations"]:
+                        if ip["Name"] == "cray-tftp":
+                            sls_variables["NMNLB_TFTP"] = ip["IPAddress"]
+                        elif ip["Name"] == "unbound":
+                            sls_variables["NMNLB_DNS"] = ip["IPAddress"]
             sls_variables["NMNLB_NETMASK"] = sls_variables["NMNLB"].netmask
             sls_variables["NMNLB_PREFIX_LEN"] = sls_variables["NMNLB"].prefixlen
             sls_variables["NMNLB_NETWORK_IP"] = sls_variables["NMNLB"].ip

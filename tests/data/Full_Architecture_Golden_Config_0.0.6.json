@@ -1,7 +1,7 @@
 {
   "canu_version": "0.0.6",
   "architecture": "network_v2",
-  "updated_at": "2021-11-18 14:28:36",
+  "updated_at": "2021-11-19 11:15:24",
   "topology": [
     {
       "common_name": "sw-spine-001",
@@ -1029,7 +1029,7 @@
           "slot": null,
           "destination_node_id": 21,
           "destination_port": 1,
-          "destination_slot": null
+          "destination_slot": "onboard"
         },
         {
           "port": 25,
@@ -1037,7 +1037,7 @@
           "slot": null,
           "destination_node_id": 22,
           "destination_port": 1,
-          "destination_slot": null
+          "destination_slot": "onboard"
         },
         {
           "port": 26,
@@ -1045,7 +1045,7 @@
           "slot": null,
           "destination_node_id": 23,
           "destination_port": 1,
-          "destination_slot": null
+          "destination_slot": "onboard"
         },
         {
           "port": 27,
@@ -1053,7 +1053,7 @@
           "slot": null,
           "destination_node_id": 24,
           "destination_port": 1,
-          "destination_slot": null
+          "destination_slot": "onboard"
         },
         {
           "port": 47,
@@ -1532,7 +1532,7 @@
         {
           "port": 1,
           "speed": 1,
-          "slot": null,
+          "slot": "onboard",
           "destination_node_id": 10,
           "destination_port": 24,
           "destination_slot": null
@@ -1562,7 +1562,7 @@
         {
           "port": 1,
           "speed": 1,
-          "slot": null,
+          "slot": "onboard",
           "destination_node_id": 10,
           "destination_port": 25,
           "destination_slot": null
@@ -1592,7 +1592,7 @@
         {
           "port": 1,
           "speed": 1,
-          "slot": null,
+          "slot": "onboard",
           "destination_node_id": 10,
           "destination_port": 26,
           "destination_slot": null
@@ -1622,7 +1622,7 @@
         {
           "port": 1,
           "speed": 1,
-          "slot": null,
+          "slot": "onboard",
           "destination_node_id": 10,
           "destination_port": 27,
           "destination_slot": null

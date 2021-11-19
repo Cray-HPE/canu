@@ -1,9 +1,69 @@
 # Validate Network Cabling
 
+## canu validate network cabling
+
+Validate network cabling.
+
 CANU can be used to validate that network cabling passes basic validation checks.
 
-- The `--architecture / -a` flag is used to set the architecture of the system, either **TDS**, or **Full**.
-- To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
+This command will use LLDP to determine if the network is properly connected architecturally.
+
+The validation will ensure that spine switches, leaf switches, edge switches, and nodes all are connected properly.
+
+
+---
+
+```
+canu validate network cabling [OPTIONS]
+```
+
+### Options
+
+
+### -a(, --architecture( <architecture>)
+**Required** CSM architecture
+
+
+* **Options**
+
+    Full | TDS | v1
+
+
+
+### --ips( <ips>)
+Comma separated list of IPv4 addresses of switches
+
+
+### --ips-file( <ips_file>)
+File with one IPv4 address per line
+
+
+### --username( <username>)
+Switch username
+
+
+* **Default**
+
+    admin
+
+
+
+### --password( <password>)
+Switch password
+
+
+### --log( <log_>)
+Level of logging.
+
+
+* **Options**
+
+    DEBUG | INFO | WARNING | ERROR
+
+
+
+### --out( <out>)
+Output results to a file
 
 ## Example
 
@@ -11,7 +71,7 @@ CANU can be used to validate that network cabling passes basic validation checks
 
 To validate the cabling run: `canu validate network cabling -a tds --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
-```bash
+```
 $ canu validate network cabling -a tds --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
 
 Cabling Node Connections
@@ -42,24 +102,7 @@ sw-spine01 should be renamed sw-spine-001
 sw-spine02 should be renamed sw-spine-002
 ```
 
-If there are any nodes that cannot be determined or should be renamed, there will be warning tables that show the details.
-
-### File Out
-
-To output the results of the `validate network cabling` command to a file, append the `--out FILENAME` flag
-
-## Flags
-
-| Option                | Description                                             |
-| --------------------- | ------------------------------------------------------- |
-| `-a / --architecture` | CSM architecture ("Full", or "TDS")                     |
-| `--ips`               | Comma separated list of IPv4 addresses of switches      |
-| `--ips-file`          | File with one IPv4 address per line                     |
-| `--username`          | Switch username                                         |
-| `--password`          | Switch password                                         |
-| `--out`               | Name of the output file                                 |
-| `--log`               | Level of logging. ("DEBUG", "INFO", "WARNING", "ERROR") |
 
 ---
 
-**[Back To Readme](/readme.md)**<br>
+<a href="/readme.md">Back To Readme</a><br>

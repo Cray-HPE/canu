@@ -95,7 +95,6 @@ def test_switch_config_spine_primary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "ssh server vrf default\n"
             + "ssh server vrf keepalive\n"
@@ -132,7 +131,6 @@ def test_switch_config_spine_primary():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
-        print(result.output)
         sw_spine_to_leaf = (
             "interface lag 101 multi-chassis\n"
             + "    no shutdown\n"

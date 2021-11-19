@@ -1,31 +1,90 @@
 # Report Network Cabling
 
+## canu report network cabling
+
 Report the cabling of all switches (Aruba, Dell, or Mellanox) on the network by using LLDP.
 
-To check out the LLDP neighbor status of switches and their neighboring devices on the network either pass in a comma separated list of IP addresses using the `--ips` option or pass in a file of IP addresses with one address per line using the `--ips-file` option.
+Pass in either a comma separated list of IP addresses using the –ips option
+
+OR
+
+Pass in a file of IP addresses with one address per line.
 
 There are three different connection types that will be shown in the results.
 
-1. '===>' Outbound connections
 
-2. '<===' Inbound connections
+1. ‘===>’ Outbound connections
 
-3. '<==>' Bi-directional connections
 
-There are two different `--view` options, `switch` and `equipment`.
+2. ‘<===’ Inbound connections
 
-1. The `--view switch` option displays a table for every switch IP address passed in showing connections.
 
-2. The `--view equipment` option displays a table for each mac address connection. This means that servers
-   and switches will both display incoming and outgoing connections.
+3. ‘<==>’ Bi-directional connections
 
-If the neighbor name is not in LLDP, the IP and vlan information are displayed by looking up the MAC address in the ARP table.
+There are two different ‘–view’ options, ‘switch’ and ‘equipment’.
 
-If there is a duplicate port, the duplicates will be highlighted in **bright white**.
 
-Ports highlighted in **blue** contain the string "ncn" in the hostname.
+1. The ‘–view switch’ option displays a table for every switch IP address passed in showing connections.
 
-Ports are highlighted in **green** when the port name is set with the interface name.
+2. The ‘–view equipment’ option displays a table for each mac address connection. This means that servers
+and switches will both display incoming and outgoing connections.
+
+If the neighbor name is not in LLDP, the IP and vlan information are displayed
+by looking up the MAC address in the ARP table and mac address table.
+
+If there is a duplicate port, the duplicates will be highlighted in ‘bright white’.
+
+Ports highlighted in ‘blue’ contain the string “ncn” in the hostname.
+
+Ports are highlighted in ‘green’ when the port name is set with the interface name.
+
+```
+canu report network cabling [OPTIONS]
+```
+
+### Options
+
+
+### --ips( <ips>)
+Comma separated list of IPv4 addresses of switches
+
+
+### --ips-file( <ips_file>)
+File with one IPv4 address per line
+
+
+### --username( <username>)
+Switch username
+
+
+* **Default**
+
+    admin
+
+
+
+### --password( <password>)
+Switch password
+
+
+### --out( <out>)
+Output results to a file
+
+
+### --view( <view>)
+View of the cabling results.
+
+
+* **Default**
+
+    switch
+
+
+
+* **Options**
+
+    switch | equipment
+
 
 ## Examples
 
@@ -33,7 +92,7 @@ Ports are highlighted in **green** when the port name is set with the interface 
 
 To check the cabling of multiple switches run: `canu report network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`. Or to load IP addresses from a file run: `canu report network cabling --ips-file ip_file.txt --username USERNAME --password PASSWORD`
 
-```bash
+```
 $ canu report network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
 
 Switch: sw-test01 (192.168.1.1)
@@ -59,7 +118,7 @@ PORT        NEIGHBOR       NEIGHBOR PORT      PORT DESCRIPTION                  
 
 An example of checking the cabling of multiple switches and displaying with the equipment view: `canu report network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --view equipment`
 
-```bash
+```
 $ canu report network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --view equipment
 
 sw-test01 Test switch description
@@ -90,21 +149,7 @@ cc:cc:cc:cc:cc:cc
 cc:cc:cc:cc:cc:cc mgmt1   <=== sw-test01       1/1/4
 ```
 
-### File Out
-
-The network cabling command can also be run with the `--out FILENAME` flag to output the results to a file.
-
-## Flags
-
-| Option       | Description                                          |
-| ------------ | ---------------------------------------------------- |
-| `--ips`      | Switch IPv4 address                                  |
-| `--ips-file` | File with one IPv4 address per line                  |
-| `--username` | Switch username                                      |
-| `--password` | Switch password                                      |
-| `--out`      | Name of the output file                              |
-| `--view`     | View of the cabling results, `switch` or `equipment` |
 
 ---
 
-**[Back To Readme](/readme.md)**<br>
+<a href="/readme.md">Back To Readme</a><br>

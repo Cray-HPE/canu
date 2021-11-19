@@ -164,9 +164,42 @@ def config(
     In order to generate network switch config, a valid SHCD must be passed in and system variables must be read in from either
     an SLS output file or the SLS API.
 
-    Use the `--folder FOLDERNAME` flag to output all the switch configs to a folder.
+    ## CSI Input
+
+    - In order to parse network data using SLS, pass in the file containing SLS JSON data (normally sls_file.json) using the '--sls-file' flag
+
+    - If used, CSI-generated sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.
+
+    - Early in the install process, when running off of the LiveCD the sls_input_file.json file is normally found in the the directory '/var/www/ephemeral/prep/SYSTEMNAME/'
+
+    - Later in the install process, the sls_file.json file is generally in '/mnt/pitdata/prep/SYSTEMNAME/'
+
+
+    ## SLS API Input
+
+    - To parse the Shasta SLS API for IP addresses, ensure that you have a valid token.
+
+    - The token file can either be passed in with the '--auth-token TOKEN_FILE' flag, or it can be automatically read if the environmental variable 'SLS_TOKEN' is set.
+
+    - The SLS address is default set to 'api-gw-service-nmn.local'.
+
+    - if you are operating on a system with a different address, you can set it with the '--sls-address SLS_ADDRESS' flag.
+
+
+    ## SHCD Input
+
+    - Use the '--tabs' flag to select which tabs on the spreadsheet will be included.
+
+    - The '--corners' flag is used to input the upper left and lower right corners of the table on each tab of the worksheet. If the corners are not specified, you will be prompted to enter them for each tab.
+
+    - The table should contain the 11 headers: Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port.
+
+
+    Use the '--folder FOLDERNAME' flag to output all the switch configs to a folder.
+
+    ----------
     \f
-    # noqa: D301
+    # noqa: D301, B950
 
     Args:
         ctx: CANU context settings

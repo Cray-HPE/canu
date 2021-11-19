@@ -1,13 +1,65 @@
 # Report Switch Firmware
 
-Report the firmware of a switch (Aruba, Dell, or Mellanox) on the network.
+## canu report switch firmware
 
-The CSM version is required to determine the firmware to validate against, you can pass it in with `--csm` like `--csm 1.2`.
+Report the firmware of a switch (Aruba, Dell, or Mellanox) on the network.
 
 There are two different statuses that might be indicated.
 
-- 🛶 - Pass: Indicates that the switch passed the firmware verification.
-- ❌ - Fail: Indicates that the switch failed the firmware verification. A list of expected firmware versions will be displayed.
+
+* 🛶 - Pass: Indicates that the switch passed the firmware verification.
+
+
+* ❌ - Fail: Indicates that the switch failed the firmware verification. A list of expected firmware versions will be displayed.
+
+
+---
+
+```
+canu report switch firmware [OPTIONS]
+```
+
+### Options
+
+
+### --csm( <csm>)
+**Required** CSM network version
+
+
+* **Options**
+
+    1.0 | 1.2
+
+
+
+### --ip( <ip>)
+**Required** The IP address of the switch
+
+
+### --username( <username>)
+Switch username
+
+
+* **Default**
+
+    admin
+
+
+
+### --password( <password>)
+Switch password
+
+
+### --json()
+Output JSON
+
+
+### --verbose()
+Verbose mode
+
+
+### --out( <out>)
+Output results to a file
 
 ## Examples
 
@@ -15,19 +67,22 @@ There are two different statuses that might be indicated.
 
 To check the firmware of a single switch run: `canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD`
 
-```bash
+```
 $ canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD
 
 🛶 - Pass - IP: 192.168.1.1 Hostname: test-switch-spine01 Firmware: GL.10.06.0001
 ```
 
-![](images/canu_report_switch_firmware.png)
+
+
+![image](images/canu_report_switch_firmware.png)
+
 
 ### 2. Firmware Verbose
 
 To get verbose firmware details of a single switch: `canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD --verbose`
 
-```bash
+```
 $ canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD --verbose
 
 🛶 - Pass - IP: 192.168.1.1 Hostname: test-switch-spine01
@@ -38,13 +93,16 @@ Default Image: primary
 Booted Image: primary
 ```
 
-![](images/canu_report_switch_firmware_verbose.png)
+
+
+![image](images/canu_report_switch_firmware_verbose.png)
+
 
 ### 3. Firmware JSON
 
 To get firmware details of a single switch with JSON output: `canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD --json`
 
-```bash
+```
 $ canu report switch firmware - 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD --json
 {
   "ip_address": "192.168.1.1",
@@ -54,13 +112,16 @@ $ canu report switch firmware - 1.4 --ip 192.168.1.1 --username USERNAME --passw
 }
 ```
 
-![](images/canu_report_switch_firmware_json.png)
+
+
+![image](images/canu_report_switch_firmware_json.png)
+
 
 ### 4. Firmware JSON Verbose
 
 To get firmware details of a single switch with JSON output: `canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD --json --verbose`
 
-```bash
+```
 $ canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD --json --verbose
 {
   "ip_address": "192.168.1.1",
@@ -78,24 +139,12 @@ $ canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --p
 }
 ```
 
-![](images/canu_report_switch_firmware_json_verbose.png)
 
-### File Out
 
-Any combination of commands can also be run with the `--out FILENAME` flag to output the results to a file.
+![image](images/canu_report_switch_firmware_json_verbose.png)
 
-## Flags
 
-| Option       | Description                    |
-| ------------ | ------------------------------ |
-| `--csm`      | CSM version                    |
-| `--ip`       | Switch IPv4 address            |
-| `--username` | Switch username                |
-| `--password` | Switch password                |
-| `--json`     | Bool indicating json output    |
-| `--verbose`  | Bool indicating verbose output |
-| `--out`      | Name of the output file        |
 
 ---
 
-**[Back To Readme](/readme.md)**<br>
+<a href="/readme.md">Back To Readme</a><br>

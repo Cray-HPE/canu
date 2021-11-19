@@ -154,18 +154,16 @@ def shcd_cabling(
     log_,
     out,
 ):
-    """Validate a SHCD file against the current network cabling .
+    """Validate a SHCD file against the current network cabling.
 
-    Pass in a SHCD file to validate that it works architecturally.
+    Pass in a SHCD file and a list of IP address to compair the connections.
 
-    This command will also use LLDP to determine the neighbors of the IP addresses passed in to validate that the network
-    is properly connected architecturally.
+    The output of the `validate shcd-cabling` command will show a port by port comparison between the devices found in the SHCD and devices found on the network.
+    If there is a difference in what is found connected to a devices port in SHCD and Cabling, the line will be highlighted in 'red'.
 
-    The validation will ensure that spine switches, leaf switches,
-    edge switches, and nodes all are connected properly.
-
+    --------
     \f
-    # noqa: D301
+    # noqa: D301, B950
 
     Args:
         ctx: CANU context settings
@@ -471,12 +469,13 @@ def combine_shcd_cabling(shcd_node_list, cabling_node_list, canu_cache, ips, csm
     return combined_nodes
 
 
-def print_combined_nodes(combined_nodes, out="-"):
+def print_combined_nodes(combined_nodes, out="-", input_type="SHCD"):
     """Print device comparison by port between SHCD and cabling.
 
     Args:
         combined_nodes: dict of the combined shcd and cabling nodes
         out: Defaults to stdout, but will print to the file name passed in
+        input_type: String for the input to compair, typically SHCD or CCJ
     """
     dash = "-" * 80
     for node, node_info in combined_nodes.items():
@@ -491,7 +490,7 @@ def print_combined_nodes(combined_nodes, out="-"):
             )
         click.secho(dash, file=out)
         click.secho(
-            f"{'Port':<7s}{'SHCD':<25s}{'Cabling'}",
+            f"{'Port':<7s}{input_type:<25s}{'Cabling'}",
             fg="bright_white",
             file=out,
         )

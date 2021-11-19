@@ -1,12 +1,90 @@
 # Validate SHCD and Cabling
 
-CANU can be used to validate an SHCD against the current network cabling.
+## canu validate shcd-cabling
 
-- The `--csm` flag is used to set the CSM version of the system.
-- The `--architecture / -a` flag is used to set the architecture of the system, either **TDS**, **Full**, or **V1**.
-- Use the `--tabs` flag to select which tabs on the spreadsheet will be included.
-- The `--corners` flag is used to input the upper left and lower right corners of the table on each tab of the worksheet. The table should contain the 11 headers: **Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port**. If the corners are not specified, you will be prompted to enter them for each tab.
-- To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
+Validate a SHCD file against the current network cabling.
+
+Pass in a SHCD file and a list of IP address to compair the connections.
+
+The output of the validate shcd-cabling command will show a port by port comparison between the devices found in the SHCD and devices found on the network.
+If there is a difference in what is found connected to a devices port in SHCD and Cabling, the line will be highlighted in ‘red’.
+
+
+---
+
+```
+canu validate shcd-cabling [OPTIONS]
+```
+
+### Options
+
+
+### --csm( <csm>)
+**Required** CSM network version
+
+
+* **Options**
+
+    1.0 | 1.2
+
+
+
+### -a(, --architecture( <architecture>)
+**Required** CSM architecture
+
+
+* **Options**
+
+    Full | TDS | V1
+
+
+
+### --shcd( <shcd>)
+**Required** SHCD file
+
+
+### --tabs( <tabs>)
+The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
+
+
+### --corners( <corners>)
+The corners on each tab, comma separated e.g. ‘J37,U227,J15,T47,J20,U167’.
+
+
+### --ips( <ips>)
+Comma separated list of IPv4 addresses of switches
+
+
+### --ips-file( <ips_file>)
+File with one IPv4 address per line
+
+
+### --username( <username>)
+Switch username
+
+
+* **Default**
+
+    admin
+
+
+
+### --password( <password>)
+Switch password
+
+
+### --log( <log_>)
+Level of logging.
+
+
+* **Options**
+
+    DEBUG | INFO | WARNING | ERROR
+
+
+
+### --out( <out>)
+Output results to a file
 
 ## Example
 
@@ -14,7 +92,7 @@ CANU can be used to validate an SHCD against the current network cabling.
 
 To validate an SHCD against the cabling run: `canu validate shcd-cabling --csm 1.2 -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN --corners I14,S49,I16,S22 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
-```bash
+```
 $ canu validate shcd-cabling --csm 1.2 -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN --corners I14,S49,I16,S22 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
 
 ====================================================================================================
@@ -93,31 +171,12 @@ sw-spine-002     1/1/3     ===> bb:bb:bb:bb:bb:bb Cray, Inc.
 Nodes that show up as MAC addresses might need to have LLDP enabled.
 ```
 
-![](images/canu_validate_shcd_cabling.png)
 
-The output of the `validate shcd-cabling` command will show a port by port comparison between the devices found in the SHCD and devices found on the network. If there is a difference in what is found connected to a devices port in SHCD and Cabling, the line will be highlighted in red.
 
-### File Out
+![image](images/canu_validate_shcd_cabling.png)
 
-To output the results of the `validate shcd-cabling` command to a file, append the `--out FILENAME` flag
 
-## Flags
-
-| Option                | Description                                                                |
-| --------------------- | -------------------------------------------------------------------------- |
-| `--csm`               | CSM version                                                                |
-| `-a / --architecture` | CSM architecture ("Full", or "TDS")                                        |
-| `--shcd`              | SHCD File                                                                  |
-| `--tabs`              | The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.         |
-| `--corners`           | The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'. |
-| `--ips`               | Comma separated list of IPv4 addresses of switches                         |
-| `--ips-file`          | File with one IPv4 address per line                                        |
-| `--username`          | Switch username                                                            |
-| `--password`          | Switch password                                                            |
-| `--log`               | Level of logging. ("DEBUG", "INFO", "WARNING", "ERROR")                    |
-| `--json`              | Bool indicating json output                                                |
-| `--out`               | Name of the output file                                                    |
 
 ---
 
-**[Back To Readme](/readme.md)**<br>
+<a href="/readme.md">Back To Readme</a><br>

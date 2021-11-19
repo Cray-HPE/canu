@@ -41,7 +41,7 @@ htmlcov
 .DS_Store
 
 # Built documentation
-docs/build
+docs/_build
 
 # Make sure a generated file isn't accidentally committed.
 pylintrc

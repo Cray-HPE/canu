@@ -847,19 +847,19 @@
       order: 600
     - lineage:
       - contains: switchport hybrid allowed-vlan
-      order: 604
+      order: 602
     - lineage:
       - contains: vrf
-      order: 605
+      order: 603
+    - lineage:
+      - contains: interface loopback
+      order: 604
     - lineage:
       - contains: interface vlan
       order: 606
     - lineage:
       - contains: no switchport
       order: 607
-    - lineage:
-      - contains: ip address
-      order: 608
     - lineage:
       - startswith: ip load-sharing
       order: 609
@@ -899,6 +899,15 @@
     - lineage:
       - contains: mgmt0
       order: 660
+    - lineage:
+      - contains: prefix-list
+      order: 661
+    - lineage:
+      - contains: route-map
+      order: 662
+    - lineage:
+      - contains: router bgp
+      order: 663
     - lineage:
       - contains: ntp
       order: 665

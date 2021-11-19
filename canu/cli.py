@@ -124,26 +124,23 @@ cli.add_command(validate.validate)
 )
 @click.pass_context
 def init(ctx, sls_file, auth_token, sls_address, network, out):
-    """Initialize CANU by extracting all the switch IPs from yaml files in the CSI folder, or by getting IPs from SLS.
+    """Initialize CANU by extracting all the switch IPs from CSI generated json, or by getting IPs from SLS.
 
-    To access SLS, a token must be passed in using the --auth-token flag.
-    Tokens are typically stored in ~./config/cray/tokens/
-    Instead of passing in a token file, the environmental variable SLS_TOKEN can be used.
+    To access the SLS API, a token must be passed in using the '--auth-token' flag.
+    - Tokens are typically stored in '~./config/cray/tokens/'
+    - Instead of passing in a token file, the environmental variable SLS_TOKEN can be used.
 
-    To initialize using any SLS data, pass in the file containing SLS JSON data (sometimes sls_input_file.json) the --sls-file flag
+    To initialize using JSON instead of the SLS API, pass in the file containing SLS JSON data (normally sls_input_file.json) using the '--sls-file' flag
 
-    If used, CSI-generated sls_input_file.json file is generally stored in one of two places
-    depending on how far the system is in the install process.
+    If used, CSI-generated sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.
+    - Early in the install process, when running off of the LiveCD the CSI sls_input_file.json file is normally found in the the directory '/var/www/ephemeral/prep/SYSTEMNAME/'
+    - Later in the install process, the CSI sls_input_file.json file is generally in '/mnt/pitdata/prep/SYSTEMNAME/'
 
 
-     - Early in the install process, when running off of the LiveCD the CSI
-     sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
-
-     - Later in the install process, the CSI sls_input_file.json file is
-     generally in `/mnt/pitdata/prep/SYSTEMNAME/`
+    The output file for the `canu init` command is set with the `--out FILENAME` flag.
 
     \f
-    # noqa: D301
+    # noqa: D301, B950
 
     Args:
         ctx: CANU context settings
