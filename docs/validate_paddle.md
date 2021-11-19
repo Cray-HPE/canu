@@ -13,17 +13,17 @@ canu validate paddle [OPTIONS]
 
 ### Options
 
-### --ccj( <ccj>)
 
+### --ccj( <ccj>)
 CCJ (CSM Cabling JSON) File containing system topology.
 
-### --out( <out>)
 
+### --out( <out>)
 Output results to a file
 
 ## Example
 
-To check a paddle CCJ run: `canu validate paddle --ccj paddle.json`
+To validate a paddle CCJ run: `canu validate paddle --ccj paddle.json`
 
 ```
 $ canu validate paddle --ccj paddle.json
@@ -39,6 +39,7 @@ CCJ Node Connections
 6: ncn-m001 connects to 2 nodes: [0, 1]
 
 ```
+
 
 ---
 

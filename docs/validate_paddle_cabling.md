@@ -68,13 +68,13 @@ To validate a CCJ Paddle against the cabling run: `canu validate paddle-cabling 
 $ canu validate paddle-cabling --csm 1.2 --ccj paddle.json --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
 
 ====================================================================================================
-SHCD vs Cabling
+CCJ vs Cabling
 ====================================================================================================
 
 sw-spine-001
 Rack: x3000    Elevation: u12
 --------------------------------------------------------------------------------
-Port   SHCD                     Cabling
+Port   CCJ                      Cabling
 --------------------------------------------------------------------------------
 1      sw-spine-002:1           sw-spine-002:1
 2      sw-spine-002:2           sw-spine-002:2
@@ -86,7 +86,7 @@ Port   SHCD                     Cabling
 sw-spine-002
 Rack: x3000    Elevation: u13
 --------------------------------------------------------------------------------
-Port   SHCD                     Cabling
+Port   CCJ                      Cabling
 --------------------------------------------------------------------------------
 1      sw-spine-001:1           sw-spine-001:1
 2      sw-spine-001:2           sw-spine-001:2
@@ -98,7 +98,7 @@ Port   SHCD                     Cabling
 ncn-m001
 Rack: x3000    Elevation: u14
 --------------------------------------------------------------------------------
-Port   SHCD                     Cabling
+Port   CCJ                      Cabling
 --------------------------------------------------------------------------------
 1      sw-spine-001:5           sw-spine-001:5
 2      sw-spine-002:5           sw-spine-002:5
@@ -106,7 +106,7 @@ Port   SHCD                     Cabling
 ncn-s001
 Rack: x3000    Elevation: u15
 --------------------------------------------------------------------------------
-Port   SHCD                     Cabling
+Port   CCJ                      Cabling
 --------------------------------------------------------------------------------
 1      sw-spine-001:6           sw-spine-001:6
 2      sw-spine-002:6           sw-spine-002:6
@@ -114,22 +114,15 @@ Port   SHCD                     Cabling
 ncn-w001
 Rack: x3000    Elevation: u16
 --------------------------------------------------------------------------------
-Port   SHCD                     Cabling
+Port   CCJ                      Cabling
 --------------------------------------------------------------------------------
 1      sw-spine-001:7           sw-spine-001:7
 2      sw-spine-002:7           sw-spine-002:7
 
 
 ====================================================================================================
-SHCD Warnings
+CCJ Warnings
 ====================================================================================================
-
-Warnings
-
-Node type could not be determined for the following
-------------------------------------------------------------
-Sheet: HMN
-Cell: R21      Name: SITE
 
 
 ====================================================================================================
@@ -142,11 +135,6 @@ sw-spine-001     1/1/3     ===> aa:aa:aa:aa:aa:aa Cray, Inc.
 sw-spine-002     1/1/3     ===> bb:bb:bb:bb:bb:bb Cray, Inc.
 Nodes that show up as MAC addresses might need to have LLDP enabled.
 ```
-
-
-
-![image](images/canu_validate_shcd_cabling.png)
-
 
 
 ---

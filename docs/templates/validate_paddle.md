@@ -7,7 +7,7 @@
 
 ## Example
 
-To check a paddle CCJ run: `canu validate paddle --ccj paddle.json`
+To validate a paddle CCJ run: `canu validate paddle --ccj paddle.json`
 
 ```bash
 $ canu validate paddle --ccj paddle.json

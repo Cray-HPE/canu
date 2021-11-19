@@ -71,11 +71,11 @@ default_architecture_spec_file = path.join(
     "models",
     "cray-network-architecture.yaml",
 )
-default_ccj_schema_file = path.join(
+default_paddle_schema_file = path.join(
     project_root,
     "network_modeling",
     "schema",
-    "cray-system-topology-schema.json",
+    "paddle-schema.json",
 )
 
 
@@ -427,7 +427,7 @@ class NetworkNodeFactory:
             )
         return lookup_mapper_as_tuple
 
-    def validate_paddle(self, ccj_json, ccj_schema_file=default_ccj_schema_file):
+    def validate_paddle(self, ccj_json, ccj_schema_file=default_paddle_schema_file):
         """Validate that the CCJ works and passes schema validation checks."""
         with open(ccj_schema_file, "r") as file:
             ccj_schema = json.load(file)

@@ -11,6 +11,8 @@ CANU can be used to:
 - Validate that SHCD spreadsheets are configured correctly and pass a number of checks
 - Validate an SHCD against actual network cabling status to check for mis-cabling
 - Generate switch configuration for an entire network
+- Convert SHCD to CCJ (CSM Cabling JSON)
+- Use CCJ / Paddle to validate the network and generate network config
 
 # Quickstart Guide
 
@@ -23,11 +25,30 @@ To checkout a fresh system using CSI:
 5. Validate BGP status: `canu validate network bgp --ips-file ips.txt --verbose`
 6. Validate cabling: `canu validate network cabling --ips-file ips.txt`
 
-If you have the system's SHCD, there are even more commands that can be run
+If you have the system's **SHCD**, there are even more commands that can be run
 
 7. Validate the SHCD: `canu validate shcd --shcd SHCD.xlsx`
 8. Validate the SHCD against network cabling: `canu validate shcd-cabling --shcd SHCD.xlsx --ips-file ips.txt`
 9. Generate switch config for the network: `canu generate network config --shcd SHCD.xlsx --sls-file sls_input_file.json --folder configs`
+10. Convert the SHCD to CCJ: `canu validate shcd --shcd SHCD.xlsx --json --out paddle.json`
+
+If you have the system's **CCJ**
+
+11. Validate the Paddle / CCJ: `canu validate paddle --ccj paddle.json`
+12. Validate the CCJ against network cabling: `canu validate paddle-cabling --ccj paddle.json --ips-file ips.txt`
+13. Generate switch config for the network: `canu generate network config --ccj paddle.json --sls-file sls_input_file.json --folder configs`
+
+# Paddle / CCJ
+
+The **paddle** or **CCJ** (CSM Cabling JSON) is a JSON representation of the network. There are many benefits of using the CCJ:
+
+- The CCJ schema has been validated using _paddle-schema.json_
+- The paddle has been architecturally validated to ensure all connections between devices are approved
+- All port connections between devices have been checked using the CANU model to ensure speed, slot choice, and port availability has been confirmed
+- The CCJ is machine readable and therefore easy to build additional tooling around
+- There are less flags that need to be used when reading the CCJ vs the SHCD
+
+The SHCD can easily be converted into CCJ by using `canu validate shcd --shcd SHCD.xlsx --json --out paddle.json`
 
 # Table of Contents
 
@@ -38,8 +59,10 @@ If you have the system's SHCD, there are even more commands that can be run
 **[Report Switch Cabling](#report-switch-cabling)**<br>
 **[Report Network Cabling](#report-network-cabling)**<br>
 **[Validate SHCD](#validate-shcd)**<br>
+**[Validate Paddle](#validate-paddle)**<br>
 **[Validate Network Cabling](#validate-network-cabling)**<br>
 **[Validate SHCD and Cabling](#validate-shcd-and-cabling)**<br>
+**[Validate Paddle and Cabling](#validate-paddle-and-cabling)**<br>
 **[Validate Network BGP](#validate-network-bgp)**<br>
 **[Config BGP](#config-bgp)**<br>
 **[Generate Switch Config](#generate-switch-config)**<br>
@@ -356,6 +379,31 @@ CAN switch
 
 ![](docs/images/canu_validate_shcd.png)
 
+The SHCD can easily be converted into CCJ by using by using the `--json` flag and outputting to a file by `canu validate shcd --shcd SHCD.xlsx --json --out paddle.json`
+
+### Validate Paddle
+
+**[Details](docs/validate_paddle.md)**<br>
+
+CANU can be used to validate that a CCJ (CSM Cabling JSON) passes basic validation checks.
+
+To validate a paddle CCJ run: `canu validate paddle --ccj paddle.json`
+
+```bash
+$ canu validate paddle --ccj paddle.json
+
+CCJ Node Connections
+------------------------------------------------------------
+0: sw-spine-001 connects to 6 nodes: [1, 2, 3, 4, 5, 6]
+1: sw-spine-002 connects to 6 nodes: [0, 2, 3, 4, 5, 6]
+2: sw-leaf-bmc-001 connects to 2 nodes: [0, 1]
+3: uan001 connects to 2 nodes: [0, 1]
+4: ncn-s001 connects to 2 nodes: [0, 1]
+5: ncn-w001 connects to 2 nodes: [0, 1]
+6: ncn-m001 connects to 2 nodes: [0, 1]
+
+```
+
 ### Validate Network Cabling
 
 **[Details](docs/validate_network_cabling.md)**<br>
@@ -505,6 +553,99 @@ Nodes that show up as MAC addresses might need to have LLDP enabled.
 
 The output of the `validate shcd-cabling` command will show a port by port comparison between the devices found in the SHCD and devices found on the network. If there is a difference in what is found connected to a devices port in SHCD and Cabling, the line will be highlighted in red.
 
+### Validate Paddle and Cabling
+
+**[Details](docs/validate_paddle_cabling.md)**<br>
+
+CANU can be used to validate aCCJ paddle against the current network cabling.
+
+- The `--csm` flag is used to set the CSM version of the system.
+- The `--ccj` flag is used to input the CCJ file.
+- To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
+
+To validate an SHCD against the cabling run: `canu validate paddle-cabling --csm 1.2 --ccj paddle.json --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
+
+```bash
+$ canu validate paddle-cabling --csm 1.2 --ccj paddle.json --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
+
+====================================================================================================
+CCJ vs Cabling
+====================================================================================================
+
+ncn-m001
+Rack: x3000    Elevation: u14
+--------------------------------------------------------------------------------
+Port   CCJ                      Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-001:5           sw-spine-001:5
+2      sw-spine-002:5           sw-spine-002:5
+
+ncn-s001
+Rack: x3000    Elevation: u15
+--------------------------------------------------------------------------------
+Port   CCJ                      Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-001:6           None
+2      sw-spine-002:6           None
+
+ncn-w001
+Rack: x3000    Elevation: u16
+--------------------------------------------------------------------------------
+Port   CCJ                      Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-001:7           sw-spine-001:7
+2      sw-spine-002:7           sw-spine-002:7
+
+sw-spine-001
+Rack: x3000    Elevation: u17
+--------------------------------------------------------------------------------
+Port   CCJ                      Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-002:1           sw-spine-002:1
+2      sw-spine-002:2           sw-spine-002:2
+3      uan001:pcie-slot1:1      aa:aa:aa:aa:aa:aa Cray, Inc.
+5      ncn-m001:pcie-slot1:1    ncn-m001:pcie-slot1:1
+6      ncn-s001:pcie-slot1:1    b4:2e:99:aa:bb:cc GIGA-BYTE TECHNOLOGY CO.,LTD.
+7      ncn-w001:pcie-slot1:1    ncn-w001:pcie-slot1:1
+
+sw-spine-002
+Rack: x3000    Elevation: u18
+--------------------------------------------------------------------------------
+Port   CCJ                      Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-001:1           sw-spine-001:1
+2      sw-spine-001:2           sw-spine-001:2
+3      uan001:pcie-slot1:2      bb:bb:bb:bb:bb:bb Cray, Inc.
+5      ncn-m001:pcie-slot1:2    ncn-m001:pcie-slot1:2
+6      ncn-s001:pcie-slot1:2    b8:59:9f:aa:bb:cc Mellanox Technologies, Inc.
+7      ncn-w001:pcie-slot1:2    ncn-w001:pcie-slot1:2
+
+uan001
+Rack: x3000    Elevation: u19
+--------------------------------------------------------------------------------
+Port   CCJ                      Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-001:3           None
+2      sw-spine-002:3           None
+
+
+====================================================================================================
+CCJ  Warnings
+====================================================================================================
+
+====================================================================================================
+Cabling Warnings
+====================================================================================================
+
+Node type could not be determined for the following
+------------------------------------------------------------
+sw-spine-001     1/1/3     ===> aa:aa:aa:aa:aa:aa Cray, Inc.
+sw-spine-002     1/1/3     ===> bb:bb:bb:bb:bb:bb Cray, Inc.
+Nodes that show up as MAC addresses might need to have LLDP enabled.
+```
+
+The output of the `validate paddle-cabling` command will show a port by port comparison between the devices found in the CCJ and devices found on the network. If there is a difference in what is found connected to a devices port in CCJ and Cabling, the line will be highlighted in red.
+
 ### Validate Network BGP
 
 **[Details](docs/validate_network_bgp.md)**<br>
@@ -575,7 +716,7 @@ To see all the lags that are generated, see [lags](docs/lags.md)
 
 CANU can be used to generate switch config.
 
-In order to generate switch config, a valid SHCD must be passed in and system variables must be read in from any SLS data, including CSI output or the SLS API.
+In order to generate switch config, a valid SHCD or CCJ must be passed in and system variables must be read in from any SLS data, including CSI output or the SLS API.
 
 #### CSI Input
 
@@ -590,6 +731,13 @@ The sls_input_file.json file is generally stored in one of two places depending 
 #### SLS API Input
 
 - To parse the Shasta SLS API for IP addresses, ensure that you have a valid token. The token file can either be passed in with the `--auth-token TOKEN_FILE` flag, or it can be automatically read if the environmental variable **SLS_TOKEN** is set. The SLS address is default set to _api-gw-service-nmn.local_, if you are operating on a system with a different address, you can set it with the `--sls-address SLS_ADDRESS` flag.
+
+#### Paddle / CCJ Input
+
+- The `--csm` flag is used to set the CSM version of the system.
+- The `--ccj` flag is used to input the CCJ file.
+
+To generate switch config run: `canu generate switch config --csm 1.2 --ccj paddle.json --sls-file SLS_FILE --name SWITCH_HOSTNAME --out FILENAME`
 
 #### SHCD Input
 
@@ -690,9 +838,11 @@ To see all the lags that are generated, see [lags](docs/lags.md)
 
 CANU can also generate switch config for all the switches on a network.
 
-In order to generate network config, a valid SHCD must be passed in and system variables must be read in from either CSI output or the SLS API. The instructions are exactly the same as the above **[Generate Switch Config](#generate-switch-config)** except there will not be a hostname and a folder must be specified for config output using the `--folder FOLDERNAME` flag.
+In order to generate network config, a valid SHCD or CCJ must be passed in and system variables must be read in from either CSI output or the SLS API. The instructions are exactly the same as the above **[Generate Switch Config](#generate-switch-config)** except there will not be a hostname and a folder must be specified for config output using the `--folder FOLDERNAME` flag.
 
-To generate switch config run: `canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --sls-file SLS_FILE --folder FOLDERNAME`
+To generate switch config from a CCJ paddle run: `canu generate network config --csm 1.2 --ccj paddle.json --sls-file SLS_FILE --folder FOLDERNAME`
+
+To generate switch config from SHCD run: `canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --sls-file SLS_FILE --folder FOLDERNAME`
 
 ```bash
 $ canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config
