@@ -1,0 +1,1787 @@
+{
+  "canu_version": "0.0.6",
+  "architecture": "network_v2",
+  "updated_at": "2021-11-18 14:28:36",
+  "topology": [
+    {
+      "common_name": "sw-spine-001",
+      "id": 0,
+      "architecture": "spine",
+      "model": "8325_JL627A",
+      "type": "switch",
+      "vendor": "aruba",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 2,
+          "destination_port": 53,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 3,
+          "destination_port": 53,
+          "destination_slot": null
+        },
+        {
+          "port": 3,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 4,
+          "destination_port": 53,
+          "destination_slot": null
+        },
+        {
+          "port": 4,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 5,
+          "destination_port": 53,
+          "destination_slot": null
+        },
+        {
+          "port": 5,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 6,
+          "destination_port": 50,
+          "destination_slot": null
+        },
+        {
+          "port": 6,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 7,
+          "destination_port": 50,
+          "destination_slot": null
+        },
+        {
+          "port": 7,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 8,
+          "destination_port": 1,
+          "destination_slot": null
+        },
+        {
+          "port": 8,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 9,
+          "destination_port": 1,
+          "destination_slot": null
+        },
+        {
+          "port": 30,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 1,
+          "destination_port": 30,
+          "destination_slot": null
+        },
+        {
+          "port": 31,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 1,
+          "destination_port": 31,
+          "destination_slot": null
+        },
+        {
+          "port": 32,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 1,
+          "destination_port": 32,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3000",
+        "elevation": "u40"
+      }
+    },
+    {
+      "common_name": "sw-spine-002",
+      "id": 1,
+      "architecture": "spine",
+      "model": "8325_JL627A",
+      "type": "switch",
+      "vendor": "aruba",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 2,
+          "destination_port": 52,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 3,
+          "destination_port": 52,
+          "destination_slot": null
+        },
+        {
+          "port": 3,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 4,
+          "destination_port": 52,
+          "destination_slot": null
+        },
+        {
+          "port": 4,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 5,
+          "destination_port": 52,
+          "destination_slot": null
+        },
+        {
+          "port": 5,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 6,
+          "destination_port": 49,
+          "destination_slot": null
+        },
+        {
+          "port": 6,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 7,
+          "destination_port": 49,
+          "destination_slot": null
+        },
+        {
+          "port": 7,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 8,
+          "destination_port": 2,
+          "destination_slot": null
+        },
+        {
+          "port": 8,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 9,
+          "destination_port": 2,
+          "destination_slot": null
+        },
+        {
+          "port": 30,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 0,
+          "destination_port": 30,
+          "destination_slot": null
+        },
+        {
+          "port": 31,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 0,
+          "destination_port": 31,
+          "destination_slot": null
+        },
+        {
+          "port": 32,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 0,
+          "destination_port": 32,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3001",
+        "elevation": "u40"
+      }
+    },
+    {
+      "common_name": "sw-leaf-001",
+      "id": 2,
+      "architecture": "river_ncn_leaf",
+      "model": "8325_JL625A",
+      "type": "switch",
+      "vendor": "aruba",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 11,
+          "destination_port": 1,
+          "destination_slot": "ocp"
+        },
+        {
+          "port": 3,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 12,
+          "destination_port": 1,
+          "destination_slot": "ocp"
+        },
+        {
+          "port": 5,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 14,
+          "destination_port": 1,
+          "destination_slot": "ocp"
+        },
+        {
+          "port": 7,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 17,
+          "destination_port": 1,
+          "destination_slot": "ocp"
+        },
+        {
+          "port": 8,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 17,
+          "destination_port": 2,
+          "destination_slot": "ocp"
+        },
+        {
+          "port": 9,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 18,
+          "destination_port": 1,
+          "destination_slot": "ocp"
+        },
+        {
+          "port": 10,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 18,
+          "destination_port": 2,
+          "destination_slot": "ocp"
+        },
+        {
+          "port": 51,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 10,
+          "destination_port": 48,
+          "destination_slot": null
+        },
+        {
+          "port": 52,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 1,
+          "destination_port": 1,
+          "destination_slot": null
+        },
+        {
+          "port": 53,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 0,
+          "destination_port": 1,
+          "destination_slot": null
+        },
+        {
+          "port": 54,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 3,
+          "destination_port": 54,
+          "destination_slot": null
+        },
+        {
+          "port": 55,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 3,
+          "destination_port": 55,
+          "destination_slot": null
+        },
+        {
+          "port": 56,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 3,
+          "destination_port": 56,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3000",
+        "elevation": "u40"
+      }
+    },
+    {
+      "common_name": "sw-leaf-002",
+      "id": 3,
+      "architecture": "river_ncn_leaf",
+      "model": "8325_JL625A",
+      "type": "switch",
+      "vendor": "aruba",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 11,
+          "destination_port": 1,
+          "destination_slot": "pcie-slot1"
+        },
+        {
+          "port": 3,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 12,
+          "destination_port": 1,
+          "destination_slot": "pcie-slot1"
+        },
+        {
+          "port": 6,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 14,
+          "destination_port": 2,
+          "destination_slot": "ocp"
+        },
+        {
+          "port": 7,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 17,
+          "destination_port": 1,
+          "destination_slot": "pcie-slot1"
+        },
+        {
+          "port": 8,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 17,
+          "destination_port": 2,
+          "destination_slot": "pcie-slot1"
+        },
+        {
+          "port": 9,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 18,
+          "destination_port": 1,
+          "destination_slot": "pcie-slot1"
+        },
+        {
+          "port": 10,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 18,
+          "destination_port": 2,
+          "destination_slot": "pcie-slot1"
+        },
+        {
+          "port": 51,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 10,
+          "destination_port": 47,
+          "destination_slot": null
+        },
+        {
+          "port": 52,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 1,
+          "destination_port": 2,
+          "destination_slot": null
+        },
+        {
+          "port": 53,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 0,
+          "destination_port": 2,
+          "destination_slot": null
+        },
+        {
+          "port": 54,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 2,
+          "destination_port": 54,
+          "destination_slot": null
+        },
+        {
+          "port": 55,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 2,
+          "destination_port": 55,
+          "destination_slot": null
+        },
+        {
+          "port": 56,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 2,
+          "destination_port": 56,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3000",
+        "elevation": "u40"
+      }
+    },
+    {
+      "common_name": "sw-leaf-003",
+      "id": 4,
+      "architecture": "river_ncn_leaf",
+      "model": "8325_JL625A",
+      "type": "switch",
+      "vendor": "aruba",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 13,
+          "destination_port": 1,
+          "destination_slot": "ocp"
+        },
+        {
+          "port": 3,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 15,
+          "destination_port": 1,
+          "destination_slot": "ocp"
+        },
+        {
+          "port": 4,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 16,
+          "destination_port": 1,
+          "destination_slot": "ocp"
+        },
+        {
+          "port": 5,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 19,
+          "destination_port": 1,
+          "destination_slot": "ocp"
+        },
+        {
+          "port": 6,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 19,
+          "destination_port": 2,
+          "destination_slot": "ocp"
+        },
+        {
+          "port": 7,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 20,
+          "destination_port": 1,
+          "destination_slot": "ocp"
+        },
+        {
+          "port": 8,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 20,
+          "destination_port": 2,
+          "destination_slot": "ocp"
+        },
+        {
+          "port": 52,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 1,
+          "destination_port": 3,
+          "destination_slot": null
+        },
+        {
+          "port": 53,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 0,
+          "destination_port": 3,
+          "destination_slot": null
+        },
+        {
+          "port": 54,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 5,
+          "destination_port": 54,
+          "destination_slot": null
+        },
+        {
+          "port": 55,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 5,
+          "destination_port": 55,
+          "destination_slot": null
+        },
+        {
+          "port": 56,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 5,
+          "destination_port": 56,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3001",
+        "elevation": "u40"
+      }
+    },
+    {
+      "common_name": "sw-leaf-004",
+      "id": 5,
+      "architecture": "river_ncn_leaf",
+      "model": "8325_JL625A",
+      "type": "switch",
+      "vendor": "aruba",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 13,
+          "destination_port": 1,
+          "destination_slot": "pcie-slot1"
+        },
+        {
+          "port": 3,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 15,
+          "destination_port": 2,
+          "destination_slot": "ocp"
+        },
+        {
+          "port": 4,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 16,
+          "destination_port": 2,
+          "destination_slot": "ocp"
+        },
+        {
+          "port": 5,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 19,
+          "destination_port": 1,
+          "destination_slot": "pcie-slot1"
+        },
+        {
+          "port": 6,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 19,
+          "destination_port": 2,
+          "destination_slot": "pcie-slot1"
+        },
+        {
+          "port": 7,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 20,
+          "destination_port": 1,
+          "destination_slot": "pcie-slot1"
+        },
+        {
+          "port": 8,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 20,
+          "destination_port": 2,
+          "destination_slot": "pcie-slot1"
+        },
+        {
+          "port": 52,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 1,
+          "destination_port": 4,
+          "destination_slot": null
+        },
+        {
+          "port": 53,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 0,
+          "destination_port": 4,
+          "destination_slot": null
+        },
+        {
+          "port": 54,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 4,
+          "destination_port": 54,
+          "destination_slot": null
+        },
+        {
+          "port": 55,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 4,
+          "destination_port": 55,
+          "destination_slot": null
+        },
+        {
+          "port": 56,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 4,
+          "destination_port": 56,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3001",
+        "elevation": "u40"
+      }
+    },
+    {
+      "common_name": "sw-cdu-001",
+      "id": 6,
+      "architecture": "mountain_compute_leaf",
+      "model": "8360_JL706A",
+      "type": "switch",
+      "vendor": "aruba",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 25,
+          "destination_port": 1,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 26,
+          "destination_port": 1,
+          "destination_slot": null
+        },
+        {
+          "port": 3,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 27,
+          "destination_port": 1,
+          "destination_slot": null
+        },
+        {
+          "port": 4,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 28,
+          "destination_port": 1,
+          "destination_slot": null
+        },
+        {
+          "port": 5,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 29,
+          "destination_port": 1,
+          "destination_slot": null
+        },
+        {
+          "port": 48,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 7,
+          "destination_port": 48,
+          "destination_slot": null
+        },
+        {
+          "port": 49,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 1,
+          "destination_port": 5,
+          "destination_slot": null
+        },
+        {
+          "port": 50,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 0,
+          "destination_port": 5,
+          "destination_slot": null
+        },
+        {
+          "port": 51,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 7,
+          "destination_port": 51,
+          "destination_slot": null
+        },
+        {
+          "port": 52,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 7,
+          "destination_port": 52,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3002",
+        "elevation": "u40"
+      }
+    },
+    {
+      "common_name": "sw-cdu-002",
+      "id": 7,
+      "architecture": "mountain_compute_leaf",
+      "model": "8360_JL706A",
+      "type": "switch",
+      "vendor": "aruba",
+      "ports": [
+        {
+          "port": 2,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 26,
+          "destination_port": 2,
+          "destination_slot": null
+        },
+        {
+          "port": 3,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 27,
+          "destination_port": 2,
+          "destination_slot": null
+        },
+        {
+          "port": 4,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 28,
+          "destination_port": 2,
+          "destination_slot": null
+        },
+        {
+          "port": 5,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 29,
+          "destination_port": 2,
+          "destination_slot": null
+        },
+        {
+          "port": 48,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 6,
+          "destination_port": 48,
+          "destination_slot": null
+        },
+        {
+          "port": 49,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 1,
+          "destination_port": 6,
+          "destination_slot": null
+        },
+        {
+          "port": 50,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 0,
+          "destination_port": 6,
+          "destination_slot": null
+        },
+        {
+          "port": 51,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 6,
+          "destination_port": 51,
+          "destination_slot": null
+        },
+        {
+          "port": 52,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 6,
+          "destination_port": 52,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3002",
+        "elevation": "u39"
+      }
+    },
+    {
+      "common_name": "sw-edge-001",
+      "id": 8,
+      "architecture": "customer_edge_router",
+      "model": "customer_edge_router",
+      "type": "switch",
+      "vendor": "none",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 0,
+          "destination_port": 7,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 1,
+          "destination_port": 7,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3003",
+        "elevation": "u40"
+      }
+    },
+    {
+      "common_name": "sw-edge-002",
+      "id": 9,
+      "architecture": "customer_edge_router",
+      "model": "customer_edge_router",
+      "type": "switch",
+      "vendor": "none",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 0,
+          "destination_port": 8,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 100,
+          "slot": null,
+          "destination_node_id": 1,
+          "destination_port": 8,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3003",
+        "elevation": "u40"
+      }
+    },
+    {
+      "common_name": "sw-leaf-bmc-001",
+      "id": 10,
+      "architecture": "river_bmc_leaf",
+      "model": "6300M_JL762A",
+      "type": "switch",
+      "vendor": "aruba",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 11,
+          "destination_port": 1,
+          "destination_slot": "bmc"
+        },
+        {
+          "port": 2,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 12,
+          "destination_port": 1,
+          "destination_slot": "bmc"
+        },
+        {
+          "port": 3,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 13,
+          "destination_port": 1,
+          "destination_slot": "bmc"
+        },
+        {
+          "port": 4,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 14,
+          "destination_port": 1,
+          "destination_slot": "bmc"
+        },
+        {
+          "port": 5,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 15,
+          "destination_port": 1,
+          "destination_slot": "bmc"
+        },
+        {
+          "port": 6,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 16,
+          "destination_port": 1,
+          "destination_slot": "bmc"
+        },
+        {
+          "port": 7,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 17,
+          "destination_port": 1,
+          "destination_slot": "bmc"
+        },
+        {
+          "port": 8,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 18,
+          "destination_port": 1,
+          "destination_slot": "bmc"
+        },
+        {
+          "port": 9,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 19,
+          "destination_port": 1,
+          "destination_slot": "bmc"
+        },
+        {
+          "port": 10,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 20,
+          "destination_port": 1,
+          "destination_slot": "bmc"
+        },
+        {
+          "port": 11,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 21,
+          "destination_port": 1,
+          "destination_slot": "bmc"
+        },
+        {
+          "port": 12,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 22,
+          "destination_port": 1,
+          "destination_slot": "bmc"
+        },
+        {
+          "port": 13,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 23,
+          "destination_port": 1,
+          "destination_slot": "bmc"
+        },
+        {
+          "port": 14,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 24,
+          "destination_port": 1,
+          "destination_slot": "bmc"
+        },
+        {
+          "port": 24,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 21,
+          "destination_port": 1,
+          "destination_slot": null
+        },
+        {
+          "port": 25,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 22,
+          "destination_port": 1,
+          "destination_slot": null
+        },
+        {
+          "port": 26,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 23,
+          "destination_port": 1,
+          "destination_slot": null
+        },
+        {
+          "port": 27,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 24,
+          "destination_port": 1,
+          "destination_slot": null
+        },
+        {
+          "port": 47,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 3,
+          "destination_port": 51,
+          "destination_slot": null
+        },
+        {
+          "port": 48,
+          "speed": 25,
+          "slot": null,
+          "destination_node_id": 2,
+          "destination_port": 51,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3000",
+        "elevation": "u37"
+      }
+    },
+    {
+      "common_name": "ncn-m001",
+      "id": 11,
+      "architecture": "river_ncn_node_4_port",
+      "model": "river_ncn_node_4_port",
+      "type": "server",
+      "vendor": "hpe",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": "bmc",
+          "destination_node_id": 10,
+          "destination_port": 1,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": "ocp",
+          "destination_node_id": 2,
+          "destination_port": 1,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": "pcie-slot1",
+          "destination_node_id": 3,
+          "destination_port": 1,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3000",
+        "elevation": "u36"
+      }
+    },
+    {
+      "common_name": "ncn-m002",
+      "id": 12,
+      "architecture": "river_ncn_node_4_port",
+      "model": "river_ncn_node_4_port",
+      "type": "server",
+      "vendor": "hpe",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": "bmc",
+          "destination_node_id": 10,
+          "destination_port": 2,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": "ocp",
+          "destination_node_id": 2,
+          "destination_port": 3,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": "pcie-slot1",
+          "destination_node_id": 3,
+          "destination_port": 3,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3000",
+        "elevation": "u35"
+      }
+    },
+    {
+      "common_name": "ncn-m003",
+      "id": 13,
+      "architecture": "river_ncn_node_4_port",
+      "model": "river_ncn_node_4_port",
+      "type": "server",
+      "vendor": "hpe",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": "bmc",
+          "destination_node_id": 10,
+          "destination_port": 3,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": "ocp",
+          "destination_node_id": 4,
+          "destination_port": 1,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": "pcie-slot1",
+          "destination_node_id": 5,
+          "destination_port": 1,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3001",
+        "elevation": "u36"
+      }
+    },
+    {
+      "common_name": "ncn-w001",
+      "id": 14,
+      "architecture": "river_ncn_node_2_port",
+      "model": "river_ncn_node_2_port",
+      "type": "server",
+      "vendor": "hpe",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": "bmc",
+          "destination_node_id": 10,
+          "destination_port": 4,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": "ocp",
+          "destination_node_id": 2,
+          "destination_port": 5,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 25,
+          "slot": "ocp",
+          "destination_node_id": 3,
+          "destination_port": 6,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3000",
+        "elevation": "u34"
+      }
+    },
+    {
+      "common_name": "ncn-w002",
+      "id": 15,
+      "architecture": "river_ncn_node_2_port",
+      "model": "river_ncn_node_2_port",
+      "type": "server",
+      "vendor": "hpe",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": "bmc",
+          "destination_node_id": 10,
+          "destination_port": 5,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": "ocp",
+          "destination_node_id": 4,
+          "destination_port": 3,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 25,
+          "slot": "ocp",
+          "destination_node_id": 5,
+          "destination_port": 3,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3001",
+        "elevation": "u35"
+      }
+    },
+    {
+      "common_name": "ncn-w003",
+      "id": 16,
+      "architecture": "river_ncn_node_2_port",
+      "model": "river_ncn_node_2_port",
+      "type": "server",
+      "vendor": "hpe",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": "bmc",
+          "destination_node_id": 10,
+          "destination_port": 6,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": "ocp",
+          "destination_node_id": 4,
+          "destination_port": 4,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 25,
+          "slot": "ocp",
+          "destination_node_id": 5,
+          "destination_port": 4,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3001",
+        "elevation": "u34"
+      }
+    },
+    {
+      "common_name": "ncn-s001",
+      "id": 17,
+      "architecture": "river_ncn_node_4_port",
+      "model": "river_ncn_node_4_port",
+      "type": "server",
+      "vendor": "hpe",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": "bmc",
+          "destination_node_id": 10,
+          "destination_port": 7,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": "ocp",
+          "destination_node_id": 2,
+          "destination_port": 7,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 25,
+          "slot": "ocp",
+          "destination_node_id": 2,
+          "destination_port": 8,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": "pcie-slot1",
+          "destination_node_id": 3,
+          "destination_port": 7,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 25,
+          "slot": "pcie-slot1",
+          "destination_node_id": 3,
+          "destination_port": 8,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3000",
+        "elevation": "u33"
+      }
+    },
+    {
+      "common_name": "ncn-s002",
+      "id": 18,
+      "architecture": "river_ncn_node_4_port",
+      "model": "river_ncn_node_4_port",
+      "type": "server",
+      "vendor": "hpe",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": "bmc",
+          "destination_node_id": 10,
+          "destination_port": 8,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": "ocp",
+          "destination_node_id": 2,
+          "destination_port": 9,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 25,
+          "slot": "ocp",
+          "destination_node_id": 2,
+          "destination_port": 10,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": "pcie-slot1",
+          "destination_node_id": 3,
+          "destination_port": 9,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 25,
+          "slot": "pcie-slot1",
+          "destination_node_id": 3,
+          "destination_port": 10,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3000",
+        "elevation": "u32"
+      }
+    },
+    {
+      "common_name": "ncn-s003",
+      "id": 19,
+      "architecture": "river_ncn_node_4_port",
+      "model": "river_ncn_node_4_port",
+      "type": "server",
+      "vendor": "hpe",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": "bmc",
+          "destination_node_id": 10,
+          "destination_port": 9,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": "ocp",
+          "destination_node_id": 4,
+          "destination_port": 5,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 25,
+          "slot": "ocp",
+          "destination_node_id": 4,
+          "destination_port": 6,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": "pcie-slot1",
+          "destination_node_id": 5,
+          "destination_port": 5,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 25,
+          "slot": "pcie-slot1",
+          "destination_node_id": 5,
+          "destination_port": 6,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3001",
+        "elevation": "u33"
+      }
+    },
+    {
+      "common_name": "uan001",
+      "id": 20,
+      "architecture": "river_ncn_node_4_port",
+      "model": "river_ncn_node_4_port",
+      "type": "server",
+      "vendor": "hpe",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": "bmc",
+          "destination_node_id": 10,
+          "destination_port": 10,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": "ocp",
+          "destination_node_id": 4,
+          "destination_port": 7,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 25,
+          "slot": "ocp",
+          "destination_node_id": 4,
+          "destination_port": 8,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 25,
+          "slot": "pcie-slot1",
+          "destination_node_id": 5,
+          "destination_port": 7,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 25,
+          "slot": "pcie-slot1",
+          "destination_node_id": 5,
+          "destination_port": 8,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3001",
+        "elevation": "u32"
+      }
+    },
+    {
+      "common_name": "cn001",
+      "id": 21,
+      "architecture": "river_compute_node",
+      "model": "river_compute_node",
+      "type": "node",
+      "vendor": "none",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 10,
+          "destination_port": 24,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": "bmc",
+          "destination_node_id": 10,
+          "destination_port": 11,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3002",
+        "elevation": "u15"
+      }
+    },
+    {
+      "common_name": "cn002",
+      "id": 22,
+      "architecture": "river_compute_node",
+      "model": "river_compute_node",
+      "type": "node",
+      "vendor": "none",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 10,
+          "destination_port": 25,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": "bmc",
+          "destination_node_id": 10,
+          "destination_port": 12,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3002",
+        "elevation": "u16"
+      }
+    },
+    {
+      "common_name": "cn003",
+      "id": 23,
+      "architecture": "river_compute_node",
+      "model": "river_compute_node",
+      "type": "node",
+      "vendor": "none",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 10,
+          "destination_port": 26,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": "bmc",
+          "destination_node_id": 10,
+          "destination_port": 13,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3002",
+        "elevation": "u17"
+      }
+    },
+    {
+      "common_name": "cn004",
+      "id": 24,
+      "architecture": "river_compute_node",
+      "model": "river_compute_node",
+      "type": "node",
+      "vendor": "none",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 10,
+          "destination_port": 27,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": "bmc",
+          "destination_node_id": 10,
+          "destination_port": 14,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3002",
+        "elevation": "u18"
+      }
+    },
+    {
+      "common_name": "cec-x3002-000",
+      "id": 25,
+      "architecture": "cec",
+      "model": "cec",
+      "type": "none",
+      "vendor": "cray",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 6,
+          "destination_port": 1,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3002",
+        "elevation": "u38"
+      }
+    },
+    {
+      "common_name": "cmm-x3002-000",
+      "id": 26,
+      "architecture": "cmm",
+      "model": "cmm",
+      "type": "none",
+      "vendor": "cray",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 6,
+          "destination_port": 2,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 7,
+          "destination_port": 2,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3002",
+        "elevation": "u37"
+      }
+    },
+    {
+      "common_name": "cmm-x3002-001",
+      "id": 27,
+      "architecture": "cmm",
+      "model": "cmm",
+      "type": "none",
+      "vendor": "cray",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 6,
+          "destination_port": 3,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 7,
+          "destination_port": 3,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3002",
+        "elevation": "u36"
+      }
+    },
+    {
+      "common_name": "cmm-x3002-002",
+      "id": 28,
+      "architecture": "cmm",
+      "model": "cmm",
+      "type": "none",
+      "vendor": "cray",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 6,
+          "destination_port": 4,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 7,
+          "destination_port": 4,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3002",
+        "elevation": "u35"
+      }
+    },
+    {
+      "common_name": "cmm-x3002-003",
+      "id": 29,
+      "architecture": "cmm",
+      "model": "cmm",
+      "type": "none",
+      "vendor": "cray",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 6,
+          "destination_port": 5,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 10,
+          "slot": null,
+          "destination_node_id": 7,
+          "destination_port": 5,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3002",
+        "elevation": "u34"
+      }
+    }
+  ]
+}

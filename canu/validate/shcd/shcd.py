@@ -21,6 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate the shcd."""
 from collections import defaultdict
+import datetime
 import json
 import logging
 from os import path
@@ -30,7 +31,6 @@ import sys
 
 import click
 from click_help_colors import HelpColorsCommand
-import jsonschema
 import natsort
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from network_modeling.NetworkPort import NetworkPort
@@ -45,37 +45,10 @@ else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent.parent
 
-# Schema and Data files
-json_schema_file = path.join(
-    project_root,
-    "network_modeling",
-    "schema",
-    "cray-system-topology-schema.json",
-)
-hardware_schema_file = path.join(
-    project_root,
-    "network_modeling",
-    "schema",
-    "cray-network-hardware-schema.yaml",
-)
-hardware_spec_file = path.join(
-    project_root,
-    "network_modeling",
-    "models",
-    "cray-network-hardware.yaml",
-)
-architecture_schema_file = path.join(
-    project_root,
-    "network_modeling",
-    "schema",
-    "cray-network-architecture-schema.yaml",
-)
-architecture_spec_file = path.join(
-    project_root,
-    "network_modeling",
-    "models",
-    "cray-network-architecture.yaml",
-)
+canu_version_file = path.join(project_root, "canu", ".version")
+
+with open(canu_version_file, "r") as version_file:
+    version = version_file.read().replace("\n", "")
 
 log = logging.getLogger("validate_shcd")
 
@@ -150,6 +123,43 @@ def shcd(ctx, architecture, shcd, tabs, corners, out, json_, log_):
     elif architecture.lower() == "v1":
         architecture = "network_v1"
 
+    # SHCD Parsing
+    try:
+        sheets = shcd_to_sheets(shcd, tabs, corners)
+    except Exception:
+        return
+
+    # Create Node factory
+    factory = NetworkNodeFactory(architecture_version=architecture)
+
+    node_list, warnings = node_model_from_shcd(
+        factory=factory,
+        spreadsheet=shcd,
+        sheets=sheets,
+    )
+
+    if json_:
+        json_output(node_list, factory, architecture, out)
+    else:
+        print_node_list(node_list, "SHCD", out)
+
+        node_list_warnings(node_list, warnings, out)
+
+
+def shcd_to_sheets(shcd, tabs, corners):
+    """Parse SHCD tabs and corners into sheets.
+
+    Args:
+        shcd: SHCD file
+        tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
+        corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
+
+    Returns:
+        sheets
+
+    Raises:
+        Exception: If there are not pairs of corners
+    """
     sheets = []
 
     if not tabs:
@@ -180,7 +190,7 @@ def shcd(ctx, architecture, shcd, tabs, corners, out, json_, log_):
                 f"{corners}\n",
                 fg="red",
             )
-            return
+            raise Exception
 
         # Each tab should have 2 corners entered in comma separated
         for i in range(len(tabs.split(","))):
@@ -208,27 +218,7 @@ def shcd(ctx, architecture, shcd, tabs, corners, out, json_, log_):
             )
             sheets.append((tab, range_start, range_end))
 
-    # Create Node factory
-    factory = NetworkNodeFactory(
-        hardware_schema=hardware_schema_file,
-        hardware_data=hardware_spec_file,
-        architecture_schema=architecture_schema_file,
-        architecture_data=architecture_spec_file,
-        architecture_version=architecture,
-    )
-
-    node_list, warnings = node_model_from_shcd(
-        factory=factory,
-        spreadsheet=shcd,
-        sheets=sheets,
-    )
-
-    if json_:
-        json_output(node_list, out, json_schema_file)
-    else:
-        print_node_list(node_list, "SHCD", out)
-
-        node_list_warnings(node_list, warnings, out)
+    return sheets
 
 
 def get_node_common_name(name, rack_number, rack_elevation, mapper):
@@ -1124,33 +1114,22 @@ def print_node_list(node_list, title, out="-"):
             logical_index += 1
 
 
-def json_output(node_list, out, json_schema_file):
+def json_output(node_list, factory, architecture, out):
     """Create a schema-validated JSON Topology file from the model."""
-    model = []
+    topology = []
     for node in node_list:
-        model.append(node.serialize())
+        topology.append(node.serialize())
 
-    with open(json_schema_file, "r") as file:
-        json_schema = json.load(file)
+    paddle = {
+        "canu_version": version,
+        "architecture": architecture,
+        "updated_at": datetime.datetime.now().strftime(
+            "%Y-%m-%d %H:%M:%S",
+        ),
+        "topology": topology,
+    }
 
-    validator = jsonschema.Draft7Validator(json_schema)
+    factory.validate_paddle(paddle)
 
-    try:
-        validator.check_schema(json_schema)
-    except jsonschema.exceptions.SchemaError as err:
-        click.secho(
-            f"Schema {json_schema_file} is invalid: {[x.message for x in err.context]}\n"
-            + "Cannot generate and write Topology JSON file.",
-            fg="red",
-        )
-        exit(1)
-
-    errors = sorted(validator.iter_errors(model), key=str)
-    if errors:
-        click.secho("Topology JSON failed schema checks:", fg="red")
-        for error in errors:
-            click.secho(f"    {error.message} in {error.absolute_path}", fg="red")
-        exit(1)
-
-    json_model = json.dumps(model, indent=2)
+    json_model = json.dumps(paddle, indent=2)
     click.echo(json_model, file=out)

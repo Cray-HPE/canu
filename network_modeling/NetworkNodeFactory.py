@@ -20,10 +20,15 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """NetworkNodeFactory to create a new network."""
+import json
 import logging
+from os import path
+from pathlib import Path
 import re
+import sys
 
 import click
+import jsonschema
 from ruamel.yaml import YAML
 import yamale
 
@@ -33,6 +38,45 @@ from .NetworkNode import NetworkNode
 yaml = YAML()
 
 log = logging.getLogger(__name__)
+
+# Get project root directory
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
+    project_root = sys._MEIPASS
+else:
+    prog = __file__
+    project_root = Path(__file__).resolve().parent.parent
+
+# Schema and Data files
+default_hardware_schema_file = path.join(
+    project_root,
+    "network_modeling",
+    "schema",
+    "cray-network-hardware-schema.yaml",
+)
+default_hardware_spec_file = path.join(
+    project_root,
+    "network_modeling",
+    "models",
+    "cray-network-hardware.yaml",
+)
+default_architecture_schema_file = path.join(
+    project_root,
+    "network_modeling",
+    "schema",
+    "cray-network-architecture-schema.yaml",
+)
+default_architecture_spec_file = path.join(
+    project_root,
+    "network_modeling",
+    "models",
+    "cray-network-architecture.yaml",
+)
+default_ccj_schema_file = path.join(
+    project_root,
+    "network_modeling",
+    "schema",
+    "cray-system-topology-schema.json",
+)
 
 
 class NetworkNodeFactory:
@@ -57,15 +101,19 @@ class NetworkNodeFactory:
         Generate a new network node.
     lookup_mapper():
         Convert architecture yaml data to tuple.
+    generate_node_from_paddle(ccj_node):
+        Generate a new network node from paddle.
+    validate_paddle(schema):
+        Validate JSON
     """
 
     def __init__(
         self,
-        hardware_schema,
-        hardware_data,
-        architecture_schema,
-        architecture_data,
         architecture_version,
+        hardware_schema=default_hardware_schema_file,
+        hardware_data=default_hardware_spec_file,
+        architecture_schema=default_architecture_schema_file,
+        architecture_data=default_architecture_spec_file,
     ):
         """
         Construct the necessary attributes for the network factory object.
@@ -313,6 +361,54 @@ class NetworkNodeFactory:
 
         return node
 
+    def generate_node_from_paddle(self, ccj_node):
+        """Generate a new network node from paddle."""
+        common_name = ccj_node["common_name"]
+        self.__node_id = ccj_node["id"]
+        node_architecture_type = ccj_node["architecture"]
+        model = ccj_node["model"]
+        node_type = ccj_node["type"]
+
+        # The architectural "model" is the "primary key" for hardware
+        node_architecture = None
+        components = self.__architecture_data[self.__architecture_version]["components"]
+        for component in components:
+            if component["name"] == node_architecture_type:
+                node_architecture = component
+        if node_architecture is None:
+            raise Exception(
+                click.secho(
+                    f"Error finding node architecture definition {node_type} in version {self.__architecture_version}",
+                    fg="red",
+                ),
+            )
+
+        # Find the hardware definition based on model
+        node_hardware = None
+        for hardware_definition in self.__hardware_data:
+            if hardware_definition["model"] == model:
+                node_hardware = hardware_definition
+        if node_hardware is None:
+            raise Exception(
+                click.secho(
+                    f"Error finding node hardware definition {node_hardware} in hardware",
+                    fg="red",
+                ),
+            )
+
+        # Create a Network Node object based on the above definitions
+        node = NetworkNode(
+            id=self.__node_id,
+            hardware=node_hardware,
+            architecture=node_architecture,
+        )
+        log.debug(
+            f"Successfully generated node {self.__node_id} of type {node.arch_type()}",
+        )
+
+        node.common_name(common_name)
+        return node
+
     # In the future SHCD and device names should match Shasta naming, but for now
     # there is a map required.  Convert architecture yaml data to tuple.
     def lookup_mapper(self):
@@ -330,3 +426,28 @@ class NetworkNodeFactory:
                 ),
             )
         return lookup_mapper_as_tuple
+
+    def validate_paddle(self, ccj_json, ccj_schema_file=default_ccj_schema_file):
+        """Validate that the CCJ works and passes schema validation checks."""
+        with open(ccj_schema_file, "r") as file:
+            ccj_schema = json.load(file)
+
+        validator = jsonschema.Draft7Validator(ccj_schema)
+
+        try:
+            validator.check_schema(ccj_schema)
+        except jsonschema.exceptions.SchemaError as err:
+            click.secho(
+                f"Schema {ccj_schema} is invalid: {[x.message for x in err.context]}\n"
+                + "Cannot generate and write Topology JSON file.",
+                fg="red",
+            )
+            exit(1)
+
+        errors = sorted(validator.iter_errors(ccj_json), key=str)
+
+        if errors:
+            click.secho("CCJ failed schema checks:", fg="red")
+            for error in errors:
+                click.secho(f"    {error.message}", fg="red")
+            exit(1)

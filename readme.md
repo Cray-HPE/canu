@@ -986,6 +986,7 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 - Added 1.2 Aruba templates
 - Added CANU validate switch config support for dellanox.
 - Added SubRack support for reading in all variations from the SHCD, and added **sub_location** and **parent** to the JSON output
+- Added Paddle / CCJ (CSM Cabling JSON) support. Commands `canu validate paddle` and `canu validate paddle-cabling` can validate the CCJ. Config can be generated using CCJ.
 
 ## [unreleased]
 

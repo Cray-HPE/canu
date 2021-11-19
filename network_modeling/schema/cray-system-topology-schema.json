@@ -1,87 +1,106 @@
 {
-    "title": "Network Topology Schema",
-    "type": "array",
+    "title": "Paddle Schema",
+    "type": "object",
     "items": {
         "type": "object",
         "properties": {
-            "common_name": {
-                "type": "string"
-            },
-            "id": {
-                "type": "integer",
-                "minimum": 0
-            },
-            "rack_number": {
-                "type": "string"
-            },
-            "rack_elevation": {
+            "canu_version": {
                 "type": "string"
             },
             "architecture": {
                 "type": "string"
             },
-            "model": {
+            "updated_at": {
                 "type": "string"
             },
-            "type": {
-                "type": "string"
-            },
-            "vendor": {
-                "type": "string"
-            },
-            "ports": {
+            "topology": {
+                "title": "Network Topology Schema",
                 "type": "array",
                 "items": {
                     "type": "object",
                     "properties": {
-                        "port": {
+                        "common_name": {
+                            "type": "string"
+                        },
+                        "id": {
                             "type": "integer",
                             "minimum": 0
                         },
-                        "speed": {
-                            "type": "integer",
-                            "minimum": 1
+                        "rack_number": {
+                            "type": "string"
                         },
-                        "slot": {
-                            "type": ["string", "null"]
+                        "rack_elevation": {
+                            "type": "string"
                         },
-                        "destination_node_id": {
-                            "type": "integer",
-                            "minimum": 0
+                        "architecture": {
+                            "type": "string"
                         },
-                        "destination_port": {
-                            "type": "integer",
-                            "minimum": 0
+                        "model": {
+                            "type": "string"
                         },
-                        "destination_slot": {
-                            "type": ["string", "null"]
+                        "type": {
+                            "type": "string"
+                        },
+                        "vendor": {
+                            "type": "string"
+                        },
+                        "ports": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "port": {
+                                        "type": "integer",
+                                        "minimum": 0
+                                    },
+                                    "speed": {
+                                        "type": "integer",
+                                        "minimum": 1
+                                    },
+                                    "slot": {
+                                        "type": ["string", "null"]
+                                    },
+                                    "destination_node_id": {
+                                        "type": "integer",
+                                        "minimum": 0
+                                    },
+                                    "destination_port": {
+                                        "type": "integer",
+                                        "minimum": 0
+                                    },
+                                    "destination_slot": {
+                                        "type": ["string", "null"]
+                                    }
+                                },
+                                "minProperties": 6,
+                                "additionalProperties": false
+                            }
+                        },
+                        "location": {
+                            "type": "object",
+                            "properties": {
+                                "rack": {
+                                    "type": "string"
+                                },
+                                "elevation": {
+                                    "type": "string"
+                                },
+                                "sub_location": {
+                                    "type": "string"
+                                },
+                                "parent": {
+                                    "type": "string"
+                                }
+                            },
+                            "minProperties": 2,
+                            "additionalProperties": false
                         }
                     },
-                    "minProperties": 6,
+                    "minProperties": 8,
                     "additionalProperties": false
                 }
-            },
-            "location": {
-                "type": "object",
-                "properties": {
-                    "rack": {
-                        "type": "string"
-                    },
-                    "elevation": {
-                        "type": "string"
-                    },
-                    "sub_location": {
-                        "type": "string"
-                    },
-                    "parent": {
-                        "type": "string"
-                    }
-                },
-                "minProperties": 2,
-                "additionalProperties": false
             }
-        },
-        "minProperties": 8,
-        "additionalProperties": false
-    }
+        }
+    },
+    "required": ["canu_version", "architecture", "topology"]
 }

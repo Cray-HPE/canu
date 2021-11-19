@@ -35,7 +35,6 @@ import click_spinner
 import natsort
 from netmiko import ssh_exception
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
-from openpyxl import load_workbook
 import requests
 from ruamel.yaml import YAML
 
@@ -45,6 +44,7 @@ from canu.validate.network.cabling.cabling import node_model_from_canu
 from canu.validate.shcd.shcd import (
     node_list_warnings,
     node_model_from_shcd,
+    shcd_to_sheets,
 )
 
 yaml = YAML()
@@ -57,31 +57,6 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent.parent
 
 # Schema and Data files
-hardware_schema_file = path.join(
-    project_root,
-    "network_modeling",
-    "schema",
-    "cray-network-hardware-schema.yaml",
-)
-hardware_spec_file = path.join(
-    project_root,
-    "network_modeling",
-    "models",
-    "cray-network-hardware.yaml",
-)
-architecture_schema_file = path.join(
-    project_root,
-    "network_modeling",
-    "schema",
-    "cray-network-architecture-schema.yaml",
-)
-architecture_spec_file = path.join(
-    project_root,
-    "network_modeling",
-    "models",
-    "cray-network-architecture.yaml",
-)
-
 canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
@@ -216,63 +191,10 @@ def shcd_cabling(
         architecture = "network_v1"
 
     # SHCD Parsing
-    sheets = []
-
-    if not tabs:
-        wb = load_workbook(shcd, read_only=True)
-        click.secho("What tabs would you like to check in the SHCD?")
-        tab_options = wb.sheetnames
-        for x in tab_options:
-            click.secho(f"{x}", fg="green")
-
-        tabs = click.prompt(
-            "Please enter the tabs to check separated by a comma, e.g. 10G_25G_40G_100G,NMN,HMN.",
-            type=str,
-        )
-
-    if corners:
-        if len(tabs.split(",")) * 2 != len(corners.split(",")):
-            log.error("")
-            click.secho("Not enough corners.\n", fg="red")
-            click.secho(
-                f"Make sure each tab: {tabs.split(',')} has 2 corners.\n",
-                fg="red",
-            )
-            click.secho(
-                f"There were {len(corners.split(','))} corners entered, but there should be {len(tabs.split(',')) * 2}.",
-                fg="red",
-            )
-            click.secho(
-                f"{corners}\n",
-                fg="red",
-            )
-            return
-
-        # Each tab should have 2 corners entered in comma separated
-        for i in range(len(tabs.split(","))):
-            # 0 -> 0,1
-            # 1 -> 2,3
-            # 2 -> 4,5
-
-            sheets.append(
-                (
-                    tabs.split(",")[i],
-                    corners.split(",")[i * 2].strip(),
-                    corners.split(",")[i * 2 + 1].strip(),
-                ),
-            )
-    else:
-        for tab in tabs.split(","):
-            click.secho(f"\nFor the Sheet {tab}", fg="green")
-            range_start = click.prompt(
-                "Enter the cell of the upper left corner (Labeled 'Source')",
-                type=str,
-            )
-            range_end = click.prompt(
-                "Enter the cell of the lower right corner",
-                type=str,
-            )
-            sheets.append((tab, range_start, range_end))
+    try:
+        sheets = shcd_to_sheets(shcd, tabs, corners)
+    except Exception:
+        return
 
     # IP Address / LLDP Parsing
     if ips_file:
@@ -319,13 +241,7 @@ def shcd_cabling(
                     errors.append([str(ip), error_message])
 
     # Create SHCD Node factory
-    shcd_factory = NetworkNodeFactory(
-        hardware_schema=hardware_schema_file,
-        hardware_data=hardware_spec_file,
-        architecture_schema=architecture_schema_file,
-        architecture_data=architecture_spec_file,
-        architecture_version=architecture,
-    )
+    shcd_factory = NetworkNodeFactory(architecture_version=architecture)
 
     shcd_node_list, shcd_warnings = node_model_from_shcd(
         factory=shcd_factory,
@@ -334,13 +250,7 @@ def shcd_cabling(
     )
 
     # Create Cabling Node factory
-    cabling_factory = NetworkNodeFactory(
-        hardware_schema=hardware_schema_file,
-        hardware_data=hardware_spec_file,
-        architecture_schema=architecture_schema_file,
-        architecture_data=architecture_spec_file,
-        architecture_version=architecture,
-    )
+    cabling_factory = NetworkNodeFactory(architecture_version=architecture)
 
     # Open the updated cache to model nodes
     with open(canu_cache_file, "r+") as file:
