@@ -148,6 +148,9 @@ network_v2:
     - lookup_name: ["uan", "slurm"]
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port"
+    - lookup_name: ["lnet"]
+      shasta_name: "lnet"
+      architecture_type: "river_ncn_node_4_port"
     - lookup_name: ["Ln", "ln", "login"]
       shasta_name: "login"
       architecture_type: "river_ncn_node_4_port"
@@ -307,6 +310,10 @@ network_v2_tds:
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port"
     - lookup_name:
+        - "lnet"
+      shasta_name: "lnet"
+      architecture_type: "river_ncn_node_4_port"
+    - lookup_name:
         - "cdu"
       shasta_name: "sw-cdu"
       architecture_type: "mountain_compute_leaf"
@@ -454,6 +461,11 @@ network_v1:
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port_gigabyte"
     - lookup_name:
+        - "lnet"
+      shasta_name: "lnet"
+      architecture_type: "river_ncn_node_4_port_gigabyte"
+    - lookup_name:
+        - "Ln"
         - "ln"
       shasta_name: "ln"
       architecture_type: "river_ncn_node_4_port_gigabyte"

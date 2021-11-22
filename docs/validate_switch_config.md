@@ -41,6 +41,16 @@ The IP address of the switch with running config
 The running switch config file
 
 
+### --vendor( <vendor>)
+The vendor is needed if passing in the running config from a file
+
+
+* **Options**
+
+    Aruba | Dell | Mellanox
+
+
+
 ### --username( <username>)
 Switch username
 
