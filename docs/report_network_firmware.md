@@ -37,7 +37,7 @@ canu report network firmware [OPTIONS]
 
 * **Options**
 
-    0.9 | 1.0 | 1.2
+    1.0 | 1.2
 
 
 

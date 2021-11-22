@@ -1,19 +1,19 @@
-# Validate SHCD and Cabling
+# Validate Paddle and Cabling
 
-## canu validate shcd-cabling
+## canu validate paddle-cabling
 
-Validate a SHCD file against the current network cabling.
+Validate a CCJ file against the current network cabling.
 
-Pass in a SHCD file and a list of IP address to compair the connections.
+Pass in a CCJ file to validate that it works architecturally.
 
-The output of the validate shcd-cabling command will show a port by port comparison between the devices found in the SHCD and devices found on the network.
-If there is a difference in what is found connected to a devices port in SHCD and Cabling, the line will be highlighted in ‘red’.
+This command will also use LLDP to determine the neighbors of the IP addresses passed in to validate that the network
+is properly connected architecturally.
 
-
----
+The validation will ensure that spine switches, leaf switches,
+edge switches, and nodes all are connected properly.
 
 ```
-canu validate shcd-cabling [OPTIONS]
+canu validate paddle-cabling [OPTIONS]
 ```
 
 ### Options
@@ -29,26 +29,8 @@ canu validate shcd-cabling [OPTIONS]
 
 
 
-### -a(, --architecture( <architecture>)
-**Required** CSM architecture
-
-
-* **Options**
-
-    Full | TDS | V1
-
-
-
-### --shcd( <shcd>)
-**Required** SHCD file
-
-
-### --tabs( <tabs>)
-The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
-
-
-### --corners( <corners>)
-The corners on each tab, comma separated e.g. ‘J37,U227,J15,T47,J20,U167’.
+### --ccj( <ccj>)
+**Required** CCJ (CSM Cabling JSON) File containing system topology.
 
 
 ### --ips( <ips>)
@@ -73,36 +55,26 @@ Switch username
 Switch password
 
 
-### --log( <log_>)
-Level of logging.
-
-
-* **Options**
-
-    DEBUG | INFO | WARNING | ERROR
-
-
-
 ### --out( <out>)
 Output results to a file
 
 ## Example
 
-### Validate SHCD and Cabling
+### Validate Paddle and Cabling
 
-To validate an SHCD against the cabling run: `canu validate shcd-cabling --csm 1.2 -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN --corners I14,S49,I16,S22 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
+To validate a CCJ Paddle against the cabling run: `canu validate paddle-cabling --csm 1.2 --ccj paddle.json --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
 ```
-$ canu validate shcd-cabling --csm 1.2 -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN --corners I14,S49,I16,S22 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
+$ canu validate paddle-cabling --csm 1.2 --ccj paddle.json --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
 
 ====================================================================================================
-SHCD vs Cabling
+CCJ vs Cabling
 ====================================================================================================
 
 sw-spine-001
 Rack: x3000    Elevation: u12
 --------------------------------------------------------------------------------
-Port   SHCD                     Cabling
+Port   CCJ                      Cabling
 --------------------------------------------------------------------------------
 1      sw-spine-002:1           sw-spine-002:1
 2      sw-spine-002:2           sw-spine-002:2
@@ -114,7 +86,7 @@ Port   SHCD                     Cabling
 sw-spine-002
 Rack: x3000    Elevation: u13
 --------------------------------------------------------------------------------
-Port   SHCD                     Cabling
+Port   CCJ                      Cabling
 --------------------------------------------------------------------------------
 1      sw-spine-001:1           sw-spine-001:1
 2      sw-spine-001:2           sw-spine-001:2
@@ -126,7 +98,7 @@ Port   SHCD                     Cabling
 ncn-m001
 Rack: x3000    Elevation: u14
 --------------------------------------------------------------------------------
-Port   SHCD                     Cabling
+Port   CCJ                      Cabling
 --------------------------------------------------------------------------------
 1      sw-spine-001:5           sw-spine-001:5
 2      sw-spine-002:5           sw-spine-002:5
@@ -134,7 +106,7 @@ Port   SHCD                     Cabling
 ncn-s001
 Rack: x3000    Elevation: u15
 --------------------------------------------------------------------------------
-Port   SHCD                     Cabling
+Port   CCJ                      Cabling
 --------------------------------------------------------------------------------
 1      sw-spine-001:6           sw-spine-001:6
 2      sw-spine-002:6           sw-spine-002:6
@@ -142,22 +114,15 @@ Port   SHCD                     Cabling
 ncn-w001
 Rack: x3000    Elevation: u16
 --------------------------------------------------------------------------------
-Port   SHCD                     Cabling
+Port   CCJ                      Cabling
 --------------------------------------------------------------------------------
 1      sw-spine-001:7           sw-spine-001:7
 2      sw-spine-002:7           sw-spine-002:7
 
 
 ====================================================================================================
-SHCD Warnings
+CCJ Warnings
 ====================================================================================================
-
-Warnings
-
-Node type could not be determined for the following
-------------------------------------------------------------
-Sheet: HMN
-Cell: R21      Name: SITE
 
 
 ====================================================================================================
@@ -170,11 +135,6 @@ sw-spine-001     1/1/3     ===> aa:aa:aa:aa:aa:aa Cray, Inc.
 sw-spine-002     1/1/3     ===> bb:bb:bb:bb:bb:bb Cray, Inc.
 Nodes that show up as MAC addresses might need to have LLDP enabled.
 ```
-
-
-
-![image](images/canu_validate_shcd_cabling.png)
-
 
 
 ---
