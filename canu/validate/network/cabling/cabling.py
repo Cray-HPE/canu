@@ -24,7 +24,6 @@ from collections import defaultdict
 import ipaddress
 import logging
 from os import path
-from pathlib import Path
 import re
 import sys
 
@@ -44,40 +43,6 @@ from canu.utils.cache import cache_directory
 from canu.validate.shcd.shcd import node_list_warnings, print_node_list
 
 yaml = YAML()
-
-
-# Get project root directory
-if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
-    project_root = sys._MEIPASS
-else:
-    prog = __file__
-    project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
-
-# Schema and Data files
-hardware_schema_file = path.join(
-    project_root,
-    "network_modeling",
-    "schema",
-    "cray-network-hardware-schema.yaml",
-)
-hardware_spec_file = path.join(
-    project_root,
-    "network_modeling",
-    "models",
-    "cray-network-hardware.yaml",
-)
-architecture_schema_file = path.join(
-    project_root,
-    "network_modeling",
-    "schema",
-    "cray-network-architecture-schema.yaml",
-)
-architecture_spec_file = path.join(
-    project_root,
-    "network_modeling",
-    "models",
-    "cray-network-architecture.yaml",
-)
 
 canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 
@@ -209,13 +174,7 @@ def cabling(ctx, architecture, ips, ips_file, username, password, log_, out):
                     errors.append([str(ip), error_message])
 
     # Create Node factory
-    factory = NetworkNodeFactory(
-        hardware_schema=hardware_schema_file,
-        hardware_data=hardware_spec_file,
-        architecture_schema=architecture_schema_file,
-        architecture_data=architecture_spec_file,
-        architecture_version=architecture,
-    )
+    factory = NetworkNodeFactory(architecture_version=architecture)
 
     # Open the updated cache to model nodes
     with open(canu_cache_file, "r+") as file:

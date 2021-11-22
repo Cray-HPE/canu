@@ -28,9 +28,9 @@ import sys
 
 import click
 from click_help_colors import HelpColorsCommand
+from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
-from openpyxl import load_workbook
 import requests
 from ruamel.yaml import YAML
 import urllib3
@@ -42,7 +42,8 @@ from canu.generate.switch.config.config import (
     rename_sls_hostnames,
 )
 from canu.utils.cache import cache_directory
-from canu.validate.shcd.shcd import node_model_from_shcd
+from canu.validate.paddle.paddle import node_model_from_paddle
+from canu.validate.shcd.shcd import node_model_from_shcd, shcd_to_sheets
 
 yaml = YAML()
 
@@ -58,31 +59,6 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
 # Schema and Data files
-hardware_schema_file = path.join(
-    project_root,
-    "network_modeling",
-    "schema",
-    "cray-network-hardware-schema.yaml",
-)
-hardware_spec_file = path.join(
-    project_root,
-    "network_modeling",
-    "models",
-    "cray-network-hardware.yaml",
-)
-architecture_schema_file = path.join(
-    project_root,
-    "network_modeling",
-    "schema",
-    "cray-network-architecture-schema.yaml",
-)
-architecture_spec_file = path.join(
-    project_root,
-    "network_modeling",
-    "models",
-    "cray-network-architecture.yaml",
-)
-
 canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
@@ -123,14 +99,20 @@ csm_options = canu_config["csm_versions"]
     "-a",
     type=click.Choice(["Full", "TDS", "V1"], case_sensitive=False),
     help="CSM architecture",
-    required=True,
-    prompt="Architecture type",
 )
-@click.option(
+@optgroup.group(
+    "Network input source",
+    cls=RequiredMutuallyExclusiveOptionGroup,
+)
+@optgroup.option(
+    "--ccj",
+    help="Paddle CCJ file",
+    type=click.File("rb"),
+)
+@optgroup.option(
     "--shcd",
     help="SHCD file",
     type=click.File("rb"),
-    required=True,
 )
 @click.option(
     "--tabs",
@@ -167,6 +149,7 @@ def config(
     ctx,
     csm,
     architecture,
+    ccj,
     shcd,
     tabs,
     corners,
@@ -222,6 +205,7 @@ def config(
         ctx: CANU context settings
         csm: CSM version
         architecture: CSM architecture
+        ccj: Paddle CCJ file
         shcd: SHCD file
         tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
         corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
@@ -231,92 +215,54 @@ def config(
         folder: Folder to store config files
         override: Input file that defines what config should be ignored
     """
-    if architecture.lower() == "full":
-        architecture = "network_v2"
-        template_folder = "full"
-        vendor_folder = "aruba"
-    elif architecture.lower() == "tds":
-        architecture = "network_v2_tds"
-        template_folder = "tds"
-        vendor_folder = "aruba"
-    elif architecture.lower() == "v1":
-        architecture = "network_v1"
-        template_folder = "full"
-        vendor_folder = "dellmellanox"
-
     # SHCD Parsing
-    sheets = []
-
-    if not tabs:
-        wb = load_workbook(shcd, read_only=True)
-        click.secho("What tabs would you like to check in the SHCD?")
-        tab_options = wb.sheetnames
-        for x in tab_options:
-            click.secho(f"{x}", fg="green")
-
-        tabs = click.prompt(
-            "Please enter the tabs to check separated by a comma, e.g. 10G_25G_40G_100G,NMN,HMN.",
-            type=str,
-        )
-
-    if corners:
-        if len(tabs.split(",")) * 2 != len(corners.split(",")):
-            click.secho("Not enough corners.\n", fg="red")
-            click.secho(
-                f"Make sure each tab: {tabs.split(',')} has 2 corners.\n",
-                fg="red",
+    if shcd:
+        try:
+            sheets = shcd_to_sheets(shcd, tabs, corners)
+        except Exception:
+            return
+        if not architecture:
+            architecture = click.prompt(
+                "Please enter the tabs to check separated by a comma, e.g. 10G_25G_40G_100G,NMN,HMN.",
+                type=click.Choice(["Full", "TDS", "V1"], case_sensitive=False),
             )
+
+    # Paddle Parsing
+    else:
+        ccj_json = json.load(ccj)
+        architecture = ccj_json.get("architecture")
+
+        if architecture is None:
             click.secho(
-                f"There were {len(corners.split(','))} corners entered, but there should be {len(tabs.split(',')) * 2}.",
-                fg="red",
-            )
-            click.secho(
-                f"{corners}\n",
+                "The key 'architecture' is missing from the CCJ. Ensure that you are using a validated CCJ.",
                 fg="red",
             )
             return
 
-        # Each tab should have 2 corners entered in comma separated
-        for i in range(len(tabs.split(","))):
-            # 0 -> 0,1
-            # 1 -> 2,3
-            # 2 -> 4,5
-
-            sheets.append(
-                (
-                    tabs.split(",")[i],
-                    corners.split(",")[i * 2].strip(),
-                    corners.split(",")[i * 2 + 1].strip(),
-                ),
-            )
-    else:
-        for tab in tabs.split(","):
-            click.secho(f"\nFor the Sheet {tab}", fg="green")
-            range_start = click.prompt(
-                "Enter the cell of the upper left corner (Labeled 'Source')",
-                type=str,
-            )
-            range_end = click.prompt(
-                "Enter the cell of the lower right corner",
-                type=str,
-            )
-            sheets.append((tab, range_start, range_end))
+    if architecture.lower() == "full" or architecture == "network_v2":
+        architecture = "network_v2"
+        template_folder = "full"
+        vendor_folder = "aruba"
+    elif architecture.lower() == "tds" or architecture == "network_v2_tds":
+        architecture = "network_v2_tds"
+        template_folder = "tds"
+        vendor_folder = "aruba"
+    elif architecture.lower() == "v1" or architecture == "network_v1":
+        architecture = "network_v1"
+        template_folder = "full"
+        vendor_folder = "dellmellanox"
 
     # Create Node factory
-    factory = NetworkNodeFactory(
-        hardware_schema=hardware_schema_file,
-        hardware_data=hardware_spec_file,
-        architecture_schema=architecture_schema_file,
-        architecture_data=architecture_spec_file,
-        architecture_version=architecture,
-    )
-
-    # Get nodes from SHCD
-    shcd_node_list, shcd_warnings = node_model_from_shcd(
-        factory=factory,
-        spreadsheet=shcd,
-        sheets=sheets,
-    )
+    factory = NetworkNodeFactory(architecture_version=architecture)
+    if shcd:
+        # Get nodes from SHCD
+        network_node_list, network_warnings = node_model_from_shcd(
+            factory=factory,
+            spreadsheet=shcd,
+            sheets=sheets,
+        )
+    else:
+        network_node_list, network_warnings = node_model_from_paddle(factory, ccj_json)
 
     # Parse SLS input file.
     if sls_file:
@@ -420,7 +366,7 @@ def config(
     }
     config_devices = set()
     all_unknown = []
-    for node in shcd_node_list:
+    for node in network_node_list:
         switch_name = node.common_name()
         node_shasta_name = get_shasta_name(switch_name, factory.lookup_mapper())
 
@@ -429,7 +375,7 @@ def config(
             switch_config, devices, unknown = generate_switch_config(
                 csm,
                 architecture,
-                shcd_node_list,
+                network_node_list,
                 factory,
                 switch_name,
                 sls_variables,

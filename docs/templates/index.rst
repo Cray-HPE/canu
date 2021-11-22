@@ -18,6 +18,8 @@ CANU
    validate_network_bgp.md
    validate_network_cabling.md
    validate_network_config.md
+   validate_paddle.md
+   validate_paddle_cabling.md
    validate_shcd_cabling.md
    validate_shcd.md
    validate_switch_config.md

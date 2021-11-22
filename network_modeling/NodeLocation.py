@@ -76,3 +76,19 @@ class NodeLocation:
             serialized["parent"] = self.__parent
 
         return serialized
+
+    def location_from_paddle(self, location):
+        """Construct the NodeLocation from the Paddle JSON."""
+        rack = location.get("rack")
+        self.rack(rack)
+
+        elevation = location.get("elevation")
+        self.elevation(elevation)
+
+        parent = location.get("parent")
+        if parent:
+            self.parent(parent)
+
+        sub_location = location.get("sub_location")
+        if sub_location:
+            self.sub_location(sub_location)

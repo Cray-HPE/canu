@@ -1,5 +1,6 @@
 aiofiles==0.7.0
 aiohttp==3.8.0
+aiosignal==1.2.0
 alabaster==0.7.12
 appdirs==1.4.4
 argcomplete==1.12.3
@@ -48,6 +49,7 @@ flake8-polyfill==1.0.2
 flake8-quotes==3.3.0
 flake8-rst-docstrings==0.2.3
 flake8-string-format==0.3.0
+frozenlist==1.2.0
 future==0.18.2
 gitdb==4.0.7
 GitPython==3.1.18
@@ -122,6 +124,7 @@ sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.5
 stevedore==3.4.0
+tblib==1.7.0
 tenacity==8.0.1
 termcolor==1.1.0
 testfixtures==6.18.3
