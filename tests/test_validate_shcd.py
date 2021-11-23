@@ -434,10 +434,10 @@ def test_validate_shcd_json():
 
         result_json = json.loads(result.output)
 
-        assert result_json[-1]["common_name"] == "sw-cdu-002"
-        assert result_json[-1]["architecture"] == "mountain_compute_leaf"
-        assert result_json[-1]["location"]["rack"] == "x3000"
-        assert result_json[-1]["location"]["elevation"] == "u13"
+        assert result_json["topology"][-1]["common_name"] == "sw-cdu-002"
+        assert result_json["topology"][-1]["architecture"] == "mountain_compute_leaf"
+        assert result_json["topology"][-1]["location"]["rack"] == "x3000"
+        assert result_json["topology"][-1]["location"]["elevation"] == "u13"
 
 
 def test_validate_shcd_vi():

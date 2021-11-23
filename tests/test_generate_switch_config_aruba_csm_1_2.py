@@ -5740,7 +5740,11 @@ def test_switch_config_missing_file():
             ],
         )
         assert result.exit_code == 2
-        assert "Error: Missing option '--shcd'." in str(result.output)
+        assert (
+            "Error: Missing one of the required mutually exclusive options from 'Network input source' option group:\n"
+            "  '--ccj'\n"
+            "  '--shcd'\n"
+        ) in str(result.output)
 
 
 def test_switch_config_bad_file():
