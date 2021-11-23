@@ -603,6 +603,7 @@ def generate_switch_config(
         "SPINE_LEAF_VLANS": spine_leaf_vlan,
         "NATIVE_VLAN": native_vlan,
         "CAN_IPs": sls_variables["CAN_IPs"],
+        "CMN_IPs": sls_variables["CMN_IPs"],
         "NMN_IPs": sls_variables["NMN_IPs"],
         "HMN_IPs": sls_variables["HMN_IPs"],
     }
@@ -1238,6 +1239,7 @@ def parse_sls_for_config(input_json):
         "CMN_IP_PRIMARY": None,
         "CMN_IP_SECONDARY": None,
         "CAN_IPs": defaultdict(),
+        "CMN_IPs": defaultdict(),
         "HMN_IPs": defaultdict(),
         "MTL_IPs": defaultdict(),
         "NMN_IPs": defaultdict(),
@@ -1290,7 +1292,10 @@ def parse_sls_for_config(input_json):
                             sls_variables["CMN_IP_PRIMARY"] = ip["IPAddress"]
                         elif ip["Name"] == "cmn-switch-2":
                             sls_variables["CMN_IP_SECONDARY"] = ip["IPAddress"]
-
+                if subnets["Name"] == "bootstrap_dhcp":
+                    for ip in subnets["IPReservations"]:
+                        if "ncn-w" in ip["Name"]:
+                            sls_variables["CMN_IPs"][ip["Name"]] = ip["IPAddress"]
         elif name == "HMN":
             sls_variables["HMN"] = netaddr.IPNetwork(
                 sls_network.get("ExtraProperties", {}).get(

@@ -88,7 +88,6 @@ def test_switch_config_spine_primary():
         assert (
             "hostname sw-spine-001\n"
             + "no ip icmp redirect\n"
-            + "vrf CAN\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -267,7 +266,6 @@ def test_switch_config_spine_primary():
             + "    area 0.0.0.0\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
-            + "https-server vrf CAN\n"
         ) in str(result.output)
 
 
@@ -310,13 +308,11 @@ def test_switch_config_spine_primary_override():
             + "\n"
             + "#vsx\n"
             + "#  role primary\n"
-            + "#https-server vrf CAN\n"
         ) in str(result.output)
 
         assert (
             "hostname sw-spine-001\n"
             + "no ip icmp redirect\n"
-            + "vrf CAN\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -527,7 +523,6 @@ def test_switch_config_spine_secondary():
         assert (
             "hostname sw-spine-002\n"
             + "no ip icmp redirect\n"
-            + "vrf CAN\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -708,7 +703,6 @@ def test_switch_config_spine_secondary():
             + "    area 0.0.0.0\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
-            + "https-server vrf CAN\n"
         ) in str(result.output)
 
 
@@ -754,13 +748,11 @@ def test_switch_config_spine_secondary_override():
             + "\n"
             + "#vsx\n"
             + "#  role secondary\n"
-            + "#https-server vrf CAN\n"
         ) in str(result.output)
 
         assert (
             "hostname sw-spine-002\n"
             + "no ip icmp redirect\n"
-            + "vrf CAN\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -5336,7 +5328,6 @@ def test_switch_config_tds_spine_primary():
         assert (
             "hostname sw-spine-001\n"
             + "no ip icmp redirect\n"
-            + "vrf CAN\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -5733,7 +5724,6 @@ def test_switch_config_tds_spine_primary():
             + "    area 0.0.0.0\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
-            + "https-server vrf CAN\n"
         ) in str(result.output)
 
 
@@ -5776,12 +5766,10 @@ def test_switch_config_tds_spine_primary_override():
             + "\n"
             + "#vsx\n"
             + "#  role primary\n"
-            + "#https-server vrf CAN\n"
         ) in str(result.output)
         assert (
             "hostname sw-spine-001\n"
             + "no ip icmp redirect\n"
-            + "vrf CAN\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -6190,7 +6178,6 @@ def test_switch_config_tds_spine_secondary():
         assert (
             "hostname sw-spine-002\n"
             + "no ip icmp redirect\n"
-            + "vrf CAN\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -6587,7 +6574,6 @@ def test_switch_config_tds_spine_secondary():
             + "    area 0.0.0.0\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
-            + "https-server vrf CAN\n"
         ) in str(result.output)
 
 
@@ -6633,13 +6619,11 @@ def test_switch_config_tds_spine_secondary_override():
             + "\n"
             + "#vsx\n"
             + "#  role secondary\n"
-            + "#https-server vrf CAN\n"
         ) in str(result.output)
 
         assert (
             "hostname sw-spine-002\n"
             + "no ip icmp redirect\n"
-            + "vrf CAN\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"

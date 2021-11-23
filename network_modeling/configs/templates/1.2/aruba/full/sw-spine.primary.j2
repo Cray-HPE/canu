@@ -2,7 +2,7 @@
 {%- include '1.2/aruba/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
 no ip icmp redirect
-vrf CAN
+vrf Customer
 vrf keepalive
 ntp server {{ variables.NCN_W001 }}
 ntp server {{ variables.NCN_W002 }}
@@ -10,7 +10,7 @@ ntp server {{ variables.NCN_W003 }}
 ntp enable
 
 
-
+ssh server vrf Customer
 ssh server vrf default
 ssh server vrf keepalive
 ssh server vrf mgmt
@@ -90,19 +90,18 @@ interface vlan {{ variables.HMN_VLAN }}
     ip ospf 1 area 0.0.0.0
 {%- if variables.CMN != None %}
 interface vlan {{ variables.CMN_VLAN }}
-    vrf attach CAN
+    vrf attach Customer
     ip mtu 9198
     ip address {{ variables.CMN_IP_PRIMARY }}/{{ variables.CMN_PREFIX_LEN }}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.CMN_IP_GATEWAY }}
 {%- endif %}
 interface vlan {{ variables.CAN_VLAN }}
-    vrf attach CAN
+    vrf attach Customer
     ip mtu 9198
     ip address {{ variables.CAN_IP_PRIMARY }}/{{ variables.CAN_PREFIX_LEN }}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.CAN_IP_GATEWAY }}
-    ip helper-address 10.92.100.222
 vsx
     system-mac 02:00:00:00:6b:00
     inter-switch-link lag 256
@@ -123,5 +122,5 @@ router ospfv3 1
 {% include '1.2/aruba/common/bgp.primary.j2' %}
 https-server vrf default
 https-server vrf mgmt
-https-server vrf CAN
+https-server vrf Customer
 {# end sw-spine.primary #}

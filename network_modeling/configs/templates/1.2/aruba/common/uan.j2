@@ -24,7 +24,6 @@ interface lag {{ node.config.LAG_NUMBER }} multi-chassis
     vlan trunk allowed {{ variables.CAN_VLAN }}
     lacp mode active
     lacp fallback
-    spanning-tree bpdu-guard
     spanning-tree port-type admin-edge
 
 interface 1/1/{{ node.config.PORT }}
