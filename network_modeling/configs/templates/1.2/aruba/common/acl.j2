@@ -1,24 +1,24 @@
 {#- acl #}
 access-list ip mgmt
 {% set sequence = 10 %}    {{ sequence }} comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET and CMN
-{% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq 22
-{% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq 443
-{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq 161
-{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq 162
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq ssh
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq https
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq snmp
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq snmp-trap
 {%- if variables.CMN != None %}
-{% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} any eq 22
-{% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} any eq 443
-{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} any eq 161
-{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} any eq 162
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} any eq ssh
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} any eq https
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} any eq snmp
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} any eq snmp-trap
 {%- endif %}
 {% set sequence = sequence+10 %}    {{ sequence }} comment ALLOW SNMP FROM HMN METALLB SUBNET
-{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMNLB_NETWORK_IP }}/{{ variables.HMNLB_NETMASK }} any eq 161
-{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMNLB_NETWORK_IP }}/{{ variables.HMNLB_NETMASK }} any eq 162
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMNLB_NETWORK_IP }}/{{ variables.HMNLB_NETMASK }} any eq snmp
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMNLB_NETWORK_IP }}/{{ variables.HMNLB_NETMASK }} any eq snmp-trap
 {% set sequence = sequence+10 %}    {{ sequence }} comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE
-{% set sequence = sequence+10 %}    {{ sequence }} deny tcp any any eq 22
-{% set sequence = sequence+10 %}    {{ sequence }} deny tcp any any eq 443
-{% set sequence = sequence+10 %}    {{ sequence }} deny udp any any eq 161
-{% set sequence = sequence+10 %}    {{ sequence }} deny udp any any eq 162
+{% set sequence = sequence+10 %}    {{ sequence }} deny tcp any any eq ssh
+{% set sequence = sequence+10 %}    {{ sequence }} deny tcp any any eq https
+{% set sequence = sequence+10 %}    {{ sequence }} deny udp any any eq snmp
+{% set sequence = sequence+10 %}    {{ sequence }} deny udp any any eq snmp-trap
 {% set sequence = sequence+10 %}    {{ sequence }} comment ALLOW ANYTHING ELSE
 {% set sequence = sequence+10 %}    {{ sequence }} permit any any any
 access-list ip nmn-hmn
