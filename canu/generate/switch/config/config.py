@@ -550,6 +550,7 @@ def generate_switch_config(
         "SPINE_LEAF_VLANS": spine_leaf_vlan,
         "NATIVE_VLAN": native_vlan,
         "CAN_IPs": sls_variables["CAN_IPs"],
+        "CMN_IPs": sls_variables["CMN_IPs"],
         "NMN_IPs": sls_variables["NMN_IPs"],
         "HMN_IPs": sls_variables["HMN_IPs"],
     }
@@ -877,7 +878,13 @@ def get_switch_nodes(switch_name, network_node_list, factory, sls_variables):
                 },
             }
             nodes.append(new_node)
-        elif shasta_name == "uan":
+        elif shasta_name in {"viz", "uan", "login"}:
+            primary_port_uan = get_primary_port(
+                nodes_by_name,
+                switch_name,
+                destination_node_id,
+                destination_port,
+            )
             new_node = {
                 "subtype": "uan",
                 "slot": destination_slot,
@@ -885,31 +892,8 @@ def get_switch_nodes(switch_name, network_node_list, factory, sls_variables):
                 "config": {
                     "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
                     "PORT": f"{source_port}",
-                    "LAG_NUMBER": primary_port,
-                },
-            }
-            nodes.append(new_node)
-        elif shasta_name == "viz":
-            new_node = {
-                "subtype": "uan",
-                "slot": destination_slot,
-                "destination_port": destination_port,
-                "config": {
-                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
-                    "PORT": f"{source_port}",
-                    "LAG_NUMBER": primary_port,
-                },
-            }
-            nodes.append(new_node)
-        elif shasta_name == "login":
-            new_node = {
-                "subtype": "uan",
-                "slot": destination_slot,
-                "destination_port": destination_port,
-                "config": {
-                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
-                    "PORT": f"{source_port}",
-                    "LAG_NUMBER": primary_port,
+                    "LAG_NUMBER": primary_port_uan,
+                    "LAG_NUMBER_V1": primary_port,
                 },
             }
             nodes.append(new_node)
@@ -1202,6 +1186,7 @@ def parse_sls_for_config(input_json):
         "CMN_IP_PRIMARY": None,
         "CMN_IP_SECONDARY": None,
         "CAN_IPs": defaultdict(),
+        "CMN_IPs": defaultdict(),
         "HMN_IPs": defaultdict(),
         "MTL_IPs": defaultdict(),
         "NMN_IPs": defaultdict(),
@@ -1254,7 +1239,10 @@ def parse_sls_for_config(input_json):
                             sls_variables["CMN_IP_PRIMARY"] = ip["IPAddress"]
                         elif ip["Name"] == "cmn-switch-2":
                             sls_variables["CMN_IP_SECONDARY"] = ip["IPAddress"]
-
+                if subnets["Name"] == "bootstrap_dhcp":
+                    for ip in subnets["IPReservations"]:
+                        if "ncn-w" in ip["Name"]:
+                            sls_variables["CMN_IPs"][ip["Name"]] = ip["IPAddress"]
         elif name == "HMN":
             sls_variables["HMN"] = netaddr.IPNetwork(
                 sls_network.get("ExtraProperties", {}).get(

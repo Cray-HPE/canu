@@ -1,7 +1,7 @@
 ---
 sw-spine-001:
 - lineage:
-  - equals: https-server vrf CAN
+  - equals: https-server vrf Customer
   add_tags: override
 - lineage:
   - startswith: vsx
@@ -11,7 +11,7 @@ sw-spine-001:
 
 sw-spine-002:
 - lineage:
-  - equals: https-server vrf CAN
+  - equals: https-server vrf Customer
   add_tags: override
 - lineage:
   - startswith: vsx

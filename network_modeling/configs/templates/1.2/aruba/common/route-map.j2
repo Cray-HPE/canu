@@ -9,9 +9,9 @@ route-map {{ name }} permit seq {{ sequence.value }}{% set sequence.value = sequ
      set local-preference {{ localpref.value }}{% set localpref.value = localpref.value + 100%}
     {%- endfor %}
 route-map {{ name }} permit seq {{ sequence.value }}
-     match ip address prefix-list pl-can
-     {%- for can_name, can_ip in variables.CAN_IPs.items() if name == can_name %}
-     set ip next-hop {{ can_ip }}
+     match ip address prefix-list pl-cmn
+     {%- for CMN_name, CMN_ip in variables.CMN_IPs.items() if name == CMN_name %}
+     set ip next-hop {{ CMN_ip }}
      {%- endfor %}
 {% set sequence.value = sequence.value + 10 %}route-map {{ name }} permit seq {{ sequence.value }}
      match ip address prefix-list pl-hmn
