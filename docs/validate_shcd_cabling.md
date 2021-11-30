@@ -86,6 +86,10 @@ Level of logging.
 ### --out( <out>)
 Output results to a file
 
+
+### --macs()
+Print NCN MAC addresses
+
 ## Example
 
 ### Validate SHCD and Cabling

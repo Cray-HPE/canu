@@ -166,6 +166,72 @@ def test_validate_shcd_cabling(netmiko_command, switch_vendor):
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
 @patch("canu.report.switch.cabling.cabling.netmiko_command")
 @responses.activate
+def test_validate_shcd_cabling_macs(netmiko_command, switch_vendor):
+    """Test that the `canu validate shcd-cabling` command runs with the `--macs` flag and produces valid output."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        netmiko_command.return_value = mac_address_table
+        generate_test_file(test_file)
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/login",
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname,system_mac",
+            json=switch_info1,
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system/interfaces/*/lldp_neighbors?depth=2",
+            json=lldp_neighbors_json1,
+        )
+        responses.add(
+            responses.GET,
+            f"https://{ip}/rest/v10.04/system/vrfs/default/neighbors?depth=2",
+            json=arp_neighbors_json1,
+        )
+
+        responses.add(
+            responses.POST,
+            f"https://{ip}/rest/v10.04/logout",
+        )
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "shcd-cabling",
+                "--csm",
+                csm,
+                "--architecture",
+                architecture,
+                "--ips",
+                ips,
+                "--username",
+                username,
+                "--password",
+                password,
+                "--shcd",
+                test_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--macs",
+            ],
+        )
+        assert result.exit_code == 0
+
+        assert ("  Connecting to 192.168.1.1 - Switch 1 of 1        \n\n") in str(
+            result.output,
+        )
+
+
+@patch("canu.report.switch.cabling.cabling.switch_vendor")
+@patch("canu.report.switch.cabling.cabling.netmiko_command")
+@responses.activate
 def test_validate_shcd_cabling_full_architecture(netmiko_command, switch_vendor):
     """Test that the `canu validate shcd-cabling` command runs and returns valid cabling with full architecture."""
     full_architecture = "full"

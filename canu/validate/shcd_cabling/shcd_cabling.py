@@ -25,6 +25,7 @@ import ipaddress
 import logging
 from os import path
 from pathlib import Path
+import re
 import sys
 
 import click
@@ -139,6 +140,11 @@ log = logging.getLogger("validate_shcd")
     type=click.File("w"),
     default="-",
 )
+@click.option(
+    "--macs",
+    help="Print NCN MAC addresses",
+    is_flag=True,
+)
 @click.pass_context
 def shcd_cabling(
     ctx,
@@ -149,6 +155,7 @@ def shcd_cabling(
     corners,
     ips,
     ips_file,
+    macs,
     username,
     password,
     log_,
@@ -174,6 +181,7 @@ def shcd_cabling(
         corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
         ips: Comma separated list of IPv4 addresses of switches
         ips_file: File with one IPv4 address per line
+        macs: Print NCN MAC addresses
         username: Switch username
         password: Switch password
         log_: Level of logging.
@@ -260,17 +268,6 @@ def shcd_cabling(
         ips,
     )
 
-    double_dash = "=" * 100
-
-    click.echo("\n", file=out)
-    click.echo(double_dash, file=out)
-    click.secho(
-        "SHCD vs Cabling",
-        fg="bright_white",
-        file=out,
-    )
-    click.echo(double_dash, file=out)
-
     # Combine the SHCD and Cabling nodes
     combined_nodes = combine_shcd_cabling(
         shcd_node_list,
@@ -279,6 +276,55 @@ def shcd_cabling(
         ips,
         csm,
     )
+
+    # canu can be used to generate information needed prior to an install
+    # such as the MAC addresses of the NCNs
+    # create two lists to hold these values
+    ncn_nodes = []
+    ncn_macs = []
+    # loop through the combined nodes
+    for node, node_info in combined_nodes.items():
+        # the MACs are readable from the leaf or spine switches
+        if node is not None:
+            if node.startswith("sw-leaf") or node.startswith("sw-spine"):
+                for k, v in node_info.items():
+                    # The MACs are stored in the "ports" key
+                    if k == "ports":
+                        # now the list of ncn_nodes is populated
+                        ncn_nodes.append(v)
+
+    # for each ncn in the list
+    for ncn in ncn_nodes:
+        for _k, v in ncn.items():
+            # if the node starts with a ncn-, we need it's mac address
+            if v["shcd"] is not None and v["shcd"].startswith("ncn"):
+                if v["cabling"] is not None:
+                    # check if there is a mac address in the data
+                    if re.match(
+                        "[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}",
+                        v["cabling"].lower(),
+                    ):
+                        node_name = v["shcd"].split(":")[0]
+                        node_mac = v["cabling"].split(" ")[0]
+                        # append it to a list
+                        ncn_macs.append((node_name, node_mac))
+
+    if macs:
+        click.secho("\n")
+        for m in ncn_macs:
+            host_mac_string = ",".join([str(i) for i in m])
+            click.secho(f"{host_mac_string}")
+        sys.exit(0)
+
+    double_dash = "=" * 100
+    click.echo("\n", file=out)
+    click.echo(double_dash, file=out)
+    click.secho(
+        "SHCD vs Cabling",
+        fg="bright_white",
+        file=out,
+    )
+    click.echo(double_dash, file=out)
 
     print_combined_nodes(combined_nodes, out)
 
@@ -450,9 +496,8 @@ def combine_shcd_cabling(shcd_node_list, cabling_node_list, canu_cache, ips, csm
 
             # Need the hostname is not in the cache, skip it
             if cache_hostname in combined_nodes.keys():
-                for port_number, port_info in combined_nodes[cache_hostname][
-                    "ports"
-                ].items():
+                combined_ports = combined_nodes[cache_hostname]["ports"].items()
+                for port_number, port_info in combined_ports:
 
                     if port_info["cabling"] is None:
                         cache_port = switch["cabling"].get(
