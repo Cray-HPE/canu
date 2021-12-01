@@ -31,6 +31,7 @@ import sys
 
 import click
 from click_help_colors import HelpColorsCommand
+import jsonschema
 import natsort
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from network_modeling.NetworkPort import NetworkPort
@@ -80,6 +81,7 @@ log = logging.getLogger("validate_shcd")
     "--corners",
     help="The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.",
 )
+@click.option("--out", help="Output JSON model to a file", type=click.File("w"))
 @click.option(
     "--out",
     help="Output results to a file",
