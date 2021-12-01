@@ -20,14 +20,25 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Nox definitions for tests, docs, and linting."""
+from os import listdir, path
+from pathlib import Path
+import shutil
+import sys
 
 import nox
+
+# Get project root directory
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
+    project_root = sys._MEIPASS
+else:
+    prog = __file__
+    project_root = Path(__file__).resolve().parent
 
 
 COVERAGE_FAIL = 90
 ERROR_ON_GENERATE = True
-locations = "canu", "tests", "noxfile.py", "network_modeling"
-nox.options.sessions = "tests", "lint", "cover"
+locations = "canu", "tests", "noxfile.py", "network_modeling", "docs/templates/conf.py"
+nox.options.sessions = "tests", "lint", "cover", "docs"
 
 
 @nox.session(python="3")
@@ -50,9 +61,9 @@ def tests(session):
         "--cov=network_modeling",
         "--cov-append",
         "--cov-report=",
-        "--cov-fail-under={}".format(COVERAGE_FAIL),
+        f"--cov-fail-under={COVERAGE_FAIL}",
         path,
-        *session.posargs
+        *session.posargs,
     )
 
 
@@ -61,12 +72,20 @@ def lint(session):
     """Run flake8 linter and plugins."""
     args = session.posargs or locations
     session.install(
-        "flake8",
+        "flake8==3.9.2",
         "flake8-black",
         "flake8-bugbear",
+        "flake8-commas",
+        "flake8-comprehensions",
+        "flake8-debugger",
         "flake8-docstrings",
+        "flake8-eradicate",
         "flake8-import-order",
+        "flake8_quotes",
+        "flake8-string-format",
+        "pep8-naming",
         "darglint",
+        # "wemake-python-styleguide",
         "toml",
     )
     session.run("flake8", *args)
@@ -76,7 +95,6 @@ def lint(session):
 def black(session):
     """Run Black, the uncompromising Python code formatter."""
     args = session.posargs or locations
-    # exclude = "(/bin, /lib)"
     exclude = """
     ^/(
     (
@@ -94,6 +112,45 @@ def cover(session):
     """Run the final coverage report."""
     session.install("coverage", "pytest-cov")
     session.run(
-        "coverage", "report", "--show-missing", "--fail-under={}".format(COVERAGE_FAIL)
+        "coverage",
+        "report",
+        "--show-missing",
+        "--fail-under={}".format(COVERAGE_FAIL),
     )
     session.run("coverage", "erase")
+
+
+# Docs start as md templates in '/docs/templates'
+# sphinx_click runs CANU and generates docs from the flags and docstrings
+# myst-parser allows it all to be read in as markdown
+# sphinx-markdown-builder exports all docs as markdown
+# exported markdown files are moved from '/docs/_build/markdown/' to '/docs/'
+@nox.session(python="3")
+def docs(session) -> None:
+    """Build the documentation."""
+    session.install("-r", "requirements.txt")
+    session.install("-r", "requirements-test.txt")
+    session.install("sphinx", "sphinx_click", "myst-parser", "sphinx-markdown-builder")
+    session.run(
+        "sphinx-build",
+        "-M",
+        "markdown",
+        "docs/templates",
+        "docs/_build",
+        "-a",
+    )
+    copy_built_md_docs()
+
+
+def copy_built_md_docs():
+    """Copy markdown docs from '/docs/_build/markdown' to '/docs'."""
+    source_dir = path.join(project_root, "docs", "_build", "markdown")
+    target_dir = path.join(project_root, "docs")
+
+    file_names = listdir(source_dir)
+
+    for file_name in file_names:
+        shutil.copyfile(
+            path.join(source_dir, file_name),
+            path.join(target_dir, file_name),
+        )

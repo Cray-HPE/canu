@@ -20,11 +20,16 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Test CANU validate shcd commands."""
+import json
+from os import path
+from pathlib import Path
 
-import click.testing
+from click import testing
 from openpyxl import Workbook
 
 from canu.cli import cli
+
+test_file_directory = Path(__file__).resolve().parent
 
 
 test_file = "test_file.xlsx"
@@ -32,7 +37,7 @@ architecture = "tds"
 tabs = "25G_10G"
 corners = "I14,S48"
 cache_minutes = 0
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 
 
 def test_validate_shcd():
@@ -57,7 +62,7 @@ def test_validate_shcd():
             ],
         )
         assert result.exit_code == 0
-        assert "sw-spine-002 connects to 18 nodes:" in str(result.output)
+        assert "sw-spine-002 connects to 17 nodes:" in str(result.output)
 
 
 def test_validate_shcd_full():
@@ -83,7 +88,7 @@ def test_validate_shcd_full():
             ],
         )
         assert result.exit_code == 0
-        assert "sw-leaf-002 connects to 18 nodes:" in str(result.output)
+        assert "sw-leaf-002 connects to 17 nodes:" in str(result.output)
 
 
 def test_validate_shcd_missing_file():
@@ -132,10 +137,7 @@ def test_validate_shcd_bad_file():
             ],
         )
         assert result.exit_code == 2
-        assert (
-            "Error: Invalid value for '--shcd': Could not open file: does_not_exist.xlsx: No such file or directory"
-            in str(result.output)
-        )
+        assert "Error: Invalid value for '--shcd':" in str(result.output)
 
 
 def test_validate_shcd_missing_tabs():
@@ -209,7 +211,7 @@ def test_validate_shcd_corner_prompt():
             input="I14\nS48",
         )
         assert result.exit_code == 0
-        assert "sw-spine-002 connects to 18 nodes:" in str(result.output)
+        assert "sw-spine-002 connects to 17 nodes:" in str(result.output)
 
 
 def test_validate_shcd_corners_too_narrow():
@@ -263,7 +265,7 @@ def test_validate_shcd_corners_too_high():
         assert result.exit_code == 1
         assert "On tab 25G_10G, header column Source not found." in str(result.output)
         assert "On tab 25G_10G, the header is formatted incorrectly." in str(
-            result.output
+            result.output,
         )
 
 
@@ -317,7 +319,7 @@ def test_validate_shcd_not_enough_corners():
         )
         assert result.exit_code == 0
         assert "There were 1 corners entered, but there should be 2." in str(
-            result.output
+            result.output,
         )
 
 
@@ -371,7 +373,7 @@ def test_validate_shcd_bad_architectural_definition():
         )
         assert result.exit_code == 1
         assert "No architectural definition found to allow connection between" in str(
-            result.output
+            result.output,
         )
 
 
@@ -401,15 +403,106 @@ def test_validate_shcd_port_reuse():
             ],
         )
         assert result.exit_code == 1
-        # assert "Node 1: port 51 in slot None already connected to Node 0: port 52 in slot None" in str(
-        #     result.output
-        # )
-        # assert "Node 0: port 52 in slot None already connected to Node 1: port 51 in slot None" in str(
-        #     result.output
-        # )
         assert "Failed to connect sw-spine-001 to sw-spine-002 bi-directionally" in str(
-            result.output
+            result.output,
         )
+
+
+def test_validate_shcd_json():
+    """Test that the `canu validate shcd` command runs and returns valid JSON cabling."""
+    with runner.isolated_filesystem():
+        generate_test_file(test_file)
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "shcd",
+                "--architecture",
+                architecture,
+                "--shcd",
+                test_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--json",
+            ],
+        )
+        assert result.exit_code == 0
+
+        result_json = json.loads(result.output)
+
+        assert result_json["topology"][-1]["common_name"] == "sw-cdu-002"
+        assert result_json["topology"][-1]["architecture"] == "mountain_compute_leaf"
+        assert result_json["topology"][-1]["location"]["rack"] == "x3000"
+        assert result_json["topology"][-1]["location"]["elevation"] == "u13"
+
+
+def test_validate_shcd_vi():
+    """Test that the `canu validate shcd` command runs and returns valid cabling for Dell and Mellanox V1 arch."""
+    architecture_v1 = "v1"
+    test_file_name_v1 = "Architecture_Golden_Config_Dellanox.xlsx"
+    test_file_v1 = path.join(test_file_directory, "data", test_file_name_v1)
+    tabs_v1 = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
+    corners_v1 = "J14,T30,J14,T34,J14,T28,J14,T27"
+
+    with runner.isolated_filesystem():
+        generate_test_file(test_file)
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "shcd",
+                "--architecture",
+                architecture_v1,
+                "--shcd",
+                test_file_v1,
+                "--tabs",
+                tabs_v1,
+                "--corners",
+                corners_v1,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "sw-spine-002 connects to 18 nodes:" in str(result.output)
+
+
+def test_validate_shcd_subrack():
+    """Test that the `canu validate shcd` command runs and returns valid cabling including SubRack."""
+    tabs_subrack = "25G_10G,HMN"
+    corners_subrack = "I14,S48,I14,T19"
+    full_architecture = "full"
+    with runner.isolated_filesystem():
+        generate_test_file(test_file)
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "validate",
+                "shcd",
+                "--architecture",
+                full_architecture,
+                "--shcd",
+                test_file,
+                "--tabs",
+                tabs_subrack,
+                "--corners",
+                corners_subrack,
+                "--log",
+                "DEBUG",
+            ],
+        )
+        assert result.exit_code == 0
+        assert "15: cn008 connects to 1 nodes: [16]" in str(result.output)
+        assert "16: SubRack002-RCM connects to 2 nodes: [15, 17]" in str(result.output)
+        assert "17: sw-leaf-bmc-002 connects to 2 nodes: [18, 16]" in str(result.output)
+        assert "18: cn004 connects to 2 nodes: [19, 17]" in str(result.output)
+        assert "19: SubRack001-RCM connects to 1 nodes: [18]" in str(result.output)
 
 
 def generate_test_file(file_name):
@@ -437,12 +530,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j51",
+            "51",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j51",
+            "51",
         ],
         [
             "sw-25g01",
@@ -455,7 +548,7 @@ def generate_test_file(file_name):
             "x3000",
             "u13",
             "-",
-            "j52",
+            "52",
         ],
         [
             "sw-smn01",
@@ -463,12 +556,12 @@ def generate_test_file(file_name):
             "U14",
             "",
             "-",
-            "j49",
+            "49",
             "sw-25g01",
             "x3000",
             "u12",
             "-",
-            "j48",
+            "48",
         ],
         [
             "sw-smn01",
@@ -476,12 +569,12 @@ def generate_test_file(file_name):
             "U14",
             "",
             "",
-            "j50",
+            "50",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j48",
+            "48",
         ],
         [
             "sw-25g01",
@@ -489,12 +582,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j47",
+            "47",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j47",
+            "47",
         ],
         [
             "uan01",
@@ -502,12 +595,12 @@ def generate_test_file(file_name):
             "u19",
             "ocp",
             "-",
-            "j1",
+            "1",
             "sw-25g01",
             "x3000",
             "u12",
             "-",
-            "j16",
+            "16",
         ],
         [
             "uan01",
@@ -515,12 +608,25 @@ def generate_test_file(file_name):
             "u19",
             "ocp",
             "-",
-            "j2",
+            "2",
             "sw-25g01",
             "x3000",
             "u12",
             "-",
-            "j17",
+            "17",
+        ],
+        [
+            "uan01",
+            "x3000",
+            "u19",
+            "pci",
+            "-",
+            "1",
+            "sw-25g02",
+            "x3000",
+            "u13",
+            "-",
+            "16",
         ],
         [
             "uan01",
@@ -528,25 +634,12 @@ def generate_test_file(file_name):
             "u19",
             "s1",
             "-",
-            "j1",
+            "2",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j16",
-        ],
-        [
-            "uan01",
-            "x3000",
-            "u19",
-            "s1",
-            "-",
-            "j2",
-            "sw-25g02",
-            "x3000",
-            "u13",
-            "-",
-            "j17",
+            "17",
         ],
         [
             "sn03",
@@ -554,12 +647,12 @@ def generate_test_file(file_name):
             "u09",
             "ocp",
             "-",
-            "j1",
+            "1",
             "sw-25g01",
             "x3000",
             "u12",
             "-",
-            "j15",
+            "15",
         ],
         [
             "sn03",
@@ -567,12 +660,12 @@ def generate_test_file(file_name):
             "u09",
             "ocp",
             "-",
-            "j2	",
+            "2	",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j15",
+            "15",
         ],
         [
             "sn03",
@@ -580,12 +673,12 @@ def generate_test_file(file_name):
             "u09",
             "s1	",
             "-",
-            "j1",
+            "1",
             "sw-25g01",
             "x3000",
             "u12",
             "-",
-            "j14",
+            "14",
         ],
         [
             "sn03",
@@ -593,12 +686,12 @@ def generate_test_file(file_name):
             "u09",
             "s1	",
             "-",
-            "j2",
+            "2",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j14",
+            "14",
         ],
         [
             "sn02",
@@ -606,12 +699,12 @@ def generate_test_file(file_name):
             "u08",
             "ocp",
             "-",
-            "j1",
+            "1",
             "sw-25g01",
             "x3000",
             "u12",
             "-",
-            "j13",
+            "13",
         ],
         [
             "sn02",
@@ -619,12 +712,12 @@ def generate_test_file(file_name):
             "u08",
             "ocp",
             "-",
-            "j2	",
+            "2	",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j13",
+            "13",
         ],
         [
             "sn02",
@@ -632,12 +725,12 @@ def generate_test_file(file_name):
             "u08",
             "s1	",
             "-",
-            "j1",
+            "1",
             "sw-25g01",
             "x3000",
             "u12",
             "-",
-            "j12",
+            "12",
         ],
         [
             "sn02",
@@ -645,12 +738,12 @@ def generate_test_file(file_name):
             "u08",
             "s1	",
             "-",
-            "j2	",
+            "2	",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j12",
+            "12",
         ],
         [
             "sn01",
@@ -658,12 +751,12 @@ def generate_test_file(file_name):
             "u07",
             "ocp",
             "-",
-            "j1",
+            "1",
             "sw-25g01",
             "x3000",
             "u12",
             "-",
-            "j11",
+            "11",
         ],
         [
             "sn01",
@@ -671,12 +764,12 @@ def generate_test_file(file_name):
             "u07",
             "ocp",
             "-",
-            "j2	",
+            "2	",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j11",
+            "11",
         ],
         [
             "sn01",
@@ -684,12 +777,12 @@ def generate_test_file(file_name):
             "u07",
             "s1	",
             "-",
-            "j1",
+            "1",
             "sw-25g01",
             "x3000",
             "u12",
             "-",
-            "j10",
+            "10",
         ],
         [
             "sn01",
@@ -697,12 +790,12 @@ def generate_test_file(file_name):
             "u07",
             "s1	",
             "-",
-            "j2	",
+            "2	",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j10",
+            "10",
         ],
         [
             "wn03",
@@ -710,12 +803,12 @@ def generate_test_file(file_name):
             "u06",
             "ocp",
             "-",
-            "j1",
+            "1",
             "sw-25g01",
             "x3000",
             "u12",
             "-",
-            "j9",
+            "9",
         ],
         [
             "wn03",
@@ -723,12 +816,12 @@ def generate_test_file(file_name):
             "u06",
             "ocp",
             "-",
-            "j2	",
+            "2	",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j9",
+            "9",
         ],
         [
             "wn02",
@@ -736,12 +829,12 @@ def generate_test_file(file_name):
             "u05",
             "ocp",
             "-",
-            "j1",
+            "1",
             "sw-25g01",
             "x3000",
             "u12",
             "-",
-            "j8",
+            "8",
         ],
         [
             "wn02",
@@ -749,12 +842,12 @@ def generate_test_file(file_name):
             "u05",
             "ocp",
             "-",
-            "j2	",
+            "2	",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j8",
+            "8",
         ],
         [
             "wn01",
@@ -762,12 +855,12 @@ def generate_test_file(file_name):
             "u04",
             "ocp",
             "-",
-            "j1",
+            "1",
             "sw-25g01",
             "x3000",
             "u12",
             "-",
-            "j7",
+            "7",
         ],
         [
             "wn01",
@@ -775,12 +868,12 @@ def generate_test_file(file_name):
             "u04",
             "ocp",
             "-",
-            "j2	",
+            "2	",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j7",
+            "7",
         ],
         [
             "mn03",
@@ -788,12 +881,12 @@ def generate_test_file(file_name):
             "u03",
             "ocp",
             "-",
-            "j1",
+            "1",
             "sw-25g01",
             "x3000",
             "u12",
             "-",
-            "j5",
+            "5",
         ],
         [
             "mn03",
@@ -801,12 +894,12 @@ def generate_test_file(file_name):
             "u03",
             "s1	",
             "-",
-            "j1	",
+            "1	",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j5",
+            "5",
         ],
         [
             "mn02",
@@ -814,12 +907,12 @@ def generate_test_file(file_name):
             "u02",
             "ocp",
             "-",
-            "j1",
+            "1",
             "sw-25g01",
             "x3000",
             "u12",
             "-",
-            "j3",
+            "3",
         ],
         [
             "mn02",
@@ -827,12 +920,12 @@ def generate_test_file(file_name):
             "u02",
             "s1	",
             "-",
-            "j1	",
+            "1	",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j3",
+            "3",
         ],
         [
             "mn01",
@@ -840,25 +933,25 @@ def generate_test_file(file_name):
             "u01",
             "ocp",
             "-",
-            "j1",
+            "1",
             "sw-25g01",
             "x3000",
             "u12",
             "-",
-            "j1",
+            "1",
         ],
         [
-            "mn01",
+            "sw-cdu-001",
             "x3000",
             "u01",
-            "s1	",
+            "",
             "-",
-            "j1	",
-            "sw-25g02",
+            "1	",
+            "sw-cdu-002",
             "x3000",
             "u13",
             "-",
-            "j1",
+            "20",
         ],
         [
             "CAN switch",
@@ -871,7 +964,7 @@ def generate_test_file(file_name):
             "x3000",
             "u12",
             "-",
-            "j36",
+            "36",
         ],
         [
             "CAN switch",
@@ -884,7 +977,7 @@ def generate_test_file(file_name):
             "x3000",
             "u13",
             "-",
-            "j36",
+            "36",
         ],
         # BAD ROW, do not include in normal run
         [
@@ -893,12 +986,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j1",
+            "1",
             "mn98",
             "x3000",
             "u13",
             "-",
-            "j1",
+            "1",
         ],
     ]
     for row in range(0, 36):
@@ -910,7 +1003,7 @@ def generate_test_file(file_name):
     ws2["I14"] = "Source"
     ws2["J14"] = "Rack"
     ws2["K14"] = "Location"
-    # ws2["L14"] = "Slot" # Missing Header
+    # Missing Header
     # None
     ws2["M14"] = "Port"
     ws2["N14"] = "Destination"
@@ -940,12 +1033,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j51",
+            "51",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j51",
+            "51",
         ],
         [
             "sw-25g01",
@@ -953,12 +1046,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j52",
+            "52",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j52",
+            "52",
         ],
         [
             "sw-25g01",
@@ -966,12 +1059,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j52",
+            "52",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j51",
+            "51",
         ],
         [
             "sw-cdu01",
@@ -979,12 +1072,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j52",
+            "52",
             "sw-smn99",
             "x3000",
             "u13",
             "-",
-            "j52",
+            "52",
         ],
         [
             "mn-99",
@@ -992,12 +1085,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j52",
+            "52",
             "sw-25g01",
             "x3000",
             "u13",
             "-",
-            "j52",
+            "52",
         ],
         [
             "mn-99",
@@ -1005,12 +1098,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j50",
+            "50",
             "sw-25g02",
             "x3000",
             "u13",
             "-",
-            "j52",
+            "52",
         ],
         [
             "mn-99",
@@ -1018,12 +1111,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j51",
+            "51",
             "sw-smn98",
             "x3000",
             "u13",
             "-",
-            "j52",
+            "52",
         ],
         [
             "mn-99",
@@ -1031,12 +1124,12 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j52",
+            "52",
             "sw-smn99",
             "x3000",
             "u13",
             "-",
-            "j52",
+            "52",
         ],
         [
             "sw-100g01",
@@ -1044,16 +1137,107 @@ def generate_test_file(file_name):
             "u12",
             "",
             "-",
-            "j52",
+            "52",
             "sw-smn99",
             "x3000",
             "u13",
             "-",
-            "j52",
+            "52",
         ],
     ]
     for row in range(0, 9):
         for col in range(0, 11):
             ws3.cell(column=col + 9, row=row + 15, value=f"{test_data3[row][col]}")
+
+    # Tab 3 "HMN" containing subrack connections
+    ws3 = wb.create_sheet(title="HMN")
+    ws3["I14"] = "Source"
+    ws3["J14"] = "Rack"
+    ws3["K14"] = "Location"
+    ws3["L14"] = "Slot"
+    ws3["M14"] = "Parent"
+    # None
+    ws3["O14"] = "Port"
+    ws3["P14"] = "Destination"
+    ws3["Q14"] = "Rack"
+    ws3["R14"] = "Location"
+    # None
+    ws3["T14"] = "Port"
+
+    test_data_hmn = [
+        [
+            "cn08",
+            "x3000",
+            "u15L",
+            "",
+            "SubRack-002-RCM",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+        ],
+        [
+            "SubRack-002-RCM",
+            "x3000",
+            "u15",
+            "",
+            "",
+            "-",
+            "RCM",
+            "sw-smn02",
+            "x3000",
+            "u32",
+            "-",
+            "36",
+        ],
+        [
+            "nid000004",
+            "x3000",
+            "u13L",
+            "",
+            "SubRack-001-RCM",
+            "-",
+            "j3",
+            "sw-smn02",
+            "x3000",
+            "u32",
+            "-",
+            "28",
+        ],
+        [
+            "SubRack-001-RCM",
+            "x3000",
+            "u13",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+        ],
+        [
+            "nid000005",
+            "x3000",
+            "u13L",
+            "",
+            "",
+            "-",
+            "j3",
+            "JUNK",
+            "x3000",
+            "u32",
+            "-",
+            "28",
+        ],
+    ]
+    for row in range(0, 5):
+        for col in range(0, 12):
+            ws3.cell(column=col + 9, row=row + 15, value=f"{test_data_hmn[row][col]}")
 
     wb.save(filename=test_file)

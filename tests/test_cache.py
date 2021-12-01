@@ -23,25 +23,25 @@
 import json
 from unittest.mock import patch
 
-import click.testing
+from click import testing
 import pytest
 import responses
 
-from canu.cache import (
+from canu.cli import cli
+from canu.utils.cache import (
     firmware_cached_recently,
     get_switch_from_cache,
     remove_switch_from_cache,
 )
-from canu.cli import cli
 
 
 username = "admin"
 password = "admin"
 ip = "192.168.1.1"
 credentials = {"username": username, "password": password}
-shasta = "1.4"
+csm = "1.0"
 cache_minutes = 10
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 
 
 @patch("canu.report.switch.firmware.firmware.switch_vendor")
@@ -83,8 +83,8 @@ def test_switch_caching(switch_vendor):
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 ip,
                 "--username",
@@ -104,8 +104,8 @@ def test_switch_caching(switch_vendor):
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 ip,
                 "--username",

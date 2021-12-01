@@ -20,8 +20,11 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate the network config."""
+from collections import defaultdict
+from glob import glob
 import ipaddress
-import os
+import json
+from os import path
 from pathlib import Path
 import sys
 
@@ -32,15 +35,16 @@ from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
 from hier_config import HConfig, Host
 from netmiko import ssh_exception
-import ruamel.yaml
+from ruamel.yaml import YAML
 
-from canu.utils.utils import netmiko_command
+from canu.utils.cache import cache_directory
 from canu.validate.switch.config.config import (
     compare_config,
+    get_switch_config,
     print_config_diff_summary,
 )
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 
 # Get project root directory
@@ -50,19 +54,26 @@ else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
-canu_cache_file = os.path.join(project_root, "canu", "canu_cache.yaml")
-canu_config_file = os.path.join(project_root, "canu", "canu.yaml")
+canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
+canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
-# Get Shasta versions from canu.yaml
-with open(canu_config_file, "r") as file:
-    canu_config = yaml.load(file)
+# Get CSM versions from canu.yaml
+with open(canu_config_file, "r") as canu_f:
+    canu_config = yaml.load(canu_f)
 
-shasta_options = canu_config["shasta_versions"]
+csm_options = canu_config["csm_versions"]
 
-options_file = os.path.join(
-    project_root, "canu", "validate", "switch", "config", "options.yaml"
+options_file = path.join(
+    project_root,
+    "canu",
+    "validate",
+    "switch",
+    "config",
+    "options.yaml",
 )
-options = yaml.load(open(options_file))
+with open(options_file, "r") as options_f:
+    options = yaml.load(options_f)
+
 host = Host("example.rtr", "aoscx", options)
 
 
@@ -72,16 +83,15 @@ host = Host("example.rtr", "aoscx", options)
     help_options_color="blue",
 )
 @click.option(
-    "--shasta",
-    "-s",
-    type=click.Choice(shasta_options),
-    help="Shasta network version",
-    prompt="Shasta network version",
+    "--csm",
+    type=click.Choice(csm_options),
+    help="CSM network version",
+    prompt="CSM network version",
     required=True,
     show_choices=True,
 )
 @optgroup.group(
-    "Network cabling IPv4 input sources",
+    "Running config input sources",
     cls=RequiredMutuallyExclusiveOptionGroup,
 )
 @optgroup.option(
@@ -94,117 +104,253 @@ host = Host("example.rtr", "aoscx", options)
     help="File with one IPv4 address per line",
     type=click.File("r"),
 )
-# @click.option("--ip", required=True, help="The IP address of the switch")
+@optgroup.option(
+    "--running",
+    help="Folder containing running config files",
+)
 @click.option("--username", default="admin", show_default=True, help="Switch username")
 @click.option(
     "--password",
-    prompt=True,
     hide_input=True,
     confirmation_prompt=False,
     help="Switch password",
 )
-@click.option("--config", "config_folder", help="Config file folder", required=True)
+@click.option(
+    "--generated",
+    "generated_folder",
+    help="Config file folder",
+    required=True,
+)
+@click.option("--json", "json_", is_flag=True, help="Output JSON")
+@click.option(
+    "--out",
+    help="Output results to a file",
+    type=click.File("w"),
+    default="-",
+)
 @click.pass_context
-def config(ctx, shasta, ips, ips_file, username, password, config_folder):
-    """Validate switch config.
+def config(
+    ctx,
+    csm,
+    ips,
+    ips_file,
+    running,
+    username,
+    password,
+    generated_folder,
+    json_,
+    out,
+):
+    """Validate network config.
 
-    Compare the current running switch config with a generated switch config.
+    For each switch, this command will compare the current running switch config with a generated switch config.
 
+    ## Running Config
+    There are three options for passing in the running config:
+
+    - A comma separated list of ips using '--ips 192.168.1.1,192.168.1.'
+
+    - A file of ip addresses, one per line using the flag '--ips-file ips.txt'
+
+    - A directory containing the running configuration '--running RUNNING/CONFIG/DIRECTORY'
+
+    ## Generated Config
+    A directory of generated config files will also need to be passed in using '--generated GENERATED/CONFIG/DIRECTORY'.
+
+    There will be a summary table for each switch highlighting the most important differences between the running switch config and the generated config files.
+
+    --------
     \f
-    # noqa: D301
+    # noqa: D301, B950
 
     Args:
         ctx: CANU context settings
-        shasta: Shasta version
+        csm: csm version
         ips: Comma separated list of IPv4 addresses of switches
         ips_file: File with one IPv4 address per line
+        running: The running switch config file folder
         username: Switch username
         password: Switch password
-        config_folder: Config file folder
+        generated_folder: Generated config file folder
+        json_: Bool indicating json output
+        out: Name of the output file
     """
     if ips_file:
         ips = []
         lines = [line.strip().replace(",", "") for line in ips_file]
         ips.extend([ipaddress.ip_address(line) for line in lines if IPV4_ADDRESS(line)])
 
-    credentials = {"username": username, "password": password}
-
     config_data = []
+    config_json = defaultdict()
     errors = []
-    ips_length = len(ips)
-    command = "show running-config"
+    # validate network config only supports aruba at this time.
+    vendor = "aruba"
 
     if ips:
+        if not password:
+            password = click.prompt(
+                "Enter the switch password",
+                type=str,
+                hide_input=True,
+            )
+
+        credentials = {"username": username, "password": password}
+        ips_length = len(ips)
         with click_spinner.spinner():
             for i, ip in enumerate(ips, start=1):
-                print(
-                    f"  Connecting to {ip} - Switch {i} of {ips_length}        ",
-                    end="\r",
-                )
+                if not json_:
+                    print(
+                        f"  Connecting to {ip} - Switch {i} of {ips_length}        ",
+                        end="\r",
+                    )
                 try:
-                    hostname = netmiko_command(str(ip), credentials, "sh run | i host")
-                    hostname = hostname.split()[1]
-                    config = netmiko_command(str(ip), credentials, command)
+                    hostname, switch_config, vendor = get_switch_config(
+                        ip,
+                        credentials,
+                        return_error=True,
+                    )
 
-                    # For versions of Shasta < 1.6, the hostname might need to be renamed
-                    if shasta:
-                        if float(shasta) < 1.6:
+                    # For versions of csm < 1.2, the hostname might need to be renamed
+                    if csm:
+                        if float(csm) < 1.2:
                             hostname = hostname.replace("-leaf-", "-leaf-bmc-")
                             hostname = hostname.replace("-agg-", "-leaf-")
 
                     running_config_hier = HConfig(host=host)
-                    running_config_hier.load_from_string(config)
+                    running_config_hier.load_from_string(switch_config)
 
                     # Build Hierarchical Configuration object for the Generated Config
                     generated_config_hier = HConfig(host=host)
                     generated_config_hier.load_from_file(
-                        f"{config_folder}/{hostname}.cfg"
+                        f"{generated_folder.rstrip('/')}/{hostname}.cfg",
                     )
 
                     differences = compare_config(
-                        running_config_hier, generated_config_hier, False
+                        running_config_hier,
+                        generated_config_hier,
+                        print_comparison=False,
+                        out=out,
                     )
+                    if json_:
+                        config_json[hostname] = differences
 
-                    config_data.append(
-                        [
-                            hostname,
-                            ip,
-                            differences,
-                        ]
-                    )
+                    else:
+                        config_data.append(
+                            [
+                                hostname,
+                                ip,
+                                differences,
+                            ],
+                        )
+                except (
+                    ssh_exception.NetmikoTimeoutException,
+                    ssh_exception.NetmikoAuthenticationException,
+                    Exception,
+                ) as error:
 
-                except ssh_exception.NetmikoTimeoutException:
-                    errors.append(
-                        [
-                            str(ip),
-                            f"Timeout error connecting to switch {ip}, check the IP address and try again.",
-                        ]
-                    )
-                except ssh_exception.NetmikoAuthenticationException:
-                    errors.append(
-                        [
-                            str(ip),
-                            f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again.",
-                        ]
-                    )
-                except Exception as err:  # pragma: no cover
-                    exception_type = type(err).__name__
-                    errors.append(
-                        [
-                            str(ip),
-                            f"{exception_type} {err}",
-                        ]
-                    )
+                    exception_type = type(error).__name__
+                    if exception_type == "NetmikoTimeoutException":
+                        error_message = (
+                            "Timeout error. Check the IP address and try again."
+                        )
+                    elif exception_type == "NetmikoAuthenticationException":
+                        error_message = "Authentication error. Check the credentials or IP address and try again"
+                    else:  # pragma: no cover
+                        error_message = f"Error connecting to switch {ip}, {exception_type} {error}."
 
-    for switch in config_data:
-        print_config_diff_summary(switch[0], switch[1], switch[2])
+                    errors.append([str(ip), error_message])
 
-    dash = "-" * 100
-    if len(errors) > 0:
-        click.echo("\n")
-        click.secho("Errors", fg="red")
-        click.echo(dash)
-        for error in errors:
-            click.echo("{:<15s} - {}".format(error[0], error[1]))
+    else:
+        # Search directory for config files
+        running_config_list = glob(f"{running.rstrip('/')}/*")
+        for config_file in running_config_list:
 
-    return
+            running_config_hier = HConfig(host=host)
+            try:
+                running_config_hier.load_from_file(config_file)
+
+            except UnicodeDecodeError:
+                errors.append(
+                    [
+                        str(config_file),
+                        f"The file {config_file} is not a valid config file.",
+                    ],
+                )
+                continue
+
+            hostname = ""
+            for line in running_config_hier.all_children():
+                if line.cisco_style_text().startswith("hostname "):
+                    hostname = line.cisco_style_text().split()[1]
+                    break
+
+            if hostname == "":
+                errors.append(
+                    [
+                        str(config_file),
+                        f"The file {config_file} is not a valid config file.",
+                    ],
+                )
+                continue
+            # For versions of CSM < 1.2, the hostname might need to be renamed
+            # If the hostname contains "-leaf-bmc-", set the version to 1.6 so nothing will be renamed
+            if csm:
+                if float(csm) < 1.2:
+                    if "-leaf-bmc-" in hostname:
+                        csm = 1.2
+                    else:
+                        hostname = hostname.replace("-leaf-", "-leaf-bmc-")
+                        hostname = hostname.replace("-agg-", "-leaf-")
+
+            # Build Hierarchical Configuration object for the Generated Config
+            generated_config_hier = HConfig(host=host)
+            generated_config_file = f"{generated_folder.rstrip('/')}/{hostname}.cfg"
+            try:
+                generated_config_hier.load_from_file(generated_config_file)
+
+            except FileNotFoundError:
+                errors.append(
+                    [
+                        str(hostname),
+                        f"Could not find generated config file {generated_config_file}",
+                    ],
+                )
+
+            differences = compare_config(
+                running_config_hier,
+                generated_config_hier,
+                print_comparison=False,
+                out=out,
+            )
+            if json_:
+                config_json[hostname] = differences
+
+            else:
+                config_data.append(
+                    [
+                        hostname,
+                        None,
+                        differences,
+                    ],
+                )
+
+    if json_:
+        # Add errors dict to config_json
+        if len(errors) > 0:
+            error_json = defaultdict()
+            for error in errors:
+                error_json[error[0]] = error[1]
+            config_json["errors"] = error_json
+
+        click.echo(json.dumps(config_json, indent=2), file=out)
+
+    else:
+        for switch in config_data:
+            print_config_diff_summary(switch[0], switch[1], switch[2], out)
+
+        dash = "-" * 100
+        if len(errors) > 0:
+            click.secho("\nErrors", fg="red", file=out)
+            click.echo(dash, file=out)
+            for error in errors:
+                click.echo("{:<15s} - {}".format(error[0], error[1]), file=out)

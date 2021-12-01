@@ -23,37 +23,91 @@
 
 block_cipher = None
 
+added_files = [
+    ("canu/.version", "canu"),
+    ("canu/canu.yaml", "canu"),
+    ("canu/validate/switch/config/*.yaml", "canu/validate/switch/config"),
+    ("network_modeling/models/*", "network_modeling/models"),
+    ("network_modeling/mac_vendors", "network_modeling"),
+    ("network_modeling/schema/*", "network_modeling/schema"),
+    (
+        "network_modeling/configs/templates/1.0/aruba/common/*.j2",
+        "network_modeling/configs/templates/1.0/aruba/common",
+    ),
+    (
+        "network_modeling/configs/templates/1.0/aruba/full/*.j2",
+        "network_modeling/configs/templates/1.0/aruba/full",
+    ),
+    (
+        "network_modeling/configs/templates/1.0/aruba/tds/*.j2",
+        "network_modeling/configs/templates/1.0/aruba/tds",
+    ),
+    (
+        "network_modeling/configs/templates/1.0/dellmellanox/common/*.j2",
+        "network_modeling/configs/templates/1.0/dellmellanox/common",
+    ),
+    (
+        "network_modeling/configs/templates/1.0/dellmellanox/full/*.j2",
+        "network_modeling/configs/templates/1.0/dellmellanox/full",
+    ),
+    (
+        "network_modeling/configs/templates/1.0/dellmellanox/tds/*.j2",
+        "network_modeling/configs/templates/1.0/dellmellanox/tds",
+    ),
+    (
+        "network_modeling/configs/templates/1.2/aruba/common/*.j2",
+        "network_modeling/configs/templates/1.2/aruba/common",
+    ),
+    (
+        "network_modeling/configs/templates/1.2/aruba/full/*.j2",
+        "network_modeling/configs/templates/1.2/aruba/full",
+    ),
+    (
+        "network_modeling/configs/templates/1.2/aruba/tds/*.j2",
+        "network_modeling/configs/templates/1.2/aruba/tds",
+    ),
+    (
+        "network_modeling/configs/templates/1.2/dellmellanox/common/*.j2",
+        "network_modeling/configs/templates/1.2/dellmellanox/common",
+    ),
+    (
+        "network_modeling/configs/templates/1.2/dellmellanox/full/*.j2",
+        "network_modeling/configs/templates/1.2/dellmellanox/full",
+    ),
+    (
+        "network_modeling/configs/templates/1.2/dellmellanox/tds/*.j2",
+        "network_modeling/configs/templates/1.2/dellmellanox/tds",
+    ),
 
-a = Analysis(['canu/cli.py'],
-             pathex=['canu', '/workspace'],
-             binaries=[],
-             datas=[
-               ('.version', '.'),
-               ('canu/canu.yaml', 'canu'),
-               ('network_modeling/models/*', 'network_modeling/models'),
-               ('network_modeling/schema/*', 'network_modeling/schema'),
-             ],
-             hiddenimports=['network_modeling'],
-             hookspath=[],
-             runtime_hooks=[],
-             excludes=[],
-             win_no_prefer_redirects=False,
-             win_private_assemblies=False,
-             cipher=block_cipher,
-             noarchive=False)
-pyz = PYZ(a.pure, a.zipped_data,
-             cipher=block_cipher)
-exe = EXE(pyz,
-          a.scripts,
-          a.binaries,
-          a.zipfiles,
-          a.datas,
-          [],
-          name='canu',
-          debug=False,
-          bootloader_ignore_signals=False,
-          strip=False,
-          upx=True,
-          upx_exclude=[],
-          runtime_tmpdir=None,
-          console=True )
+]
+a = Analysis(
+    ["canu/cli.py"],
+    pathex=["canu", "/workspace"],
+    binaries=[],
+    datas=added_files,
+    hiddenimports=["network_modeling"],
+    hookspath=[],
+    runtime_hooks=[],
+    excludes=["tests"],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
+    noarchive=False,
+)
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+exe = EXE(
+    pyz,
+    a.scripts,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    [],
+    name="canu",
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    runtime_tmpdir=None,
+    console=True,
+)

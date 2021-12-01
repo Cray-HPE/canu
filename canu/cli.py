@@ -19,23 +19,26 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-"""CANU (CSM Automatic Network Utility) floats through a new Shasta network and makes setup a breeze."""
+"""CANU (CSM Automatic Network Utility) floats through a Shasta network and makes setup and config breeze."""
+from collections import defaultdict
 import json
-import os.path
+from os import environ, path
 import sys
 
 import click
 from click_help_colors import HelpColorsCommand, HelpColorsGroup
 import requests
-import ruamel.yaml
+from ruamel.yaml import YAML
 import urllib3
 
+from canu.cache import cache
 from canu.config import config
 from canu.generate import generate
 from canu.report import report
+from canu.utils.cache import cache_switch
 from canu.validate import validate
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 # To disable warnings about unsecured HTTPS requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -44,22 +47,22 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
     parent_directory = sys._MEIPASS
 else:
-    parent_directory = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    parent_directory = path.abspath(path.dirname(path.dirname(__file__)))
 
-canu_config_file = os.path.join(parent_directory, "canu", "canu.yaml")
-canu_version_file = os.path.join(parent_directory, ".version")
+canu_config_file = path.join(parent_directory, "canu", "canu.yaml")
+canu_version_file = path.join(parent_directory, "canu", ".version")
 
 with open(canu_version_file, "r") as version_file:
     version = version_file.read().replace("\n", "")
 
-with open(canu_config_file, "r") as file:
-    canu_config = yaml.load(file)
+with open(canu_config_file, "r") as canu_f:
+    canu_config = yaml.load(canu_f)
 
-CONTEXT_SETTING = dict(
-    obj={
+CONTEXT_SETTING = {
+    "obj": {
         "config": canu_config,
-    }
-)
+    },
+}
 
 
 @click.group(
@@ -78,12 +81,13 @@ CONTEXT_SETTING = dict(
 @click.version_option(version)
 @click.pass_context
 def cli(ctx, cache_minutes):
-    """CANU (CSM Automatic Network Utility) floats through a new Shasta network and makes setup a breeze."""
+    """CANU (CSM Automatic Network Utility) floats through a Shasta network and makes setup and config breeze."""
     ctx.ensure_object(dict)
 
     ctx.obj["cache_minutes"] = cache_minutes
 
 
+cli.add_command(cache.cache)
 cli.add_command(config.config)
 cli.add_command(generate.generate)
 cli.add_command(report.report)
@@ -95,7 +99,11 @@ cli.add_command(validate.validate)
     help_headers_color="yellow",
     help_options_color="blue",
 )
-@click.option("--csi-folder", help="Directory containing the CSI json file")
+@click.option(
+    "--sls-file",
+    help="File containing system SLS JSON data.",
+    type=click.File("r"),
+)
 @click.option(
     "--auth-token",
     envvar="SLS_TOKEN",
@@ -103,70 +111,77 @@ cli.add_command(validate.validate)
 )
 @click.option("--sls-address", default="api-gw-service-nmn.local", show_default=True)
 @click.option(
+    "--network",
+    default="NMN",
+    help="Switch network e.g. (CAN, MTL, NMN)",
+    show_default=True,
+)
+@click.option(
     "--out",
     required=True,
     help="Output file with CSI IP addresses",
     type=click.File("w"),
 )
 @click.pass_context
-def init(ctx, csi_folder, auth_token, sls_address, out):
-    """Initialize CANU by extracting all the switch IPs from yaml files in the CSI folder, or by getting IPs from SLS.
+def init(ctx, sls_file, auth_token, sls_address, network, out):
+    """Initialize CANU by extracting all the switch IPs from CSI generated json, or by getting IPs from SLS.
 
-    To access SLS, a token must be passed in using the --auth-token flag.
-    Tokens are typically stored in ~./config/cray/tokens/
-    Instead of passing in a token file, the environmental variable SLS_TOKEN can be used.
+    To access the SLS API, a token must be passed in using the '--auth-token' flag.
+    - Tokens are typically stored in '~./config/cray/tokens/'
+    - Instead of passing in a token file, the environmental variable SLS_TOKEN can be used.
 
-    To initialize using CSI, pass in the CSI folder containing the sls_input_file.json file using the --csi-folder flag
+    To initialize using JSON instead of the SLS API, pass in the file containing SLS JSON data (normally sls_input_file.json) using the '--sls-file' flag
 
-    The sls_input_file.json file is generally stored in one of two places
-    depending on how far the system is in the install process.
+    If used, CSI-generated sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.
+    - Early in the install process, when running off of the LiveCD the CSI sls_input_file.json file is normally found in the the directory '/var/www/ephemeral/prep/SYSTEMNAME/'
+    - Later in the install process, the CSI sls_input_file.json file is generally in '/mnt/pitdata/prep/SYSTEMNAME/'
 
 
-     - Early in the install process, when running off of the LiveCD the
-     sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
-
-     - Later in the install process, the sls_input_file.json file is
-     generally in `/mnt/pitdata/prep/SYSTEMNAME/`
+    The output file for the `canu init` command is set with the `--out FILENAME` flag.
 
     \f
-    # noqa: D301
+    # noqa: D301, B950
 
     Args:
         ctx: CANU context settings
-        csi_folder: Directory containing the CSI json file
+        sls_file: File containing the CSI json data
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
+        network: Switch network e.g. (CAN, MTL, NMN).
         out: Name of the output file
     """
     switch_addresses = []
 
-    # Parse sls_input_file.json file from CSI and filter "Node Management Network" IP addresses
-    if csi_folder:
+    # Parse SLS input file. and filter "Node Management Network" IP addresses
+    if sls_file:
         try:
-            with open(os.path.join(csi_folder, "sls_input_file.json"), "r") as f:
-                input_json = json.load(f)
-
-                # Format the input to be like the SLS JSON
-                input_json_networks = [input_json["Networks"]["CAN"]]
-
-                switch_addresses = parse_sls_json_for_ips(input_json_networks)
-
-        except FileNotFoundError:
+            input_json = json.load(sls_file)
+        except (json.JSONDecodeError, UnicodeDecodeError):
             click.secho(
-                "The file sls_input_file.json was not found, check that this is the correct CSI directory.",
+                f"The file {sls_file.name} is not valid JSON.",
                 fg="red",
             )
             return
 
+        # Format the input to be like the SLS JSON
+        input_json_networks = [input_json["Networks"][network]]
+        input_json_hardware = input_json.get("Hardware", {})
+
+        switch_addresses, switch_dict = parse_sls_json_for_ips(
+            input_json_networks,
+            network,
+        )
+        parse_sls_json_for_vendor(input_json_hardware, switch_dict)
+
     else:
-        token = os.environ.get("SLS_TOKEN")
+        token = environ.get("SLS_TOKEN")
 
         # Token file takes precedence over the environmental variable
         if auth_token != token:
             try:
-                with open(auth_token) as f:
-                    data = json.load(f)
-                    token = data["access_token"]
+                with open(auth_token) as auth_f:
+                    auth_data = json.load(auth_f)
+                    token = auth_data["access_token"]
 
             except Exception:
                 return click.secho(
@@ -176,21 +191,37 @@ def init(ctx, csi_folder, auth_token, sls_address, out):
                 )
 
         # SLS
-        url = "https://" + sls_address + "/apis/sls/v1/networks"
+        networks_url = "https://" + sls_address + "/apis/sls/v1/networks"
+        hardware_url = "https://" + sls_address + "/apis/sls/v1/hardware"
         try:
-            response = requests.get(
-                url,
+            # Networks
+            networks_response = requests.get(
+                networks_url,
                 headers={
                     "Content-Type": "application/json",
                     "Authorization": f"Bearer {token}",
                 },
                 verify=False,
             )
-            response.raise_for_status()
+            networks_response.raise_for_status()
+            csm_networks = networks_response.json()
+            switch_addresses, switch_dict = parse_sls_json_for_ips(
+                csm_networks,
+                network,
+            )
 
-            shasta_networks = response.json()
-
-            switch_addresses = parse_sls_json_for_ips(shasta_networks)
+            # Hardware
+            hardware_response = requests.get(
+                hardware_url,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {token}",
+                },
+                verify=False,
+            )
+            hardware_response.raise_for_status()
+            csm_hardware = hardware_response.json()
+            parse_sls_json_for_vendor(csm_hardware[0], switch_dict)
 
         except requests.exceptions.ConnectionError:
             return click.secho(
@@ -214,31 +245,69 @@ def init(ctx, csi_folder, auth_token, sls_address, out):
     for ip in switch_addresses:
         click.echo(ip, file=out)
     click.secho(
-        f"{len(switch_addresses)} IP addresses saved to {out.name}", fg="yellow"
+        f"{len(switch_addresses)} IP addresses saved to {out.name}",
+        fg="yellow",
     )
 
 
-def parse_sls_json_for_ips(shasta):
-    """Parse SLS JSON and return CAN IPv4 addresses.
+def parse_sls_json_for_ips(csm, network="NMN"):
+    """Parse SLS JSON and return IPv4 addresses.
+
+    Defaults to the "NMN" network, but another network can be passed in. Cache the switch IP and hostname.
 
     Args:
-        shasta: The SLS JSON to be parsed.
+        csm: The SLS JSON to be parsed.
+        network: Switch network e.g. (CAN, MTL, NMN).
 
     Returns:
-        A list of switch IPs.
+        switch_addresses: A list of switch IPs.
+        switch_dict: Dictionary of IP addresses and hostnames
+
     """
     switch_addresses = []
-    for sls_network in shasta:
-        if sls_network["Name"] == "CAN":
-            switch_addresses = [
-                ip.get("IPAddress", None)
-                for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {})
-                for ip in subnets.get("IPReservations", {})
-                # Only get the IP addresses if the name starts with "sw-"
-                if ip.get("Name", "").startswith("sw-")
-            ]
+    switch_dict = defaultdict()
+    for sls_network in csm:
+        if sls_network["Name"] == network:
+            for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
+                for ip in subnets.get("IPReservations", {}):
+                    # Only get the IP addresses if the name starts with "sw-"
+                    if ip.get("Name", "").startswith("sw-"):
+                        ip_address = ip.get("IPAddress", None)
+                        hostname = ip.get("Name", "")
+                        switch_json = {
+                            "ip_address": ip_address,
+                            "hostname": hostname,
+                        }
+                        cache_switch(switch_json)
+                        switch_addresses.append(ip_address)
+                        if hostname:
+                            switch_dict[hostname] = ip_address
 
-    return switch_addresses
+    return switch_addresses, switch_dict
+
+
+def parse_sls_json_for_vendor(csm, switch_dict):
+    """Parse SLS JSON for switch vendor and cache the results.
+
+    Args:
+        csm: The SLS JSON to be parsed.
+        switch_dict: Dictionary of IP addresses and hostnames
+    """
+    # for device in csm:
+    for _key, device in csm.items():
+        alias_list = device.get("ExtraProperties", {}).get("Aliases", [])
+
+        for alias in alias_list:
+            if alias.startswith("sw-"):
+                vendor = device["ExtraProperties"].get("Brand", "").lower()
+                hostname = alias
+
+                switch_json = {
+                    "ip_address": switch_dict[hostname],
+                    "hostname": hostname,
+                    "vendor": vendor,
+                }
+                cache_switch(switch_json)
 
 
 if __name__ == "__main__":  # pragma: no cover

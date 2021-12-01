@@ -22,7 +22,7 @@
 """Test CANU validate network bgp commands."""
 from unittest.mock import patch
 
-import click.testing
+from click import testing
 import requests
 import responses
 
@@ -38,7 +38,7 @@ ip_dell = "192.168.1.2"
 ip_mellanox = "192.168.1.3"
 cache_minutes = 0
 asn = 65533
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 
 
 @patch("canu.validate.network.bgp.bgp.switch_vendor")
@@ -408,7 +408,7 @@ def test_validate_bgp_bad_ip(switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -452,7 +452,7 @@ def test_validate_bgp_bad_ip_file(switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -515,7 +515,7 @@ def test_validate_bgp_bad_password(switch_vendor):
         )
         assert result.exit_code == 0
         assert (
-            "Error connecting to switch 192.168.1.1, check that this IP is an Aruba switch, or check the username or password"
+            "Error connecting to switch 192.168.1.1, check the username or password"
             in str(result.output)
         )
 
@@ -980,7 +980,7 @@ def test_validate_bgp_mellanox(switch_vendor):
         )
         assert result.exit_code == 0
         assert "PASS - IP: 192.168.1.3 Hostname: sw-spine-mellanox" in str(
-            result.output
+            result.output,
         )
 
 
@@ -1119,7 +1119,7 @@ dell_firmware_mock = {
     "dell-system-software:sw-version": {
         "sw-version": "10.5.1.4",
         "sw-platform": "S4048T-ON",
-    }
+    },
 }
 
 dell_hostname_mock = {"dell-system:hostname": "test-dell"}
@@ -1136,7 +1136,7 @@ bgp_status_mellanox = {
             "192.168.1.9": [
                 {
                     "State/PfxRcd": "ESTABLISHED/13",
-                }
+                },
             ],
         },
     ],

@@ -22,8 +22,10 @@
 """Test CANU config BGP."""
 from collections import defaultdict
 import json
+from os import urandom
+from unittest.mock import patch
 
-import click.testing
+from click import testing
 import requests
 import responses
 
@@ -37,16 +39,20 @@ sls_address = "api-gw-service-nmn.local"
 ip1 = "192.168.1.1"
 ip2 = "192.168.1.2"
 ips = "192.168.1.1,192.168.1.2"
+ips_dell = "192.168.1.3,192.168.1.4"
+ips_mellanox = "192.168.1.5,192.168.1.6"
 cache_minutes = 0
 asn = 65533
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 token = "123abc"
 
 
+@patch("canu.config.bgp.bgp.switch_vendor")
 @responses.activate
-def test_config_bgp():
+def test_config_bgp(switch_vendor):
     """Test that the `canu config bgp` command runs."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.GET,
             f"https://{sls_address}/apis/sls/v1/networks",
@@ -97,7 +103,7 @@ def test_config_bgp():
             )
 
             # Route Maps
-            # ncn_names = ['ncn-w001', 'ncn-w002', 'ncn-w003', 'ncn-w004', 'ncn-w005']
+            # ncn_names are ['ncn-w001', 'ncn-w002', 'ncn-w003', 'ncn-w004', 'ncn-w005']
             responses.add(
                 responses.POST,
                 f"https://{ip}/rest/v10.04/system/route_maps",
@@ -200,18 +206,20 @@ def test_config_bgp():
         assert "192.168.1.2" in str(result.output)
 
 
+@patch("canu.config.bgp.bgp.switch_vendor")
 @responses.activate
-def test_config_bgp_file():
-    """Test that the `canu config bgp` command runs from CSI input."""
+def test_config_bgp_file(switch_vendor):
+    """Test that the `canu config bgp` command runs from SLS input."""
     with runner.isolated_filesystem():
-        # format sls_networks to be like sls_input_file.json
+        switch_vendor.return_value = "aruba"
+        # format sls_networks to be like sls_file.json
         sls_json = defaultdict()
         for network in sls_networks:
             name = network["Name"]
             sls_json[name] = network
         sls_json = {"Networks": sls_json}
 
-        with open("sls_input_file.json", "w") as f:
+        with open("sls_file.json", "w") as f:
             f.write(json.dumps(sls_json))
 
         responses.add(
@@ -264,7 +272,7 @@ def test_config_bgp_file():
             )
 
             # Route Maps
-            # ncn_names = ['ncn-w001', 'ncn-w002', 'ncn-w003', 'ncn-w004', 'ncn-w005']
+            # ncn_names are ['ncn-w001', 'ncn-w002', 'ncn-w003', 'ncn-w004', 'ncn-w005']
             responses.add(
                 responses.POST,
                 f"https://{ip}/rest/v10.04/system/route_maps",
@@ -359,8 +367,8 @@ def test_config_bgp_file():
                 password,
                 "--ips",
                 ips,
-                "--csi-folder",
-                ".",
+                "--sls-file",
+                "sls_file.json",
             ],
         )
         assert result.exit_code == 0
@@ -369,10 +377,12 @@ def test_config_bgp_file():
         assert "192.168.1.2" in str(result.output)
 
 
+@patch("canu.config.bgp.bgp.switch_vendor")
 @responses.activate
-def test_config_bgp_verbose():
+def test_config_bgp_verbose(switch_vendor):
     """Test that the `canu config bgp` command runs with verbose output."""
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.GET,
             f"https://{sls_address}/apis/sls/v1/networks",
@@ -423,7 +433,7 @@ def test_config_bgp_verbose():
             )
 
             # Route Maps
-            # ncn_names = ['ncn-w001', 'ncn-w002', 'ncn-w003', 'ncn-w004', 'ncn-w005']
+            # ncn_names are ['ncn-w001', 'ncn-w002', 'ncn-w003', 'ncn-w004', 'ncn-w005']
             responses.add(
                 responses.POST,
                 f"https://{ip}/rest/v10.04/system/route_maps",
@@ -632,13 +642,15 @@ def test_config_bgp_invalid_ip_file():
         assert "Error: Invalid value:" in str(result.output)
 
 
+@patch("canu.config.bgp.bgp.switch_vendor")
 @responses.activate
-def test_config_bgp_bad_ip():
+def test_config_bgp_bad_ip(switch_vendor):
     """Test that the `canu config bgp` command errors on bad IPs."""
     bad_ip = "192.168.1.98"
     bad_ip2 = "192.168.1.99"
 
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.GET,
             f"https://{sls_address}/apis/sls/v1/networks",
@@ -649,14 +661,14 @@ def test_config_bgp_bad_ip():
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
         responses.add(
             responses.POST,
             f"https://{bad_ip2}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -680,13 +692,15 @@ def test_config_bgp_bad_ip():
         assert "Error connecting to switch 192.168.1.99" in str(result.output)
 
 
+@patch("canu.config.bgp.bgp.switch_vendor")
 @responses.activate
-def test_config_bgp_bad_ip_file():
+def test_config_bgp_bad_ip_file(switch_vendor):
     """Test that the `canu config bgp` command errors on bad IPs from a file."""
     bad_ip = "192.168.1.98"
     bad_ip2 = "192.168.1.99"
 
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         with open("test.txt", "w") as f:
             f.write(bad_ip)
             f.write("\n")
@@ -703,14 +717,14 @@ def test_config_bgp_bad_ip_file():
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
         responses.add(
             responses.POST,
             f"https://{bad_ip2}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -734,12 +748,14 @@ def test_config_bgp_bad_ip_file():
         assert "Error connecting to switch 192.168.1.99" in str(result.output)
 
 
+@patch("canu.config.bgp.bgp.switch_vendor")
 @responses.activate
-def test_config_bgp_bad_password():
+def test_config_bgp_bad_password(switch_vendor):
     """Test that the `canu config bgp` command errors on bad credentials."""
     bad_password = "foo"
 
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         responses.add(
             responses.GET,
             f"https://{sls_address}/apis/sls/v1/networks",
@@ -775,11 +791,11 @@ def test_config_bgp_bad_password():
         )
         assert result.exit_code == 0
         assert (
-            "Error connecting to switch 192.168.1.1, check that this IP is an Aruba switch, or check the username or password"
+            "Error connecting to switch 192.168.1.1, check the IP, username, or password"
             in str(result.output)
         )
         assert (
-            "Error connecting to switch 192.168.1.2, check that this IP is an Aruba switch, or check the username or password"
+            "Error connecting to switch 192.168.1.2, check the IP, username, or password"
             in str(result.output)
         )
 
@@ -896,11 +912,13 @@ def test_config_bgp_not_enough_ips_file():
         )
 
 
+@patch("canu.config.bgp.bgp.switch_vendor")
 @responses.activate
-def test_config_bgp_sls_token_bad():
+def test_config_bgp_sls_token_bad(switch_vendor):
     """Test that the `canu config bgp` command errors on bad token file."""
     bad_token = "bad_token.token"
     with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
         with open(bad_token, "w") as f:
             f.write('{"access_token": "123"}')
 
@@ -908,7 +926,7 @@ def test_config_bgp_sls_token_bad():
             responses.GET,
             f"https://{sls_address}/apis/sls/v1/networks",
             body=requests.exceptions.HTTPError(
-                "503 Server Error: Service Unavailable for url"
+                "503 Server Error: Service Unavailable for url",
             ),
         )
 
@@ -960,20 +978,22 @@ def test_config_bgp_sls_token_missing():
     )
     assert result.exit_code == 0
     assert "Invalid token file, generate another token or try again." in str(
-        result.output
+        result.output,
     )
 
 
+@patch("canu.config.bgp.bgp.switch_vendor")
 @responses.activate
-def test_config_bgp_sls_address_bad():
+def test_config_bgp_sls_address_bad(switch_vendor):
     """Test that the `canu config bgp` command errors with bad SLS address."""
+    switch_vendor.return_value = "aruba"
     bad_sls_address = "192.168.254.254"
 
     responses.add(
         responses.GET,
         f"https://{bad_sls_address}/apis/sls/v1/networks",
         body=requests.exceptions.ConnectionError(
-            "Failed to establish a new connection: [Errno 51] Network is unreachable"
+            "Failed to establish a new connection: [Errno 51] Network is unreachable",
         ),
     )
 
@@ -999,9 +1019,9 @@ def test_config_bgp_sls_address_bad():
     )
 
 
-def test_config_bgp_csi_file_missing():
-    """Test that the `canu config bgp` command errors on sls_input_file.json file missing."""
-    bad_csi_folder = "/bad_folder"
+def test_config_bgp_sls_file_missing():
+    """Test that the `canu config bgp` command errors on sls_file.json file missing."""
+    bad_sls_folder = "/bad_folder"
     with runner.isolated_filesystem():
         result = runner.invoke(
             cli,
@@ -1014,15 +1034,179 @@ def test_config_bgp_csi_file_missing():
                 password,
                 "--ips",
                 ips,
-                "--csi-folder",
-                bad_csi_folder,
+                "--sls-file",
+                bad_sls_folder,
+            ],
+        )
+        assert result.exit_code == 2
+        assert "No such file or directory" in str(result.output)
+
+
+def test_config_bgp_sls_file_bad():
+    """Test that the `canu config bgp` command errors on a bad sls_file.json."""
+    bad_sls_file = "invalid_json_sls_file.json"
+    with runner.isolated_filesystem():
+        # Generate junk data in what should be a json file
+        with open(bad_sls_file, "wb") as f:
+            f.write(urandom(128))
+
+        result = runner.invoke(
+            cli,
+            [
+                "config",
+                "bgp",
+                "--username",
+                username,
+                "--password",
+                password,
+                "--ips",
+                ips,
+                "--sls-file",
+                bad_sls_file,
+            ],
+        )
+        print(result.output)
+        assert result.exit_code == 0
+        assert "The file invalid_json_sls_file.json is not valid JSON." in str(
+            result.output,
+        )
+
+
+@patch("canu.config.bgp.bgp.switch_vendor")
+@responses.activate
+def test_config_bgp_no_vendor(switch_vendor):
+    """Test that the `canu config bgp` command errors on unrecognized vendor."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = None
+        responses.add(
+            responses.GET,
+            f"https://{sls_address}/apis/sls/v1/networks",
+            json=sls_networks,
+        )
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "config",
+                "bgp",
+                "--ips",
+                ips_dell,
+                "--username",
+                username,
+                "--password",
+                password,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "Could not determine the vendor of the switch" in str(result.output)
+
+
+@patch("canu.config.bgp.bgp.switch_vendor")
+@responses.activate
+def test_config_bgp_dell(switch_vendor):
+    """Test that the `canu config bgp` command warns about Dell."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "dell"
+        responses.add(
+            responses.GET,
+            f"https://{sls_address}/apis/sls/v1/networks",
+            json=sls_networks,
+        )
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "config",
+                "bgp",
+                "--ips",
+                ips_dell,
+                "--username",
+                username,
+                "--password",
+                password,
             ],
         )
         assert result.exit_code == 0
         assert (
-            "The file sls_input_file.json was not found, check that this is the correct CSI directory"
+            "BGP peering against Dell switch not allowed by CSM architecture."
             in str(result.output)
         )
+
+
+@patch("canu.config.bgp.bgp.switch_vendor")
+@responses.activate
+def test_config_bgp_mellanox(switch_vendor):
+    """Test that the `canu config bgp` command runs on Mellanox."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "mellanox"
+        responses.add(
+            responses.GET,
+            f"https://{sls_address}/apis/sls/v1/networks",
+            json=sls_networks,
+        )
+
+        for ip in ips_mellanox.split(","):
+            login_url = f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login"
+            command_url = (
+                login_url
+                + "/admin/launch?script=rh&template=json-request&action=json-login"
+            )
+            # Login
+            responses.add(
+                responses.POST,
+                login_url,
+            )
+            # Get Route Map
+            responses.add(
+                responses.POST,
+                command_url,
+                json=mellanox_route_map,
+            )
+            # posts NO route maps to the switch
+            responses.add(
+                responses.POST,
+                command_url,
+            )
+            # delete prefix lists
+            responses.add(
+                responses.POST,
+                command_url,
+            )
+            # post all the bgp configuration commands
+            responses.add(
+                responses.POST,
+                command_url,
+            )
+            # write memory
+            responses.add(
+                responses.POST,
+                command_url,
+            )
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "config",
+                "bgp",
+                "--ips",
+                ips_mellanox,
+                "--username",
+                username,
+                "--password",
+                password,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "BGP Updated\n"
+            + "--------------------------------------------------\n"
+            + "192.168.1.5\n"
+            + "192.168.1.6\n"
+        ) in str(result.output)
 
 
 sls_networks = [
@@ -1038,7 +1222,7 @@ sls_networks = [
                     "IPReservations": [
                         {"IPAddress": "192.168.7.60", "Name": "cray-tftp"},
                     ],
-                }
+                },
             ],
         },
     },
@@ -1078,7 +1262,7 @@ sls_networks = [
                         {"IPAddress": "192.168.5.28", "Name": "ncn-w004"},
                         {"IPAddress": "192.168.5.29", "Name": "ncn-w005"},
                     ],
-                }
+                },
             ],
         },
     },
@@ -1091,7 +1275,7 @@ sls_networks = [
                 {
                     "CIDR": "192.168.6.0/24",
                     "FullName": "HMN MetalLB",
-                }
+                },
             ],
         },
     },
@@ -1111,8 +1295,71 @@ sls_networks = [
                         {"IPAddress": "192.168.20.47", "Name": "ncn-w004"},
                         {"IPAddress": "192.168.20.48", "Name": "ncn-w005"},
                     ],
-                }
+                },
             ],
         },
     },
 ]
+
+
+mellanox_route_map = {
+    "status": "OK",
+    "executed_command": "show route-map",
+    "status_message": "",
+    "data": [
+        {
+            "route-map ncn-w001, permit, sequence 10": [
+                {"Match clauses": [{"Lines": ["prefix ipv4 pl-nmn"]}]},
+                {"Set clauses": [{"Lines": ["ip next-hop 192.168.100.12"]}]},
+            ],
+        },
+        {
+            "route-map ncn-w001, permit, sequence 20": [
+                {"Match clauses": [{"Lines": ["prefix ipv4 pl-hmn"]}]},
+                {"Set clauses": [{"Lines": ["ip next-hop 192.168.200.20"]}]},
+            ],
+        },
+        {
+            "route-map ncn-w001, permit, sequence 30": [
+                {"Match clauses": [{"Lines": ["prefix ipv4 pl-can"]}]},
+                {"Set clauses": [{"Lines": ["ip next-hop 192.168.300.13"]}]},
+            ],
+        },
+        {
+            "route-map ncn-w002, permit, sequence 10": [
+                {"Match clauses": [{"Lines": ["prefix ipv4 pl-nmn"]}]},
+                {"Set clauses": [{"Lines": ["ip next-hop 192.168.100.11"]}]},
+            ],
+        },
+        {
+            "route-map ncn-w002, permit, sequence 20": [
+                {"Match clauses": [{"Lines": ["prefix ipv4 pl-hmn"]}]},
+                {"Set clauses": [{"Lines": ["ip next-hop 192.168.200.18"]}]},
+            ],
+        },
+        {
+            "route-map ncn-w002, permit, sequence 30": [
+                {"Match clauses": [{"Lines": ["prefix ipv4 pl-can"]}]},
+                {"Set clauses": [{"Lines": ["ip next-hop 192.168.300.12"]}]},
+            ],
+        },
+        {
+            "route-map ncn-w003, permit, sequence 10": [
+                {"Match clauses": [{"Lines": ["prefix ipv4 pl-nmn"]}]},
+                {"Set clauses": [{"Lines": ["ip next-hop 192.168.100.10"]}]},
+            ],
+        },
+        {
+            "route-map ncn-w003, permit, sequence 20": [
+                {"Match clauses": [{"Lines": ["prefix ipv4 pl-hmn"]}]},
+                {"Set clauses": [{"Lines": ["ip next-hop 192.168.200.16"]}]},
+            ],
+        },
+        {
+            "route-map ncn-w003, permit, sequence 30": [
+                {"Match clauses": [{"Lines": ["prefix ipv4 pl-can"]}]},
+                {"Set clauses": [{"Lines": ["ip next-hop 192.168.300.11"]}]},
+            ],
+        },
+    ],
+}

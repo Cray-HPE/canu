@@ -23,15 +23,15 @@
 import json
 from unittest.mock import patch
 
-import click.testing
+from click import testing
 from netmiko import ssh_exception
 import pytest
 import requests
 import responses
 
-from canu.cache import get_switch_from_cache, remove_switch_from_cache
 from canu.cli import cli
 from canu.report.switch.firmware.firmware import get_firmware_aruba
+from canu.utils.cache import get_switch_from_cache, remove_switch_from_cache
 
 
 username = "admin"
@@ -40,9 +40,9 @@ ip = "192.168.1.1"
 ip_dell = "192.168.1.2"
 ip_mellanox = "192.168.1.3"
 credentials = {"username": username, "password": password}
-shasta = "1.4"
+csm = "1.0"
 cache_minutes = 0
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 
 
 def test_switch_cli():
@@ -89,7 +89,10 @@ def test_get_firmware_aruba_function(switch_vendor):
         )
 
         switch_firmware, switch_info = get_firmware_aruba(
-            ip, credentials, True, cache_minutes
+            ip,
+            credentials,
+            True,
+            cache_minutes,
         )
         assert switch_firmware["current_version"] == "Virtual.10.06.0001"
         assert switch_info["hostname"] == "test-switch"
@@ -108,7 +111,7 @@ def test_get_firmware_aruba_function_bad_ip(switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -176,8 +179,8 @@ def test_switch_firmware(switch_vendor):
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 ip,
                 "--username",
@@ -230,8 +233,8 @@ def test_switch_firmware_verbose(switch_vendor):
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 ip,
                 "--username",
@@ -258,8 +261,8 @@ def test_switch_firmware_missing_ip():
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--username",
                 username,
                 "--password",
@@ -283,8 +286,8 @@ def test_switch_firmware_invalid_ip():
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 invalid_ip,
                 "--username",
@@ -310,7 +313,7 @@ def test_switch_firmware_bad_ip(switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -322,8 +325,8 @@ def test_switch_firmware_bad_ip(switch_vendor):
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 bad_ip,
                 "--username",
@@ -359,8 +362,8 @@ def test_switch_firmware_bad_password(switch_vendor):
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 ip,
                 "--username",
@@ -413,8 +416,8 @@ def test_switch_firmware_json(switch_vendor):
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 ip,
                 "--username",
@@ -468,8 +471,8 @@ def test_switch_firmware_json_verbose(switch_vendor):
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 ip,
                 "--username",
@@ -527,8 +530,8 @@ def test_switch_firmware_mismatch(switch_vendor):
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 ip,
                 "--username",
@@ -583,8 +586,8 @@ def test_switch_firmware_mismatch_verbose(switch_vendor):
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 ip,
                 "--username",
@@ -627,8 +630,8 @@ def test_switch_firmware_dell(switch_vendor):
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 ip_dell,
                 "--username",
@@ -639,7 +642,7 @@ def test_switch_firmware_dell(switch_vendor):
         )
         assert result.exit_code == 0
         assert "Pass - IP: 192.168.1.2 Hostname: test-dell Firmware: 10.5.1.4" in str(
-            result.output
+            result.output,
         )
         remove_switch_from_cache(ip_dell)
 
@@ -670,8 +673,8 @@ def test_switch_firmware_dell_cache(switch_vendor):
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 ip_dell,
                 "--username",
@@ -691,8 +694,8 @@ def test_switch_firmware_dell_cache(switch_vendor):
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 ip_dell,
                 "--username",
@@ -737,8 +740,8 @@ def test_switch_firmware_dell_exception(switch_vendor):
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 ip_dell,
                 "--username",
@@ -749,7 +752,7 @@ def test_switch_firmware_dell_exception(switch_vendor):
         )
         assert result.exit_code == 0
         assert "Error getting firmware version from Dell switch 192.168.1.2" in str(
-            result.output
+            result.output,
         )
 
 
@@ -770,8 +773,8 @@ def test_switch_firmware_mellanox(netmiko_commands, switch_vendor):
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 ip_mellanox,
                 "--username",
@@ -805,8 +808,8 @@ def test_switch_firmware_mellanox_timeout(netmiko_commands, switch_vendor):
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 ip_mellanox,
                 "--username",
@@ -839,8 +842,8 @@ def test_switch_firmware_mellanox_auth_exception(netmiko_commands, switch_vendor
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 ip_mellanox,
                 "--username",
@@ -874,8 +877,8 @@ def test_switch_firmware_mellanox_cache(netmiko_commands, switch_vendor):
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 ip_mellanox,
                 "--username",
@@ -895,8 +898,8 @@ def test_switch_firmware_mellanox_cache(netmiko_commands, switch_vendor):
                 "report",
                 "switch",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ip",
                 ip_mellanox,
                 "--username",
@@ -925,7 +928,7 @@ dell_firmware_mock = {
     "dell-system-software:sw-version": {
         "sw-version": "10.5.1.4",
         "sw-platform": "S4048T-ON",
-    }
+    },
 }
 
 dell_hostname_mock = {"dell-system:hostname": "test-dell"}
