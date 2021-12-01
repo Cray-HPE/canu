@@ -8,7 +8,7 @@ RUN echo 'export PS1="canu \w : "' >> /etc/bash.bashrc
 
 # prep image layer for faster builds
 COPY requirements.txt /app/canu/
-RUN zypper -n install python3 python3-pip vim
+RUN zypper -n install python3 python3-pip vim jq
 RUN pip3 install -r /app/canu/requirements.txt
 
 # copy canu files
