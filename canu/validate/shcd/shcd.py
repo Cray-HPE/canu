@@ -31,7 +31,6 @@ import sys
 
 import click
 from click_help_colors import HelpColorsCommand
-import jsonschema
 import natsort
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from network_modeling.NetworkPort import NetworkPort
