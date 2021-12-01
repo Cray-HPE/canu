@@ -1153,6 +1153,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Computes/HSN-bmcs/VizNodes/LoginNodes/pdus now have their switch config generated.
 - Added SubRack support for reading in all variations from the SHCD, and added **sub_location** and **parent** to the JSON output
 - Added Paddle / CCJ (CSM Cabling JSON) support. Commands `canu validate paddle` and `canu validate paddle-cabling` can validate the CCJ. Config can be generated using CCJ.
+- Added the `jq` command to the Docker image.
 
 ## [unreleased]
 
