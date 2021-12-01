@@ -32,7 +32,7 @@ import natsort
 from netmiko import ssh_exception
 import requests
 
-from canu.utils.utils import switch_vendor
+from canu.utils.vendor import switch_vendor
 
 
 @click.command(
@@ -72,18 +72,29 @@ from canu.utils.utils import switch_vendor
     "--architecture",
     "-a",
     type=click.Choice(["Full", "TDS", "V1"], case_sensitive=False),
-    help="Shasta architecture",
+    help="CSM architecture",
     required=True,
     prompt="Architecture type",
 )
 @click.option("--verbose", is_flag=True, help="Verbose mode")
 @click.pass_context
 def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
-    """Validate BGP neighbors..
+    """Validate BGP neighbors.
 
     This command will check the BGP neighbors for the switch IP addresses entered. All of the neighbors of a switch
     must be 'Established', or the verification will fail.
 
+    If a switch that is not a spine switch is tested, it will show in the results table as 'SKIP'.
+
+    - Enter a comma separated list of IP addresses with the '---ips' flag.
+
+    - Or read the IP addresses from a file, one IP address per line, using '--ips-file FILENAME' flag.
+
+    - The default 'asn' is set to 65533 if it needs to be changed, use the '--asn NEW_ASN_NUMBER' flag.
+
+    If you want to see the individual status of all the neighbors of a switch, use the '--verbose' flag.
+
+    --------
     \f
     # noqa: D301
 
@@ -94,7 +105,7 @@ def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
         username: Switch username
         password: Switch password
         asn: Switch ASN
-        architecture: Shasta architecture
+        architecture: CSM architecture
         verbose: Bool indicating verbose output
     """
     if architecture.lower() == "full":
@@ -124,14 +135,16 @@ def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
                 )
 
                 bgp_neighbors, switch_info = get_bgp_neighbors(
-                    str(ip), credentials, asn
+                    str(ip),
+                    credentials,
+                    asn,
                 )
                 if switch_info is None:
                     errors.append(
                         [
                             str(ip),
                             "Connection Error",
-                        ]
+                        ],
                     )
                 else:
                     data[ip] = {
@@ -183,7 +196,7 @@ def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
                         [
                             str(ip),
                             f"{hostname} not a spine switch, with TDS architecture BGP config only allowed with spine switches",
-                        ]
+                        ],
                     )
             if architecture == "full":
                 if "agg" not in str(hostname) and "leaf" not in str(hostname):
@@ -192,7 +205,7 @@ def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
                             str(ip),
                             f"{hostname} not an agg or leaf switch, with Full architecture BGP config only allowed"
                             + "with agg and leaf switches",
-                        ]
+                        ],
                     )
 
     click.echo("\n")
@@ -218,7 +231,7 @@ def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
         )
 
     if len(errors) > 0:
-        errors = set(tuple(x) for x in errors)
+        errors = {tuple(x) for x in errors}
         errors = natsort.natsorted(errors)
         click.echo("\n")
         click.secho("Errors", fg="red")
@@ -289,32 +302,36 @@ def get_bgp_neighbors_aruba(ip, credentials, asn):
     try:
         # Login
         login = session.post(
-            f"https://{ip}/rest/v10.04/login", data=credentials, verify=False
+            f"https://{ip}/rest/v10.04/login",
+            data=credentials,
+            verify=False,
         )
         login.raise_for_status()
 
-    except requests.exceptions.HTTPError:
-        click.secho(
-            f"Error connecting to switch {ip}, check that this IP is an Aruba switch, or check the username or password",
-            fg="white",
-            bg="red",
-        )
-        return None, None
-    except requests.exceptions.ConnectionError:
-        click.secho(
-            f"Error connecting to switch {ip}, check the IP address and try again",
-            fg="white",
-            bg="red",
-        )
-        return None, None
-    except requests.exceptions.RequestException:  # pragma: no cover
-        click.secho(
-            f"Error connecting to switch  {ip}.",
-            fg="white",
-            bg="red",
-        )
-        return None, None
+    except (
+        requests.exceptions.HTTPError,
+        requests.exceptions.ConnectionError,
+        requests.exceptions.RequestException,
+    ) as err:
+        exception_type = type(err).__name__
 
+        if exception_type == "HTTPError":
+            error_message = (
+                f"Error connecting to switch {ip}, check the username or password"
+            )
+        elif exception_type == "ConnectionError":
+            error_message = (
+                f"Error connecting to switch {ip}, check the IP address and try again."
+            )
+        else:
+            error_message = f"Error connecting to switch {ip}."
+
+        click.secho(
+            str(error_message),
+            fg="white",
+            bg="red",
+        )
+        return None, None
     # Get neighbors
     try:
         bgp_neighbors_response = session.get(
@@ -482,7 +499,6 @@ def get_bgp_neighbors_mellanox(ip, credentials):
             "hostname": switch_info["hostname"],
             "platform_name": switch_info["platform_name"],
             "vendor": "mellanox",
-            # "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
 
     except (

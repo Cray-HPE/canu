@@ -1,8 +1,16 @@
---- # Definition of network components: model, size, speeds, etc...
+---
+# This file defines how hardware connects to the network
+# Models here must be represented cray-network-hardware.yaml
+# Definition of network components: model, size, speeds, etc...
 # NOTE:  Only specify upward/north connections and east/west (MLAG).
 #        1. compute/ncn specify connections to leafs
 #        2. leafs specify connections to spines
 #        3. spines specify connections to superspines
+# network_v2 is full systems with agg/leaf switches
+# network_v2_tds is where NCNs plug directly into the spines
+# network_v1 is Dell/Mellanox
+
+# architecture_type: lookup_mapper[*]lookup_name.architecture_type should match components[*]name.model
 network_v2:
   name: "Version 2"
   description: "Aruba Hardware"
@@ -55,15 +63,20 @@ network_v2:
           speed: 100
           number: 2
           comment: "isl"
-        - name: "river_ncn_leaf"
-          speed: 10
-          number: 1
-          comment: "keepalive"
+        # - name: "river_ncn_leaf"
+        #   speed: 10
+        #   number: 1
+        #   comment: "keepalive"
     - name: "river_bmc_leaf"
       model: "6300M_JL762A"
       connections:
         - name: "river_ncn_leaf"
           speed: 25
+    - name: "slingshot_hsn_switch"
+      model: "slingshot_hsn_switch"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
     - name: "river_ncn_node_2_port"
       model: "river_ncn_node_2_port"
       connections:
@@ -81,8 +94,12 @@ network_v2:
     - name: "river_compute_node"
       model: "river_compute_node"
       connections:
+        - name: "subrack"
+          speed: 1
+          comment: "cmc"
         - name: "river_bmc_leaf"
           speed: 1
+          comment: "bmc"
     - name: "mountain_compute_cabinet"
       model: "mountain_compute_cabinet"
       connections:
@@ -103,7 +120,22 @@ network_v2:
       connections:
         - name: "mountain_compute_leaf"
           speed: 10
+    - name: "pdu"
+      model: "pdu"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
+    - name: "subrack"
+      model: "subrack"
+      connections:
+        - name: "river_compute_node"
+          speed: 1
+        - name: "river_bmc_leaf"
+          speed: 1
   lookup_mapper:
+    - lookup_name: ["SubRack", "subrack"]
+      shasta_name: "SubRack"
+      architecture_type: "subrack"
     - lookup_name: ["mn"]
       shasta_name: "ncn-m"
       architecture_type: "river_ncn_node_4_port"
@@ -113,11 +145,14 @@ network_v2:
     - lookup_name: ["sn"]
       shasta_name: "ncn-s"
       architecture_type: "river_ncn_node_4_port"
-    - lookup_name: ["uan"]
+    - lookup_name: ["uan", "slurm"]
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port"
-    - lookup_name: ["Ln", "ln"]
-      shasta_name: "ln"
+    - lookup_name: ["lnet"]
+      shasta_name: "lnet"
+      architecture_type: "river_ncn_node_4_port"
+    - lookup_name: ["Ln", "ln", "login"]
+      shasta_name: "login"
       architecture_type: "river_ncn_node_4_port"
     - lookup_name: ["viz"]
       shasta_name: "viz"
@@ -125,6 +160,9 @@ network_v2:
     - lookup_name: ["cdu"]
       shasta_name: "sw-cdu"
       architecture_type: "mountain_compute_leaf"
+    - lookup_name: ["sw-hsn"]
+      shasta_name: "sw-hsn"
+      architecture_type: "slingshot_hsn_switch"
     - lookup_name: ["sw-smn"]
       shasta_name: "sw-leaf-bmc"
       architecture_type: "river_bmc_leaf"
@@ -146,9 +184,15 @@ network_v2:
     - lookup_name: ["cmm"]
       shasta_name: "cmm"
       architecture_type: "cmm"
-    - lookup_name: ["cn"]
+    - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"
+    - lookup_name:
+        - '^x\d+p\d+$'
+        - '^pdu\d+$'
+      shasta_name: "pdu"
+      architecture_type: "pdu"
+      regex: true
 network_v2_tds:
   name: "Version 2 TDS"
   description: "Aruba Hardware"
@@ -187,6 +231,11 @@ network_v2_tds:
         - name: "spine"
           speed: 10
           number: 2
+    - name: "slingshot_hsn_switch"
+      model: "slingshot_hsn_switch"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
     - name: "river_ncn_node_2_port"
       model: "river_ncn_node_2_port"
       connections:
@@ -211,6 +260,10 @@ network_v2_tds:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
+          comment: "onboard nmn"
+        - name: "river_bmc_leaf"
+          speed: 1
+          comment: "bmc"
     - name: "mountain_compute_cabinet"
       model: "mountain_compute_cabinet"
       connections:
@@ -226,6 +279,18 @@ network_v2_tds:
       connections:
         - name: "mountain_compute_leaf"
           speed: 10
+    - name: "pdu"
+      model: "pdu"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
+    - name: "subrack"
+      model: "subrack"
+      connections:
+        - name: "river_compute_node"
+          speed: 1
+        - name: "river_bmc_leaf"
+          speed: 1
   lookup_mapper:
     - lookup_name:
         - "mn"
@@ -241,12 +306,21 @@ network_v2_tds:
       architecture_type: "river_ncn_node_4_port"
     - lookup_name:
         - "uan"
+        - "slurm"
       shasta_name: "uan"
+      architecture_type: "river_ncn_node_4_port"
+    - lookup_name:
+        - "lnet"
+      shasta_name: "lnet"
       architecture_type: "river_ncn_node_4_port"
     - lookup_name:
         - "cdu"
       shasta_name: "sw-cdu"
       architecture_type: "mountain_compute_leaf"
+    - lookup_name:
+        - "sw-hsn"
+      shasta_name: "sw-hsn"
+      architecture_type: "slingshot_hsn_switch"
     - lookup_name:
         - "sw-smn"
       shasta_name: "sw-leaf-bmc"
@@ -267,9 +341,18 @@ network_v2_tds:
         - "cmm"
       shasta_name: "cmm"
       architecture_type: "cmm"
-    - lookup_name: ["cn"]
+    - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"
+    - lookup_name:
+        - '^x\d+p\d+$'
+        - '^pdu\d+$'
+      shasta_name: "pdu"
+      architecture_type: "pdu"
+      regex: true
+    - lookup_name: ["SubRack", "subrack"]
+      shasta_name: "SubRack"
+      architecture_type: "subrack"
 network_v1:
   name: "Dell and Mellanox Architecture"
   description: "Dell and Mellanox Hardware"
@@ -288,11 +371,25 @@ network_v1:
       connections:
         - name: "spine"
           speed: 40
+    - name: "slingshot_hsn_switch"
+      model: "slingshot_hsn_switch"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
     - name: "mountain_compute_leaf"
       model: "S4148T-ON"
       connections:
         - name: "spine"
           speed: 100
+          number: 2
+        - name: "mountain_compute_leaf"
+          speed: 100
+          number: 4
+          comment: "isl"
+        - name: "mountain_compute_leaf"
+          speed: 1
+          number: 1
+          comment: "keepalive"
     - name: "river_ncn_node_2_port_gigabyte"
       model: "river_ncn_node_2_port_gigabyte"
       connections:
@@ -329,6 +426,22 @@ network_v1:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
+          comment: "onboard"
+        - name: "river_bmc_leaf"
+          speed: 1
+          comment: "bmc"
+    - name: "pdu"
+      model: "pdu"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
+    - name: "subrack"
+      model: "subrack"
+      connections:
+        - name: "river_compute_node"
+          speed: 1
+        - name: "river_bmc_leaf"
+          speed: 1
   lookup_mapper:
     - lookup_name:
         - "mn"
@@ -344,10 +457,16 @@ network_v1:
       architecture_type: "river_ncn_node_2_port_gigabyte"
     - lookup_name:
         - "uan"
+        - "slurm"
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port_gigabyte"
     - lookup_name:
+        - "lnet"
+      shasta_name: "lnet"
+      architecture_type: "river_ncn_node_4_port_gigabyte"
+    - lookup_name:
         - "Ln"
+        - "ln"
       shasta_name: "ln"
       architecture_type: "river_ncn_node_4_port_gigabyte"
     - lookup_name:
@@ -358,6 +477,10 @@ network_v1:
         - "sw-cdu"
       shasta_name: "sw-cdu"
       architecture_type: "mountain_compute_leaf"
+    - lookup_name:
+        - "sw-hsn"
+      shasta_name: "sw-hsn"
+      architecture_type: "slingshot_hsn_switch"
     - lookup_name:
         - "sw-smn"
         - "sw-leaf"
@@ -377,6 +500,15 @@ network_v1:
     - lookup_name: ["cmm"]
       shasta_name: "cmm"
       architecture_type: "cmm"
-    - lookup_name: ["cn"]
+    - lookup_name: ["cn", "nid"]
       shasta_name: "cn"
       architecture_type: "river_compute_node"
+    - lookup_name:
+        - '^x\d+p\d+$'
+        - '^pdu\d+$'
+      shasta_name: "pdu"
+      architecture_type: "pdu"
+      regex: true
+    - lookup_name: ["SubRack", "subrack"]
+      shasta_name: "SubRack"
+      architecture_type: "subrack"

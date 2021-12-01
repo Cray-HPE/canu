@@ -24,7 +24,7 @@ from collections import defaultdict
 import datetime
 import ipaddress
 import json
-import os.path
+from os import path
 from pathlib import Path
 import sys
 
@@ -36,19 +36,19 @@ import click_spinner
 import emoji
 from netmiko import ssh_exception
 import requests
-import ruamel.yaml
+from ruamel.yaml import YAML
 
 
-from canu.cache import cache_switch
 from canu.report.switch.firmware.firmware import (
     get_firmware_aruba,
     get_firmware_dell,
     get_firmware_mellanox,
 )
-from canu.utils.utils import switch_vendor
+from canu.utils.cache import cache_switch
+from canu.utils.vendor import switch_vendor
 
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 
 # Get project root directory
@@ -58,13 +58,13 @@ else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
-canu_config_file = os.path.join(project_root, "canu", "canu.yaml")
+canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
-# Get Shasta versions from canu.yaml
+# Get CSM versions from canu.yaml
 with open(canu_config_file, "r") as file:
     canu_config = yaml.load(file)
 
-shasta_options = canu_config["shasta_versions"]
+csm_options = canu_config["csm_versions"]
 
 
 @click.command(
@@ -73,11 +73,10 @@ shasta_options = canu_config["shasta_versions"]
     help_options_color="blue",
 )
 @click.option(
-    "--shasta",
-    "-s",
-    type=click.Choice(shasta_options),
-    help="Shasta network version",
-    prompt="Shasta network version",
+    "--csm",
+    type=click.Choice(csm_options),
+    help="CSM network version",
+    prompt="CSM network version",
     required=True,
     show_choices=True,
 )
@@ -105,33 +104,38 @@ shasta_options = canu_config["shasta_versions"]
 )
 @click.option("--json", "json_", is_flag=True, help="Output JSON")
 @click.option(
-    "--out", help="Output results to a file", type=click.File("w"), default="-"
+    "--out",
+    help="Output results to a file",
+    type=click.File("w"),
+    default="-",
 )
 # @click.option("--verbose", "-v", is_flag=True, help="Verbose mode")
 @click.pass_context
-def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
-    """Report the firmware versions of all Aruba switches (API v10.04) on the network.
+def firmware(ctx, csm, ips, ips_file, username, password, json_, out):
+    """Report the firmware versions of all switches (Aruba, Dell, or Mellanox) on the network.
 
-    Pass in either a comma separated list of IP addresses using the --ips option
+    Pass in either a comma separated list of IP addresses using the '--ips' option
 
     OR
 
-    Pass in a file of IP addresses with one address per line
+    Pass in a file of IP addresses with one address per line using the '--ips-file' option
+
+
     There are three different statuses found in the report.
 
-    🛶 Pass: Indicates that the switch passed the firmware verification.
+    - 🛶 Pass: Indicates that the switch passed the firmware verification.
 
-    ❌ Fail: Indicates that the switch failed the firmware verification, in the generated table, a
-    list of expected firmware versions for that switch is displayed.
+    - ❌ Fail: Indicates that the switch failed the firmware verification, in the generated table, a list of expected firmware versions for that switch is displayed.
 
-    🔺 Error: Indicates that there was an error connecting to the switch, check the Errors table for the specific error.
+    - 🔺 Error: Indicates that there was an error connecting to the switch, check the Errors table for the specific error.
 
+    --------
     \f
-    # noqa: D301
+    # noqa: D301, B950
 
     Args:
         ctx: CANU context settings
-        shasta: Shasta version
+        csm: CSM version
         ips: Comma separated list of IPv4 addresses of switches
         ips_file: File with one IPv4 address per line
         username: Switch username
@@ -168,18 +172,25 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
 
                     if vendor == "aruba":
                         switch_firmware, switch_info = get_firmware_aruba(
-                            str(ip), credentials, True, cache_minutes=cache_minutes
+                            str(ip),
+                            credentials,
+                            True,
+                            cache_minutes=cache_minutes,
                         )
                     elif vendor == "dell":
                         switch_firmware, switch_info = get_firmware_dell(
-                            str(ip), credentials, True
+                            str(ip),
+                            credentials,
+                            True,
                         )
                     elif vendor == "mellanox":
                         switch_firmware, switch_info = get_firmware_mellanox(
-                            str(ip), credentials, True
+                            str(ip),
+                            credentials,
+                            True,
                         )
 
-                    firmware_range = config["shasta"][shasta][vendor][
+                    firmware_range = config["csm"][csm][vendor][
                         switch_info["platform_name"]
                     ]
                     if switch_firmware["current_version"] in firmware_range:
@@ -197,7 +208,7 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
                         "platform_name": switch_info["platform_name"],
                         "firmware": switch_firmware,
                         "updated_at": datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
+                            "%Y-%m-%d %H:%M:%S",
                         ),
                     }
                     data.append(
@@ -208,7 +219,7 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
                             switch_info["hostname"],
                             switch_firmware["current_version"],
                             firmware_error,
-                        ]
+                        ],
                     )
                     cache_switch(switch_json[str(ip)])
 
@@ -249,7 +260,7 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
                         "ip_address": str(ip),
                         "status": "Error",
                         "updated_at": datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
+                            "%Y-%m-%d %H:%M:%S",
                         ),
                     }
                     data.append([error_emoji, "Error", str(ip), "", "", ""])
@@ -265,7 +276,7 @@ def firmware(ctx, shasta, ips, ips_file, username, password, json_, out):
                         "ip_address": str(ip),
                         "status": "Error",
                         "updated_at": datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
+                            "%Y-%m-%d %H:%M:%S",
                         ),
                     }
                     data.append([error_emoji, "Error", str(ip), "", "", ""])
@@ -301,7 +312,12 @@ def firmware_table(data, out="-"):
     click.echo(dash, file=out)
     click.echo(
         "{:^4s}{:<8s}{:<16s}{:<20s}{:<20s}{}".format(
-            heading[0], heading[1], heading[2], heading[3], heading[4], heading[5]
+            heading[0],
+            heading[1],
+            heading[2],
+            heading[3],
+            heading[4],
+            heading[5],
         ),
         file=out,
     )

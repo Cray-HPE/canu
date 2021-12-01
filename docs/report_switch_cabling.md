@@ -1,16 +1,54 @@
 # Report Switch Cabling
 
-Report the cabling of an Aruba switch (API v10.04) on the network by using LLDP.
+## canu report switch cabling
 
-Sometimes when checking cabling using LLDP, the neighbor does not return any information except a MAC address. When that is the case, CANU looks up the MAC in the ARP table and displays the IP addresses and vlan information associated with the MAC.
+Report the cabling of a switch (Aruba, Dell, or Mellanox) on the network by using LLDP.
 
-Entries in the table will be colored based on what they are. Neighbors that have _ncn_ in their name will be colored blue. Neighbors that have a port labeled (not a MAC address), are generally switches and are labeled green. Ports that are duplicated, will be bright white.
+If the neighbor name is not in LLDP, the IP and vlan information are displayed
+by looking up the MAC address in the ARP table or the mac address table.
+
+If there is a duplicate port, the duplicates will be highlighted in ‘bright white’.
+
+Ports highlighted in ‘blue’ contain the string “ncn” in the hostname.
+
+Ports are highlighted in ‘green’ when the port name is set with the interface name.
+
+
+---
+
+```
+canu report switch cabling [OPTIONS]
+```
+
+### Options
+
+
+### --ip( <ip>)
+**Required** The IP address of the switch
+
+
+### --username( <username>)
+Switch username
+
+
+* **Default**
+
+    admin
+
+
+
+### --password( <password>)
+Switch password
+
+
+### --out( <out>)
+Output results to a file
 
 ## Example
 
 To check the cabling of a single switch run: `canu report switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD`
 
-```bash
+```
 $ canu report switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD
 
 Switch: test-switch-spine01 (192.168.1.1)
@@ -26,19 +64,12 @@ PORT        NEIGHBOR       NEIGHBOR PORT      PORT DESCRIPTION                  
 1/1/52  ==> test-spine02   1/1/52                                                                   Aruba JL635A  GL.10.06.0010
 ```
 
-### File Out
 
-The switch cabling command can also be run with the `--out FILENAME` flag to output the results to a file.
 
-## Flags
+![image](images/canu_report_switch_cabling.png)
 
-| Option       | Description             |
-| ------------ | ----------------------- |
-| `--ip`       | Switch IPv4 address     |
-| `--username` | Switch username         |
-| `--password` | Switch password         |
-| `--out`      | Name of the output file |
+
 
 ---
 
-**[Back To Readme](/readme.md)**<br>
+<a href="/readme.md">Back To Readme</a><br>

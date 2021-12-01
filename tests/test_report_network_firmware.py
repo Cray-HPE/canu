@@ -22,16 +22,16 @@
 """Test CANU report network firmware commands."""
 from unittest.mock import patch
 
-import click.testing
+from click import testing
 from netmiko import ssh_exception
 import requests
 import responses
 
-from canu.cache import remove_switch_from_cache
 from canu.cli import cli
+from canu.utils.cache import remove_switch_from_cache
 
 
-shasta = "1.4"
+csm = "1.0"
 username = "admin"
 password = "admin"
 ip = "192.168.1.1"
@@ -39,7 +39,7 @@ ips = "192.168.1.1"
 ip_dell = "192.168.1.2"
 ip_mellanox = "192.168.1.3"
 cache_minutes = 0
-runner = click.testing.CliRunner()
+runner = testing.CliRunner()
 
 
 def test_network_cli():
@@ -93,8 +93,8 @@ def test_network_firmware(switch_vendor):
                 "report",
                 "network",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ips",
                 ips,
                 "--username",
@@ -151,8 +151,8 @@ def test_network_firmware_file(switch_vendor):
                 "report",
                 "network",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ips-file",
                 "test.txt",
                 "--username",
@@ -205,8 +205,8 @@ def test_network_firmware_json(switch_vendor):
                 "report",
                 "network",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ips",
                 ips,
                 "--username",
@@ -234,8 +234,8 @@ def test_network_firmware_missing_ips():
                 "report",
                 "network",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--username",
                 username,
                 "--password",
@@ -260,8 +260,8 @@ def test_network_firmware_mutually_exclusive_ips_and_file():
                 "report",
                 "network",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--username",
                 username,
                 "--password",
@@ -292,8 +292,8 @@ def test_network_firmware_invalid_ip():
                 "report",
                 "network",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ips",
                 invalid_ip,
                 "--username",
@@ -322,8 +322,8 @@ def test_network_firmware_invalid_ip_file():
                 "report",
                 "network",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ips-file",
                 "test.txt",
                 "--username",
@@ -348,7 +348,7 @@ def test_network_firmware_bad_ip(switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -360,8 +360,8 @@ def test_network_firmware_bad_ip(switch_vendor):
                 "report",
                 "network",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ips",
                 bad_ip,
                 "--username",
@@ -389,7 +389,7 @@ def test_network_firmware_bad_ip_file(switch_vendor):
             responses.POST,
             f"https://{bad_ip}/rest/v10.04/login",
             body=requests.exceptions.ConnectionError(
-                "Failed to establish a new connection: [Errno 60] Operation timed out'))"
+                "Failed to establish a new connection: [Errno 60] Operation timed out'))",
             ),
         )
 
@@ -401,8 +401,8 @@ def test_network_firmware_bad_ip_file(switch_vendor):
                 "report",
                 "network",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ips-file",
                 "test.txt",
                 "--username",
@@ -437,8 +437,8 @@ def test_network_firmware_bad_password(switch_vendor):
                 "report",
                 "network",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ips",
                 ips,
                 "--username",
@@ -490,8 +490,8 @@ def test_network_firmware_mismatch(switch_vendor):
                 "report",
                 "network",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ips",
                 ips,
                 "--username",
@@ -521,8 +521,8 @@ def test_network_firmware_timeout_exception(switch_vendor, get_firmware_dell):
                 "report",
                 "network",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ips",
                 ip_dell,
                 "--username",
@@ -553,8 +553,8 @@ def test_network_firmware_auth_exception(switch_vendor, get_firmware_dell):
                 "report",
                 "network",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ips",
                 ip_dell,
                 "--username",
@@ -592,8 +592,8 @@ def test_network_firmware_dell(get_firmware_dell, switch_vendor):
                 "report",
                 "network",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ips",
                 ip_dell,
                 "--username",
@@ -604,7 +604,7 @@ def test_network_firmware_dell(get_firmware_dell, switch_vendor):
         )
         assert result.exit_code == 0
         assert "Pass    192.168.1.2     test-dell           10.5.1.4" in str(
-            result.output
+            result.output,
         )
         remove_switch_from_cache(ip_dell)
 
@@ -629,8 +629,8 @@ def test_network_firmware_dell_timeout(switch_vendor):
                 "report",
                 "network",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ips",
                 ip_dell,
                 "--username",
@@ -668,10 +668,8 @@ def test_network_firmware_mellanox(get_firmware_mellanox, switch_vendor):
                 "report",
                 "network",
                 "firmware",
-                "--shasta",
-                shasta,
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ips",
                 ip_mellanox,
                 "--username",
@@ -682,7 +680,7 @@ def test_network_firmware_mellanox(get_firmware_mellanox, switch_vendor):
         )
         assert result.exit_code == 0
         assert "Pass    192.168.1.3     test-mellanox       3.9.1014" in str(
-            result.output
+            result.output,
         )
         remove_switch_from_cache(ip_mellanox)
 
@@ -703,8 +701,8 @@ def test_network_firmware_mellanox_timeout_error(netmiko_commands, switch_vendor
                 "report",
                 "network",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ips",
                 ip_mellanox,
                 "--username",
@@ -736,8 +734,8 @@ def test_network_firmware_mellanox_auth_error(netmiko_commands, switch_vendor):
                 "report",
                 "network",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ips",
                 ip_mellanox,
                 "--username",
@@ -769,8 +767,8 @@ def test_network_firmware_no_vendor(switch_vendor):
                 "report",
                 "network",
                 "firmware",
-                "--shasta",
-                shasta,
+                "--csm",
+                csm,
                 "--ips",
                 ips,
                 "--username",
@@ -781,5 +779,5 @@ def test_network_firmware_no_vendor(switch_vendor):
         )
         assert result.exit_code == 0
         assert "192.168.1.1     - Could not determine the vendor of the switch." in str(
-            result.output
+            result.output,
         )

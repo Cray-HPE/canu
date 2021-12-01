@@ -23,8 +23,7 @@
 from collections import defaultdict
 import ipaddress
 import logging
-import os
-from pathlib import Path
+from os import path
 import re
 import sys
 
@@ -33,40 +32,19 @@ from click_help_colors import HelpColorsCommand
 from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
+from netmiko import ssh_exception
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from network_modeling.NetworkPort import NetworkPort
 import requests
-import ruamel.yaml
+from ruamel.yaml import YAML
 
 from canu.report.switch.cabling.cabling import get_lldp
+from canu.utils.cache import cache_directory
 from canu.validate.shcd.shcd import node_list_warnings, print_node_list
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
-
-# Get project root directory
-if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
-    project_root = sys._MEIPASS
-else:
-    prog = __file__
-    project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
-
-# Schema and Data files
-hardware_schema_file = os.path.join(
-    project_root, "network_modeling", "schema", "cray-network-hardware-schema.yaml"
-)
-hardware_spec_file = os.path.join(
-    project_root, "network_modeling", "models", "cray-network-hardware.yaml"
-)
-architecture_schema_file = os.path.join(
-    project_root, "network_modeling", "schema", "cray-network-architecture-schema.yaml"
-)
-architecture_spec_file = os.path.join(
-    project_root, "network_modeling", "models", "cray-network-architecture.yaml"
-)
-
-canu_cache_file = os.path.join(project_root, "canu", "canu_cache.yaml")
-
+canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 
 log = logging.getLogger("validate_shcd")
 
@@ -80,7 +58,7 @@ log = logging.getLogger("validate_shcd")
     "--architecture",
     "-a",
     type=click.Choice(["Full", "TDS", "v1"], case_sensitive=False),
-    help="Shasta architecture",
+    help="CSM architecture",
     required=True,
     prompt="Architecture type",
 )
@@ -113,25 +91,35 @@ log = logging.getLogger("validate_shcd")
     type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
     default="ERROR",
 )
+@click.option(
+    "--out",
+    help="Output results to a file",
+    type=click.File("w"),
+    default="-",
+)
 @click.pass_context
-def cabling(ctx, architecture, ips, ips_file, username, password, log_):
-    """Validate the network.
+def cabling(ctx, architecture, ips, ips_file, username, password, log_, out):
+    """Validate network cabling.
 
-    This command will use LLDP to determine the neighbors of the IP addresses passed in to validate that the network
-    is properly connected architecturally. The validation will ensure that spine switches, leaf switches,
-    edge switches, and nodes all are connected properly.
+    CANU can be used to validate that network cabling passes basic validation checks.
 
+    This command will use LLDP to determine if the network is properly connected architecturally.
+
+    The validation will ensure that spine switches, leaf switches, edge switches, and nodes all are connected properly.
+
+    --------
     \f
-    # noqa: D301
+    # noqa: D301, B950
 
     Args:
         ctx: CANU context settings
-        architecture: Shasta architecture
+        architecture: CSM architecture
         ips: Comma separated list of IPv4 addresses of switches
         ips_file: File with one IPv4 address per line
         username: Switch username
         password: Switch password
         log_: Level of logging.
+        out: Name of the output file
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
@@ -161,40 +149,32 @@ def cabling(ctx, architecture, ips, ips_file, username, password, log_):
                 )
                 try:
                     # Get LLDP info (stored in cache)
-                    get_lldp(str(ip), credentials, True)
+                    get_lldp(str(ip), credentials, return_error=True)
 
-                except requests.exceptions.HTTPError:
-                    errors.append(
-                        [
-                            str(ip),
-                            f"Error connecting to switch {ip}, "
-                            + "check that this IP is an Aruba switch, or check the username or password.",
-                        ]
-                    )
-                except requests.exceptions.ConnectionError:
-                    errors.append(
-                        [
-                            str(ip),
-                            f"Error connecting to switch {ip},"
-                            + " check the IP address and try again.",
-                        ]
-                    )
-                except requests.exceptions.RequestException:  # pragma: no cover
-                    errors.append(
-                        [
-                            str(ip),
-                            f"Error connecting to switch {ip}.",
-                        ]
-                    )
+                except (
+                    requests.exceptions.HTTPError,
+                    requests.exceptions.ConnectionError,
+                    requests.exceptions.RequestException,
+                    ssh_exception.NetmikoTimeoutException,
+                    ssh_exception.NetmikoAuthenticationException,
+                ) as err:
+                    exception_type = type(err).__name__
+
+                    if exception_type == "HTTPError":
+                        error_message = f"Error connecting to switch {ip}, check the IP, username, or password."
+                    elif exception_type == "ConnectionError":
+                        error_message = f"Error connecting to switch {ip}, check the IP address and try again."
+                    elif exception_type == "NetmikoTimeoutException":
+                        error_message = f"Timeout error connecting to {ip}. Check the IP address and try again."
+                    elif exception_type == "NetmikoAuthenticationException":
+                        error_message = f"Auth error connecting to {ip}. Check the credentials or IP address and try again"
+                    else:
+                        error_message = f"Error connecting to switch {ip}."
+
+                    errors.append([str(ip), error_message])
 
     # Create Node factory
-    factory = NetworkNodeFactory(
-        hardware_schema=hardware_schema_file,
-        hardware_data=hardware_spec_file,
-        architecture_schema=architecture_schema_file,
-        architecture_data=architecture_spec_file,
-        architecture_version=architecture,
-    )
+    factory = NetworkNodeFactory(architecture_version=architecture)
 
     # Open the updated cache to model nodes
     with open(canu_cache_file, "r+") as file:
@@ -202,17 +182,17 @@ def cabling(ctx, architecture, ips, ips_file, username, password, log_):
 
     node_list, warnings = node_model_from_canu(factory, canu_cache, ips)
 
-    print_node_list(node_list, "Cabling")
+    print_node_list(node_list, "Cabling", out)
 
-    node_list_warnings(node_list, warnings)
+    node_list_warnings(node_list, warnings, out)
 
     dash = "-" * 100
     if len(errors) > 0:
-        click.echo("\n")
-        click.secho("Errors", fg="red")
-        click.echo(dash)
+        click.echo("\n", file=out)
+        click.secho("Errors", fg="red", file=out)
+        click.echo(dash, file=out)
         for error in errors:
-            click.echo("{:<15s} - {}".format(error[0], error[1]))
+            click.echo("{:<15s} - {}".format(error[0], error[1]), file=out)
 
 
 def get_node_type_yaml(name, mapper):
@@ -252,10 +232,12 @@ def validate_cabling_slot_data(lldp_info, warnings, vendor="aruba"):
     # TODO:  Integrate with cabling standards and remove this hack.
     # NCN slot case
     port_result = re.search(
-        r"([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}", lldp_info["neighbor_port"]
+        r"([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}",
+        lldp_info["neighbor_port"],
     )
     port_description_result = re.search(
-        r"mgmt(\d)", lldp_info["neighbor_port_description"]
+        r"mgmt(\d)",
+        lldp_info["neighbor_port_description"],
     )
     if port_result is not None and port_description_result is not None:
         port_number = int(port_description_result.group(1))
@@ -289,10 +271,12 @@ def validate_cabling_port_data(lldp_info, warnings):
 
     # NCN port case
     port_result = re.search(
-        r"([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}", lldp_info["neighbor_port"]
+        r"([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}",
+        lldp_info["neighbor_port"],
     )
     port_description_result = re.search(
-        r"mgmt(\d)", lldp_info["neighbor_port_description"]
+        r"mgmt(\d)",
+        lldp_info["neighbor_port_description"],
     )
     if port_result is not None and port_description_result is not None:
         port_number = int(port_description_result.group(1))
@@ -348,7 +332,8 @@ def node_model_from_canu(factory, canu_cache, ips):
 
                 log.debug(f"Source Name Lookup: {node_name}")
                 node_type, rename = get_node_type_yaml(
-                    str(src_name), factory.lookup_mapper()
+                    str(src_name),
+                    factory.lookup_mapper(),
                 )
                 log.debug(f"Source Node Type Lookup: {node_type}")
 
@@ -383,14 +368,14 @@ def node_model_from_canu(factory, canu_cache, ips):
                         node_name_list.append(node_name)
                     else:
                         log.debug(
-                            f"Node {node_name} already exists, skipping node creation."
+                            f"Node {node_name} already exists, skipping node creation.",
                         )
 
                     src_index = node_name_list.index(node_name)
                 else:
                     warnings["node_type"].append(node_name)
                     log.warning(
-                        f"Node type for {node_name} cannot be determined by node type ({node_type}) or node name ({node_name})"
+                        f"Node type for {node_name} cannot be determined by node type ({node_type}) or node name ({node_name})",
                     )
 
                 # Create the source port for the node
@@ -399,13 +384,15 @@ def node_model_from_canu(factory, canu_cache, ips):
                 # Cable destination
                 dst_lldp = switch["cabling"][port][0]
 
-                # If starts with 'sw-' then add an extra '-' before the number, and convert to 3 digit
                 dst_name = dst_lldp["neighbor"]
                 dst_slot = validate_cabling_slot_data(
-                    dst_lldp, warnings, vendor=switch["vendor"]
+                    dst_lldp,
+                    warnings,
+                    vendor=switch["vendor"],
                 )
                 dst_port = validate_cabling_port_data(dst_lldp, warnings)
 
+                # If starts with 'sw-' then add an extra '-' before the number, and convert to 3 digit
                 if dst_name.startswith("sw-"):
                     dst_start = "sw-"
                     dst_middle = re.findall(r"(?:sw-)([a-z-]+)", dst_name)[0]
@@ -418,7 +405,8 @@ def node_model_from_canu(factory, canu_cache, ips):
                 dst_node_name = dst_name
                 log.debug(f"Destination Name Lookup:  {dst_node_name}")
                 node_type, dst_rename = get_node_type_yaml(
-                    dst_name, factory.lookup_mapper()
+                    dst_name,
+                    factory.lookup_mapper(),
                 )
                 log.debug(f"Destination Node Type Lookup:  {node_type}")
 
@@ -436,7 +424,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                         dst_renamed = ""
                     warnings["rename"].append([dst_lldp["neighbor"], dst_renamed])
                     log.warning(
-                        f"Node {dst_lldp['neighbor']} should be renamed {dst_renamed}"
+                        f"Node {dst_lldp['neighbor']} should be renamed {dst_renamed}",
                     )
                 # Create dst_node if it does not exist
                 dst_node = None
@@ -444,7 +432,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                 if node_type is not None and dst_node_name is not None:
                     if dst_node_name not in node_name_list:
                         log.info(
-                            f"Creating new node {dst_node_name} of type {node_type}"
+                            f"Creating new node {dst_node_name} of type {node_type}",
                         )
                         try:
                             dst_node = factory.generate_node(node_type)
@@ -458,7 +446,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                         node_name_list.append(dst_node_name)
                     else:
                         log.debug(
-                            f"Node {dst_node_name} already exists, skipping node creation."
+                            f"Node {dst_node_name} already exists, skipping node creation.",
                         )
 
                     dst_index = node_name_list.index(dst_node_name)
@@ -472,7 +460,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                     warnings["node_type"].append(dst_name_warning)
 
                     log.warning(
-                        f"Node type for {dst_name} cannot be determined by node type ({node_type}) or node name ({node_name})"
+                        f"Node type for {dst_name} cannot be determined by node type ({node_type}) or node name ({node_name})",
                     )
 
                 # Create the destination
@@ -484,7 +472,9 @@ def node_model_from_canu(factory, canu_cache, ips):
                     dst_node = node_list[dst_index]
                     try:
                         connected = src_node.connect(
-                            dst_node, src_port=src_node_port, dst_port=dst_node_port
+                            dst_node,
+                            src_port=src_node_port,
+                            dst_port=dst_node_port,
                         )
                     except Exception:
                         log.fatal(
@@ -492,13 +482,13 @@ def node_model_from_canu(factory, canu_cache, ips):
                                 f"Failed to connect {src_node.common_name()} "
                                 + f"to {dst_node.common_name()} bi-directionally ",
                                 fg="red",
-                            )
+                            ),
                         )
                         exit(1)
                     if connected:
                         log.info(
                             f"Connected {src_node.common_name()} to"
-                            + f" {dst_node.common_name()} bi-directionally"
+                            + f" {dst_node.common_name()} bi-directionally",
                         )
                     else:
                         log.error("")
@@ -510,246 +500,11 @@ def node_model_from_canu(factory, canu_cache, ips):
                         for node in node_list:
                             click.secho(
                                 f"Node {node.id()} named {node.common_name()} connects "
-                                + f"to {len(node.edges())} ports on nodes: {node.edges()}"
+                                + f"to {len(node.edges())} ports on nodes: {node.edges()}",
                             )
                         log.fatal(
                             f"Failed to connect {src_node.common_name()} "
-                            + f"to {dst_node.common_name()} bi-directionally"
+                            + f"to {dst_node.common_name()} bi-directionally",
                         )
                         sys.exit(1)  # TODO: this should probably be an exception
     return node_list, warnings
-
-
-# y = ordereddict(
-#     [
-#         ("ip_address", "10.103.2.4"),
-#         (
-#             "cabling",
-#             ordereddict(
-#                 [
-#                     (
-#                         "1/1/1",
-#                         [
-#                             ordereddict(
-#                                 [
-#                                     ("neighbor", "ncn-m001"),
-#                                     (
-#                                         "neighbor_description",
-#                                         "Linux ncn-m001 5.3.18-24.49-default #1 SMP Mon Feb 1 1",
-#                                     ),
-#                                     ("neighbor_port", "14:02:ec:df:9b:60"),
-#                                     ("neighbor_port_description", "mgmt0"),
-#                                     ("neighbor_chassis_id", "14:02:ec:df:9b:60"),
-#                                 ]
-#                             )
-#                         ],
-#                     ),
-#                     (
-#                         "1/1/2",
-#                         [
-#                             ordereddict(
-#                                 [
-#                                     ("neighbor", ""),
-#                                     (
-#                                         "neighbor_description",
-#                                         "10.103.2.15:vlan7, 10.252.1.14:vlan2",
-#                                     ),
-#                                     ("neighbor_port", "14:02:ec:df:9b:90"),
-#                                     ("neighbor_port_description", ""),
-#                                     ("neighbor_chassis_id", "14:02:ec:df:9b:90"),
-#                                 ]
-#                             )
-#                         ],
-#                     ),
-#                     (
-#                         "1/1/3",
-#                         [
-#                             ordereddict(
-#                                 [
-#                                     ("neighbor", ""),
-#                                     (
-#                                         "neighbor_description",
-#                                         "10.103.2.13:vlan7, 10.252.1.12:vlan2, 10.254.1.20:vlan4",
-#                                     ),
-#                                     ("neighbor_port", "14:02:ec:df:9b:f0"),
-#                                     ("neighbor_port_description", ""),
-#                                     ("neighbor_chassis_id", "14:02:ec:df:9b:f0"),
-#                                 ]
-#                             )
-#                         ],
-#                     ),
-#                     (
-#                         "1/1/4",
-#                         [
-#                             ordereddict(
-#                                 [
-#                                     ("neighbor", ""),
-#                                     (
-#                                         "neighbor_description",
-#                                         "10.103.2.12:vlan7, 10.252.1.11:vlan2, 10.254.1.18:vlan4",
-#                                     ),
-#                                     ("neighbor_port", "14:02:ec:df:9a:e8"),
-#                                     ("neighbor_port_description", ""),
-#                                     ("neighbor_chassis_id", "14:02:ec:df:9a:e8"),
-#                                 ]
-#                             )
-#                         ],
-#                     ),
-#                     (
-#                         "1/1/5",
-#                         [
-#                             ordereddict(
-#                                 [
-#                                     ("neighbor", "ncn-w003"),
-#                                     (
-#                                         "neighbor_description",
-#                                         "Linux ncn-w003 5.3.18-24.49-default #1 SMP Mon Feb 1 1",
-#                                     ),
-#                                     ("neighbor_port", "14:02:ec:df:a1:18"),
-#                                     ("neighbor_port_description", "mgmt0"),
-#                                     ("neighbor_chassis_id", "14:02:ec:df:a1:18"),
-#                                 ]
-#                             )
-#                         ],
-#                     ),
-#                     (
-#                         "1/1/6",
-#                         [
-#                             ordereddict(
-#                                 [
-#                                     ("neighbor", "ncn-s001"),
-#                                     (
-#                                         "neighbor_description",
-#                                         "Linux ncn-s001 5.3.18-24.49-default #1 SMP Mon Feb 1 1",
-#                                     ),
-#                                     ("neighbor_port", "14:02:ec:df:9f:98"),
-#                                     ("neighbor_port_description", "mgmt0"),
-#                                     ("neighbor_chassis_id", "14:02:ec:df:9f:98"),
-#                                 ]
-#                             )
-#                         ],
-#                     ),
-#                     (
-#                         "1/1/7",
-#                         [
-#                             ordereddict(
-#                                 [
-#                                     ("neighbor", "ncn-s002"),
-#                                     (
-#                                         "neighbor_description",
-#                                         "Linux ncn-s002 5.3.18-24.49-default #1 SMP Mon Feb 1 1",
-#                                     ),
-#                                     ("neighbor_port", "14:02:ec:df:9b:30"),
-#                                     ("neighbor_port_description", "mgmt0"),
-#                                     ("neighbor_chassis_id", "14:02:ec:df:9b:30"),
-#                                 ]
-#                             )
-#                         ],
-#                     ),
-#                     (
-#                         "1/1/8",
-#                         [
-#                             ordereddict(
-#                                 [
-#                                     ("neighbor", ""),
-#                                     ("neighbor_description", ""),
-#                                     ("neighbor_port", "14:02:ec:df:a5:4a"),
-#                                     ("neighbor_port_description", ""),
-#                                     ("neighbor_chassis_id", "14:02:ec:df:a5:4a"),
-#                                 ]
-#                             )
-#                         ],
-#                     ),
-#                     (
-#                         "1/1/9",
-#                         [
-#                             ordereddict(
-#                                 [
-#                                     ("neighbor", ""),
-#                                     ("neighbor_description", ""),
-#                                     ("neighbor_port", "14:02:ec:df:9c:62"),
-#                                     ("neighbor_port_description", ""),
-#                                     ("neighbor_chassis_id", "14:02:ec:df:9c:62"),
-#                                 ]
-#                             )
-#                         ],
-#                     ),
-#                     (
-#                         "1/1/10",
-#                         [
-#                             ordereddict(
-#                                 [
-#                                     ("neighbor", ""),
-#                                     ("neighbor_description", "10.252.1.17:vlan2"),
-#                                     ("neighbor_port", "14:02:ec:da:c1:f0"),
-#                                     ("neighbor_port_description", ""),
-#                                     ("neighbor_chassis_id", "14:02:ec:da:c1:f0"),
-#                                 ]
-#                             ),
-#                             ordereddict(
-#                                 [
-#                                     ("neighbor", ""),
-#                                     ("neighbor_description", ""),
-#                                     ("neighbor_port", "14:02:ec:da:c2:02"),
-#                                     ("neighbor_port_description", ""),
-#                                     ("neighbor_chassis_id", "14:02:ec:da:c2:02"),
-#                                 ]
-#                             ),
-#                         ],
-#                     ),
-#                     (
-#                         "1/1/11",
-#                         [
-#                             ordereddict(
-#                                 [
-#                                     ("neighbor", ""),
-#                                     ("neighbor_description", "10.252.1.30:vlan2"),
-#                                     ("neighbor_port", "14:02:ec:d9:41:f0"),
-#                                     ("neighbor_port_description", ""),
-#                                     ("neighbor_chassis_id", "14:02:ec:d9:41:f0"),
-#                                 ]
-#                             ),
-#                             ordereddict(
-#                                 [
-#                                     ("neighbor", ""),
-#                                     ("neighbor_description", ""),
-#                                     ("neighbor_port", "14:02:ec:d9:42:02"),
-#                                     ("neighbor_port_description", ""),
-#                                     ("neighbor_chassis_id", "14:02:ec:d9:42:02"),
-#                                 ]
-#                             ),
-#                         ],
-#                     ),
-#                     (
-#                         "1/1/14",
-#                         [
-#                             ordereddict(
-#                                 [
-#                                     ("neighbor", ""),
-#                                     ("neighbor_description", ""),
-#                                     ("neighbor_port", "14:02:ec:df:a5:4b"),
-#                                     ("neighbor_port_description", ""),
-#                                     ("neighbor_chassis_id", "14:02:ec:df:a5:4b"),
-#                                 ]
-#                             )
-#                         ],
-#                     ),
-#                     (
-#                         "1/1/16",
-#                         [
-#                             ordereddict(
-#                                 [
-#                                     ("neighbor", ""),
-#                                     ("neighbor_description", "10.103.2.21:vlan7"),
-#                                     ("neighbor_port", "14:02:ec:da:c1:f1"),
-#                                     ("neighbor_port_description", ""),
-#                                     ("neighbor_chassis_id", "14:02:ec:da:c1:f1"),
-#                                 ]
-#                             )
-#                         ],
-#                     ),
-#                 ]
-#             ),
-#         ),
-#     ]
-# )

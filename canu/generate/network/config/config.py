@@ -22,16 +22,17 @@
 """CANU commands that generate the config of the entire Shasta network."""
 import json
 import os
+from os import environ, makedirs, path
 from pathlib import Path
 import sys
 
 import click
 from click_help_colors import HelpColorsCommand
+from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
-from openpyxl import load_workbook
 import requests
-import ruamel.yaml
+from ruamel.yaml import YAML
 import urllib3
 
 from canu.generate.switch.config.config import (
@@ -40,9 +41,11 @@ from canu.generate.switch.config.config import (
     parse_sls_for_config,
     rename_sls_hostnames,
 )
-from canu.validate.shcd.shcd import node_model_from_shcd
+from canu.utils.cache import cache_directory
+from canu.validate.paddle.paddle import node_model_from_paddle
+from canu.validate.shcd.shcd import node_model_from_shcd, shcd_to_sheets
 
-yaml = ruamel.yaml.YAML()
+yaml = YAML()
 
 # To disable warnings about unsecured HTTPS requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -56,37 +59,26 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
 # Schema and Data files
-hardware_schema_file = os.path.join(
-    project_root, "network_modeling", "schema", "cray-network-hardware-schema.yaml"
-)
-hardware_spec_file = os.path.join(
-    project_root, "network_modeling", "models", "cray-network-hardware.yaml"
-)
-architecture_schema_file = os.path.join(
-    project_root, "network_modeling", "schema", "cray-network-architecture-schema.yaml"
-)
-architecture_spec_file = os.path.join(
-    project_root, "network_modeling", "models", "cray-network-architecture.yaml"
-)
-
-canu_cache_file = os.path.join(project_root, "canu", "canu_cache.yaml")
-canu_config_file = os.path.join(project_root, "canu", "canu.yaml")
+canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
+canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
 # Import templates
-network_templates_folder = os.path.join(
-    project_root, "network_modeling", "configs", "templates"
+network_templates_folder = path.join(
+    project_root,
+    "network_modeling",
+    "configs",
+    "templates",
 )
 env = Environment(
     loader=FileSystemLoader(network_templates_folder),
-    # trim_blocks=True,
     undefined=StrictUndefined,
 )
 
-# Get Shasta versions from canu.yaml
+# Get CSM versions from canu.yaml
 with open(canu_config_file, "r") as file:
     canu_config = yaml.load(file)
 
-shasta_options = canu_config["shasta_versions"]
+csm_options = canu_config["csm_versions"]
 
 
 @click.command(
@@ -95,11 +87,10 @@ shasta_options = canu_config["shasta_versions"]
     help_options_color="blue",
 )
 @click.option(
-    "--shasta",
-    "-s",
-    type=click.Choice(shasta_options),
-    help="Shasta network version",
-    prompt="Shasta network version",
+    "--csm",
+    type=click.Choice(csm_options),
+    help="CSM network version",
+    prompt="CSM network version",
     required=True,
     show_choices=True,
 )
@@ -107,15 +98,21 @@ shasta_options = canu_config["shasta_versions"]
     "--architecture",
     "-a",
     type=click.Choice(["Full", "TDS", "V1"], case_sensitive=False),
-    help="Shasta architecture",
-    required=True,
-    prompt="Architecture type",
+    help="CSM architecture",
 )
-@click.option(
+@optgroup.group(
+    "Network input source",
+    cls=RequiredMutuallyExclusiveOptionGroup,
+)
+@optgroup.option(
+    "--ccj",
+    help="Paddle CCJ file",
+    type=click.File("rb"),
+)
+@optgroup.option(
     "--shcd",
     help="SHCD file",
     type=click.File("rb"),
-    required=True,
 )
 @click.option(
     "--tabs",
@@ -125,7 +122,11 @@ shasta_options = canu_config["shasta_versions"]
     "--corners",
     help="The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.",
 )
-@click.option("--csi-folder", help="Directory containing the CSI json file")
+@click.option(
+    "--sls-file",
+    help="File containing system SLS JSON data.",
+    type=click.File("r"),
+)
 @click.option(
     "--auth-token",
     envvar="SLS_TOKEN",
@@ -138,142 +139,150 @@ shasta_options = canu_config["shasta_versions"]
     required=True,
     prompt="Folder for configs",
 )
+@click.option(
+    "--override",
+    help="Switch configuration override",
+    type=click.Path(),
+)
 @click.pass_context
 def config(
     ctx,
-    shasta,
+    csm,
     architecture,
+    ccj,
     shcd,
     tabs,
     corners,
-    csi_folder,
+    sls_file,
     auth_token,
     sls_address,
     folder,
+    override,
 ):
-    """Generate the config of all Aruba switches (API v10.04) on the network using the SHCD.
+    """Generate the config of all switches (Aruba, Dell, or Mellanox) on the network using the SHCD.
 
     In order to generate network switch config, a valid SHCD must be passed in and system variables must be read in from either
-    CSI output or the SLS API.
+    an SLS output file or the SLS API.
 
-    Use the `--folder FOLDERNAME` flag to output all the switch configs to a folder.
+    ## CSI Input
+
+    - In order to parse network data using SLS, pass in the file containing SLS JSON data (normally sls_file.json) using the '--sls-file' flag
+
+    - If used, CSI-generated sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.
+
+    - Early in the install process, when running off of the LiveCD the sls_input_file.json file is normally found in the the directory '/var/www/ephemeral/prep/SYSTEMNAME/'
+
+    - Later in the install process, the sls_file.json file is generally in '/mnt/pitdata/prep/SYSTEMNAME/'
+
+
+    ## SLS API Input
+
+    - To parse the Shasta SLS API for IP addresses, ensure that you have a valid token.
+
+    - The token file can either be passed in with the '--auth-token TOKEN_FILE' flag, or it can be automatically read if the environmental variable 'SLS_TOKEN' is set.
+
+    - The SLS address is default set to 'api-gw-service-nmn.local'.
+
+    - if you are operating on a system with a different address, you can set it with the '--sls-address SLS_ADDRESS' flag.
+
+
+    ## SHCD Input
+
+    - Use the '--tabs' flag to select which tabs on the spreadsheet will be included.
+
+    - The '--corners' flag is used to input the upper left and lower right corners of the table on each tab of the worksheet. If the corners are not specified, you will be prompted to enter them for each tab.
+
+    - The table should contain the 11 headers: Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port.
+
+
+    Use the '--folder FOLDERNAME' flag to output all the switch configs to a folder.
+
+    ----------
     \f
-    # noqa: D301
+    # noqa: D301, B950
 
     Args:
         ctx: CANU context settings
-        shasta: Shasta version
-        architecture: Shasta architecture
+        csm: CSM version
+        architecture: CSM architecture
+        ccj: Paddle CCJ file
         shcd: SHCD file
         tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
         corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
-        csi_folder: Directory containing the CSI json file
+        sls_file: Directory containing the CSI json file
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         folder: Folder to store config files
+        override: Input file that defines what config should be ignored
     """
-    if architecture.lower() == "full":
+    # SHCD Parsing
+    if shcd:
+        try:
+            sheets = shcd_to_sheets(shcd, tabs, corners)
+        except Exception:
+            return
+        if not architecture:
+            architecture = click.prompt(
+                "Please enter the tabs to check separated by a comma, e.g. 10G_25G_40G_100G,NMN,HMN.",
+                type=click.Choice(["Full", "TDS", "V1"], case_sensitive=False),
+            )
+
+    # Paddle Parsing
+    else:
+        ccj_json = json.load(ccj)
+        architecture = ccj_json.get("architecture")
+
+        if architecture is None:
+            click.secho(
+                "The key 'architecture' is missing from the CCJ. Ensure that you are using a validated CCJ.",
+                fg="red",
+            )
+            return
+
+    if architecture.lower() == "full" or architecture == "network_v2":
         architecture = "network_v2"
         template_folder = "full"
-    elif architecture.lower() == "tds":
+        vendor_folder = "aruba"
+    elif architecture.lower() == "tds" or architecture == "network_v2_tds":
         architecture = "network_v2_tds"
         template_folder = "tds"
-    elif architecture.lower() == "v1":
+        vendor_folder = "aruba"
+    elif architecture.lower() == "v1" or architecture == "network_v1":
         architecture = "network_v1"
         template_folder = "full"
-
-    # SHCD Parsing
-    sheets = []
-
-    if not tabs:
-        wb = load_workbook(shcd, read_only=True)
-        click.secho("What tabs would you like to check in the SHCD?")
-        tab_options = wb.sheetnames
-        for x in tab_options:
-            click.secho(f"{x}", fg="green")
-
-        tabs = click.prompt(
-            "Please enter the tabs to check separated by a comma, e.g. 10G_25G_40G_100G,NMN,HMN.",
-            type=str,
-        )
-
-    if corners:
-        if len(tabs.split(",")) * 2 != len(corners.split(",")):
-            click.secho("Not enough corners.\n", fg="red")
-            click.secho(
-                f"Make sure each tab: {tabs.split(',')} has 2 corners.\n", fg="red"
-            )
-            click.secho(
-                f"There were {len(corners.split(','))} corners entered, but there should be {len(tabs.split(',')) * 2}.",
-                fg="red",
-            )
-            click.secho(
-                f"{corners}\n",
-                fg="red",
-            )
-            return
-
-        # Each tab should have 2 corners entered in comma separated
-        for i in range(len(tabs.split(","))):
-            # 0 -> 0,1
-            # 1 -> 2,3
-            # 2 -> 4,5
-
-            sheets.append(
-                (
-                    tabs.split(",")[i],
-                    corners.split(",")[i * 2].strip(),
-                    corners.split(",")[i * 2 + 1].strip(),
-                )
-            )
-    else:
-        for tab in tabs.split(","):
-            click.secho(f"\nFor the Sheet {tab}", fg="green")
-            range_start = click.prompt(
-                "Enter the cell of the upper left corner (Labeled 'Source')",
-                type=str,
-            )
-            range_end = click.prompt(
-                "Enter the cell of the lower right corner", type=str
-            )
-            sheets.append((tab, range_start, range_end))
+        vendor_folder = "dellmellanox"
 
     # Create Node factory
-    factory = NetworkNodeFactory(
-        hardware_schema=hardware_schema_file,
-        hardware_data=hardware_spec_file,
-        architecture_schema=architecture_schema_file,
-        architecture_data=architecture_spec_file,
-        architecture_version=architecture,
-    )
+    factory = NetworkNodeFactory(architecture_version=architecture)
+    if shcd:
+        # Get nodes from SHCD
+        network_node_list, network_warnings = node_model_from_shcd(
+            factory=factory,
+            spreadsheet=shcd,
+            sheets=sheets,
+        )
+    else:
+        network_node_list, network_warnings = node_model_from_paddle(factory, ccj_json)
 
-    # Get nodes from SHCD
-    shcd_node_list, shcd_warnings = node_model_from_shcd(
-        factory=factory, spreadsheet=shcd, sheets=sheets
-    )
-
-    # Parse sls_input_file.json file from CSI
-    if csi_folder:
+    # Parse SLS input file.
+    if sls_file:
         try:
-            with open(os.path.join(csi_folder, "sls_input_file.json"), "r") as f:
-                input_json = json.load(f)
-
-                # Format the input to be like the SLS JSON
-                sls_json = [
-                    network[x]
-                    for network in [input_json.get("Networks", {})]
-                    for x in network
-                ]
-
-        except FileNotFoundError:
+            input_json = json.load(sls_file)
+        except (json.JSONDecodeError, UnicodeDecodeError):
             click.secho(
-                "The file sls_input_file.json was not found, check that this is the correct CSI directory.",
+                f"The file {sls_file.name} is not valid JSON.",
                 fg="red",
             )
             return
+
+        # Format the input to be like the SLS JSON
+        sls_json = [
+            network[x] for network in [input_json.get("Networks", {})] for x in network
+        ]
+
     else:
         # Get SLS config
-        token = os.environ.get("SLS_TOKEN")
+        token = environ.get("SLS_TOKEN")
 
         # Token file takes precedence over the environmental variable
         if auth_token != token:
@@ -324,14 +333,25 @@ def config(
             )
     sls_variables = parse_sls_for_config(sls_json)
 
-    # For versions of Shasta < 1.6, the SLS Hostnames need to be renamed
-    if shasta:
-        if float(shasta) < 1.6:
+    # For versions of csm < 1.2, the SLS Hostnames need to be renamed
+    if csm:
+        if float(csm) < 1.2:
             sls_variables = rename_sls_hostnames(sls_variables)
 
+    if override:
+        try:
+            with open(os.path.join(override), "r") as f:
+                override = yaml.load(f)
+        except FileNotFoundError:
+            click.secho(
+                "The override yaml file was not found, check that you entered the right file name and path.",
+                fg="red",
+            )
+            exit(1)
+
     # make folder
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    if not path.exists(folder):
+        makedirs(folder)
     all_devices = {
         "cdu",
         "cec",
@@ -345,42 +365,64 @@ def config(
         "worker",
     }
     config_devices = set()
-    for node in shcd_node_list:
+    all_unknown = []
+    for node in network_node_list:
         switch_name = node.common_name()
         node_shasta_name = get_shasta_name(switch_name, factory.lookup_mapper())
 
         if node_shasta_name in ["sw-cdu", "sw-leaf-bmc", "sw-leaf", "sw-spine"]:
 
-            switch_config, devices = generate_switch_config(
-                shcd_node_list,
+            switch_config, devices, unknown = generate_switch_config(
+                csm,
+                architecture,
+                network_node_list,
                 factory,
                 switch_name,
                 sls_variables,
                 template_folder,
+                vendor_folder,
+                override,
             )
+            all_unknown.extend(unknown)
             config_devices.update(devices)
             with open(f"{folder}/{switch_name}.cfg", "w+") as f:
                 f.write(switch_config)
-
-            click.secho(f"{switch_name} Config Generated", fg="bright_white")
+            if "# OVERRIDE" in switch_config:
+                click.secho(f"{switch_name} Override Config Generated", fg="yellow")
+            else:
+                click.secho(f"{switch_name} Config Generated", fg="bright_white")
     missing_devices = all_devices.difference(config_devices)
+    dash = "-" * 60
     if len(missing_devices) > 0:
-        dash = "-" * 60
         click.secho("\nWarning", fg="red")
 
         click.secho(
-            "\nThe following devices were not found in the configurations.",
+            "\nThe following devices typically exist, but were not found in the current configuration.",
             fg="red",
         )
         click.secho(
-            "If the network contains these devices, check the SHCD to ensure all tabs were included.",
+            "If the network is supposed to have these devices, check the SHCD to ensure all tabs were included.",
             fg="red",
         )
         click.secho(
-            "If the network does not contain these devices, disregard this warning."
+            "If the network does not contain these devices, disregard this warning.",
         )
         click.secho(dash)
         for x in missing_devices:
+            click.secho(x, fg="bright_white")
+
+    if len(all_unknown) > 0:
+        click.secho("\nWarning", fg="red")
+
+        click.secho(
+            "\nThe following devices were discovered in the input data, but the CANU model cannot determine "
+            + "the type and generate a configuration.\nApplying this configuration without considering these "
+            + "devices will likely result in loss of contact with these devices."
+            + "\nEnsure valid input, submit a bug to CANU and manually add these devices to the configuration.",
+            fg="red",
+        )
+        click.secho(dash)
+        for x in all_unknown:
             click.secho(x, fg="bright_white")
 
     return

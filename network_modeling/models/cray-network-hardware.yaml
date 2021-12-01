@@ -1,4 +1,6 @@
---- # Definition of network components: model, size, speeds, etc...
+---
+# This file defines the hardware components that make up a shasta system
+# name.ports[*]count is how may BMC ports there are
 network_hardware:
   - name: "Aruba 8325-48Y8C JL625A"
     vendor: "aruba"
@@ -102,6 +104,10 @@ network_hardware:
     ports:
       - count: 1
         speed: 1
+        slot: "onboard"
+      - count: 1
+        speed: 1
+        slot: "cmc"
       - count: 1
         speed: 1
         slot: "bmc"
@@ -119,6 +125,17 @@ network_hardware:
     ports:
       - count: 48
         speed: 100
+  - name: "Generic Multi-chassis SubRack"
+    vendor: "none"
+    type: "subrack"
+    model: "subrack"
+    ports:
+      - count: 4
+        speed: 1
+        slot: "cmc"
+      - count: 1
+        speed: 1
+        slot: "bmc"
   #
   # DELLANOX
   #
@@ -170,6 +187,17 @@ network_hardware:
       - count: 1
         speed: 1
         slot: "mgmt"
+  - name: "SLINGSHOT 200G 64P"
+    vendor: "cray"
+    model: "slingshot_hsn_switch"
+    type: "switch"
+    deprecated: False
+    ports:
+      - count: 1
+        speed: 1
+        slot: "bmc"
+      - count: 64
+        speed: 200
   - name: "River NCN Node - Generic 2 port stub Gigabyte"
     vendor: "gigabyte"
     type: "server"
@@ -212,3 +240,12 @@ network_hardware:
     ports:
       - count: 2
         speed: 10
+  - name: "HPE G2 Mtrd/Swtd 3P 17.3kVA/C13 NA/J PDU"
+    vendor: "hpe"
+    model: "pdu"
+    type: "none"
+    deprecated: False
+    ports:
+      - count: 1
+        speed: 1
+        slot: "bmc"

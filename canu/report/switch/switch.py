@@ -23,8 +23,8 @@
 import click
 from click_help_colors import HelpColorsGroup
 
-from .cabling import cabling
-from .firmware import firmware
+from canu.report.switch.cabling import cabling
+from canu.report.switch.firmware import firmware
 
 
 @click.group(
@@ -35,7 +35,6 @@ from .firmware import firmware
 @click.pass_context
 def switch(ctx):
     """Report switch commands."""
-    pass
 
 
 switch.add_command(cabling.cabling)
