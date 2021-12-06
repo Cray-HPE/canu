@@ -570,7 +570,9 @@ def generate_switch_config(
     if switch_name not in sls_variables["HMN_IPs"].keys():
         click.secho(f"Cannot find {switch_name} in CSI / SLS nodes.", fg="red")
         exit(1)
-    if sls_variables["CMN_IPs"]:
+
+    cmm_switch_ip = sls_variables.get("CMN_IPs")
+    if cmm_switch_ip:
         variables["CMN_IP"] = sls_variables["CMN_IPs"][switch_name]
     variables["HMN_IP"] = sls_variables["HMN_IPs"][switch_name]
     variables["MTL_IP"] = sls_variables["MTL_IPs"][switch_name]
@@ -1103,17 +1105,20 @@ def groupby_vlan_range(vlan_list):
     Returns:
         list of vlans formatted
     """
-    if None in vlan_list:
-        return
-    if not len(vlan_list):
+    vlans = []
+    for val in vlan_list:
+        if val is not None:
+            vlans.append(val)
+
+    if not len(vlans):
         return ""
 
     def _group_id(item):
         return item[0] - item[1]
 
     values = []
-    vlan_list.sort()
-    for _group_id, members in groupby(enumerate(vlan_list), key=_group_id):
+    vlans.sort()
+    for _group_id, members in groupby(enumerate(vlans), key=_group_id):
         members = list(members)
         first, last = members[0][1], members[-1][1]
 
