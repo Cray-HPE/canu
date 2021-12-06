@@ -75,6 +75,7 @@ interface vlan {{ variables.NATIVE_VLAN }}
     active-gateway ip {{ variables.MTL_IP_GATEWAY }}
     ip helper-address 10.92.100.222
 interface vlan {{ variables.NMN_VLAN }}
+    description NMN
     ip mtu 9198
     ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}}
     active-gateway ip mac 12:00:00:00:6b:00
@@ -82,6 +83,7 @@ interface vlan {{ variables.NMN_VLAN }}
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
 interface vlan {{ variables.HMN_VLAN }}
+    description HMN
     ip mtu 9198
     ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
     active-gateway ip mac 12:00:00:00:6b:00
@@ -91,13 +93,16 @@ interface vlan {{ variables.HMN_VLAN }}
 {%- if variables.CMN != None %}
 interface vlan {{ variables.CMN_VLAN }}
     vrf attach Customer
+    description CMN
     ip mtu 9198
-    ip address {{ variables.CMN_IP_SECONDARY }}/{{ variables.CMN_PREFIX_LEN }}
+    ip address {{ variables.CMN_IP }}/{{ variables.CMN_PREFIX_LEN }}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.CMN_IP_GATEWAY }}
+    ip ospf 1 area 0.0.0.0
 {%- endif %}
 interface vlan {{ variables.CAN_VLAN }}
     vrf attach Customer
+    description CAN
     ip mtu 9198
     ip address {{ variables.CAN_IP_SECONDARY }}/{{ variables.CAN_PREFIX_LEN }}
     active-gateway ip mac 12:00:00:00:6b:00
@@ -112,6 +117,10 @@ vsx
 ip dns server-address {{ variables.NMNLB_DNS }}
 {% include '1.2/aruba/common/prefix-list.j2' %}
 {% include '1.2/aruba/common/route-map.j2' %}
+router ospf 1 vrf Customer
+    router-id {{ variables.LOOPBACK_IP }}
+    default-information originate
+    area 0.0.0.0
 router ospf 1
     router-id {{ variables.LOOPBACK_IP }}
     redistribute bgp
@@ -120,7 +129,7 @@ router ospfv3 1
     router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 {% include '1.2/aruba/common/bgp.secondary.j2' %}
+https-server vrf Customer
 https-server vrf default
 https-server vrf mgmt
-https-server vrf Customer
 {# end sw-spine.secondary #}
