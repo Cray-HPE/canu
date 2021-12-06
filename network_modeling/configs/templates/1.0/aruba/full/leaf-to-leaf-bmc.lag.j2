@@ -4,8 +4,8 @@ interface lag {{ node.config.LAG_NUMBER }} multi-chassis
     no shutdown
     description {{ node.config.DESCRIPTION }}
     no routing
-    vlan trunk native {{ variables.NATIVE_VLAN }}
-    vlan trunk allowed {{ variables.LEAF_BMC_VLANS }}
+    vlan trunk native 1
+    vlan trunk allowed 1-2,4
     lacp mode active
 
 interface 1/1/{{ node.config.PORT }}

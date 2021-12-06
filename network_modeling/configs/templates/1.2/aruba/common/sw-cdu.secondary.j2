@@ -3,6 +3,7 @@
 hostname {{ variables.HOSTNAME }}
 no ip icmp redirect
 vrf keepalive
+vrf Customer
 ntp server {{ variables.NCN_W001 }}
 ntp server {{ variables.NCN_W002 }}
 ntp server {{ variables.NCN_W003 }}
@@ -10,6 +11,7 @@ ntp enable
 
 
 
+ssh server vrf Customer
 ssh server vrf default
 ssh server vrf keepalive
 ssh server vrf mgmt
@@ -24,6 +26,8 @@ vlan {{ variables.HMN_VLAN }}
     name HMN
     apply access-list ip nmn-hmn in
     apply access-list ip nmn-hmn out
+vlan {{ variables.CMN_VLAN }}
+    name CMN
 spanning-tree
 spanning-tree config-name MST0
 spanning-tree config-revision 1
@@ -78,6 +82,12 @@ interface vlan {{ variables.HMN_VLAN }}
     ip mtu 9198
     ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
     ip ospf 1 area 0.0.0.0
+interface vlan {{ variables.CMN_VLAN }}
+    vrf attach Customer
+    description CMN
+    ip mtu 9198
+    ip address {{ variables.CMN_IP }}/{{variables.CMN_PREFIX_LEN}}
+    ip ospf 1 area 0.0.0.0
     
 {%- include '1.2/aruba/common/mtn_hmn_vlan.j2' %}
 {%- include '1.2/aruba/common/mtn_nmn_vlan.j2' %}
@@ -90,12 +100,16 @@ vsx
     linkup-delay-timer 600
     vsx-sync vsx-global
 
+router ospf 1 vrf Customer
+    router-id {{ variables.LOOPBACK_IP }}
+    area 0.0.0.0
 router ospf 1
     router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 router ospfv3 1
     router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
+https-server vrf Customer
 https-server vrf default
 https-server vrf mgmt
 {# end sw-cdu.secondary #}

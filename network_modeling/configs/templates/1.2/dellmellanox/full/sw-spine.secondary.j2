@@ -59,7 +59,7 @@ interface loopback 0 {{ variables.LOOPBACK_IP }}/32
 interface vlan {{ variables.NATIVE_VLAN }} ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}} primary
 interface vlan {{ variables.NMN_VLAN }} ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}} primary
 interface vlan {{ variables.HMN_VLAN }} ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}} primary
-interface vlan {{ variables.CMN_VLAN }} ip address {{ variables.CMN_IP_SECONDARY }}/{{ variables.CMN_PREFIX_LEN }} primary
+interface vlan {{ variables.CMN_VLAN }} ip address {{ variables.CMN_IP }}/{{ variables.CMN_PREFIX_LEN }} primary
 interface vlan {{ variables.CAN_VLAN }} ip address {{ variables.CAN_IP_SECONDARY }}/{{ variables.CAN_PREFIX_LEN }} primary
 interface vlan 4000 ip address 192.168.255.254/30 primary
 no interface vlan {{ variables.NATIVE_VLAN }} ip icmp redirect
