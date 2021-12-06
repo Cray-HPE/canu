@@ -1526,11 +1526,25 @@ sls_input = {
                 "CIDR": "192.168.12.0/24",
                 "Subnets": [
                     {
+                        "Name": "network_hardware",
+                        "CIDR": "192.168.12.0/24",
+                        "IPReservations": [
+                            {"Name": "sw-spine-001", "IPAddress": "192.168.12.2"},
+                            {"Name": "sw-spine-002", "IPAddress": "192.168.12.3"},
+                            {"Name": "sw-leaf-bmc-001", "IPAddress": "192.168.12.4"},
+                            {"Name": "sw-cdu-001", "IPAddress": "192.168.12.5"},
+                            {"Name": "sw-cdu-002", "IPAddress": "192.168.12.6"},
+                        ],
+                        "VlanID": 6,
+                        "Gateway": "192.168.12.1",
+                    },
+                    {
                         "Name": "bootstrap_dhcp",
                         "CIDR": "192.168.12.0/24",
                         "IPReservations": [
-                            {"Name": "cmn-switch-1", "IPAddress": "192.168.12.2"},
-                            {"Name": "cmn-switch-2", "IPAddress": "192.168.12.3"},
+                            {"Name": "ncn-w001", "IPAddress": "192.168.12.4"},
+                            {"Name": "ncn-w002", "IPAddress": "192.168.12.5"},
+                            {"Name": "ncn-w003", "IPAddress": "192.168.12.6"},
                         ],
                         "VlanID": 6,
                         "Gateway": "192.168.12.1",

@@ -476,7 +476,12 @@ def generate_switch_config(
 
     native_vlan = 1
     leaf_bmc_vlan = groupby_vlan_range(
-        [native_vlan, sls_variables["NMN_VLAN"], sls_variables["HMN_VLAN"]],
+        [
+            native_vlan,
+            sls_variables["NMN_VLAN"],
+            sls_variables["HMN_VLAN"],
+            sls_variables["CMN_VLAN"],
+        ],
     )
     spine_leaf_vlan = [
         native_vlan,
@@ -566,6 +571,9 @@ def generate_switch_config(
         click.secho(f"Cannot find {switch_name} in CSI / SLS nodes.", fg="red")
         exit(1)
 
+    cmm_switch_ip = sls_variables.get("CMN_IPs")
+    if cmm_switch_ip:
+        variables["CMN_IP"] = sls_variables["CMN_IPs"][switch_name]
     variables["HMN_IP"] = sls_variables["HMN_IPs"][switch_name]
     variables["MTL_IP"] = sls_variables["MTL_IPs"][switch_name]
     variables["NMN_IP"] = sls_variables["NMN_IPs"][switch_name]
@@ -1097,15 +1105,20 @@ def groupby_vlan_range(vlan_list):
     Returns:
         list of vlans formatted
     """
-    if not len(vlan_list):
+    vlans = []
+    for val in vlan_list:
+        if val is not None:
+            vlans.append(val)
+
+    if not len(vlans):
         return ""
 
     def _group_id(item):
         return item[0] - item[1]
 
     values = []
-    vlan_list.sort()
-    for _group_id, members in groupby(enumerate(vlan_list), key=_group_id):
+    vlans.sort()
+    for _group_id, members in groupby(enumerate(vlans), key=_group_id):
         members = list(members)
         first, last = members[0][1], members[-1][1]
 
@@ -1234,11 +1247,10 @@ def parse_sls_for_config(input_json):
                 if subnets["Name"] == "bootstrap_dhcp":
                     sls_variables["CMN_IP_GATEWAY"] = subnets["Gateway"]
                     sls_variables["CMN_VLAN"] = subnets["VlanID"]
+                if subnets["Name"] == "network_hardware":
                     for ip in subnets["IPReservations"]:
-                        if ip["Name"] == "cmn-switch-1":
-                            sls_variables["CMN_IP_PRIMARY"] = ip["IPAddress"]
-                        elif ip["Name"] == "cmn-switch-2":
-                            sls_variables["CMN_IP_SECONDARY"] = ip["IPAddress"]
+                        if "sw" in ip["Name"]:
+                            sls_variables["CMN_IPs"][ip["Name"]] = ip["IPAddress"]
                 if subnets["Name"] == "bootstrap_dhcp":
                     for ip in subnets["IPReservations"]:
                         if "ncn-w" in ip["Name"]:
