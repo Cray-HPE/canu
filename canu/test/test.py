@@ -1,11 +1,9 @@
-#!/usr/bin/env python3
 """CANU commands that test the network."""
 import json
 from os import environ, path
 from pathlib import Path
-import pprint
 import sys
-
+import logging
 import click
 from click_help_colors import HelpColorsCommand
 import click_spinner
@@ -28,7 +26,8 @@ test_file = path.join(
     project_root,
     "canu",
     "test",
-    "tests_suite.yaml",
+    "aruba",
+    "test_suite.yaml",
 )
 
 
@@ -137,13 +136,12 @@ def test(ctx, username, password, sls_file, auth_token, sls_address):
     sls_variables = parse_sls_for_config(sls_json)
 
     inventory = {"groups": "shasta", "hosts": {}}
-    for k in sls_variables["HMN_IPs"]:
+    for k in sls_variables["CMN_IPs"]:
         if "sw" in k:
-
             inventory["hosts"].update(
                 {
                     k: {
-                        "hostname": str(sls_variables["HMN_IPs"][k]),
+                        "hostname": str(sls_variables["CMN_IPs"][k]),
                         "platform": "generic",
                         "username": username,
                         "password": password,
@@ -166,37 +164,86 @@ def test(ctx, username, password, sls_file, auth_token, sls_address):
                 "defaults": {},
             },
         },
+        logging={
+            "to_console": False,
+        },
     )
     with open(test_file) as f:
-        tests_suite = yaml.safe_load(f.read())
+        test_suite = yaml.safe_load(f.read())
 
     # add tests processor
-    nr_with_tests = nr.with_processors([TestsProcessor(tests_suite)])
-    filtered_nr = nr_with_tests.filter(filter_func=lambda h: "sw" in h.name)
+
+    tests = nr.with_processors([TestsProcessor(test_suite)])
+
+    spine_nr = tests.filter(filter_func=lambda h: "sw-spine" in h.name)
+    leaf_nr = tests.filter(
+        filter_func=lambda h: "sw-leaf" in h.name and "bmc" not in h.name,
+    )
+    leaf_bmc_nr = tests.filter(filter_func=lambda h: "sw-leaf-bmc" in h.name)
+    cdu_nr = tests.filter(filter_func=lambda h: "sw-cdu" in h.name)
 
     # collect commands to get from devices accounting
     # for case when task is a list of commands
-    commands = []
-    for item in tests_suite:
-        if isinstance(item["task"], str):
-            commands.append(item["task"])
-        elif isinstance(item["task"], list):
-            commands.extend(item["task"])
+    spine_commands = []
+    leaf_commands = []
+    leaf_bmc_commands = []
+    cdu_commands = []
+    for item in test_suite:
+        device = item.get("device")
+        if "spine" in device:
+            if isinstance(item["task"], str):
+                spine_commands.append(item["task"])
+            elif isinstance(item["task"], list):
+                spine_commands.extend(item["task"])
+            if "leaf" in device:
+                if isinstance(item["task"], str):
+                    leaf_commands.append(item["task"])
+                elif isinstance(item["task"], list):
+                    leaf_commands.extend(item["task"])
+                if "leaf-bmc" in device:
+                    if isinstance(item["task"], str):
+                        leaf_bmc_commands.append(item["task"])
+                    elif isinstance(item["task"], list):
+                        leaf_bmc_commands.extend(item["task"])
+                    if "cdu" in device:
+                        if isinstance(item["task"], str):
+                            cdu_commands.append(item["task"])
+                        elif isinstance(item["task"], list):
+                            cdu_commands.extend(item["task"])
 
     # collect output from devices using netmiko_send_commands task plugin
-    with click_spinner.spinner():
-        print(
-            "  Connecting...",
-            end="\r",
-        )
-        results = filtered_nr.run(task=netmiko_send_commands, commands=commands)
-    print(
-        "                                                             ",
-        end="\r",
+    # with click_spinner.spinner():
+    #     print(
+    #         "  Connecting...",
+    #         end="\r",
+    #     )
+    spine_results = spine_nr.run(
+        task=netmiko_send_commands,
+        commands=spine_commands,
     )
+    leaf_results = leaf_nr.run(
+        task=netmiko_send_commands, severity_level=logging.DEBUG, commands=leaf_commands
+    )
+    leaf_bmc_results = leaf_bmc_nr.run(
+        task=netmiko_send_commands,
+        commands=leaf_bmc_commands,
+    )
+    cdu_results = cdu_nr.run(task=netmiko_send_commands, commands=cdu_commands)
+    # print(
+    #     "                                                             ",
+    #     end="\r",
+    # )
 
     # prettify results transforming them in a text table using TabulateFormatter
-    table = TabulateFormatter(results, tabulate="brief")
-    result_dictionary = ResultSerializer(results, add_details=False)
-    pprint.pprint(result_dictionary)
-    print(table)
+
+    leaf_list = ResultSerializer(leaf_results, add_details=True, to_dict=False)
+    spine_list = ResultSerializer(spine_results, add_details=True, to_dict=False)
+    leaf_bmc_list = ResultSerializer(leaf_bmc_results, add_details=True, to_dict=False)
+    cdu_list = ResultSerializer(cdu_results, add_details=True, to_dict=False)
+
+    print(
+        TabulateFormatter(
+            leaf_list + spine_list + leaf_bmc_list + cdu_list,
+            tabulate="brief",
+        ),
+    )

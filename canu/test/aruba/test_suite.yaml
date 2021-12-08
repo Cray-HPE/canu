@@ -1,0 +1,133 @@
+---
+- name: Software version test
+  task: show version
+  test: contains
+  pattern: "10.08.1021"
+  err_msg: Software version is wrong
+  device:
+    - cdu
+    - leaf
+    - leaf-bmc
+    - spine
+- name: lacp interfaces test
+  task: show lacp interfaces
+  test: ncontains
+  pattern: "lacp-block"
+  err_msg: lacp port in blocking
+  device:
+    - cdu
+    - leaf
+    - leaf-bmc
+    - spine
+- name: Interface error check
+  task: "show interface error-statistics | exclude vlan"
+  test: "!contains_re"
+  pattern: "\\d{4,}"
+  err_msg: Interfaces errors above 999
+  device:
+    - cdu
+    - leaf
+    - leaf-bmc
+    - spine
+- name: running-config different from startup-config
+  task: checkpoint diff startup-config running-config
+  test: contains
+  pattern: No difference in configs
+  err_msg: running-config does not match startup-config
+  device:
+    - cdu
+    - leaf
+    - leaf-bmc
+    - spine
+# - name: custom test
+#   task: show ip route all-vrfs
+#   test: custom
+#   function_file: "custom.py"
+#   function_name: "run"
+- name: STP check for blocked ports
+  task: show spanning-tree inconsistent-ports
+  test: ncontains_lines
+  pattern: 
+    - BPDU
+    - Loop
+    - Root
+  err_msg: STP port blocked
+  device:
+    - cdu
+    - leaf
+    - leaf-bmc
+    - spine
+- name: CPU Utilization over 70%
+  task: show system resource-utilization | include "CPU usage"
+  test: "!contains_re"
+  pattern: "[7-9][0-9]+"
+  err_msg: CPU Utilization is over 70%
+  device:
+    - cdu
+    - leaf
+    - leaf-bmc
+    - spine
+- name: Memory Utilization over 70%
+  task: show system resource-utilization | include "Memory usage"
+  test: "!contains_re"
+  pattern: "[7-9][0-9]+"
+  err_msg: Memory usage is over 70%
+  device:
+    - cdu
+    - leaf
+    - leaf-bmc
+    - spine
+- name: vlan 1 ip-helper test
+  task: show run interface vlan 1
+  test: contains
+  pattern: 10.92.100.222
+  err_msg: IP-Helper is missing
+  device: spine
+- name: vlan 2 ip-helper test
+  task: show run interface vlan 2
+  test: contains
+  pattern: 10.92.100.222
+  err_msg: IP-Helper is missing
+  device: spine
+- name: vlan 4 ip-helper test
+  task: show run interface vlan 4
+  test: contains
+  pattern: 10.94.100.222
+  err_msg: IP-Helper is missing
+  device: spine
+- name: vlan 7 ip-helper test
+  task: show run interface vlan 7
+  test: contains
+  pattern: 10.92.100.222
+  err_msg: IP-Helper is missing
+  device: spine
+- name: tftp route
+  task: show ip route 10.92.100.60
+  test: contains
+  pattern: Nexthop
+  err_msg: route to tftp incorrect
+  device: spine
+- name: BGP Test
+  task: show bgp all-vrf all summary
+  test: ncontains_lines
+  pattern: 
+    - Idle
+    - Active
+    - connect
+  err_msg: BGP has Neighbors in active or idle
+  device: spine
+- name: STP check for root bridge spine
+  task: show spanning-tree
+  test: contains
+  pattern: This bridge is the root
+  err_msg: Not the root bridge
+  device: spine
+- name: STP check for root bridge leaf
+  task: show spanning
+  test: ncontains
+  pattern: This bridge is the root
+  err_msg: is the root bridge
+  device:
+    - leaf
+    - leaf-bmc
+    - cdu
