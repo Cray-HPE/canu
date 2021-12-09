@@ -1,9 +1,11 @@
 """CANU commands that test the network."""
 import json
+import logging
 from os import environ, path
 from pathlib import Path
+import pprint
 import sys
-import logging
+
 import click
 from click_help_colors import HelpColorsCommand
 import click_spinner
@@ -54,9 +56,40 @@ test_file = path.join(
     envvar="SLS_TOKEN",
     help="Token for SLS authentication",
 )
+@click.option(
+    "--network",
+    default="HMN",
+    show_default=True,
+    type=click.Choice(["HMN", "CMN"], case_sensitive=False),
+    help="The network that is used to connect to the switches.",
+)
+@click.option(
+    "--log",
+    "log_",
+    is_flag=True,
+    help="enable logging.",
+    required=False,
+)
+@click.option(
+    "--json",
+    "json_",
+    is_flag=True,
+    help="JSON output.",
+    required=False,
+)
 @click.option("--sls-address", default="api-gw-service-nmn.local", show_default=True)
 @click.pass_context
-def test(ctx, username, password, sls_file, auth_token, sls_address):
+def test(
+    ctx,
+    username,
+    password,
+    sls_file,
+    auth_token,
+    sls_address,
+    network,
+    log_,
+    json_,
+):
     """Canu test commands."""
     # Parse SLS input file.
     if sls_file:
@@ -132,23 +165,24 @@ def test(ctx, username, password, sls_file, auth_token, sls_address):
             type=str,
             hide_input=True,
         )
+    # set to critical otherwise nornir plugin logs to screen.
+    logging.basicConfig(level="CRITICAL")
 
     sls_variables = parse_sls_for_config(sls_json)
 
     inventory = {"groups": "shasta", "hosts": {}}
-    for k in sls_variables["CMN_IPs"]:
+    for k in sls_variables[network + "_IPs"]:
         if "sw" in k:
             inventory["hosts"].update(
                 {
                     k: {
-                        "hostname": str(sls_variables["CMN_IPs"][k]),
+                        "hostname": str(sls_variables[network + "_IPs"][k]),
                         "platform": "generic",
                         "username": username,
                         "password": password,
                     },
                 },
             )
-
     nr = InitNornir(
         runner={
             "plugin": "threaded",
@@ -164,9 +198,7 @@ def test(ctx, username, password, sls_file, auth_token, sls_address):
                 "defaults": {},
             },
         },
-        logging={
-            "to_console": False,
-        },
+        logging={"enabled": log_, "to_console": True, "level": "DEBUG"},
     )
     with open(test_file) as f:
         test_suite = yaml.safe_load(f.read())
@@ -212,38 +244,42 @@ def test(ctx, username, password, sls_file, auth_token, sls_address):
                             cdu_commands.extend(item["task"])
 
     # collect output from devices using netmiko_send_commands task plugin
-    # with click_spinner.spinner():
-    #     print(
-    #         "  Connecting...",
-    #         end="\r",
-    #     )
-    spine_results = spine_nr.run(
-        task=netmiko_send_commands,
-        commands=spine_commands,
-    )
-    leaf_results = leaf_nr.run(
-        task=netmiko_send_commands, severity_level=logging.DEBUG, commands=leaf_commands
-    )
-    leaf_bmc_results = leaf_bmc_nr.run(
-        task=netmiko_send_commands,
-        commands=leaf_bmc_commands,
-    )
-    cdu_results = cdu_nr.run(task=netmiko_send_commands, commands=cdu_commands)
-    # print(
-    #     "                                                             ",
-    #     end="\r",
-    # )
-
-    # prettify results transforming them in a text table using TabulateFormatter
-
-    leaf_list = ResultSerializer(leaf_results, add_details=True, to_dict=False)
-    spine_list = ResultSerializer(spine_results, add_details=True, to_dict=False)
-    leaf_bmc_list = ResultSerializer(leaf_bmc_results, add_details=True, to_dict=False)
-    cdu_list = ResultSerializer(cdu_results, add_details=True, to_dict=False)
-
+    with click_spinner.spinner():
+        print(
+            "  Connecting...",
+            end="\r",
+        )
+        spine_results = spine_nr.run(
+            task=netmiko_send_commands,
+            commands=spine_commands,
+        )
+        leaf_results = leaf_nr.run(task=netmiko_send_commands, commands=leaf_commands)
+        leaf_bmc_results = leaf_bmc_nr.run(
+            task=netmiko_send_commands,
+            commands=leaf_bmc_commands,
+        )
+        cdu_results = cdu_nr.run(task=netmiko_send_commands, commands=cdu_commands)
     print(
-        TabulateFormatter(
-            leaf_list + spine_list + leaf_bmc_list + cdu_list,
-            tabulate="brief",
-        ),
+        "                                                             ",
+        end="\r",
     )
+
+    # print out the results
+    if json_:
+        pprint.pprint(ResultSerializer(spine_results, add_details=False, to_dict=True))
+        pprint.pprint(ResultSerializer(leaf_results, add_details=False, to_dict=True))
+        pprint.pprint(
+            ResultSerializer(leaf_bmc_results, add_details=False, to_dict=True),
+        )
+        pprint.pprint(ResultSerializer(cdu_results, add_details=False, to_dict=True))
+    else:
+        spine = ResultSerializer(spine_results, add_details=True, to_dict=False)
+        leaf = ResultSerializer(leaf_results, add_details=True, to_dict=False)
+        leaf_bmc = ResultSerializer(leaf_bmc_results, add_details=True, to_dict=False)
+        cdu = ResultSerializer(cdu_results, add_details=True, to_dict=False)
+        print(
+            TabulateFormatter(
+                leaf + spine + leaf_bmc + cdu,
+                tabulate="brief",
+            ),
+        )
