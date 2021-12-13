@@ -45,7 +45,7 @@ setup(
                   "network_modeling": ["schema/*.json",
                                        "schema/*.yaml",
                                        "models/*yaml",
-                                       "configs/templates/**/*"],
+                                       "configs/templates/**/**/**/*"],
                   },
     exclude_package_data={"canu": ["canu_cache.yaml"]},
     install_requires=REQUIREMENTS,
