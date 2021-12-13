@@ -1127,7 +1127,12 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## [development]
 
+## [1.0.1]
+
 - Changed setup.py file glob to follow previously updated Jinja2 template locations.
+
+## [1.0.0]
+
 - Command line option --csi-folder has changed to --sls-file. Any SLS JSON file can be used.
 - Installation via pip now supports non-developer modes. Pyinstaller binary and RPM now work as advertised.
 - The directory of canu_cache.yaml is now dynamically configured in the user's home directory (preferred), or the system temporary directory depending on filesystem permissions.
@@ -1155,8 +1160,6 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Added SubRack support for reading in all variations from the SHCD, and added **sub_location** and **parent** to the JSON output
 - Added Paddle / CCJ (CSM Cabling JSON) support. Commands `canu validate paddle` and `canu validate paddle-cabling` can validate the CCJ. Config can be generated using CCJ.
 - Added the `jq` command to the Docker image.
-
-## [unreleased]
 
 ## [0.0.6] - 2021-9-23
 
@@ -1220,6 +1223,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 [development]: https://github.com/Cray-HPE/canu/tree/develop
 [unreleased]: https://github.com/Cray-HPE/canu/tree/main
+[1.0.0]: https://github.com/Cray-HPE/canu/tree/1.0.0
 [0.0.6]: https://github.com/Cray-HPE/canu/tree/0.0.6
 [0.0.5]: https://github.com/Cray-HPE/canu/tree/0.0.5
 [0.0.4]: https://github.com/Cray-HPE/canu/tree/0.0.4
