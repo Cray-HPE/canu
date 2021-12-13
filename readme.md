@@ -1127,6 +1127,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## [development]
 
+- Changed setup.py file glob to follow previously updated Jinja2 template locations.
 - Command line option --csi-folder has changed to --sls-file. Any SLS JSON file can be used.
 - Installation via pip now supports non-developer modes. Pyinstaller binary and RPM now work as advertised.
 - The directory of canu_cache.yaml is now dynamically configured in the user's home directory (preferred), or the system temporary directory depending on filesystem permissions.
