@@ -18,6 +18,9 @@
     #   order: 600
     ordering:
     - lineage:
+      - startswith: ip vrf
+      order: 4
+    - lineage:
       - startswith: ip name-server
       order: 5
     - lineage:
