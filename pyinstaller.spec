@@ -74,6 +74,10 @@ added_files = [
         "network_modeling/configs/templates/1.2/dellmellanox/full/*.j2",
         "network_modeling/configs/templates/1.2/dellmellanox/full",
     ),
+    (
+        "network_modeling/configs/templates/1.2/dellmellanox/tds/*.j2",
+        "network_modeling/configs/templates/1.2/dellmellanox/tds",
+    ),
     ("canu/test/aruba/test_suite.yaml", "canu/test/aruba"),
     ("canu/test/aruba/test_suite.yaml", "canu/test/dellanox"),
 ]
