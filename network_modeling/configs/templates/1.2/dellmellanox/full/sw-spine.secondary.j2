@@ -93,9 +93,9 @@ spanning-tree mst revision 2
 
 interface port-channel 100 dcb priority-flow-control mode on force
 
-{% include '1.2/dellmellanox/common/ncn-m.lag.j2' %}
-{% include '1.2/dellmellanox/common/ncn-w.lag.j2' %}
-{% include '1.2/dellmellanox/common/ncn-s.lag.j2' %}
+{% include '1.2/dellmellanox/common/ncn-m-secondary.lag.j2' %}
+{% include '1.2/dellmellanox/common/ncn-w-secondary.lag.j2' %}
+{% include '1.2/dellmellanox/common/ncn-s-secondary.lag.j2' %}
 {% include '1.2/dellmellanox/common/uan.j2' %}
 {% include '1.2/dellmellanox/full/spine-to-leaf-bmc.lag.j2' %}
 {% include '1.2/dellmellanox/common/spine-to-cdu.lag.j2' %}

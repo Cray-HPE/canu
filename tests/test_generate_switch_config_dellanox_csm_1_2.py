@@ -77,7 +77,6 @@ def test_switch_config_spine_primary():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
         assert (
             "hostname sw-spine-001\n"
             + "no cli default prefix-modes enable\n"
@@ -593,18 +592,6 @@ def test_switch_config_spine_secondary():
             + "interface mlag-port-channel 201 no shutdown\n"
         ) in str(result.output)
         assert (
-            "interface mlag-port-channel 1 lacp-individual enable force\n"
-            + "interface mlag-port-channel 2 lacp-individual enable force\n"
-            + "interface mlag-port-channel 3 lacp-individual enable force\n"
-            + "interface mlag-port-channel 4 lacp-individual enable force\n"
-            + "interface mlag-port-channel 5 lacp-individual enable force\n"
-            + "interface mlag-port-channel 6 lacp-individual enable force\n"
-            + "interface mlag-port-channel 7 lacp-individual enable force\n"
-            + "interface mlag-port-channel 8 lacp-individual enable force\n"
-            + "interface mlag-port-channel 9 lacp-individual enable force\n"
-            + "interface mlag-port-channel 13 lacp-individual enable force\n"
-        ) in str(result.output)
-        assert (
             "vlan 2\n"
             + "vlan 4\n"
             + "vlan 6\n"
@@ -616,7 +603,6 @@ def test_switch_config_spine_secondary():
             + 'vlan 7 name "CAN"\n'
             + 'vlan 4000 name "MLAG"\n'
         ) in str(result.output)
-        print(result.output)
         assert (
             "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 2\n"
             + "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 4\n"
@@ -870,14 +856,12 @@ def test_switch_config_leaf_bmc():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
         assert (
             "ip vrf Customer\n"
             + "ip name-server 10.92.100.225\n"
             + "hostname sw-leaf-bmc-001\n"
             + "rest api restconf\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "interface vlan1\n"
             + "  Description MTL\n"
@@ -1446,7 +1430,6 @@ def test_switch_config_cdu_secondary():
             + "  vlt-port-channel 5\n"
             + "  spanning-tree guard root\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "interface port-channel100\n"
             + "  description sw-cdu-002:27==>sw-spine-001:30\n"
