@@ -8,14 +8,14 @@ interface port-channel100
  no shutdown
  switchport mode trunk
  switchport access vlan {{ variables.NATIVE_VLAN }}
- switchport trunk allowed vlan {{ variables.NMN_VLAN }},{{ variables.HMN_VLAN }}
+ switchport trunk allowed vlan {{ variables.NMN_VLAN }},{{ variables.HMN_VLAN }},{{ variables.CMN_VLAN }}
  mtu 9216
 {%- endif %}
 {%- endfor %}
 
 {%- for node in cabling.nodes if node.subtype == "spine"%}
 
-interface ethernet 1/1/{{ node.config.PORT }}
+interface ethernet1/1/{{ node.config.PORT }}
  no shutdown
  channel-group 100 mode active
  no switchport

@@ -1,9 +1,9 @@
 {#- compute #}
 {%- for node in cabling.nodes if node.subtype == "compute" and node.slot == "onboard" %}
-interface ethernet 1/1/{{ node.config.PORT }}
+interface ethernet1/1/{{ node.config.PORT }}
   description {{ node.config.DESCRIPTION }}
   no shutdown
-  switchport access vlan 2
+  switchport access vlan {{ variables.NMN_VLAN }}
   mtu 9216
   flowcontrol receive off
   flowcontrol transmit off
