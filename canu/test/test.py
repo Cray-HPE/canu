@@ -24,15 +24,26 @@ else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent
 
-test_file = path.join(project_root, "canu", "test", "aruba", "test_suite.yaml",)
+test_file = path.join(
+    project_root,
+    "canu",
+    "test",
+    "aruba",
+    "test_suite.yaml",
+)
 
 
 @click.option("--username", default="admin", show_default=True, help="Switch username")
 @click.option(
-    "--password", hide_input=True, confirmation_prompt=False, help="Switch password",
+    "--password",
+    hide_input=True,
+    confirmation_prompt=False,
+    help="Switch password",
 )
 @click.command(
-    cls=HelpColorsCommand, help_headers_color="yellow", help_options_color="blue",
+    cls=HelpColorsCommand,
+    help_headers_color="yellow",
+    help_options_color="blue",
 )
 @click.option(
     "--sls-file",
@@ -41,7 +52,9 @@ test_file = path.join(project_root, "canu", "test", "aruba", "test_suite.yaml",)
     required=True,
 )
 @click.option(
-    "--auth-token", envvar="SLS_TOKEN", help="Token for SLS authentication",
+    "--auth-token",
+    envvar="SLS_TOKEN",
+    help="Token for SLS authentication",
 )
 @click.option(
     "--network",
@@ -51,15 +64,31 @@ test_file = path.join(project_root, "canu", "test", "aruba", "test_suite.yaml",)
     help="The network that is used to connect to the switches.",
 )
 @click.option(
-    "--log", "log_", is_flag=True, help="enable logging.", required=False,
+    "--log",
+    "log_",
+    is_flag=True,
+    help="enable logging.",
+    required=False,
 )
 @click.option(
-    "--json", "json_", is_flag=True, help="JSON output.", required=False,
+    "--json",
+    "json_",
+    is_flag=True,
+    help="JSON output.",
+    required=False,
 )
 @click.option("--sls-address", default="api-gw-service-nmn.local", show_default=True)
 @click.pass_context
 def test(
-    ctx, username, password, sls_file, auth_token, sls_address, network, log_, json_,
+    ctx,
+    username,
+    password,
+    sls_file,
+    auth_token,
+    sls_address,
+    network,
+    log_,
+    json_,
 ):
     """Canu test commands."""
     # Parse SLS input file.
@@ -68,7 +97,8 @@ def test(
             input_json = json.load(sls_file)
         except (json.JSONDecodeError, UnicodeDecodeError):
             click.secho(
-                f"The file {sls_file.name} is not valid JSON.", fg="red",
+                f"The file {sls_file.name} is not valid JSON.",
+                fg="red",
             )
             return
 
@@ -130,7 +160,11 @@ def test(
             )
 
     if not password:
-        password = click.prompt("Enter the switch password", type=str, hide_input=True,)
+        password = click.prompt(
+            "Enter the switch password",
+            type=str,
+            hide_input=True,
+        )
     # set to critical otherwise nornir plugin logs to screen.
     logging.basicConfig(level="CRITICAL")
 
@@ -150,10 +184,19 @@ def test(
                 },
             )
     nr = InitNornir(
-        runner={"plugin": "threaded", "options": {"num_workers": 10,},},
+        runner={
+            "plugin": "threaded",
+            "options": {
+                "num_workers": 10,
+            },
+        },
         inventory={
             "plugin": "DictInventory",
-            "options": {"hosts": inventory["hosts"], "groups": {}, "defaults": {},},
+            "options": {
+                "hosts": inventory["hosts"],
+                "groups": {},
+                "defaults": {},
+            },
         },
         logging={"enabled": log_, "to_console": True, "level": "DEBUG"},
     )
@@ -203,18 +246,22 @@ def test(
     # collect output from devices using netmiko_send_commands task plugin
     with click_spinner.spinner():
         print(
-            "  Connecting...", end="\r",
+            "  Connecting...",
+            end="\r",
         )
         spine_results = spine_nr.run(
-            task=netmiko_send_commands, commands=spine_commands,
+            task=netmiko_send_commands,
+            commands=spine_commands,
         )
         leaf_results = leaf_nr.run(task=netmiko_send_commands, commands=leaf_commands)
         leaf_bmc_results = leaf_bmc_nr.run(
-            task=netmiko_send_commands, commands=leaf_bmc_commands,
+            task=netmiko_send_commands,
+            commands=leaf_bmc_commands,
         )
         cdu_results = cdu_nr.run(task=netmiko_send_commands, commands=cdu_commands)
     print(
-        "                                                             ", end="\r",
+        "                                                             ",
+        end="\r",
     )
 
     # print out the results
@@ -230,5 +277,9 @@ def test(
         leaf = ResultSerializer(leaf_results, add_details=True, to_dict=False)
         leaf_bmc = ResultSerializer(leaf_bmc_results, add_details=True, to_dict=False)
         cdu = ResultSerializer(cdu_results, add_details=True, to_dict=False)
-        print(TabulateFormatter(leaf + spine + leaf_bmc + cdu, tabulate="brief",),)
-
+        print(
+            TabulateFormatter(
+                leaf + spine + leaf_bmc + cdu,
+                tabulate="brief",
+            ),
+        )
