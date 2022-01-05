@@ -46,10 +46,7 @@ test_file = path.join(
     help_options_color="blue",
 )
 @click.option(
-    "--sls-file",
-    help="File containing system SLS JSON data.",
-    type=click.File("r"),
-    required=True,
+    "--sls-file", help="File containing system SLS JSON data.", type=click.File("r")
 )
 @click.option(
     "--auth-token",
