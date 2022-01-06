@@ -491,13 +491,15 @@ def generate_switch_config(
         leaf_bmc_vlan.append(sls_variables["CMN_VLAN"])
     elif sls_variables["CMN_VLAN"] and float(csm) < 1.2:
         click.secho(
-            "CMN network found in SLS, the CSM version required to use this network has to be 1.2 or greater.",
+            "\nCMN network found in SLS, the CSM version required to use this network has to be 1.2 or greater. "
+            + "\nMake sure the --csm flag matches the CSM version you are using.",
             fg="red",
         )
         exit(1)
-    elif sls_variables["CMN_VLAN"] == "None":
+    elif sls_variables["CMN_VLAN"] == None:
         click.secho(
-            "CMN network not found in SLS, this is required for csm 1.2",
+            "\nCMN network not found in SLS, this is required for csm 1.2 "
+            + "\nHas the CSM 1.2 SLS upgrade procedure been run?",
             fg="red",
         )
         exit(1)
