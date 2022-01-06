@@ -480,30 +480,29 @@ def generate_switch_config(
         sls_variables["NMN_VLAN"],
         sls_variables["HMN_VLAN"],
     ]
-    if sls_variables["CMN_VLAN"] and csm == "1.2":
-        leaf_bmc_vlan.append(sls_variables["CMN_VLAN"])
-    else:
-        click.secho(
-            "CMN network not found in SLS, this is required for csm 1.2",
-            fg="red",
-        )
-        exit(1)
-    leaf_bmc_vlan = groupby_vlan_range(leaf_bmc_vlan)
     spine_leaf_vlan = [
         native_vlan,
         sls_variables["NMN_VLAN"],
         sls_variables["HMN_VLAN"],
         sls_variables["CAN_VLAN"],
     ]
-    if sls_variables["CMN_VLAN"] and csm == "1.2":
+    if sls_variables["CMN_VLAN"] and float(csm) >= 1.2:
         spine_leaf_vlan.append(sls_variables["CMN_VLAN"])
-    else:
+        leaf_bmc_vlan.append(sls_variables["CMN_VLAN"])
+    elif sls_variables["CMN_VLAN"] and float(csm) < 1.2:
+        click.secho(
+            "CMN network found in SLS, the CSM version required to use this network has to be 1.2 or greater.",
+            fg="red",
+        )
+        exit(1)
+    elif sls_variables["CMN_VLAN"] == "None":
         click.secho(
             "CMN network not found in SLS, this is required for csm 1.2",
             fg="red",
         )
         exit(1)
     spine_leaf_vlan = groupby_vlan_range(spine_leaf_vlan)
+    leaf_bmc_vlan = groupby_vlan_range(leaf_bmc_vlan)
 
     variables = {
         "HOSTNAME": switch_name,
