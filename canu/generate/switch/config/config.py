@@ -473,25 +473,38 @@ def generate_switch_config(
         "primary" if is_primary else "secondary"
     ]
     template = env.get_template(template_name)
-
     native_vlan = 1
-    leaf_bmc_vlan = groupby_vlan_range(
-        [
-            native_vlan,
-            sls_variables["NMN_VLAN"],
-            sls_variables["HMN_VLAN"],
-            sls_variables["CMN_VLAN"],
-        ],
-    )
+
+    leaf_bmc_vlan = [
+        native_vlan,
+        sls_variables["NMN_VLAN"],
+        sls_variables["HMN_VLAN"],
+    ]
     spine_leaf_vlan = [
         native_vlan,
         sls_variables["NMN_VLAN"],
         sls_variables["HMN_VLAN"],
         sls_variables["CAN_VLAN"],
     ]
-    if sls_variables["CMN_VLAN"]:
+    if sls_variables["CMN_VLAN"] and float(csm) >= 1.2:
         spine_leaf_vlan.append(sls_variables["CMN_VLAN"])
+        leaf_bmc_vlan.append(sls_variables["CMN_VLAN"])
+    elif sls_variables["CMN_VLAN"] and float(csm) < 1.2:
+        click.secho(
+            "\nCMN network found in SLS, the CSM version required to use this network has to be 1.2 or greater. "
+            + "\nMake sure the --csm flag matches the CSM version you are using.",
+            fg="red",
+        )
+        exit(1)
+    elif sls_variables["CMN_VLAN"] is None and float(csm) >= 1.2:
+        click.secho(
+            "\nCMN network not found in SLS, this is required for csm 1.2 "
+            + "\nHas the CSM 1.2 SLS upgrade procedure been run?",
+            fg="red",
+        )
+        exit(1)
     spine_leaf_vlan = groupby_vlan_range(spine_leaf_vlan)
+    leaf_bmc_vlan = groupby_vlan_range(leaf_bmc_vlan)
 
     variables = {
         "HOSTNAME": switch_name,
