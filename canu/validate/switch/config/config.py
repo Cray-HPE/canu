@@ -375,7 +375,7 @@ def config(
         remediation_config_hier.add_tags(tags)
     click.echo(dash, file=out)
     for safe_line in remediation_config_hier.with_tags({"safe"}).all_children():
-        click.echo(safe_line.cisco_style_text())
+        click.echo(safe_line.cisco_style_text(), file=out)
     click.echo(dash, file=out)
 
     click.secho(
