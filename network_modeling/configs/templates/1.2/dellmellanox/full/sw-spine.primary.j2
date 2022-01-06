@@ -121,21 +121,21 @@ interface vlan {{ variables.NMN_VLAN }} ip dhcp relay instance 2 downstream
 interface vlan {{ variables.HMN_VLAN }} ip dhcp relay instance 4 downstream
 
 protocol magp
-interface vlan {{ variables.NATIVE_VLAN }} magp 1
-interface vlan {{ variables.NMN_VLAN }} magp 2
-interface vlan {{ variables.HMN_VLAN }} magp 4
-interface vlan {{ variables.CMN_VLAN }} magp 6
-interface vlan {{ variables.CAN_VLAN }} magp 7
-interface vlan 1 magp 1 ip virtual-router address {{ variables.MTL_IP_GATEWAY }}
-interface vlan {{ variables.NMN_VLAN }} magp 2 ip virtual-router address {{ variables.NMN_IP_GATEWAY }}
-interface vlan {{ variables.HMN_VLAN }} magp 4 ip virtual-router address  {{ variables.HMN_IP_GATEWAY }}
-interface vlan {{ variables.CMN_VLAN }} magp 6 ip virtual-router address {{ variables.CMN_IP_GATEWAY }}
-interface vlan {{ variables.CAN_VLAN }} magp 7 ip virtual-router address {{ variables.CAN_IP_GATEWAY }}
-interface vlan 1 magp 1 ip virtual-router mac-address 00:00:5E:00:01:01
-interface vlan {{ variables.NMN_VLAN }} magp 2 ip virtual-router mac-address 00:00:5E:00:01:01
-interface vlan {{ variables.HMN_VLAN }} magp 4 ip virtual-router mac-address 00:00:5E:00:01:01
-interface vlan {{ variables.CMN_VLAN }} magp 6 ip virtual-router mac-address 00:00:5E:00:01:01
-interface vlan {{ variables.CAN_VLAN }} magp 7 ip virtual-router mac-address 00:00:5E:00:01:01
+interface vlan {{ variables.NATIVE_VLAN }} magp {{ variables.NATIVE_VLAN }}
+interface vlan {{ variables.NMN_VLAN }} magp {{ variables.NMN_VLAN }}
+interface vlan {{ variables.HMN_VLAN }} magp {{ variables.HMN_VLAN }}
+interface vlan {{ variables.CMN_VLAN }} magp {{ variables.CMN_VLAN }}
+interface vlan {{ variables.CAN_VLAN }} magp {{ variables.CAN_VLAN }}
+interface vlan {{ variables.NATIVE_VLAN }} magp {{ variables.NATIVE_VLAN }} ip virtual-router address {{ variables.MTL_IP_GATEWAY }}
+interface vlan {{ variables.NMN_VLAN }} magp {{ variables.NMN_VLAN }} ip virtual-router address {{ variables.NMN_IP_GATEWAY }}
+interface vlan {{ variables.HMN_VLAN }} magp {{ variables.HMN_VLAN }} ip virtual-router address  {{ variables.HMN_IP_GATEWAY }}
+interface vlan {{ variables.CMN_VLAN }} magp {{ variables.CMN_VLAN }} ip virtual-router address {{ variables.CMN_IP_GATEWAY }}
+interface vlan {{ variables.CAN_VLAN }} magp {{ variables.CAN_VLAN }} ip virtual-router address {{ variables.CAN_IP_GATEWAY }}
+interface vlan {{ variables.NATIVE_VLAN }} magp {{ variables.NATIVE_VLAN }} ip virtual-router mac-address 00:00:5E:00:01:01
+interface vlan {{ variables.NMN_VLAN }} magp {{ variables.NMN_VLAN }} ip virtual-router mac-address 00:00:5E:00:01:01
+interface vlan {{ variables.HMN_VLAN }} magp {{ variables.HMN_VLAN }} ip virtual-router mac-address 00:00:5E:00:01:01
+interface vlan {{ variables.CMN_VLAN }} magp {{ variables.CMN_VLAN }} ip virtual-router mac-address 00:00:5E:00:01:01
+interface vlan {{ variables.CAN_VLAN }} magp {{ variables.CAN_VLAN }} ip virtual-router mac-address 00:00:5E:00:01:01
 
 mlag-vip mlag-domain ip 192.168.255.242 /29 force
 no mlag shutdown
