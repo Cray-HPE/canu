@@ -496,7 +496,7 @@ def generate_switch_config(
             fg="red",
         )
         exit(1)
-    elif sls_variables["CMN_VLAN"] == None:
+    elif sls_variables["CMN_VLAN"] is None and float(csm) >= 1.2:
         click.secho(
             "\nCMN network not found in SLS, this is required for csm 1.2 "
             + "\nHas the CSM 1.2 SLS upgrade procedure been run?",
