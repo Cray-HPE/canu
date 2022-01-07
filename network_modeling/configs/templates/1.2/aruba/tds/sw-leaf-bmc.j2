@@ -28,6 +28,7 @@ vlan {{ variables.CMN_VLAN }}
     name CMN
 
 spanning-tree
+spanning-tree forward-delay 4
 spanning-tree config-name MST0
 spanning-tree config-revision 1
 interface mgmt

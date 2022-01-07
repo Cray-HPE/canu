@@ -34,6 +34,7 @@ vlan {{ variables.CAN_VLAN }}
 vlan 10
     name SUN
 spanning-tree
+spanning-tree forward-delay 4
 spanning-tree priority 0
 spanning-tree config-name MST0
 spanning-tree config-revision 1
