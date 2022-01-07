@@ -119,6 +119,7 @@
       - no ip dns
       - ip dns
       - no ntp
+      - ip name-server
     add_tags: safe
   #manual contains
   - lineage:
@@ -126,6 +127,8 @@
       - spanning-tree
       - magp
       - mgmt0
+      - mlag-port-channel
+      - vrf
     add_tags: manual
   #safe contains
   - lineage:

@@ -348,6 +348,7 @@ def test_switch_config_spine_primary():
             + "interface vlan 1 ip dhcp relay instance 2 downstream\n"
             + "interface vlan 2 ip dhcp relay instance 2 downstream\n"
             + "interface vlan 4 ip dhcp relay instance 4 downstream\n"
+            + "interface vlan 6 ip dhcp relay instance 2 downstream\n"
         ) in str(result.output)
         assert (
             "protocol magp\n"
@@ -744,6 +745,7 @@ def test_switch_config_spine_secondary():
             + "interface vlan 1 ip dhcp relay instance 2 downstream\n"
             + "interface vlan 2 ip dhcp relay instance 2 downstream\n"
             + "interface vlan 4 ip dhcp relay instance 4 downstream\n"
+            + "interface vlan 6 ip dhcp relay instance 2 downstream\n"
         ) in str(result.output)
         assert (
             "protocol magp\n"
