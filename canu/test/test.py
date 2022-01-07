@@ -164,8 +164,8 @@ def test(
             type=str,
             hide_input=True,
         )
-    # set to critical otherwise nornir plugin logs to screen.
-    logging.basicConfig(level="CRITICAL")
+    # set to ERROR otherwise nornir plugin logs debug messages to the screen.
+    logging.basicConfig(level="ERROR")
 
     sls_variables = parse_sls_for_config(sls_json)
 
@@ -213,8 +213,7 @@ def test(
     leaf_bmc_nr = tests.filter(filter_func=lambda h: "sw-leaf-bmc" in h.name)
     cdu_nr = tests.filter(filter_func=lambda h: "sw-cdu" in h.name)
 
-    # collect commands to get from devices accounting
-    # for case when task is a list of commands
+    # collect commands for devices
     spine_commands = []
     leaf_commands = []
     leaf_bmc_commands = []
@@ -265,12 +264,21 @@ def test(
 
     # print out the results
     if json_:
-        pprint.pprint(ResultSerializer(spine_results, add_details=False, to_dict=True))
-        pprint.pprint(ResultSerializer(leaf_results, add_details=False, to_dict=True))
-        pprint.pprint(
+        dict_results = ResultSerializer(spine_results, add_details=False, to_dict=True)
+        dict_results.update(
+            ResultSerializer(leaf_results, add_details=False, to_dict=True),
+        )
+        dict_results.update(
+            ResultSerializer(spine_results, add_details=False, to_dict=True),
+        )
+        dict_results.update(
             ResultSerializer(leaf_bmc_results, add_details=False, to_dict=True),
         )
-        pprint.pprint(ResultSerializer(cdu_results, add_details=False, to_dict=True))
+        dict_results.update(
+            ResultSerializer(cdu_results, add_details=False, to_dict=True),
+        )
+
+        pprint.pprint(dict_results)
     else:
         spine = ResultSerializer(spine_results, add_details=True, to_dict=False)
         leaf = ResultSerializer(leaf_results, add_details=True, to_dict=False)
