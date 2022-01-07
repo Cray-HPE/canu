@@ -78,12 +78,8 @@ canu generate switch config [OPTIONS]
 
 
 
-### --ccj( <ccj>)
-Paddle CCJ file
-
-
 ### --shcd( <shcd>)
-SHCD file
+**Required** SHCD file
 
 
 ### --tabs( <tabs>)

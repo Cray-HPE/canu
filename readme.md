@@ -1,4 +1,4 @@
-# 🛶 CANU v0.0.6
+# 🛶 CANU v1.1.1-develop
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1125,10 +1125,11 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [development]
+## [1.1.1-develop]
 
-## [1.0.0]
-
+- Updated pull_request_template.md
+- Adjusted the STP timeout to 4 seconds from the default of 15.
+- Changed setup.py file glob to follow previously updated Jinja2 template locations.
 - Command line option --csi-folder has changed to --sls-file. Any SLS JSON file can be used.
 - Installation via pip now supports non-developer modes. Pyinstaller binary and RPM now work as advertised.
 - The directory of canu_cache.yaml is now dynamically configured in the user's home directory (preferred), or the system temporary directory depending on filesystem permissions.
@@ -1219,7 +1220,6 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 [development]: https://github.com/Cray-HPE/canu/tree/develop
 [unreleased]: https://github.com/Cray-HPE/canu/tree/main
-[1.0.0]: https://github.com/Cray-HPE/canu/tree/1.0.0
 [0.0.6]: https://github.com/Cray-HPE/canu/tree/0.0.6
 [0.0.5]: https://github.com/Cray-HPE/canu/tree/0.0.5
 [0.0.4]: https://github.com/Cray-HPE/canu/tree/0.0.4
