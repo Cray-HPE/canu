@@ -393,7 +393,10 @@ def config(
         + "\n"
         + "These commands may cause disruption to the system and should be done only during a maintenance period."
         + "\n"
-        + "It is recommended to have an out of band connection while running these commands.",
+        + "It is recommended to have an out of band connection while running these commands."
+        + "\n"
+        + "If commands are going to be applied to Aruba switches, it is recommended to utilize Configuration Checkpoints "
+        + "to avoid getting locked out.",
         fg="red",
         file=out,
     )
