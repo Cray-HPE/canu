@@ -256,24 +256,24 @@ def config(
             )
         try:
             # Load config from file and parse hostname
-            f = open(running)
-            running = f.read()
-            vendor = vendor.lower()
-            if vendor == "dell":
-                host = Host("example.rtr", "dellOS10", dell_options)
-            elif vendor == "mellanox":
-                host = Host("example.rtr", "onyx", mellanox_options)
-                switch_config_list = []
-                for line in running.splitlines():
-                    if line.startswith("   "):
-                        switch_config_list.append(line.strip())
-                    else:
-                        switch_config_list.append(line)
-                running = ("\n").join(switch_config_list)
-            elif vendor == "aruba":
-                host = Host("example.rtr", "aoscx", options)
-            running_config_hier = HConfig(host=host)
-            running_config_hier.load_from_string(running)
+            with open(running, "r") as f:
+                running = f.read()
+                vendor = vendor.lower()
+                if vendor == "dell":
+                    host = Host("example.rtr", "dellOS10", dell_options)
+                elif vendor == "mellanox":
+                    host = Host("example.rtr", "onyx", mellanox_options)
+                    switch_config_list = []
+                    for line in running.splitlines():
+                        if line.startswith("   "):
+                            switch_config_list.append(line.strip())
+                        else:
+                            switch_config_list.append(line)
+                    running = ("\n").join(switch_config_list)
+                elif vendor == "aruba":
+                    host = Host("example.rtr", "aoscx", options)
+                running_config_hier = HConfig(host=host)
+                running_config_hier.load_from_string(running)
         except UnicodeDecodeError:
             click.secho(
                 f"The file {running} is not a valid config file.",
