@@ -1,4 +1,4 @@
-# 🛶 CANU v0.0.6
+# 🛶 CANU v1.1.1-develop
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1125,8 +1125,10 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [development]
+## [1.1.1-develop]
 
+- Updated pull_request_template.md
+- Adjusted the STP timeout to 4 seconds from the default of 15.
 - Changed setup.py file glob to follow previously updated Jinja2 template locations.
 - Command line option --csi-folder has changed to --sls-file. Any SLS JSON file can be used.
 - Installation via pip now supports non-developer modes. Pyinstaller binary and RPM now work as advertised.
@@ -1155,8 +1157,6 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Added SubRack support for reading in all variations from the SHCD, and added **sub_location** and **parent** to the JSON output
 - Added Paddle / CCJ (CSM Cabling JSON) support. Commands `canu validate paddle` and `canu validate paddle-cabling` can validate the CCJ. Config can be generated using CCJ.
 - Added the `jq` command to the Docker image.
-
-## [unreleased]
 
 ## [0.0.6] - 2021-9-23
 
