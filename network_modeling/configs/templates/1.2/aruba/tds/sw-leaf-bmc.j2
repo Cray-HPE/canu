@@ -28,6 +28,7 @@ vlan {{ variables.CMN_VLAN }}
     name CMN
 
 spanning-tree
+{#- forward delay added to help with pxe boots. CASMNET-1099 + CASMTRIAGE-2793 #}
 spanning-tree forward-delay 4
 spanning-tree config-name MST0
 spanning-tree config-revision 1
