@@ -1,5 +1,6 @@
 {#- sw-leaf-bmc #}
 {%- include '1.2/dellmellanox/common/unknown.j2' %}
+ip vrf Customer
 ip name-server {{ variables.NMNLB_DNS }}
 hostname {{ variables.HOSTNAME }}
 rest api restconf
@@ -35,7 +36,17 @@ interface vlan{{ variables.HMN_VLAN }}
  ip access-group nmn-hmn out
  ip ospf 1 area 0.0.0.0
 
-interface loopback 0
+interface vlan{{ variables.CMN_VLAN }}
+ description CMN
+ no shutdown
+ ip vrf forwarding Customer
+ mtu 9216
+ ip address {{ variables.CMN_IP }}/{{variables.CMN_PREFIX_LEN}}
+ ip ospf 2 area 0.0.0.0
+
+interface loopback0
+ no shutdown
+ mtu 9216
  ip address {{ variables.LOOPBACK_IP }}/32
  ip ospf 1 area 0.0.0.0
 
@@ -45,13 +56,17 @@ interface mgmt1/1/1
  ipv6 address autoconfig
 
 spanning-tree mst configuration
- instance 1 vlan 1-4093
+ name cray
+ revision 2
 
 {% include '1.2/dellmellanox/full/leaf-bmc-to-spine.lag.j2' %}
 {% include '1.2/dellmellanox/common/bmc.j2' %}
 {% include '1.2/dellmellanox/common/uan-nmn.j2' %}
 {% include '1.2/dellmellanox/common/compute.j2' %}
 router ospf 1
+ router-id {{ variables.LOOPBACK_IP }}
+
+router ospf 2 vrf Customer
  router-id {{ variables.LOOPBACK_IP }}
 
 {# end sw-leaf-bmc #}

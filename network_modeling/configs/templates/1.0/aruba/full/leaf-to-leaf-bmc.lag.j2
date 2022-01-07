@@ -1,4 +1,4 @@
-{#- leaf-to-leaf-bmc #}
+{#- spine-to-leaf-bmc #}
 {%- for node in cabling.nodes if node.subtype == "leaf-bmc" %}
 interface lag {{ node.config.LAG_NUMBER }} multi-chassis
     no shutdown
@@ -15,4 +15,4 @@ interface 1/1/{{ node.config.PORT }}
     lag {{ node.config.LAG_NUMBER }}
 
 {%- endfor %}
-{#- end leaf-to-leaf-bmc #}
+{#- end spine-to-leaf-bmc #}
