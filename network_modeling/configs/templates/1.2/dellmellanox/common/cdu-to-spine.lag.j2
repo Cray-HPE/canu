@@ -8,8 +8,8 @@ interface port-channel100
  description {{ node.config.DESCRIPTION }}
  no shutdown
  switchport mode trunk
- switchport access vlan 1
- switchport trunk allowed vlan 2,4
+ switchport access vlan {{ variables.NATIVE_VLAN }}
+ switchport trunk allowed vlan {{ variables.NMN_VLAN }},{{ variables.HMN_VLAN }},{{ variables.CMN_VLAN }}
  mtu 9216
  vlt-port-channel 100
  !

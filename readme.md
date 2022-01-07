@@ -1,4 +1,4 @@
-# 🛶 CANU v0.0.6
+# 🛶 CANU v1.1.1
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1125,10 +1125,11 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [development]
+## [1.1.1] 2022-01-07
 
-## [1.0.0]
-
+- Updated pull_request_template.md
+- Adjusted the STP timeout to 4 seconds from the default of 15.
+- Changed setup.py file glob to follow previously updated Jinja2 template locations.
 - Command line option --csi-folder has changed to --sls-file. Any SLS JSON file can be used.
 - Installation via pip now supports non-developer modes. Pyinstaller binary and RPM now work as advertised.
 - The directory of canu_cache.yaml is now dynamically configured in the user's home directory (preferred), or the system temporary directory depending on filesystem permissions.
@@ -1157,7 +1158,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Added Paddle / CCJ (CSM Cabling JSON) support. Commands `canu validate paddle` and `canu validate paddle-cabling` can validate the CCJ. Config can be generated using CCJ.
 - Added the `jq` command to the Docker image.
 
-## [0.0.6] - 2021-9-23
+## [0.0.6] - 2021-09-23
 
 - Added alpha version of schema-checked JSON output in `validate shcd` as a machine-readable exchange for SHCD data.
 - Add ability to run CANU in a container, and update Python virtual environment documentation.
@@ -1173,7 +1174,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
   - PDUs are not yet properly handled in the generated switch configurations.
   - Switch and SNMP passwords have been removed from generated configurations until the handling code is secure.
 
-## [0.0.5] - 2021-5-14
+## [0.0.5] - 2021-05-14
 
 - Updated license
 - Updated the plan-of-record firmware for the 8360 in Shasta 1.4 and 1.5
@@ -1219,7 +1220,6 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 [development]: https://github.com/Cray-HPE/canu/tree/develop
 [unreleased]: https://github.com/Cray-HPE/canu/tree/main
-[1.0.0]: https://github.com/Cray-HPE/canu/tree/1.0.0
 [0.0.6]: https://github.com/Cray-HPE/canu/tree/0.0.6
 [0.0.5]: https://github.com/Cray-HPE/canu/tree/0.0.5
 [0.0.4]: https://github.com/Cray-HPE/canu/tree/0.0.4
