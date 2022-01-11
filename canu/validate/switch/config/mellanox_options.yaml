@@ -207,6 +207,9 @@
       - equals: interface ethernet 1/32 mtu 9216 force
       order: 91
     - lineage:
+      - contains: speed
+      order: 100
+    - lineage:
       - equals: interface mlag-port-channel 1 mtu 9216 force
       order: 160
     - lineage:
