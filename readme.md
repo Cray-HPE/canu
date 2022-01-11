@@ -1125,7 +1125,11 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [1.1.1-develop]
+## [1.1.2-develop]
+
+- Added speed commands to dell/mellanox templates.
+
+## [1.1.1-develop] 2022-12-07
 
 - Updated pull_request_template.md
 - Adjusted the STP timeout to 4 seconds from the default of 15.
