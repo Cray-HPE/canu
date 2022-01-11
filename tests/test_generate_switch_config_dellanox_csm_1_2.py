@@ -282,7 +282,8 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 201 switchport hybrid allowed-vlan add 6\n"
         ) in str(result.output)
         assert (
-            "vrf definition Customer\n"
+            "web vrf default enable\n"
+            + "vrf definition Customer\n"
             + "vrf definition Customer rd 7:7\n"
             + "ip routing vrf Customer\n"
             + "ip routing vrf default\n"
@@ -692,7 +693,8 @@ def test_switch_config_spine_secondary():
             + "interface mlag-port-channel 201 switchport hybrid allowed-vlan add 6\n"
         ) in str(result.output)
         assert (
-            "vrf definition Customer\n"
+            "web vrf default enable\n"
+            + "vrf definition Customer\n"
             + "vrf definition Customer rd 7:7\n"
             + "ip routing vrf Customer\n"
             + "ip routing vrf default\n"
