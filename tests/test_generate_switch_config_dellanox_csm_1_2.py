@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+# (C) Copyright [2022] Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -109,6 +109,19 @@ def test_switch_config_spine_primary():
             + "interface ethernet 1/26 mtu 9216 force\n"
             + "interface ethernet 1/29 mtu 9216 force\n"
             + "interface ethernet 1/30 mtu 9216 force\n"
+            + "interface ethernet 1/1 speed 40G force\n"
+            + "interface ethernet 1/2 speed 40G force\n"
+            + "interface ethernet 1/3 speed 40G force\n"
+            + "interface ethernet 1/4 speed 40G force\n"
+            + "interface ethernet 1/5 speed 40G force\n"
+            + "interface ethernet 1/6 speed 40G force\n"
+            + "interface ethernet 1/7 speed 40G force\n"
+            + "interface ethernet 1/8 speed 40G force\n"
+            + "interface ethernet 1/9 speed 40G force\n"
+            + "interface ethernet 1/13 speed 40G force\n"
+            + "interface ethernet 1/26 speed 10G force\n"
+            + "interface ethernet 1/29 speed 40G force\n"
+            + "interface ethernet 1/30 speed 40G force\n"
             + "interface mlag-port-channel 1 mtu 9216 force\n"
             + "interface mlag-port-channel 2 mtu 9216 force\n"
             + "interface mlag-port-channel 3 mtu 9216 force\n"
@@ -269,7 +282,8 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 201 switchport hybrid allowed-vlan add 6\n"
         ) in str(result.output)
         assert (
-            "vrf definition Customer\n"
+            "web vrf default enable\n"
+            + "vrf definition Customer\n"
             + "vrf definition Customer rd 7:7\n"
             + "ip routing vrf Customer\n"
             + "ip routing vrf default\n"
@@ -505,6 +519,19 @@ def test_switch_config_spine_secondary():
             + "interface ethernet 1/26 mtu 9216 force\n"
             + "interface ethernet 1/29 mtu 9216 force\n"
             + "interface ethernet 1/30 mtu 9216 force\n"
+            + "interface ethernet 1/1 speed 40G force\n"
+            + "interface ethernet 1/2 speed 40G force\n"
+            + "interface ethernet 1/3 speed 40G force\n"
+            + "interface ethernet 1/4 speed 40G force\n"
+            + "interface ethernet 1/5 speed 40G force\n"
+            + "interface ethernet 1/6 speed 40G force\n"
+            + "interface ethernet 1/7 speed 40G force\n"
+            + "interface ethernet 1/8 speed 40G force\n"
+            + "interface ethernet 1/9 speed 40G force\n"
+            + "interface ethernet 1/13 speed 40G force\n"
+            + "interface ethernet 1/26 speed 10G force\n"
+            + "interface ethernet 1/29 speed 40G force\n"
+            + "interface ethernet 1/30 speed 40G force\n"
             + "interface mlag-port-channel 1 mtu 9216 force\n"
             + "interface mlag-port-channel 2 mtu 9216 force\n"
             + "interface mlag-port-channel 3 mtu 9216 force\n"
@@ -666,7 +693,8 @@ def test_switch_config_spine_secondary():
             + "interface mlag-port-channel 201 switchport hybrid allowed-vlan add 6\n"
         ) in str(result.output)
         assert (
-            "vrf definition Customer\n"
+            "web vrf default enable\n"
+            + "vrf definition Customer\n"
             + "vrf definition Customer rd 7:7\n"
             + "ip routing vrf Customer\n"
             + "ip routing vrf default\n"
@@ -1261,6 +1289,7 @@ def test_switch_config_cdu_primary():
             + "  no shutdown\n"
             + "  channel-group 100 mode active\n"
             + "  no switchport\n"
+            + "  speed 40000\n"
             + "  mtu 9216\n"
             + "  flowcontrol receive off\n"
             + "  flowcontrol transmit off\n"
@@ -1268,6 +1297,7 @@ def test_switch_config_cdu_primary():
             + "  no shutdown\n"
             + "  channel-group 100 mode active\n"
             + "  no switchport\n"
+            + "  speed 40000\n"
             + "  mtu 9216\n"
             + "  flowcontrol receive off\n"
             + "  flowcontrol transmit off\n"
@@ -1504,6 +1534,7 @@ def test_switch_config_cdu_secondary():
             + "  no shutdown\n"
             + "  channel-group 100 mode active\n"
             + "  no switchport\n"
+            + "  speed 40000\n"
             + "  mtu 9216\n"
             + "  flowcontrol receive off\n"
             + "  flowcontrol transmit off\n"
@@ -1511,6 +1542,7 @@ def test_switch_config_cdu_secondary():
             + "  no shutdown\n"
             + "  channel-group 100 mode active\n"
             + "  no switchport\n"
+            + "  speed 40000\n"
             + "  mtu 9216\n"
             + "  flowcontrol receive off\n"
             + "  flowcontrol transmit off\n"
