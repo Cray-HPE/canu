@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+# (C) Copyright [2022] Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -78,7 +78,6 @@ added_files = [
         "network_modeling/configs/templates/1.2/dellmellanox/tds/*.j2",
         "network_modeling/configs/templates/1.2/dellmellanox/tds",
     ),
-
 ]
 a = Analysis(
     ["canu/cli.py"],
