@@ -1170,6 +1170,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 # Changelog
 
 ## [1.1.2-develop]
+- Added a feature to run tests against a running network. (Aruba only)
 - Enabled webui for mellanox.
 - Added speed commands to dell/mellanox templates.
 
