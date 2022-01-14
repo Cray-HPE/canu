@@ -220,26 +220,22 @@ def test(
     cdu_commands = []
     for item in test_suite:
         device = item.get("device")
-        if "spine" in device:
-            if isinstance(item["task"], str):
-                spine_commands.append(item["task"])
-            elif isinstance(item["task"], list):
-                spine_commands.extend(item["task"])
-            if "leaf" in device:
-                if isinstance(item["task"], str):
-                    leaf_commands.append(item["task"])
-                elif isinstance(item["task"], list):
-                    leaf_commands.extend(item["task"])
-                if "leaf-bmc" in device:
-                    if isinstance(item["task"], str):
-                        leaf_bmc_commands.append(item["task"])
-                    elif isinstance(item["task"], list):
-                        leaf_bmc_commands.extend(item["task"])
-                    if "cdu" in device:
-                        if isinstance(item["task"], str):
-                            cdu_commands.append(item["task"])
-                        elif isinstance(item["task"], list):
-                            cdu_commands.extend(item["task"])
+        if "spine" in device and isinstance(item["task"], str):
+            spine_commands.append(item["task"])
+        elif isinstance(item["task"], list):
+            spine_commands.extend(item["task"])
+        if "leaf" in device and isinstance(item["task"], str):
+            leaf_commands.append(item["task"])
+        elif isinstance(item["task"], list):
+            leaf_commands.extend(item["task"])
+        if "leaf-bmc" in device and isinstance(item["task"], str):
+            leaf_bmc_commands.append(item["task"])
+        elif isinstance(item["task"], list):
+            leaf_bmc_commands.extend(item["task"])
+        if "cdu" in device and isinstance(item["task"], str):
+            cdu_commands.append(item["task"])
+        elif isinstance(item["task"], list):
+            cdu_commands.extend(item["task"])
 
     # collect output from devices using netmiko_send_commands task plugin
     with click_spinner.spinner():
@@ -261,7 +257,6 @@ def test(
         "                                                             ",
         end="\r",
     )
-
     # print out the results
     if json_:
         dict_results = ResultSerializer(spine_results, add_details=False, to_dict=True)
@@ -284,6 +279,7 @@ def test(
         leaf = ResultSerializer(leaf_results, add_details=True, to_dict=False)
         leaf_bmc = ResultSerializer(leaf_bmc_results, add_details=True, to_dict=False)
         cdu = ResultSerializer(cdu_results, add_details=True, to_dict=False)
+        print(spine)
         print(
             TabulateFormatter(
                 leaf + spine + leaf_bmc + cdu,
