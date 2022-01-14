@@ -279,7 +279,6 @@ def test(
         leaf = ResultSerializer(leaf_results, add_details=True, to_dict=False)
         leaf_bmc = ResultSerializer(leaf_bmc_results, add_details=True, to_dict=False)
         cdu = ResultSerializer(cdu_results, add_details=True, to_dict=False)
-        print(spine)
         print(
             TabulateFormatter(
                 leaf + spine + leaf_bmc + cdu,
