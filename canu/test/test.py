@@ -37,6 +37,7 @@ import requests
 import yaml
 
 from canu.generate.switch.config.config import parse_sls_for_config
+from canu.utils.sls_token import sls_token
 
 # Get project root directory
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
@@ -129,7 +130,10 @@ def test(
 
     else:
         # Get SLS config
-        token = environ.get("SLS_TOKEN")
+        if not auth_token:
+            token = sls_token()
+        else:
+            token = environ.get("SLS_TOKEN")
 
         # Token file takes precedence over the environmental variable
         if auth_token != token:
