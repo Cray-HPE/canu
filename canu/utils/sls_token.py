@@ -53,7 +53,7 @@ def sls_token():
         remote_url,
         headers=None,
         data=None,
-        verify=True,
+        verify=False,
         debug=False,
     ):
         remote_response = None
