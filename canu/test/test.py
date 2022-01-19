@@ -22,7 +22,7 @@
 """CANU commands that test the network."""
 import json
 import logging
-from os import environ, path
+from os import path
 from pathlib import Path
 import pprint
 import sys
@@ -33,11 +33,10 @@ import click_spinner
 from nornir import InitNornir
 from nornir_salt import netmiko_send_commands, TabulateFormatter, TestsProcessor
 from nornir_salt.plugins.functions import ResultSerializer
-import requests
 import yaml
 
 from canu.generate.switch.config.config import parse_sls_for_config
-from canu.utils.sls_token import sls_token
+from canu.utils.sls import pull_sls_networks
 
 # Get project root directory
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
@@ -73,11 +72,6 @@ test_file = path.join(
     type=click.File("r"),
 )
 @click.option(
-    "--auth-token",
-    envvar="SLS_TOKEN",
-    help="Token for SLS authentication",
-)
-@click.option(
     "--network",
     default="HMN",
     show_default=True,
@@ -105,7 +99,6 @@ def test(
     username,
     password,
     sls_file,
-    auth_token,
     sls_address,
     network,
     log_,
@@ -129,59 +122,7 @@ def test(
         ]
 
     else:
-        # Get SLS config
-        if not auth_token:
-            token = sls_token()
-        else:
-            token = environ.get("SLS_TOKEN")
-
-        # Token file takes precedence over the environmental variable
-        if auth_token != token:
-            try:
-                with open(auth_token) as f:
-                    data = json.load(f)
-                    token = data["access_token"]
-
-            except Exception:
-                click.secho(
-                    "Invalid token file, generate another token or try again.",
-                    fg="white",
-                    bg="red",
-                )
-                return
-
-        # SLS
-        url = "https://" + sls_address + "/apis/sls/v1/networks"
-        try:
-            response = requests.get(
-                url,
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {token}",
-                },
-                verify=False,
-            )
-            response.raise_for_status()
-
-            sls_json = response.json()
-
-        except requests.exceptions.ConnectionError:
-            return click.secho(
-                f"Error connecting to SLS {sls_address}, check the address or pass in a new address using --sls-address.",
-                fg="white",
-                bg="red",
-            )
-        except requests.exceptions.HTTPError:
-            bad_token_reason = (
-                "environmental variable 'SLS_TOKEN' is correct."
-                if auth_token == token
-                else "token is valid, or generate a new one."
-            )
-            return click.secho(
-                f"Error connecting SLS {sls_address}, check that the {bad_token_reason}",
-                fg="white",
-                bg="red",
-            )
+        sls_json = pull_sls_networks()
 
     if not password:
         password = click.prompt(
