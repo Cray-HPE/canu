@@ -120,11 +120,10 @@ def bgp(ctx, username, password, asn, verbose):
         bgp_neighbors = data[switch]["neighbors"]
         ip = switch
         hostname = data[switch]["hostname"]
-
         if verbose:
             click.echo(dash)
             click.secho(
-                f"Switch: {switch_info['hostname']} ({switch_info['ip']})                       ",
+                f"Switch: {hostname} ({ip})                       ",
                 fg="bright_white",
             )
             click.secho(

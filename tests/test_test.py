@@ -73,56 +73,6 @@ def test_test_sls_address_bad():
     assert "Error collecting secret from Kubernetes:" in str(result.output)
 
 
-@responses.activate
-def test_network_config_sls_token_missing():
-    """Test that the `canu generate network config` command errors on no token file."""
-    bad_token = "no_token.token"
-
-    result = runner.invoke(
-        cli,
-        [
-            "test",
-            "--auth-token",
-            bad_token,
-        ],
-    )
-    assert result.exit_code == 0
-    assert "Invalid token file, generate another token or try again." in str(
-        result.output,
-    )
-
-
-@responses.activate
-def test_network_config_sls_token_bad():
-    """Test that the `canu generate network config` command errors on bad token file."""
-    bad_token = "bad_token.token"
-    with runner.isolated_filesystem():
-        with open(bad_token, "w") as f:
-            f.write('{"access_token": "123"}')
-
-        responses.add(
-            responses.GET,
-            f"https://{sls_address}/apis/sls/v1/networks",
-            body=requests.exceptions.HTTPError(
-                "503 Server Error: Service Unavailable for url",
-            ),
-        )
-
-        result = runner.invoke(
-            cli,
-            [
-                "test",
-                "--auth-token",
-                bad_token,
-            ],
-        )
-        assert result.exit_code == 0
-        assert (
-            "Error connecting SLS api-gw-service-nmn.local, check that the token is valid, or generate a new one"
-            in str(result.output)
-        )
-
-
 def test_network_config_csi_file_missing():
     """Test that the `canu generate network config` command errors on sls_file.json file missing."""
     bad_sls_file = "/bad_folder"
