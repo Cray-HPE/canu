@@ -35,7 +35,7 @@ from nornir_salt import netmiko_send_commands, TabulateFormatter, TestsProcessor
 from nornir_salt.plugins.functions import ResultSerializer
 import yaml
 
-from canu.generate.switch.config.config import parse_sls_for_config
+# from canu.generate.switch.config.config import parse_sls_for_config
 from canu.utils.sls import pull_sls_networks
 
 # Get project root directory
@@ -45,13 +45,13 @@ else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent
 
-test_file_dellanox = path.join(
-    project_root,
-    "canu",
-    "test",
-    "dellanox",
-    "test_suite.yaml",
-)
+# test_file = path.join(
+#     project_root,
+#     "canu",
+#     "test",
+#     "dellanox",
+#     "test_suite.yaml",
+# )
 test_file = path.join(
     project_root,
     "canu",
@@ -124,13 +124,15 @@ def test(
             return
 
         # Format the input to be like the SLS JSON
-        sls_json = [
-            network[x] for network in [input_json.get("Networks", {})] for x in network
-        ]
+        # sls_json = [
+        #     network[x] for network in [input_json.get("Networks", {})] for x in network
+        # ]
+        # print("yes")
 
+        sls_variables = pull_sls_networks(input_json)
     else:
-        sls_json = pull_sls_networks()
-
+        sls_variables = pull_sls_networks()
+    pprint.pprint(sls_variables)
     if not password:
         password = click.prompt(
             "Enter the switch password",
@@ -140,8 +142,6 @@ def test(
     # set to ERROR otherwise nornir plugin logs debug messages to the screen.
     logging.basicConfig(level="ERROR")
 
-    sls_variables = parse_sls_for_config(sls_json)
-
     inventory = {"groups": "shasta", "hosts": {}}
     for k in sls_variables[network + "_IPs"]:
         if "sw" in k:
@@ -149,7 +149,7 @@ def test(
                 {
                     k: {
                         "hostname": str(sls_variables[network + "_IPs"][k]),
-                        "platform": "generic",
+                        "platform": "dell_os10",
                         "username": username,
                         "password": password,
                     },

@@ -29,7 +29,7 @@ import natsort
 from netmiko import ssh_exception
 import requests
 
-from canu.utils.sls import parse_sls_file
+from canu.utils.sls import pull_sls_networks
 from canu.utils.vendor import switch_vendor
 
 
@@ -84,7 +84,7 @@ def bgp(ctx, username, password, asn, verbose):
     credentials = {"username": username, "password": password}
     data = {}
     errors = []
-    sls_cache = parse_sls_file()
+    sls_cache = pull_sls_networks()
     spine_switches = [
         sls_cache["HMN_IPs"]["sw-spine-001"],
         sls_cache["HMN_IPs"]["sw-spine-002"],
