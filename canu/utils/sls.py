@@ -303,108 +303,132 @@ def pull_sls_networks(sls_file=None):
     return sls_variables
 
 
-def pull_sls_hardware():
+def pull_sls_hardware(sls_file=None):
     """Query API-GW and retrieve token.
 
     Args:
-        None.
+        sls_file: generated sls json file.
 
     Returns:
         API token.
     """
-    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    debug = False
+    if sls_file:
+        sls_hardware = [
+            hardware[x] for hardware in [sls_file.get("Hardware", {})] for x in hardware
+        ]
+        return sls_hardware
+    if not sls_file:
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        debug = False
 
-    def on_debug(debug=False, message=None):
-        if debug:
-            print("DEBUG: {}".format(message))
+        def on_debug(debug=False, message=None):
+            if debug:
+                print("DEBUG: {}".format(message))
 
-    #
-    # Convenience wrapper around remote calls
-    #
-    def remote_request(
-        remote_type,
-        remote_url,
-        headers=None,
-        data=None,
-        verify=False,
-        debug=False,
-    ):
-        remote_response = None
-        while True:
-            try:
-                response = requests.request(
-                    remote_type,
-                    url=remote_url,
-                    headers=headers,
-                    data=data,
-                    verify=verify,
-                )
-                on_debug(debug, "Request response: {}".format(response.text))
-                response.raise_for_status()
-                remote_response = json.dumps({})
-                if response.text:
-                    remote_response = response.json()
-                break
-            except Exception as err:
-                message = "Error calling {}: {}".format(remote_url, err)
-                raise SystemExit(message) from err
-        return remote_response
+        #
+        # Convenience wrapper around remote calls
+        #
+        def remote_request(
+            remote_type,
+            remote_url,
+            headers=None,
+            data=None,
+            verify=False,
+            debug=False,
+        ):
+            remote_response = None
+            while True:
+                try:
+                    response = requests.request(
+                        remote_type,
+                        url=remote_url,
+                        headers=headers,
+                        data=data,
+                        verify=verify,
+                    )
+                    on_debug(debug, "Request response: {}".format(response.text))
+                    response.raise_for_status()
+                    remote_response = json.dumps({})
+                    if response.text:
+                        remote_response = response.json()
+                    break
+                except Exception as err:
+                    message = "Error calling {}: {}".format(remote_url, err)
+                    raise SystemExit(message) from err
+            return remote_response
 
-    #
-    # Get the admin client secret from Kubernetes
-    #
-    secret = None
-    try:
-        config.load_kube_config()
-        v1 = client.CoreV1Api()
-        secret_obj = v1.list_namespaced_secret(
-            "default",
-            field_selector="metadata.name=admin-client-auth",
-        )
-        secret_dict = secret_obj.to_dict()
-        secret_base64_str = secret_dict["items"][0]["data"]["client-secret"]
-        on_debug(debug, "base64 secret from Kubernetes is {}".format(secret_base64_str))
-        secret = base64.b64decode(secret_base64_str.encode("utf-8"))
-        on_debug(debug, "secret from Kubernetes is {}".format(secret))
-    except Exception as err:
-        print("Error collecting secret from Kubernetes: {}".format(err))
-        sys.exit(1)
+        #
+        # Get the admin client secret from Kubernetes
+        #
+        secret = None
+        try:
+            config.load_kube_config()
+            v1 = client.CoreV1Api()
+            secret_obj = v1.list_namespaced_secret(
+                "default",
+                field_selector="metadata.name=admin-client-auth",
+            )
+            secret_dict = secret_obj.to_dict()
+            secret_base64_str = secret_dict["items"][0]["data"]["client-secret"]
+            on_debug(
+                debug,
+                "base64 secret from Kubernetes is {}".format(secret_base64_str),
+            )
+            secret = base64.b64decode(secret_base64_str.encode("utf-8"))
+            on_debug(debug, "secret from Kubernetes is {}".format(secret))
+        except Exception as err:
+            print("Error collecting secret from Kubernetes: {}".format(err))
+            sys.exit(1)
 
-    #
-    # Get an auth token by using the secret
-    #
-    token = None
-    try:
-        token_url = "https://api-gw-service-nmn.local/keycloak/realms/shasta/protocol/openid-connect/token"
-        token_data = {
-            "grant_type": "client_credentials",
-            "client_id": "admin-client",
-            "client_secret": secret,
-        }
-        token_request = remote_request("POST", token_url, data=token_data, debug=debug)
-        token = token_request["access_token"]
-        on_debug(
-            debug=debug,
-            message="Auth Token from keycloak (first 50 char): {}".format(token[:50]),
-        )
+        #
+        # Get an auth token by using the secret
+        #
+        token = None
+        try:
+            token_url = "https://api-gw-service-nmn.local/keycloak/realms/shasta/protocol/openid-connect/token"
+            token_data = {
+                "grant_type": "client_credentials",
+                "client_id": "admin-client",
+                "client_secret": secret,
+            }
+            token_request = remote_request(
+                "POST",
+                token_url,
+                data=token_data,
+                debug=debug,
+            )
+            token = token_request["access_token"]
+            on_debug(
+                debug=debug,
+                message="Auth Token from keycloak (first 50 char): {}".format(
+                    token[:50],
+                ),
+            )
 
-    except Exception as err:
-        print("Error obtaining keycloak token: {}".format(err))
-        sys.exit(1)
+        except Exception as err:
+            print("Error obtaining keycloak token: {}".format(err))
+            sys.exit(1)
 
-    #
-    # Get existing SLS data for comparison (used as a cache)
-    #
-    sls_cache = None
-    sls_url = "https://api_gw_service.local/apis/sls/v1/hardware"
-    auth_headers = {"Authorization": "Bearer {}".format(token)}
-    try:
-        sls_cache = remote_request("GET", sls_url, headers=auth_headers, verify=False)
-        on_debug(debug=debug, message="SLS data has {} records".format(len(sls_cache)))
-    except Exception as err:
-        print("Error requesting Networks from SLS: {}".format(err))
-        sys.exit(1)
-    on_debug(debug=debug, message="SLS records {}".format(sls_cache))
+        #
+        # Get existing SLS data for comparison (used as a cache)
+        #
+        sls_cache = None
+        sls_url = "https://api_gw_service.local/apis/sls/v1/hardware"
+        auth_headers = {"Authorization": "Bearer {}".format(token)}
+        try:
+            sls_cache = remote_request(
+                "GET",
+                sls_url,
+                headers=auth_headers,
+                verify=False,
+            )
+            on_debug(
+                debug=debug,
+                message="SLS data has {} records".format(len(sls_cache)),
+            )
+        except Exception as err:
+            print("Error requesting Networks from SLS: {}".format(err))
+            sys.exit(1)
+        on_debug(debug=debug, message="SLS records {}".format(sls_cache))
 
-    return sls_cache
+        return sls_cache

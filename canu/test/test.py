@@ -108,10 +108,10 @@ def test(
             return
 
         sls_variables = pull_sls_networks(input_json)
+        sls_hardware = pull_sls_hardware(input_json)
     else:
         sls_variables = pull_sls_networks()
-    sls_hardware = pull_sls_hardware()
-
+        sls_hardware = pull_sls_hardware()
     if not password:
         password = click.prompt(
             "Enter the switch password",
