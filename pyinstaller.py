@@ -79,7 +79,7 @@ added_files = [
         "network_modeling/configs/templates/1.2/dellmellanox/tds",
     ),
     ("canu/test/aruba/test_suite.yaml", "canu/test/aruba"),
-    ("canu/test/aruba/test_suite.yaml", "canu/test/dellanox"),
+    ("canu/test/dellanox/test_suite.yaml", "canu/test/dellanox"),
 ]
 a = Analysis(
     ["canu/cli.py"],
