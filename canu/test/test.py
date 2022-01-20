@@ -45,6 +45,13 @@ else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent
 
+test_file_dellanox = path.join(
+    project_root,
+    "canu",
+    "test",
+    "dellanox",
+    "test_suite.yaml",
+)
 test_file = path.join(
     project_root,
     "canu",

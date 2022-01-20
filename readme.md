@@ -1,4 +1,4 @@
-# 🛶 CANU v1.1.1-develop
+# 🛶 CANU v1.1.3-develop
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1169,9 +1169,11 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [1.1.2-develop]
+## [1.1.3-develop]
 - validate BGP now reads IPs from the SLS API
-- Added a feature to run tests against a running network. (Aruba only)
+- Added a feature to run tests against a live network. (Aruba only)
+
+## [1.1.2-develop]
 - Enabled webui for mellanox.
 - Added speed commands to dell/mellanox templates.
 

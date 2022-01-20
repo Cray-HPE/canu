@@ -1,0 +1,115 @@
+# MIT License
+#
+# (C) Copyright [2022] Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
+---
+# - name: Software version test
+#   task: show version concise
+#   test: contains
+#   pattern: "3.9.3210"
+#   err_msg: Software version is wrong
+#   device: spine
+# - name: BGP test
+#   task: show ip bgp vrf all summary
+#   test: contains_lines
+#   pattern: 
+#     - IDLE
+#     - ACTIVE
+#     - CONNECT
+#   err_msg: BGP has Neighbors in active or idle
+#   device: spine
+# - name: STP check for root bridge
+#   task: show spanning-tree
+#   test: contains
+#   pattern: "Bridge root        : yes"
+#   err_msg: Not the root bridge
+#   device: spine
+# - name: STP check for discarding ports
+#   task: show spanning-tree
+#   test: ncontains
+#   pattern: "Discarding"
+#   err_msg: Port is disabled due to STP
+#   device: spine
+# - name: MLAG VIP check
+#   task: show mlag-vip
+#   test: ncontains
+#   pattern: "Active nodes: 1"
+#   err_msg: MLAG VIP has only 1 active node
+#   device: spine
+# - name: unsaved config changes
+#   task: show configuration files
+#   test: eval
+#   expr: "all(['no' in line for line in result.splitlines()])"
+#   err_msg: There are unsaved changes
+#   device: spine
+# - name: Interface error check
+#   task: "show interfaces ethernet counters | include error"
+#   test: "!contains_re"
+#   pattern: "\\d{4,}"
+#   err_msg: Interfaces errors above 999
+#   device: spine
+# - name: MLAG check
+#   task: show interfaces mlag-port-channel summary | include LACP
+#   test: ncontains
+#   pattern: "(S)"
+#   err_msg: MLAG port in suspended mode 
+#   device: spine
+# - name: OSPF check
+#   task: show ip ospf neighbors vrf all
+#   test: ncontains
+#   pattern: EXCHANGE
+#   err_msg: ospf neighbor down
+#   device: spine
+# - name: Software version test
+#   task: show version | grep "OS Version:"
+#   test: contains
+#   pattern: "10.5.1.4"
+#   err_msg: Software version is wrong
+#   device: leaf-bmc
+# - name: OSPF check
+#   task: show ip ospf neighbor
+#   test: ncontains
+#   pattern: EXSTART
+#   err_msg: ospf neighbor down 
+#   device: leaf-bmc
+# - name: OSPF check vrf customer
+#   task: show ip ospf vrf Customer neighbor
+#   test: ncontains
+#   pattern: EXSTART
+#   err_msg: ospf neighbor down 
+#   device: leaf-bmc
+# - name: STP check for root bridge
+#   task: show spanning-tree brief
+#   test: ncontains
+#   pattern: We are the root
+#   err_msg: we are the STP root
+#   device: leaf-bmc
+# - name: Interface error check
+#   task: "show interface | grep CRC"
+#   test: "!contains_re"
+#   pattern: "\\d{4,}"
+#   err_msg: Interfaces errors above 999
+#   device: leaf-bmc
+# - name: running-config different from startup-config
+#   task: show diff running-configuration startup-configuration 
+#   test: "!contains_re"
+#   pattern: (.*?)
+#   err_msg: running-config does not match startup-config
+#   device: leaf-bmc
