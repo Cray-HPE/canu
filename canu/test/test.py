@@ -35,8 +35,7 @@ from nornir_salt import netmiko_send_commands, TabulateFormatter, TestsProcessor
 from nornir_salt.plugins.functions import ResultSerializer
 import yaml
 
-# from canu.generate.switch.config.config import parse_sls_for_config
-from canu.utils.sls import pull_sls_networks
+from canu.utils.sls import pull_sls_hardware, pull_sls_networks
 
 # Get project root directory
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
@@ -44,21 +43,6 @@ if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cov
 else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent
-
-# test_file = path.join(
-#     project_root,
-#     "canu",
-#     "test",
-#     "dellanox",
-#     "test_suite.yaml",
-# )
-test_file = path.join(
-    project_root,
-    "canu",
-    "test",
-    "aruba",
-    "test_suite.yaml",
-)
 
 
 @click.option("--username", default="admin", show_default=True, help="Switch username")
@@ -123,16 +107,11 @@ def test(
             )
             return
 
-        # Format the input to be like the SLS JSON
-        # sls_json = [
-        #     network[x] for network in [input_json.get("Networks", {})] for x in network
-        # ]
-        # print("yes")
-
         sls_variables = pull_sls_networks(input_json)
     else:
         sls_variables = pull_sls_networks()
-    pprint.pprint(sls_variables)
+    sls_hardware = pull_sls_hardware()
+
     if not password:
         password = click.prompt(
             "Enter the switch password",
@@ -149,12 +128,32 @@ def test(
                 {
                     k: {
                         "hostname": str(sls_variables[network + "_IPs"][k]),
-                        "platform": "dell_os10",
+                        "platform": "",
                         "username": username,
                         "password": password,
                     },
                 },
             )
+    # pull in the platform type from sls hardware data
+    for x in sls_hardware:
+        if (
+            x["Type"] == "comptype_hl_switch"
+            or x["Type"] == "comptype_mgmt_switch"
+            or x["Type"] == "comptype_cdu_mgmt_switch"
+        ):
+            for host in inventory["hosts"]:
+                if host == x["ExtraProperties"]["Aliases"][0]:
+                    if x["ExtraProperties"]["Brand"] == "Aruba":
+                        inventory["hosts"][host]["platform"] = "aruba_os"
+                        vendor = "aruba"
+                    elif x["ExtraProperties"]["Brand"] == "Dell":
+                        inventory["hosts"][host]["platform"] = "dell_os10"
+                    elif x["ExtraProperties"]["Brand"] == "Mellanox":
+                        inventory["hosts"][host]["platform"] = "mellanox"
+                        vendor = "dellanox"
+                    else:
+                        inventory["hosts"][host]["platform"] = "generic"
+
     nr = InitNornir(
         runner={
             "plugin": "threaded",
@@ -172,9 +171,16 @@ def test(
         },
         logging={"enabled": log_, "to_console": True, "level": "DEBUG"},
     )
+    test_file = path.join(
+        project_root,
+        "canu",
+        "test",
+        vendor,
+        "test_suite.yaml",
+    )
+
     with open(test_file) as f:
         test_suite = yaml.safe_load(f.read())
-
     # add tests processor
 
     tests = nr.with_processors([TestsProcessor(test_suite)])

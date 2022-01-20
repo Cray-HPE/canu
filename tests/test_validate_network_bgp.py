@@ -45,13 +45,13 @@ runner = testing.CliRunner()
 
 
 @patch("canu.validate.network.bgp.bgp.switch_vendor")
-@patch("canu.validate.network.bgp.bgp.parse_sls_file")
+@patch("canu.validate.network.bgp.bgp.pull_sls_networks")
 @responses.activate
-def test_validate_bgp_aruba(parse_sls_file, switch_vendor):
+def test_validate_bgp_aruba(pull_sls_networks, switch_vendor):
     """Test that the `canu validate network bgp` command runs and returns PASS."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
-        parse_sls_file.return_value = sls_cache
+        pull_sls_networks.return_value = sls_cache
         for name, ip in sls_cache["HMN_IPs"].items():
             responses.add(
                 responses.POST,
@@ -95,13 +95,13 @@ def test_validate_bgp_aruba(parse_sls_file, switch_vendor):
 
 
 @patch("canu.validate.network.bgp.bgp.switch_vendor")
-@patch("canu.validate.network.bgp.bgp.parse_sls_file")
+@patch("canu.validate.network.bgp.bgp.pull_sls_networks")
 @responses.activate
-def test_validate_bgp_verbose(parse_sls_file, switch_vendor):
+def test_validate_bgp_verbose(pull_sls_networks, switch_vendor):
     """Test that the `canu validate network bgp` command runs and returns PASS."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
-        parse_sls_file.return_value = sls_cache
+        pull_sls_networks.return_value = sls_cache
         for name, ip_address in sls_cache["HMN_IPs"].items():
             responses.add(
                 responses.POST,
@@ -154,14 +154,14 @@ def test_validate_bgp_verbose(parse_sls_file, switch_vendor):
 
 
 @patch("canu.validate.network.bgp.bgp.switch_vendor")
-@patch("canu.validate.network.bgp.bgp.parse_sls_file")
+@patch("canu.validate.network.bgp.bgp.pull_sls_networks")
 @responses.activate
-def test_validate_bgp_bad_password(parse_sls_file, switch_vendor):
+def test_validate_bgp_bad_password(pull_sls_networks, switch_vendor):
     """Test that the `canu validate network bgp` command errors on bad credentials."""
     bad_password = "foo"
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
-        parse_sls_file.return_value = sls_cache
+        pull_sls_networks.return_value = sls_cache
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -188,13 +188,13 @@ def test_validate_bgp_bad_password(parse_sls_file, switch_vendor):
 
 
 @patch("canu.validate.network.bgp.bgp.switch_vendor")
-@patch("canu.validate.network.bgp.bgp.parse_sls_file")
+@patch("canu.validate.network.bgp.bgp.pull_sls_networks")
 @responses.activate
-def test_validate_bgp_fail(parse_sls_file, switch_vendor):
+def test_validate_bgp_fail(pull_sls_networks, switch_vendor):
     """Test that the `canu validate network bgp` command runs and returns PASS."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
-        parse_sls_file.return_value = sls_cache
+        pull_sls_networks.return_value = sls_cache
         for name, ip in sls_cache["HMN_IPs"].items():
             responses.add(
                 responses.POST,
@@ -238,13 +238,13 @@ def test_validate_bgp_fail(parse_sls_file, switch_vendor):
 
 
 @patch("canu.validate.network.bgp.bgp.switch_vendor")
-@patch("canu.validate.network.bgp.bgp.parse_sls_file")
+@patch("canu.validate.network.bgp.bgp.pull_sls_networks")
 @responses.activate
-def test_validate_bgp_fail_verbose(parse_sls_file, switch_vendor):
+def test_validate_bgp_fail_verbose(pull_sls_networks, switch_vendor):
     """Test that the `canu validate network bgp` command runs and returns PASS."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
-        parse_sls_file.return_value = sls_cache
+        pull_sls_networks.return_value = sls_cache
         for name, ip in sls_cache["HMN_IPs"].items():
             responses.add(
                 responses.POST,
@@ -297,13 +297,13 @@ def test_validate_bgp_fail_verbose(parse_sls_file, switch_vendor):
 
 
 @patch("canu.validate.network.bgp.bgp.switch_vendor")
-@patch("canu.validate.network.bgp.bgp.parse_sls_file")
+@patch("canu.validate.network.bgp.bgp.pull_sls_networks")
 @responses.activate
-def test_validate_bgp_vendor_error(parse_sls_file, switch_vendor):
+def test_validate_bgp_vendor_error(pull_sls_networks, switch_vendor):
     """Test that the `canu validate network bgp` command errors on 'None' vendor."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = None
-        parse_sls_file.return_value = sls_cache
+        pull_sls_networks.return_value = sls_cache
         result = runner.invoke(
             cli,
             [
@@ -321,14 +321,14 @@ def test_validate_bgp_vendor_error(parse_sls_file, switch_vendor):
 
 
 @patch("canu.validate.network.bgp.bgp.switch_vendor")
-@patch("canu.validate.network.bgp.bgp.parse_sls_file")
+@patch("canu.validate.network.bgp.bgp.pull_sls_networks")
 @patch("canu.validate.network.bgp.bgp.get_bgp_neighbors_aruba")
 @responses.activate
-def test_validate_bgp_exception(get_bgp_neighbors_aruba, parse_sls_file, switch_vendor):
+def test_validate_bgp_exception(get_bgp_neighbors_aruba, pull_sls_networks, switch_vendor):
     """Test that the `canu validate network bgp` command errors on exception."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
-        parse_sls_file.return_value = sls_cache
+        pull_sls_networks.return_value = sls_cache
         get_bgp_neighbors_aruba.side_effect = requests.exceptions.HTTPError
 
         result = runner.invoke(
@@ -349,13 +349,13 @@ def test_validate_bgp_exception(get_bgp_neighbors_aruba, parse_sls_file, switch_
 
 # Mellanox
 @patch("canu.validate.network.bgp.bgp.switch_vendor")
-@patch("canu.validate.network.bgp.bgp.parse_sls_file")
+@patch("canu.validate.network.bgp.bgp.pull_sls_networks")
 @responses.activate
-def test_validate_bgp_mellanox(parse_sls_file, switch_vendor):
+def test_validate_bgp_mellanox(pull_sls_networks, switch_vendor):
     """Test that the `canu validate network bgp` command runs with Mellanox switch."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "mellanox"
-        parse_sls_file.return_value = sls_cache
+        pull_sls_networks.return_value = sls_cache
         responses.add(
             responses.POST,
             f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
@@ -396,13 +396,13 @@ def test_validate_bgp_mellanox(parse_sls_file, switch_vendor):
 
 
 @patch("canu.validate.network.bgp.bgp.switch_vendor")
-@patch("canu.validate.network.bgp.bgp.parse_sls_file")
+@patch("canu.validate.network.bgp.bgp.pull_sls_networks")
 @responses.activate
-def test_validate_bgp_mellanox_connection_error(parse_sls_file, switch_vendor):
+def test_validate_bgp_mellanox_connection_error(pull_sls_networks, switch_vendor):
     """Test that the `canu validate network bgp` command errors with Mellanox switch connection error."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "mellanox"
-        parse_sls_file.return_value = sls_cache
+        pull_sls_networks.return_value = sls_cache
         responses.add(
             responses.POST,
             f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
@@ -426,13 +426,13 @@ def test_validate_bgp_mellanox_connection_error(parse_sls_file, switch_vendor):
 
 
 @patch("canu.validate.network.bgp.bgp.switch_vendor")
-@patch("canu.validate.network.bgp.bgp.parse_sls_file")
+@patch("canu.validate.network.bgp.bgp.pull_sls_networks")
 @responses.activate
-def test_validate_bgp_mellanox_bad_login(parse_sls_file, switch_vendor):
+def test_validate_bgp_mellanox_bad_login(pull_sls_networks, switch_vendor):
     """Test that the `canu validate network bgp` command errors with Mellanox switch bad login."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "mellanox"
-        parse_sls_file.return_value = sls_cache
+        pull_sls_networks.return_value = sls_cache
         responses.add(
             responses.POST,
             f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
@@ -456,13 +456,13 @@ def test_validate_bgp_mellanox_bad_login(parse_sls_file, switch_vendor):
 
 
 @patch("canu.validate.network.bgp.bgp.switch_vendor")
-@patch("canu.validate.network.bgp.bgp.parse_sls_file")
+@patch("canu.validate.network.bgp.bgp.pull_sls_networks")
 @responses.activate
-def test_validate_bgp_mellanox_exception(parse_sls_file, switch_vendor):
+def test_validate_bgp_mellanox_exception(pull_sls_networks, switch_vendor):
     """Test that the `canu validate network bgp` command errors with Mellanox switch exception."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "mellanox"
-        parse_sls_file.return_value = sls_cache
+        pull_sls_networks.return_value = sls_cache
         responses.add(
             responses.POST,
             f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",

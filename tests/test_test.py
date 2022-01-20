@@ -70,6 +70,7 @@ def test_test_sls_address_bad():
         ],
     )
     assert result.exit_code == 1
+    print(result.output)
     assert "Error collecting secret from Kubernetes:" in str(result.output)
 
 
