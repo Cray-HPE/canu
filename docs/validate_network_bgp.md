@@ -30,6 +30,14 @@ canu validate network bgp [OPTIONS]
 ### Options
 
 
+### --ips( <ips>)
+Comma separated list of IPv4 addresses of switches
+
+
+### --ips-file( <ips_file>)
+File with one IPv4 address per line
+
+
 ### --username( <username>)
 Switch username
 
@@ -51,6 +59,16 @@ ASN
 * **Default**
 
     65533
+
+
+
+### -a(, --architecture( <architecture>)
+**Required** CSM architecture
+
+
+* **Options**
+
+    Full | TDS | V1
 
 
 

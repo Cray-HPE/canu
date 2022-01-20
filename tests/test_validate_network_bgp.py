@@ -324,7 +324,11 @@ def test_validate_bgp_vendor_error(pull_sls_networks, switch_vendor):
 @patch("canu.validate.network.bgp.bgp.pull_sls_networks")
 @patch("canu.validate.network.bgp.bgp.get_bgp_neighbors_aruba")
 @responses.activate
-def test_validate_bgp_exception(get_bgp_neighbors_aruba, pull_sls_networks, switch_vendor):
+def test_validate_bgp_exception(
+    get_bgp_neighbors_aruba,
+    pull_sls_networks,
+    switch_vendor,
+):
     """Test that the `canu validate network bgp` command errors on exception."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
