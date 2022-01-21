@@ -1,4 +1,4 @@
-# 🛶 CANU v1.1.1-develop
+# 🛶 CANU v1.1.3-develop
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -13,6 +13,7 @@ CANU can be used to:
 - Generate switch configuration for an entire network
 - Convert SHCD to CCJ (CSM Cabling JSON)
 - Use CCJ / Paddle to validate the network and generate network config
+- Run tests against the mgmt network to check for faults/inconsistencies.
 
 # Quickstart Guide
 
@@ -653,7 +654,6 @@ The output of the `validate paddle-cabling` command will show a port by port com
 
 CANU can be used to validate BGP neighbors. All neighbors of a switch must return status **Established** or the verification will fail.
 
-- To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
 - The default **asn** is set to _65533_ if it needs to be changed, use the flag `--asn NEW_ASN_NUMBER` to set the new number
 
 If you want to see the individual status of all the neighbors of a switch, use the `--verbose` flag.
@@ -661,7 +661,7 @@ If you want to see the individual status of all the neighbors of a switch, use t
 To validate BGP run: `canu validate network bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
 ```bash
-$ canu validate network bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
+$ canu validate network bgp --username USERNAME --password PASSWORD
 
 BGP Neighbors Established
 --------------------------------------------------
@@ -671,11 +671,12 @@ PASS - IP: 192.168.1.2 Hostname: sw-spine01 
 
 If any of the spine switch neighbors for a connection other than **Established**, the switch will **FAIL** validation.
 
-If a switch that is not a **spine** switch is tested, it will show in the results table as **SKIP**.
 
 ### Config BGP
 
 **[Details](docs/config_bgp.md)**<br>
+
+CSM 1.0 only.
 
 CANU can be used to configure BGP for a pair of switches.
 
@@ -1091,6 +1092,49 @@ There are several commands to help with the canu cache:
 - `canu cache print` will print a colored version of your cache to the screen
 - `canu cache delete` will delete your cache file, the file will be created again on the next canu command
 
+### Test The Network
+
+Aruba support only.
+
+CANU has the ability to run a set of tests against all of the switches in the management network.
+It is utilizing the nornir automation framework and additional nornir plugins to do this.
+
+More info can be found at
+- https://nornir.tech/2021/08/06/testing-your-network-with-nornir-testsprocessor/
+- https://github.com/nornir-automation/nornir
+- https://github.com/dmulyalin/salt-nornir
+
+Required Input
+You can either use an SLS file or pull the SLS file from the API-Gateway using a token.
+- `--sls-file`
+- `--auth-token`
+
+Options
+- `--log` outputs the nornir debug logs
+- `--network [HMN|CMN]` This gives the user the ability to connect to the switches over the CMN.  This allows the use of this tool from outside the Mgmt Network.  The default network used is the HMN.
+- `--json` outputs the results in json format.
+- `--password` prompts if password is not entered
+- `--username` defaults to admin
+
+#### Adding tests
+Additional tests can be easily added by updating the .yaml file at `canu/test/*/test_suite.yaml`
+More information on tests and how to write them can be found at https://nornir.tech/2021/08/06/testing-your-network-with-nornir-testsprocessor/
+
+Example test
+```
+- name: Software version test
+  task: show version
+  test: contains
+  pattern: "10.08.1021"
+  err_msg: Software version is wrong
+  device:
+    - cdu
+    - leaf
+    - leaf-bmc
+    - spine
+```
+This test logs into the cdu, leaf, leaf-bmc, and spine switches and runs the command `show version` and checks that `10.08.1021` is in the output.  If it's not the test fails.
+
 ## Uninstallation
 
 `pip3 uninstall canu`
@@ -1124,6 +1168,10 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.1.3-develop]
+- validate BGP now reads IPs from the SLS API
+- Added a feature to run tests against a live network. (Aruba only)
 
 ## [1.1.2-develop]
 - Enabled webui for mellanox.
@@ -1161,6 +1209,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Added SubRack support for reading in all variations from the SHCD, and added **sub_location** and **parent** to the JSON output
 - Added Paddle / CCJ (CSM Cabling JSON) support. Commands `canu validate paddle` and `canu validate paddle-cabling` can validate the CCJ. Config can be generated using CCJ.
 - Added the `jq` command to the Docker image.
+- Added `canu test` to run tests against the network (aruba only).
 
 ## [0.0.6] - 2021-9-23
 

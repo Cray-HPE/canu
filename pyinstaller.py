@@ -78,6 +78,8 @@ added_files = [
         "network_modeling/configs/templates/1.2/dellmellanox/tds/*.j2",
         "network_modeling/configs/templates/1.2/dellmellanox/tds",
     ),
+    ("canu/test/aruba/test_suite.yaml", "canu/test/aruba"),
+    ("canu/test/dellanox/test_suite.yaml", "canu/test/dellanox"),
 ]
 a = Analysis(
     ["canu/cli.py"],
@@ -85,7 +87,7 @@ a = Analysis(
     binaries=[],
     datas=added_files,
     hiddenimports=["network_modeling"],
-    hookspath=[],
+    hookspath=["./"],
     runtime_hooks=[],
     excludes=["tests"],
     win_no_prefer_redirects=False,
