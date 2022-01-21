@@ -1,7 +1,7 @@
 {#- bgp #}
 {% set sequence = 10 %}
-ip prefix-list pl-can
-ip prefix-list pl-can seq {{ sequence }} permit {{ variables.CAN_NETWORK_IP }} /{{ variables.CAN_PREFIX_LEN }} ge {{ variables.CAN_PREFIX_LEN }}
+ip prefix-list pl-cmn
+ip prefix-list pl-cmn seq {{ sequence }} permit {{ variables.CMN_NETWORK_IP }} /{{ variables.CMN_PREFIX_LEN }} ge {{ variables.CMN_PREFIX_LEN }}
 ip prefix-list pl-hmn
 ip prefix-list pl-hmn {% set sequence = sequence+10 %}seq {{ sequence }} permit {{ variables.HMNLB_NETWORK_IP }} /{{ variables.HMNLB_PREFIX_LEN }} ge {{ variables.HMNLB_PREFIX_LEN }}
 ip prefix-list pl-nmn

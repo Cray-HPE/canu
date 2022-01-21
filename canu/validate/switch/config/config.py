@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+# (C) Copyright [2022] Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -256,15 +256,24 @@ def config(
             )
         try:
             # Load config from file and parse hostname
-            vendor = vendor.lower()
-            if vendor == "dell":
-                host = Host("example.rtr", "dellOS10", dell_options)
-            elif vendor == "mellanox":
-                host = Host("example.rtr", "onyx", mellanox_options)
-            elif vendor == "aruba":
-                host = Host("example.rtr", "aoscx", options)
-            running_config_hier = HConfig(host=host)
-            running_config_hier.load_from_file(running)
+            with open(running, "r") as f:
+                running = f.read()
+                vendor = vendor.lower()
+                if vendor == "dell":
+                    host = Host("example.rtr", "dellOS10", dell_options)
+                elif vendor == "mellanox":
+                    host = Host("example.rtr", "onyx", mellanox_options)
+                    switch_config_list = []
+                    for line in running.splitlines():
+                        if line.startswith("   "):
+                            switch_config_list.append(line.strip())
+                        else:
+                            switch_config_list.append(line)
+                    running = ("\n").join(switch_config_list)
+                elif vendor == "aruba":
+                    host = Host("example.rtr", "aoscx", options)
+                running_config_hier = HConfig(host=host)
+                running_config_hier.load_from_string(running)
         except UnicodeDecodeError:
             click.secho(
                 f"The file {running} is not a valid config file.",
@@ -375,7 +384,7 @@ def config(
         remediation_config_hier.add_tags(tags)
     click.echo(dash, file=out)
     for safe_line in remediation_config_hier.with_tags({"safe"}).all_children():
-        click.echo(safe_line.cisco_style_text())
+        click.echo(safe_line.cisco_style_text(), file=out)
     click.echo(dash, file=out)
 
     click.secho(
@@ -384,7 +393,10 @@ def config(
         + "\n"
         + "These commands may cause disruption to the system and should be done only during a maintenance period."
         + "\n"
-        + "It is recommended to have an out of band connection while running these commands.",
+        + "It is recommended to have an out of band connection while running these commands."
+        + "\n"
+        + "If commands are going to be applied to Aruba switches, it is recommended to utilize Configuration Checkpoints "
+        + "to avoid getting locked out.",
         fg="red",
         file=out,
     )

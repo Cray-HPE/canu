@@ -1,6 +1,7 @@
 # CANU Files
 canu_cache.yaml
 files/*
+nornir.log
 
 # Build artifacts
 *.py[cod]
