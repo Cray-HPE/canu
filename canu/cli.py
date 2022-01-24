@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+# (C) Copyright [2022] Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -35,6 +35,7 @@ from canu.cache import cache
 from canu.config import config
 from canu.generate import generate
 from canu.report import report
+from canu.test import test
 from canu.utils.cache import cache_switch
 from canu.validate import validate
 
@@ -92,6 +93,7 @@ cli.add_command(config.config)
 cli.add_command(generate.generate)
 cli.add_command(report.report)
 cli.add_command(validate.validate)
+cli.add_command(test.test)
 
 
 @cli.command(
