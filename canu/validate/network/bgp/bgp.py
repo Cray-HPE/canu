@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+# (C) Copyright [2022] Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -21,17 +21,15 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate the network bgp."""
 from collections import defaultdict
-import ipaddress
 
 import click
 from click_help_colors import HelpColorsCommand
-from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
-from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
 import natsort
 from netmiko import ssh_exception
 import requests
 
+from canu.utils.sls import pull_sls_networks
 from canu.utils.vendor import switch_vendor
 
 
@@ -39,20 +37,6 @@ from canu.utils.vendor import switch_vendor
     cls=HelpColorsCommand,
     help_headers_color="yellow",
     help_options_color="blue",
-)
-@optgroup.group(
-    "Network cabling IPv4 input sources",
-    cls=RequiredMutuallyExclusiveOptionGroup,
-)
-@optgroup.option(
-    "--ips",
-    help="Comma separated list of IPv4 addresses of switches",
-    type=Ipv4AddressListParamType(),
-)
-@optgroup.option(
-    "--ips-file",
-    help="File with one IPv4 address per line",
-    type=click.File("r"),
 )
 @click.option("--username", default="admin", show_default=True, help="Switch username")
 @click.option(
@@ -68,17 +52,9 @@ from canu.utils.vendor import switch_vendor
     default="65533",
     show_default=True,
 )
-@click.option(
-    "--architecture",
-    "-a",
-    type=click.Choice(["Full", "TDS", "V1"], case_sensitive=False),
-    help="CSM architecture",
-    required=True,
-    prompt="Architecture type",
-)
 @click.option("--verbose", is_flag=True, help="Verbose mode")
 @click.pass_context
-def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
+def bgp(ctx, username, password, asn, verbose):
     """Validate BGP neighbors.
 
     This command will check the BGP neighbors for the switch IP addresses entered. All of the neighbors of a switch
@@ -100,57 +76,43 @@ def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
 
     Args:
         ctx: CANU context settings
-        ips: Comma separated list of IPv4 addresses of switches
-        ips_file: File with one IPv4 address per line
         username: Switch username
         password: Switch password
         asn: Switch ASN
-        architecture: CSM architecture
         verbose: Bool indicating verbose output
     """
-    if architecture.lower() == "full":
-        architecture = "full"
-    elif architecture.lower() == "tds":
-        architecture = "tds"
-    elif architecture.lower() == "v1":
-        architecture = "network_v1"
-
-    if ips_file:
-        ips = []
-        lines = [line.strip().replace(",", "") for line in ips_file]
-        ips.extend([ipaddress.ip_address(line) for line in lines if IPV4_ADDRESS(line)])
-
     credentials = {"username": username, "password": password}
-
     data = {}
     errors = []
-    ips_length = len(ips)
+    sls_cache = pull_sls_networks()
+    spine_switches = [
+        sls_cache["HMN_IPs"]["sw-spine-001"],
+        sls_cache["HMN_IPs"]["sw-spine-002"],
+    ]
+    with click_spinner.spinner():
+        for ip in spine_switches:
+            print(
+                "  Connecting",
+                end="\r",
+            )
 
-    if ips:
-        with click_spinner.spinner():
-            for i, ip in enumerate(ips, start=1):
-                print(
-                    f"  Connecting to {ip} - Switch {i} of {ips_length}        ",
-                    end="\r",
+            bgp_neighbors, switch_info = get_bgp_neighbors(
+                str(ip),
+                credentials,
+                asn,
+            )
+            if switch_info is None:
+                errors.append(
+                    [
+                        str(ip),
+                        "Connection Error",
+                    ],
                 )
-
-                bgp_neighbors, switch_info = get_bgp_neighbors(
-                    str(ip),
-                    credentials,
-                    asn,
-                )
-                if switch_info is None:
-                    errors.append(
-                        [
-                            str(ip),
-                            "Connection Error",
-                        ],
-                    )
-                else:
-                    data[ip] = {
-                        "neighbors": bgp_neighbors,
-                        "hostname": switch_info["hostname"],
-                    }
+            else:
+                data[ip] = {
+                    "neighbors": bgp_neighbors,
+                    "hostname": switch_info["hostname"],
+                }
 
     dash = "-" * 50
 
@@ -158,11 +120,10 @@ def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
         bgp_neighbors = data[switch]["neighbors"]
         ip = switch
         hostname = data[switch]["hostname"]
-
         if verbose:
             click.echo(dash)
             click.secho(
-                f"Switch: {switch_info['hostname']} ({switch_info['ip']})                       ",
+                f"Switch: {hostname} ({ip})                       ",
                 fg="bright_white",
             )
             click.secho(
@@ -189,24 +150,6 @@ def bgp(ctx, ips, ips_file, username, password, asn, architecture, verbose):
             else:
                 if verbose:
                     click.secho(f"{hostname} ===> {neighbor}: {neighbor_status}")
-
-            if architecture == "tds":
-                if "spine" not in str(hostname):
-                    errors.append(
-                        [
-                            str(ip),
-                            f"{hostname} not a spine switch, with TDS architecture BGP config only allowed with spine switches",
-                        ],
-                    )
-            if architecture == "full":
-                if "agg" not in str(hostname) and "leaf" not in str(hostname):
-                    errors.append(
-                        [
-                            str(ip),
-                            f"{hostname} not an agg or leaf switch, with Full architecture BGP config only allowed"
-                            + "with agg and leaf switches",
-                        ],
-                    )
 
     click.echo("\n")
     click.secho("BGP Neighbors Established", fg="bright_white")
@@ -333,15 +276,16 @@ def get_bgp_neighbors_aruba(ip, credentials, asn):
         )
         return None, None
     # Get neighbors
+    vrfs = ["default", "Customer"]
+    bgp_neighbors_aruba = {}
     try:
-        bgp_neighbors_response = session.get(
-            f"https://{ip}/rest/v10.04/system/vrfs/default/bgp_routers/{asn}/bgp_neighbors?depth=2",
-            verify=False,
-        )
-        bgp_neighbors_response.raise_for_status()
-
-        bgp_neighbors_aruba = bgp_neighbors_response.json()
-
+        for vrf in vrfs:
+            bgp_neighbors_response = session.get(
+                f"https://{ip}/rest/v10.04/system/vrfs/{vrf}/bgp_routers/{asn}/bgp_neighbors?depth=2",
+                verify=False,
+            )
+            bgp_neighbors_aruba.update(bgp_neighbors_response.json())
+            bgp_neighbors_response.raise_for_status()
         switch_info_response = session.get(
             f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
             verify=False,
@@ -449,7 +393,7 @@ def get_bgp_neighbors_mellanox(ip, credentials):
     try:
         bgp_status = session.post(
             f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
-            json={"cmd": "show ip bgp summary"},
+            json={"cmd": "show ip bgp vrf all summary"},
             verify=False,
         )
         bgp_status = bgp_status.json()

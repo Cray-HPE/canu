@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+# (C) Copyright [2022] Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -39,14 +39,15 @@ setup(
     py_modules=["canu"],
     packages=find_packages(exclude=("tests",)),
     include_package_data=True,
-    package_data={"canu": [".version",
-                           "canu.yaml",
-                           "validate/switch/config/*.yaml"],
-                  "network_modeling": ["schema/*.json",
-                                       "schema/*.yaml",
-                                       "models/*yaml",
-                                       "configs/templates/**/**/**/*"],
-                  },
+    package_data={
+        "canu": [".version", "canu.yaml", "validate/switch/config/*.yaml"],
+        "network_modeling": [
+            "schema/*.json",
+            "schema/*.yaml",
+            "models/*yaml",
+            "configs/templates/**/**/**/*",
+        ],
+    },
     exclude_package_data={"canu": ["canu_cache.yaml"]},
     install_requires=REQUIREMENTS,
     entry_points="""

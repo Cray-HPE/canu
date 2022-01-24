@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
+# (C) Copyright [2022] Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -81,6 +81,13 @@ log = logging.getLogger("validate_shcd")
     help="The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.",
 )
 @click.option("--out", help="Output JSON model to a file", type=click.File("w"))
+@click.option(
+    "--out",
+    help="Output results to a file",
+    type=click.File("w"),
+    default="-",
+)
+@click.option("--json", "json_", is_flag=True, help="Output JSON model to a file")
 @click.option(
     "--out",
     help="Output results to a file",
