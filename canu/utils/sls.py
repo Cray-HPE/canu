@@ -139,7 +139,7 @@ def pull_sls_networks(sls_file=None):
         # Get existing SLS data for comparison (used as a cache)
         #
         sls_cache = None
-        sls_url = "https://api_gw_service.local/apis/sls/v1/networks"
+        sls_url = "https://api-gw-service-nmn.local/apis/sls/v1/networks"
         auth_headers = {"Authorization": "Bearer {}".format(token)}
         try:
             sls_cache = remote_request(
@@ -413,7 +413,7 @@ def pull_sls_hardware(sls_file=None):
         # Get existing SLS data for comparison (used as a cache)
         #
         sls_cache = None
-        sls_url = "https://api_gw_service.local/apis/sls/v1/hardware"
+        sls_url = "https://api-gw-service-nmn.local/apis/sls/v1/hardware"
         auth_headers = {"Authorization": "Bearer {}".format(token)}
         try:
             sls_cache = remote_request(
