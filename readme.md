@@ -1,4 +1,4 @@
-# 🛶 CANU v1.1.1
+# 🛶 CANU v1.1.3
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -13,6 +13,7 @@ CANU can be used to:
 - Generate switch configuration for an entire network
 - Convert SHCD to CCJ (CSM Cabling JSON)
 - Use CCJ / Paddle to validate the network and generate network config
+- Run tests against the mgmt network to check for faults/inconsistencies.
 
 # Quickstart Guide
 
@@ -653,7 +654,6 @@ The output of the `validate paddle-cabling` command will show a port by port com
 
 CANU can be used to validate BGP neighbors. All neighbors of a switch must return status **Established** or the verification will fail.
 
-- To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
 - The default **asn** is set to _65533_ if it needs to be changed, use the flag `--asn NEW_ASN_NUMBER` to set the new number
 
 If you want to see the individual status of all the neighbors of a switch, use the `--verbose` flag.
@@ -661,7 +661,7 @@ If you want to see the individual status of all the neighbors of a switch, use t
 To validate BGP run: `canu validate network bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
 ```bash
-$ canu validate network bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
+$ canu validate network bgp --username USERNAME --password PASSWORD
 
 BGP Neighbors Established
 --------------------------------------------------
@@ -671,11 +671,12 @@ PASS - IP: 192.168.1.2 Hostname: sw-spine01 
 
 If any of the spine switch neighbors for a connection other than **Established**, the switch will **FAIL** validation.
 
-If a switch that is not a **spine** switch is tested, it will show in the results table as **SKIP**.
 
 ### Config BGP
 
 **[Details](docs/config_bgp.md)**<br>
+
+CSM 1.0 only.
 
 CANU can be used to configure BGP for a pair of switches.
 
@@ -1091,6 +1092,49 @@ There are several commands to help with the canu cache:
 - `canu cache print` will print a colored version of your cache to the screen
 - `canu cache delete` will delete your cache file, the file will be created again on the next canu command
 
+### Test The Network
+
+Aruba support only.
+
+CANU has the ability to run a set of tests against all of the switches in the management network.
+It is utilizing the nornir automation framework and additional nornir plugins to do this.
+
+More info can be found at
+- https://nornir.tech/2021/08/06/testing-your-network-with-nornir-testsprocessor/
+- https://github.com/nornir-automation/nornir
+- https://github.com/dmulyalin/salt-nornir
+
+Required Input
+You can either use an SLS file or pull the SLS file from the API-Gateway using a token.
+- `--sls-file`
+- `--auth-token`
+
+Options
+- `--log` outputs the nornir debug logs
+- `--network [HMN|CMN]` This gives the user the ability to connect to the switches over the CMN.  This allows the use of this tool from outside the Mgmt Network.  The default network used is the HMN.
+- `--json` outputs the results in json format.
+- `--password` prompts if password is not entered
+- `--username` defaults to admin
+
+#### Adding tests
+Additional tests can be easily added by updating the .yaml file at `canu/test/*/test_suite.yaml`
+More information on tests and how to write them can be found at https://nornir.tech/2021/08/06/testing-your-network-with-nornir-testsprocessor/
+
+Example test
+```
+- name: Software version test
+  task: show version
+  test: contains
+  pattern: "10.08.1021"
+  err_msg: Software version is wrong
+  device:
+    - cdu
+    - leaf
+    - leaf-bmc
+    - spine
+```
+This test logs into the cdu, leaf, leaf-bmc, and spine switches and runs the command `show version` and checks that `10.08.1021` is in the output.  If it's not the test fails.
+
 ## Uninstallation
 
 `pip3 uninstall canu`
@@ -1124,6 +1168,64 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.1.3-develop]
+- validate BGP now reads IPs from the SLS API
+- Added a feature to run tests against a live network. (Aruba only)
+
+## [1.1.2-develop]
+- Enabled webui for mellanox.
+- Added speed commands to dell/mellanox templates.
+
+## [1.1.1-develop] 2022-12-07
+
+- Updated pull_request_template.md
+- Adjusted the STP timeout to 4 seconds from the default of 15.
+- Changed setup.py file glob to follow previously updated Jinja2 template locations.
+- Command line option --csi-folder has changed to --sls-file. Any SLS JSON file can be used.
+- Installation via pip now supports non-developer modes. Pyinstaller binary and RPM now work as advertised.
+- The directory of canu_cache.yaml is now dynamically configured in the user's home directory (preferred), or the system temporary directory depending on filesystem permissions.
+- Added `canu cache location` print the folder where your cache is located
+- Added `canu cache print` to print a colored version of your cache to the screen
+- Added `canu cache delete` to delete the cache file, the file will be created again on the next canu command
+- Added Dell and Mellanox support to the `canu validate switch config` command
+- Added Dell and Mellanox support to the `canu validate network config` command
+- Added ability to compare two config files with `canu validate switch config`
+- Added ability to compare two config folders with `canu validate network config`
+- Added an `--override` option to `canu generate switch config` and `canu generate network config`, this allows users to ignore custom configuration so CANU does not overwrite it.
+- Changed the `-s --shasta` flag to `--csm`
+- Added Mellanox support to the `canu config bgp` command
+- Added Dell/Mellanox support to the `canu generate network config` & `canu generate switch config` commands
+- Updated `canu validate shcd-cabling` to show port by port differences.
+- Updated the docs in the `/docs` folder to build automatically with nox
+- Added support for CMN (Customer Management Network) on Aruba and Dellanox.
+- Added mgmt plane ACL on Aruba Switches
+- Added Metallb networks to ACLs
+- Removed the hardcoded VLAN variables, these are now being pulled in from SLS.
+- Added 1.2 Aruba templates
+- Added CANU validate switch config support for dellanox.
+- BGP is now generated during `canu generate` switch/network config. (aruba &Mellanox)
+- Computes/HSN-bmcs/VizNodes/LoginNodes/pdus now have their switch config generated.
+- Added SubRack support for reading in all variations from the SHCD, and added **sub_location** and **parent** to the JSON output
+- Added Paddle / CCJ (CSM Cabling JSON) support. Commands `canu validate paddle` and `canu validate paddle-cabling` can validate the CCJ. Config can be generated using CCJ.
+- Added the `jq` command to the Docker image.
+- Added `canu test` to run tests against the network (aruba only).
+
+## [0.0.6] - 2021-9-23
+
+- Added alpha version of schema-checked JSON output in `validate shcd` as a machine-readable exchange for SHCD data.
+- Add ability to run CANU in a container, and update Python virtual environment documentation.
+- Added `canu generate switch config` to generate switch configuration for Aruba systems.
+- Added `canu generate network config` to generate network configuration for Aruba systems.
+- Added `canu validate switch config` to compare running switch config to a file for Aruba systems.
+- Added `canu validate network config` to compare running network config to files for Aruba systems.
+- Updated naming conventions to `canu <verb> switch/network <noun>`
+- Added the ability to fully track device slot and port assignments.
+- Mountain hardware (CMM, CEC) is now being generated in the switch configurations.
+- Fixed multiple templates to match what is on the Aruba switch, these include, UANs, Loopbacks, VLAN interfaces, ACLs.
+- Known Limitations:
+  - PDUs are not yet properly handled in the generated switch configurations.
+  - Switch and SNMP passwords have been removed from generated configurations until the handling code is secure.
 
 ## [1.1.1] 2022-01-07
 
