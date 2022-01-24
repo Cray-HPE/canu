@@ -1169,15 +1169,15 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [1.1.3-develop]
+## [1.1.3]
 - validate BGP now reads IPs from the SLS API
-- Added a feature to run tests against a live network. (Aruba only)
+- Added a feature to run tests against a live network.
 
-## [1.1.2-develop]
+## [1.1.2]
 - Enabled webui for mellanox.
 - Added speed commands to dell/mellanox templates.
 
-## [1.1.1-develop] 2022-12-07
+## [1.1.1] 2022-12-07
 
 - Updated pull_request_template.md
 - Adjusted the STP timeout to 4 seconds from the default of 15.
