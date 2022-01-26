@@ -274,7 +274,7 @@ def get_node_common_name(name, rack_number, rack_elevation, mapper):
                     #    x3113pdu1 in x3113, or
                     #    x3113p1 in x3113
                     # Becomes pdu-xXXXX-NNN, or pdu-x3113-001
-                    common_name = f"{tmp_name}-{digit:0>3}"
+                    common_name = f"{tmp_name}{digit:0>3}"
                 else:
                     tmp_id = re.sub(
                         "^({})0*([1-9]*)".format(lookup_name),
