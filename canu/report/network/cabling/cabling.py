@@ -20,19 +20,22 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that report the cabling of the entire Shasta network."""
-from collections import defaultdict
 import ipaddress
 import re
+from collections import defaultdict
 
 import click
-from click_help_colors import HelpColorsCommand
-from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
-from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
-from netmiko import ssh_exception
 import requests
+from click_help_colors import HelpColorsCommand
+from click_option_group import optgroup
+from click_option_group import RequiredMutuallyExclusiveOptionGroup
+from click_params import IPV4_ADDRESS
+from click_params import Ipv4AddressListParamType
+from netmiko import ssh_exception
 
-from canu.report.switch.cabling.cabling import get_lldp, print_lldp
+from canu.report.switch.cabling.cabling import get_lldp
+from canu.report.switch.cabling.cabling import print_lldp
 
 
 @click.command(

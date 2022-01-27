@@ -20,33 +20,31 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that report the firmware of the entire Shasta network."""
-from collections import defaultdict
 import datetime
 import ipaddress
 import json
+import sys
+from collections import defaultdict
 from os import path
 from pathlib import Path
-import sys
 
 import click
-from click_help_colors import HelpColorsCommand
-from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
-from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
 import emoji
-from netmiko import ssh_exception
 import requests
+from click_help_colors import HelpColorsCommand
+from click_option_group import optgroup
+from click_option_group import RequiredMutuallyExclusiveOptionGroup
+from click_params import IPV4_ADDRESS
+from click_params import Ipv4AddressListParamType
+from netmiko import ssh_exception
 from ruamel.yaml import YAML
 
-
-from canu.report.switch.firmware.firmware import (
-    get_firmware_aruba,
-    get_firmware_dell,
-    get_firmware_mellanox,
-)
+from canu.report.switch.firmware.firmware import get_firmware_aruba
+from canu.report.switch.firmware.firmware import get_firmware_dell
+from canu.report.switch.firmware.firmware import get_firmware_mellanox
 from canu.utils.cache import cache_switch
 from canu.utils.vendor import switch_vendor
-
 
 yaml = YAML()
 

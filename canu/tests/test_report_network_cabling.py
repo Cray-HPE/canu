@@ -22,21 +22,18 @@
 """Test CANU report network cabling commands."""
 from unittest.mock import patch
 
-from click import testing
-from netmiko import ssh_exception
 import requests
 import responses
+from click import testing
+from netmiko import ssh_exception
 
 from canu.cli import cli
 from canu.utils.cache import remove_switch_from_cache
-from .test_report_switch_cabling import (
-    arp_neighbors_mellanox,
-    lldp_json_mellanox,
-    mac_address_table_mellanox,
-    mlag_mellanox,
-    netmiko_commands_dell,
-)
-
+from canu.tests.test_report_switch_cabling import arp_neighbors_mellanox
+from canu.tests.test_report_switch_cabling import lldp_json_mellanox
+from canu.tests.test_report_switch_cabling import mac_address_table_mellanox
+from canu.tests.test_report_switch_cabling import mlag_mellanox
+from canu.tests.test_report_switch_cabling import netmiko_commands_dell
 
 username = "admin"
 password = "admin"

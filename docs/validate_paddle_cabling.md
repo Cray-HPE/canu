@@ -1,70 +1,12 @@
 # Validate Paddle and Cabling
 
-## canu validate paddle-cabling
-
-Validate a CCJ file against the current network cabling.
-
-Pass in a CCJ file to validate that it works architecturally.
-
-This command will also use LLDP to determine the neighbors of the IP addresses passed in to validate that the network
-is properly connected architecturally.
-
-The validation will ensure that spine switches, leaf switches,
-edge switches, and nodes all are connected properly.
-
-```
-canu validate paddle-cabling [OPTIONS]
-```
-
-### Options
-
-
-### --csm( <csm>)
-**Required** CSM network version
-
-
-* **Options**
-
-    1.0 | 1.2
-
-
-
-### --ccj( <ccj>)
-**Required** CCJ (CSM Cabling JSON) File containing system topology.
-
-
-### --ips( <ips>)
-Comma separated list of IPv4 addresses of switches
-
-
-### --ips-file( <ips_file>)
-File with one IPv4 address per line
-
-
-### --username( <username>)
-Switch username
-
-
-* **Default**
-
-    admin
-
-
-
-### --password( <password>)
-Switch password
-
-
-### --out( <out>)
-Output results to a file
-
 ## Example
 
 ### Validate Paddle and Cabling
 
 To validate a CCJ Paddle against the cabling run: `canu validate paddle-cabling --csm 1.2 --ccj paddle.json --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
-```
+```bash
 $ canu validate paddle-cabling --csm 1.2 --ccj paddle.json --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
 
 ====================================================================================================

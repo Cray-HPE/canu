@@ -12,7 +12,31 @@ If there is a difference in what is found connected to a devices port in SHCD an
 
 ---
 
-```
+# noqa: D301, B950
+
+Args:
+
+    ctx: CANU context settings
+    csm: csm version
+    architecture: CSM architecture
+    shcd: SHCD file
+    tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
+    corners: The corners on each tab, comma separated e.g. ‘J37,U227,J15,T47,J20,U167’.
+    ips: Comma separated list of IPv4 addresses of switches
+    ips_file: File with one IPv4 address per line
+    macs: Print NCN MAC addresses
+    username: Switch username
+    password: Switch password
+
+
+    ```
+    log_
+    ```
+
+    : Level of logging.
+    out: Name of the output file
+
+```shell
 canu validate shcd-cabling [OPTIONS]
 ```
 
@@ -96,7 +120,7 @@ Print NCN MAC addresses
 
 To validate an SHCD against the cabling run: `canu validate shcd-cabling --csm 1.2 -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN --corners I14,S49,I16,S22 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
-```
+```bash
 $ canu validate shcd-cabling --csm 1.2 -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN --corners I14,S49,I16,S22 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
 
 ====================================================================================================

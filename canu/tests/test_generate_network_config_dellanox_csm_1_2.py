@@ -24,22 +24,25 @@ import json
 from os import path
 from pathlib import Path
 
-from click import testing
 import requests
 import responses
+from click import testing
 
 from canu.cli import cli
-from .test_generate_switch_config_aruba_csm_1_0 import sls_input, sls_networks
+from canu.tests.test_generate_switch_config_dellanox_csm_1_2 import sls_input
+from canu.tests.test_generate_switch_config_dellanox_csm_1_2 import sls_networks
 
 test_file_directory = Path(__file__).resolve().parent
 
-test_file_name = "Full_Architecture_Golden_Config_1.1.5.xlsx"
+test_file_name = "Architecture_Golden_Config_Dellanox.xlsx"
 test_file = path.join(test_file_directory, "data", test_file_name)
-architecture = "full"
+custom_file_name = "dellanox_custom.yaml"
+custom_file = path.join(test_file_directory, "data", custom_file_name)
+architecture = "v1"
 tabs = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
-corners = "J14,T44,J14,T48,J14,T28,J14,T27"
+corners = "J14,T30,J14,T34,J14,T28,J14,T27"
 sls_file = "sls_file.json"
-csm = "1.0"
+csm = "1.2"
 folder_name = "test_config"
 cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
@@ -79,13 +82,60 @@ def test_network_config():
         assert result.exit_code == 0
         assert "sw-spine-001 Config Generated" in str(result.output)
         assert "sw-spine-002 Config Generated" in str(result.output)
-        assert "sw-leaf-001 Config Generated" in str(result.output)
-        assert "sw-leaf-002 Config Generated" in str(result.output)
-        assert "sw-leaf-003 Config Generated" in str(result.output)
-        assert "sw-leaf-004 Config Generated" in str(result.output)
         assert "sw-cdu-001 Config Generated" in str(result.output)
         assert "sw-cdu-002 Config Generated" in str(result.output)
         assert "sw-leaf-bmc-001 Config Generated" in str(result.output)
+        assert "sw-edge-001 Config Generated" in str(result.output)
+        assert "sw-edge-002 Config Generated" in str(result.output)
+
+
+def test_network_config_custom():
+    """Test that the `canu generate network config` command runs and generates config."""
+    with runner.isolated_filesystem():
+        with open(sls_file, "w") as f:
+            json.dump(sls_input, f)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "generate",
+                "network",
+                "config",
+                "--csm",
+                csm,
+                "--architecture",
+                architecture,
+                "--shcd",
+                test_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--sls-file",
+                sls_file,
+                "--folder",
+                folder_name,
+                "--custom-config",
+                custom_file,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "sw-spine-001 Customized Configurations have been detected in the generated switch configurations"
+            in str(result.output)
+        )
+        assert (
+            "sw-spine-002 Customized Configurations have been detected in the generated switch configurations"
+            in str(result.output)
+        )
+        assert "sw-cdu-001 Config Generated" in str(result.output)
+        assert "sw-cdu-002 Config Generated" in str(result.output)
+        assert (
+            "sw-leaf-bmc-001 Customized Configurations have been detected in the generated switch configurations"
+            in str(result.output)
+        )
 
 
 def test_network_config_folder_prompt():
@@ -120,13 +170,11 @@ def test_network_config_folder_prompt():
         assert result.exit_code == 0
         assert "sw-spine-001 Config Generated" in str(result.output)
         assert "sw-spine-002 Config Generated" in str(result.output)
-        assert "sw-leaf-001 Config Generated" in str(result.output)
-        assert "sw-leaf-002 Config Generated" in str(result.output)
-        assert "sw-leaf-003 Config Generated" in str(result.output)
-        assert "sw-leaf-004 Config Generated" in str(result.output)
         assert "sw-cdu-001 Config Generated" in str(result.output)
         assert "sw-cdu-002 Config Generated" in str(result.output)
         assert "sw-leaf-bmc-001 Config Generated" in str(result.output)
+        assert "sw-edge-001 Config Generated" in str(result.output)
+        assert "sw-edge-002 Config Generated" in str(result.output)
 
 
 def test_network_config_csi_file_missing():
@@ -262,13 +310,11 @@ def test_network_config_missing_tabs():
         assert result.exit_code == 0
         assert "sw-spine-001 Config Generated" in str(result.output)
         assert "sw-spine-002 Config Generated" in str(result.output)
-        assert "sw-leaf-001 Config Generated" in str(result.output)
-        assert "sw-leaf-002 Config Generated" in str(result.output)
-        assert "sw-leaf-003 Config Generated" in str(result.output)
-        assert "sw-leaf-004 Config Generated" in str(result.output)
         assert "sw-cdu-001 Config Generated" in str(result.output)
         assert "sw-cdu-002 Config Generated" in str(result.output)
         assert "sw-leaf-bmc-001 Config Generated" in str(result.output)
+        assert "sw-edge-001 Config Generated" in str(result.output)
+        assert "sw-edge-002 Config Generated" in str(result.output)
 
 
 def test_network_config_bad_tab():
@@ -339,13 +385,11 @@ def test_network_config_corner_prompt():
         assert result.exit_code == 0
         assert "sw-spine-001 Config Generated" in str(result.output)
         assert "sw-spine-002 Config Generated" in str(result.output)
-        assert "sw-leaf-001 Config Generated" in str(result.output)
-        assert "sw-leaf-002 Config Generated" in str(result.output)
-        assert "sw-leaf-003 Config Generated" in str(result.output)
-        assert "sw-leaf-004 Config Generated" in str(result.output)
         assert "sw-cdu-001 Config Generated" in str(result.output)
         assert "sw-cdu-002 Config Generated" in str(result.output)
         assert "sw-leaf-bmc-001 Config Generated" in str(result.output)
+        assert "sw-edge-001 Config Generated" in str(result.output)
+        assert "sw-edge-002 Config Generated" in str(result.output)
 
 
 def test_network_config_not_enough_corners():
@@ -420,13 +464,11 @@ def test_network_config_sls():
         assert result.exit_code == 0
         assert "sw-spine-001 Config Generated" in str(result.output)
         assert "sw-spine-002 Config Generated" in str(result.output)
-        assert "sw-leaf-001 Config Generated" in str(result.output)
-        assert "sw-leaf-002 Config Generated" in str(result.output)
-        assert "sw-leaf-003 Config Generated" in str(result.output)
-        assert "sw-leaf-004 Config Generated" in str(result.output)
         assert "sw-cdu-001 Config Generated" in str(result.output)
         assert "sw-cdu-002 Config Generated" in str(result.output)
         assert "sw-leaf-bmc-001 Config Generated" in str(result.output)
+        assert "sw-edge-001 Config Generated" in str(result.output)
+        assert "sw-edge-002 Config Generated" in str(result.output)
 
 
 @responses.activate

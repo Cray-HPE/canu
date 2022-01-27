@@ -22,18 +22,19 @@
 """CANU commands that validate the shcd against the current network cabling."""
 import ipaddress
 import json
+import sys
 from os import path
 from pathlib import Path
-import sys
 
 import click
-from click_help_colors import HelpColorsCommand
-from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
-from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
-from netmiko import ssh_exception
-from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import requests
+from click_help_colors import HelpColorsCommand
+from click_option_group import optgroup
+from click_option_group import RequiredMutuallyExclusiveOptionGroup
+from click_params import IPV4_ADDRESS
+from click_params import Ipv4AddressListParamType
+from netmiko import ssh_exception
 from ruamel.yaml import YAML
 
 from canu.report.switch.cabling.cabling import get_lldp
@@ -41,10 +42,9 @@ from canu.utils.cache import cache_directory
 from canu.validate.network.cabling.cabling import node_model_from_canu
 from canu.validate.paddle.paddle import node_model_from_paddle
 from canu.validate.shcd.shcd import node_list_warnings
-from canu.validate.shcd_cabling.shcd_cabling import (
-    combine_shcd_cabling,
-    print_combined_nodes,
-)
+from canu.validate.shcd_cabling.shcd_cabling import combine_shcd_cabling
+from canu.validate.shcd_cabling.shcd_cabling import print_combined_nodes
+from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 
 yaml = YAML()
 

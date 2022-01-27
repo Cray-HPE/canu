@@ -24,12 +24,13 @@ import json
 from os import path
 from pathlib import Path
 
-from click import testing
 import requests
 import responses
+from click import testing
 
 from canu.cli import cli
-from .test_generate_switch_config_dellanox_csm_1_0 import sls_input, sls_networks
+from canu.tests.test_generate_switch_config_dellanox_csm_1_0 import sls_input
+from canu.tests.test_generate_switch_config_dellanox_csm_1_0 import sls_networks
 
 test_file_directory = Path(__file__).resolve().parent
 

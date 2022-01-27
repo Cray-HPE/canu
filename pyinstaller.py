@@ -24,7 +24,6 @@
 block_cipher = None
 
 added_files = [
-    ("canu/.version", "canu"),
     ("canu/canu.yaml", "canu"),
     ("canu/validate/switch/config/*.yaml", "canu/validate/switch/config"),
     ("network_modeling/models/*", "network_modeling/models"),

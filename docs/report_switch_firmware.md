@@ -15,7 +15,26 @@ There are two different statuses that might be indicated.
 
 ---
 
-```
+# noqa: D301, B950
+
+Args:
+
+    ctx: CANU context settings
+    csm: CSM version
+    ip: Switch IPv4 address
+    username: Switch username
+    password: Switch password
+
+
+    ```
+    json_
+    ```
+
+    : Bool indicating json output
+    verbose: Bool indicating verbose output
+    out: Name of the output file
+
+```shell
 canu report switch firmware [OPTIONS]
 ```
 
@@ -67,7 +86,7 @@ Output results to a file
 
 To check the firmware of a single switch run: `canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD`
 
-```
+```bash
 $ canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD
 
 🛶 - Pass - IP: 192.168.1.1 Hostname: test-switch-spine01 Firmware: GL.10.06.0001
@@ -82,7 +101,7 @@ $ canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --p
 
 To get verbose firmware details of a single switch: `canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD --verbose`
 
-```
+```bash
 $ canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD --verbose
 
 🛶 - Pass - IP: 192.168.1.1 Hostname: test-switch-spine01
@@ -102,7 +121,7 @@ Booted Image: primary
 
 To get firmware details of a single switch with JSON output: `canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD --json`
 
-```
+```bash
 $ canu report switch firmware - 1.4 --ip 192.168.1.1 --username USERNAME --password PASSWORD --json
 {
   "ip_address": "192.168.1.1",
@@ -121,7 +140,7 @@ $ canu report switch firmware - 1.4 --ip 192.168.1.1 --username USERNAME --passw
 
 To get firmware details of a single switch with JSON output: `canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD --json --verbose`
 
-```
+```bash
 $ canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD --json --verbose
 {
   "ip_address": "192.168.1.1",

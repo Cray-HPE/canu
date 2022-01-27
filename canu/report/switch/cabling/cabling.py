@@ -20,21 +20,23 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that report the cabling of an individual switch."""
-from collections import defaultdict, OrderedDict
 import datetime
 import re
+from collections import defaultdict
+from collections import OrderedDict
 from urllib.parse import unquote
 
 import click
-from click_help_colors import HelpColorsCommand
 import natsort
-from netmiko import ssh_exception
 import requests
 import urllib3
+from click_help_colors import HelpColorsCommand
+from netmiko import ssh_exception
 
 from canu.utils.cache import cache_switch
 from canu.utils.mac import find_mac
-from canu.utils.ssh import netmiko_command, netmiko_commands
+from canu.utils.ssh import netmiko_command
+from canu.utils.ssh import netmiko_commands
 from canu.utils.vendor import switch_vendor
 
 # To disable warnings about unsecured HTTPS requests

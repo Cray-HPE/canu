@@ -20,15 +20,15 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Test CANU validate network config commands."""
-from os import mkdir, urandom
+from os import mkdir
+from os import urandom
 from unittest.mock import patch
 
 from click import testing
 from netmiko import ssh_exception
 
 from canu.cli import cli
-from .test_validate_switch_config import switch_config
-
+from canu.tests.test_validate_switch_config import switch_config
 
 username = "admin"
 password = "admin"

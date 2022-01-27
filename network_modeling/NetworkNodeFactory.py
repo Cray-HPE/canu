@@ -22,18 +22,17 @@
 """NetworkNodeFactory to create a new network."""
 import json
 import logging
-from os import path
-from pathlib import Path
 import re
 import sys
+from os import path
+from pathlib import Path
 
 import click
 import jsonschema
-from ruamel.yaml import YAML
 import yamale
+from ruamel.yaml import YAML
 
 from .NetworkNode import NetworkNode
-
 
 yaml = YAML()
 

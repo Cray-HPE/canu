@@ -19,29 +19,39 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-"""Test CANU backup network."""
+"""Test CANU test."""
 
+from os import path
 from pathlib import Path
 
-from click import testing
 import requests
 import responses
+from click import testing
 
 from canu.cli import cli
 
 test_file_directory = Path(__file__).resolve().parent
 
+test_file_name = "Full_Architecture_Golden_Config_1.1.5.xlsx"
+test_file = path.join(test_file_directory, "data", test_file_name)
+override_file_name = "override.yaml"
+override_file = path.join(test_file_directory, "data", override_file_name)
+architecture = "full"
+tabs = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
+corners = "J14,T44,J14,T48,J14,T28,J14,T27"
+sls_file = "sls_file.json"
+csm = "1.2"
+folder_name = "test_config"
+cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
 runner = testing.CliRunner()
-username = "user"
-password = "password"
-folder = "./"
 
 
 @responses.activate
-def test_backup_network_sls_address_bad():
-    """Test that the `canu backup network config` command errors with bad SLS address."""
+def test_test_sls_address_bad():
+    """Test that the `canu generate network config` command errors with bad SLS address."""
     bad_sls_address = "192.168.254.254"
+
     responses.add(
         responses.GET,
         f"https://{bad_sls_address}/apis/sls/v1/networks",
@@ -53,14 +63,9 @@ def test_backup_network_sls_address_bad():
     result = runner.invoke(
         cli,
         [
-            "backup",
-            "network",
-            "--folder",
-            folder,
+            "test",
             "--sls-address",
             bad_sls_address,
-            "--password",
-            password,
         ],
     )
     assert result.exit_code == 1
@@ -68,21 +73,16 @@ def test_backup_network_sls_address_bad():
     assert "Error collecting secret from Kubernetes:" in str(result.output)
 
 
-def test_backup_network_sls_file_missing():
-    """Test that the `canu backup network` command errors on sls_file.json file missing."""
+def test_network_config_csi_file_missing():
+    """Test that the `canu generate network config` command errors on sls_file.json file missing."""
     bad_sls_file = "/bad_folder"
     with runner.isolated_filesystem():
         result = runner.invoke(
             cli,
             [
-                "backup",
-                "network",
+                "test",
                 "--sls-file",
                 bad_sls_file,
-                "password",
-                password,
-                "--folder",
-                folder,
             ],
         )
         assert result.exit_code == 2

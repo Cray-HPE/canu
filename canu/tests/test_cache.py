@@ -23,17 +23,14 @@
 import json
 from unittest.mock import patch
 
-from click import testing
 import pytest
 import responses
+from click import testing
 
 from canu.cli import cli
-from canu.utils.cache import (
-    firmware_cached_recently,
-    get_switch_from_cache,
-    remove_switch_from_cache,
-)
-
+from canu.utils.cache import firmware_cached_recently
+from canu.utils.cache import get_switch_from_cache
+from canu.utils.cache import remove_switch_from_cache
 
 username = "admin"
 password = "admin"

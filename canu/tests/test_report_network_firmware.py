@@ -22,14 +22,13 @@
 """Test CANU report network firmware commands."""
 from unittest.mock import patch
 
-from click import testing
-from netmiko import ssh_exception
 import requests
 import responses
+from click import testing
+from netmiko import ssh_exception
 
 from canu.cli import cli
 from canu.utils.cache import remove_switch_from_cache
-
 
 csm = "1.0"
 username = "admin"

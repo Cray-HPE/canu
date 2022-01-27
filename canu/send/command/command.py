@@ -20,12 +20,12 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU send command."""
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import click
-from click_help_colors import HelpColorsCommand
 import click_spinner
+from click_help_colors import HelpColorsCommand
 from nornir import InitNornir
 from nornir_netmiko import netmiko_send_command
 from nornir_utils.plugins.functions import print_result

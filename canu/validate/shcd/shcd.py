@@ -20,23 +20,24 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate the shcd."""
-from collections import defaultdict
 import datetime
 import json
 import logging
-from os import path
-from pathlib import Path
+import pkg_resources
 import re
 import sys
+from collections import defaultdict
+from os import path
+from pathlib import Path
 
 import click
-from click_help_colors import HelpColorsCommand
 import natsort
+from click_help_colors import HelpColorsCommand
+from openpyxl import load_workbook
+
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from network_modeling.NetworkPort import NetworkPort
 from network_modeling.NodeLocation import NodeLocation
-from openpyxl import load_workbook
-
 
 # Get project root directory
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
@@ -45,10 +46,7 @@ else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent.parent
 
-canu_version_file = path.join(project_root, "canu", ".version")
-
-with open(canu_version_file, "r") as version_file:
-    version = version_file.read().replace("\n", "")
+version = pkg_resources.get_distribution('canu').version
 
 log = logging.getLogger("validate_shcd")
 

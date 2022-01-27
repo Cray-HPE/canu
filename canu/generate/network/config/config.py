@@ -21,28 +21,32 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that generate the config of the entire Shasta network."""
 import json
-from os import environ, makedirs, path
-from pathlib import Path
 import sys
+from os import environ
+from os import makedirs
+from os import path
+from pathlib import Path
 
 import click
-from click_help_colors import HelpColorsCommand
-from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
-from jinja2 import Environment, FileSystemLoader, StrictUndefined
-from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import requests
-from ruamel.yaml import YAML
 import urllib3
+from click_help_colors import HelpColorsCommand
+from click_option_group import optgroup
+from click_option_group import RequiredMutuallyExclusiveOptionGroup
+from jinja2 import Environment
+from jinja2 import FileSystemLoader
+from jinja2 import StrictUndefined
+from ruamel.yaml import YAML
 
-from canu.generate.switch.config.config import (
-    generate_switch_config,
-    get_shasta_name,
-    parse_sls_for_config,
-    rename_sls_hostnames,
-)
+from canu.generate.switch.config.config import generate_switch_config
+from canu.generate.switch.config.config import get_shasta_name
+from canu.generate.switch.config.config import parse_sls_for_config
+from canu.generate.switch.config.config import rename_sls_hostnames
 from canu.utils.cache import cache_directory
 from canu.validate.paddle.paddle import node_model_from_paddle
-from canu.validate.shcd.shcd import node_model_from_shcd, shcd_to_sheets
+from canu.validate.shcd.shcd import node_model_from_shcd
+from canu.validate.shcd.shcd import shcd_to_sheets
+from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 
 yaml = YAML()
 

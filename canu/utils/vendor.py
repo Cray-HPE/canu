@@ -24,13 +24,12 @@ import datetime
 import re
 
 import click
-from netmiko import ssh_exception, SSHDetect
 import requests
+from netmiko import ssh_exception
+from netmiko import SSHDetect
 
-from canu.utils.cache import (
-    cache_switch,
-    get_switch_from_cache,
-)
+from canu.utils.cache import cache_switch
+from canu.utils.cache import get_switch_from_cache
 from canu.utils.ssh import netmiko_command
 
 

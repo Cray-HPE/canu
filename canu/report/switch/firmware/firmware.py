@@ -22,23 +22,21 @@
 """CANU commands that report the firmware of an individual switch."""
 import datetime
 import json
+import sys
 from os import path
 from pathlib import Path
-import sys
 
 import click
-from click_help_colors import HelpColorsCommand
 import emoji
-from netmiko import ssh_exception
 import requests
-from ruamel.yaml import YAML
 import urllib3
+from click_help_colors import HelpColorsCommand
+from netmiko import ssh_exception
+from ruamel.yaml import YAML
 
-from canu.utils.cache import (
-    cache_switch,
-    firmware_cached_recently,
-    get_switch_from_cache,
-)
+from canu.utils.cache import cache_switch
+from canu.utils.cache import firmware_cached_recently
+from canu.utils.cache import get_switch_from_cache
 from canu.utils.ssh import netmiko_commands
 from canu.utils.vendor import switch_vendor
 

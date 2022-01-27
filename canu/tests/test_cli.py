@@ -22,13 +22,12 @@
 """Test CANU cli."""
 from os import urandom
 
-from click import testing
 import requests
 import responses
+from click import testing
 
 from canu.cli import cli
 from canu.utils.cache import remove_switch_from_cache
-
 
 fileout = "fileout.txt"
 sls_address = "api-gw-service-nmn.local"

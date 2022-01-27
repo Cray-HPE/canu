@@ -22,12 +22,11 @@
 """Test CANU validate network bgp commands."""
 from unittest.mock import patch
 
-from click import testing
 import requests
 import responses
+from click import testing
 
 from canu.cli import cli
-
 
 username = "admin"
 password = "admin"

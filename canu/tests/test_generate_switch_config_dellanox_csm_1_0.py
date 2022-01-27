@@ -22,6 +22,8 @@
 """Test CANU generate switch config commands."""
 import json
 from os import path
+
+import pkg_resources
 from pathlib import Path
 
 from click import testing
@@ -42,16 +44,13 @@ cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
 switch_backups = "switch_backups/dellanox"
 switch_backups_folder = path.join(test_file_directory, "data", switch_backups)
+version = pkg_resources.get_distribution('canu').version
 
-canu_version_file = path.join(test_file_directory.resolve().parent, "canu", ".version")
-with open(canu_version_file, "r") as file:
-    canu_version = file.readline()
-canu_version = canu_version.strip()
 banner_motd = (
     'banner motd "\n'
     "###############################################################################\n"
     f"# CSM version:  {csm}\n"
-    f"# CANU version: {canu_version}\n"
+    f"# CANU version: {version}\n"
     "###############################################################################\n"
     '"\n'
 )

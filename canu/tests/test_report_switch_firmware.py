@@ -23,16 +23,16 @@
 import json
 from unittest.mock import patch
 
-from click import testing
-from netmiko import ssh_exception
 import pytest
 import requests
 import responses
+from click import testing
+from netmiko import ssh_exception
 
 from canu.cli import cli
 from canu.report.switch.firmware.firmware import get_firmware_aruba
-from canu.utils.cache import get_switch_from_cache, remove_switch_from_cache
-
+from canu.utils.cache import get_switch_from_cache
+from canu.utils.cache import remove_switch_from_cache
 
 username = "admin"
 password = "admin"

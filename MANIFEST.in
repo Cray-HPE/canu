@@ -1,0 +1,8 @@
+include .version
+include README.md
+include canu/canu.yaml
+include canu/validate/switch/config/*.yaml
+include network_modeling/schema/*.json
+include network_modeling/schema/*.yaml
+include network_modeling/models/*.yaml
+recursive-include network_modeling/configs/templates *

@@ -16,7 +16,17 @@ Ports are highlighted in ‘green’ when the port name is set with the interfac
 
 ---
 
-```
+# noqa: D301, B950
+
+Args:
+
+    ctx: CANU context settings
+    ip: Switch IPv4 address
+    username: Switch username
+    password: Switch password
+    out: Name of the output file
+
+```shell
 canu report switch cabling [OPTIONS]
 ```
 
@@ -48,7 +58,7 @@ Output results to a file
 
 To check the cabling of a single switch run: `canu report switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD`
 
-```
+```bash
 $ canu report switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD
 
 Switch: test-switch-spine01 (192.168.1.1)

@@ -19,36 +19,22 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
+FROM artifactory.algol60.net/csm-docker/unstable/csm-docker-sle-python:3.10
 
-from artifactory.algol60.net/csm-docker/stable/docker.io/python:slim-bullseye
+RUN zypper \
+    --non-interactive \
+    --plus-repo https://artifactory.algol60.net/artifactory/csm-rpms/hpe/stable/sle-15sp3 \
+    install \
+    --no-recommends \
+    --force-resolution \
+    canu
 
-# create canu user
-RUN useradd -ms /bin/bash canu
+RUN mkdir /files \
+    && chown canu:canu /files \
+    && echo 'export PS1="canu \w : "' >> /etc/bash.bashrc 
 
-# update command prompt
-RUN echo 'export PS1="canu \w : "' >> /etc/bash.bashrc
+COPY --chown canu:canu . /app/canu
 
-# make files dir
-RUN mkdir /files
-
-# prep image layer for faster builds
-COPY requirements.txt /app/canu/
-
-RUN apt-get -yq update && apt-get -yq install gcc openssl jq vim libffi-dev musl-dev \
-    python3 python3-dev python3-pip
-
-RUN pip3 install --upgrade pip && pip3 install -r /app/canu/requirements.txt
-
-# copy canu files
-COPY . /app/canu
-
-# install canu
-RUN pip3 install --editable /app/canu/
-
-# set file perms for canu
-RUN chown -R canu /app/canu /files
-
-# set none root user: canu
 USER canu
-
 WORKDIR /files
+VOLUME /files

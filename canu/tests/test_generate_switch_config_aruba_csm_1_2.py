@@ -24,9 +24,9 @@ import json
 from os import path
 from pathlib import Path
 
-from click import testing
 import requests
 import responses
+from click import testing
 
 from canu.cli import cli
 
@@ -51,15 +51,12 @@ architecture_tds = "TDS"
 tabs_tds = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners_tds = "J14,T30,J14,T53,J14,T32,J14,T27"
 
-canu_version_file = path.join(test_file_directory.resolve().parent, "canu", ".version")
-with open(canu_version_file, "r") as file:
-    canu_version = file.readline()
-canu_version = canu_version.strip()
+version = pkg_resources.get_distribution('canu').version
 banner_motd = (
     "banner exec !\n"
     "###############################################################################\n"
     f"# CSM version:  {csm}\n"
-    f"# CANU version: {canu_version}\n"
+    f"# CANU version: {version}\n"
     "###############################################################################\n"
     "!\n"
 )

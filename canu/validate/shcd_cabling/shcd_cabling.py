@@ -20,33 +20,34 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate the shcd against the current network cabling."""
-from collections import defaultdict, OrderedDict
 import ipaddress
 import logging
-from os import path
-from pathlib import Path
 import re
 import sys
+from collections import defaultdict
+from collections import OrderedDict
+from os import path
+from pathlib import Path
 
 import click
-from click_help_colors import HelpColorsCommand
-from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
-from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
 import natsort
-from netmiko import ssh_exception
-from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import requests
+from click_help_colors import HelpColorsCommand
+from click_option_group import optgroup
+from click_option_group import RequiredMutuallyExclusiveOptionGroup
+from click_params import IPV4_ADDRESS
+from click_params import Ipv4AddressListParamType
+from netmiko import ssh_exception
 from ruamel.yaml import YAML
 
 from canu.report.switch.cabling.cabling import get_lldp
 from canu.utils.cache import cache_directory
 from canu.validate.network.cabling.cabling import node_model_from_canu
-from canu.validate.shcd.shcd import (
-    node_list_warnings,
-    node_model_from_shcd,
-    shcd_to_sheets,
-)
+from canu.validate.shcd.shcd import node_list_warnings
+from canu.validate.shcd.shcd import node_model_from_shcd
+from canu.validate.shcd.shcd import shcd_to_sheets
+from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 
 yaml = YAML()
 

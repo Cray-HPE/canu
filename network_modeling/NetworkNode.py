@@ -25,8 +25,8 @@ import logging
 
 import click
 
-from .NetworkPort import NetworkPort
-from .NodeLocation import NodeLocation
+from network_modeling.NetworkPort import NetworkPort
+from network_modeling.NodeLocation import NodeLocation
 
 log = logging.getLogger(__name__)
 

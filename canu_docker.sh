@@ -21,14 +21,12 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 
-# check for folder call files
-# used to mount data between local and container
 if [[ ! -d "files" ]]
 then
-    mkdir files
+    echo 'Making local directory for Docker volume.'
+    mkdir -v files
 fi
 
-# get local path
 path=$(pwd)
 
 case $1 in
@@ -50,9 +48,9 @@ case $1 in
 
     *)
         echo ""
-        echo "canu_docker.sh usuage is:"
-        echo "canu_docker.sh up - for starting container"
-        echo "canu_docker.sh down - for stopping container"
+        echo "$0 usage is:"
+        echo "$0 up   - for starting container"
+        echo "$0 down - for stopping container"
         echo ""
     ;;
 esac

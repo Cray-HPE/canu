@@ -30,7 +30,6 @@ from canu.validate.shcd import shcd
 from canu.validate.shcd_cabling import shcd_cabling
 from canu.validate.switch import switch
 
-
 @click.group(
     cls=HelpColorsGroup,
     help_headers_color="yellow",
@@ -39,7 +38,7 @@ from canu.validate.switch import switch
 @click.pass_context
 def validate(ctx):
     """CANU validate commands."""
-
+    pass
 
 validate.add_command(network.network)
 validate.add_command(paddle.paddle)

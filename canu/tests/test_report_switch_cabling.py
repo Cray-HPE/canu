@@ -22,16 +22,15 @@
 """Test CANU report switch cabling commands."""
 from unittest.mock import patch
 
-from click import testing
-from netmiko import ssh_exception
 import pytest
 import requests
 import responses
+from click import testing
+from netmiko import ssh_exception
 
 from canu.cli import cli
 from canu.report.switch.cabling.cabling import get_lldp
 from canu.utils.cache import remove_switch_from_cache
-
 
 username = "admin"
 password = "admin"

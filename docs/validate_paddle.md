@@ -1,31 +1,10 @@
 # Validate Paddle
 
-## canu validate paddle
-
-Validate a CCJ file.
-
-Pass in a CCJ file to validate that it works architecturally. The validation will ensure that spine switches,
-leaf switches, edge switches, and nodes all are connected properly.
-
-```
-canu validate paddle [OPTIONS]
-```
-
-### Options
-
-
-### --ccj( <ccj>)
-CCJ (CSM Cabling JSON) File containing system topology.
-
-
-### --out( <out>)
-Output results to a file
-
 ## Example
 
 To validate a paddle CCJ run: `canu validate paddle --ccj paddle.json`
 
-```
+```bash
 $ canu validate paddle --ccj paddle.json
 
 CCJ Node Connections

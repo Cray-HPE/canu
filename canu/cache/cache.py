@@ -20,15 +20,16 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU Commands that configure switches on the network."""
-from os import path, remove
 import sys
+from os import path
+from os import remove
 
 import click
-from click_help_colors import HelpColorsCommand, HelpColorsGroup
+from click_help_colors import HelpColorsCommand
+from click_help_colors import HelpColorsGroup
 from ruamel.yaml import YAML
 
 from canu.utils.cache import cache_directory
-
 
 yaml = YAML()
 

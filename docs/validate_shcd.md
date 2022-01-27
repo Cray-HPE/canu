@@ -18,7 +18,32 @@ CANU can be used to validate that an SHCD (SHasta Cabling Diagram) passes basic 
 
 ---
 
-```
+# noqa: D301, B950
+
+Args:
+
+    ctx: CANU context settings
+    architecture: CSM architecture
+    shcd: SHCD file
+    tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
+    corners: The corners on each tab, comma separated e.g. ‘J37,U227,J15,T47,J20,U167’.
+    out: Filename for the JSON Topology if requested.
+
+
+    ```
+    json_
+    ```
+
+    : Bool indicating json output
+
+
+    ```
+    log_
+    ```
+
+    : Level of logging.
+
+```shell
 canu validate shcd [OPTIONS]
 ```
 
@@ -68,7 +93,7 @@ Level of logging.
 
 To check an SHCD run: `canu validate shcd -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN,HMN --corners I14,S25,I16,S22,J20,T39`
 
-```
+```bash
 $ canu validate shcd -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN,HMN --corners I14,S25,I16,S22,J20,T39
 
 SHCD Node Connections

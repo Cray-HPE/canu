@@ -25,7 +25,6 @@ from click_help_colors import HelpColorsGroup
 
 from canu.send.command import command
 
-
 @click.group(
     cls=HelpColorsGroup,
     help_headers_color="yellow",
@@ -34,6 +33,6 @@ from canu.send.command import command
 @click.pass_context
 def send(ctx):
     """Commands that are sent to the switches on the network."""
-
+    pass
 
 send.add_command(command.command)

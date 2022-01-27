@@ -21,12 +21,12 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU backup network config."""
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import click
-from click_help_colors import HelpColorsCommand
 import click_spinner
+from click_help_colors import HelpColorsCommand
 from netutils.config.clean import sanitize_config
 from nornir import InitNornir
 from nornir.core.filter import F

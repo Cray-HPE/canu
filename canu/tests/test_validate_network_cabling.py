@@ -22,13 +22,12 @@
 """Test CANU validate network cabling commands."""
 from unittest.mock import patch
 
-from click import testing
 import requests
 import responses
+from click import testing
 
 from canu.cli import cli
 from canu.utils.cache import remove_switch_from_cache
-
 
 architecture = "tds"
 username = "admin"

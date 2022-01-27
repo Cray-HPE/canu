@@ -20,29 +20,30 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate the network config."""
-from collections import defaultdict
-from glob import glob
 import ipaddress
 import json
+import sys
+from collections import defaultdict
+from glob import glob
 from os import path
 from pathlib import Path
-import sys
 
 import click
-from click_help_colors import HelpColorsCommand
-from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
-from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
-from hier_config import HConfig, Host
+from click_help_colors import HelpColorsCommand
+from click_option_group import optgroup
+from click_option_group import RequiredMutuallyExclusiveOptionGroup
+from click_params import IPV4_ADDRESS
+from click_params import Ipv4AddressListParamType
+from hier_config import HConfig
+from hier_config import Host
 from netmiko import ssh_exception
 from ruamel.yaml import YAML
 
 from canu.utils.cache import cache_directory
-from canu.validate.switch.config.config import (
-    compare_config,
-    get_switch_config,
-    print_config_diff_summary,
-)
+from canu.validate.switch.config.config import compare_config
+from canu.validate.switch.config.config import get_switch_config
+from canu.validate.switch.config.config import print_config_diff_summary
 
 yaml = YAML()
 

@@ -24,7 +24,8 @@ import json
 
 import click
 
-from canu.utils.sls import pull_sls_hardware, pull_sls_networks
+from canu.utils.sls import pull_sls_hardware
+from canu.utils.sls import pull_sls_networks
 
 
 def inventory(username, password, network, sls_json=None):

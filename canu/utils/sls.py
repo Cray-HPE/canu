@@ -21,13 +21,14 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """Retrieve SLS token."""
 import base64
-from collections import defaultdict
 import json
 import sys
+from collections import defaultdict
 
-from kubernetes import client, config
 import requests
 import urllib3
+from kubernetes import client
+from kubernetes import config
 
 
 def pull_sls_networks(sls_file=None):

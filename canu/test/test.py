@@ -22,36 +22,39 @@
 """CANU commands that test the network."""
 import json
 import logging
+import sys
 from os import path
 from pathlib import Path
-import sys
 
 import click
-from click_help_colors import HelpColorsCommand
 import click_spinner
+import yaml
+from click_help_colors import HelpColorsCommand
 from nornir import InitNornir
 from nornir.core.filter import F
-from nornir_salt import (
-    netmiko_send_commands,
-    TabulateFormatter,
-    tcp_ping,
-    TestsProcessor,
-)
+from nornir_salt import netmiko_send_commands
+from nornir_salt import TabulateFormatter
+from nornir_salt import tcp_ping
+from nornir_salt import TestsProcessor
 from nornir_salt.plugins.functions import ResultSerializer
-import yaml
 
 from canu.utils.inventory import inventory
 
-
 # Get project root directory
-if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
+if getattr(sys, "frozen", False) and hasattr(sys,
+                                             "_MEIPASS"
+                                             ):  # pragma: no cover
     project_root = sys._MEIPASS
 else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent
 
 
-@click.option("--username", default="admin", show_default=True, help="Switch username")
+@click.option("--username",
+              default="admin",
+              show_default=True,
+              help="Switch username"
+              )
 @click.option(
     "--password",
     hide_input=True,
@@ -89,17 +92,20 @@ else:
     help="JSON output.",
     required=False,
 )
-@click.option("--sls-address", default="api-gw-service-nmn.local", show_default=True)
+@click.option("--sls-address",
+              default="api-gw-service-nmn.local",
+              show_default=True
+              )
 @click.pass_context
 def test(
-    ctx,
-    username,
-    password,
-    sls_file,
-    sls_address,
-    network,
-    log_,
-    json_,
+        ctx,
+        username,
+        password,
+        sls_file,
+        sls_address,
+        network,
+        log_,
+        json_,
 ):
     """Canu test commands."""
     if not password:
@@ -190,7 +196,10 @@ def test(
                 ResultSerializer(results, add_details=False, to_dict=True),
             )
 
-            pretty_results += ResultSerializer(results, add_details=True, to_dict=False)
+            pretty_results += ResultSerializer(results,
+                                               add_details=True,
+                                               to_dict=False
+                                               )
 
     if json_:
         click.secho(json.dumps(dict_results, indent=4))

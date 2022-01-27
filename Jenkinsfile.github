@@ -20,6 +20,7 @@
 
 @Library('csm-shared-library') _
 
+def pyVersion = '3.10'
 pipeline {
     agent {
         label "metal-gcp-builder"
@@ -45,10 +46,8 @@ pipeline {
         stage("Prepare: RPM") {
             agent {
                 docker {
-                    image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:3.10"
+                    image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${pyVersion}"
                     reuseNode true
-                    // Support docker in docker for clamav scan
-                    args "-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --group-add 999"
                 }
             }
             steps {
@@ -59,34 +58,19 @@ pipeline {
             }
         }
 
-        stage("Test: UnitTests") {
-            steps {
-                script {
-                    sh "make test"
-                }
-            }
-        }
-
-        stage("Build: Binary") {
-            steps {
-                script {
-                    sh "make binary"
-                }
-            }
-        }
-
-
         stage("Build: RPMs") {
             agent {
                 docker {
-                    image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:3.10"
+                    image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${pyVersion}"
                     reuseNode true
                     // Support docker in docker for clamav scan
-                    args "-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --group-add 999"
+                    args "-u root -v ${env.WORKSPACE}:/workspace"
                 }
             }
             steps {
                 sh "make rpm"
+                sh "cp -r ${env.WORKSPACE}/${vendorDir}/dist /workspace/"
+                sh "chown -R jenkins:jenkins /workspace"
             }
         }
 

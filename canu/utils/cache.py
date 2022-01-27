@@ -22,11 +22,12 @@
 """Utilities to help CANU cache switch information to YAML."""
 
 import datetime
+import pkg_resources
+import sys
+import tempfile
 from operator import itemgetter
 from os import path
 from pathlib import Path
-import sys
-import tempfile
 
 import click
 from ruamel.yaml import YAML
@@ -66,7 +67,7 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent
 
 canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
-canu_version_file = path.join(project_root, "canu", ".version")
+version = pkg_resources.get_distribution('canu').version
 
 file_exists = path.isfile(canu_cache_file)
 
@@ -75,9 +76,6 @@ if file_exists:  # pragma: no cover
     with open(canu_cache_file, "r+") as canu_exist_f:
         canu_cache = yaml.load(canu_exist_f)
     if canu_cache is None:
-        with open(canu_version_file, "r") as version_file:
-            version = version_file.read().replace("\n", "")
-
         with open(canu_cache_file, "w+") as f:
             f.write(f"version: {version}\n")
             f.write("switches:\n")
@@ -85,9 +83,6 @@ if file_exists:  # pragma: no cover
         with open(canu_cache_file, "r+") as canu_f:
             canu_cache = yaml.load(canu_f)
 else:  # pragma: no cover
-    with open(canu_version_file, "r") as version_f:
-        version = version_f.read().replace("\n", "")
-
     with open(canu_cache_file, "w+") as new_cache_f:
         new_cache_f.write(f"version: {version}\n")
         new_cache_f.write("switches:\n")

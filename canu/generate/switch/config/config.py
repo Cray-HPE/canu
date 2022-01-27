@@ -20,36 +20,40 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU generate switch config commands."""
-from collections import defaultdict
-from itertools import groupby
 import json
 import os
-from os import environ, path
-from pathlib import Path
+import pkg_resources
 import re
 import sys
+from collections import defaultdict
+from itertools import groupby
+from os import environ
+from os import path
+from pathlib import Path
 
 import click
-from click_help_colors import HelpColorsCommand
-from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
-from hier_config import HConfig, Host
-from jinja2 import Environment, FileSystemLoader, StrictUndefined
 import natsort
 import netaddr
-from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import requests
+import urllib3
+from click_help_colors import HelpColorsCommand
+from click_option_group import optgroup
+from click_option_group import RequiredMutuallyExclusiveOptionGroup
+from hier_config import HConfig
+from hier_config import Host
+from jinja2 import Environment
+from jinja2 import FileSystemLoader
+from jinja2 import StrictUndefined
 from ruamel.yaml import YAML
 from ttp import ttp
-import urllib3
 
 from canu.utils.cache import cache_directory
 from canu.utils.yaml_load import load_yaml
 from canu.validate.paddle.paddle import node_model_from_paddle
-from canu.validate.shcd.shcd import (
-    node_model_from_shcd,
-    shcd_to_sheets,
-    switch_unused_ports,
-)
+from canu.validate.shcd.shcd import node_model_from_shcd
+from canu.validate.shcd.shcd import shcd_to_sheets
+from canu.validate.shcd.shcd import switch_unused_ports
+from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 
 yaml = YAML()
 
@@ -67,7 +71,7 @@ else:
 # Schema and Data files
 canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
-canu_version_file = path.join(project_root, "canu", ".version")
+version = pkg_resources.get_distribution('canu').version
 
 # ttp preserve templates
 # pulls the interface and lag from switch configs.
@@ -112,10 +116,6 @@ with open(canu_config_file, "r") as file:
 csm_options = canu_config["csm_versions"]
 
 # Get CANU version from .version
-with open(canu_version_file, "r") as file:
-    canu_version = file.readline()
-canu_version = canu_version.strip()
-
 dash = "-" * 60
 
 
@@ -665,7 +665,7 @@ def generate_switch_config(
     variables = {
         "HOSTNAME": switch_name,
         "CSM_VERSION": csm,
-        "CANU_VERSION": canu_version,
+        "CANU_VERSION": version,
         "NCN_W001": sls_variables["ncn_w001"],
         "NCN_W002": sls_variables["ncn_w002"],
         "NCN_W003": sls_variables["ncn_w003"],

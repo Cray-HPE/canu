@@ -20,16 +20,19 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU (CSM Automatic Network Utility) floats through a Shasta network and makes setup and config breeze."""
-from collections import defaultdict
 import json
-from os import environ, path
+import pkg_resources
 import sys
+from collections import defaultdict
+from os import environ
+from os import path
 
 import click
-from click_help_colors import HelpColorsCommand, HelpColorsGroup
 import requests
-from ruamel.yaml import YAML
 import urllib3
+from click_help_colors import HelpColorsCommand
+from click_help_colors import HelpColorsGroup
+from ruamel.yaml import YAML
 
 from canu.backup import backup
 from canu.cache import cache
@@ -53,13 +56,10 @@ else:
     parent_directory = path.abspath(path.dirname(path.dirname(__file__)))
 
 canu_config_file = path.join(parent_directory, "canu", "canu.yaml")
-canu_version_file = path.join(parent_directory, "canu", ".version")
-
-with open(canu_version_file, "r") as version_file:
-    version = version_file.read().replace("\n", "")
-
 with open(canu_config_file, "r") as canu_f:
     canu_config = yaml.load(canu_f)
+
+version = pkg_resources.get_distribution('canu').version
 
 CONTEXT_SETTING = {
     "obj": {

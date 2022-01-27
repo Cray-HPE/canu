@@ -21,20 +21,23 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate switch running config against a config file."""
 import difflib
+import sys
 from os import path
 from pathlib import Path
-import sys
 
 import click
-from click_help_colors import HelpColorsCommand
-from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
-from click_params import IPV4_ADDRESS
 import click_spinner
-from hier_config import HConfig, Host
+from click_help_colors import HelpColorsCommand
+from click_option_group import optgroup
+from click_option_group import RequiredMutuallyExclusiveOptionGroup
+from click_params import IPV4_ADDRESS
+from hier_config import HConfig
+from hier_config import Host
 from netmiko import ssh_exception
 from ruamel.yaml import YAML
 
-from canu.utils.ssh import netmiko_command, netmiko_commands
+from canu.utils.ssh import netmiko_command
+from canu.utils.ssh import netmiko_commands
 from canu.utils.vendor import switch_vendor
 
 yaml = YAML()

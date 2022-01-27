@@ -23,11 +23,11 @@
 from collections import defaultdict
 
 import click
-from click_help_colors import HelpColorsCommand
 import click_spinner
 import natsort
-from netmiko import ssh_exception
 import requests
+from click_help_colors import HelpColorsCommand
+from netmiko import ssh_exception
 
 from canu.utils.sls import pull_sls_networks
 from canu.utils.vendor import switch_vendor

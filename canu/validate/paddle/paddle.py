@@ -20,19 +20,17 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate the paddle."""
-from collections import defaultdict
 import json
+from collections import defaultdict
 
 import click
 from click_help_colors import HelpColorsCommand
+
+from canu.validate.shcd.shcd import node_list_warnings
+from canu.validate.shcd.shcd import print_node_list
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from network_modeling.NetworkPort import NetworkPort
 from network_modeling.NodeLocation import NodeLocation
-
-from canu.validate.shcd.shcd import (
-    node_list_warnings,
-    print_node_list,
-)
 
 
 @click.command(

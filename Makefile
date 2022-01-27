@@ -21,9 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 name ?= ${GIT_REPO_NAME}
 
-version := $(shell cat $(name)/.version)
-
-build_image := cdrx/pyinstaller-linux:python3
+version := $(shell cat .version)
 
 # Default release if not set
 BUILD_METADATA ?= "1~development~$(shell git rev-parse --short HEAD)"
@@ -38,21 +36,29 @@ all : prepare binary test rpm
 rpm: rpm_package_source rpm_build_source rpm_build
 
 prepare:
-		rm -rf dist
-		mkdir -p $(build_dir)/SPECS $(build_dir)/SOURCES
-		cp $(spec_file) $(build_dir)/SPECS/
+	rm -rf dist
+	mkdir -p $(build_dir)/SPECS $(build_dir)/SOURCES
+	cp $(spec_file) $(build_dir)/SPECS/
 
-binary:
-		docker run --rm -v $(PWD):/src $(build_image) ./pyinstaller.sh
 
 test:
-		docker run --rm -v $(PWD):/src $(build_image) nox
+	python3 -m pip install .[ci]
+	nox
 
 rpm_package_source:
-		tar --transform 'flags=r;s,^,/$(source_name)/,' --exclude .git --exclude .nox --exclude dist/rpmbuild -cvjf $(source_path) .
+	tar --transform 'flags=r;s,^,/$(source_name)/,' --exclude .git --exclude .nox --exclude dist/rpmbuild -cvjf $(source_path) .
 
 rpm_build_source:
-		BUILD_METADATA=$(BUILD_METADATA) rpmbuild -ts $(source_path) --define "_topdir $(build_dir)"
+	BUILD_METADATA=$(BUILD_METADATA) rpmbuild -ts $(source_path) --define "_topdir $(build_dir)"
 
 rpm_build:
-		BUILD_METADATA=$(BUILD_METADATA) rpmbuild -ba $(spec_file) --define "_topdir $(build_dir)"
+	BUILD_METADATA=$(BUILD_METADATA) rpmbuild -ba $(spec_file) --define "_topdir $(build_dir)"
+
+image:
+	docker build --no-cache --pull ${DOCKER_ARGS} --tag '${NAME}:${VERSION}' .
+
+
+snyk:
+	$(MAKE) -s image | xargs --verbose -n 1 snyk container test
+
+

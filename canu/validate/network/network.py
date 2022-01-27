@@ -25,7 +25,7 @@ from click_help_colors import HelpColorsGroup
 
 from canu.validate.network.bgp import bgp
 from canu.validate.network.cabling import cabling
-from canu.validate.network.config import config
+from canu.validate.switch.config import config
 
 
 @click.group(

@@ -20,12 +20,14 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU mac utils."""
+import sys
 from os import path
 from pathlib import Path
-import sys
 
 from aiohttp import client_exceptions
-from mac_vendor_lookup import BaseMacLookup, InvalidMacError, MacLookup
+from mac_vendor_lookup import BaseMacLookup
+from mac_vendor_lookup import InvalidMacError
+from mac_vendor_lookup import MacLookup
 
 # Get project root directory
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover

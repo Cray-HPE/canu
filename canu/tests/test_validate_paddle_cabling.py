@@ -25,19 +25,17 @@ from os import path
 from pathlib import Path
 from unittest.mock import patch
 
-from click import testing
 import requests
 import responses
+from click import testing
 
 from canu.cli import cli
 from canu.utils.cache import remove_switch_from_cache
-from .test_validate_paddle import bad_ccj
-from .test_validate_shcd_cabling import (
-    arp_neighbors_json1,
-    lldp_neighbors_json1,
-    mac_address_table,
-    switch_info1,
-)
+from canu.tests.test_validate_paddle import bad_ccj
+from canu.tests.test_validate_shcd_cabling import arp_neighbors_json1
+from canu.tests.test_validate_shcd_cabling import lldp_neighbors_json1
+from canu.tests.test_validate_shcd_cabling import mac_address_table
+from canu.tests.test_validate_shcd_cabling import switch_info1
 
 test_file_directory = Path(__file__).resolve().parent
 test_file_name = "Full_Architecture_Golden_Config_1.1.5.json"

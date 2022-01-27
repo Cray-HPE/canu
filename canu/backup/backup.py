@@ -25,7 +25,6 @@ from click_help_colors import HelpColorsGroup
 
 from canu.backup.network import network
 
-
 @click.group(
     cls=HelpColorsGroup,
     help_headers_color="yellow",
@@ -34,6 +33,6 @@ from canu.backup.network import network
 @click.pass_context
 def backup(ctx):
     """Canu backup commands."""
-
+    pass
 
 backup.add_command(network.network)
