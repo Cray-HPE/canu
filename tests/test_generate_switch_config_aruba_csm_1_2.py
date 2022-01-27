@@ -32,24 +32,24 @@ from canu.cli import cli
 
 test_file_directory = Path(__file__).resolve().parent
 
-test_file_name = "Full_Architecture_Golden_Config_0.0.6.xlsx"
+test_file_name = "Full_Architecture_Golden_Config_1.1.5.xlsx"
 test_file = path.join(test_file_directory, "data", test_file_name)
 override_file_name = "override.yaml"
 override_file = path.join(test_file_directory, "data", override_file_name)
 architecture = "full"
 tabs = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
-corners = "J14,T44,J14,T48,J14,T28,J14,T27"
+corners = "J14,T44,J14,T53,J14,T34,J14,T27"
 sls_file = "sls_file.json"
 csm = "1.2"
 switch_name = "sw-spine-001"
 cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
 
-test_file_name_tds = "TDS_Architecture_Golden_Config_0.0.6.xlsx"
+test_file_name_tds = "TDS_Architecture_Golden_Config_1.1.5.xlsx"
 test_file_tds = path.join(test_file_directory, "data", test_file_name_tds)
 architecture_tds = "TDS"
 tabs_tds = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
-corners_tds = "J14,T30,J14,T48,J14,T28,J14,T27"
+corners_tds = "J14,T30,J14,T53,J14,T32,J14,T27"
 
 runner = testing.CliRunner()
 

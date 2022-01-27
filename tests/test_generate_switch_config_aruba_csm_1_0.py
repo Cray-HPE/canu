@@ -32,7 +32,7 @@ from canu.cli import cli
 
 test_file_directory = Path(__file__).resolve().parent
 
-test_file_name = "Full_Architecture_Golden_Config_0.0.6.xlsx"
+test_file_name = "Full_Architecture_Golden_Config_1.1.5.xlsx"
 test_file = path.join(test_file_directory, "data", test_file_name)
 override_file_name = "override.yaml"
 override_file = path.join(test_file_directory, "data", override_file_name)
@@ -45,7 +45,7 @@ switch_name = "sw-spine-001"
 cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
 
-test_file_name_tds = "TDS_Architecture_Golden_Config_0.0.6.xlsx"
+test_file_name_tds = "TDS_Architecture_Golden_Config_1.1.5.xlsx"
 test_file_tds = path.join(test_file_directory, "data", test_file_name_tds)
 architecture_tds = "TDS"
 tabs_tds = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
