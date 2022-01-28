@@ -118,6 +118,17 @@ network_hardware:
       - count: 1
         speed: 1
         slot: "bmc"
+  - name: "River NCN Node - Specialty 4 port HPE Server 1G OCP card"
+    vendor: "hpe"
+    type: "server"
+    model: "river_ncn_node_4_port_1g_ocp"
+    ports:
+      - count: 4
+        speed: 1
+        slot: ocp
+      - count: 1
+        speed: 1
+        slot: "bmc"
   - name: "River Compute Node - generic stub"
     vendor: "none"
     type: "node"
@@ -216,7 +227,7 @@ network_hardware:
     ports:
       - count: 1
         speed: 1
-        slot: "bmc"
+        slot: "mgmt"
       - count: 64
         speed: 200
   - name: "River NCN Node - Generic 2 port stub Gigabyte"
