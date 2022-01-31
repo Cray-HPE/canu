@@ -34,6 +34,8 @@ ntp server {{ variables.NCN_W003 }} version 4
 {%- include '1.2/dellmellanox/common/acl-mellanox.j2' %}
 
 interface port-channel 100
+interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} speed 40G force
+interface ethernet 1/{{ variables.VSX_ISL_PORT2 }} speed 40G force
 interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} channel-group 100 mode active
 interface ethernet 1/{{ variables.VSX_ISL_PORT2 }} channel-group 100 mode active
 interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} description "mlag-isl"
