@@ -1171,8 +1171,6 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## [1.1.5-develop]
 - Fix Mellanox ISL speed setting.
-
-## [1.1.5-develop]
 - Fix PDU node recognition and naming: `pdu<#>, <cabinet>pdu<#>, <cabinet>p<#> all map to a name pdu-<cabinet>-<###>`
 - Add large memory UAN node definitions: `lm-<###> maps to lm-<###>`
 - Add gateway: `gateway<#>, gw<#> map to gateway-<###>`
