@@ -340,6 +340,8 @@ def test_switch_config_spine_primary():
             + "ipv4 access-list nmn-hmn seq-number 70 deny ip 192.168.200.0 mask 255.255.128.0 192.168.3.0 mask 255.255.128.0\n"
             + "ipv4 access-list nmn-hmn seq-number 80 deny ip 192.168.200.0 mask 255.255.128.0 192.168.100.0 mask 255.255.128.0\n"
             + "ipv4 access-list nmn-hmn seq-number 90 permit ip any any\n"
+            + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
+            + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
         ) in str(result.output)
         assert (
             "protocol ospf\n"
@@ -419,6 +421,7 @@ def test_switch_config_spine_primary():
             + "router bgp 65533 vrf Customer distance 20 70 20\n"
             + "router bgp 65533 vrf default distance 20 70 20\n"
             + "router bgp 65533 vrf Customer maximum-paths ibgp 32\n"
+            + "router bgp 65533 vrf Customer maximum-paths 32\n"
             + "router bgp 65533 vrf default maximum-paths ibgp 32\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.4 remote-as 65536\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.5 remote-as 65536\n"
@@ -751,6 +754,8 @@ def test_switch_config_spine_secondary():
             + "ipv4 access-list nmn-hmn seq-number 70 deny ip 192.168.200.0 mask 255.255.128.0 192.168.3.0 mask 255.255.128.0\n"
             + "ipv4 access-list nmn-hmn seq-number 80 deny ip 192.168.200.0 mask 255.255.128.0 192.168.100.0 mask 255.255.128.0\n"
             + "ipv4 access-list nmn-hmn seq-number 90 permit ip any any\n"
+            + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
+            + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
         ) in str(result.output)
         assert (
             "protocol ospf\n"
@@ -830,6 +835,7 @@ def test_switch_config_spine_secondary():
             + "router bgp 65533 vrf Customer distance 20 70 20\n"
             + "router bgp 65533 vrf default distance 20 70 20\n"
             + "router bgp 65533 vrf Customer maximum-paths ibgp 32\n"
+            + "router bgp 65533 vrf Customer maximum-paths 32\n"
             + "router bgp 65533 vrf default maximum-paths ibgp 32\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.4 remote-as 65536\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.5 remote-as 65536\n"
