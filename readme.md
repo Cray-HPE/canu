@@ -1170,6 +1170,9 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 # Changelog
 
 ## [1.1.5-develop]
+- Mellanox dns command fix.
+- Mellanox loopback command fix.
+- Mellanox NTP command fix.
 - Add ACLs to VLAN interfaces.
 - Add maximum paths to mellanox BGP template for customer VRF.
 - Fix Mellanox ISL speed setting.
