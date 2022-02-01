@@ -7,6 +7,7 @@ router bgp 65533 vrf default router-id {{ variables.LOOPBACK_IP }} force
 router bgp 65533 vrf Customer distance 20 70 20
 router bgp 65533 vrf default distance 20 70 20
 router bgp 65533 vrf Customer maximum-paths ibgp 32
+router bgp 65533 vrf Customer maximum-paths 32
 router bgp 65533 vrf default maximum-paths ibgp 32
 {%- for cmn_name, cmn_ip in variables.CMN_IPs.items() if "ncn-w" in cmn_name %}
 router bgp 65533 vrf Customer neighbor {{ cmn_ip }} remote-as 65536

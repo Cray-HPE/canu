@@ -1170,6 +1170,8 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 # Changelog
 
 ## [1.1.5-develop]
+- Add ACLs to VLAN interfaces.
+- Add maximum paths to mellanox BGP template for customer VRF.
 - Fix Mellanox ISL speed setting.
 - Fix PDU node recognition and naming: `pdu<#>, <cabinet>pdu<#>, <cabinet>p<#> all map to a name pdu-<cabinet>-<###>`
 - Add large memory UAN node definitions: `lm-<###> maps to lm-<###>`
