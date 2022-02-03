@@ -97,10 +97,7 @@ def test_switch_config_spine_primary():
                 switch_name,
             ],
         )
-        print("XXXX")
-        print(banner_motd)
-        print("XXXX")
-        print(result.output)
+
         assert result.exit_code == 0
         assert ("hostname sw-spine-001\n") in str(result.output)
         assert banner_motd in str(result.output)
