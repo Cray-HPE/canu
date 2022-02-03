@@ -65,7 +65,7 @@ interface vlan {{ variables.CMN_VLAN }}
     ip ospf 1 area 0.0.0.0
 snmp-server vrf default
 
-router ospf 1 vrf Customer
+router ospf 2 vrf Customer
     router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 router ospf 1

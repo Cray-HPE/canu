@@ -1171,6 +1171,14 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Add banner motd to all switch configs with CSM and CANU versions.
 - Add documentation to install from RPM (for SLES).
 
+## [1.1.7-develop]
+- Remove CMN ip helper on mellanox.
+- Remove broken tests.
+- Fix Aruba OSPF process.
+- Mellanox dns command fix.
+- Mellanox loopback command fix.
+- Mellanox NTP command fix.
+
 ## [1.1.5-develop]
 - Add ACLs to VLAN interfaces.
 - Add maximum paths to mellanox BGP template for customer VRF.

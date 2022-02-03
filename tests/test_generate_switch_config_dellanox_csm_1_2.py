@@ -302,9 +302,9 @@ def test_switch_config_spine_primary():
             + "vrf definition Customer rd 7:7\n"
             + "ip routing vrf Customer\n"
             + "ip routing vrf default\n"
-            + "ip name-server vrf default 10.92.100.225\n"
+            + "ip name-server vrf vrf-default 10.92.100.225\n"
             + "interface loopback 0\n"
-            + "interface loopback 0 ip address 10.2.0.2/32\n"
+            + "interface loopback 0 ip address 10.2.0.2/32 primary\n"
             + "interface vlan 1\n"
             + "interface vlan 2\n"
             + "interface vlan 4\n"
@@ -379,7 +379,6 @@ def test_switch_config_spine_primary():
             + "interface vlan 1 ip dhcp relay instance 2 downstream\n"
             + "interface vlan 2 ip dhcp relay instance 2 downstream\n"
             + "interface vlan 4 ip dhcp relay instance 4 downstream\n"
-            + "interface vlan 6 ip dhcp relay instance 2 downstream\n"
         ) in str(result.output)
         assert (
             "protocol magp\n"
@@ -718,9 +717,9 @@ def test_switch_config_spine_secondary():
             + "vrf definition Customer rd 7:7\n"
             + "ip routing vrf Customer\n"
             + "ip routing vrf default\n"
-            + "ip name-server vrf default 10.92.100.225\n"
+            + "ip name-server vrf vrf-default 10.92.100.225\n"
             + "interface loopback 0\n"
-            + "interface loopback 0 ip address 10.2.0.3/32\n"
+            + "interface loopback 0 ip address 10.2.0.3/32 primary\n"
             + "interface vlan 1\n"
             + "interface vlan 2\n"
             + "interface vlan 4\n"
@@ -795,7 +794,6 @@ def test_switch_config_spine_secondary():
             + "interface vlan 1 ip dhcp relay instance 2 downstream\n"
             + "interface vlan 2 ip dhcp relay instance 2 downstream\n"
             + "interface vlan 4 ip dhcp relay instance 4 downstream\n"
-            + "interface vlan 6 ip dhcp relay instance 2 downstream\n"
         ) in str(result.output)
         assert (
             "protocol magp\n"

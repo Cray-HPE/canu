@@ -23,7 +23,7 @@
 - name: Software version test
   task: show version
   test: contains
-  pattern: "10.08.1021"
+  pattern: "10.09.0010"
   err_msg: Software version is wrong
   device:
     - cdu
@@ -114,12 +114,6 @@
   task: show run interface vlan 4
   test: contains
   pattern: 10.94.100.222
-  err_msg: IP-Helper is missing
-  device: spine
-- name: vlan 7 ip-helper test
-  task: show run interface vlan 7
-  test: contains
-  pattern: 10.92.100.222
   err_msg: IP-Helper is missing
   device: spine
 - name: tftp route

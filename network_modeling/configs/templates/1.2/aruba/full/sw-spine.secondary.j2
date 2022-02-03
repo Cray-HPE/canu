@@ -120,7 +120,7 @@ vsx
 ip dns server-address {{ variables.NMNLB_DNS }}
 {% include '1.2/aruba/common/prefix-list.j2' %}
 {% include '1.2/aruba/common/route-map.j2' %}
-router ospf 1 vrf Customer
+router ospf 2 vrf Customer
     router-id {{ variables.LOOPBACK_IP }}
     default-information originate
     area 0.0.0.0

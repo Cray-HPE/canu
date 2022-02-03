@@ -104,7 +104,7 @@ ip dns server-address {{ variables.NMNLB_DNS }}
 
 
 
-router ospf 1 vrf Customer
+router ospf 2 vrf Customer
     router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 router ospf 1
