@@ -51,6 +51,19 @@ architecture_tds = "TDS"
 tabs_tds = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners_tds = "J14,T30,J14,T48,J14,T28,J14,T27"
 
+canu_version_file = path.join(test_file_directory.resolve().parent, "canu", ".version")
+with open(canu_version_file, "r") as file:
+    canu_version = file.readline()
+canu_version = canu_version.strip()
+banner_motd = (
+    "banner motd ^\n"
+    "###############################################################################\n"
+    f"# CSM version:  {csm}\n"
+    f"# CANU version: {canu_version}\n"
+    "###############################################################################\n"
+    "^\n"
+)
+
 runner = testing.CliRunner()
 
 
@@ -84,10 +97,15 @@ def test_switch_config_spine_primary():
                 switch_name,
             ],
         )
+        print("XXXX")
+        print(banner_motd)
+        print("XXXX")
+        print(result.output)
         assert result.exit_code == 0
+        assert ("hostname sw-spine-001\n") in str(result.output)
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-spine-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -310,9 +328,10 @@ def test_switch_config_spine_primary_override():
             + "#  role primary\n"
         ) in str(result.output)
 
+        assert ("hostname sw-spine-001\n") in str(result.output)
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-spine-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -520,9 +539,10 @@ def test_switch_config_spine_secondary():
             ],
         )
         assert result.exit_code == 0
+        assert ("hostname sw-spine-002\n") in str(result.output)
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-spine-002\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -749,10 +769,10 @@ def test_switch_config_spine_secondary_override():
             + "#vsx\n"
             + "#  role secondary\n"
         ) in str(result.output)
-
+        assert ("hostname sw-spine-002\n") in str(result.output)
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-spine-002\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -959,9 +979,10 @@ def test_switch_config_leaf_primary():
             ],
         )
         assert result.exit_code == 0
+        assert ("hostname sw-leaf-001\n") in str(result.output)
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -1289,10 +1310,10 @@ def test_switch_config_leaf_primary_override():
             + "#vsx\n"
             + "#  inter-switch-link lag 256\n"
         ) in str(result.output)
-
+        assert ("hostname sw-leaf-001\n") in str(result.output)
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -1589,9 +1610,10 @@ def test_switch_config_leaf_primary_to_uan():
             ],
         )
         assert result.exit_code == 0
+        assert ("hostname sw-leaf-003\n") in str(result.output)
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-003\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -1889,9 +1911,10 @@ def test_switch_config_leaf_primary_to_uan_override():
         ) in str(result.output)
 
         assert result.exit_code == 0
+        assert "hostname sw-leaf-003\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-003\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -2162,9 +2185,10 @@ def test_switch_config_leaf_secondary():
             ],
         )
         assert result.exit_code == 0
+        assert "hostname sw-leaf-002\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-002\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -2482,9 +2506,10 @@ def test_switch_config_leaf_secondary_override():
             + "#  inter-switch-link lag 256\n"
         ) in str(result.output)
 
+        assert "hostname sw-leaf-002\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-002\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -2771,9 +2796,10 @@ def test_switch_config_leaf_secondary_to_uan():
             ],
         )
         assert result.exit_code == 0
+        assert "hostname sw-leaf-004\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-004\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -3067,9 +3093,10 @@ def test_switch_config_leaf_secondary_to_uan_override():
             + "#vsx\n"
             + "#  inter-switch-link lag 256\n"
         ) in str(result.output)
+        assert "hostname sw-leaf-004\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-004\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -3336,10 +3363,10 @@ def test_switch_config_cdu_primary():
             ],
         )
         assert result.exit_code == 0
+        assert "hostname sw-cdu-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-cdu-001\n"
-            + "no ip icmp redirect\n"
-            + "vrf keepalive\n"
+            "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
             + "ntp server 192.168.4.6\n"
@@ -3602,9 +3629,10 @@ def test_switch_config_cdu_primary_override():
             + "#vsx\n"
             + "#  inter-switch-link lag 256\n"
         ) in str(result.output)
+        assert "hostname sw-cdu-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-cdu-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -3840,9 +3868,10 @@ def test_switch_config_cdu_secondary():
             ],
         )
         assert result.exit_code == 0
+        assert "hostname sw-cdu-002\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-cdu-002\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -4095,9 +4124,10 @@ def test_switch_config_cdu_secondary_override():
             + "#vsx\n"
             + "#  inter-switch-link lag 256\n"
         ) in str(result.output)
+        assert "hostname sw-cdu-002\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-cdu-002\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -4321,9 +4351,10 @@ def test_switch_config_leaf_bmc():
             ],
         )
         assert result.exit_code == 0
+        assert "hostname sw-leaf-bmc-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-bmc-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
             + "ntp server 192.168.4.6\n"
@@ -5329,9 +5360,10 @@ def test_switch_config_tds_spine_primary():
             ],
         )
         assert result.exit_code == 0
+        assert "hostname sw-spine-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-spine-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -5771,9 +5803,10 @@ def test_switch_config_tds_spine_primary_override():
             + "#vsx\n"
             + "#  role primary\n"
         ) in str(result.output)
+        assert "hostname sw-spine-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-spine-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -6179,9 +6212,10 @@ def test_switch_config_tds_spine_secondary():
             ],
         )
         assert result.exit_code == 0
+        assert "hostname sw-spine-002\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-spine-002\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -6625,9 +6659,10 @@ def test_switch_config_tds_spine_secondary_override():
             + "#  role secondary\n"
         ) in str(result.output)
 
+        assert "hostname sw-spine-002\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-spine-002\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -7032,9 +7067,10 @@ def test_switch_config_tds_cdu_primary():
             ],
         )
         assert result.exit_code == 0
+        assert "hostname sw-cdu-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-cdu-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -7300,9 +7336,10 @@ def test_switch_config_tds_cdu_primary_override():
             + "#  inter-switch-link lag 256\n"
         ) in str(result.output)
 
+        assert "hostname sw-cdu-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-cdu-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -7538,9 +7575,10 @@ def test_switch_config_tds_cdu_secondary():
             ],
         )
         assert result.exit_code == 0
+        assert "hostname sw-cdu-002\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-cdu-002\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -7794,9 +7832,10 @@ def test_switch_config_tds_cdu_secondary_override():
             + "#  inter-switch-link lag 256\n"
         ) in str(result.output)
 
+        assert "hostname sw-cdu-002\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-cdu-002\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -8020,9 +8059,10 @@ def test_switch_config_tds_leaf_bmc():
             ],
         )
         assert result.exit_code == 0
+        assert "hostname sw-leaf-bmc-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-bmc-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
             + "ntp server 192.168.4.6\n"
@@ -8243,9 +8283,10 @@ def test_switch_config_tds_leaf_bmc_override():
             + "#  ip address 192.168.3.12/17\n"
         ) in str(result.output)
 
+        assert "hostname sw-leaf-bmc-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-bmc-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
             + "ntp server 192.168.4.6\n"

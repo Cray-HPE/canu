@@ -3,6 +3,7 @@
 ip vrf Customer
 ip name-server {{ variables.NMNLB_DNS }}
 hostname {{ variables.HOSTNAME }}
+{%- include '1.2/dellmellanox/common/banner-motd-dell.j2' %}
 rest api restconf
 spanning-tree mode mst
 

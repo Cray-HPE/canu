@@ -1,6 +1,7 @@
 {#- sw-leaf.primary #}
 {%- include '1.0/aruba/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
+{%- include '1.0/aruba/common/banner-motd.j2' %}
 no ip icmp redirect
 vrf keepalive
 ntp server {{ variables.NCN_W001 }}
