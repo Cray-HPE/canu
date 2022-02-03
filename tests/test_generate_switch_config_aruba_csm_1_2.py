@@ -383,7 +383,7 @@ def test_switch_config_spine_primary():
         print(result.output)
         print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.2\n"
             + "    default-information originate\n"
             + "    area 0.0.0.0\n"
@@ -768,7 +768,7 @@ def test_switch_config_spine_primary_override():
         ) in str(result.output)
         print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.2\n"
             + "    default-information originate\n"
             + "    area 0.0.0.0\n"
@@ -1154,7 +1154,7 @@ def test_switch_config_spine_secondary():
 
         print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.3\n"
             + "    default-information originate\n"
             + "    area 0.0.0.0\n"
@@ -1542,7 +1542,7 @@ def test_switch_config_spine_secondary_override():
 
         print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.3\n"
             + "    default-information originate\n"
             + "    area 0.0.0.0\n"
@@ -1933,7 +1933,7 @@ def test_switch_config_leaf_primary():
 
         print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.4\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -2282,7 +2282,7 @@ def test_switch_config_leaf_primary_override():
         print(result.output)
         print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.4\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -2603,7 +2603,7 @@ def test_switch_config_leaf_primary_to_uan():
 
         print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.6\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -2925,7 +2925,7 @@ def test_switch_config_leaf_primary_to_uan_override():
 
         print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.6\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -3269,7 +3269,7 @@ def test_switch_config_leaf_secondary():
 
         print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.5\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -3609,7 +3609,7 @@ def test_switch_config_leaf_secondary_override():
 
         print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.5\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -4248,7 +4248,7 @@ def test_switch_config_leaf_secondary_to_uan_override():
 
         print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.7\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -4541,7 +4541,7 @@ def test_switch_config_cdu_primary():
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
             + "\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.16\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -4830,7 +4830,7 @@ def test_switch_config_cdu_primary_override():
             + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.16\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -5111,7 +5111,7 @@ def test_switch_config_cdu_secondary():
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
             + "\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.17\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -5388,7 +5388,7 @@ def test_switch_config_cdu_secondary_override():
             + "    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive\n"
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.17\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -5674,7 +5674,7 @@ def test_switch_config_leaf_bmc():
             + "    ip ospf 1 area 0.0.0.0\n"
             + "snmp-server vrf default\n"
             + "\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.12\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -5968,7 +5968,7 @@ def test_switch_config_leaf_bmc_override():
             + "    ip address 192.168.12.12/24\n"
             + "    ip ospf 1 area 0.0.0.0\n"
             + "snmp-server vrf default\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.12\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -7105,7 +7105,7 @@ def test_switch_config_tds_spine_primary():
 
         print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.2\n"
             + "    default-information originate\n"
             + "    area 0.0.0.0\n"
@@ -7676,7 +7676,7 @@ def test_switch_config_tds_spine_primary_override():
 
         print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.2\n"
             + "    default-information originate\n"
             + "    area 0.0.0.0\n"
@@ -8266,7 +8266,7 @@ def test_switch_config_tds_spine_secondary():
 
         print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.3\n"
             + "    default-information originate\n"
             + "    area 0.0.0.0\n"
@@ -8839,7 +8839,7 @@ def test_switch_config_tds_spine_secondary_override():
         ) in str(result.output)
         print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.3\n"
             + "    default-information originate\n"
             + "    area 0.0.0.0\n"
@@ -9171,7 +9171,7 @@ def test_switch_config_tds_cdu_primary():
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
             + "\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.16\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -9461,7 +9461,7 @@ def test_switch_config_tds_cdu_primary_override():
             + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.16\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -9742,7 +9742,7 @@ def test_switch_config_tds_cdu_secondary():
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
             + "\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.17\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -10020,7 +10020,7 @@ def test_switch_config_tds_cdu_secondary_override():
             + "    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive\n"
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.17\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -10303,7 +10303,7 @@ def test_switch_config_tds_leaf_bmc():
             + "    ip ospf 1 area 0.0.0.0\n"
             + "snmp-server vrf default\n"
             + "\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.12\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -10595,7 +10595,7 @@ def test_switch_config_tds_leaf_bmc_override():
             + "    ip address 192.168.12.12/24\n"
             + "    ip ospf 1 area 0.0.0.0\n"
             + "snmp-server vrf default\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.12\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"

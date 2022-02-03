@@ -1170,6 +1170,9 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 # Changelog
 
 ## [1.1.5-develop]
+- Remove CMN ip helper on mellanox.
+- Remove broken tests.
+- Fix Aruba OSPF process.
 - Mellanox dns command fix.
 - Mellanox loopback command fix.
 - Mellanox NTP command fix.
