@@ -2,6 +2,7 @@
 {%- include '1.0/dellmellanox/common/unknown.j2' %}
 ip name-server 10.92.100.225
 hostname {{ variables.HOSTNAME }}
+{%- include '1.0/dellmellanox/common/banner-motd.j2' %}
 rest api restconf
 spanning-tree mode mst
 

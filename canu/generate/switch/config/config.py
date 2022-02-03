@@ -61,6 +61,7 @@ else:
 # Schema and Data files
 canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
+canu_version_file = path.join(project_root, "canu", ".version")
 
 # Import templates
 network_templates_folder = path.join(
@@ -79,6 +80,11 @@ with open(canu_config_file, "r") as file:
     canu_config = yaml.load(file)
 
 csm_options = canu_config["csm_versions"]
+
+# Get CANU version from .version
+with open(canu_version_file, "r") as file:
+    canu_version = file.readline()
+canu_version = canu_version.strip()
 
 
 @click.command(
@@ -508,6 +514,8 @@ def generate_switch_config(
 
     variables = {
         "HOSTNAME": switch_name,
+        "CSM_VERSION": csm,
+        "CANU_VERSION": canu_version,
         "NCN_W001": sls_variables["ncn_w001"],
         "NCN_W002": sls_variables["ncn_w002"],
         "NCN_W003": sls_variables["ncn_w003"],

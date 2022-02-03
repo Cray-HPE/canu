@@ -43,6 +43,19 @@ switch_name = "sw-spine-001"
 cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
 
+canu_version_file = path.join(test_file_directory.resolve().parent, "canu", ".version")
+with open(canu_version_file, "r") as file:
+    canu_version = file.readline()
+canu_version = canu_version.strip()
+banner_motd = (
+    'banner motd "\n'
+    "###############################################################################\n"
+    f"# CSM version:  {csm}\n"
+    f"# CANU version: {canu_version}\n"
+    "###############################################################################\n"
+    '"\n'
+)
+
 runner = testing.CliRunner()
 
 
