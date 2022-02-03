@@ -1,4 +1,4 @@
-# 🛶 CANU v1.1.7-develop
+# 🛶 CANU v1.1.8-develop
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -125,14 +125,12 @@ In order to run CANU, both python3 and pip3 need to be installed.
 - To install the development build of CANU type:
 
   ```bash
-  python3 setup.py develop --user
-  ```
-
-  If that doesn't work, try:
-
-  ```bash
   pip3 install --editable .
   ```
+
+- To install SLES RPM versions
+
+[SLES RPM](docs/rpm_install.md)
 
 ## Usage
 
@@ -665,8 +663,8 @@ $ canu validate network bgp --username USERNAME --password PASSWORD
 
 BGP Neighbors Established
 --------------------------------------------------
-PASS - IP: 192.168.1.1 Hostname: sw-spine01 
-PASS - IP: 192.168.1.2 Hostname: sw-spine01 
+PASS - IP: 192.168.1.1 Hostname: sw-spine01
+PASS - IP: 192.168.1.2 Hostname: sw-spine01
 ```
 
 If any of the spine switch neighbors for a connection other than **Established**, the switch will **FAIL** validation.
@@ -1168,6 +1166,10 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.1.8-develop]
+- Add banner motd to all switch configs with CSM and CANU versions.
+- Add documentation to install from RPM (for SLES).
 
 ## [1.1.7-develop]
 - Remove CMN ip helper on mellanox.

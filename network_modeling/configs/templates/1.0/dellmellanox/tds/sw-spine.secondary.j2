@@ -1,6 +1,7 @@
 {#- dm-sw-spine.secondary #}
 {%- include '1.0/dellmellanox/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
+{%- include '1.0/dellmellanox/common/banner-motd.j2' %}
 ip dhcp send-hostname
 ip domain-list local
 

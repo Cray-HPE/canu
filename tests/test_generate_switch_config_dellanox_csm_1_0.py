@@ -43,6 +43,19 @@ switch_name = "sw-spine-001"
 cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
 
+canu_version_file = path.join(test_file_directory.resolve().parent, "canu", ".version")
+with open(canu_version_file, "r") as file:
+    canu_version = file.readline()
+canu_version = canu_version.strip()
+banner_motd = (
+    'banner motd "\n'
+    "###############################################################################\n"
+    f"# CSM version:  {csm}\n"
+    f"# CANU version: {canu_version}\n"
+    "###############################################################################\n"
+    '"\n'
+)
+
 runner = testing.CliRunner()
 
 
@@ -76,10 +89,12 @@ def test_switch_config_spine_primary():
                 switch_name,
             ],
         )
+
         assert result.exit_code == 0
+        assert ("hostname sw-spine-001\n") in str(result.output)
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-spine-001\n"
-            + "no cli default prefix-modes enable\n"
+            "no cli default prefix-modes enable\n"
             + "protocol mlag\n"
             + "protocol bgp\n"
             + "lacp\n"

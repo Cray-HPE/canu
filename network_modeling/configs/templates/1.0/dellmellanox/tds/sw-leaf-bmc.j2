@@ -1,6 +1,7 @@
 {#- sw-leaf-bmc #}
 {%- include '1.0/dellmellanox/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
+{%- include '1.0/dellmellanox/common/banner-motd-dell.j2' %}
 
 rest api restconf
 
