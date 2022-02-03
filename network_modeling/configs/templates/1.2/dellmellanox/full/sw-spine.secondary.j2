@@ -35,6 +35,8 @@ web vrf default enable
 {%- include '1.2/dellmellanox/common/acl-mellanox.j2' %}
 
 interface port-channel 100
+interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} speed 40G force
+interface ethernet 1/{{ variables.VSX_ISL_PORT2 }} speed 40G force
 interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} channel-group 100 mode active
 interface ethernet 1/{{ variables.VSX_ISL_PORT2 }} channel-group 100 mode active
 interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} description "mlag-isl"
@@ -74,6 +76,8 @@ interface vlan {{ variables.CMN_VLAN }} mtu 9184
 no interface vlan {{ variables.CAN_VLAN }} ip icmp redirect
 interface vlan {{ variables.CAN_VLAN }} mtu 9184
 interface vlan 4000 mtu 9216 
+interface vlan {{ variables.NMN_VLAN }} ipv4 port access-group nmn-hmn
+interface vlan {{ variables.HMN_VLAN }} ipv4 port access-group nmn-hmn
 ip load-sharing source-ip-port
 ip load-sharing type consistent
    

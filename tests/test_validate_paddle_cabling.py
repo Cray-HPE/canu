@@ -40,7 +40,7 @@ from .test_validate_shcd_cabling import (
 )
 
 test_file_directory = Path(__file__).resolve().parent
-test_file_name = "Full_Architecture_Golden_Config_0.0.6.json"
+test_file_name = "Full_Architecture_Golden_Config_1.1.5.json"
 test_file = path.join(test_file_directory, "data", test_file_name)
 cache_minutes = 0
 csm = "1.2"
