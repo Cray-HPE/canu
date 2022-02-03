@@ -4572,9 +4572,10 @@ def test_switch_config_leaf_bmc_override():
             + "#  ip address 192.168.3.12/17\n"
         ) in str(result.output)
 
+        assert "hostname sw-leaf-bmc-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-bmc-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
             + "ntp server 192.168.4.6\n"
