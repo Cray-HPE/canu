@@ -1,4 +1,4 @@
-# 🛶 CANU v1.1.6-develop
+# 🛶 CANU v1.1.7-develop
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1168,6 +1168,14 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.1.7-develop]
+- Remove CMN ip helper on mellanox.
+- Remove broken tests.
+- Fix Aruba OSPF process.
+- Mellanox dns command fix.
+- Mellanox loopback command fix.
+- Mellanox NTP command fix.
 
 ## [1.1.5-develop]
 - Add ACLs to VLAN interfaces.
