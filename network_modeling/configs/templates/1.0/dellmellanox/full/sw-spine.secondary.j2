@@ -113,6 +113,7 @@ ip dhcp relay instance 4 address 10.94.100.222
 interface vlan {{ variables.NATIVE_VLAN }} ip dhcp relay instance 2 downstream
 interface vlan {{ variables.NMN_VLAN }} ip dhcp relay instance 2 downstream
 interface vlan {{ variables.HMN_VLAN }} ip dhcp relay instance 4 downstream
+interface vlan {{ variables.CAN_VLAN }} ip dhcp relay instance 2 downstream
 
 protocol magp
 interface vlan {{ variables.NATIVE_VLAN }} magp {{ variables.NATIVE_VLAN }}
