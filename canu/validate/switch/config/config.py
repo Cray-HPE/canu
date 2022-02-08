@@ -21,7 +21,6 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate switch running config against a config file."""
 import difflib
-import json
 import os
 from os import path
 from pathlib import Path
@@ -153,7 +152,6 @@ with open(mellanox_options_file, "r") as options_f:
     "generated_config",
     help="Generated config file",
 )
-@click.option("--json", "json_", is_flag=True, help="Output JSON")
 @click.option(
     "--out",
     help="Output results to a file",
@@ -165,6 +163,12 @@ with open(mellanox_options_file, "r") as options_f:
     help="Switch configuration override",
     type=click.Path(),
 )
+@click.option(
+    "--remediation",
+    is_flag=True,
+    help="Outputs commands to get from the running-config to generated config",
+    required=False,
+)
 @click.pass_context
 def config(
     ctx,
@@ -173,10 +177,10 @@ def config(
     username,
     password,
     generated_config,
-    json_,
     out,
     override,
     vendor,
+    remediation,
 ):
     """Validate switch config.
 
@@ -206,10 +210,10 @@ def config(
         username: Switch username
         password: Switch password
         generated_config: Generated config file
-        json_: Bool indicating json output
         out: Name of the output file
         override: Input file to ignore switch configuration
         vendor: Switch vendor. Aruba, Dell, or Mellanox
+        remediation: output remediation config
     """
     if ip:
         ip = str(ip)
@@ -223,11 +227,10 @@ def config(
         credentials = {"username": username, "password": password}
 
         with click_spinner.spinner():
-            if not json_:
-                print(
-                    f"  Connecting to {ip}...",
-                    end="\r",
-                )
+            print(
+                f"  Connecting to {ip}...",
+                end="\r",
+            )
             hostname, switch_config, vendor = get_switch_config(ip, credentials)
         print(
             "                                                             ",
@@ -330,98 +333,110 @@ def config(
             )
             exit(1)
 
-    print_differences = True
-    if json_:
-        print_differences = False
+    compare_config_heir(running_config_hier, generated_config_hier)
 
-    differences = compare_config(
-        running_config_hier.difference(generated_config_hier),
-        generated_config_hier.difference(running_config_hier),
-        print_comparison=print_differences,
-        out=out,
-    )
-
-    if json_:
-        click.echo(json.dumps(differences, indent=2), file=out)
-        return
-
+    click.echo(dash, file=out)
     click.secho(
         "\n" + "Config differences between running config and generated config" + "\n",
         fg="bright_white",
         file=out,
     )
-
-    # Build Hierarchical Configuration object for the Remediation Config
-    remediation_config_hier = running_config_hier.config_to_get_to(
-        generated_config_hier,
-    )
     click.secho(
         "\n"
-        "Safe Commands"
-        + "\n"
-        + "These commands should be safe to run while the system is running.",
+        + 'lines that start with a minus "-" and RED: Config that is present in running config but not in generated config',
+        fg="red",
+        file=out,
+    )
+    click.secho(
+        'lines that start with a plus "+" and GREEN: Config that is present in generated config but not in running config.'
+        + "\n",
         fg="green",
         file=out,
     )
 
-    if vendor == "dell":
-        remediation_config_hier.add_tags(dell_tags)
-    elif vendor == "mellanox":
-        remediation_config_hier.add_tags(mellanox_tags)
-    elif vendor == "aruba":
-        port_reset_cmds = [
-            "no mtu",
-            "shutdown",
-            "no description",
-            "routing",
-            "no speed",
-        ]
-        for line in remediation_config_hier.with_tags({"no interface"}).all_children():
-            interface = str(line)
-            remediation_config_hier.del_child_by_text(interface)
-            for x in port_reset_cmds:
-                remediation_config_hier.add_child(interface[3:]).add_child(x)
-        remediation_config_hier.add_tags(tags)
-    click.echo(dash, file=out)
-    for safe_line in remediation_config_hier.with_tags({"safe"}).all_children():
-        click.echo(safe_line.cisco_style_text(), file=out)
-    click.echo(dash, file=out)
+    # Build Hierarchical Configuration object for the Remediation Config
+    if remediation:
+        click.echo(dash, file=out)
+        click.secho(
+            "\n"
+            + "Remediation Config"
+            + "\n"
+            + "This feature is experimental and has limited testing.",
+            fg="bright_white",
+            file=out,
+        )
 
-    click.secho(
-        "\n"
-        + "Manual Commands"
-        + "\n"
-        + "These commands may cause disruption to the system and should be done only during a maintenance period."
-        + "\n"
-        + "It is recommended to have an out of band connection while running these commands."
-        + "\n"
-        + "If commands are going to be applied to Aruba switches, it is recommended to utilize Configuration Checkpoints "
-        + "to avoid getting locked out.",
-        fg="red",
-        file=out,
-    )
-    click.echo(dash, file=out)
-    for manual_line in remediation_config_hier.with_tags({"manual"}).all_children():
-        click.echo(manual_line.cisco_style_text(), file=out)
-    click.echo(dash, file=out)
+        remediation_config_hier = running_config_hier.config_to_get_to(
+            generated_config_hier,
+        )
+        click.secho(
+            "\n"
+            "Safe Commands"
+            + "\n"
+            + "These commands should be safe to run while the system is running.",
+            fg="green",
+            file=out,
+        )
 
-    click.secho(
-        "\n"
-        + "Commands NOT classified as Safe or Manual"
-        + "\n"
-        + "These commands include authentication as well as unique commands for the system."
-        + "\n"
-        + "These should be looked over carefully before keeping/applying.",
-        fg="yellow",
-        file=out,
-    )
-    click.echo(dash, file=out)
-    for untagged_line in remediation_config_hier.all_children_sorted_untagged():
-        click.echo(untagged_line.cisco_style_text(), file=out)
-    click.echo(dash, file=out)
-    print_config_diff_summary(hostname, ip, differences, out)
-    for line in remediation_config_hier.with_tags({"interface"}).all_children():
-        click.echo(line.cisco_style_text())
+        if vendor == "dell":
+            remediation_config_hier.add_tags(dell_tags)
+        elif vendor == "mellanox":
+            remediation_config_hier.add_tags(mellanox_tags)
+        elif vendor == "aruba":
+            port_reset_cmds = [
+                "no mtu",
+                "shutdown",
+                "no description",
+                "routing",
+                "no speed",
+            ]
+            for line in remediation_config_hier.with_tags(
+                {"no interface"},
+            ).all_children():
+                interface = str(line)
+                remediation_config_hier.del_child_by_text(interface)
+                for x in port_reset_cmds:
+                    remediation_config_hier.add_child(interface[3:]).add_child(x)
+            remediation_config_hier.add_tags(tags)
+        click.echo(dash, file=out)
+        for safe_line in remediation_config_hier.with_tags({"safe"}).all_children():
+            click.echo(safe_line.cisco_style_text(), file=out)
+        click.echo(dash, file=out)
+
+        click.secho(
+            "\n"
+            + "Manual Commands"
+            + "\n"
+            + "These commands may cause disruption to the system and should be done only during a maintenance period."
+            + "\n"
+            + "It is recommended to have an out of band connection while running these commands."
+            + "\n"
+            + "If commands are going to be applied to Aruba switches, it is recommended to utilize Configuration Checkpoints "
+            + "to avoid getting locked out.",
+            fg="red",
+            file=out,
+        )
+        click.echo(dash, file=out)
+        for manual_line in remediation_config_hier.with_tags({"manual"}).all_children():
+            click.echo(manual_line.cisco_style_text(), file=out)
+        click.echo(dash, file=out)
+
+        click.secho(
+            "\n"
+            + "Commands NOT classified as Safe or Manual"
+            + "\n"
+            + "These commands include authentication as well as unique commands for the system."
+            + "\n"
+            + "These should be looked over carefully before keeping/applying.",
+            fg="yellow",
+            file=out,
+        )
+        click.echo(dash, file=out)
+        for untagged_line in remediation_config_hier.all_children_sorted_untagged():
+            click.echo(untagged_line.cisco_style_text(), file=out)
+        click.echo(dash, file=out)
+        for line in remediation_config_hier.with_tags({"interface"}).all_children():
+            click.echo(line.cisco_style_text())
 
 
 def get_switch_config(ip, credentials, return_error=False):
@@ -656,6 +671,29 @@ def print_difference_line(additions, additions_int, deletions, deletions_int, ou
         ),
         file=out,
     )
+
+
+def compare_config_heir(config1, config2, print_comparison=True):
+    """Compare and print two switch configurations.
+
+    Args:
+        config1: (Str) Switch 1 config
+        config2: (Str) Switch 2 config
+        print_comparison: Print the comparison to the screen (defaults True)
+
+    Returns:
+        List with the number of additions and deletions
+    """
+    differences = list(config1.unified_diff(config2))
+    if print_comparison:
+        for line in differences:
+            if "+" in line:
+                click.secho(line, fg="green")
+            elif "-" in line:
+                click.secho(line, fg="red")
+            else:
+                click.secho(line, fg="bright_white")
+    return differences
 
 
 def compare_config(config1, config2, print_comparison=True, out="-"):
