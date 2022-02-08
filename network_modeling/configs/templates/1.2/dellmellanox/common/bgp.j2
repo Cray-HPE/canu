@@ -1,31 +1,31 @@
 {#- bgp #}
 protocol bgp
-router bgp 65533 vrf Customer
-router bgp 65533 vrf default
-router bgp 65533 vrf Customer router-id {{ variables.LOOPBACK_IP }} force
-router bgp 65533 vrf default router-id {{ variables.LOOPBACK_IP }} force
-router bgp 65533 vrf Customer distance 20 70 20
-router bgp 65533 vrf default distance 20 70 20
-router bgp 65533 vrf Customer maximum-paths ibgp 32
-router bgp 65533 vrf Customer maximum-paths 32
-router bgp 65533 vrf default maximum-paths ibgp 32
+router bgp {{ variables.SWITCH_ASN }} vrf Customer
+router bgp {{ variables.SWITCH_ASN }} vrf default
+router bgp {{ variables.SWITCH_ASN }} vrf Customer router-id {{ variables.LOOPBACK_IP }} force
+router bgp {{ variables.SWITCH_ASN }} vrf default router-id {{ variables.LOOPBACK_IP }} force
+router bgp {{ variables.SWITCH_ASN }} vrf Customer distance 20 70 20
+router bgp {{ variables.SWITCH_ASN }} vrf default distance 20 70 20
+router bgp {{ variables.SWITCH_ASN }} vrf Customer maximum-paths ibgp 32
+router bgp {{ variables.SWITCH_ASN }} vrf Customer maximum-paths 32
+router bgp {{ variables.SWITCH_ASN }} vrf default maximum-paths ibgp 32
 {%- for cmn_name, cmn_ip in variables.CMN_IPs.items() if "ncn-w" in cmn_name %}
-router bgp 65533 vrf Customer neighbor {{ cmn_ip }} remote-as 65536
+router bgp {{ variables.SWITCH_ASN }} vrf Customer neighbor {{ cmn_ip }} remote-as {{ variables.CMN_ASN }}
 {%- endfor %}
 {%- for nmn_name, nmn_ip in variables.NMN_IPs.items() if "ncn-w" in nmn_name %}
-router bgp 65533 vrf default neighbor {{ nmn_ip }} remote-as 65533
-router bgp 65533 vrf default neighbor {{ nmn_ip }} route-map {{ nmn_name }}
+router bgp {{ variables.SWITCH_ASN }} vrf default neighbor {{ nmn_ip }} remote-as {{ variables.NMN_ASN }}
+router bgp {{ variables.SWITCH_ASN }} vrf default neighbor {{ nmn_ip }} route-map {{ nmn_name }}
 {%- endfor %}
 {%- for cmn_name, cmn_ip in variables.CMN_IPs.items() if "ncn-w" in cmn_name %}
-router bgp 65533 vrf Customer neighbor {{ cmn_ip }} timers 1 3
+router bgp {{ variables.SWITCH_ASN }} vrf Customer neighbor {{ cmn_ip }} timers 1 3
 {%- endfor %}
 {%- for nmn_name, nmn_ip in variables.NMN_IPs.items() if "ncn-w" in nmn_name %}
-router bgp 65533 vrf default neighbor {{ nmn_ip }} timers 1 3
+router bgp {{ variables.SWITCH_ASN }} vrf default neighbor {{ nmn_ip }} timers 1 3
 {%- endfor %}
 {%- for cmn_name, cmn_ip in variables.CMN_IPs.items() if "ncn-w" in cmn_name %}
-router bgp 65533 vrf Customer neighbor {{ cmn_ip }} transport connection-mode passive
+router bgp {{ variables.SWITCH_ASN }} vrf Customer neighbor {{ cmn_ip }} transport connection-mode passive
 {%- endfor %}
 {%- for nmn_name, nmn_ip in variables.NMN_IPs.items() if "ncn-w" in nmn_name %}
-router bgp 65533 vrf default neighbor {{ nmn_ip }} transport connection-mode passive
+router bgp {{ variables.SWITCH_ASN }} vrf default neighbor {{ nmn_ip }} transport connection-mode passive
 {%- endfor %}
 {#- end bgp #}
