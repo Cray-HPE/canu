@@ -112,7 +112,7 @@ In order to run CANU, both python3 and pip3 need to be installed.
   ```bash
     python3 -m venv .venv
     source ./.venv/bin/activate
-    pip3 install ./canu
+    pip3 install .
   ```
 
   - When you are done working in the Python Virtualenv.
