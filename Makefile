@@ -23,7 +23,7 @@ name = canu
 
 version := $(shell cat canu/.version)
 
-build_image := python:3.8
+build_image := thekevjames/nox
 
 # Default release if not set
 BUILD_METADATA ?= "1~development~$(shell git rev-parse --short HEAD)"
