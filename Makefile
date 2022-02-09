@@ -23,7 +23,7 @@ name = canu
 
 version := $(shell cat canu/.version)
 
-build_image := thekevjames/nox
+build_image := cdrx/pyinstaller-linux:python3
 
 # Default release if not set
 BUILD_METADATA ?= "1~development~$(shell git rev-parse --short HEAD)"
