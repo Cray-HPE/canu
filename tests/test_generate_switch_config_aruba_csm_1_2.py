@@ -483,6 +483,7 @@ def test_switch_config_spine_primary_override():
             ],
         )
         assert result.exit_code == 0
+        print(result.output)
         assert (
             "# OVERRIDE CONFIG\n"
             + "# The configuration below has been ignored and is not included in the GENERATED CONFIG\n"

@@ -69,16 +69,16 @@ Switch password
 Generated config file
 
 
-### --json()
-Output JSON
-
-
 ### --out( <out>)
 Output results to a file
 
 
 ### --override( <override>)
 Switch configuration override
+
+
+### --remediation()
+Outputs commands to get from the running-config to generated config
 
 ## Example
 
