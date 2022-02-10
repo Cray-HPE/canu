@@ -1,0 +1,7 @@
+{#- prefix-list #}
+ip prefix-list pl-can seq 10 permit {{ variables.CAN }} ge {{ variables.CAN_PREFIX_LEN }}
+ip prefix-list pl-hmn seq 20 permit {{ variables.HMNLB }} ge {{ variables.HMNLB_PREFIX_LEN }}
+ip prefix-list pl-nmn seq 30 permit {{ variables.NMNLB }} ge {{ variables.NMNLB_PREFIX_LEN }}
+ip prefix-list tftp seq 10 permit {{ variables.NMNLB_TFTP }}/32 ge 32 le 32
+ip prefix-list tftp seq 20 permit {{ variables.HMNLB_TFTP }}/32 ge 32 le 32
+{#- end prefix-list #}
