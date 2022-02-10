@@ -529,6 +529,7 @@ def generate_switch_config(
         "CMN_NETMASK": sls_variables["CMN_NETMASK"],
         "CMN_NETWORK_IP": sls_variables["CMN_NETWORK_IP"],
         "CMN_PREFIX_LEN": sls_variables["CMN_PREFIX_LEN"],
+        "CMN_ASN": sls_variables["CMN_ASN"],
         "MTL_NETMASK": sls_variables["MTL_NETMASK"],
         "MTL_PREFIX_LEN": sls_variables["MTL_PREFIX_LEN"],
         "NMN": sls_variables["NMN"],
@@ -536,6 +537,7 @@ def generate_switch_config(
         "NMN_NETMASK": sls_variables["NMN_NETMASK"],
         "NMN_NETWORK_IP": sls_variables["NMN_NETWORK_IP"],
         "NMN_PREFIX_LEN": sls_variables["NMN_PREFIX_LEN"],
+        "NMN_ASN": sls_variables["NMN_ASN"],
         "HMN": sls_variables["HMN"],
         "HMN_VLAN": sls_variables["HMN_VLAN"],
         "HMN_NETMASK": sls_variables["HMN_NETMASK"],
@@ -579,6 +581,7 @@ def generate_switch_config(
         "CMN_IPs": sls_variables["CMN_IPs"],
         "NMN_IPs": sls_variables["NMN_IPs"],
         "HMN_IPs": sls_variables["HMN_IPs"],
+        "SWITCH_ASN": sls_variables["SWITCH_ASN"],
     }
     cabling = {}
     cabling["nodes"], unknown = get_switch_nodes(
@@ -820,7 +823,7 @@ def get_switch_nodes(switch_name, network_node_list, factory, sls_variables):
         destination_slot = port["destination_slot"]
 
         shasta_name = get_shasta_name(destination_node_name, factory.lookup_mapper())
-
+        print(port)
         primary_port = get_primary_port(nodes_by_name, switch_name, destination_node_id)
         if shasta_name == "ncn-m":
             new_node = {
@@ -1160,6 +1163,7 @@ def parse_sls_for_config(input_json):
     networks_list = []
 
     sls_variables = {
+        "SWITCH_ASN": None,
         "CAN": None,
         "CAN_VLAN": None,
         "CAN_NETMASK": None,
@@ -1170,6 +1174,7 @@ def parse_sls_for_config(input_json):
         "CMN_NETMASK": None,
         "CMN_PREFIX_LEN": None,
         "CMN_NETWORK_IP": None,
+        "CMN_ASN": None,
         "HMN": None,
         "HMN_VLAN": None,
         "HMN_NETMASK": None,
@@ -1184,6 +1189,7 @@ def parse_sls_for_config(input_json):
         "NMN_NETMASK": None,
         "NMN_NETWORK_IP": None,
         "NMN_PREFIX_LEN": None,
+        "NMN_ASN": None,
         "HMN_MTN": None,
         "HMN_MTN_NETMASK": None,
         "HMN_MTN_NETWORK_IP": None,
@@ -1261,6 +1267,10 @@ def parse_sls_for_config(input_json):
             sls_variables["CMN_NETMASK"] = sls_variables["CMN"].netmask
             sls_variables["CMN_PREFIX_LEN"] = sls_variables["CMN"].prefixlen
             sls_variables["CMN_NETWORK_IP"] = sls_variables["CMN"].ip
+            sls_variables["CMN_ASN"] = sls_network.get("ExtraProperties", {}).get(
+                "MyASN",
+                {},
+            )
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 if subnets["Name"] == "bootstrap_dhcp":
                     sls_variables["CMN_IP_GATEWAY"] = subnets["Gateway"]
@@ -1319,6 +1329,14 @@ def parse_sls_for_config(input_json):
             sls_variables["NMN_NETMASK"] = sls_variables["NMN"].netmask
             sls_variables["NMN_PREFIX_LEN"] = sls_variables["NMN"].prefixlen
             sls_variables["NMN_NETWORK_IP"] = sls_variables["NMN"].ip
+            sls_variables["SWITCH_ASN"] = sls_network.get("ExtraProperties", {}).get(
+                "PeerASN",
+                {},
+            )
+            sls_variables["NMN_ASN"] = sls_network.get("ExtraProperties", {}).get(
+                "MyASN",
+                {},
+            )
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 if subnets["Name"] == "bootstrap_dhcp":
                     for ip in subnets["IPReservations"]:

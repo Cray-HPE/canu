@@ -1,4 +1,4 @@
-# 🛶 CANU v1.1.9-develop
+# 🛶 CANU v1.1.10-develop
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1167,10 +1167,15 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [1.1.9-develop]
+## [1.1.10-develop]
 - Update canu validate to user heir config diff and cleaner output.
 - Add --remediate option for canu validate
 - bump heir config version
+
+## [1.1.9-develop]
+- Remove hard coded BGP ASN #
+- Add CMN to CAN ACL
+- Level set CSM 1.0 templates with CSM 1.2 minus CMN, VRF, etc..
 
 ## [1.1.8-develop]
 - Add banner motd to all switch configs with CSM and CANU versions.
