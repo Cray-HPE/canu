@@ -1173,6 +1173,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - bump heir config version
 
 ## [1.1.9-develop]
+- Fix Mellanox web interface command
 - Remove hard coded BGP ASN #
 - Add CMN to CAN ACL
 - Level set CSM 1.0 templates with CSM 1.2 minus CMN, VRF, etc..
