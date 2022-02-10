@@ -1169,6 +1169,8 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## [1.1.9-develop]
 - Remove hard coded BGP ASN #
+- Add CMN to CAN ACL
+- Level set CSM 1.0 templates with CSM 1.2 minus CMN, VRF, etc..
 
 ## [1.1.8-develop]
 - Add banner motd to all switch configs with CSM and CANU versions.

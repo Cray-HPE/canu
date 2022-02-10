@@ -1,5 +1,5 @@
-{#- uan-nmn #}
-{%- for node in cabling.nodes if node.slot == "onboard" and node.subtype == "uan" %}
+{#- compute #}
+{%- for node in cabling.nodes if node.subtype == "compute" and node.slot == "onboard" %}
 interface ethernet1/1/{{ node.config.PORT }}
   description {{ node.config.DESCRIPTION }}
   no shutdown
@@ -11,6 +11,6 @@ interface ethernet1/1/{{ node.config.PORT }}
   spanning-tree port type edge
 
 {%- endfor %}
-{#- end uan-nmn #}
+{#- end compute #}
 
 
