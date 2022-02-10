@@ -445,14 +445,14 @@ def test_switch_config_spine_primary():
             + "router bgp 65533 vrf Customer maximum-paths ibgp 32\n"
             + "router bgp 65533 vrf Customer maximum-paths 32\n"
             + "router bgp 65533 vrf default maximum-paths ibgp 32\n"
-            + "router bgp 65533 vrf Customer neighbor 192.168.12.4 remote-as 65536\n"
-            + "router bgp 65533 vrf Customer neighbor 192.168.12.5 remote-as 65536\n"
-            + "router bgp 65533 vrf Customer neighbor 192.168.12.6 remote-as 65536\n"
-            + "router bgp 65533 vrf default neighbor 192.168.4.4 remote-as 65533\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.4 remote-as 65532\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.5 remote-as 65532\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.6 remote-as 65532\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.4 remote-as 65531\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.4 route-map ncn-w001\n"
-            + "router bgp 65533 vrf default neighbor 192.168.4.5 remote-as 65533\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.5 remote-as 65531\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.5 route-map ncn-w002\n"
-            + "router bgp 65533 vrf default neighbor 192.168.4.6 remote-as 65533\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.6 remote-as 65531\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.6 route-map ncn-w003\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.4 timers 1 3\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.5 timers 1 3\n"
@@ -867,14 +867,14 @@ def test_switch_config_spine_secondary():
             + "router bgp 65533 vrf Customer maximum-paths ibgp 32\n"
             + "router bgp 65533 vrf Customer maximum-paths 32\n"
             + "router bgp 65533 vrf default maximum-paths ibgp 32\n"
-            + "router bgp 65533 vrf Customer neighbor 192.168.12.4 remote-as 65536\n"
-            + "router bgp 65533 vrf Customer neighbor 192.168.12.5 remote-as 65536\n"
-            + "router bgp 65533 vrf Customer neighbor 192.168.12.6 remote-as 65536\n"
-            + "router bgp 65533 vrf default neighbor 192.168.4.4 remote-as 65533\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.4 remote-as 65532\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.5 remote-as 65532\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.6 remote-as 65532\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.4 remote-as 65531\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.4 route-map ncn-w001\n"
-            + "router bgp 65533 vrf default neighbor 192.168.4.5 remote-as 65533\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.5 remote-as 65531\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.5 route-map ncn-w002\n"
-            + "router bgp 65533 vrf default neighbor 192.168.4.6 remote-as 65533\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.6 remote-as 65531\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.6 route-map ncn-w003\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.4 timers 1 3\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.5 timers 1 3\n"
@@ -1680,6 +1680,8 @@ sls_input = {
             "Name": "CMN",
             "ExtraProperties": {
                 "CIDR": "192.168.12.0/24",
+                "MyASN": 65532,
+                "PeerASN": 65533,
                 "Subnets": [
                     {
                         "Name": "network_hardware",
@@ -1767,6 +1769,8 @@ sls_input = {
             "FullName": "Node Management Network",
             "ExtraProperties": {
                 "CIDR": "192.168.3.0/17",
+                "MyASN": 65531,
+                "PeerASN": 65533,
                 "Subnets": [
                     {
                         "FullName": "NMN Management Network Infrastructure",
