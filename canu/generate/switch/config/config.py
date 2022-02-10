@@ -700,14 +700,16 @@ def generate_switch_config(
             v1_config = ""
             dell_switch = Host(node_shasta_name, "dellOS10", dell_options)
             dell_config_hier = HConfig(host=dell_switch)
-            dell_config_hier.load_from_string(switch_config).set_order_weight()
+            dell_config_hier.load_from_string(switch_config)
+            dell_config_hier.set_order_weight()
             for line in dell_config_hier.all_children_sorted():
                 v1_config = v1_config + line.cisco_style_text() + "\n"
         if "sw-spine" in node_shasta_name:
             v1_config = ""
             mellanox_switch = Host(node_shasta_name, "onyx", mellanox_options)
             mellanox_config_hier = HConfig(host=mellanox_switch)
-            mellanox_config_hier.load_from_string(switch_config).set_order_weight()
+            mellanox_config_hier.load_from_string(switch_config)
+            mellanox_config_hier.set_order_weight()
             for line in mellanox_config_hier.all_children_sorted():
                 v1_config = v1_config + line.cisco_style_text() + "\n"
         return v1_config, devices, unknown
@@ -729,18 +731,17 @@ def generate_switch_config(
                 + "# The configuration below has been ignored and is not included in the GENERATED CONFIG\n"
             )
             override_config_hier = HConfig(host=host)
-            override_config_hier.load_from_string(switch_config).add_tags(
-                override[switch_name],
-            )
+            override_config_hier.load_from_string(switch_config)
+            override_config_hier.add_tags(override[switch_name])
             for line in override_config_hier.all_children_sorted_by_tags(
-                "override",
-                None,
+                {"override"},
+                set(),
             ):
                 override_config = override_config + "\n" + "#" + line.cisco_style_text()
             override_config = override_config + "\n# GENERATED CONFIG\n"
             for line in override_config_hier.all_children_sorted_by_tags(
-                None,
-                "override",
+                set(),
+                {"override"},
             ):
                 # add two spaces to indented config to match aruba formatting.
                 if line.cisco_style_text().startswith("  "):
