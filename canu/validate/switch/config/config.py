@@ -21,7 +21,6 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate switch running config against a config file."""
 import difflib
-import json
 import os
 from os import path
 from pathlib import Path
@@ -296,9 +295,7 @@ def config(
     generated_config_hier = HConfig(host=host)
     generated_config_hier.load_from_file(generated_config)
 
-    if json_:
-        click.echo(json.dumps(differences, indent=2), file=out)
-        return
+    dash = "-" * 73
 
     if override:
         try:
