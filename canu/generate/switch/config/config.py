@@ -823,7 +823,6 @@ def get_switch_nodes(switch_name, network_node_list, factory, sls_variables):
         destination_slot = port["destination_slot"]
 
         shasta_name = get_shasta_name(destination_node_name, factory.lookup_mapper())
-        print(port)
         primary_port = get_primary_port(nodes_by_name, switch_name, destination_node_id)
         if shasta_name == "ncn-m":
             new_node = {
@@ -1337,6 +1336,9 @@ def parse_sls_for_config(input_json):
                 "MyASN",
                 {},
             )
+            sls_variables["NMN_NETMASK"] = sls_variables["NMN"].netmask
+            sls_variables["NMN_PREFIX_LEN"] = sls_variables["NMN"].prefixlen
+            sls_variables["NMN_NETWORK_IP"] = sls_variables["NMN"].ip
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 if subnets["Name"] == "bootstrap_dhcp":
                     for ip in subnets["IPReservations"]:

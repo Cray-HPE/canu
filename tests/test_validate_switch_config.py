@@ -531,6 +531,7 @@ def test_validate_config_timeout(netmiko_command, switch_vendor):
                 "--generated",
                 generated_config_file,
             ],
+            input=password,
         )
         assert result.exit_code == 0
         print(result.output)
