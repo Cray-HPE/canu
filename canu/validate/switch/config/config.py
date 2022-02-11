@@ -687,9 +687,9 @@ def compare_config_heir(config1, config2, print_comparison=True):
     differences = list(config1.unified_diff(config2))
     if print_comparison:
         for line in differences:
-            if "+" in line:
+            if "+" == line.strip()[0]:
                 click.secho(line, fg="green")
-            elif "-" in line:
+            elif "-" == line.strip()[0]:
                 click.secho(line, fg="red")
             else:
                 click.secho(line, fg="bright_white")
