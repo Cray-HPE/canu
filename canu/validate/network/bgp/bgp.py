@@ -52,9 +52,16 @@ from canu.utils.vendor import switch_vendor
     default="65533",
     show_default=True,
 )
+@click.option(
+    "--network",
+    default="ALL",
+    show_default=True,
+    type=click.Choice(["ALL", "NMN", "CMN"], case_sensitive=False),
+    help="The network that BGP neighbors are checked.",
+)
 @click.option("--verbose", is_flag=True, help="Verbose mode")
 @click.pass_context
-def bgp(ctx, username, password, asn, verbose):
+def bgp(ctx, username, password, asn, verbose, network):
     """Validate BGP neighbors.
 
     This command will check the BGP neighbors for the switch IP addresses entered. All of the neighbors of a switch
@@ -229,7 +236,7 @@ def get_bgp_neighbors(ip, credentials, asn):
     return bgp_neighbors, switch_info
 
 
-def get_bgp_neighbors_aruba(ip, credentials, asn):
+def get_bgp_neighbors_aruba(ip, credentials, asn, network):
     """Get BGP neighbors for an Aruba switch.
 
     Args:
@@ -276,28 +283,63 @@ def get_bgp_neighbors_aruba(ip, credentials, asn):
         )
         return None, None
     # Get neighbors
-    vrfs = ["default", "Customer"]
     bgp_neighbors_aruba = {}
+    network_list = {"CMN": "Customer", "NMN": "default"}
+    if network == "NMN":
+        del network_list["CMN"]
+    elif network == "CMN":
+        del network_list["NMN"]
+    
     try:
-        for vrf in vrfs:
+        for net_vrf in network_list.values():
             bgp_neighbors_response = session.get(
-                f"https://{ip}/rest/v10.04/system/vrfs/{vrf}/bgp_routers/{asn}/bgp_neighbors?depth=2",
-                verify=False,
-            )
-            bgp_neighbors_aruba.update(bgp_neighbors_response.json())
-            bgp_neighbors_response.raise_for_status()
-        switch_info_response = session.get(
-            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
+            f"https://{ip}/rest/v10.04/system/vrfs/{net_vrf}/bgp_routers/{asn}/bgp_neighbors?depth=2",
             verify=False,
         )
-        switch_info_response.raise_for_status()
+            bgp_neighbors_response.raise_for_status()
+            bgp_neighbors_aruba.update(bgp_neighbors_response.json())
+            switch_info_response = session.get(
+                f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
+                verify=False,
+            )
+            switch_info_response.raise_for_status()
+            switch_info = switch_info_response.json()
+            switch_info["ip"] = ip
+            switch_info["vendor"] = "aruba"
 
-        switch_info = switch_info_response.json()
-        switch_info["ip"] = ip
-        switch_info["vendor"] = "aruba"
+            # Logout
+            session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
 
-        # Logout
-        session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
+
+
+            if network == "CMN":
+                bgp_neighbors_response = session.get(
+                f"https://{ip}/rest/v10.04/system/vrfs/{net_vrf}/bgp_routers/{asn}/bgp_neighbors?depth=2",
+                verify=False,
+            )
+                bgp_neighbors_aruba.update(bgp_neighbors_response.json())
+            elif network == "NMN":
+                bgp_neighbors_response = session.get(
+                    f"https://{ip}/rest/v10.04/system/vrfs/{net_vrf}/bgp_routers/{asn}/bgp_neighbors?depth=2",
+                    verify=False,
+                )
+                bgp_neighbors_aruba.update(bgp_neighbors_response.json())
+            switch_info_response = session.get(
+                f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
+                verify=False,
+            )
+            else: 
+
+                
+            bgp_neighbors_response.raise_for_status()
+            switch_info_response.raise_for_status()
+
+            switch_info = switch_info_response.json()
+            switch_info["ip"] = ip
+            switch_info["vendor"] = "aruba"
+
+            # Logout
+            session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
 
     except requests.exceptions.RequestException:  # pragma: no cover
         click.secho(
