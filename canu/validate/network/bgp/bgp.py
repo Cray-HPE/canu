@@ -403,9 +403,7 @@ def get_bgp_neighbors_mellanox(ip, credentials, network):
         raise requests.exceptions.HTTPError
 
     try:
-        print(network)
         if network == "NMN":
-            print("test")
             bgp_command = {"cmd": "show ip bgp summary"}
         else:
             bgp_command = {"cmd": "show ip bgp vrf all summary"}
