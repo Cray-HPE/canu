@@ -289,13 +289,13 @@ def get_bgp_neighbors_aruba(ip, credentials, asn, network):
         del network_list["CMN"]
     elif network == "CMN":
         del network_list["NMN"]
-    
+
     try:
         for net_vrf in network_list.values():
             bgp_neighbors_response = session.get(
-            f"https://{ip}/rest/v10.04/system/vrfs/{net_vrf}/bgp_routers/{asn}/bgp_neighbors?depth=2",
-            verify=False,
-        )
+                f"https://{ip}/rest/v10.04/system/vrfs/{net_vrf}/bgp_routers/{asn}/bgp_neighbors?depth=2",
+                verify=False,
+            )
             bgp_neighbors_response.raise_for_status()
             bgp_neighbors_aruba.update(bgp_neighbors_response.json())
             switch_info_response = session.get(
@@ -303,37 +303,6 @@ def get_bgp_neighbors_aruba(ip, credentials, asn, network):
                 verify=False,
             )
             switch_info_response.raise_for_status()
-            switch_info = switch_info_response.json()
-            switch_info["ip"] = ip
-            switch_info["vendor"] = "aruba"
-
-            # Logout
-            session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
-
-
-
-            if network == "CMN":
-                bgp_neighbors_response = session.get(
-                f"https://{ip}/rest/v10.04/system/vrfs/{net_vrf}/bgp_routers/{asn}/bgp_neighbors?depth=2",
-                verify=False,
-            )
-                bgp_neighbors_aruba.update(bgp_neighbors_response.json())
-            elif network == "NMN":
-                bgp_neighbors_response = session.get(
-                    f"https://{ip}/rest/v10.04/system/vrfs/{net_vrf}/bgp_routers/{asn}/bgp_neighbors?depth=2",
-                    verify=False,
-                )
-                bgp_neighbors_aruba.update(bgp_neighbors_response.json())
-            switch_info_response = session.get(
-                f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
-                verify=False,
-            )
-            else: 
-
-                
-            bgp_neighbors_response.raise_for_status()
-            switch_info_response.raise_for_status()
-
             switch_info = switch_info_response.json()
             switch_info["ip"] = ip
             switch_info["vendor"] = "aruba"
