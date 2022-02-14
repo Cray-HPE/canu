@@ -107,6 +107,7 @@ def bgp(ctx, username, password, asn, verbose, network):
                 str(ip),
                 credentials,
                 asn,
+                network,
             )
             if switch_info is None:
                 errors.append(
@@ -191,7 +192,7 @@ def bgp(ctx, username, password, asn, verbose, network):
     return
 
 
-def get_bgp_neighbors(ip, credentials, asn):
+def get_bgp_neighbors(ip, credentials, asn, network):
     """Get BGP neighbors for a switch.
 
     Args:
@@ -210,13 +211,13 @@ def get_bgp_neighbors(ip, credentials, asn):
         if vendor is None:
             return None, None
         elif vendor == "aruba":
-            bgp_neighbors, switch_info = get_bgp_neighbors_aruba(ip, credentials, asn)
+            bgp_neighbors, switch_info = get_bgp_neighbors_aruba(ip, credentials, network)
         elif vendor == "dell":
             # This function returns: {}, switch_info
             # There won't be any Dell switches with BGP neighbors
-            bgp_neighbors, switch_info = get_bgp_neighbors_dell(ip, credentials)
+            bgp_neighbors, switch_info = get_bgp_neighbors_dell(ip, credentials, asn, network)
         elif vendor == "mellanox":
-            bgp_neighbors, switch_info = get_bgp_neighbors_mellanox(ip, credentials)
+            bgp_neighbors, switch_info = get_bgp_neighbors_mellanox(ip, credentials, network)
 
     except (
         requests.exceptions.HTTPError,
@@ -372,7 +373,7 @@ def get_bgp_neighbors_dell(ip, credentials):
     return {}, switch_info
 
 
-def get_bgp_neighbors_mellanox(ip, credentials):
+def get_bgp_neighbors_mellanox(ip, credentials, network):
     """Get BGP neighbors for a Mellanox switch.
 
     Args:
@@ -402,11 +403,18 @@ def get_bgp_neighbors_mellanox(ip, credentials):
         raise requests.exceptions.HTTPError
 
     try:
+        print(network)
+        if network == "NMN":
+            print("test")
+            bgp_command = {"cmd": "show ip bgp summary"}
+        else:
+            bgp_command = {"cmd": "show ip bgp vrf all summary"}
         bgp_status = session.post(
             f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
-            json={"cmd": "show ip bgp vrf all summary"},
+            json=bgp_command,
             verify=False,
         )
+
         bgp_status = bgp_status.json()
 
         bgp_neighbors_mellanox = defaultdict(list)
