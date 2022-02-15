@@ -648,18 +648,6 @@ def test_switch_config_spine_secondary():
             + "interface mlag-port-channel 201 no shutdown\n"
         ) in str(result.output)
         assert (
-            "interface mlag-port-channel 1 lacp-individual enable force\n"
-            + "interface mlag-port-channel 2 lacp-individual enable force\n"
-            + "interface mlag-port-channel 3 lacp-individual enable force\n"
-            + "interface mlag-port-channel 4 lacp-individual enable force\n"
-            + "interface mlag-port-channel 5 lacp-individual enable force\n"
-            + "interface mlag-port-channel 6 lacp-individual enable force\n"
-            + "interface mlag-port-channel 7 lacp-individual enable force\n"
-            + "interface mlag-port-channel 8 lacp-individual enable force\n"
-            + "interface mlag-port-channel 9 lacp-individual enable force\n"
-            + "interface mlag-port-channel 13 lacp-individual enable force\n"
-        ) in str(result.output)
-        assert (
             "vlan 2\n"
             + "vlan 4\n"
             + "vlan 6\n"
