@@ -74,7 +74,6 @@ pipeline {
                 }
             }
             steps {
-                sh "make binary"
                 sh "make rpm"
             }
         }
@@ -97,7 +96,6 @@ pipeline {
                 }
             }
             steps {
-                sh "make binary"
                 sh "make rpm"
             }
         }
