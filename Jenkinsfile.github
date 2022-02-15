@@ -34,6 +34,8 @@ pipeline {
         SPEC_FILE = "canu.spec"
         IS_STABLE = getBuildIsStable()
         BUILD_METADATA = getRpmRevision(isStable: env.IS_STABLE)
+        PUBLISH_SP2 = "sle-15sp2"
+        PUBLISH_SP3 = "sle-15sp3"
     }
 
     stages {
