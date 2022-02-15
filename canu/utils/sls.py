@@ -160,6 +160,7 @@ def pull_sls_networks(sls_file=None):
         sls_networks = sls_cache
 
     sls_variables = {
+        "SWITCH_ASN": None,
         "CAN": None,
         "CAN_VLAN": None,
         "CMN": None,
@@ -267,6 +268,10 @@ def pull_sls_networks(sls_file=None):
             sls_variables["NMN"] = sls_network.get("ExtraProperties", {}).get(
                 "CIDR",
                 "",
+            )
+            sls_variables["SWITCH_ASN"] = sls_network.get("ExtraProperties", {}).get(
+                "PeerASN",
+                {},
             )
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 sls_variables["NMN_VLAN"] = subnets.get("VlanID", "")
