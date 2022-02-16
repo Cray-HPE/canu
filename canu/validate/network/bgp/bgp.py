@@ -80,6 +80,7 @@ def bgp(ctx, username, password, asn, verbose):
         password: Switch password
         asn: Switch ASN
         verbose: Bool indicating verbose output
+        network: The network that BGP neighbors are checked
     """
     credentials = {"username": username, "password": password}
     data = {}
@@ -191,6 +192,7 @@ def get_bgp_neighbors(ip, credentials, asn):
         ip: IPv4 address of the switch
         credentials: Dictionary with username and password of the switch
         asn: Switch ASN
+        network: The network that BGP neighbors are checked
 
     Returns:
         bgp_neighbors: A dict with switch neighbors
@@ -203,6 +205,7 @@ def get_bgp_neighbors(ip, credentials, asn):
         if vendor is None:
             return None, None
         elif vendor == "aruba":
+<<<<<<< HEAD
             bgp_neighbors, switch_info = get_bgp_neighbors_aruba(ip, credentials, asn)
         elif vendor == "dell":
             # This function returns: {}, switch_info
@@ -210,6 +213,29 @@ def get_bgp_neighbors(ip, credentials, asn):
             bgp_neighbors, switch_info = get_bgp_neighbors_dell(ip, credentials)
         elif vendor == "mellanox":
             bgp_neighbors, switch_info = get_bgp_neighbors_mellanox(ip, credentials)
+=======
+            bgp_neighbors, switch_info = get_bgp_neighbors_aruba(
+                ip,
+                credentials,
+                asn,
+                network,
+            )
+        elif vendor == "dell":
+            # This function returns: {}, switch_info
+            # There won't be any Dell switches with BGP neighbors
+            bgp_neighbors, switch_info = get_bgp_neighbors_dell(
+                ip,
+                credentials,
+                asn,
+                network,
+            )
+        elif vendor == "mellanox":
+            bgp_neighbors, switch_info = get_bgp_neighbors_mellanox(
+                ip,
+                credentials,
+                network,
+            )
+>>>>>>> d60c268 (fix tests)
 
     except (
         requests.exceptions.HTTPError,
@@ -236,6 +262,7 @@ def get_bgp_neighbors_aruba(ip, credentials, asn):
         ip: IPv4 address of the switch
         credentials: Dictionary with username and password of the switch
         asn: Switch ASN
+        network: The network that BGP neighbors are checked
 
     Returns:
         bgp_neighbors: A dict with switch neighbors
@@ -367,6 +394,7 @@ def get_bgp_neighbors_mellanox(ip, credentials):
     Args:
         ip: IPv4 address of the switch
         credentials: Dictionary with username and password of the switch
+        network: The network that BGP neighbors are checked
 
     Returns:
         bgp_neighbors: A dict with switch neighbors
