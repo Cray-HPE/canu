@@ -27,6 +27,8 @@ vlan {{ variables.HMN_VLAN }}
     apply access-list ip nmn-hmn out
 vlan {{ variables.CMN_VLAN }}
     name CMN
+    apply access-list ip cmn-can in
+    apply access-list ip cmn-can out
 
 spanning-tree
 {#- forward delay added to help with pxe boots. CASMNET-1099 + CASMTRIAGE-2793 #}

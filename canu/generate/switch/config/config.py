@@ -529,6 +529,7 @@ def generate_switch_config(
         "CMN_NETMASK": sls_variables["CMN_NETMASK"],
         "CMN_NETWORK_IP": sls_variables["CMN_NETWORK_IP"],
         "CMN_PREFIX_LEN": sls_variables["CMN_PREFIX_LEN"],
+        "CMN_ASN": sls_variables["CMN_ASN"],
         "MTL_NETMASK": sls_variables["MTL_NETMASK"],
         "MTL_PREFIX_LEN": sls_variables["MTL_PREFIX_LEN"],
         "NMN": sls_variables["NMN"],
@@ -536,6 +537,7 @@ def generate_switch_config(
         "NMN_NETMASK": sls_variables["NMN_NETMASK"],
         "NMN_NETWORK_IP": sls_variables["NMN_NETWORK_IP"],
         "NMN_PREFIX_LEN": sls_variables["NMN_PREFIX_LEN"],
+        "NMN_ASN": sls_variables["NMN_ASN"],
         "HMN": sls_variables["HMN"],
         "HMN_VLAN": sls_variables["HMN_VLAN"],
         "HMN_NETMASK": sls_variables["HMN_NETMASK"],
@@ -579,6 +581,7 @@ def generate_switch_config(
         "CMN_IPs": sls_variables["CMN_IPs"],
         "NMN_IPs": sls_variables["NMN_IPs"],
         "HMN_IPs": sls_variables["HMN_IPs"],
+        "SWITCH_ASN": sls_variables["SWITCH_ASN"],
     }
     cabling = {}
     cabling["nodes"], unknown = get_switch_nodes(
@@ -697,14 +700,16 @@ def generate_switch_config(
             v1_config = ""
             dell_switch = Host(node_shasta_name, "dellOS10", dell_options)
             dell_config_hier = HConfig(host=dell_switch)
-            dell_config_hier.load_from_string(switch_config).set_order_weight()
+            dell_config_hier.load_from_string(switch_config)
+            dell_config_hier.set_order_weight()
             for line in dell_config_hier.all_children_sorted():
                 v1_config = v1_config + line.cisco_style_text() + "\n"
         if "sw-spine" in node_shasta_name:
             v1_config = ""
             mellanox_switch = Host(node_shasta_name, "onyx", mellanox_options)
             mellanox_config_hier = HConfig(host=mellanox_switch)
-            mellanox_config_hier.load_from_string(switch_config).set_order_weight()
+            mellanox_config_hier.load_from_string(switch_config)
+            mellanox_config_hier.set_order_weight()
             for line in mellanox_config_hier.all_children_sorted():
                 v1_config = v1_config + line.cisco_style_text() + "\n"
         return v1_config, devices, unknown
@@ -726,18 +731,17 @@ def generate_switch_config(
                 + "# The configuration below has been ignored and is not included in the GENERATED CONFIG\n"
             )
             override_config_hier = HConfig(host=host)
-            override_config_hier.load_from_string(switch_config).add_tags(
-                override[switch_name],
-            )
+            override_config_hier.load_from_string(switch_config)
+            override_config_hier.add_tags(override[switch_name])
             for line in override_config_hier.all_children_sorted_by_tags(
-                "override",
-                None,
+                {"override"},
+                set(),
             ):
                 override_config = override_config + "\n" + "#" + line.cisco_style_text()
             override_config = override_config + "\n# GENERATED CONFIG\n"
             for line in override_config_hier.all_children_sorted_by_tags(
-                None,
-                "override",
+                set(),
+                {"override"},
             ):
                 # add two spaces to indented config to match aruba formatting.
                 if line.cisco_style_text().startswith("  "):
@@ -819,13 +823,9 @@ def get_switch_nodes(switch_name, network_node_list, factory, sls_variables):
         destination_slot = port["destination_slot"]
 
         shasta_name = get_shasta_name(destination_node_name, factory.lookup_mapper())
-
+        print(port)
         primary_port = get_primary_port(nodes_by_name, switch_name, destination_node_id)
         if shasta_name == "ncn-m":
-            print("\nport", port)
-            print("switch_name", switch_name)
-            print("dest", nodes_by_id[port["destination_node_id"]])
-            print("primary_port", primary_port)
             new_node = {
                 "subtype": "master",
                 "slot": destination_slot,
@@ -1163,6 +1163,7 @@ def parse_sls_for_config(input_json):
     networks_list = []
 
     sls_variables = {
+        "SWITCH_ASN": None,
         "CAN": None,
         "CAN_VLAN": None,
         "CAN_NETMASK": None,
@@ -1173,6 +1174,7 @@ def parse_sls_for_config(input_json):
         "CMN_NETMASK": None,
         "CMN_PREFIX_LEN": None,
         "CMN_NETWORK_IP": None,
+        "CMN_ASN": None,
         "HMN": None,
         "HMN_VLAN": None,
         "HMN_NETMASK": None,
@@ -1187,6 +1189,7 @@ def parse_sls_for_config(input_json):
         "NMN_NETMASK": None,
         "NMN_NETWORK_IP": None,
         "NMN_PREFIX_LEN": None,
+        "NMN_ASN": None,
         "HMN_MTN": None,
         "HMN_MTN_NETMASK": None,
         "HMN_MTN_NETWORK_IP": None,
@@ -1264,6 +1267,10 @@ def parse_sls_for_config(input_json):
             sls_variables["CMN_NETMASK"] = sls_variables["CMN"].netmask
             sls_variables["CMN_PREFIX_LEN"] = sls_variables["CMN"].prefixlen
             sls_variables["CMN_NETWORK_IP"] = sls_variables["CMN"].ip
+            sls_variables["CMN_ASN"] = sls_network.get("ExtraProperties", {}).get(
+                "MyASN",
+                {},
+            )
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 if subnets["Name"] == "bootstrap_dhcp":
                     sls_variables["CMN_IP_GATEWAY"] = subnets["Gateway"]
@@ -1322,6 +1329,14 @@ def parse_sls_for_config(input_json):
             sls_variables["NMN_NETMASK"] = sls_variables["NMN"].netmask
             sls_variables["NMN_PREFIX_LEN"] = sls_variables["NMN"].prefixlen
             sls_variables["NMN_NETWORK_IP"] = sls_variables["NMN"].ip
+            sls_variables["SWITCH_ASN"] = sls_network.get("ExtraProperties", {}).get(
+                "PeerASN",
+                {},
+            )
+            sls_variables["NMN_ASN"] = sls_network.get("ExtraProperties", {}).get(
+                "MyASN",
+                {},
+            )
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 if subnets["Name"] == "bootstrap_dhcp":
                     for ip in subnets["IPReservations"]:

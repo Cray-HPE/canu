@@ -1,4 +1,4 @@
-# 🛶 CANU v1.1.8-develop
+# 🛶 CANU v1.1.10-develop
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -112,7 +112,7 @@ In order to run CANU, both python3 and pip3 need to be installed.
   ```bash
     python3 -m venv .venv
     source ./.venv/bin/activate
-    pip3 install ./canu
+    pip3 install .
   ```
 
   - When you are done working in the Python Virtualenv.
@@ -1166,6 +1166,17 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.1.10-develop]
+- Update canu validate to user heir config diff and cleaner output.
+- Add --remediate option for canu validate
+- bump heir config version
+
+## [1.1.9-develop]
+- Fix Mellanox web interface command
+- Remove hard coded BGP ASN #
+- Add CMN to CAN ACL
+- Level set CSM 1.0 templates with CSM 1.2 minus CMN, VRF, etc..
 
 ## [1.1.8-develop]
 - Add banner motd to all switch configs with CSM and CANU versions.

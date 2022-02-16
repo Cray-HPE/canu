@@ -297,7 +297,7 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 201 switchport hybrid allowed-vlan add 6\n"
         ) in str(result.output)
         assert (
-            "web vrf default enable\n"
+            "web vrf default enable force\n"
             + "vrf definition Customer\n"
             + "vrf definition Customer rd 7:7\n"
             + "ip routing vrf Customer\n"
@@ -343,6 +343,7 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 201 spanning-tree port type network\n"
             + "interface mlag-port-channel 201 spanning-tree guard root\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "ipv4 access-list nmn-hmn\n"
             + "ipv4 access-list nmn-hmn bind-point rif\n"
@@ -355,8 +356,15 @@ def test_switch_config_spine_primary():
             + "ipv4 access-list nmn-hmn seq-number 70 deny ip 192.168.200.0 mask 255.255.128.0 192.168.3.0 mask 255.255.128.0\n"
             + "ipv4 access-list nmn-hmn seq-number 80 deny ip 192.168.200.0 mask 255.255.128.0 192.168.100.0 mask 255.255.128.0\n"
             + "ipv4 access-list nmn-hmn seq-number 90 permit ip any any\n"
+            + "ipv4 access-list cmn-can\n"
+            + "ipv4 access-list cmn-can bind-point rif\n"
+            + "ipv4 access-list cmn-can seq-number 10 deny ip 192.168.12.0 mask 255.255.255.0 192.168.11.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 20 deny ip 192.168.11.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 30 permit ip any any\n"
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
+            + "interface vlan 6 ipv4 port access-group cmn-can\n"
+            + "interface vlan 7 ipv4 port access-group cmn-can\n"
         ) in str(result.output)
         assert (
             "protocol ospf\n"
@@ -437,14 +445,14 @@ def test_switch_config_spine_primary():
             + "router bgp 65533 vrf Customer maximum-paths ibgp 32\n"
             + "router bgp 65533 vrf Customer maximum-paths 32\n"
             + "router bgp 65533 vrf default maximum-paths ibgp 32\n"
-            + "router bgp 65533 vrf Customer neighbor 192.168.12.4 remote-as 65536\n"
-            + "router bgp 65533 vrf Customer neighbor 192.168.12.5 remote-as 65536\n"
-            + "router bgp 65533 vrf Customer neighbor 192.168.12.6 remote-as 65536\n"
-            + "router bgp 65533 vrf default neighbor 192.168.4.4 remote-as 65533\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.4 remote-as 65532\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.5 remote-as 65532\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.6 remote-as 65532\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.4 remote-as 65531\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.4 route-map ncn-w001\n"
-            + "router bgp 65533 vrf default neighbor 192.168.4.5 remote-as 65533\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.5 remote-as 65531\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.5 route-map ncn-w002\n"
-            + "router bgp 65533 vrf default neighbor 192.168.4.6 remote-as 65533\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.6 remote-as 65531\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.6 route-map ncn-w003\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.4 timers 1 3\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.5 timers 1 3\n"
@@ -712,7 +720,7 @@ def test_switch_config_spine_secondary():
             + "interface mlag-port-channel 201 switchport hybrid allowed-vlan add 6\n"
         ) in str(result.output)
         assert (
-            "web vrf default enable\n"
+            "web vrf default enable force\n"
             + "vrf definition Customer\n"
             + "vrf definition Customer rd 7:7\n"
             + "ip routing vrf Customer\n"
@@ -770,8 +778,15 @@ def test_switch_config_spine_secondary():
             + "ipv4 access-list nmn-hmn seq-number 70 deny ip 192.168.200.0 mask 255.255.128.0 192.168.3.0 mask 255.255.128.0\n"
             + "ipv4 access-list nmn-hmn seq-number 80 deny ip 192.168.200.0 mask 255.255.128.0 192.168.100.0 mask 255.255.128.0\n"
             + "ipv4 access-list nmn-hmn seq-number 90 permit ip any any\n"
+            + "ipv4 access-list cmn-can\n"
+            + "ipv4 access-list cmn-can bind-point rif\n"
+            + "ipv4 access-list cmn-can seq-number 10 deny ip 192.168.12.0 mask 255.255.255.0 192.168.11.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 20 deny ip 192.168.11.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 30 permit ip any any\n"
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
+            + "interface vlan 6 ipv4 port access-group cmn-can\n"
+            + "interface vlan 7 ipv4 port access-group cmn-can\n"
         ) in str(result.output)
         assert (
             "protocol ospf\n"
@@ -852,14 +867,14 @@ def test_switch_config_spine_secondary():
             + "router bgp 65533 vrf Customer maximum-paths ibgp 32\n"
             + "router bgp 65533 vrf Customer maximum-paths 32\n"
             + "router bgp 65533 vrf default maximum-paths ibgp 32\n"
-            + "router bgp 65533 vrf Customer neighbor 192.168.12.4 remote-as 65536\n"
-            + "router bgp 65533 vrf Customer neighbor 192.168.12.5 remote-as 65536\n"
-            + "router bgp 65533 vrf Customer neighbor 192.168.12.6 remote-as 65536\n"
-            + "router bgp 65533 vrf default neighbor 192.168.4.4 remote-as 65533\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.4 remote-as 65532\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.5 remote-as 65532\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.6 remote-as 65532\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.4 remote-as 65531\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.4 route-map ncn-w001\n"
-            + "router bgp 65533 vrf default neighbor 192.168.4.5 remote-as 65533\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.5 remote-as 65531\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.5 route-map ncn-w002\n"
-            + "router bgp 65533 vrf default neighbor 192.168.4.6 remote-as 65533\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.6 remote-as 65531\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.6 route-map ncn-w003\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.4 timers 1 3\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.5 timers 1 3\n"
@@ -957,6 +972,8 @@ def test_switch_config_leaf_bmc():
             + "  ip vrf forwarding Customer\n"
             + "  mtu 9216\n"
             + "  ip address 192.168.12.4/24\n"
+            + "  ip access-group cmn-can in\n"
+            + "  ip access-group cmn-can out\n"
             + "  ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
         assert (
@@ -1085,7 +1102,7 @@ def test_switch_config_leaf_bmc():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
         ) in str(result.output)
-
+        print(result.output)
         assert (
             "ip access-list nmn-hmn\n"
             + "  seq 10 deny ip 192.168.3.0/17 192.168.0.0/17\n"
@@ -1097,6 +1114,10 @@ def test_switch_config_leaf_bmc():
             + "  seq 70 deny ip 192.168.200.0/17 192.168.3.0/17\n"
             + "  seq 80 deny ip 192.168.200.0/17 192.168.100.0/17\n"
             + "  seq 90 permit ip any any\n"
+            + "ip access-list cmn-can\n"
+            + "  seq 10 deny ip 192.168.12.0/24 192.168.11.0/24\n"
+            + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
+            + "  seq 30 permit ip any any\n"
         ) in str(result.output)
         assert (
             "router ospf 1\n"
@@ -1206,6 +1227,8 @@ def test_switch_config_cdu_primary():
             + "  ip vrf forwarding Customer\n"
             + "  mtu 9216\n"
             + "  ip address 192.168.12.5/24\n"
+            + "  ip access-group cmn-can in\n"
+            + "  ip access-group cmn-can out\n"
             + "  ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
         assert (
@@ -1344,6 +1367,10 @@ def test_switch_config_cdu_primary():
             + "  seq 70 deny ip 192.168.200.0/17 192.168.3.0/17\n"
             + "  seq 80 deny ip 192.168.200.0/17 192.168.100.0/17\n"
             + "  seq 90 permit ip any any\n"
+            + "ip access-list cmn-can\n"
+            + "  seq 10 deny ip 192.168.12.0/24 192.168.11.0/24\n"
+            + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
+            + "  seq 30 permit ip any any\n"
         ) in str(result.output)
         assert (
             "router ospf 1\n"
@@ -1459,6 +1486,8 @@ def test_switch_config_cdu_secondary():
             + "  ip vrf forwarding Customer\n"
             + "  mtu 9216\n"
             + "  ip address 192.168.12.6/24\n"
+            + "  ip access-group cmn-can in\n"
+            + "  ip access-group cmn-can out\n"
             + "  ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
         assert (
@@ -1589,6 +1618,10 @@ def test_switch_config_cdu_secondary():
             + "  seq 70 deny ip 192.168.200.0/17 192.168.3.0/17\n"
             + "  seq 80 deny ip 192.168.200.0/17 192.168.100.0/17\n"
             + "  seq 90 permit ip any any\n"
+            + "ip access-list cmn-can\n"
+            + "  seq 10 deny ip 192.168.12.0/24 192.168.11.0/24\n"
+            + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
+            + "  seq 30 permit ip any any\n"
         ) in str(result.output)
         assert (
             "router ospf 1\n"
@@ -1647,6 +1680,8 @@ sls_input = {
             "Name": "CMN",
             "ExtraProperties": {
                 "CIDR": "192.168.12.0/24",
+                "MyASN": 65532,
+                "PeerASN": 65533,
                 "Subnets": [
                     {
                         "Name": "network_hardware",
@@ -1734,6 +1769,8 @@ sls_input = {
             "FullName": "Node Management Network",
             "ExtraProperties": {
                 "CIDR": "192.168.3.0/17",
+                "MyASN": 65531,
+                "PeerASN": 65533,
                 "Subnets": [
                     {
                         "FullName": "NMN Management Network Infrastructure",
