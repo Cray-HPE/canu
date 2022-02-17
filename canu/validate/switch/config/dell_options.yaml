@@ -167,7 +167,7 @@
       - startswith:
         - description
         - ip address
-    
+        - switchport trunk allowed
     # Default when expression: list of expressions
     negation_default_when: []
     
@@ -177,4 +177,7 @@
     #   - startswith: route-map
     #   - startswith: description
     #   use: no description
-    negation_negate_with: []
+    negation_negate_with:
+      - lineage:
+          - startswith: banner motd
+        use: no banner motd

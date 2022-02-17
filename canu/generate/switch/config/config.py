@@ -734,14 +734,14 @@ def generate_switch_config(
             override_config_hier.load_from_string(switch_config)
             override_config_hier.add_tags(override[switch_name])
             for line in override_config_hier.all_children_sorted_by_tags(
-                {"override"},
-                set(),
+                "override",
+                None,
             ):
                 override_config = override_config + "\n" + "#" + line.cisco_style_text()
             override_config = override_config + "\n# GENERATED CONFIG\n"
             for line in override_config_hier.all_children_sorted_by_tags(
-                set(),
-                {"override"},
+                None,
+                "override",
             ):
                 # add two spaces to indented config to match aruba formatting.
                 if line.cisco_style_text().startswith("  "):
