@@ -23,7 +23,7 @@ name = canu
 
 version := $(shell cat canu/.version)
 
-build_image := datle/pyinstaller
+build_image := datle/pyinstaller:3.8.11
 
 # Default release if not set
 BUILD_METADATA ?= "1~development~$(shell git rev-parse --short HEAD)"

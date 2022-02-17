@@ -1170,6 +1170,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 ## [1.1.11-develop]
 - `canu validate BGP` now has an option to choose what network to run against.
 - Remove `'lacp-individual` from mellanox spine02.
+- Generate unique MAC address for each Mellanox magp virtual router.
 
 ## [1.1.10-develop]
 - Update canu validate to user heir config diff and cleaner output.
