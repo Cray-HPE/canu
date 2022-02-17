@@ -32,14 +32,16 @@ from canu.cli import cli
 username = "admin"
 password = "admin"
 ip = "192.168.1.1"
+asn = 65533
 sls_cache = {
     "HMN_IPs": {
         "sw-spine-001": "192.168.1.1",
         "sw-spine-002": "192.168.1.2",
     },
+    "SWITCH_ASN": asn,
 }
 cache_minutes = 0
-asn = 65533
+
 sls_address = "api-gw-service-nmn.local"
 runner = testing.CliRunner()
 
@@ -115,7 +117,7 @@ def test_validate_bgp_verbose(pull_sls_networks, switch_vendor):
             responses.add(
                 responses.GET,
                 f"https://{ip_address}/rest/v10.04/system/vrfs/Customer/bgp_routers/{asn}/bgp_neighbors?depth=2",
-                json=all_established,
+                json=all_established_cmn,
             )
             responses.add(
                 responses.GET,
@@ -145,10 +147,128 @@ def test_validate_bgp_verbose(pull_sls_networks, switch_vendor):
     assert "sw-spine-001 ===> 192.168.1.2: Established" in str(result.output)
     assert "sw-spine-001 ===> 192.168.1.3: Established" in str(result.output)
     assert "sw-spine-001 ===> 192.168.1.4: Established" in str(result.output)
+    assert "sw-spine-001 ===> 192.168.10.2: Established" in str(result.output)
+    assert "sw-spine-001 ===> 192.168.10.3: Established" in str(result.output)
+    assert "sw-spine-001 ===> 192.168.10.4: Established" in str(result.output)
     assert "Switch: sw-spine-002 (192.168.1.2)      " in str(result.output)
     assert "sw-spine-002 ===> 192.168.1.2: Established" in str(result.output)
     assert "sw-spine-002 ===> 192.168.1.3: Established" in str(result.output)
     assert "sw-spine-002 ===> 192.168.1.4: Established" in str(result.output)
+    assert "sw-spine-002 ===> 192.168.10.2: Established" in str(result.output)
+    assert "sw-spine-002 ===> 192.168.10.3: Established" in str(result.output)
+    assert "sw-spine-002 ===> 192.168.10.4: Established" in str(result.output)
+    assert "PASS - IP: 192.168.1.1 Hostname: sw-spine-001" in str(result.output)
+    assert "PASS - IP: 192.168.1.2 Hostname: sw-spine-002" in str(result.output)
+
+
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
+@patch("canu.validate.network.bgp.bgp.pull_sls_networks")
+@responses.activate
+def test_validate_bgp_nmn(pull_sls_networks, switch_vendor):
+    """Test that the `canu validate network bgp` command runs and returns PASS."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        pull_sls_networks.return_value = sls_cache
+        for name, ip_address in sls_cache["HMN_IPs"].items():
+            responses.add(
+                responses.POST,
+                f"https://{ip_address}/rest/v10.04/login",
+            )
+            responses.add(
+                responses.GET,
+                f"https://{ip_address}/rest/v10.04/system/vrfs/default/bgp_routers/{asn}/bgp_neighbors?depth=2",
+                json=all_established,
+            )
+            responses.add(
+                responses.GET,
+                f"https://{ip_address}/rest/v10.04/system?attributes=platform_name,hostname",
+                json={"hostname": name, "platform_name": "X86-64"},
+            )
+            responses.add(
+                responses.POST,
+                f"https://{ip_address}/rest/v10.04/logout",
+            )
+
+    result = runner.invoke(
+        cli,
+        [
+            "validate",
+            "network",
+            "bgp",
+            "--username",
+            username,
+            "--password",
+            password,
+            "--verbose",
+            "--network",
+            "nmn",
+        ],
+    )
+    assert result.exit_code == 0
+    assert "Switch: sw-spine-001 (192.168.1.1)      " in str(result.output)
+    assert "sw-spine-001 ===> 192.168.1.2: Established" in str(result.output)
+    assert "sw-spine-001 ===> 192.168.1.3: Established" in str(result.output)
+    assert "sw-spine-001 ===> 192.168.1.4: Established" in str(result.output)
+    assert "Switch: sw-spine-002 (192.168.1.2)      " in str(result.output)
+    assert "sw-spine-002 ===> 192.168.1.2: Established" in str(result.output)
+    assert "sw-spine-002 ===> 192.168.1.3: Established" in str(result.output)
+    assert "sw-spine-002 ===> 192.168.1.4: Established" in str(result.output)
+    assert "PASS - IP: 192.168.1.1 Hostname: sw-spine-001" in str(result.output)
+    assert "PASS - IP: 192.168.1.2 Hostname: sw-spine-002" in str(result.output)
+
+
+@patch("canu.validate.network.bgp.bgp.switch_vendor")
+@patch("canu.validate.network.bgp.bgp.pull_sls_networks")
+@responses.activate
+def test_validate_bgp_cmn(pull_sls_networks, switch_vendor):
+    """Test that the `canu validate network bgp` command runs and returns PASS."""
+    with runner.isolated_filesystem():
+        switch_vendor.return_value = "aruba"
+        pull_sls_networks.return_value = sls_cache
+        for name, ip_address in sls_cache["HMN_IPs"].items():
+            responses.add(
+                responses.POST,
+                f"https://{ip_address}/rest/v10.04/login",
+            )
+            responses.add(
+                responses.GET,
+                f"https://{ip_address}/rest/v10.04/system/vrfs/Customer/bgp_routers/{asn}/bgp_neighbors?depth=2",
+                json=all_established_cmn,
+            )
+            responses.add(
+                responses.GET,
+                f"https://{ip_address}/rest/v10.04/system?attributes=platform_name,hostname",
+                json={"hostname": name, "platform_name": "X86-64"},
+            )
+            responses.add(
+                responses.POST,
+                f"https://{ip_address}/rest/v10.04/logout",
+            )
+
+    result = runner.invoke(
+        cli,
+        [
+            "validate",
+            "network",
+            "bgp",
+            "--username",
+            username,
+            "--password",
+            password,
+            "--verbose",
+            "--network",
+            "cmn",
+        ],
+    )
+    assert result.exit_code == 0
+    assert "Switch: sw-spine-001 (192.168.1.1)      " in str(result.output)
+    assert "sw-spine-001 ===> 192.168.10.2: Established" in str(result.output)
+    assert "sw-spine-001 ===> 192.168.10.3: Established" in str(result.output)
+    assert "sw-spine-001 ===> 192.168.10.4: Established" in str(result.output)
+    assert "Switch: sw-spine-002 (192.168.1.2)      " in str(result.output)
+    assert "sw-spine-002 ===> 192.168.10.2: Established" in str(result.output)
+    assert "sw-spine-002 ===> 192.168.10.3: Established" in str(result.output)
+    assert "sw-spine-002 ===> 192.168.10.4: Established" in str(result.output)
     assert "PASS - IP: 192.168.1.1 Hostname: sw-spine-001" in str(result.output)
     assert "PASS - IP: 192.168.1.2 Hostname: sw-spine-002" in str(result.output)
 
@@ -502,6 +622,18 @@ all_established = {
         "status": {"bgp_peer_state": "Established"},
     },
     "192.168.1.4": {
+        "status": {"bgp_peer_state": "Established"},
+    },
+}
+
+all_established_cmn = {
+    "192.168.10.2": {
+        "status": {"bgp_peer_state": "Established"},
+    },
+    "192.168.10.3": {
+        "status": {"bgp_peer_state": "Established"},
+    },
+    "192.168.10.4": {
         "status": {"bgp_peer_state": "Established"},
     },
 }
