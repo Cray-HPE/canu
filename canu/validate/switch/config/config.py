@@ -332,8 +332,11 @@ def config(
                 fg="red",
             )
             exit(1)
-
-    compare_config_heir(running_config_hier, generated_config_hier)
+    compare_config_heir(
+        running_config_hier.difference(generated_config_hier),
+        generated_config_hier.difference(running_config_hier),
+        vendor,
+    )
 
     click.echo(dash, file=out)
     click.secho(
@@ -369,74 +372,9 @@ def config(
         remediation_config_hier = running_config_hier.config_to_get_to(
             generated_config_hier,
         )
-        click.secho(
-            "\n"
-            "Safe Commands"
-            + "\n"
-            + "These commands should be safe to run while the system is running.",
-            fg="green",
-            file=out,
-        )
 
-        if vendor == "dell":
-            remediation_config_hier.add_tags(dell_tags)
-        elif vendor == "mellanox":
-            remediation_config_hier.add_tags(mellanox_tags)
-        elif vendor == "aruba":
-            port_reset_cmds = [
-                "no mtu",
-                "shutdown",
-                "no description",
-                "routing",
-                "no speed",
-            ]
-            for line in remediation_config_hier.with_tags(
-                {"no interface"},
-            ).all_children():
-                interface = str(line)
-                remediation_config_hier.del_child_by_text(interface)
-                for x in port_reset_cmds:
-                    remediation_config_hier.add_child(interface[3:]).add_child(x)
-            remediation_config_hier.add_tags(tags)
-        click.echo(dash, file=out)
-        for safe_line in remediation_config_hier.with_tags({"safe"}).all_children():
-            click.echo(safe_line.cisco_style_text(), file=out)
-        click.echo(dash, file=out)
-
-        click.secho(
-            "\n"
-            + "Manual Commands"
-            + "\n"
-            + "These commands may cause disruption to the system and should be done only during a maintenance period."
-            + "\n"
-            + "It is recommended to have an out of band connection while running these commands."
-            + "\n"
-            + "If commands are going to be applied to Aruba switches, it is recommended to utilize Configuration Checkpoints "
-            + "to avoid getting locked out.",
-            fg="red",
-            file=out,
-        )
-        click.echo(dash, file=out)
-        for manual_line in remediation_config_hier.with_tags({"manual"}).all_children():
-            click.echo(manual_line.cisco_style_text(), file=out)
-        click.echo(dash, file=out)
-
-        click.secho(
-            "\n"
-            + "Commands NOT classified as Safe or Manual"
-            + "\n"
-            + "These commands include authentication as well as unique commands for the system."
-            + "\n"
-            + "These should be looked over carefully before keeping/applying.",
-            fg="yellow",
-            file=out,
-        )
-        click.echo(dash, file=out)
-        for untagged_line in remediation_config_hier.all_children_sorted_untagged():
-            click.echo(untagged_line.cisco_style_text(), file=out)
-        click.echo(dash, file=out)
-        for line in remediation_config_hier.with_tags({"interface"}).all_children():
-            click.echo(line.cisco_style_text())
+        for line in remediation_config_hier.all_children():
+            click.echo(line.cisco_style_text(), file=out)
 
 
 def get_switch_config(ip, credentials, return_error=False):
@@ -673,27 +611,44 @@ def print_difference_line(additions, additions_int, deletions, deletions_int, ou
     )
 
 
-def compare_config_heir(config1, config2, print_comparison=True):
+def compare_config_heir(config1, config2, vendor):
     """Compare and print two switch configurations.
 
     Args:
         config1: (Str) Switch 1 config
         config2: (Str) Switch 2 config
-        print_comparison: Print the comparison to the screen (defaults True)
+        vendor: Switch vendor. Aruba, Dell, or Mellanox
 
     Returns:
         List with the number of additions and deletions
     """
-    differences = list(config1.unified_diff(config2))
-    if print_comparison:
-        for line in differences:
-            if "+" in line:
-                click.secho(line, fg="green")
-            elif "-" in line:
-                click.secho(line, fg="red")
-            else:
-                click.secho(line, fg="bright_white")
-    return differences
+    one = []
+    two = []
+
+    config1.set_order_weight()
+    config2.set_order_weight()
+
+    for config1_line in config1.all_children_sorted():
+        one.append(config1_line.cisco_style_text())
+    for config2_line in config2.all_children_sorted():
+        two.append(config2_line.cisco_style_text())
+    d = difflib.Differ()
+    difflist = []
+
+    for line in d.compare(one, two):
+        difflist.append(line)
+    if vendor == "mellanox":
+        difflist.sort(reverse=True)
+    for line in difflist:
+        if "+" == line.strip()[0]:
+            click.secho(line, fg="green")
+        elif "-" == line.strip()[0]:
+            click.secho(line, fg="red")
+        elif line.startswith("? "):
+            pass
+        else:
+            click.secho(line, fg="bright_white")
+    return difflist
 
 
 def compare_config(config1, config2, print_comparison=True, out="-"):
@@ -751,8 +706,6 @@ def compare_config(config1, config2, print_comparison=True, out="-"):
         elif diff.startswith("+ "):
             color = "green"
             differences["additions"] += 1
-        elif diff.startswith("? "):
-            color = "blue"
 
         if diff.startswith("+ hostname"):
             differences["hostname_additions"] += 1
