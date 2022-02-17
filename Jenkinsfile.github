@@ -31,9 +31,12 @@ pipeline {
     }
 
     environment {
+        RPM_NAME = "canu"
         SPEC_FILE = "canu.spec"
         IS_STABLE = getBuildIsStable()
         BUILD_METADATA = getRpmRevision(isStable: env.IS_STABLE)
+        PUBLISH_SP2 = "sle-15sp2"
+        PUBLISH_SP3 = "sle-15sp3"
     }
 
     stages {
@@ -61,19 +64,47 @@ pipeline {
                 }
             }
         }
-        stage("Build RPM") {
-            steps {
-                script {
-                    sh "make rpm"
+        stage("Build SP2") {
+            agent {
+                docker {
+                    image "arti.dev.cray.com/dstbuildenv-docker-master-local/cray-sle15sp2_build_environment:latest"
+                    reuseNode true
+                    // Support docker in docker for clamav scan
+                    args "-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --group-add 999"
                 }
+            }
+            steps {
+                sh "make rpm"
             }
         }
 
-        stage('Publish ') {
+        stage('Publish SP2') {
             steps {
                 script {
-                    publishCsmRpms(component: "canu", pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", arch: "x86_64", isStable: env.IS_STABLE)
-                    publishCsmRpms(component: "canu", pattern: "dist/rpmbuild/SRPMS/*.rpm", arch: "src", isStable: env.IS_STABLE)
+                    publishCsmRpms(component: env.RPM_NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: env.PUBLISH_SP2, arch: "x86_64", isStable: env.IS_STABLE)
+                    publishCsmRpms(component: env.RPM_NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: env.PUBLISH_SP2, arch: "src", isStable: env.IS_STABLE)
+                }
+            }
+        }
+                stage("Build SP3") {
+            agent {
+                docker {
+                    image "arti.dev.cray.com/dstbuildenv-docker-master-local/cray-sle15sp3_build_environment:latest"
+                    reuseNode true
+                    // Support docker in docker for clamav scan
+                    args "-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --group-add 999"
+                }
+            }
+            steps {
+                sh "make rpm"
+            }
+        }
+
+        stage('Publish SP3') {
+            steps {
+                script {
+                    publishCsmRpms(component: env.RPM_NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: env.PUBLISH_SP3, arch: "x86_64", isStable: env.IS_STABLE)
+                    publishCsmRpms(component: env.RPM_NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: env.PUBLISH_SP3, arch: "src", isStable: env.IS_STABLE)
                 }
             }
         }
