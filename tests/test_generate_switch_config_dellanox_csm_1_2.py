@@ -43,6 +43,19 @@ switch_name = "sw-spine-001"
 cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
 
+canu_version_file = path.join(test_file_directory.resolve().parent, "canu", ".version")
+with open(canu_version_file, "r") as file:
+    canu_version = file.readline()
+canu_version = canu_version.strip()
+banner_motd = (
+    'banner motd "\n'
+    "###############################################################################\n"
+    f"# CSM version:  {csm}\n"
+    f"# CANU version: {canu_version}\n"
+    "###############################################################################\n"
+    '"\n'
+)
+
 runner = testing.CliRunner()
 
 
@@ -109,6 +122,8 @@ def test_switch_config_spine_primary():
             + "interface ethernet 1/26 mtu 9216 force\n"
             + "interface ethernet 1/29 mtu 9216 force\n"
             + "interface ethernet 1/30 mtu 9216 force\n"
+            + "interface ethernet 1/31 speed 40G force\n"
+            + "interface ethernet 1/32 speed 40G force\n"
             + "interface ethernet 1/1 speed 40G force\n"
             + "interface ethernet 1/2 speed 40G force\n"
             + "interface ethernet 1/3 speed 40G force\n"
@@ -282,14 +297,14 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 201 switchport hybrid allowed-vlan add 6\n"
         ) in str(result.output)
         assert (
-            "web vrf default enable\n"
+            "web vrf default enable force\n"
             + "vrf definition Customer\n"
             + "vrf definition Customer rd 7:7\n"
             + "ip routing vrf Customer\n"
             + "ip routing vrf default\n"
-            + "ip name-server vrf default 10.92.100.225\n"
+            + "ip name-server vrf vrf-default 10.92.100.225\n"
             + "interface loopback 0\n"
-            + "interface loopback 0 ip address 10.2.0.2/32\n"
+            + "interface loopback 0 ip address 10.2.0.2/32 primary\n"
             + "interface vlan 1\n"
             + "interface vlan 2\n"
             + "interface vlan 4\n"
@@ -328,6 +343,7 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 201 spanning-tree port type network\n"
             + "interface mlag-port-channel 201 spanning-tree guard root\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "ipv4 access-list nmn-hmn\n"
             + "ipv4 access-list nmn-hmn bind-point rif\n"
@@ -340,6 +356,15 @@ def test_switch_config_spine_primary():
             + "ipv4 access-list nmn-hmn seq-number 70 deny ip 192.168.200.0 mask 255.255.128.0 192.168.3.0 mask 255.255.128.0\n"
             + "ipv4 access-list nmn-hmn seq-number 80 deny ip 192.168.200.0 mask 255.255.128.0 192.168.100.0 mask 255.255.128.0\n"
             + "ipv4 access-list nmn-hmn seq-number 90 permit ip any any\n"
+            + "ipv4 access-list cmn-can\n"
+            + "ipv4 access-list cmn-can bind-point rif\n"
+            + "ipv4 access-list cmn-can seq-number 10 deny ip 192.168.12.0 mask 255.255.255.0 192.168.11.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 20 deny ip 192.168.11.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 30 permit ip any any\n"
+            + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
+            + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
+            + "interface vlan 6 ipv4 port access-group cmn-can\n"
+            + "interface vlan 7 ipv4 port access-group cmn-can\n"
         ) in str(result.output)
         assert (
             "protocol ospf\n"
@@ -362,25 +387,24 @@ def test_switch_config_spine_primary():
             + "interface vlan 1 ip dhcp relay instance 2 downstream\n"
             + "interface vlan 2 ip dhcp relay instance 2 downstream\n"
             + "interface vlan 4 ip dhcp relay instance 4 downstream\n"
-            + "interface vlan 6 ip dhcp relay instance 2 downstream\n"
         ) in str(result.output)
         assert (
             "protocol magp\n"
             + "interface vlan 1 magp 1\n"
             + "interface vlan 2 magp 2\n"
-            + "interface vlan 4 magp 4\n"
-            + "interface vlan 6 magp 6\n"
-            + "interface vlan 7 magp 7\n"
+            + "interface vlan 4 magp 3\n"
+            + "interface vlan 6 magp 4\n"
+            + "interface vlan 7 magp 5\n"
             + "interface vlan 1 magp 1 ip virtual-router address 192.168.1.1\n"
             + "interface vlan 2 magp 2 ip virtual-router address 192.168.3.1\n"
-            + "interface vlan 4 magp 4 ip virtual-router address 192.168.0.1\n"
-            + "interface vlan 6 magp 6 ip virtual-router address 192.168.12.1\n"
-            + "interface vlan 7 magp 7 ip virtual-router address 192.168.11.1\n"
+            + "interface vlan 4 magp 3 ip virtual-router address 192.168.0.1\n"
+            + "interface vlan 6 magp 4 ip virtual-router address 192.168.12.1\n"
+            + "interface vlan 7 magp 5 ip virtual-router address 192.168.11.1\n"
             + "interface vlan 1 magp 1 ip virtual-router mac-address 00:00:5E:00:01:01\n"
-            + "interface vlan 2 magp 2 ip virtual-router mac-address 00:00:5E:00:01:01\n"
-            + "interface vlan 4 magp 4 ip virtual-router mac-address 00:00:5E:00:01:01\n"
-            + "interface vlan 6 magp 6 ip virtual-router mac-address 00:00:5E:00:01:01\n"
-            + "interface vlan 7 magp 7 ip virtual-router mac-address 00:00:5E:00:01:01\n"
+            + "interface vlan 2 magp 2 ip virtual-router mac-address 00:00:5E:00:01:02\n"
+            + "interface vlan 4 magp 3 ip virtual-router mac-address 00:00:5E:00:01:03\n"
+            + "interface vlan 6 magp 4 ip virtual-router mac-address 00:00:5E:00:01:04\n"
+            + "interface vlan 7 magp 5 ip virtual-router mac-address 00:00:5E:00:01:05\n"
             + "mlag-vip mlag-domain ip 192.168.255.242 /29 force\n"
             + "no mlag shutdown\n"
             + "mlag system-mac 00:00:5E:00:01:01\n"
@@ -419,15 +443,16 @@ def test_switch_config_spine_primary():
             + "router bgp 65533 vrf Customer distance 20 70 20\n"
             + "router bgp 65533 vrf default distance 20 70 20\n"
             + "router bgp 65533 vrf Customer maximum-paths ibgp 32\n"
+            + "router bgp 65533 vrf Customer maximum-paths 32\n"
             + "router bgp 65533 vrf default maximum-paths ibgp 32\n"
-            + "router bgp 65533 vrf Customer neighbor 192.168.12.4 remote-as 65536\n"
-            + "router bgp 65533 vrf Customer neighbor 192.168.12.5 remote-as 65536\n"
-            + "router bgp 65533 vrf Customer neighbor 192.168.12.6 remote-as 65536\n"
-            + "router bgp 65533 vrf default neighbor 192.168.4.4 remote-as 65533\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.4 remote-as 65532\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.5 remote-as 65532\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.6 remote-as 65532\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.4 remote-as 65531\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.4 route-map ncn-w001\n"
-            + "router bgp 65533 vrf default neighbor 192.168.4.5 remote-as 65533\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.5 remote-as 65531\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.5 route-map ncn-w002\n"
-            + "router bgp 65533 vrf default neighbor 192.168.4.6 remote-as 65533\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.6 remote-as 65531\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.6 route-map ncn-w003\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.4 timers 1 3\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.5 timers 1 3\n"
@@ -519,6 +544,8 @@ def test_switch_config_spine_secondary():
             + "interface ethernet 1/26 mtu 9216 force\n"
             + "interface ethernet 1/29 mtu 9216 force\n"
             + "interface ethernet 1/30 mtu 9216 force\n"
+            + "interface ethernet 1/31 speed 40G force\n"
+            + "interface ethernet 1/32 speed 40G force\n"
             + "interface ethernet 1/1 speed 40G force\n"
             + "interface ethernet 1/2 speed 40G force\n"
             + "interface ethernet 1/3 speed 40G force\n"
@@ -621,18 +648,6 @@ def test_switch_config_spine_secondary():
             + "interface mlag-port-channel 201 no shutdown\n"
         ) in str(result.output)
         assert (
-            "interface mlag-port-channel 1 lacp-individual enable force\n"
-            + "interface mlag-port-channel 2 lacp-individual enable force\n"
-            + "interface mlag-port-channel 3 lacp-individual enable force\n"
-            + "interface mlag-port-channel 4 lacp-individual enable force\n"
-            + "interface mlag-port-channel 5 lacp-individual enable force\n"
-            + "interface mlag-port-channel 6 lacp-individual enable force\n"
-            + "interface mlag-port-channel 7 lacp-individual enable force\n"
-            + "interface mlag-port-channel 8 lacp-individual enable force\n"
-            + "interface mlag-port-channel 9 lacp-individual enable force\n"
-            + "interface mlag-port-channel 13 lacp-individual enable force\n"
-        ) in str(result.output)
-        assert (
             "vlan 2\n"
             + "vlan 4\n"
             + "vlan 6\n"
@@ -693,14 +708,14 @@ def test_switch_config_spine_secondary():
             + "interface mlag-port-channel 201 switchport hybrid allowed-vlan add 6\n"
         ) in str(result.output)
         assert (
-            "web vrf default enable\n"
+            "web vrf default enable force\n"
             + "vrf definition Customer\n"
             + "vrf definition Customer rd 7:7\n"
             + "ip routing vrf Customer\n"
             + "ip routing vrf default\n"
-            + "ip name-server vrf default 10.92.100.225\n"
+            + "ip name-server vrf vrf-default 10.92.100.225\n"
             + "interface loopback 0\n"
-            + "interface loopback 0 ip address 10.2.0.3/32\n"
+            + "interface loopback 0 ip address 10.2.0.3/32 primary\n"
             + "interface vlan 1\n"
             + "interface vlan 2\n"
             + "interface vlan 4\n"
@@ -751,6 +766,15 @@ def test_switch_config_spine_secondary():
             + "ipv4 access-list nmn-hmn seq-number 70 deny ip 192.168.200.0 mask 255.255.128.0 192.168.3.0 mask 255.255.128.0\n"
             + "ipv4 access-list nmn-hmn seq-number 80 deny ip 192.168.200.0 mask 255.255.128.0 192.168.100.0 mask 255.255.128.0\n"
             + "ipv4 access-list nmn-hmn seq-number 90 permit ip any any\n"
+            + "ipv4 access-list cmn-can\n"
+            + "ipv4 access-list cmn-can bind-point rif\n"
+            + "ipv4 access-list cmn-can seq-number 10 deny ip 192.168.12.0 mask 255.255.255.0 192.168.11.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 20 deny ip 192.168.11.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 30 permit ip any any\n"
+            + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
+            + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
+            + "interface vlan 6 ipv4 port access-group cmn-can\n"
+            + "interface vlan 7 ipv4 port access-group cmn-can\n"
         ) in str(result.output)
         assert (
             "protocol ospf\n"
@@ -773,25 +797,24 @@ def test_switch_config_spine_secondary():
             + "interface vlan 1 ip dhcp relay instance 2 downstream\n"
             + "interface vlan 2 ip dhcp relay instance 2 downstream\n"
             + "interface vlan 4 ip dhcp relay instance 4 downstream\n"
-            + "interface vlan 6 ip dhcp relay instance 2 downstream\n"
         ) in str(result.output)
         assert (
             "protocol magp\n"
             + "interface vlan 1 magp 1\n"
             + "interface vlan 2 magp 2\n"
-            + "interface vlan 4 magp 4\n"
-            + "interface vlan 6 magp 6\n"
-            + "interface vlan 7 magp 7\n"
+            + "interface vlan 4 magp 3\n"
+            + "interface vlan 6 magp 4\n"
+            + "interface vlan 7 magp 5\n"
             + "interface vlan 1 magp 1 ip virtual-router address 192.168.1.1\n"
             + "interface vlan 2 magp 2 ip virtual-router address 192.168.3.1\n"
-            + "interface vlan 4 magp 4 ip virtual-router address 192.168.0.1\n"
-            + "interface vlan 6 magp 6 ip virtual-router address 192.168.12.1\n"
-            + "interface vlan 7 magp 7 ip virtual-router address 192.168.11.1\n"
+            + "interface vlan 4 magp 3 ip virtual-router address 192.168.0.1\n"
+            + "interface vlan 6 magp 4 ip virtual-router address 192.168.12.1\n"
+            + "interface vlan 7 magp 5 ip virtual-router address 192.168.11.1\n"
             + "interface vlan 1 magp 1 ip virtual-router mac-address 00:00:5E:00:01:01\n"
-            + "interface vlan 2 magp 2 ip virtual-router mac-address 00:00:5E:00:01:01\n"
-            + "interface vlan 4 magp 4 ip virtual-router mac-address 00:00:5E:00:01:01\n"
-            + "interface vlan 6 magp 6 ip virtual-router mac-address 00:00:5E:00:01:01\n"
-            + "interface vlan 7 magp 7 ip virtual-router mac-address 00:00:5E:00:01:01\n"
+            + "interface vlan 2 magp 2 ip virtual-router mac-address 00:00:5E:00:01:02\n"
+            + "interface vlan 4 magp 3 ip virtual-router mac-address 00:00:5E:00:01:03\n"
+            + "interface vlan 6 magp 4 ip virtual-router mac-address 00:00:5E:00:01:04\n"
+            + "interface vlan 7 magp 5 ip virtual-router mac-address 00:00:5E:00:01:05\n"
             + "mlag-vip mlag-domain ip 192.168.255.242 /29 force\n"
             + "no mlag shutdown\n"
             + "mlag system-mac 00:00:5E:00:01:01\n"
@@ -830,15 +853,16 @@ def test_switch_config_spine_secondary():
             + "router bgp 65533 vrf Customer distance 20 70 20\n"
             + "router bgp 65533 vrf default distance 20 70 20\n"
             + "router bgp 65533 vrf Customer maximum-paths ibgp 32\n"
+            + "router bgp 65533 vrf Customer maximum-paths 32\n"
             + "router bgp 65533 vrf default maximum-paths ibgp 32\n"
-            + "router bgp 65533 vrf Customer neighbor 192.168.12.4 remote-as 65536\n"
-            + "router bgp 65533 vrf Customer neighbor 192.168.12.5 remote-as 65536\n"
-            + "router bgp 65533 vrf Customer neighbor 192.168.12.6 remote-as 65536\n"
-            + "router bgp 65533 vrf default neighbor 192.168.4.4 remote-as 65533\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.4 remote-as 65532\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.5 remote-as 65532\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.6 remote-as 65532\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.4 remote-as 65531\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.4 route-map ncn-w001\n"
-            + "router bgp 65533 vrf default neighbor 192.168.4.5 remote-as 65533\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.5 remote-as 65531\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.5 route-map ncn-w002\n"
-            + "router bgp 65533 vrf default neighbor 192.168.4.6 remote-as 65533\n"
+            + "router bgp 65533 vrf default neighbor 192.168.4.6 remote-as 65531\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.6 route-map ncn-w003\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.4 timers 1 3\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.5 timers 1 3\n"
@@ -936,6 +960,8 @@ def test_switch_config_leaf_bmc():
             + "  ip vrf forwarding Customer\n"
             + "  mtu 9216\n"
             + "  ip address 192.168.12.4/24\n"
+            + "  ip access-group cmn-can in\n"
+            + "  ip access-group cmn-can out\n"
             + "  ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
         assert (
@@ -1064,7 +1090,7 @@ def test_switch_config_leaf_bmc():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
         ) in str(result.output)
-
+        print(result.output)
         assert (
             "ip access-list nmn-hmn\n"
             + "  seq 10 deny ip 192.168.3.0/17 192.168.0.0/17\n"
@@ -1076,6 +1102,10 @@ def test_switch_config_leaf_bmc():
             + "  seq 70 deny ip 192.168.200.0/17 192.168.3.0/17\n"
             + "  seq 80 deny ip 192.168.200.0/17 192.168.100.0/17\n"
             + "  seq 90 permit ip any any\n"
+            + "ip access-list cmn-can\n"
+            + "  seq 10 deny ip 192.168.12.0/24 192.168.11.0/24\n"
+            + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
+            + "  seq 30 permit ip any any\n"
         ) in str(result.output)
         assert (
             "router ospf 1\n"
@@ -1185,6 +1215,8 @@ def test_switch_config_cdu_primary():
             + "  ip vrf forwarding Customer\n"
             + "  mtu 9216\n"
             + "  ip address 192.168.12.5/24\n"
+            + "  ip access-group cmn-can in\n"
+            + "  ip access-group cmn-can out\n"
             + "  ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
         assert (
@@ -1323,6 +1355,10 @@ def test_switch_config_cdu_primary():
             + "  seq 70 deny ip 192.168.200.0/17 192.168.3.0/17\n"
             + "  seq 80 deny ip 192.168.200.0/17 192.168.100.0/17\n"
             + "  seq 90 permit ip any any\n"
+            + "ip access-list cmn-can\n"
+            + "  seq 10 deny ip 192.168.12.0/24 192.168.11.0/24\n"
+            + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
+            + "  seq 30 permit ip any any\n"
         ) in str(result.output)
         assert (
             "router ospf 1\n"
@@ -1438,6 +1474,8 @@ def test_switch_config_cdu_secondary():
             + "  ip vrf forwarding Customer\n"
             + "  mtu 9216\n"
             + "  ip address 192.168.12.6/24\n"
+            + "  ip access-group cmn-can in\n"
+            + "  ip access-group cmn-can out\n"
             + "  ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
         assert (
@@ -1568,6 +1606,10 @@ def test_switch_config_cdu_secondary():
             + "  seq 70 deny ip 192.168.200.0/17 192.168.3.0/17\n"
             + "  seq 80 deny ip 192.168.200.0/17 192.168.100.0/17\n"
             + "  seq 90 permit ip any any\n"
+            + "ip access-list cmn-can\n"
+            + "  seq 10 deny ip 192.168.12.0/24 192.168.11.0/24\n"
+            + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
+            + "  seq 30 permit ip any any\n"
         ) in str(result.output)
         assert (
             "router ospf 1\n"
@@ -1626,6 +1668,8 @@ sls_input = {
             "Name": "CMN",
             "ExtraProperties": {
                 "CIDR": "192.168.12.0/24",
+                "MyASN": 65532,
+                "PeerASN": 65533,
                 "Subnets": [
                     {
                         "Name": "network_hardware",
@@ -1713,6 +1757,8 @@ sls_input = {
             "FullName": "Node Management Network",
             "ExtraProperties": {
                 "CIDR": "192.168.3.0/17",
+                "MyASN": 65531,
+                "PeerASN": 65533,
                 "Subnets": [
                     {
                         "FullName": "NMN Management Network Infrastructure",

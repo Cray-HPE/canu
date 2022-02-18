@@ -20,7 +20,6 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Test CANU validate switch config commands."""
-import json
 from os import urandom
 from unittest.mock import patch
 
@@ -75,79 +74,8 @@ def test_validate_config(netmiko_command, switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert (
-            "Switch: sw-spine-001 (192.168.1.1)\n"
-            + "Differences\n"
-            + "-------------------------------------------------------------------------\n"
-            + "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
-            + "-------------------------------------------------------------------------\n"
-            + "Total Additions:                 1  |  Total Deletions:                 1\n"
-            + "                                    |  Script:                          1\n"
-            + "Router:                          1  |                                    \n"
-        ) in str(result.output)
-
-
-@patch("canu.validate.switch.config.config.switch_vendor")
-@patch("canu.validate.switch.config.config.netmiko_command")
-def test_validate_config_json(netmiko_command, switch_vendor):
-    """Test that the `canu validate switch config` command runs and prints json."""
-    switch_config_edit = switch_config[:-15] + "router add\n"
-    with runner.isolated_filesystem():
-        switch_vendor.return_value = "aruba"
-        netmiko_command.return_value = "sw-spine-001"
-        netmiko_command.return_value = switch_config
-        vendor = "aruba"
-        with open("switch.cfg", "w") as f:
-            f.writelines(switch_config_edit)
-
-        result = runner.invoke(
-            cli,
-            [
-                "--cache",
-                cache_minutes,
-                "validate",
-                "switch",
-                "config",
-                "--ip",
-                ip,
-                "--username",
-                username,
-                "--password",
-                password,
-                "--generated",
-                generated_config_file,
-                "--json",
-                "--vendor",
-                vendor,
-            ],
-        )
-        result_json = json.loads(result.output)
-
-        assert result.exit_code == 0
-        assert result_json == {
-            "additions": 1,
-            "deletions": 1,
-            "hostname_additions": 0,
-            "hostname_deletions": 0,
-            "interface_additions": 0,
-            "interface_deletions": 0,
-            "interface_lag_additions": 0,
-            "interface_lag_deletions": 0,
-            "spanning_tree_additions": 0,
-            "spanning_tree_deletions": 0,
-            "script_additions": 0,
-            "script_deletions": 1,
-            "router_additions": 1,
-            "router_deletions": 0,
-            "system_mac_additions": 0,
-            "system_mac_deletions": 0,
-            "isl_additions": 0,
-            "isl_deletions": 0,
-            "role_additions": 0,
-            "role_deletions": 0,
-            "keepalive_additions": 0,
-            "keepalive_deletions": 0,
-        }
+        print(result.output)
+        assert ("- nae-script abc\n" + "+ router add\n") in str(result.output)
 
 
 @patch("canu.validate.switch.config.config.switch_vendor")
@@ -180,23 +108,49 @@ def test_validate_config_additions(netmiko_command, switch_vendor):
             ],
         )
         assert result.exit_code == 0
+        print(result.output)
         assert (
-            "Switch: sw-spine-001 (192.168.1.1)\n"
-            + "Differences\n"
-            + "-------------------------------------------------------------------------\n"
-            + "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
-            + "-------------------------------------------------------------------------\n"
-            + "Total Additions:                13  |  Total Deletions:                13\n"
-            + "Hostname:                        1  |  Hostname:                        1\n"
-            + "Interface:                       1  |  Interface:                       1\n"
-            + "Interface Lag:                   1  |  Interface Lag:                   1\n"
-            + "Spanning Tree:                   1  |  Spanning Tree:                   1\n"
-            + "Script:                          1  |  Script:                          1\n"
-            + "Router:                          1  |  Router:                          1\n"
-            + "System Mac:                      1  |  System Mac:                      1\n"
-            + "Inter Switch Link:               1  |  Inter Switch Link:               1\n"
-            + "Role:                            1  |  Role:                            1\n"
-            + "Keepalive:                       1  |  Keepalive:                       1\n"
+            "- hostname sw-spine-001\n"
+            + "+ hostname sw-spine-01\n"
+            + "- spanning-tree priority 0\n"
+            + "+ spanning-tree priority 7\n"
+            + "- interface lag 101 multi-chassis\n"
+            + "+ interface lag 100 multi-chassis\n"
+            + "    no shutdown\n"
+            + "    description spine_to_leaf_lag\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 2,4,7\n"
+            + "    lacp mode active\n"
+            + "    spanning-tree root-guard\n"
+            + "  vsx\n"
+            + "-   system-mac 02:00:00:00:6b:00\n"
+            + "+   system-mac 02:00:00:00:6b:01\n"
+            + "-   inter-switch-link lag 256\n"
+            + "+   inter-switch-link lag 255\n"
+            + "-   role primary\n"
+            + "+   role secondary\n"
+            + "-   keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
+            + "+   keepalive peer 192.168.255.1 source 192.168.255.2 vrf keepalive\n"
+            + "  interface 1/1/1\n"
+            + "-   lag 101\n"
+            + "+   lag 100\n"
+            + "  interface 1/1/2\n"
+            + "-   lag 101\n"
+            + "+   lag 100\n"
+            + "- interface 1/1/6\n"
+            + "+ interface 1/1/7\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "-   description sw-spine-001:6==>sw-cdu-002:49\n"
+            + "+   description sw-spine-001:7==>sw-cdu-002:49\n"
+            + "    lag 201\n"
+            + "- router ospf 1\n"
+            + "+ router ospf 0\n"
+            + "    router-id 10.2.0.2/32\n"
+            + "    area 0.0.0.0\n"
+            + "- nae-script abc\n"
+            + "+ nae-script 123\n"
         ) in str(result.output)
 
 
@@ -230,23 +184,49 @@ def test_validate_config_running_file_aruba():
             ],
         )
         assert result.exit_code == 0
+        print(result.output)
         assert (
-            "Switch: sw-spine-001\n"
-            + "Differences\n"
-            + "-------------------------------------------------------------------------\n"
-            + "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
-            + "-------------------------------------------------------------------------\n"
-            + "Total Additions:                13  |  Total Deletions:                13\n"
-            + "Hostname:                        1  |  Hostname:                        1\n"
-            + "Interface:                       1  |  Interface:                       1\n"
-            + "Interface Lag:                   1  |  Interface Lag:                   1\n"
-            + "Spanning Tree:                   1  |  Spanning Tree:                   1\n"
-            + "Script:                          1  |  Script:                          1\n"
-            + "Router:                          1  |  Router:                          1\n"
-            + "System Mac:                      1  |  System Mac:                      1\n"
-            + "Inter Switch Link:               1  |  Inter Switch Link:               1\n"
-            + "Role:                            1  |  Role:                            1\n"
-            + "Keepalive:                       1  |  Keepalive:                       1\n"
+            "- hostname sw-spine-001\n"
+            + "+ hostname sw-spine-01\n"
+            + "- spanning-tree priority 0\n"
+            + "+ spanning-tree priority 7\n"
+            + "- interface lag 101 multi-chassis\n"
+            + "+ interface lag 100 multi-chassis\n"
+            + "    no shutdown\n"
+            + "    description spine_to_leaf_lag\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 2,4,7\n"
+            + "    lacp mode active\n"
+            + "    spanning-tree root-guard\n"
+            + "  vsx\n"
+            + "-   system-mac 02:00:00:00:6b:00\n"
+            + "+   system-mac 02:00:00:00:6b:01\n"
+            + "-   inter-switch-link lag 256\n"
+            + "+   inter-switch-link lag 255\n"
+            + "-   role primary\n"
+            + "+   role secondary\n"
+            + "-   keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
+            + "+   keepalive peer 192.168.255.1 source 192.168.255.2 vrf keepalive\n"
+            + "  interface 1/1/1\n"
+            + "-   lag 101\n"
+            + "+   lag 100\n"
+            + "  interface 1/1/2\n"
+            + "-   lag 101\n"
+            + "+   lag 100\n"
+            + "- interface 1/1/6\n"
+            + "+ interface 1/1/7\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "-   description sw-spine-001:6==>sw-cdu-002:49\n"
+            + "+   description sw-spine-001:7==>sw-cdu-002:49\n"
+            + "    lag 201\n"
+            + "- router ospf 1\n"
+            + "+ router ospf 0\n"
+            + "    router-id 10.2.0.2/32\n"
+            + "    area 0.0.0.0\n"
+            + "- nae-script abc\n"
+            + "+ nae-script 123\n"
         ) in str(result.output)
 
 
@@ -280,14 +260,50 @@ def test_validate_config_running_file_dell():
             ],
         )
         assert result.exit_code == 0
+        print(result.output)
         assert (
-            "Switch: \n"
-            + "Differences\n"
-            + "-------------------------------------------------------------------------\n"
-            + "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
-            + "-------------------------------------------------------------------------\n"
-            + "Total Additions:                15  |  Total Deletions:                17\n"
-            + "Router:                          1  |  Router:                          1\n"
+            "- interface vlan3000\n"
+            + "+ interface vlan7\n"
+            + "+   description CAN\n"
+            + "+   no shutdown\n"
+            + "+   mtu 9216\n"
+            + "+   ip address 192.168.0.16/17\n"
+            + "+   ip access-group nmn-hmn in\n"
+            + "+   ip access-group nmn-hmn out\n"
+            + "+   ip ospf 1 area 0.0.0.0\n"
+            + "+ interface ethernet1/1/28\n"
+            + "+   flowcontrol receive on\n"
+            + "+   flowcontrol transmit on\n"
+            + "+ ip access-list nmn-hmn\n"
+            + "+   seq 85 deny ip 192.168.201.0/17 192.168.101.0/17\n"
+            + "+ router bgp\n"
+            + "    mode L3\n"
+            + "    description cabinet_3002\n"
+            + "+   no shutdown\n"
+            + "    mtu 9216\n"
+            + "    ip address 192.168.104.2/22\n"
+            + "    ip ospf 1 area 0.0.0.0\n"
+            + "    ip ospf passive\n"
+            + "    ip helper-address 10.94.100.222\n"
+            + "    vrrp-group 30\n"
+            + "      virtual-address 192.168.104.1\n"
+            + "      priority 110\n"
+            + "- interface vlan2\n"
+            + "-   ip address 192.168.3.16/17\n"
+            + "- interface port-channel5\n"
+            + "-   vlt-port-channel 5\n"
+            + "- interface ethernet1/1/28\n"
+            + "-   channel-group 100 mode active\n"
+            + "-   flowcontrol receive off\n"
+            + "-   flowcontrol transmit off\n"
+            + "- ip access-list nmn-hmn\n"
+            + "-   seq 40 deny ip 192.168.0.0/17 192.168.100.0/17\n"
+            + "-   seq 50 deny ip 192.168.100.0/17 192.168.0.0/17\n"
+            + "- router ospf 1\n"
+            + "-   router-id 10.2.0.16\n"
+            + "- vlt-domain 1\n"
+            + "-   vlt-mac 00:11:22:aa:bb:cc\n"
+            + "- ntp server 192.168.4.4\n"
         ) in str(result.output)
 
 
@@ -323,13 +339,10 @@ def test_validate_config_running_file_mellanox():
         assert result.exit_code == 0
         print(result.output)
         assert (
-            "Switch: sw-spine-001\n"
-            + "Differences\n"
-            + "-------------------------------------------------------------------------\n"
-            + "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
-            + "-------------------------------------------------------------------------\n"
-            + "Total Additions:                 1  |  Total Deletions:                 3\n"
-            + "Router:                          1  |  Router:                          1\n"
+            "- router ospf 1 vrf default\n"
+            + "- ntp server 192.168.4.6 version 4\n"
+            + "- ntp server 192.168.4.6 keyID 0\n"
+            + "+ router ospf 0 vrf default\n"
         ) in str(result.output)
 
 
@@ -363,16 +376,8 @@ def test_validate_config_password_prompt(netmiko_command, switch_vendor):
             input=password,
         )
         assert result.exit_code == 0
-        assert (
-            "Switch: sw-spine-001 (192.168.1.1)\n"
-            + "Differences\n"
-            + "-------------------------------------------------------------------------\n"
-            + "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
-            + "-------------------------------------------------------------------------\n"
-            + "Total Additions:                 1  |  Total Deletions:                 1\n"
-            + "                                    |  Script:                          1\n"
-            + "Router:                          1  |                                    \n"
-        ) in str(result.output)
+        print(result.output)
+        assert ("- nae-script abc\n" + "+ router add\n") in str(result.output)
 
 
 def test_validate_config_vendor_prompt():
@@ -404,23 +409,49 @@ def test_validate_config_vendor_prompt():
             input=vendor,
         )
         assert result.exit_code == 0
+        print(result.output)
         assert (
-            "Switch: sw-spine-001\n"
-            + "Differences\n"
-            + "-------------------------------------------------------------------------\n"
-            + "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
-            + "-------------------------------------------------------------------------\n"
-            + "Total Additions:                13  |  Total Deletions:                13\n"
-            + "Hostname:                        1  |  Hostname:                        1\n"
-            + "Interface:                       1  |  Interface:                       1\n"
-            + "Interface Lag:                   1  |  Interface Lag:                   1\n"
-            + "Spanning Tree:                   1  |  Spanning Tree:                   1\n"
-            + "Script:                          1  |  Script:                          1\n"
-            + "Router:                          1  |  Router:                          1\n"
-            + "System Mac:                      1  |  System Mac:                      1\n"
-            + "Inter Switch Link:               1  |  Inter Switch Link:               1\n"
-            + "Role:                            1  |  Role:                            1\n"
-            + "Keepalive:                       1  |  Keepalive:                       1\n"
+            "- hostname sw-spine-001\n"
+            + "+ hostname sw-spine-01\n"
+            + "- spanning-tree priority 0\n"
+            + "+ spanning-tree priority 7\n"
+            + "- interface lag 101 multi-chassis\n"
+            + "+ interface lag 100 multi-chassis\n"
+            + "    no shutdown\n"
+            + "    description spine_to_leaf_lag\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 2,4,7\n"
+            + "    lacp mode active\n"
+            + "    spanning-tree root-guard\n"
+            + "  vsx\n"
+            + "-   system-mac 02:00:00:00:6b:00\n"
+            + "+   system-mac 02:00:00:00:6b:01\n"
+            + "-   inter-switch-link lag 256\n"
+            + "+   inter-switch-link lag 255\n"
+            + "-   role primary\n"
+            + "+   role secondary\n"
+            + "-   keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
+            + "+   keepalive peer 192.168.255.1 source 192.168.255.2 vrf keepalive\n"
+            + "  interface 1/1/1\n"
+            + "-   lag 101\n"
+            + "+   lag 100\n"
+            + "  interface 1/1/2\n"
+            + "-   lag 101\n"
+            + "+   lag 100\n"
+            + "- interface 1/1/6\n"
+            + "+ interface 1/1/7\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "-   description sw-spine-001:6==>sw-cdu-002:49\n"
+            + "+   description sw-spine-001:7==>sw-cdu-002:49\n"
+            + "    lag 201\n"
+            + "- router ospf 1\n"
+            + "+ router ospf 0\n"
+            + "    router-id 10.2.0.2/32\n"
+            + "    area 0.0.0.0\n"
+            + "- nae-script abc\n"
+            + "+ nae-script 123\n"
         ) in str(result.output)
 
 
@@ -454,6 +485,7 @@ def test_validate_config_timeout(netmiko_command, switch_vendor):
             ],
         )
         assert result.exit_code == 0
+        print(result.output)
         assert ("Timeout error. Check the IP address and try again.") in str(
             result.output,
         )
@@ -489,6 +521,7 @@ def test_validate_config_auth_exception(netmiko_command, switch_vendor):
             ],
         )
         assert result.exit_code == 0
+        print(result.output)
         assert (
             "Authentication error. Check the credentials or IP address and try again"
         ) in str(result.output)
@@ -527,6 +560,7 @@ def test_validate_config_bad_config_file():
             ],
         )
         assert result.exit_code == 0
+        print(result.output)
         assert ("The file bad.file is not a valid config file.") in str(result.output)
 
 
@@ -596,23 +630,15 @@ def test_validate_config_dell(netmiko_commands, switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert (
-            "Switch: sw-spine-001 (192.168.1.2)\n"
-            + "Differences\n"
-            + "-------------------------------------------------------------------------\n"
-            + "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
-            + "-------------------------------------------------------------------------\n"
-            + "Total Additions:                 1  |  Total Deletions:                 1\n"
-            + "                                    |  Script:                          1\n"
-            + "Router:                          1  |                                    \n"
-        ) in str(result.output)
+        print(result.output)
+        assert ("- nae-script abc\n" + "+ router add\n") in str(result.output)
 
 
 @patch("canu.validate.switch.config.config.switch_vendor")
 @patch("canu.validate.switch.config.config.netmiko_commands")
 def test_validate_config_mellanox(netmiko_commands, switch_vendor):
     """Test that the `canu validate switch config` command runs on mellanox switch."""
-    switch_config_edit = mellanox_switch_config[:-15] + "\n" + "router add\n"
+    switch_config_edit = mellanox_switch_config[:-1] + "\n" + "router add\n"
     with runner.isolated_filesystem():
         switch_vendor.return_value = "mellanox"
         netmiko_commands.return_value = [
@@ -621,7 +647,6 @@ def test_validate_config_mellanox(netmiko_commands, switch_vendor):
         ]
         with open("mellanox_switch.cfg", "w") as f:
             f.writelines(switch_config_edit)
-
         result = runner.invoke(
             cli,
             [
@@ -642,15 +667,7 @@ def test_validate_config_mellanox(netmiko_commands, switch_vendor):
         )
         assert result.exit_code == 0
         print(result.output)
-        assert (
-            "Switch: sw-spine-001 (192.168.1.3)\n"
-            + "Differences\n"
-            + "-------------------------------------------------------------------------\n"
-            + "In Generated Not In Running (+)     |  In Running Not In Generated (-)   \n"
-            + "-------------------------------------------------------------------------\n"
-            + "Total Additions:                 2  |  Total Deletions:                 1\n"
-            + "Router:                          1  |                                    \n"
-        ) in str(result.output)
+        assert ("+ router add") in str(result.output)
 
 
 switch_config = (

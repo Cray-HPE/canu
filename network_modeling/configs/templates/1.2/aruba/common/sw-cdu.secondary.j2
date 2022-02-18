@@ -1,6 +1,7 @@
 {#- sw-cdu.secondary #}
 {%- include '1.2/aruba/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
+{%- include '1.2/aruba/common/banner-motd.j2' %}
 no ip icmp redirect
 vrf keepalive
 vrf Customer
@@ -28,6 +29,8 @@ vlan {{ variables.HMN_VLAN }}
     apply access-list ip nmn-hmn out
 vlan {{ variables.CMN_VLAN }}
     name CMN
+    apply access-list ip cmn-can in
+    apply access-list ip cmn-can out
 spanning-tree
 {#- forward delay added to help with pxe boots. CASMNET-1099 + CASMTRIAGE-2793 #}
 spanning-tree forward-delay 4
@@ -102,7 +105,7 @@ vsx
     linkup-delay-timer 600
     vsx-sync vsx-global
 
-router ospf 1 vrf Customer
+router ospf 2 vrf Customer
     router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 router ospf 1

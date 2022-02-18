@@ -47,14 +47,15 @@ from canu.utils.vendor import switch_vendor
     help="Switch password",
 )
 @click.option(
-    "--asn",
-    help="ASN",
-    default="65533",
+    "--network",
+    default="ALL",
     show_default=True,
+    type=click.Choice(["ALL", "NMN", "CMN"], case_sensitive=False),
+    help="The network that BGP neighbors are checked.",
 )
 @click.option("--verbose", is_flag=True, help="Verbose mode")
 @click.pass_context
-def bgp(ctx, username, password, asn, verbose):
+def bgp(ctx, username, password, verbose, network):
     """Validate BGP neighbors.
 
     This command will check the BGP neighbors for the switch IP addresses entered. All of the neighbors of a switch
@@ -66,8 +67,6 @@ def bgp(ctx, username, password, asn, verbose):
 
     - Or read the IP addresses from a file, one IP address per line, using '--ips-file FILENAME' flag.
 
-    - The default 'asn' is set to 65533 if it needs to be changed, use the '--asn NEW_ASN_NUMBER' flag.
-
     If you want to see the individual status of all the neighbors of a switch, use the '--verbose' flag.
 
     --------
@@ -78,13 +77,18 @@ def bgp(ctx, username, password, asn, verbose):
         ctx: CANU context settings
         username: Switch username
         password: Switch password
-        asn: Switch ASN
         verbose: Bool indicating verbose output
+        network: The network that BGP neighbors are checked
     """
     credentials = {"username": username, "password": password}
     data = {}
     errors = []
     sls_cache = pull_sls_networks()
+    if sls_cache["SWITCH_ASN"]:
+        asn = sls_cache["SWITCH_ASN"]
+    else:
+        # default asn if ASN isn't in SLS
+        asn = "65533"
     spine_switches = [
         sls_cache["HMN_IPs"]["sw-spine-001"],
         sls_cache["HMN_IPs"]["sw-spine-002"],
@@ -100,6 +104,7 @@ def bgp(ctx, username, password, asn, verbose):
                 str(ip),
                 credentials,
                 asn,
+                network,
             )
             if switch_info is None:
                 errors.append(
@@ -184,13 +189,14 @@ def bgp(ctx, username, password, asn, verbose):
     return
 
 
-def get_bgp_neighbors(ip, credentials, asn):
+def get_bgp_neighbors(ip, credentials, asn, network):
     """Get BGP neighbors for a switch.
 
     Args:
         ip: IPv4 address of the switch
         credentials: Dictionary with username and password of the switch
         asn: Switch ASN
+        network: The network that BGP neighbors are checked
 
     Returns:
         bgp_neighbors: A dict with switch neighbors
@@ -203,13 +209,27 @@ def get_bgp_neighbors(ip, credentials, asn):
         if vendor is None:
             return None, None
         elif vendor == "aruba":
-            bgp_neighbors, switch_info = get_bgp_neighbors_aruba(ip, credentials, asn)
+            bgp_neighbors, switch_info = get_bgp_neighbors_aruba(
+                ip,
+                credentials,
+                asn,
+                network,
+            )
         elif vendor == "dell":
             # This function returns: {}, switch_info
             # There won't be any Dell switches with BGP neighbors
-            bgp_neighbors, switch_info = get_bgp_neighbors_dell(ip, credentials)
+            bgp_neighbors, switch_info = get_bgp_neighbors_dell(
+                ip,
+                credentials,
+                asn,
+                network,
+            )
         elif vendor == "mellanox":
-            bgp_neighbors, switch_info = get_bgp_neighbors_mellanox(ip, credentials)
+            bgp_neighbors, switch_info = get_bgp_neighbors_mellanox(
+                ip,
+                credentials,
+                network,
+            )
 
     except (
         requests.exceptions.HTTPError,
@@ -229,13 +249,14 @@ def get_bgp_neighbors(ip, credentials, asn):
     return bgp_neighbors, switch_info
 
 
-def get_bgp_neighbors_aruba(ip, credentials, asn):
+def get_bgp_neighbors_aruba(ip, credentials, asn, network):
     """Get BGP neighbors for an Aruba switch.
 
     Args:
         ip: IPv4 address of the switch
         credentials: Dictionary with username and password of the switch
         asn: Switch ASN
+        network: The network that BGP neighbors are checked
 
     Returns:
         bgp_neighbors: A dict with switch neighbors
@@ -276,27 +297,31 @@ def get_bgp_neighbors_aruba(ip, credentials, asn):
         )
         return None, None
     # Get neighbors
-    vrfs = ["default", "Customer"]
     bgp_neighbors_aruba = {}
+    network_list = {"CMN": "Customer", "NMN": "default"}
+    if network == "NMN":
+        del network_list["CMN"]
+    elif network == "CMN":
+        del network_list["NMN"]
+
     try:
-        for vrf in vrfs:
+        for net_vrf in network_list.values():
             bgp_neighbors_response = session.get(
-                f"https://{ip}/rest/v10.04/system/vrfs/{vrf}/bgp_routers/{asn}/bgp_neighbors?depth=2",
+                f"https://{ip}/rest/v10.04/system/vrfs/{net_vrf}/bgp_routers/{asn}/bgp_neighbors?depth=2",
                 verify=False,
             )
-            bgp_neighbors_aruba.update(bgp_neighbors_response.json())
             bgp_neighbors_response.raise_for_status()
-        switch_info_response = session.get(
-            f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
-            verify=False,
-        )
-        switch_info_response.raise_for_status()
+            bgp_neighbors_aruba.update(bgp_neighbors_response.json())
+            switch_info_response = session.get(
+                f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
+                verify=False,
+            )
+            switch_info_response.raise_for_status()
+            switch_info = switch_info_response.json()
+            switch_info["ip"] = ip
+            switch_info["vendor"] = "aruba"
 
-        switch_info = switch_info_response.json()
-        switch_info["ip"] = ip
-        switch_info["vendor"] = "aruba"
-
-        # Logout
+            # Logout
         session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
 
     except requests.exceptions.RequestException:  # pragma: no cover
@@ -361,12 +386,13 @@ def get_bgp_neighbors_dell(ip, credentials):
     return {}, switch_info
 
 
-def get_bgp_neighbors_mellanox(ip, credentials):
+def get_bgp_neighbors_mellanox(ip, credentials, network):
     """Get BGP neighbors for a Mellanox switch.
 
     Args:
         ip: IPv4 address of the switch
         credentials: Dictionary with username and password of the switch
+        network: The network that BGP neighbors are checked
 
     Returns:
         bgp_neighbors: A dict with switch neighbors
@@ -390,10 +416,16 @@ def get_bgp_neighbors_mellanox(ip, credentials):
     if login.json()["status"] != "OK":
         raise requests.exceptions.HTTPError
 
+    if network == "NMN":
+        net_vrf = "default"
+    elif network == "CMN":
+        net_vrf = "Customer"
+    else:
+        net_vrf = "all"
     try:
         bgp_status = session.post(
             f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
-            json={"cmd": "show ip bgp vrf all summary"},
+            json={"cmd": f"show ip bgp vrf {net_vrf} summary"},
             verify=False,
         )
         bgp_status = bgp_status.json()
