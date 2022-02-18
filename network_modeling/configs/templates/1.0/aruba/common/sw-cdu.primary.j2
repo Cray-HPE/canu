@@ -1,6 +1,7 @@
 {#- sw-cdu.primary #}
 {%- include '1.0/aruba/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
+{%- include '1.0/aruba/common/banner-motd.j2' %}
 no ip icmp redirect
 vrf keepalive
 ntp server {{ variables.NCN_W001 }}
@@ -25,6 +26,8 @@ vlan {{ variables.HMN_VLAN }}
     apply access-list ip nmn-hmn in
     apply access-list ip nmn-hmn out
 spanning-tree
+{#- forward delay added to help with pxe boots. CASMNET-1099 + CASMTRIAGE-2793 #}
+spanning-tree forward-delay 4
 spanning-tree config-name MST0
 spanning-tree config-revision 1
 interface mgmt

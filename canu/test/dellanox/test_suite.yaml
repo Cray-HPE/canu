@@ -26,15 +26,15 @@
   pattern: "3.9.3210"
   err_msg: Software version is wrong
   device: spine
-- name: BGP test
-  task: show ip bgp vrf all summary
-  test: contains_lines
-  pattern: 
-    - IDLE
-    - ACTIVE
-    - CONNECT
-  err_msg: BGP has Neighbors in active or idle
-  device: spine
+# - name: BGP test
+#   task: show ip bgp vrf all summary
+#   test: contains_lines
+#   pattern: 
+#     - IDLE
+#     - ACTIVE
+#     - CONNECT
+#   err_msg: BGP has Neighbors in active or idle
+#   device: spine
 - name: STP check for root bridge
   task: show spanning-tree
   test: contains
@@ -53,12 +53,12 @@
   pattern: "Active nodes: 1"
   err_msg: MLAG VIP has only 1 active node
   device: spine
-- name: unsaved config changes
-  task: show configuration files
-  test: eval
-  expr: "all(['no' in line for line in result.splitlines()])"
-  err_msg: There are unsaved changes
-  device: spine
+# - name: unsaved config changes
+#   task: show configuration files
+#   test: eval
+#   expr: "all(['no' in line for line in result.splitlines()])"
+#   err_msg: There are unsaved changes
+#   device: spine
 - name: Interface error check
   task: "show interfaces ethernet counters | include error"
   test: "!contains_re"

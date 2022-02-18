@@ -32,24 +32,37 @@ from canu.cli import cli
 
 test_file_directory = Path(__file__).resolve().parent
 
-test_file_name = "Full_Architecture_Golden_Config_0.0.6.xlsx"
+test_file_name = "Full_Architecture_Golden_Config_1.1.5.xlsx"
 test_file = path.join(test_file_directory, "data", test_file_name)
 override_file_name = "override.yaml"
 override_file = path.join(test_file_directory, "data", override_file_name)
 architecture = "full"
 tabs = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
-corners = "J14,T44,J14,T48,J14,T28,J14,T27"
+corners = "J14,T44,J14,T53,J14,T34,J14,T27"
 sls_file = "sls_file.json"
 csm = "1.2"
 switch_name = "sw-spine-001"
 cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
 
-test_file_name_tds = "TDS_Architecture_Golden_Config_0.0.6.xlsx"
+test_file_name_tds = "TDS_Architecture_Golden_Config_1.1.5.xlsx"
 test_file_tds = path.join(test_file_directory, "data", test_file_name_tds)
 architecture_tds = "TDS"
 tabs_tds = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
-corners_tds = "J14,T30,J14,T48,J14,T28,J14,T27"
+corners_tds = "J14,T30,J14,T53,J14,T32,J14,T27"
+
+canu_version_file = path.join(test_file_directory.resolve().parent, "canu", ".version")
+with open(canu_version_file, "r") as file:
+    canu_version = file.readline()
+canu_version = canu_version.strip()
+banner_motd = (
+    "banner motd ^\n"
+    "###############################################################################\n"
+    f"# CSM version:  {csm}\n"
+    f"# CANU version: {canu_version}\n"
+    "###############################################################################\n"
+    "^\n"
+)
 
 runner = testing.CliRunner()
 
@@ -85,10 +98,10 @@ def test_switch_config_spine_primary():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+        assert "hostname sw-spine-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-spine-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf Customer\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
@@ -136,6 +149,10 @@ def test_switch_config_spine_primary():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "\n"
             + "vlan 1\n"
@@ -149,8 +166,12 @@ def test_switch_config_spine_primary():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 7\n"
             + "    name CAN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 10\n"
             + "    name SUN\n"
             + "spanning-tree\n"
@@ -206,7 +227,7 @@ def test_switch_config_spine_primary():
             + "    lag 103\n"
         )
         assert sw_spine_to_leaf in str(result.output)
-        print(result.output)
+
         spine_to_cdu = (
             "interface lag 201 multi-chassis\n"
             + "    no shutdown\n"
@@ -230,7 +251,7 @@ def test_switch_config_spine_primary():
             + "    lag 201\n"
         )
         assert spine_to_cdu in str(result.output)
-        print(result.output)
+
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -302,7 +323,7 @@ def test_switch_config_spine_primary():
             + "    vsx-sync vsx-global\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "ip prefix-list pl-cmn seq 10 permit 192.168.12.0/24 ge 24\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24\n"
@@ -310,7 +331,7 @@ def test_switch_config_spine_primary():
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "route-map ncn-w001 permit seq 10\n"
             + "     match ip address prefix-list tftp\n"
@@ -380,10 +401,8 @@ def test_switch_config_spine_primary():
             + "     match ip address prefix-list pl-nmn\n"
             + "     set ip next-hop 192.168.4.6\n"
         ) in str(result.output)
-        print(result.output)
-        print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.2\n"
             + "    default-information originate\n"
             + "    area 0.0.0.0\n"
@@ -401,11 +420,11 @@ def test_switch_config_spine_primary():
             + "    timers bgp 1 3\n"
             + "    distance bgp 20 70\n"
             + "    neighbor 192.168.3.3 remote-as 65533\n"
-            + "    neighbor 192.168.4.4 remote-as 65533\n"
+            + "    neighbor 192.168.4.4 remote-as 65531\n"
             + "    neighbor 192.168.4.4 passive\n"
-            + "    neighbor 192.168.4.5 remote-as 65533\n"
+            + "    neighbor 192.168.4.5 remote-as 65531\n"
             + "    neighbor 192.168.4.5 passive\n"
-            + "    neighbor 192.168.4.6 remote-as 65533\n"
+            + "    neighbor 192.168.4.6 remote-as 65531\n"
             + "    neighbor 192.168.4.6 passive\n"
             + "    address-family ipv4 unicast\n"
             + "        neighbor 192.168.3.3 activate\n"
@@ -422,11 +441,11 @@ def test_switch_config_spine_primary():
             + "        timers bgp 1 3\n"
             + "        distance bgp 20 70\n"
             + "        neighbor 192.168.12.3 remote-as 65533\n"
-            + "        neighbor 192.168.12.4 remote-as 65536\n"
+            + "        neighbor 192.168.12.4 remote-as 65532\n"
             + "        neighbor 192.168.12.4 passive\n"
-            + "        neighbor 192.168.12.5 remote-as 65536\n"
+            + "        neighbor 192.168.12.5 remote-as 65532\n"
             + "        neighbor 192.168.12.5 passive\n"
-            + "        neighbor 192.168.12.6 remote-as 65536\n"
+            + "        neighbor 192.168.12.6 remote-as 65532\n"
             + "        neighbor 192.168.12.6 passive\n"
             + "        address-family ipv4 unicast\n"
             + "            neighbor 192.168.12.3 activate\n"
@@ -481,11 +500,10 @@ def test_switch_config_spine_primary_override():
             + "#  role primary\n"
             + "#https-server vrf Customer\n"
         ) in str(result.output)
-
-        print(result.output)
+        assert "hostname sw-spine-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-spine-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf Customer\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
@@ -494,7 +512,6 @@ def test_switch_config_spine_primary_override():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf Customer\n"
             + "ssh server vrf default\n"
@@ -534,6 +551,10 @@ def test_switch_config_spine_primary_override():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -546,8 +567,12 @@ def test_switch_config_spine_primary_override():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 7\n"
             + "    name CAN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 10\n"
             + "    name SUN\n"
             + "spanning-tree\n"
@@ -621,7 +646,6 @@ def test_switch_config_spine_primary_override():
             + "    lag 201\n"
         )
         assert spine_to_cdu in str(result.output)
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -692,7 +716,6 @@ def test_switch_config_spine_primary_override():
             + "    vsx-sync vsx-global\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "ip prefix-list pl-cmn seq 10 permit 192.168.12.0/24 ge 24\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24\n"
@@ -700,7 +723,6 @@ def test_switch_config_spine_primary_override():
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "route-map ncn-w001 permit seq 10\n"
             + "    match ip address prefix-list tftp\n"
@@ -766,9 +788,8 @@ def test_switch_config_spine_primary_override():
             + "    match ip address prefix-list pl-nmn\n"
             + "    set ip next-hop 192.168.4.6\n"
         ) in str(result.output)
-        print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.2\n"
             + "    default-information originate\n"
             + "    area 0.0.0.0\n"
@@ -785,11 +806,11 @@ def test_switch_config_spine_primary_override():
             + "    timers bgp 1 3\n"
             + "    distance bgp 20 70\n"
             + "    neighbor 192.168.3.3 remote-as 65533\n"
-            + "    neighbor 192.168.4.4 remote-as 65533\n"
+            + "    neighbor 192.168.4.4 remote-as 65531\n"
             + "    neighbor 192.168.4.4 passive\n"
-            + "    neighbor 192.168.4.5 remote-as 65533\n"
+            + "    neighbor 192.168.4.5 remote-as 65531\n"
             + "    neighbor 192.168.4.5 passive\n"
-            + "    neighbor 192.168.4.6 remote-as 65533\n"
+            + "    neighbor 192.168.4.6 remote-as 65531\n"
             + "    neighbor 192.168.4.6 passive\n"
             + "    address-family ipv4 unicast\n"
             + "      neighbor 192.168.3.3 activate\n"
@@ -806,11 +827,11 @@ def test_switch_config_spine_primary_override():
             + "      timers bgp 1 3\n"
             + "      distance bgp 20 70\n"
             + "      neighbor 192.168.12.3 remote-as 65533\n"
-            + "      neighbor 192.168.12.4 remote-as 65536\n"
+            + "      neighbor 192.168.12.4 remote-as 65532\n"
             + "      neighbor 192.168.12.4 passive\n"
-            + "      neighbor 192.168.12.5 remote-as 65536\n"
+            + "      neighbor 192.168.12.5 remote-as 65532\n"
             + "      neighbor 192.168.12.5 passive\n"
-            + "      neighbor 192.168.12.6 remote-as 65536\n"
+            + "      neighbor 192.168.12.6 remote-as 65532\n"
             + "      neighbor 192.168.12.6 passive\n"
             + "      address-family ipv4 unicast\n"
             + "        neighbor 192.168.12.3 activate\n"
@@ -855,10 +876,11 @@ def test_switch_config_spine_secondary():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+
+        assert "hostname sw-spine-002\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-spine-002\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf Customer\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
@@ -866,7 +888,6 @@ def test_switch_config_spine_secondary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "ssh server vrf Customer\n"
             + "ssh server vrf default\n"
@@ -906,6 +927,10 @@ def test_switch_config_spine_secondary():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "\n"
             + "vlan 1\n"
@@ -919,8 +944,12 @@ def test_switch_config_spine_secondary():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 7\n"
             + "    name CAN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 10\n"
             + "    name SUN\n"
             + "spanning-tree\n"
@@ -1001,7 +1030,6 @@ def test_switch_config_spine_secondary():
         )
         assert spine_to_cdu in str(result.output)
 
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -1073,7 +1101,6 @@ def test_switch_config_spine_secondary():
             + "    vsx-sync vsx-global\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "ip prefix-list pl-cmn seq 10 permit 192.168.12.0/24 ge 24\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24\n"
@@ -1081,7 +1108,6 @@ def test_switch_config_spine_secondary():
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "route-map ncn-w001 permit seq 10\n"
             + "     match ip address prefix-list tftp\n"
@@ -1152,9 +1178,8 @@ def test_switch_config_spine_secondary():
             + "     set ip next-hop 192.168.4.6\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.3\n"
             + "    default-information originate\n"
             + "    area 0.0.0.0\n"
@@ -1172,11 +1197,11 @@ def test_switch_config_spine_secondary():
             + "    timers bgp 1 3\n"
             + "    distance bgp 20 70\n"
             + "    neighbor 192.168.3.2 remote-as 65533\n"
-            + "    neighbor 192.168.4.4 remote-as 65533\n"
+            + "    neighbor 192.168.4.4 remote-as 65531\n"
             + "    neighbor 192.168.4.4 passive\n"
-            + "    neighbor 192.168.4.5 remote-as 65533\n"
+            + "    neighbor 192.168.4.5 remote-as 65531\n"
             + "    neighbor 192.168.4.5 passive\n"
-            + "    neighbor 192.168.4.6 remote-as 65533\n"
+            + "    neighbor 192.168.4.6 remote-as 65531\n"
             + "    neighbor 192.168.4.6 passive\n"
             + "    address-family ipv4 unicast\n"
             + "        neighbor 192.168.3.2 activate\n"
@@ -1193,11 +1218,11 @@ def test_switch_config_spine_secondary():
             + "        timers bgp 1 3\n"
             + "        distance bgp 20 70\n"
             + "        neighbor 192.168.12.2 remote-as 65533\n"
-            + "        neighbor 192.168.12.4 remote-as 65536\n"
+            + "        neighbor 192.168.12.4 remote-as 65532\n"
             + "        neighbor 192.168.12.4 passive\n"
-            + "        neighbor 192.168.12.5 remote-as 65536\n"
+            + "        neighbor 192.168.12.5 remote-as 65532\n"
             + "        neighbor 192.168.12.5 passive\n"
-            + "        neighbor 192.168.12.6 remote-as 65536\n"
+            + "        neighbor 192.168.12.6 remote-as 65532\n"
             + "        neighbor 192.168.12.6 passive\n"
             + "        address-family ipv4 unicast\n"
             + "            neighbor 192.168.12.2 activate\n"
@@ -1246,7 +1271,6 @@ def test_switch_config_spine_secondary_override():
         )
         assert result.exit_code == 0
 
-        print(result.output)
         assert (
             "# OVERRIDE CONFIG\n"
             + "# The configuration below has been ignored and is not included in the GENERATED CONFIG\n"
@@ -1255,11 +1279,10 @@ def test_switch_config_spine_secondary_override():
             + "#  role secondary\n"
             + "#https-server vrf Customer\n"
         ) in str(result.output)
-
-        print(result.output)
+        assert "hostname sw-spine-002\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-spine-002\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf Customer\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
@@ -1267,7 +1290,6 @@ def test_switch_config_spine_secondary_override():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "ssh server vrf default\n"
             + "ssh server vrf keepalive\n"
@@ -1306,6 +1328,10 @@ def test_switch_config_spine_secondary_override():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -1318,8 +1344,12 @@ def test_switch_config_spine_secondary_override():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 7\n"
             + "    name CAN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 10\n"
             + "    name SUN\n"
             + "spanning-tree\n"
@@ -1394,7 +1424,6 @@ def test_switch_config_spine_secondary_override():
         )
         assert spine_to_cdu in str(result.output)
 
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -1465,7 +1494,6 @@ def test_switch_config_spine_secondary_override():
             + "    vsx-sync vsx-global\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "ip prefix-list pl-cmn seq 10 permit 192.168.12.0/24 ge 24\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24\n"
@@ -1473,7 +1501,6 @@ def test_switch_config_spine_secondary_override():
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "route-map ncn-w001 permit seq 10\n"
             + "    match ip address prefix-list tftp\n"
@@ -1540,9 +1567,8 @@ def test_switch_config_spine_secondary_override():
             + "    set ip next-hop 192.168.4.6\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.3\n"
             + "    default-information originate\n"
             + "    area 0.0.0.0\n"
@@ -1559,11 +1585,11 @@ def test_switch_config_spine_secondary_override():
             + "    timers bgp 1 3\n"
             + "    distance bgp 20 70\n"
             + "    neighbor 192.168.3.2 remote-as 65533\n"
-            + "    neighbor 192.168.4.4 remote-as 65533\n"
+            + "    neighbor 192.168.4.4 remote-as 65531\n"
             + "    neighbor 192.168.4.4 passive\n"
-            + "    neighbor 192.168.4.5 remote-as 65533\n"
+            + "    neighbor 192.168.4.5 remote-as 65531\n"
             + "    neighbor 192.168.4.5 passive\n"
-            + "    neighbor 192.168.4.6 remote-as 65533\n"
+            + "    neighbor 192.168.4.6 remote-as 65531\n"
             + "    neighbor 192.168.4.6 passive\n"
             + "    address-family ipv4 unicast\n"
             + "      neighbor 192.168.3.2 activate\n"
@@ -1580,11 +1606,11 @@ def test_switch_config_spine_secondary_override():
             + "      timers bgp 1 3\n"
             + "      distance bgp 20 70\n"
             + "      neighbor 192.168.12.2 remote-as 65533\n"
-            + "      neighbor 192.168.12.4 remote-as 65536\n"
+            + "      neighbor 192.168.12.4 remote-as 65532\n"
             + "      neighbor 192.168.12.4 passive\n"
-            + "      neighbor 192.168.12.5 remote-as 65536\n"
+            + "      neighbor 192.168.12.5 remote-as 65532\n"
             + "      neighbor 192.168.12.5 passive\n"
-            + "      neighbor 192.168.12.6 remote-as 65536\n"
+            + "      neighbor 192.168.12.6 remote-as 65532\n"
             + "      neighbor 192.168.12.6 passive\n"
             + "      address-family ipv4 unicast\n"
             + "        neighbor 192.168.12.2 activate\n"
@@ -1629,10 +1655,10 @@ def test_switch_config_leaf_primary():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+        assert "hostname sw-leaf-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf Customer\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
@@ -1640,8 +1666,6 @@ def test_switch_config_leaf_primary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
-        print(result.output)
-        print(result.output)
         assert (
             "ssh server vrf default\n"
             + "ssh server vrf keepalive\n"
@@ -1681,6 +1705,10 @@ def test_switch_config_leaf_primary():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "\n"
             + "vlan 1\n"
@@ -1694,8 +1722,12 @@ def test_switch_config_leaf_primary():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 7\n"
             + "    name CAN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 10\n"
             + "    name SUN\n"
             + "spanning-tree\n"
@@ -1868,7 +1900,6 @@ def test_switch_config_leaf_primary():
         )
         assert leaf_to_spine in str(result.output)
 
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -1905,7 +1936,6 @@ def test_switch_config_leaf_primary():
             + "    ip ospf 1 area 0.0.0.0\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "interface vlan 4\n"
             + "    description HMN\n"
@@ -1920,7 +1950,6 @@ def test_switch_config_leaf_primary():
             + "    ip ospf 1 area 0.0.0.0\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "vsx\n"
             + "    system-mac 02:00:00:00:65:00\n"
@@ -1931,9 +1960,8 @@ def test_switch_config_leaf_primary():
             + "    vsx-sync vsx-global\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.4\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -1984,7 +2012,6 @@ def test_switch_config_leaf_primary_override():
         )
         assert result.exit_code == 0
 
-        print(result.output)
         assert (
             "# OVERRIDE CONFIG\n"
             + "# The configuration below has been ignored and is not included in the GENERATED CONFIG\n"
@@ -1996,10 +2023,10 @@ def test_switch_config_leaf_primary_override():
             + "#  inter-switch-link lag 256\n"
         ) in str(result.output)
 
-        print(result.output)
+        assert "hostname sw-leaf-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf Customer\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
@@ -2008,7 +2035,6 @@ def test_switch_config_leaf_primary_override():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf default\n"
             + "ssh server vrf mgmt\n"
@@ -2047,6 +2073,10 @@ def test_switch_config_leaf_primary_override():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -2059,8 +2089,12 @@ def test_switch_config_leaf_primary_override():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 7\n"
             + "    name CAN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 10\n"
             + "    name SUN\n"
             + "spanning-tree\n"
@@ -2219,7 +2253,6 @@ def test_switch_config_leaf_primary_override():
         )
         assert leaf_to_spine in str(result.output)
 
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -2255,7 +2288,6 @@ def test_switch_config_leaf_primary_override():
             + "    ip ospf 1 area 0.0.0.0\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "interface vlan 4\n"
             + "    description HMN\n"
@@ -2270,7 +2302,6 @@ def test_switch_config_leaf_primary_override():
             + "    ip ospf 1 area 0.0.0.0\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "vsx\n"
             + "    system-mac 02:00:00:00:65:00\n"
@@ -2279,10 +2310,8 @@ def test_switch_config_leaf_primary_override():
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
         ) in str(result.output)
-        print(result.output)
-        print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.4\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -2330,10 +2359,10 @@ def test_switch_config_leaf_primary_to_uan():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+        assert "hostname sw-leaf-003\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-003\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf Customer\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
@@ -2342,7 +2371,6 @@ def test_switch_config_leaf_primary_to_uan():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf default\n"
             + "ssh server vrf keepalive\n"
@@ -2382,6 +2410,10 @@ def test_switch_config_leaf_primary_to_uan():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "\n"
             + "vlan 1\n"
@@ -2395,8 +2427,12 @@ def test_switch_config_leaf_primary_to_uan():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 7\n"
             + "    name CAN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 10\n"
             + "    name SUN\n"
             + "spanning-tree\n"
@@ -2545,8 +2581,6 @@ def test_switch_config_leaf_primary_to_uan():
             + "    lag 103\n"
         )
         assert leaf_to_spine in str(result.output)
-        print(result.output)
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -2601,9 +2635,8 @@ def test_switch_config_leaf_primary_to_uan():
             + "    vsx-sync vsx-global\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.6\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -2652,7 +2685,6 @@ def test_switch_config_leaf_primary_to_uan_override():
                 override_file,
             ],
         )
-        print(result.output)
         assert (
             "# OVERRIDE CONFIG\n"
             + "# The configuration below has been ignored and is not included in the GENERATED CONFIG\n"
@@ -2665,10 +2697,10 @@ def test_switch_config_leaf_primary_to_uan_override():
         ) in str(result.output)
 
         assert result.exit_code == 0
-        print(result.output)
+        assert "hostname sw-leaf-003\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-003\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf Customer\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
@@ -2677,7 +2709,6 @@ def test_switch_config_leaf_primary_to_uan_override():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf default\n"
             + "ssh server vrf mgmt\n"
@@ -2716,6 +2747,10 @@ def test_switch_config_leaf_primary_to_uan_override():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -2728,8 +2763,12 @@ def test_switch_config_leaf_primary_to_uan_override():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 7\n"
             + "    name CAN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 10\n"
             + "    name SUN\n"
             + "spanning-tree\n"
@@ -2870,7 +2909,6 @@ def test_switch_config_leaf_primary_to_uan_override():
         )
         assert leaf_to_spine in str(result.output)
 
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -2923,9 +2961,8 @@ def test_switch_config_leaf_primary_to_uan_override():
             + "    vsx-sync vsx-global\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.6\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -2973,10 +3010,10 @@ def test_switch_config_leaf_secondary():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+        assert "hostname sw-leaf-002\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-002\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf Customer\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
@@ -2985,7 +3022,6 @@ def test_switch_config_leaf_secondary():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf default\n"
             + "ssh server vrf keepalive\n"
@@ -3025,6 +3061,10 @@ def test_switch_config_leaf_secondary():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "\n"
             + "vlan 1\n"
@@ -3038,8 +3078,12 @@ def test_switch_config_leaf_secondary():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 7\n"
             + "    name CAN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 10\n"
             + "    name SUN\n"
             + "spanning-tree\n"
@@ -3212,7 +3256,6 @@ def test_switch_config_leaf_secondary():
         )
         assert leaf_to_spine in str(result.output)
 
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -3267,9 +3310,8 @@ def test_switch_config_leaf_secondary():
             + "    vsx-sync vsx-global\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.5\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -3319,7 +3361,6 @@ def test_switch_config_leaf_secondary_override():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
         assert (
             "# OVERRIDE CONFIG\n"
             + "# The configuration below has been ignored and is not included in the GENERATED CONFIG\n"
@@ -3331,10 +3372,10 @@ def test_switch_config_leaf_secondary_override():
             + "#  inter-switch-link lag 256\n"
         ) in str(result.output)
 
-        print(result.output)
+        assert "hostname sw-leaf-002\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-002\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf Customer\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
@@ -3343,7 +3384,6 @@ def test_switch_config_leaf_secondary_override():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf default\n"
             + "ssh server vrf mgmt\n"
@@ -3382,6 +3422,10 @@ def test_switch_config_leaf_secondary_override():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -3394,8 +3438,12 @@ def test_switch_config_leaf_secondary_override():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 7\n"
             + "    name CAN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 10\n"
             + "    name SUN\n"
             + "spanning-tree\n"
@@ -3554,7 +3602,6 @@ def test_switch_config_leaf_secondary_override():
         )
         assert leaf_to_spine in str(result.output)
 
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -3607,9 +3654,8 @@ def test_switch_config_leaf_secondary_override():
             + "    vsx-sync vsx-global\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.5\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -3657,10 +3703,10 @@ def test_switch_config_leaf_secondary_to_uan():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+        assert "hostname sw-leaf-004\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-004\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf Customer\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
@@ -3669,7 +3715,6 @@ def test_switch_config_leaf_secondary_to_uan():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf default\n"
             + "ssh server vrf keepalive\n"
@@ -3709,6 +3754,10 @@ def test_switch_config_leaf_secondary_to_uan():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "\n"
             + "vlan 1\n"
@@ -3722,8 +3771,12 @@ def test_switch_config_leaf_secondary_to_uan():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 7\n"
             + "    name CAN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 10\n"
             + "    name SUN\n"
             + "spanning-tree\n"
@@ -3873,8 +3926,6 @@ def test_switch_config_leaf_secondary_to_uan():
             + "    lag 103\n"
         )
         assert leaf_to_spine in str(result.output)
-
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -3929,7 +3980,6 @@ def test_switch_config_leaf_secondary_to_uan():
             + "    vsx-sync vsx-global\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "router ospf 1\n"
             + "    router-id 10.2.0.7\n"
@@ -3978,7 +4028,6 @@ def test_switch_config_leaf_secondary_to_uan_override():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
         assert (
             "# OVERRIDE CONFIG\n"
             + "# The configuration below has been ignored and is not included in the GENERATED CONFIG\n"
@@ -3989,10 +4038,10 @@ def test_switch_config_leaf_secondary_to_uan_override():
             + "#vsx\n"
             + "#  inter-switch-link lag 256\n"
         ) in str(result.output)
-        print(result.output)
+        assert "hostname sw-leaf-004\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-004\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf Customer\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
@@ -4000,8 +4049,6 @@ def test_switch_config_leaf_secondary_to_uan_override():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
-
-        print(result.output)
         assert (
             "ssh server vrf default\n"
             + "ssh server vrf mgmt\n"
@@ -4040,6 +4087,10 @@ def test_switch_config_leaf_secondary_to_uan_override():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -4052,8 +4103,12 @@ def test_switch_config_leaf_secondary_to_uan_override():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 7\n"
             + "    name CAN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 10\n"
             + "    name SUN\n"
             + "spanning-tree\n"
@@ -4193,7 +4248,6 @@ def test_switch_config_leaf_secondary_to_uan_override():
         )
         assert leaf_to_spine in str(result.output)
 
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -4246,9 +4300,8 @@ def test_switch_config_leaf_secondary_to_uan_override():
             + "    vsx-sync vsx-global\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.7\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -4296,11 +4349,10 @@ def test_switch_config_cdu_primary():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
-        print(result.output)
+        assert "hostname sw-cdu-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-cdu-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "vrf Customer\n"
             + "ntp server 192.168.4.4\n"
@@ -4308,7 +4360,6 @@ def test_switch_config_cdu_primary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "ssh server vrf Customer\n"
             + "ssh server vrf default\n"
@@ -4348,6 +4399,10 @@ def test_switch_config_cdu_primary():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "\n"
             + "vlan 1\n"
@@ -4361,6 +4416,8 @@ def test_switch_config_cdu_primary():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "spanning-tree\n"
             + "spanning-tree forward-delay 4\n"
             + "spanning-tree config-name MST0\n"
@@ -4461,7 +4518,6 @@ def test_switch_config_cdu_primary():
         )
         assert cdu_to_spine in str(result.output)
 
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -4531,7 +4587,6 @@ def test_switch_config_cdu_primary():
         )
         assert mtn_nmn_vlan in str(result.output)
 
-        print(result.output)
         assert (
             "vsx\n"
             + "    system-mac 02:00:00:00:73:00\n"
@@ -4541,7 +4596,7 @@ def test_switch_config_cdu_primary():
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
             + "\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.16\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -4591,7 +4646,6 @@ def test_switch_config_cdu_primary_override():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
         assert (
             "# OVERRIDE CONFIG\n"
             + "# The configuration below has been ignored and is not included in the GENERATED CONFIG\n"
@@ -4602,10 +4656,10 @@ def test_switch_config_cdu_primary_override():
             + "#vsx\n"
             + "#  inter-switch-link lag 256\n"
         ) in str(result.output)
-        print(result.output)
+        assert "hostname sw-cdu-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-cdu-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "vrf Customer\n"
             + "ntp server 192.168.4.4\n"
@@ -4614,7 +4668,6 @@ def test_switch_config_cdu_primary_override():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf Customer\n"
             + "ssh server vrf default\n"
@@ -4653,6 +4706,10 @@ def test_switch_config_cdu_primary_override():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -4665,6 +4722,8 @@ def test_switch_config_cdu_primary_override():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "spanning-tree\n"
             + "spanning-tree forward-delay 4\n"
             + "spanning-tree config-name MST0\n"
@@ -4759,7 +4818,6 @@ def test_switch_config_cdu_primary_override():
         )
         assert cdu_to_spine in str(result.output)
 
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -4822,7 +4880,6 @@ def test_switch_config_cdu_primary_override():
         )
         assert mtn_nmn_vlan in str(result.output)
 
-        print(result.output)
         assert (
             "vsx\n"
             + "    system-mac 02:00:00:00:73:00\n"
@@ -4830,7 +4887,7 @@ def test_switch_config_cdu_primary_override():
             + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.16\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -4878,10 +4935,10 @@ def test_switch_config_cdu_secondary():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+        assert "hostname sw-cdu-002\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-cdu-002\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "vrf Customer\n"
             + "ntp server 192.168.4.4\n"
@@ -4890,7 +4947,6 @@ def test_switch_config_cdu_secondary():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf Customer\n"
             + "ssh server vrf default\n"
@@ -4930,6 +4986,10 @@ def test_switch_config_cdu_secondary():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "\n"
             + "vlan 1\n"
@@ -4943,6 +5003,8 @@ def test_switch_config_cdu_secondary():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "spanning-tree\n"
             + "spanning-tree forward-delay 4\n"
             + "spanning-tree config-name MST0\n"
@@ -5031,7 +5093,6 @@ def test_switch_config_cdu_secondary():
         )
         assert cdu_to_spine in str(result.output)
 
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -5101,7 +5162,6 @@ def test_switch_config_cdu_secondary():
         )
         assert mtn_nmn_vlan in str(result.output)
 
-        print(result.output)
         assert (
             "vsx\n"
             + "    system-mac 02:00:00:00:73:00\n"
@@ -5111,7 +5171,7 @@ def test_switch_config_cdu_secondary():
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
             + "\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.17\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -5161,7 +5221,6 @@ def test_switch_config_cdu_secondary_override():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
         assert (
             "# OVERRIDE CONFIG\n"
             + "# The configuration below has been ignored and is not included in the GENERATED CONFIG\n"
@@ -5172,10 +5231,10 @@ def test_switch_config_cdu_secondary_override():
             + "#vsx\n"
             + "#  inter-switch-link lag 256\n"
         ) in str(result.output)
-        print(result.output)
+        assert "hostname sw-cdu-002\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-cdu-002\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "vrf Customer\n"
             + "ntp server 192.168.4.4\n"
@@ -5184,7 +5243,6 @@ def test_switch_config_cdu_secondary_override():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf Customer\n"
             + "ssh server vrf default\n"
@@ -5223,6 +5281,10 @@ def test_switch_config_cdu_secondary_override():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -5235,6 +5297,8 @@ def test_switch_config_cdu_secondary_override():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "spanning-tree\n"
             + "spanning-tree forward-delay 4\n"
             + "spanning-tree config-name MST0\n"
@@ -5317,7 +5381,6 @@ def test_switch_config_cdu_secondary_override():
         )
         assert cdu_to_spine in str(result.output)
 
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -5380,7 +5443,6 @@ def test_switch_config_cdu_secondary_override():
         )
         assert mtn_nmn_vlan in str(result.output)
 
-        print(result.output)
         assert (
             "vsx\n"
             + "    system-mac 02:00:00:00:73:00\n"
@@ -5388,7 +5450,7 @@ def test_switch_config_cdu_secondary_override():
             + "    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive\n"
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.17\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -5436,10 +5498,10 @@ def test_switch_config_leaf_bmc():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+        assert "hostname sw-leaf-bmc-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-bmc-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf Customer\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -5447,7 +5509,6 @@ def test_switch_config_leaf_bmc():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf default\n"
             + "ssh server vrf mgmt\n"
@@ -5486,6 +5547,10 @@ def test_switch_config_leaf_bmc():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "\n"
             + "vlan 1\n"
@@ -5499,6 +5564,8 @@ def test_switch_config_leaf_bmc():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "\n"
             + "spanning-tree\n"
             + "spanning-tree forward-delay 4\n"
@@ -5648,7 +5715,6 @@ def test_switch_config_leaf_bmc():
             + "    lag 255\n"
         )
         assert leaf_bmc_to_leaf in str(result.output)
-        print(result.output)
         assert (
             "interface loopback 0\n"
             + "    ip address 10.2.0.12/32\n"
@@ -5674,7 +5740,7 @@ def test_switch_config_leaf_bmc():
             + "    ip ospf 1 area 0.0.0.0\n"
             + "snmp-server vrf default\n"
             + "\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.12\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -5724,7 +5790,6 @@ def test_switch_config_leaf_bmc_override():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
         assert (
             "# OVERRIDE CONFIG\n"
             + "# The configuration below has been ignored and is not included in the GENERATED CONFIG\n"
@@ -5734,10 +5799,10 @@ def test_switch_config_leaf_bmc_override():
             + "#  ip address 192.168.3.12/17\n"
         ) in str(result.output)
 
-        print(result.output)
+        assert "hostname sw-leaf-bmc-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-bmc-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf Customer\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -5745,7 +5810,6 @@ def test_switch_config_leaf_bmc_override():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf default\n"
             + "ssh server vrf Customer\n"
@@ -5783,6 +5847,10 @@ def test_switch_config_leaf_bmc_override():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -5795,6 +5863,8 @@ def test_switch_config_leaf_bmc_override():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "spanning-tree\n"
             + "spanning-tree forward-delay 4\n"
             + "spanning-tree config-name MST0\n"
@@ -5944,7 +6014,6 @@ def test_switch_config_leaf_bmc_override():
         )
         assert bmc in str(result.output)
 
-        print(result.output)
         assert (
             "interface loopback 0\n"
             + "    ip address 10.2.0.12/32\n"
@@ -5968,7 +6037,7 @@ def test_switch_config_leaf_bmc_override():
             + "    ip address 192.168.12.12/24\n"
             + "    ip ospf 1 area 0.0.0.0\n"
             + "snmp-server vrf default\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.12\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -6044,7 +6113,6 @@ def test_switch_config_missing_file():
             ],
         )
         assert result.exit_code == 2
-        print(result.output)
         assert (
             "Error: Missing one of the required mutually exclusive options from 'Network input source' option group:\n"
             "  '--ccj'\n"
@@ -6310,7 +6378,6 @@ def test_switch_config_bad_switch_name_1():
             ],
         )
         assert result.exit_code == 1
-        print(result.output)
         assert (
             f"For switch {bad_name_1}, the type cannot be determined. Please check the switch name and try again."
             in str(result.output)
@@ -6349,7 +6416,6 @@ def test_switch_config_bad_switch_name_2():
             ],
         )
         assert result.exit_code == 1
-        print(result.output)
         assert (
             f"For switch {bad_name_2}, the type cannot be determined. Please check the switch name and try again."
             in str(result.output)
@@ -6388,7 +6454,6 @@ def test_switch_config_non_switch():
             ],
         )
         assert result.exit_code == 1
-        print(result.output)
         assert (
             f"{non_switch} is not a switch. Only switch config can be generated."
             in str(result.output)
@@ -6481,7 +6546,6 @@ def test_switch_config_sls_token_bad():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
         assert (
             "Error connecting SLS api-gw-service-nmn.local, check that the token is valid, or generate a new one"
             in str(result.output)
@@ -6601,10 +6665,10 @@ def test_switch_config_tds_spine_primary():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+        assert "hostname sw-spine-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-spine-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf Customer\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
@@ -6613,7 +6677,6 @@ def test_switch_config_tds_spine_primary():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf Customer\n"
             + "ssh server vrf default\n"
@@ -6653,6 +6716,10 @@ def test_switch_config_tds_spine_primary():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "\n"
             + "vlan 1\n"
@@ -6666,8 +6733,12 @@ def test_switch_config_tds_spine_primary():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 7\n"
             + "    name CAN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 10\n"
             + "    name SUN\n"
             + "spanning-tree\n"
@@ -6952,7 +7023,6 @@ def test_switch_config_tds_spine_primary():
             + "    lag 201\n"
         )
         assert spine_to_cdu in str(result.output)
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -7024,7 +7094,6 @@ def test_switch_config_tds_spine_primary():
             + "    vsx-sync vsx-global\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "ip prefix-list pl-cmn seq 10 permit 192.168.12.0/24 ge 24\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24\n"
@@ -7032,7 +7101,6 @@ def test_switch_config_tds_spine_primary():
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "route-map ncn-w001 permit seq 10\n"
             + "     match ip address prefix-list tftp\n"
@@ -7103,9 +7171,8 @@ def test_switch_config_tds_spine_primary():
             + "     set ip next-hop 192.168.4.6\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.2\n"
             + "    default-information originate\n"
             + "    area 0.0.0.0\n"
@@ -7123,11 +7190,11 @@ def test_switch_config_tds_spine_primary():
             + "    timers bgp 1 3\n"
             + "    distance bgp 20 70\n"
             + "    neighbor 192.168.3.3 remote-as 65533\n"
-            + "    neighbor 192.168.4.4 remote-as 65533\n"
+            + "    neighbor 192.168.4.4 remote-as 65531\n"
             + "    neighbor 192.168.4.4 passive\n"
-            + "    neighbor 192.168.4.5 remote-as 65533\n"
+            + "    neighbor 192.168.4.5 remote-as 65531\n"
             + "    neighbor 192.168.4.5 passive\n"
-            + "    neighbor 192.168.4.6 remote-as 65533\n"
+            + "    neighbor 192.168.4.6 remote-as 65531\n"
             + "    neighbor 192.168.4.6 passive\n"
             + "    address-family ipv4 unicast\n"
             + "        neighbor 192.168.3.3 activate\n"
@@ -7144,11 +7211,11 @@ def test_switch_config_tds_spine_primary():
             + "        timers bgp 1 3\n"
             + "        distance bgp 20 70\n"
             + "        neighbor 192.168.12.3 remote-as 65533\n"
-            + "        neighbor 192.168.12.4 remote-as 65536\n"
+            + "        neighbor 192.168.12.4 remote-as 65532\n"
             + "        neighbor 192.168.12.4 passive\n"
-            + "        neighbor 192.168.12.5 remote-as 65536\n"
+            + "        neighbor 192.168.12.5 remote-as 65532\n"
             + "        neighbor 192.168.12.5 passive\n"
-            + "        neighbor 192.168.12.6 remote-as 65536\n"
+            + "        neighbor 192.168.12.6 remote-as 65532\n"
             + "        neighbor 192.168.12.6 passive\n"
             + "        address-family ipv4 unicast\n"
             + "            neighbor 192.168.12.3 activate\n"
@@ -7194,7 +7261,6 @@ def test_switch_config_tds_spine_primary_override():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
         assert (
             "# OVERRIDE CONFIG\n"
             + "# The configuration below has been ignored and is not included in the GENERATED CONFIG\n"
@@ -7203,10 +7269,10 @@ def test_switch_config_tds_spine_primary_override():
             + "#  role primary\n"
             + "#https-server vrf Customer\n"
         ) in str(result.output)
-        print(result.output)
+        assert "hostname sw-spine-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-spine-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf Customer\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
@@ -7215,7 +7281,6 @@ def test_switch_config_tds_spine_primary_override():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf Customer\n"
             + "ssh server vrf default\n"
@@ -7255,6 +7320,10 @@ def test_switch_config_tds_spine_primary_override():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -7267,8 +7336,12 @@ def test_switch_config_tds_spine_primary_override():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 7\n"
             + "    name CAN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 10\n"
             + "    name SUN\n"
             + "spanning-tree\n"
@@ -7528,7 +7601,6 @@ def test_switch_config_tds_spine_primary_override():
         )
         assert spine_to_cdu in str(result.output)
 
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -7599,7 +7671,6 @@ def test_switch_config_tds_spine_primary_override():
             + "    vsx-sync vsx-global\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "ip prefix-list pl-cmn seq 10 permit 192.168.12.0/24 ge 24\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24\n"
@@ -7607,7 +7678,6 @@ def test_switch_config_tds_spine_primary_override():
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "route-map ncn-w001 permit seq 10\n"
             + "    match ip address prefix-list tftp\n"
@@ -7674,9 +7744,8 @@ def test_switch_config_tds_spine_primary_override():
             + "    set ip next-hop 192.168.4.6\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.2\n"
             + "    default-information originate\n"
             + "    area 0.0.0.0\n"
@@ -7693,11 +7762,11 @@ def test_switch_config_tds_spine_primary_override():
             + "    timers bgp 1 3\n"
             + "    distance bgp 20 70\n"
             + "    neighbor 192.168.3.3 remote-as 65533\n"
-            + "    neighbor 192.168.4.4 remote-as 65533\n"
+            + "    neighbor 192.168.4.4 remote-as 65531\n"
             + "    neighbor 192.168.4.4 passive\n"
-            + "    neighbor 192.168.4.5 remote-as 65533\n"
+            + "    neighbor 192.168.4.5 remote-as 65531\n"
             + "    neighbor 192.168.4.5 passive\n"
-            + "    neighbor 192.168.4.6 remote-as 65533\n"
+            + "    neighbor 192.168.4.6 remote-as 65531\n"
             + "    neighbor 192.168.4.6 passive\n"
             + "    address-family ipv4 unicast\n"
             + "      neighbor 192.168.3.3 activate\n"
@@ -7714,11 +7783,11 @@ def test_switch_config_tds_spine_primary_override():
             + "      timers bgp 1 3\n"
             + "      distance bgp 20 70\n"
             + "      neighbor 192.168.12.3 remote-as 65533\n"
-            + "      neighbor 192.168.12.4 remote-as 65536\n"
+            + "      neighbor 192.168.12.4 remote-as 65532\n"
             + "      neighbor 192.168.12.4 passive\n"
-            + "      neighbor 192.168.12.5 remote-as 65536\n"
+            + "      neighbor 192.168.12.5 remote-as 65532\n"
             + "      neighbor 192.168.12.5 passive\n"
-            + "      neighbor 192.168.12.6 remote-as 65536\n"
+            + "      neighbor 192.168.12.6 remote-as 65532\n"
             + "      neighbor 192.168.12.6 passive\n"
             + "      address-family ipv4 unicast\n"
             + "        neighbor 192.168.12.3 activate\n"
@@ -7763,10 +7832,10 @@ def test_switch_config_tds_spine_secondary():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+        assert "hostname sw-spine-002\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-spine-002\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf Customer\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
@@ -7775,7 +7844,6 @@ def test_switch_config_tds_spine_secondary():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf Customer\n"
             + "ssh server vrf default\n"
@@ -7815,6 +7883,10 @@ def test_switch_config_tds_spine_secondary():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "\n"
             + "vlan 1\n"
@@ -7828,8 +7900,12 @@ def test_switch_config_tds_spine_secondary():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 7\n"
             + "    name CAN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 10\n"
             + "    name SUN\n"
             + "spanning-tree\n"
@@ -8113,7 +8189,6 @@ def test_switch_config_tds_spine_secondary():
         )
         assert spine_to_cdu in str(result.output)
 
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -8185,7 +8260,6 @@ def test_switch_config_tds_spine_secondary():
             + "    vsx-sync vsx-global\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "ip prefix-list pl-cmn seq 10 permit 192.168.12.0/24 ge 24\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24\n"
@@ -8193,7 +8267,6 @@ def test_switch_config_tds_spine_secondary():
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "route-map ncn-w001 permit seq 10\n"
             + "     match ip address prefix-list tftp\n"
@@ -8264,9 +8337,8 @@ def test_switch_config_tds_spine_secondary():
             + "     set ip next-hop 192.168.4.6\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.3\n"
             + "    default-information originate\n"
             + "    area 0.0.0.0\n"
@@ -8284,11 +8356,11 @@ def test_switch_config_tds_spine_secondary():
             + "    timers bgp 1 3\n"
             + "    distance bgp 20 70\n"
             + "    neighbor 192.168.3.2 remote-as 65533\n"
-            + "    neighbor 192.168.4.4 remote-as 65533\n"
+            + "    neighbor 192.168.4.4 remote-as 65531\n"
             + "    neighbor 192.168.4.4 passive\n"
-            + "    neighbor 192.168.4.5 remote-as 65533\n"
+            + "    neighbor 192.168.4.5 remote-as 65531\n"
             + "    neighbor 192.168.4.5 passive\n"
-            + "    neighbor 192.168.4.6 remote-as 65533\n"
+            + "    neighbor 192.168.4.6 remote-as 65531\n"
             + "    neighbor 192.168.4.6 passive\n"
             + "    address-family ipv4 unicast\n"
             + "        neighbor 192.168.3.2 activate\n"
@@ -8305,11 +8377,11 @@ def test_switch_config_tds_spine_secondary():
             + "        timers bgp 1 3\n"
             + "        distance bgp 20 70\n"
             + "        neighbor 192.168.12.2 remote-as 65533\n"
-            + "        neighbor 192.168.12.4 remote-as 65536\n"
+            + "        neighbor 192.168.12.4 remote-as 65532\n"
             + "        neighbor 192.168.12.4 passive\n"
-            + "        neighbor 192.168.12.5 remote-as 65536\n"
+            + "        neighbor 192.168.12.5 remote-as 65532\n"
             + "        neighbor 192.168.12.5 passive\n"
-            + "        neighbor 192.168.12.6 remote-as 65536\n"
+            + "        neighbor 192.168.12.6 remote-as 65532\n"
             + "        neighbor 192.168.12.6 passive\n"
             + "        address-family ipv4 unicast\n"
             + "            neighbor 192.168.12.2 activate\n"
@@ -8358,7 +8430,6 @@ def test_switch_config_tds_spine_secondary_override():
         )
         assert result.exit_code == 0
 
-        print(result.output)
         assert (
             "# OVERRIDE CONFIG\n"
             + "# The configuration below has been ignored and is not included in the GENERATED CONFIG\n"
@@ -8368,10 +8439,10 @@ def test_switch_config_tds_spine_secondary_override():
             + "#https-server vrf Customer\n"
         ) in str(result.output)
 
-        print(result.output)
+        assert "hostname sw-spine-002\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-spine-002\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf Customer\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
@@ -8380,7 +8451,6 @@ def test_switch_config_tds_spine_secondary_override():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf Customer\n"
             + "ssh server vrf default\n"
@@ -8420,6 +8490,10 @@ def test_switch_config_tds_spine_secondary_override():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -8432,8 +8506,12 @@ def test_switch_config_tds_spine_secondary_override():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 7\n"
             + "    name CAN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "vlan 10\n"
             + "    name SUN\n"
             + "spanning-tree\n"
@@ -8692,7 +8770,6 @@ def test_switch_config_tds_spine_secondary_override():
         )
         assert spine_to_cdu in str(result.output)
 
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -8763,7 +8840,6 @@ def test_switch_config_tds_spine_secondary_override():
             + "    vsx-sync vsx-global\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "ip prefix-list pl-cmn seq 10 permit 192.168.12.0/24 ge 24\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24\n"
@@ -8771,7 +8847,6 @@ def test_switch_config_tds_spine_secondary_override():
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
-        print(result.output)
         assert (
             "route-map ncn-w001 permit seq 10\n"
             + "    match ip address prefix-list tftp\n"
@@ -8837,9 +8912,8 @@ def test_switch_config_tds_spine_secondary_override():
             + "    match ip address prefix-list pl-nmn\n"
             + "    set ip next-hop 192.168.4.6\n"
         ) in str(result.output)
-        print(result.output)
         assert (
-            "router ospf 1 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.3\n"
             + "    default-information originate\n"
             + "    area 0.0.0.0\n"
@@ -8856,11 +8930,11 @@ def test_switch_config_tds_spine_secondary_override():
             + "    timers bgp 1 3\n"
             + "    distance bgp 20 70\n"
             + "    neighbor 192.168.3.2 remote-as 65533\n"
-            + "    neighbor 192.168.4.4 remote-as 65533\n"
+            + "    neighbor 192.168.4.4 remote-as 65531\n"
             + "    neighbor 192.168.4.4 passive\n"
-            + "    neighbor 192.168.4.5 remote-as 65533\n"
+            + "    neighbor 192.168.4.5 remote-as 65531\n"
             + "    neighbor 192.168.4.5 passive\n"
-            + "    neighbor 192.168.4.6 remote-as 65533\n"
+            + "    neighbor 192.168.4.6 remote-as 65531\n"
             + "    neighbor 192.168.4.6 passive\n"
             + "    address-family ipv4 unicast\n"
             + "      neighbor 192.168.3.2 activate\n"
@@ -8877,11 +8951,11 @@ def test_switch_config_tds_spine_secondary_override():
             + "      timers bgp 1 3\n"
             + "      distance bgp 20 70\n"
             + "      neighbor 192.168.12.2 remote-as 65533\n"
-            + "      neighbor 192.168.12.4 remote-as 65536\n"
+            + "      neighbor 192.168.12.4 remote-as 65532\n"
             + "      neighbor 192.168.12.4 passive\n"
-            + "      neighbor 192.168.12.5 remote-as 65536\n"
+            + "      neighbor 192.168.12.5 remote-as 65532\n"
             + "      neighbor 192.168.12.5 passive\n"
-            + "      neighbor 192.168.12.6 remote-as 65536\n"
+            + "      neighbor 192.168.12.6 remote-as 65532\n"
             + "      neighbor 192.168.12.6 passive\n"
             + "      address-family ipv4 unicast\n"
             + "        neighbor 192.168.12.2 activate\n"
@@ -8926,10 +9000,10 @@ def test_switch_config_tds_cdu_primary():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+        assert "hostname sw-cdu-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-cdu-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "vrf Customer\n"
             + "ntp server 192.168.4.4\n"
@@ -8938,7 +9012,6 @@ def test_switch_config_tds_cdu_primary():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf Customer\n"
             + "ssh server vrf default\n"
@@ -8978,6 +9051,10 @@ def test_switch_config_tds_cdu_primary():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "\n"
             + "vlan 1\n"
@@ -8991,6 +9068,8 @@ def test_switch_config_tds_cdu_primary():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "spanning-tree\n"
             + "spanning-tree forward-delay 4\n"
             + "spanning-tree config-name MST0\n"
@@ -9091,7 +9170,6 @@ def test_switch_config_tds_cdu_primary():
         )
         assert cdu_to_spine in str(result.output)
 
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -9161,7 +9239,6 @@ def test_switch_config_tds_cdu_primary():
         )
         assert mtn_nmn_vlan in str(result.output)
 
-        print(result.output)
         assert (
             "vsx\n"
             + "    system-mac 02:00:00:00:73:00\n"
@@ -9171,7 +9248,7 @@ def test_switch_config_tds_cdu_primary():
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
             + "\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.16\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -9221,7 +9298,6 @@ def test_switch_config_tds_cdu_primary_override():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
         assert (
             "# OVERRIDE CONFIG\n"
             + "# The configuration below has been ignored and is not included in the GENERATED CONFIG\n"
@@ -9233,10 +9309,10 @@ def test_switch_config_tds_cdu_primary_override():
             + "#  inter-switch-link lag 256\n"
         ) in str(result.output)
 
-        print(result.output)
+        assert "hostname sw-cdu-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-cdu-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "vrf Customer\n"
             + "ntp server 192.168.4.4\n"
@@ -9245,7 +9321,6 @@ def test_switch_config_tds_cdu_primary_override():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf Customer\n"
             + "ssh server vrf default\n"
@@ -9284,6 +9359,10 @@ def test_switch_config_tds_cdu_primary_override():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -9296,6 +9375,8 @@ def test_switch_config_tds_cdu_primary_override():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "spanning-tree\n"
             + "spanning-tree forward-delay 4\n"
             + "spanning-tree config-name MST0\n"
@@ -9390,7 +9471,6 @@ def test_switch_config_tds_cdu_primary_override():
         )
         assert cdu_to_spine in str(result.output)
 
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -9453,7 +9533,6 @@ def test_switch_config_tds_cdu_primary_override():
         )
         assert mtn_nmn_vlan in str(result.output)
 
-        print(result.output)
         assert (
             "vsx\n"
             + "    system-mac 02:00:00:00:73:00\n"
@@ -9461,7 +9540,7 @@ def test_switch_config_tds_cdu_primary_override():
             + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.16\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -9509,10 +9588,10 @@ def test_switch_config_tds_cdu_secondary():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+        assert "hostname sw-cdu-002\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-cdu-002\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "vrf Customer\n"
             + "ntp server 192.168.4.4\n"
@@ -9521,7 +9600,6 @@ def test_switch_config_tds_cdu_secondary():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf Customer\n"
             + "ssh server vrf default\n"
@@ -9561,6 +9639,10 @@ def test_switch_config_tds_cdu_secondary():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "\n"
             + "vlan 1\n"
@@ -9574,6 +9656,8 @@ def test_switch_config_tds_cdu_secondary():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "spanning-tree\n"
             + "spanning-tree forward-delay 4\n"
             + "spanning-tree config-name MST0\n"
@@ -9662,7 +9746,6 @@ def test_switch_config_tds_cdu_secondary():
         )
         assert cdu_to_spine in str(result.output)
 
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -9732,7 +9815,6 @@ def test_switch_config_tds_cdu_secondary():
         )
         assert mtn_nmn_vlan in str(result.output)
 
-        print(result.output)
         assert (
             "vsx\n"
             + "    system-mac 02:00:00:00:73:00\n"
@@ -9742,7 +9824,7 @@ def test_switch_config_tds_cdu_secondary():
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
             + "\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.17\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -9792,7 +9874,6 @@ def test_switch_config_tds_cdu_secondary_override():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
         assert (
             "# OVERRIDE CONFIG\n"
             + "# The configuration below has been ignored and is not included in the GENERATED CONFIG\n"
@@ -9804,10 +9885,10 @@ def test_switch_config_tds_cdu_secondary_override():
             + "#  inter-switch-link lag 256\n"
         ) in str(result.output)
 
-        print(result.output)
+        assert "hostname sw-cdu-002\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-cdu-002\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf keepalive\n"
             + "vrf Customer\n"
             + "ntp server 192.168.4.4\n"
@@ -9816,7 +9897,6 @@ def test_switch_config_tds_cdu_secondary_override():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf Customer\n"
             + "ssh server vrf default\n"
@@ -9855,6 +9935,10 @@ def test_switch_config_tds_cdu_secondary_override():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -9867,6 +9951,8 @@ def test_switch_config_tds_cdu_secondary_override():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "spanning-tree\n"
             + "spanning-tree forward-delay 4\n"
             + "spanning-tree config-name MST0\n"
@@ -9949,7 +10035,6 @@ def test_switch_config_tds_cdu_secondary_override():
         )
         assert cdu_to_spine in str(result.output)
 
-        print(result.output)
         assert (
             "interface lag 256\n"
             + "    no shutdown\n"
@@ -10012,7 +10097,6 @@ def test_switch_config_tds_cdu_secondary_override():
         )
         assert mtn_nmn_vlan in str(result.output)
 
-        print(result.output)
         assert (
             "vsx\n"
             + "    system-mac 02:00:00:00:73:00\n"
@@ -10020,7 +10104,7 @@ def test_switch_config_tds_cdu_secondary_override():
             + "    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive\n"
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.17\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -10068,10 +10152,10 @@ def test_switch_config_tds_leaf_bmc():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+        assert "hostname sw-leaf-bmc-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-bmc-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf Customer\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -10079,10 +10163,10 @@ def test_switch_config_tds_leaf_bmc():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
+        assert "ssh server vrf default\n"
+        assert banner_motd in str(result.output)
         assert (
-            "ssh server vrf default\n"
-            + "ssh server vrf mgmt\n"
+            "ssh server vrf mgmt\n"
             + "ssh server vrf Customer\n"
             + "access-list ip mgmt\n"
             + "    10 comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET and CMN\n"
@@ -10118,6 +10202,10 @@ def test_switch_config_tds_leaf_bmc():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "\n"
             + "vlan 1\n"
@@ -10131,6 +10219,8 @@ def test_switch_config_tds_leaf_bmc():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "\n"
             + "spanning-tree\n"
             + "spanning-tree forward-delay 4\n"
@@ -10277,7 +10367,6 @@ def test_switch_config_tds_leaf_bmc():
         )
         assert bmc in str(result.output)
 
-        print(result.output)
         assert (
             "interface loopback 0\n"
             + "    ip address 10.2.0.12/32\n"
@@ -10303,7 +10392,7 @@ def test_switch_config_tds_leaf_bmc():
             + "    ip ospf 1 area 0.0.0.0\n"
             + "snmp-server vrf default\n"
             + "\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.12\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -10353,7 +10442,6 @@ def test_switch_config_tds_leaf_bmc_override():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
         assert (
             "# OVERRIDE CONFIG\n"
             + "# The configuration below has been ignored and is not included in the GENERATED CONFIG\n"
@@ -10363,10 +10451,10 @@ def test_switch_config_tds_leaf_bmc_override():
             + "#  ip address 192.168.3.12/17\n"
         ) in str(result.output)
 
-        print(result.output)
+        assert "hostname sw-leaf-bmc-001\n"
+        assert banner_motd in str(result.output)
         assert (
-            "hostname sw-leaf-bmc-001\n"
-            + "no ip icmp redirect\n"
+            "no ip icmp redirect\n"
             + "vrf Customer\n"
             + "ntp server 192.168.4.4\n"
             + "ntp server 192.168.4.5\n"
@@ -10374,7 +10462,6 @@ def test_switch_config_tds_leaf_bmc_override():
             + "ntp enable\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "ssh server vrf default\n"
             + "ssh server vrf Customer\n"
@@ -10412,6 +10499,10 @@ def test_switch_config_tds_leaf_bmc_override():
             + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
             + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
             + "    130 permit any any any\n"
+            + "access-list ip cmn-can\n"
+            + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
+            + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    30 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -10424,6 +10515,8 @@ def test_switch_config_tds_leaf_bmc_override():
             + "    apply access-list ip nmn-hmn out\n"
             + "vlan 6\n"
             + "    name CMN\n"
+            + "    apply access-list ip cmn-can in\n"
+            + "    apply access-list ip cmn-can out\n"
             + "spanning-tree\n"
             + "spanning-tree forward-delay 4\n"
             + "spanning-tree config-name MST0\n"
@@ -10571,7 +10664,6 @@ def test_switch_config_tds_leaf_bmc_override():
         )
         assert bmc in str(result.output)
 
-        print(result.output)
         assert (
             "interface loopback 0\n"
             + "    ip address 10.2.0.12/32\n"
@@ -10595,7 +10687,7 @@ def test_switch_config_tds_leaf_bmc_override():
             + "    ip address 192.168.12.12/24\n"
             + "    ip ospf 1 area 0.0.0.0\n"
             + "snmp-server vrf default\n"
-            + "router ospf 1 vrf Customer\n"
+            + "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.12\n"
             + "    area 0.0.0.0\n"
             + "router ospf 1\n"
@@ -10646,6 +10738,8 @@ sls_input = {
             "Name": "CMN",
             "ExtraProperties": {
                 "CIDR": "192.168.12.0/24",
+                "MyASN": 65532,
+                "PeerASN": 65533,
                 "Subnets": [
                     {
                         "Name": "network_hardware",
@@ -10755,6 +10849,8 @@ sls_input = {
             "FullName": "Node Management Network",
             "ExtraProperties": {
                 "CIDR": "192.168.3.0/17",
+                "MyASN": 65531,
+                "PeerASN": 65533,
                 "Subnets": [
                     {
                         "FullName": "NMN Management Network Infrastructure",

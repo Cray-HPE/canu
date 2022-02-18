@@ -75,6 +75,14 @@ Output results to a file
 Output JSON model to a file
 
 
+### --out( <out>)
+Output results to a file
+
+
+### --json()
+Output JSON model to a file
+
+
 ### --log( <log_>)
 Level of logging.
 

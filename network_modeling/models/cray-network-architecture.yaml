@@ -112,6 +112,11 @@ network_v2:
           speed: 25
         - name: "river_bmc_leaf"
           speed: 1
+    - name: "river_ncn_node_4_port_1g_ocp"
+      model: "river_ncn_node_4_port_1g_ocp"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
     - name: "river_compute_node"
       model: "river_compute_node"
       connections:
@@ -169,12 +174,18 @@ network_v2:
     - lookup_name: ["uan", "slurm"]
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port"
+    - lookup_name: ["lm", "lmem"]
+      shasta_name: "lm"
+      architecture_type: "river_ncn_node_4_port"
     - lookup_name: ["lnet"]
       shasta_name: "lnet"
       architecture_type: "river_ncn_node_4_port"
     - lookup_name: ["Ln", "ln", "login"]
       shasta_name: "login"
       architecture_type: "river_ncn_node_4_port"
+    - lookup_name: ["gw", "gateway"]
+      shasta_name: "gateway"
+      architecture_type: "river_ncn_node_4_port_1g_ocp"
     - lookup_name: ["viz"]
       shasta_name: "viz"
       architecture_type: "river_ncn_node_4_port"
@@ -210,6 +221,7 @@ network_v2:
       architecture_type: "river_compute_node"
     - lookup_name:
         - '^x\d+p\d+$'
+        - '^x\d+pdu\d+$'
         - '^pdu\d+$'
       shasta_name: "pdu"
       architecture_type: "pdu"
@@ -271,6 +283,11 @@ network_v2_tds:
           speed: 25
         - name: "river_bmc_leaf"
           speed: 1
+    - name: "river_ncn_node_4_port_1g_ocp"
+      model: "river_ncn_node_4_port_1g_ocp"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
     - name: "customer_edge_router"
       model: "customer_edge_router"
       connections:
@@ -330,6 +347,20 @@ network_v2_tds:
         - "slurm"
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port"
+    - lookup_name: 
+        - "lm"
+        - "lmem"
+      shasta_name: "lm"
+      architecture_type: "river_ncn_node_4_port"
+    - lookup_name:
+        - "lnet"
+      shasta_name: "lnet"
+      architecture_type: "river_ncn_node_4_port"
+    - lookup_name: 
+        - "gw"
+        - "gateway"
+      shasta_name: "gateway"
+      architecture_type: "river_ncn_node_4_port_1g_ocp"
     - lookup_name:
         - "lnet"
       shasta_name: "lnet"
@@ -367,6 +398,7 @@ network_v2_tds:
       architecture_type: "river_compute_node"
     - lookup_name:
         - '^x\d+p\d+$'
+        - '^x\d+pdu\d+$'
         - '^pdu\d+$'
       shasta_name: "pdu"
       architecture_type: "pdu"

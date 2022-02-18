@@ -1,4 +1,4 @@
-# 🛶 CANU v1.1.4
+# 🛶 CANU v1.1.11 
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -112,7 +112,7 @@ In order to run CANU, both python3 and pip3 need to be installed.
   ```bash
     python3 -m venv .venv
     source ./.venv/bin/activate
-    pip3 install ./canu
+    pip3 install .
   ```
 
   - When you are done working in the Python Virtualenv.
@@ -125,14 +125,12 @@ In order to run CANU, both python3 and pip3 need to be installed.
 - To install the development build of CANU type:
 
   ```bash
-  python3 setup.py develop --user
-  ```
-
-  If that doesn't work, try:
-
-  ```bash
   pip3 install --editable .
   ```
+
+- To install SLES RPM versions
+
+[SLES RPM](docs/rpm_install.md)
 
 ## Usage
 
@@ -665,8 +663,8 @@ $ canu validate network bgp --username USERNAME --password PASSWORD
 
 BGP Neighbors Established
 --------------------------------------------------
-PASS - IP: 192.168.1.1 Hostname: sw-spine01 
-PASS - IP: 192.168.1.2 Hostname: sw-spine01 
+PASS - IP: 192.168.1.1 Hostname: sw-spine01
+PASS - IP: 192.168.1.2 Hostname: sw-spine01
 ```
 
 If any of the spine switch neighbors for a connection other than **Established**, the switch will **FAIL** validation.
@@ -1168,6 +1166,102 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.1.11]
+- `canu validate BGP` now has an option to choose what network to run against.
+- Remove `'lacp-individual` from mellanox spine02.
+- Generate unique MAC address for each Mellanox magp virtual router.
+
+## [1.1.10]
+- Update canu validate to have cleaner output.
+- Add --remediate option for canu validate.
+
+## [1.1.9]
+- Fix Mellanox web interface command
+- Remove hard coded BGP ASN #
+- Add CMN to CAN ACL
+- Level set CSM 1.0 templates with CSM 1.2 minus CMN, VRF, etc..
+
+## [1.1.8]
+- Add banner motd to all switch configs with CSM and CANU versions.
+- Add documentation to install from RPM (for SLES).
+
+## [1.1.7]
+- Remove CMN ip helper on mellanox.
+- Remove broken tests.
+- Fix Aruba OSPF process.
+- Mellanox dns command fix.
+- Mellanox loopback command fix.
+- Mellanox NTP command fix.
+
+## [1.1.5]
+- Add ACLs to VLAN interfaces.
+- Add maximum paths to mellanox BGP template for customer VRF.
+- Fix Mellanox ISL speed setting.
+- Fix PDU node recognition and naming: `pdu<#>, <cabinet>pdu<#>, <cabinet>p<#> all map to a name pdu-<cabinet>-<###>`
+- Add large memory UAN node definitions: `lm-<###> maps to lm-<###>`
+- Add gateway: `gateway<#>, gw<#> map to gateway-<###>`
+
+## [1.1.4]
+- fix sls url
+
+## [1.1.3]
+- validate BGP now reads IPs from the SLS API
+- Added a feature to run tests against a live network. (Aruba only)
+
+## [1.1.2]
+- Enabled webui for mellanox.
+- Added speed commands to dell/mellanox templates.
+
+## [1.1.1] 2022-12-07
+
+- Updated pull_request_template.md
+- Adjusted the STP timeout to 4 seconds from the default of 15.
+- Changed setup.py file glob to follow previously updated Jinja2 template locations.
+- Command line option --csi-folder has changed to --sls-file. Any SLS JSON file can be used.
+- Installation via pip now supports non-developer modes. Pyinstaller binary and RPM now work as advertised.
+- The directory of canu_cache.yaml is now dynamically configured in the user's home directory (preferred), or the system temporary directory depending on filesystem permissions.
+- Added `canu cache location` print the folder where your cache is located
+- Added `canu cache print` to print a colored version of your cache to the screen
+- Added `canu cache delete` to delete the cache file, the file will be created again on the next canu command
+- Added Dell and Mellanox support to the `canu validate switch config` command
+- Added Dell and Mellanox support to the `canu validate network config` command
+- Added ability to compare two config files with `canu validate switch config`
+- Added ability to compare two config folders with `canu validate network config`
+- Added an `--override` option to `canu generate switch config` and `canu generate network config`, this allows users to ignore custom configuration so CANU does not overwrite it.
+- Changed the `-s --shasta` flag to `--csm`
+- Added Mellanox support to the `canu config bgp` command
+- Added Dell/Mellanox support to the `canu generate network config` & `canu generate switch config` commands
+- Updated `canu validate shcd-cabling` to show port by port differences.
+- Updated the docs in the `/docs` folder to build automatically with nox
+- Added support for CMN (Customer Management Network) on Aruba and Dellanox.
+- Added mgmt plane ACL on Aruba Switches
+- Added Metallb networks to ACLs
+- Removed the hardcoded VLAN variables, these are now being pulled in from SLS.
+- Added 1.2 Aruba templates
+- Added CANU validate switch config support for dellanox.
+- BGP is now generated during `canu generate` switch/network config. (aruba &Mellanox)
+- Computes/HSN-bmcs/VizNodes/LoginNodes/pdus now have their switch config generated.
+- Added SubRack support for reading in all variations from the SHCD, and added **sub_location** and **parent** to the JSON output
+- Added Paddle / CCJ (CSM Cabling JSON) support. Commands `canu validate paddle` and `canu validate paddle-cabling` can validate the CCJ. Config can be generated using CCJ.
+- Added the `jq` command to the Docker image.
+- Added `canu test` to run tests against the network (aruba only).
+
+## [0.0.6] - 2021-9-23
+
+- Added alpha version of schema-checked JSON output in `validate shcd` as a machine-readable exchange for SHCD data.
+- Add ability to run CANU in a container, and update Python virtual environment documentation.
+- Added `canu generate switch config` to generate switch configuration for Aruba systems.
+- Added `canu generate network config` to generate network configuration for Aruba systems.
+- Added `canu validate switch config` to compare running switch config to a file for Aruba systems.
+- Added `canu validate network config` to compare running network config to files for Aruba systems.
+- Updated naming conventions to `canu <verb> switch/network <noun>`
+- Added the ability to fully track device slot and port assignments.
+- Mountain hardware (CMM, CEC) is now being generated in the switch configurations.
+- Fixed multiple templates to match what is on the Aruba switch, these include, UANs, Loopbacks, VLAN interfaces, ACLs.
+- Known Limitations:
+  - PDUs are not yet properly handled in the generated switch configurations.
+  - Switch and SNMP passwords have been removed from generated configurations until the handling code is secure.
 
 ## [1.1.4]
 - fix sls url
