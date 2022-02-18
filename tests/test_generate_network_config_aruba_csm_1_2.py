@@ -33,7 +33,7 @@ from .test_generate_switch_config_aruba_csm_1_2 import sls_input, sls_networks
 
 test_file_directory = Path(__file__).resolve().parent
 
-test_file_name = "Full_Architecture_Golden_Config_0.0.6.xlsx"
+test_file_name = "Full_Architecture_Golden_Config_1.1.5.xlsx"
 test_file = path.join(test_file_directory, "data", test_file_name)
 override_file_name = "override.yaml"
 override_file = path.join(test_file_directory, "data", override_file_name)

@@ -1,0 +1,17 @@
+{#- bgp #}
+protocol bgp
+router bgp 65533 vrf default
+router bgp 65533 vrf default router-id {{ variables.LOOPBACK_IP }} force
+router bgp 65533 vrf default distance 20 70 20
+router bgp 65533 vrf default maximum-paths ibgp 32
+{%- for nmn_name, nmn_ip in variables.NMN_IPs.items() if "ncn-w" in nmn_name %}
+router bgp 65533 vrf default neighbor {{ nmn_ip }} remote-as 65533
+router bgp 65533 vrf default neighbor {{ nmn_ip }} route-map {{ nmn_name }}
+{%- endfor %}
+{%- for nmn_name, nmn_ip in variables.NMN_IPs.items() if "ncn-w" in nmn_name %}
+router bgp 65533 vrf default neighbor {{ nmn_ip }} timers 1 3
+{%- endfor %}
+{%- for nmn_name, nmn_ip in variables.NMN_IPs.items() if "ncn-w" in nmn_name %}
+router bgp 65533 vrf default neighbor {{ nmn_ip }} transport connection-mode passive
+{%- endfor %}
+{#- end bgp #}

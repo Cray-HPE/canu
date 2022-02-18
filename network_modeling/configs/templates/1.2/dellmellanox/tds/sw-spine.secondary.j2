@@ -1,6 +1,7 @@
 {#- dm-sw-spine.secondary #}
 {%- include '1.2/dellmellanox/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
+{%- include '1.2/dellmellanox/common/banner-motd.j2' %}
 
 no cli default prefix-modes enable
 
@@ -34,6 +35,8 @@ ntp server {{ variables.NCN_W003 }} version 4
 {%- include '1.2/dellmellanox/common/acl-mellanox.j2' %}
 
 interface port-channel 100
+interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} speed 40G force
+interface ethernet 1/{{ variables.VSX_ISL_PORT2 }} speed 40G force
 interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} channel-group 100 mode active
 interface ethernet 1/{{ variables.VSX_ISL_PORT2 }} channel-group 100 mode active
 interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} description "mlag-isl"
@@ -120,22 +123,7 @@ interface vlan {{ variables.NATIVE_VLAN }} ip dhcp relay instance 2 downstream
 interface vlan {{ variables.NMN_VLAN }} ip dhcp relay instance 2 downstream
 interface vlan {{ variables.HMN_VLAN }} ip dhcp relay instance 4 downstream
 
-protocol magp
-interface vlan {{ variables.NATIVE_VLAN }} magp 1
-interface vlan {{ variables.NMN_VLAN }} magp 2
-interface vlan {{ variables.HMN_VLAN }} magp 4
-interface vlan {{ variables.CMN_VLAN }} magp 6
-interface vlan {{ variables.CAN_VLAN }} magp 7
-interface vlan 1 magp 1 ip virtual-router address {{ variables.MTL_IP_GATEWAY }}
-interface vlan {{ variables.NMN_VLAN }} magp 2 ip virtual-router address {{ variables.NMN_IP_GATEWAY }}
-interface vlan {{ variables.HMN_VLAN }} magp 4 ip virtual-router address  {{ variables.HMN_IP_GATEWAY }}
-interface vlan {{ variables.CMN_VLAN }} magp 6 ip virtual-router address {{ variables.CMN_IP_GATEWAY }}
-interface vlan {{ variables.CAN_VLAN }} magp 7 ip virtual-router address {{ variables.CAN_IP_GATEWAY }}
-interface vlan 1 magp 1 ip virtual-router mac-address 00:00:5E:00:01:01
-interface vlan {{ variables.NMN_VLAN }} magp 2 ip virtual-router mac-address 00:00:5E:00:01:01
-interface vlan {{ variables.HMN_VLAN }} magp 4 ip virtual-router mac-address 00:00:5E:00:01:01
-interface vlan {{ variables.CMN_VLAN }} magp 6 ip virtual-router mac-address 00:00:5E:00:01:01
-interface vlan {{ variables.CAN_VLAN }} magp 7 ip virtual-router mac-address 00:00:5E:00:01:01
+{% include '1.2/dellmellanox/common/magp.j2' %}
 
 mlag-vip mlag-domain ip 192.168.255.242 /29 force
 no mlag shutdown

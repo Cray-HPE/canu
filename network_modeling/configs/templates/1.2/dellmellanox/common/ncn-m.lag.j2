@@ -6,7 +6,10 @@ interface mlag-port-channel {{ node.config.LAG_NUMBER }} mtu 9216 force
 interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport mode hybrid
 interface mlag-port-channel {{ node.config.LAG_NUMBER }} description "{{ node.config.DESCRIPTION }}"
 interface mlag-port-channel {{ node.config.LAG_NUMBER }} no shutdown
+{%- if variables.HOSTNAME == "sw-spine-001" %}
 interface mlag-port-channel {{ node.config.LAG_NUMBER }} lacp-individual enable force
+{%- endif %}
+
 
 interface ethernet 1/{{ node.config.PORT }} speed 40G force
 interface ethernet 1/{{ node.config.PORT }} mtu 9216 force

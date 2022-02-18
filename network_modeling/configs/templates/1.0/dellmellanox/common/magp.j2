@@ -1,0 +1,15 @@
+{#- magp #}
+protocol magp
+interface vlan {{ variables.NATIVE_VLAN }} magp 1
+interface vlan {{ variables.NMN_VLAN }} magp 2
+interface vlan {{ variables.HMN_VLAN }} magp 3
+interface vlan {{ variables.CAN_VLAN }} magp 4
+interface vlan {{ variables.NATIVE_VLAN }} magp 1 ip virtual-router address {{ variables.MTL_IP_GATEWAY }}
+interface vlan {{ variables.NMN_VLAN }} magp 2 ip virtual-router address {{ variables.NMN_IP_GATEWAY }}
+interface vlan {{ variables.HMN_VLAN }} magp 3 ip virtual-router address  {{ variables.HMN_IP_GATEWAY }}
+interface vlan {{ variables.CAN_VLAN }} magp 4 ip virtual-router address {{ variables.CAN_IP_GATEWAY }}
+interface vlan {{ variables.NATIVE_VLAN }} magp 1 ip virtual-router mac-address 00:00:5E:00:01:01
+interface vlan {{ variables.NMN_VLAN }} magp 2 ip virtual-router mac-address 00:00:5E:00:01:02
+interface vlan {{ variables.HMN_VLAN }} magp 3 ip virtual-router mac-address 00:00:5E:00:01:03
+interface vlan {{ variables.CAN_VLAN }} magp 4 ip virtual-router mac-address 00:00:5E:00:01:04
+{#- end magp #}

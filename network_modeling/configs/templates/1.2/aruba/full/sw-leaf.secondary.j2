@@ -1,6 +1,7 @@
 {#- sw-leaf.secondary #}
 {%- include '1.2/aruba/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
+{%- include '1.2/aruba/common/banner-motd.j2' %}
 no ip icmp redirect
 vrf Customer
 vrf keepalive
@@ -26,12 +27,14 @@ vlan {{ variables.HMN_VLAN }}
     name HMN
     apply access-list ip nmn-hmn in
     apply access-list ip nmn-hmn out
-{%- if variables.CMN != None %}
 vlan {{ variables.CMN_VLAN }}
     name CMN
-{%- endif %}
+    apply access-list ip cmn-can in
+    apply access-list ip cmn-can out
 vlan {{ variables.CAN_VLAN }}
     name CAN
+    apply access-list ip cmn-can in
+    apply access-list ip cmn-can out
 vlan 10
     name SUN
 spanning-tree
@@ -105,7 +108,7 @@ ip dns server-address {{ variables.NMNLB_DNS }}
 
 
 
-router ospf 1 vrf Customer
+router ospf 2 vrf Customer
     router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 router ospf 1

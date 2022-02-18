@@ -1,9 +1,9 @@
 {#- bmc #}
 {%- for node in cabling.nodes if node.slot == "bmc" %}
-interface ethernet 1/1/{{ node.config.PORT }}
+interface ethernet1/1/{{node.config.PORT}}
   description {{ node.config.DESCRIPTION }}
   no shutdown
-  switchport access vlan 4
+  switchport access vlan {{ variables.HMN_VLAN }}
   mtu 9216
   flowcontrol receive off
   flowcontrol transmit off

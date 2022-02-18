@@ -1,6 +1,7 @@
 {#- sw-leaf-bmc #}
 {%- include '1.0/aruba/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
+{%- include '1.0/aruba/common/banner-motd.j2' %}
 no ip icmp redirect
 ntp server {{ variables.NCN_W001 }}
 ntp server {{ variables.NCN_W002 }}
@@ -14,26 +15,27 @@ ssh server vrf mgmt
 {%- include '1.0/aruba/common/acl.j2' %}
 
 vlan 1
-vlan 2
+vlan {{ variables.NMN_VLAN }}
     name NMN
     apply access-list ip nmn-hmn in
     apply access-list ip nmn-hmn out
-vlan 4
+vlan {{ variables.HMN_VLAN }}
     name HMN
     apply access-list ip nmn-hmn in
     apply access-list ip nmn-hmn out
-vlan 7
-    name CAN
 
 spanning-tree
+{#- forward delay added to help with pxe boots. CASMNET-1099 + CASMTRIAGE-2793 #}
+spanning-tree forward-delay 4
 spanning-tree config-name MST0
 spanning-tree config-revision 1
 interface mgmt
     shutdown
     ip dhcp
 
-{% include '1.0/aruba/tds/leaf-bmc-to-spine.lag.j2' %}
+{% include '1.0/aruba/common/compute.j2' %}
 {% include '1.0/aruba/common/bmc.j2' %}
+{% include '1.0/aruba/tds/leaf-bmc-to-spine.lag.j2' %}
 
 interface loopback 0
     ip address {{ variables.LOOPBACK_IP }}/32
@@ -41,12 +43,12 @@ interface loopback 0
 interface vlan 1
     ip mtu 9198
     ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}}
-interface vlan 2
+interface vlan {{ variables.NMN_VLAN }}
     description NMN
     ip mtu 9198
     ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}}
     ip ospf 1 area 0.0.0.0
-interface vlan 4
+interface vlan {{ variables.HMN_VLAN }}
     description HMN
     ip mtu 9198
     ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}

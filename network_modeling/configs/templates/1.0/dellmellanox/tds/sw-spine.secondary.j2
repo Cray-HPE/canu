@@ -1,114 +1,121 @@
 {#- dm-sw-spine.secondary #}
 {%- include '1.0/dellmellanox/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
-ip dhcp send-hostname
-ip domain-list local
+{%- include '1.0/dellmellanox/common/banner-motd.j2' %}
 
 no cli default prefix-modes enable
 
-ntp enable
-ntp server {{ variables.NCN_W001 }}
-ntp server {{ variables.NCN_W002 }}
-ntp server {{ variables.NCN_W003 }}
-
 protocol mlag
-   
-interface port-channel 100
-interface ethernet {{ variables.VSX_ISL_PORT1 }} channel-group 100 mode active
-interface ethernet {{ variables.VSX_ISL_PORT2 }} channel-group 100 mode active
-interface ethernet {{ variables.VSX_ISL_PORT1 }} description mlag-isl
-interface ethernet {{ variables.VSX_ISL_PORT2 }} description mlag-isl
-interface port-channel 100 description mlag-isl
+protocol bgp
 
+vlan {{ variables.NMN_VLAN }}
+vlan {{ variables.HMN_VLAN }}
+vlan {{ variables.CAN_VLAN }}
+vlan 4000
+vlan {{ variables.NMN_VLAN }} name "RVR_NMN"
+vlan {{ variables.HMN_VLAN }} name "RVR_HMN"
+vlan {{ variables.CAN_VLAN }} name "CAN"
+vlan 4000 name "MLAG" 
+
+no ntp server {{ variables.NCN_W001 }} disable
+ntp server {{ variables.NCN_W001 }} keyID 0
+no ntp server {{ variables.NCN_W001 }} trusted-enable
+ntp server {{ variables.NCN_W001 }} version 4
+no ntp server {{ variables.NCN_W002 }} disable
+ntp server {{ variables.NCN_W002 }} keyID 0
+no ntp server {{ variables.NCN_W002 }} trusted-enable
+ntp server {{ variables.NCN_W002 }} version 4
+no ntp server {{ variables.NCN_W003 }} disable
+ntp server {{ variables.NCN_W003 }} keyID 0
+no ntp server {{ variables.NCN_W003 }} trusted-enable
+ntp server {{ variables.NCN_W003 }} version 4
+
+{%- include '1.0/dellmellanox/common/acl-mellanox.j2' %}
+
+interface port-channel 100
+interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} speed 40G force
+interface ethernet 1/{{ variables.VSX_ISL_PORT2 }} speed 40G force
+interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} channel-group 100 mode active
+interface ethernet 1/{{ variables.VSX_ISL_PORT2 }} channel-group 100 mode active
+interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} description "mlag-isl"
+interface ethernet 1/{{ variables.VSX_ISL_PORT2 }} description "mlag-isl"
+interface port-channel 100 description "mlag-isl"
+   
 lacp
 port-channel load-balance ethernet source-destination-ip ingress-port
-   
-vlan 2
-vlan 4
-vlan 7
-vlan 10
-vlan 4000
-vlan 2 name "RVR_NMN"
-vlan 4 name "RVR_HMN"
-vlan 7 name "CAN"
-vlan 10 name "SUN"
-vlan 4000 name "MLAG"
-vlan 4091 name "CMM_RECOVERY"
 
 ip routing vrf default
-interface vlan 1
-interface vlan 2
-interface vlan 4
-interface vlan 7
+interface loopback 0
+interface vlan {{ variables.NATIVE_VLAN }}
+interface vlan {{ variables.NMN_VLAN }}
+interface vlan {{ variables.HMN_VLAN }}
+interface vlan {{ variables.CAN_VLAN }}
 interface vlan 10
 interface vlan 4000
-interface vlan 1 ip address {{ variables.MTL_IP }} primary
-interface vlan 2 ip address {{ variables.NMN_IP }} primary
-interface vlan 4 ip address {{ variables.HMN_IP }} primary
-interface vlan 7 ip address {{ variables.CAN_IP_PRIMARY }} primary
-interface vlan 10 ip address {{ variables.SUN_IP }} primary
-interface vlan 4000 ip address {{ variables.MLAG_IP }} primary
-interface vlan 10 mtu 9216 
+interface loopback 0 ip address {{ variables.LOOPBACK_IP }}/32
+interface vlan {{ variables.NATIVE_VLAN }} ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}} primary
+interface vlan {{ variables.NMN_VLAN }} ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}} primary
+interface vlan {{ variables.HMN_VLAN }} ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}} primary
+interface vlan {{ variables.CAN_VLAN }} ip address {{ variables.CAN_IP_SECONDARY }}/{{ variables.CAN_PREFIX_LEN }} primary
+interface vlan 4000 ip address 192.168.255.254/30 primary
+no interface vlan {{ variables.NATIVE_VLAN }} ip icmp redirect
+interface vlan {{ variables.NATIVE_VLAN }} mtu 9184
+no interface vlan {{ variables.NMN_VLAN }} ip icmp redirect
+interface vlan {{ variables.NMN_VLAN }} mtu 9184
+no interface vlan {{ variables.HMN_VLAN }} ip icmp redirect
+interface vlan {{ variables.HMN_VLAN }} mtu 9184
+no interface vlan {{ variables.CAN_VLAN }} ip icmp redirect
+interface vlan {{ variables.CAN_VLAN }} mtu 9184
 interface vlan 4000 mtu 9216 
 ip load-sharing source-ip-port
 ip load-sharing type consistent
-
+   
 no interface mgmt0 dhcp
-interface mgmt0 ip address {{ variables.LOOPBACK_IP }}
+interface mgmt0 ip address 192.168.255.243 /29
+
+{%- include '1.0/dellmellanox/common/prefix.list.j2' %}
+{%- include '1.0/dellmellanox/common/route-map.j2' %}
+{%- include '1.0/dellmellanox/common/bgp.j2' %}
+
+ip name-server vrf default {{ variables.NMNLB_DNS }}
 
 spanning-tree mode mst
+spanning-tree priority 4096
 spanning-tree port type edge default
-spanning-tree mst revision 1
-spanning-tree mst name MST0
- 
-dcb priority-flow-control enable force
+spanning-tree mst name cray
+spanning-tree mst revision 2
+
 interface port-channel 100 dcb priority-flow-control mode on force
-   
-{% include '1.0/dellmellanox/common/acl-mellanox.j2' %}
+
 {% include '1.0/dellmellanox/common/ncn-m.lag.j2' %}
 {% include '1.0/dellmellanox/common/ncn-w.lag.j2' %}
 {% include '1.0/dellmellanox/common/ncn-s.lag.j2' %}
 {% include '1.0/dellmellanox/common/uan.j2' %}
-{% include '1.0/dellmellanox/tds/spine-to-leaf-bmc.lag.j2' %}
+{% include '1.0/dellmellanox/full/spine-to-leaf-bmc.lag.j2' %}
 {% include '1.0/dellmellanox/common/spine-to-cdu.lag.j2' %}
-
+      
 protocol ospf
 router ospf 1 vrf default
 router ospf 1 vrf default router-id {{ variables.LOOPBACK_IP }}
-interface vlan 2 ip ospf area 0.0.0.2
-interface vlan 4 ip ospf area 0.0.0.4
-router ospf 1 vrf default redistribute ibgp
-   
+interface loopback 0 ip ospf area 0.0.0.0
+interface vlan {{ variables.NMN_VLAN }} ip ospf area 0.0.0.0
+interface vlan {{ variables.HMN_VLAN }} ip ospf area 0.0.0.0
+router ospf 1 vrf default redistribute bgp
+
 ip dhcp relay instance 2 vrf default
 ip dhcp relay instance 4 vrf default
 ip dhcp relay instance 2 address 10.92.100.222
 ip dhcp relay instance 4 address 10.94.100.222
-interface vlan 1 ip dhcp relay instance 2 downstream
-interface vlan 2 ip dhcp relay instance 2 downstream
-interface vlan 4 ip dhcp relay instance 4 downstream
-interface vlan 7 ip dhcp relay instance 2 downstream
-   
-protocol magp
-interface vlan 1 magp 1
-interface vlan 2 magp 2
-interface vlan 4 magp 4
-interface vlan 7 magp 7
-interface vlan 10 magp 10
-interface vlan 1 magp 1 ip virtual-router address {{ variables.MTL_IP_GATEWAY }}
-interface vlan 2 magp 2 ip virtual-router address {{ variables.NMN_IP_GATEWAY }}
-interface vlan 4 magp 4 ip virtual-router address  {{ variables.HMN_IP_GATEWAY }}
-interface vlan 7 magp 7 ip virtual-router address {{ variables.CAN_IP_GATEWAY }}1
-interface vlan 10 magp 10 ip virtual-router address {{ variables.SUN_IP_GATEWAY }}
-interface vlan 1 magp 1 ip virtual-router mac-address 00:00:5E:00:01:01
-interface vlan 2 magp 2 ip virtual-router mac-address 00:00:5E:00:01:01
-interface vlan 4 magp 4 ip virtual-router mac-address 00:00:5E:00:01:01
-interface vlan 7 magp 7 ip virtual-router mac-address 00:00:5E:00:01:01
-interface vlan 10 magp 10 ip virtual-router mac-address 00:00:5E:00:01:01
-   
-mlag-vip gamora-mlag-domain ip 192.168.255.242 /29 force
+interface vlan {{ variables.NATIVE_VLAN }} ip dhcp relay instance 2 downstream
+interface vlan {{ variables.NMN_VLAN }} ip dhcp relay instance 2 downstream
+interface vlan {{ variables.HMN_VLAN }} ip dhcp relay instance 4 downstream
+
+{% include '1.0/dellmellanox/common/magp.j2' %}
+
+mlag-vip mlag-domain ip 192.168.255.242 /29 force
 no mlag shutdown
 mlag system-mac 00:00:5E:00:01:01
 interface port-channel 100 ipl 1
 interface vlan 4000 ipl 1 peer-address 192.168.255.253
-
+   
 {# end dm-sw-spine.secondary #}
