@@ -452,6 +452,7 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False, node_type=
                 port = 1
 
     if port is None:
+        print(port)
         if node_type == "subrack":
             return None
         else:

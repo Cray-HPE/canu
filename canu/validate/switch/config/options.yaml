@@ -195,6 +195,8 @@
         - startswith: role
     - lineage:
         - startswith: hostname
+    - lineage:
+        - startswith: banner
   # Default when expression: list of expressions
   negation_default_when: []
   # Negate substitutions: expression -> negate with

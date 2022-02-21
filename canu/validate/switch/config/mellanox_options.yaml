@@ -1002,6 +1002,8 @@
       replace: ''
     - search: /^ +/gm, ''
       replace: ''
+    # - search: ^ no ip prefix-list
+    #   replace: ''
     
     idempotent_commands_blacklist: []
     
@@ -1016,9 +1018,25 @@
       - startswith: name
     - lineage:
       - contains: description
+    - lineage:
+        - startswith: banner
+    - lineage:
+        - startswith: vlan 7 name
+    - lineage:
+        - startswith: interface vlan 7
+    - lineage:
+        - startswith: ip prefix-li
+    - lineage:
+        - startswith: route-map
     
     # Default when expression: list of expressions
-    negation_default_when: []
+    negation_default_when:
+    - lineage:
+        - startswith: interface lag 101 multi-chassis
+      use: no interface lag 101
+    - lineage:
+        - startswith: route-map ncn-w001 permit 10 match ip address pl-can
+      use: no interface lag 101
     
     # Negate substitutions: expression -> negate with
     # Example Syntax:

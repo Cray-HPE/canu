@@ -372,6 +372,11 @@ def config(
         remediation_config_hier = running_config_hier.config_to_get_to(
             generated_config_hier,
         )
+        if vendor == "mellanox":
+            for line in remediation_config_hier.all_children():
+                if "route-map" in line:
+                    print("yes")
+                    line.set_order_weight(1)
 
         for line in remediation_config_hier.all_children():
             click.echo(line.cisco_style_text(), file=out)
