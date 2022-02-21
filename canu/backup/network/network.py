@@ -19,22 +19,17 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-"""CANU backup switch commands."""
-import json
-import logging
-from os import path
+"""CANU backup network config."""
 import os
 from pathlib import Path
-import pprint
 import sys
-import regex
 
 import click
 from click_help_colors import HelpColorsCommand
 import click_spinner
+from netutils.config.clean import sanitize_config
 from nornir import InitNornir
 from nornir_netmiko import netmiko_send_command
-from netutils.config.clean import sanitize_config
 
 from canu.utils.inventory import inventory
 
@@ -109,6 +104,7 @@ def network(
     unsanitized,
     switch_name,
 ):
+    """Canu backup network config."""
     if not password:
         password = click.prompt(
             "Enter the switch password",
@@ -116,7 +112,6 @@ def network(
             hide_input=True,
         )
     switch_inventory = inventory(username, password, network, sls_file)
-    print(switch_inventory)
     nr = InitNornir(
         runner={
             "plugin": "threaded",
@@ -128,22 +123,29 @@ def network(
         logging={"enabled": log_, "to_console": True, "level": "DEBUG"},
     )
 
+    # Save the netmiko config to file.
     def save_config_to_file(hostname, config):
         if not unsanitized:
-            config = sanitize_config(config, SANITIZE_FILTERS)
-        filename = f"{hostname}-.cfg"
-        with open(os.path.join(folder, hostname), "w") as f:
+            config = sanitize_config(config, sanitize_filters)
+        filename = f"{hostname}.cfg"
+        with open(os.path.join(folder, filename), "w") as f:
             f.write(config)
 
+    # Use netmiko to SSH to switches and retrieve config.
     def get_netmiko_backups():
+        # If we only want to backup one switch.
         if switch_name:
             nr_name = nr.filter(filter_func=lambda h: switch_name in h.name)
             backup_results = nr_name.run(
-                task=netmiko_send_command, enable=True, command_string="show run"
+                task=netmiko_send_command,
+                enable=True,
+                command_string="show run",
             )
         else:
             backup_results = nr.run(
-                task=netmiko_send_command, enable=True, command_string="show run"
+                task=netmiko_send_command,
+                enable=True,
+                command_string="show run",
             )
 
         for hostname in backup_results:
@@ -152,7 +154,8 @@ def network(
                 config=backup_results[hostname][0].result,
             )
 
-    SANITIZE_FILTERS = [
+    # filters to sanitize sensitive data.
+    sanitize_filters = [
         {
             "regex": r"()(?<=ciphertext).+",
             "replace": r"\1 <removed>",
@@ -170,4 +173,5 @@ def network(
             "replace": r"\1 <removed>",
         },
     ]
-    get_netmiko_backups()
+    with click_spinner.spinner():
+        get_netmiko_backups()

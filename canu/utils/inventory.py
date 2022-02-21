@@ -21,19 +21,21 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """Create Nornir Inventory from SLS."""
 import json
-import pprint
+
 import click
+
 from canu.utils.sls import pull_sls_hardware, pull_sls_networks
 
 
 def inventory(username, password, network, sls_json=None):
+    """Build Nornir inventory from sls_input."""
     inventory = {"groups": "shasta", "hosts": {}}
     if sls_json:
         try:
             input_json = json.load(sls_json)
         except (json.JSONDecodeError, UnicodeDecodeError):
             click.secho(
-                f"The file {sls_file.name} is not valid JSON.",
+                f"The file {sls_json.name} is not valid JSON.",
                 fg="red",
             )
             return
@@ -66,12 +68,10 @@ def inventory(username, password, network, sls_json=None):
                 if host == x["ExtraProperties"]["Aliases"][0]:
                     if x["ExtraProperties"]["Brand"] == "Aruba":
                         inventory["hosts"][host]["platform"] = "aruba_os"
-                        vendor = "aruba"
                     elif x["ExtraProperties"]["Brand"] == "Dell":
                         inventory["hosts"][host]["platform"] = "dell_os10"
                     elif x["ExtraProperties"]["Brand"] == "Mellanox":
                         inventory["hosts"][host]["platform"] = "mellanox"
-                        vendor = "dellanox"
                     else:
                         inventory["hosts"][host]["platform"] = "generic"
     inventory = {
