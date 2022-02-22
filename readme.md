@@ -1154,17 +1154,18 @@ Options
 Example
 ```bash
 $ canu backup network --sls-file ./sls_input_file.json --network CMN --folder ./ --unsanitized
-$ ls | grep sw
-sw-cdu-001.cfg
-sw-cdu-002.cfg
+Running Configs Saved
+---------------------
+sw-spine-001.cfg
+sw-spine-002.cfg
 sw-leaf-001.cfg
 sw-leaf-002.cfg
 sw-leaf-003.cfg
 sw-leaf-004.cfg
 sw-leaf-bmc-001.cfg
 sw-leaf-bmc-002.cfg
-sw-spine-001.cfg
-sw-spine-002.cfg
+sw-cdu-001.cfg
+sw-cdu-002.cfg
 ```
 
 

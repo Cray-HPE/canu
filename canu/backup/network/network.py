@@ -123,13 +123,14 @@ def network(
         logging={"enabled": log_, "to_console": True, "level": "DEBUG"},
     )
 
-    # Save the netmiko config to file.
+    # Save the netmiko config.
     def save_config_to_file(hostname, config):
         if not unsanitized:
             config = sanitize_config(config, sanitize_filters)
         filename = f"{hostname}.cfg"
         with open(os.path.join(folder, filename), "w") as f:
             f.write(config)
+            click.secho(f"{filename}", fg="green")
 
     # Use netmiko to SSH to switches and retrieve config.
     def get_netmiko_backups():
@@ -147,7 +148,7 @@ def network(
                 enable=True,
                 command_string="show run",
             )
-
+        click.secho("\nRunning Configs Saved\n---------------------", fg="green")
         for hostname in backup_results:
             save_config_to_file(
                 hostname=hostname,
