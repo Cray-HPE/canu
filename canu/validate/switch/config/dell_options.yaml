@@ -45,9 +45,6 @@
       - startswith: no banner motd
       order: 5
     - lineage:
-      - startswith: no banner motd
-      order: 5
-    - lineage:
       - startswith: ip name-server
       order: 6
     - lineage:
