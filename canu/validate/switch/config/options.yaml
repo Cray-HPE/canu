@@ -178,6 +178,7 @@
         - startswith:
             - description
             - ip address
+            - vlan trunk
     - lineage:
         - startswith: interface vlan
         - startswith: ip ospf

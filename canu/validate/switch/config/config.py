@@ -336,6 +336,7 @@ def config(
         running_config_hier.difference(generated_config_hier),
         generated_config_hier.difference(running_config_hier),
         vendor,
+        out,
     )
 
     click.echo(dash, file=out)
@@ -361,10 +362,7 @@ def config(
     if remediation:
         click.echo(dash, file=out)
         click.secho(
-            "\n"
-            + "Remediation Config"
-            + "\n"
-            + "This feature is experimental and has limited testing.",
+            "\n" + "Remediation Config" + "\n",
             fg="bright_white",
             file=out,
         )
@@ -372,11 +370,6 @@ def config(
         remediation_config_hier = running_config_hier.config_to_get_to(
             generated_config_hier,
         )
-        if vendor == "mellanox":
-            for line in remediation_config_hier.all_children():
-                if "route-map" in line:
-                    print("yes")
-                    line.set_order_weight(1)
 
         for line in remediation_config_hier.all_children():
             click.echo(line.cisco_style_text(), file=out)
@@ -616,13 +609,14 @@ def print_difference_line(additions, additions_int, deletions, deletions_int, ou
     )
 
 
-def compare_config_heir(config1, config2, vendor):
+def compare_config_heir(config1, config2, vendor, out="-"):
     """Compare and print two switch configurations.
 
     Args:
         config1: (Str) Switch 1 config
         config2: (Str) Switch 2 config
         vendor: Switch vendor. Aruba, Dell, or Mellanox
+        out: Defaults to stdout, but will print to the file name passed in
 
     Returns:
         List with the number of additions and deletions
@@ -646,13 +640,13 @@ def compare_config_heir(config1, config2, vendor):
         difflist.sort(reverse=True)
     for line in difflist:
         if "+" == line.strip()[0]:
-            click.secho(line, fg="green")
+            click.secho(line, fg="green", file=out)
         elif "-" == line.strip()[0]:
-            click.secho(line, fg="red")
+            click.secho(line, fg="red", file=out)
         elif line.startswith("? "):
             pass
         else:
-            click.secho(line, fg="bright_white")
+            click.secho(line, fg="bright_white", file=out)
     return difflist
 
 

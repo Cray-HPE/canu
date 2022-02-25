@@ -1,4 +1,4 @@
-# 🛶 CANU v1.1.11 
+# 🛶 CANU v1.2.1 
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -7,7 +7,6 @@ CANU can be used to:
 - Check if switches (Aruba, Dell, or Mellanox) on a Shasta network meet the firmware version requirements
 - Check network cabling status using LLDP
 - Validate BGP status
-- Configure BGP
 - Validate that SHCD spreadsheets are configured correctly and pass a number of checks
 - Validate an SHCD against actual network cabling status to check for mis-cabling
 - Generate switch configuration for an entire network
@@ -65,7 +64,6 @@ The SHCD can easily be converted into CCJ by using `canu validate shcd --shcd SH
 **[Validate SHCD and Cabling](#validate-shcd-and-cabling)**<br>
 **[Validate Paddle and Cabling](#validate-paddle-and-cabling)**<br>
 **[Validate Network BGP](#validate-network-bgp)**<br>
-**[Config BGP](#config-bgp)**<br>
 **[Generate Switch Config](#generate-switch-config)**<br>
 **[Generate Network Config](#generate-network-config)**<br>
 **[Validate Switch Config](#validate-switch-config)**<br>
@@ -669,46 +667,6 @@ PASS - IP: 192.168.1.2 Hostname: sw-spine01
 
 If any of the spine switch neighbors for a connection other than **Established**, the switch will **FAIL** validation.
 
-
-### Config BGP
-
-**[Details](docs/config_bgp.md)**<br>
-
-CSM 1.0 only.
-
-CANU can be used to configure BGP for a pair of switches.
-
-This command will remove previous configuration (BGP, Prefix Lists, Route Maps), then add prefix lists, create
-route maps, and update BGP neighbors, then write it all to the switch memory.
-
-The network and NCN data can be read from one of two sources, the SLS API, or using any SLS File - including CSI-generated sls_input_file.json.
-
-To access SLS, a token must be passed in using the `--auth-token` flag.
-Tokens are typically stored in ~./config/cray/tokens/
-Instead of passing in a token file, the environmental variable SLS_TOKEN can be used.
-
-To get the network data using CSI, pass in the CSI folder containing the SLS JSON file using the `--sls-file` flag
-
-The CSI SLS JSON file is generally stored in one of two places depending on how far the system is in the install process.
-
-- Early in the install process, when running off of the LiveCD the CSI sls_input_file.json file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
-
-- Later in the install process, the CSI sls_input_file.json file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
-
-To configure BGP run: `canu config bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
-
-```bash
-$ canu config bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
-
-BGP Updated
---------------------------------------------------
-192.168.1.1
-192.168.1.2
-
-```
-
-To print extra details (prefixes, NCN names, IPs), add the `--verbose` flag
-
 ### Generate Switch Config
 
 **[Details](docs/switch_config.md)**<br>
@@ -1166,6 +1124,12 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.2.1]
+- Remove `canu config bgp`, there is no need for this as it's configured during `canu generated switch/network config`
+- Move Aruba CMN ospf instance from 1 to 2.
+- `canu validate` output enahncements & bug fixes.
+- Template fixes/enhancements.
 
 ## [1.1.11]
 - `canu validate BGP` now has an option to choose what network to run against.
