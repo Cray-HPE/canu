@@ -80,28 +80,6 @@ log = logging.getLogger("validate_shcd")
     "--corners",
     help="The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.",
 )
-@click.option("--out", help="Output JSON model to a file", type=click.File("w"))
-@click.option(
-    "--out",
-    help="Output results to a file",
-    type=click.File("w"),
-    default="-",
-)
-@click.option("--json", "json_", is_flag=True, help="Output JSON model to a file")
-@click.option(
-    "--out",
-    help="Output results to a file",
-    type=click.File("w"),
-    default="-",
-)
-@click.option("--json", "json_", is_flag=True, help="Output JSON model to a file")
-@click.option(
-    "--out",
-    help="Output results to a file",
-    type=click.File("w"),
-    default="-",
-)
-@click.option("--json", "json_", is_flag=True, help="Output JSON model to a file")
 @click.option(
     "--out",
     help="Output results to a file",
@@ -452,7 +430,6 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False, node_type=
                 port = 1
 
     if port is None:
-        print(port)
         if node_type == "subrack":
             return None
         else:
