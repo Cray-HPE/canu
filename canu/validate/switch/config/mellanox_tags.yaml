@@ -156,8 +156,4 @@
     - contains:
       - description
     add_tags: safe
-  - lineage:
-    - contains:
-      - description
-    add_tags: safe
   
