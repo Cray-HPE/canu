@@ -1151,3 +1151,4 @@ def json_output(node_list, factory, architecture, out):
 
     json_model = json.dumps(paddle, indent=2)
     click.echo(json_model, file=out)
+    
