@@ -1,0 +1,43 @@
+{#- vsx_isl #}
+{%- set ns = namespace(lag_displayed=false) %}
+{%- for node in cabling.nodes if node.subtype in variables.HOSTNAME and node.config.LAG_NUMBER %}
+{%- if ns.lag_displayed == false %}
+{%- set ns.lag_displayed = true %}
+
+interface lag {{ node.config.LAG_NUMBER }}
+    no shutdown
+    description ISL link
+    no routing
+    vlan trunk native 1 tag
+    vlan trunk allowed all
+    lacp mode active
+interface 1/1/{{ variables.VSX_KEEPALIVE }}
+    no shutdown
+    vrf attach keepalive
+    ip address 192.168.255.0/31
+interface 1/1/{{ variables.VSX_ISL_PORT1 }}
+    no shutdown
+    mtu 9198
+    description vsx isl
+    lag {{ node.config.LAG_NUMBER }}
+interface 1/1/{{ variables.VSX_ISL_PORT2 }}
+    no shutdown
+    mtu 9198
+    description vsx isl
+    lag {{ node.config.LAG_NUMBER }}
+vsx
+    system-mac 02:00:00:00:6b:00
+    inter-switch-link lag {{ node.config.LAG_NUMBER }}
+{%- if node.primary == false %}
+    role primary
+    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive
+{%- endif %}
+{%- if node.primary == true %}
+    role secondary
+    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive
+{%- endif %}
+    linkup-delay-timer 600
+    vsx-sync vsx-global
+{%- endif %}
+{%- endfor %}
+{#- end vsx_isl #}
