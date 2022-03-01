@@ -1,4 +1,4 @@
-# 🛶 CANU v1.1.11-develop
+# 🛶 CANU v1.2.0-develop
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -14,6 +14,7 @@ CANU can be used to:
 - Convert SHCD to CCJ (CSM Cabling JSON)
 - Use CCJ / Paddle to validate the network and generate network config
 - Run tests against the mgmt network to check for faults/inconsistencies.
+- Backup switch configs.
 
 # Quickstart Guide
 
@@ -70,6 +71,7 @@ The SHCD can easily be converted into CCJ by using `canu validate shcd --shcd SH
 **[Generate Network Config](#generate-network-config)**<br>
 **[Validate Switch Config](#validate-switch-config)**<br>
 **[Validate Network Config](#validate-network-config)**<br>
+**[Backup Network](#backup-network)**<br>
 **[Cache](#cache)**<br>
 **[Uninstallation](#uninstallation)**<br>
 **[Road Map](#road-map)**<br>
@@ -1092,8 +1094,6 @@ There are several commands to help with the canu cache:
 
 ### Test The Network
 
-Aruba support only.
-
 CANU has the ability to run a set of tests against all of the switches in the management network.
 It is utilizing the nornir automation framework and additional nornir plugins to do this.
 
@@ -1131,7 +1131,43 @@ Example test
     - leaf-bmc
     - spine
 ```
-This test logs into the cdu, leaf, leaf-bmc, and spine switches and runs the command `show version` and checks that `10.08.1021` is in the output.  If it's not the test fails.
+This test logs into the cdu, leaf, leaf-bmc, and spine switches and runs the command `show version` and checks that `10.09.0010` is in the output.  If it's not the test fails.
+
+### Backup Network
+
+Canu can backup the running configurations for switches in the management network.
+It backs up the entire swithc inventory from SLS by defualt, if you want to backup just one switch use the `--name` flag.
+
+Required Input
+You can either use an SLS file or pull the SLS file from the API-Gateway using a token.
+- `--sls-file`
+- `--folder` "Folder to store running config files"
+
+Options
+- `--log` outputs the nornir debug logs
+- `--network [HMN|CMN]` This gives the user the ability to connect to the switches over the CMN.  This allows the use of this tool from outside the Mgmt Network.  The default network used is the HMN.
+- `--password` prompts if password is not entered
+- `--username` defaults to admin
+- `--unsanitized` Retains sensitive data such as passwords and SNMP credentials.  The default is to sanitize the config.
+- `--name` The name of the switch that you want to back up. e.g. 'sw-spine-001'
+
+Example
+```bash
+$ canu backup network --sls-file ./sls_input_file.json --network CMN --folder ./ --unsanitized
+Running Configs Saved
+---------------------
+sw-spine-001.cfg
+sw-spine-002.cfg
+sw-leaf-001.cfg
+sw-leaf-002.cfg
+sw-leaf-003.cfg
+sw-leaf-004.cfg
+sw-leaf-bmc-001.cfg
+sw-leaf-bmc-002.cfg
+sw-cdu-001.cfg
+sw-cdu-002.cfg
+```
+
 
 ## Uninstallation
 
@@ -1166,6 +1202,9 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.2.0-develop]
+- Add `canu backup network`
 
 ## [1.1.11-develop]
 - `canu validate BGP` now has an option to choose what network to run against.
