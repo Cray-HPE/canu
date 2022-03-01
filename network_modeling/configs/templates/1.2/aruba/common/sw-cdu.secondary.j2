@@ -92,7 +92,7 @@ interface vlan {{ variables.CMN_VLAN }}
     description CMN
     ip mtu 9198
     ip address {{ variables.CMN_IP }}/{{variables.CMN_PREFIX_LEN}}
-    ip ospf 2 area 0.0.0.0
+    ip ospf 1 area 0.0.0.0
     
 {%- include '1.2/aruba/common/mtn_hmn_vlan.j2' %}
 {%- include '1.2/aruba/common/mtn_nmn_vlan.j2' %}

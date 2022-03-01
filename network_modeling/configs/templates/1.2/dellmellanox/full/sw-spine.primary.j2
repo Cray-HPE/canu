@@ -31,7 +31,7 @@ no ntp server {{ variables.NCN_W003 }} disable
 ntp server {{ variables.NCN_W003 }} keyID 0
 no ntp server {{ variables.NCN_W003 }} trusted-enable
 ntp server {{ variables.NCN_W003 }} version 4
-ntp vrf default enable force
+ntp vrf default enable
 web vrf default enable force
 
 {%- include '1.2/dellmellanox/common/acl-mellanox.j2' %}

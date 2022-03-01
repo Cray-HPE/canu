@@ -336,7 +336,6 @@ def config(
         running_config_hier.difference(generated_config_hier),
         generated_config_hier.difference(running_config_hier),
         vendor,
-        out,
     )
 
     click.echo(dash, file=out)
@@ -362,7 +361,10 @@ def config(
     if remediation:
         click.echo(dash, file=out)
         click.secho(
-            "\n" + "Remediation Config" + "\n",
+            "\n"
+            + "Remediation Config"
+            + "\n"
+            + "This feature is experimental and has limited testing.",
             fg="bright_white",
             file=out,
         )
@@ -609,14 +611,13 @@ def print_difference_line(additions, additions_int, deletions, deletions_int, ou
     )
 
 
-def compare_config_heir(config1, config2, vendor, out="-"):
+def compare_config_heir(config1, config2, vendor):
     """Compare and print two switch configurations.
 
     Args:
         config1: (Str) Switch 1 config
         config2: (Str) Switch 2 config
         vendor: Switch vendor. Aruba, Dell, or Mellanox
-        out: Defaults to stdout, but will print to the file name passed in
 
     Returns:
         List with the number of additions and deletions
@@ -640,13 +641,13 @@ def compare_config_heir(config1, config2, vendor, out="-"):
         difflist.sort(reverse=True)
     for line in difflist:
         if "+" == line.strip()[0]:
-            click.secho(line, fg="green", file=out)
+            click.secho(line, fg="green")
         elif "-" == line.strip()[0]:
-            click.secho(line, fg="red", file=out)
+            click.secho(line, fg="red")
         elif line.startswith("? "):
             pass
         else:
-            click.secho(line, fg="bright_white", file=out)
+            click.secho(line, fg="bright_white")
     return difflist
 
 
