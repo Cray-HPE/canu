@@ -6,6 +6,7 @@ interface mlag-port-channel {{ node.config.LAG_NUMBER_V1 }} mtu 9216 force
 interface mlag-port-channel {{ node.config.LAG_NUMBER_V1 }} switchport mode hybrid
 interface mlag-port-channel {{ node.config.LAG_NUMBER_V1 }} description "{{ node.config.DESCRIPTION }}"
 interface mlag-port-channel {{ node.config.LAG_NUMBER_V1 }} no shutdown
+interface mlag-port-channel {{ node.config.LAG_NUMBER_V1 }} lacp-individual enable force
 
 interface ethernet 1/{{ node.config.PORT }} speed 40G force
 interface ethernet 1/{{ node.config.PORT }} mtu 9216 force
