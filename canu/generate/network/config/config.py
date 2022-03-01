@@ -144,6 +144,11 @@ csm_options = canu_config["csm_versions"]
     help="Switch configuration override",
     type=click.Path(),
 )
+@click.option(
+    "--preserve",
+    help="Path to current running configs.",
+    type=click.Path(),
+)
 @click.pass_context
 def config(
     ctx,
@@ -158,6 +163,7 @@ def config(
     sls_address,
     folder,
     override,
+    preserve,
 ):
     """Generate the config of all switches (Aruba, Dell, or Mellanox) on the network using the SHCD.
 
@@ -382,6 +388,7 @@ def config(
                 template_folder,
                 vendor_folder,
                 override,
+                preserve,
             )
             all_unknown.extend(unknown)
             config_devices.update(devices)
