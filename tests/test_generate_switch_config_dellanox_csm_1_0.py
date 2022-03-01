@@ -235,7 +235,6 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 7 lacp-individual enable force\n"
             + "interface mlag-port-channel 8 lacp-individual enable force\n"
             + "interface mlag-port-channel 9 lacp-individual enable force\n"
-            + "interface mlag-port-channel 13 lacp-individual enable force\n"
         ) in str(result.output)
         assert (
             "vlan 2\n"
@@ -429,6 +428,7 @@ def test_switch_config_spine_primary():
             + "ntp server 192.168.4.6 keyID 0\n"
             + "no ntp server 192.168.4.6 trusted-enable\n"
             + "ntp server 192.168.4.6 version 4\n"
+            + "ntp vrf default enable force\n"
         ) in str(result.output)
 
 
@@ -791,6 +791,7 @@ def test_switch_config_spine_secondary():
             + "ntp server 192.168.4.6 keyID 0\n"
             + "no ntp server 192.168.4.6 trusted-enable\n"
             + "ntp server 192.168.4.6 version 4\n"
+            + "ntp vrf default enable force\n"
         ) in str(result.output)
 
 

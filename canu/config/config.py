@@ -23,8 +23,6 @@
 import click
 from click_help_colors import HelpColorsGroup
 
-from canu.config.bgp import bgp
-
 
 @click.group(
     cls=HelpColorsGroup,
@@ -34,6 +32,3 @@ from canu.config.bgp import bgp
 @click.pass_context
 def config(ctx):
     """Commands that configure switches on the network."""
-
-
-config.add_command(bgp.bgp)
