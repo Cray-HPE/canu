@@ -103,7 +103,7 @@ interface vlan {{ variables.CMN_VLAN }}
     ip address {{ variables.CMN_IP }}/{{ variables.CMN_PREFIX_LEN }}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.CMN_IP_GATEWAY }}
-    ip ospf 1 area 0.0.0.0
+    ip ospf 2 area 0.0.0.0
 {%- endif %}
 interface vlan {{ variables.CAN_VLAN }}
     vrf attach Customer
