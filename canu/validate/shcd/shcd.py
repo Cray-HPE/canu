@@ -110,6 +110,13 @@ log = logging.getLogger("validate_shcd")
 )
 @click.option("--json", "json_", is_flag=True, help="Output JSON model to a file")
 @click.option(
+    "--out",
+    help="Output results to a file",
+    type=click.File("w"),
+    default="-",
+)
+@click.option("--json", "json_", is_flag=True, help="Output JSON model to a file")
+@click.option(
     "--log",
     "log_",
     help="Level of logging.",

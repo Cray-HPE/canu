@@ -235,7 +235,6 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 7 lacp-individual enable force\n"
             + "interface mlag-port-channel 8 lacp-individual enable force\n"
             + "interface mlag-port-channel 9 lacp-individual enable force\n"
-            + "interface mlag-port-channel 13 lacp-individual enable force\n"
         ) in str(result.output)
         assert (
             "vlan 2\n"
