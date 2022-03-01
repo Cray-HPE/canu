@@ -362,10 +362,6 @@ network_v2_tds:
       shasta_name: "gateway"
       architecture_type: "river_ncn_node_4_port_1g_ocp"
     - lookup_name:
-        - "lnet"
-      shasta_name: "lnet"
-      architecture_type: "river_ncn_node_4_port"
-    - lookup_name:
         - "cdu"
       shasta_name: "sw-cdu"
       architecture_type: "mountain_compute_leaf"

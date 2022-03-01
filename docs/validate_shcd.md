@@ -48,7 +48,7 @@ The corners on each tab, comma separated e.g. ‘J37,U227,J15,T47,J20,U167’.
 
 
 ### --out( <out>)
-Output JSON model to a file
+Output results to a file
 
 
 ### --json()

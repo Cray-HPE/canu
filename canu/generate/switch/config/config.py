@@ -823,6 +823,7 @@ def get_switch_nodes(switch_name, network_node_list, factory, sls_variables):
         destination_slot = port["destination_slot"]
 
         shasta_name = get_shasta_name(destination_node_name, factory.lookup_mapper())
+        print(port)
         primary_port = get_primary_port(nodes_by_name, switch_name, destination_node_id)
         if shasta_name == "ncn-m":
             new_node = {

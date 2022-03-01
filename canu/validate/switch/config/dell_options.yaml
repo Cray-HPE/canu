@@ -42,11 +42,8 @@
       - startswith: ip vrf
       order: 4
     - lineage:
-      - startswith: no banner motd
-      order: 5
-    - lineage:
       - startswith: ip name-server
-      order: 6
+      order: 5
     - lineage:
       - startswith: hostname
       order: 10
