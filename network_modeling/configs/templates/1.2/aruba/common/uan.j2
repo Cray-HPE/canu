@@ -18,7 +18,7 @@ interface 1/1/{{ node.config.PORT }}
 
 interface lag {{ node.config.LAG_NUMBER }} multi-chassis
     no shutdown
-    description uan_can_lag
+    description {{ node.config.DESCRIPTION }}
     no routing
     vlan trunk native {{ variables.NATIVE_VLAN }}
     vlan trunk allowed {{ variables.CAN_VLAN }}
