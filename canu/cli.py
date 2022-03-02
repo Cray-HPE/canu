@@ -31,6 +31,7 @@ import requests
 from ruamel.yaml import YAML
 import urllib3
 
+from canu.backup import backup
 from canu.cache import cache
 from canu.config import config
 from canu.generate import generate
@@ -88,6 +89,7 @@ def cli(ctx, cache_minutes):
     ctx.obj["cache_minutes"] = cache_minutes
 
 
+cli.add_command(backup.backup)
 cli.add_command(cache.cache)
 cli.add_command(config.config)
 cli.add_command(generate.generate)
