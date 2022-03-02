@@ -19,9 +19,11 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-"""CANU Commands that configure switches on the network."""
+"""CANU backup commands."""
 import click
 from click_help_colors import HelpColorsGroup
+
+from canu.backup.network import network
 
 
 @click.group(
@@ -30,5 +32,8 @@ from click_help_colors import HelpColorsGroup
     help_options_color="blue",
 )
 @click.pass_context
-def config(ctx):
-    """Commands that configure switches on the network."""
+def backup(ctx):
+    """Canu backup commands."""
+
+
+backup.add_command(network.network)

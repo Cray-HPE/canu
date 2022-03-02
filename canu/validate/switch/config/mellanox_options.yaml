@@ -1016,6 +1016,16 @@
       - startswith: name
     - lineage:
       - contains: description
+    - lineage:
+        - startswith: banner
+    - lineage:
+        - startswith: vlan 7 name
+    - lineage:
+        - startswith: interface vlan 7
+    - lineage:
+        - startswith: ip prefix-li
+    - lineage:
+        - startswith: route-map
     
     # Default when expression: list of expressions
     negation_default_when: []
