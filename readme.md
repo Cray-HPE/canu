@@ -1,4 +1,4 @@
-# 🛶 CANU v1.2.1-develop
+# 🛶 CANU v1.2.1
 
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
@@ -1162,36 +1162,36 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [1.2.1-develop]
+## [1.2.1]
 - Remove `canu config bgp`, there is no need for this as it's configured during `canu generated switch/network config`
 - Move Aruba CMN ospf instance from 1 to 2.
 - `canu validate` output enahncements & bug fixes.
 - Template fixes/enhancements.
 
-## [1.2.0-develop]
+## [1.2.0]
 - Add `canu backup network`
 
-## [1.1.11-develop]
+## [1.1.11]
 - `canu validate BGP` now has an option to choose what network to run against.
 - Remove `'lacp-individual` from mellanox spine02.
 - Generate unique MAC address for each Mellanox magp virtual router.
 
-## [1.1.10-develop]
+## [1.1.10]
 - Update canu validate to user heir config diff and cleaner output.
 - Add --remediate option for canu validate
 - bump heir config version
 
-## [1.1.9-develop]
+## [1.1.9]
 - Fix Mellanox web interface command
 - Remove hard coded BGP ASN #
 - Add CMN to CAN ACL
 - Level set CSM 1.0 templates with CSM 1.2 minus CMN, VRF, etc..
 
-## [1.1.8-develop]
+## [1.1.8]
 - Add banner motd to all switch configs with CSM and CANU versions.
 - Add documentation to install from RPM (for SLES).
 
-## [1.1.7-develop]
+## [1.1.7]
 - Remove CMN ip helper on mellanox.
 - Remove broken tests.
 - Fix Aruba OSPF process.
@@ -1199,7 +1199,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Mellanox loopback command fix.
 - Mellanox NTP command fix.
 
-## [1.1.5-develop]
+## [1.1.5]
 - Add ACLs to VLAN interfaces.
 - Add maximum paths to mellanox BGP template for customer VRF.
 - Fix Mellanox ISL speed setting.
@@ -1207,18 +1207,18 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Add large memory UAN node definitions: `lm-<###> maps to lm-<###>`
 - Add gateway: `gateway<#>, gw<#> map to gateway-<###>`
 
-## [1.1.4-develop]
+## [1.1.4]
 - fix sls url
 
-## [1.1.3-develop]
+## [1.1.3]
 - validate BGP now reads IPs from the SLS API
 - Added a feature to run tests against a live network. (Aruba only)
 
-## [1.1.2-develop]
+## [1.1.2]
 - Enabled webui for mellanox.
 - Added speed commands to dell/mellanox templates.
 
-## [1.1.1-develop] 2022-12-07
+## [1.1.1] 2022-12-07
 - Updated pull_request_template.md
 - Adjusted the STP timeout to 4 seconds from the default of 15.
 - Changed setup.py file glob to follow previously updated Jinja2 template locations.
