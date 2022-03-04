@@ -220,6 +220,7 @@ def config(
         sls_address: The address of SLS
         folder: Folder to store config files
         override: Input file that defines what config should be ignored
+        preserve: Folder where switch running configs exist.
     """
     # SHCD Parsing
     if shcd:

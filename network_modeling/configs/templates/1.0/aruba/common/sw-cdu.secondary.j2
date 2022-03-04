@@ -37,33 +37,7 @@ interface mgmt
 {% include '1.0/aruba/common/cmm.j2' %}
 {% include '1.0/aruba/common/cec.j2' %}
 {% include '1.0/aruba/common/cdu-to-spine.lag.j2' %}
-
-interface lag 256
-    no shutdown
-    description ISL link
-    no routing
-    vlan trunk native 1 tag
-    vlan trunk allowed all
-    lacp mode active
-
-interface 1/1/{{ variables.VSX_KEEPALIVE }}
-    no shutdown
-    mtu 9198
-    vrf attach keepalive
-    description vsx keepalive
-    ip address 192.168.255.1/31
-
-interface 1/1/{{ variables.VSX_ISL_PORT1 }}
-    no shutdown
-    mtu 9198
-    description vsx isl
-    lag 256
-
-interface 1/1/{{ variables.VSX_ISL_PORT2 }}
-    no shutdown
-    mtu 9198
-    description vsx isl
-    lag 256
+{% include '1.0/aruba/common/vsx_isl.secondary.j2' %}
 
 interface loopback 0
     ip address {{ variables.LOOPBACK_IP }}/32
@@ -84,14 +58,6 @@ interface vlan {{ variables.HMN_VLAN }}
     
 {%- include '1.0/aruba/common/mtn_hmn_vlan.j2' %}
 {%- include '1.0/aruba/common/mtn_nmn_vlan.j2' %}
-
-vsx
-    system-mac 02:00:00:00:73:00
-    inter-switch-link lag 256
-    role secondary
-    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive
-    linkup-delay-timer 600
-    vsx-sync vsx-global
 
 router ospf 1
     router-id {{ variables.LOOPBACK_IP }}
