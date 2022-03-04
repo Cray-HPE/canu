@@ -420,6 +420,21 @@ def get_shasta_name(name, mapper):
             return shasta_name
 
 
+aruba_template = """
+interface {{ interface }}
+    lag {{ lag }}
+"""
+dell_template = """
+interface ethernet{{ interface }}
+  channel-group {{ lag }}
+  channel-group {{ lag }} mode active
+"""
+mellanox_template = """
+interface ethernet {{ interface }} channel-group {{ lag }} mode active
+interface ethernet {{ interface }} mlag-channel-group {{ lag }} mode active
+"""
+
+
 def generate_switch_config(
     csm,
     architecture,
@@ -470,32 +485,15 @@ def generate_switch_config(
         try:
             with open(os.path.join(f"{preserve}/{switch_name}.cfg"), "r") as f:
                 device_running = f.read()
-                # Get mellanox Switches
                 if architecture == "network_v1" and "spine" in switch_name:
-                    template = """
-   interface ethernet {{ interface }} {{ _line_ | contains("channel-group") }} {{ lag }} mode active
-                """
-                # get Dell Switches
+                    template = mellanox_template
                 elif architecture == "network_v1":
-                    print(switch_name)
-                    template = """
-interface ethernet{{ interface }}
-  channel-group {{ lag }}
-  channel-group {{ lag }} mode active
-                """
-                # get Aruba switches
+                    template = dell_template
                 else:
-                    template = """
-interface {{ interface }}
-    lag {{ lag }}
-                """
-                import pprint
-
-                print(template)
+                    template = aruba_template
                 parser = ttp(device_running, template)
                 parser.parse()
                 preserve = parser.result()
-                pprint.pprint(preserve)
         except FileNotFoundError:
             click.secho(
                 "The running config was not found, check that you entered the right file name and path.",
@@ -841,6 +839,7 @@ def preserve_port(
     Args:
         preserve: parsed running config
         source_port: port that is going to be assigned a LAG
+        mellanox: if switch is mellanox parse the interface differently.
 
     Returns:
         The LAG Number of the old running config.
@@ -850,16 +849,21 @@ def preserve_port(
             if str(source_port) == port["interface"][2:] and mellanox:
                 return port["lag"]
             elif str(source_port) == port["interface"][4:]:
-                print(str(source_port))
                 return port["lag"]
 
 
 def get_switch_nodes(
-    architecture, switch_name, network_node_list, factory, sls_variables, preserve
+    architecture,
+    switch_name,
+    network_node_list,
+    factory,
+    sls_variables,
+    preserve,
 ):
     """Get the nodes connected to the switch ports.
 
     Args:
+        architecture: CSM architecture
         switch_name: Switch hostname
         network_node_list: List of nodes from the SHCD / Paddle
         factory: Node factory object
@@ -913,7 +917,9 @@ def get_switch_nodes(
             }
             if preserve and architecture == "network_v1":
                 new_node["config"]["LAG_NUMBER"] = preserve_port(
-                    preserve, source_port, mellanox=True
+                    preserve,
+                    source_port,
+                    mellanox=True,
                 )
             elif preserve:
                 new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
@@ -939,7 +945,9 @@ def get_switch_nodes(
             }
             if preserve and architecture == "network_v1":
                 new_node["config"]["LAG_NUMBER"] = preserve_port(
-                    preserve, source_port, mellanox=True
+                    preserve,
+                    source_port,
+                    mellanox=True,
                 )
             elif preserve:
                 new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
@@ -957,7 +965,9 @@ def get_switch_nodes(
             }
             if preserve and architecture == "network_v1":
                 new_node["config"]["LAG_NUMBER"] = preserve_port(
-                    preserve, source_port, mellanox=True
+                    preserve,
+                    source_port,
+                    mellanox=True,
                 )
             elif preserve:
                 new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
@@ -1000,8 +1010,6 @@ def get_switch_nodes(
                 },
             }
             if preserve:
-                import pprint
-
                 new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name in {"viz", "uan", "login"}:
@@ -1022,11 +1030,11 @@ def get_switch_nodes(
                     "LAG_NUMBER_V1": primary_port,
                 },
             }
-            print(source_port)
             if preserve and architecture == "network_v1":
-                print(preserve_port(preserve, source_port, mellanox=True))
                 new_node["config"]["LAG_NUMBER_V1"] = preserve_port(
-                    preserve, source_port, mellanox=True
+                    preserve,
+                    source_port,
+                    mellanox=True,
                 )
             elif preserve:
                 new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
@@ -1110,7 +1118,9 @@ def get_switch_nodes(
             }
             if preserve and architecture == "network_v1":
                 new_node["config"]["LAG_NUMBER"] = preserve_port(
-                    preserve, source_port, mellanox=True
+                    preserve,
+                    source_port,
+                    mellanox=True,
                 )
             elif preserve:
                 new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
@@ -1137,7 +1147,9 @@ def get_switch_nodes(
             }
             if preserve and architecture == "network_v1":
                 new_node["config"]["LAG_NUMBER"] = preserve_port(
-                    preserve, source_port, mellanox=True
+                    preserve,
+                    source_port,
+                    mellanox=True,
                 )
             elif preserve:
                 new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
@@ -1168,7 +1180,9 @@ def get_switch_nodes(
             }
             if preserve and architecture == "network_v1":
                 new_node["config"]["LAG_NUMBER"] = preserve_port(
-                    preserve, source_port, mellanox=True
+                    preserve,
+                    source_port,
+                    mellanox=True,
                 )
             elif preserve:
                 new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
@@ -1194,7 +1208,9 @@ def get_switch_nodes(
             }
             if preserve and architecture == "network_v1":
                 new_node["config"]["LAG_NUMBER"] = preserve_port(
-                    preserve, source_port, mellanox=True
+                    preserve,
+                    source_port,
+                    mellanox=True,
                 )
             elif preserve:
                 new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)

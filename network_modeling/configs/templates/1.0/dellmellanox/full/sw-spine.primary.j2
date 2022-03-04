@@ -37,7 +37,6 @@ web vrf default enable force
 {%- include '1.0/dellmellanox/common/mlag_isl.j2' %}
    
 lacp
-port-channel load-balance ethernet source-destination-ip ingress-port
 
 ip routing vrf default
 interface loopback 0
