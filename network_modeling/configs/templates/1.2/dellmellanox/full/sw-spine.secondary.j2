@@ -36,17 +36,9 @@ web vrf default enable force
 
 {%- include '1.2/dellmellanox/common/acl-mellanox.j2' %}
 
-interface port-channel 100
-interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} speed 40G force
-interface ethernet 1/{{ variables.VSX_ISL_PORT2 }} speed 40G force
-interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} channel-group 100 mode active
-interface ethernet 1/{{ variables.VSX_ISL_PORT2 }} channel-group 100 mode active
-interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} description "mlag-isl"
-interface ethernet 1/{{ variables.VSX_ISL_PORT2 }} description "mlag-isl"
-interface port-channel 100 description "mlag-isl"
+{%- include '1.0/dellmellanox/common/mlag_isl.j2' %}
    
 lacp
-port-channel load-balance ethernet source-destination-ip ingress-port
 
 vrf definition Customer
 vrf definition Customer rd 7:7
@@ -100,8 +92,6 @@ spanning-tree port type edge default
 spanning-tree mst name cray
 spanning-tree mst revision 2
 
-interface port-channel 100 dcb priority-flow-control mode on force
-
 {% include '1.2/dellmellanox/common/ncn-m.lag.j2' %}
 {% include '1.2/dellmellanox/common/ncn-w.lag.j2' %}
 {% include '1.2/dellmellanox/common/ncn-s.lag.j2' %}
@@ -134,7 +124,6 @@ interface vlan {{ variables.HMN_VLAN }} ip dhcp relay instance 4 downstream
 mlag-vip mlag-domain ip 192.168.255.242 /29 force
 no mlag shutdown
 mlag system-mac 00:00:5E:00:01:01
-interface port-channel 100 ipl 1
 interface vlan 4000 ipl 1 peer-address 192.168.255.253
    
 {# end dm-sw-spine.secondary #}
