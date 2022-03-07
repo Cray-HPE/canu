@@ -1,4 +1,4 @@
-# 🛶 CANU v1.2.1-develop
+# 🛶 CANU v1.2.2-develop
 
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
@@ -1161,6 +1161,8 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+## [1.2.2-develop]
+- Add SHCD filename to paddle/ccj JSON to obtain originating SHCD version.
 
 ## [1.2.1-develop]
 - Remove `canu config bgp`, there is no need for this as it's configured during `canu generated switch/network config`
