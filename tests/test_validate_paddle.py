@@ -120,6 +120,7 @@ def test_validate_paddle_no_architecture():
 
 bad_ccj = {
     "canu_version": "0.0.6",
+    "shcd_file": "bad_ccj",
     "topology": [
         {
             "common_name": "sw-spine-001",
