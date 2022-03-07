@@ -108,7 +108,6 @@ def test_validate_paddle_cabling(netmiko_command, switch_vendor):
             ],
         )
         assert result.exit_code == 0
-
         assert (
             "sw-spine-001\n"
             + "Rack: x3000    Elevation: u12\n"
@@ -609,6 +608,7 @@ def test_validate_paddle_cabling_bad_file():
 ccj = {
     "canu_version": "0.0.6",
     "architecture": "network_v2_tds",
+    "shcd_file": "ccj",
     "topology": [
         {
             "common_name": "sw-spine-001",

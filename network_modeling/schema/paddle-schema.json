@@ -10,6 +10,9 @@
             "architecture": {
                 "type": "string"
             },
+            "shcd_file": {
+                "type": "string"
+            },
             "updated_at": {
                 "type": "string"
             },
@@ -102,5 +105,5 @@
             }
         }
     },
-    "required": ["canu_version", "architecture", "topology"]
+    "required": ["canu_version", "architecture", "shcd_file", "topology"]
 }
