@@ -145,7 +145,7 @@ def shcd(ctx, architecture, shcd, tabs, corners, out, json_, log_):
     )
 
     if json_:
-        json_output(node_list, factory, architecture, out)
+        json_output(node_list, factory, architecture, shcd, out)
     else:
         print_node_list(node_list, "SHCD", out)
 
@@ -1132,7 +1132,7 @@ def print_node_list(node_list, title, out="-"):
             logical_index += 1
 
 
-def json_output(node_list, factory, architecture, out):
+def json_output(node_list, factory, architecture, shcd, out):
     """Create a schema-validated JSON Topology file from the model."""
     topology = []
     for node in node_list:
@@ -1141,6 +1141,7 @@ def json_output(node_list, factory, architecture, out):
     paddle = {
         "canu_version": version,
         "architecture": architecture,
+        "shcd_file": path.basename(shcd.name),
         "updated_at": datetime.datetime.now().strftime(
             "%Y-%m-%d %H:%M:%S",
         ),

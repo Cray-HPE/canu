@@ -318,7 +318,7 @@ def test_switch_config_spine_primary():
             + "    ip address 192.168.12.2/24\n"
             + "    active-gateway ip mac 12:00:00:00:6b:00\n"
             + "    active-gateway ip 192.168.12.1\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
+            + "    ip ospf 2 area 0.0.0.0\n"
             + "interface vlan 7\n"
             + "    vrf attach Customer\n"
             + "    description CAN\n"
@@ -719,7 +719,7 @@ def test_switch_config_spine_primary_override():
             + "    ip address 192.168.12.2/24\n"
             + "    active-gateway ip mac 12:00:00:00:6b:00\n"
             + "    active-gateway ip 192.168.12.1\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
+            + "    ip ospf 2 area 0.0.0.0\n"
             + "interface vlan 7\n"
             + "    vrf attach Customer\n"
             + "    description CAN\n"
@@ -1112,7 +1112,7 @@ def test_switch_config_spine_secondary():
             + "    ip address 192.168.12.3/24\n"
             + "    active-gateway ip mac 12:00:00:00:6b:00\n"
             + "    active-gateway ip 192.168.12.1\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
+            + "    ip ospf 2 area 0.0.0.0\n"
             + "interface vlan 7\n"
             + "    vrf attach Customer\n"
             + "    description CAN\n"
@@ -1513,7 +1513,7 @@ def test_switch_config_spine_secondary_override():
             + "    ip address 192.168.12.3/24\n"
             + "    active-gateway ip mac 12:00:00:00:6b:00\n"
             + "    active-gateway ip 192.168.12.1\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
+            + "    ip ospf 2 area 0.0.0.0\n"
             + "interface vlan 7\n"
             + "    vrf attach Customer\n"
             + "    description CAN\n"
@@ -1991,7 +1991,7 @@ def test_switch_config_leaf_primary():
             + "    description CMN\n"
             + "    ip mtu 9198\n"
             + "    ip address 192.168.12.4/24\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
+            + "    ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
 
         print(result.output)
@@ -2231,7 +2231,7 @@ def test_switch_config_leaf_primary_to_uan():
             + "\n"
             + "interface lag 8 multi-chassis\n"
             + "    no shutdown\n"
-            + "    description uan_can_lag\n"
+            + "    description sw-leaf-003:8==>uan001:ocp:2\n"
             + "    no routing\n"
             + "    vlan trunk native 1\n"
             + "    vlan trunk allowed 7\n"
@@ -2321,7 +2321,7 @@ def test_switch_config_leaf_primary_to_uan():
             + "    description CMN\n"
             + "    ip mtu 9198\n"
             + "    ip address 192.168.12.6/24\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
+            + "    ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
 
         print(result.output)
@@ -2621,7 +2621,6 @@ def test_switch_config_leaf_secondary():
             + "    lag 101\n"
         )
         assert leaf_to_spine in str(result.output)
-
         print(result.output)
         assert (
             "interface lag 256\n"
@@ -2675,7 +2674,7 @@ def test_switch_config_leaf_secondary():
             + "    description CMN\n"
             + "    ip mtu 9198\n"
             + "    ip address 192.168.12.5/24\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
+            + "    ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
 
         print(result.output)
@@ -2915,7 +2914,7 @@ def test_switch_config_leaf_secondary_to_uan():
             + "\n"
             + "interface lag 8 multi-chassis\n"
             + "    no shutdown\n"
-            + "    description uan_can_lag\n"
+            + "    description sw-leaf-004:8==>uan001:pcie-slot1:2\n"
             + "    no routing\n"
             + "    vlan trunk native 1\n"
             + "    vlan trunk allowed 7\n"
@@ -3006,7 +3005,7 @@ def test_switch_config_leaf_secondary_to_uan():
             + "    description CMN\n"
             + "    ip mtu 9198\n"
             + "    ip address 192.168.12.7/24\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
+            + "    ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
         print(result.output)
         print(result.output)
@@ -3902,7 +3901,7 @@ def test_switch_config_leaf_bmc():
             + "    description CMN\n"
             + "    ip mtu 9198\n"
             + "    ip address 192.168.12.12/24\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
+            + "    ip ospf 2 area 0.0.0.0\n"
             + "snmp-server vrf default\n"
             + "\n"
             + "router ospf 2 vrf Customer\n"
@@ -4842,7 +4841,7 @@ def test_switch_config_tds_spine_primary():
             + "\n"
             + "interface lag 14 multi-chassis\n"
             + "    no shutdown\n"
-            + "    description uan_can_lag\n"
+            + "    description sw-spine-001:14==>uan001:ocp:2\n"
             + "    no routing\n"
             + "    vlan trunk native 1\n"
             + "    vlan trunk allowed 7\n"
@@ -4953,7 +4952,7 @@ def test_switch_config_tds_spine_primary():
             + "    ip address 192.168.12.2/24\n"
             + "    active-gateway ip mac 12:00:00:00:6b:00\n"
             + "    active-gateway ip 192.168.12.1\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
+            + "    ip ospf 2 area 0.0.0.0\n"
             + "interface vlan 7\n"
             + "    vrf attach Customer\n"
             + "    description CAN\n"
@@ -5443,7 +5442,7 @@ def test_switch_config_tds_spine_secondary():
             + "\n"
             + "interface lag 14 multi-chassis\n"
             + "    no shutdown\n"
-            + "    description uan_can_lag\n"
+            + "    description sw-spine-002:14==>uan001:pcie-slot1:2\n"
             + "    no routing\n"
             + "    vlan trunk native 1\n"
             + "    vlan trunk allowed 7\n"
@@ -5554,7 +5553,7 @@ def test_switch_config_tds_spine_secondary():
             + "    ip address 192.168.12.3/24\n"
             + "    active-gateway ip mac 12:00:00:00:6b:00\n"
             + "    active-gateway ip 192.168.12.1\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
+            + "    ip ospf 2 area 0.0.0.0\n"
             + "interface vlan 7\n"
             + "    vrf attach Customer\n"
             + "    description CAN\n"
@@ -6587,7 +6586,7 @@ def test_switch_config_tds_leaf_bmc():
             + "    description CMN\n"
             + "    ip mtu 9198\n"
             + "    ip address 192.168.12.12/24\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
+            + "    ip ospf 2 area 0.0.0.0\n"
             + "snmp-server vrf default\n"
             + "\n"
             + "router ospf 2 vrf Customer\n"

@@ -75,7 +75,7 @@ interface vlan {{ variables.CMN_VLAN }}
     description CMN
     ip mtu 9198
     ip address {{ variables.CMN_IP }}/{{variables.CMN_PREFIX_LEN}}
-    ip ospf 1 area 0.0.0.0
+    ip ospf 2 area 0.0.0.0
 ip dns server-address {{ variables.NMNLB_DNS }}
 
 router ospf 2 vrf Customer
