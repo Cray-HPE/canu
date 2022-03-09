@@ -848,11 +848,11 @@ def preserve_port(
         The LAG Number of the old running config.
     """
     for port in preserve[0][0]:
-        if "lag" in port.keys():
-            if (str(source_port) == port["interface"][2:] and mellanox) or str(
-                source_port,
-            ) == port["interface"][4:]:
-                return port["lag"]
+        if "lag" in port.keys() and (
+            (str(source_port) == port["interface"][2:] and mellanox)
+            or (str(source_port) == port["interface"][4:])
+        ):
+            return port["lag"]
 
 
 def get_switch_nodes(
