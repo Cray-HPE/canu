@@ -419,7 +419,7 @@ def test_switch_config_spine_primary():
 
 
 def test_switch_config_spine_primary_preserve():
-    """Test that the `canu generate switch config` command runs and returns valid primary spine config while preserving LAG numbers."""
+    """Test that the `canu generate switch config` command returns the config while preserving LAG #s."""
     with runner.isolated_filesystem():
         with open(sls_file, "w") as f:
             json.dump(sls_input, f)
@@ -451,8 +451,10 @@ def test_switch_config_spine_primary_preserve():
             ],
         )
         assert result.exit_code == 0
+        print(result.output)
         assert "hostname sw-spine-001\n"
         assert banner_motd in str(result.output)
+        print(result.output)
         assert (
             "no ip icmp redirect\n"
             + "vrf keepalive\n"
@@ -1470,7 +1472,7 @@ def test_switch_config_spine_secondary():
 
 
 def test_switch_config_spine_secondary_preserve():
-    """Test that the `canu generate switch config` command runs and returns valid secondary spine config."""
+    """Test that the `canu generate switch config` command returns the config while preserving LAG #s."""
     spine_secondary = "sw-spine-002"
 
     with runner.isolated_filesystem():
@@ -2504,7 +2506,7 @@ def test_switch_config_leaf_primary():
 
 
 def test_switch_config_leaf_primary_preserve():
-    """Test that the `canu generate switch config` command runs and returns valid primary leaf config."""
+    """Test that the `canu generate switch config` command returns the config while preserving LAG #s."""
     leaf_primary = "sw-leaf-001"
 
     with runner.isolated_filesystem():
@@ -4063,7 +4065,7 @@ def test_switch_config_cdu_primary():
 
 
 def test_switch_config_cdu_primary_preserve():
-    """Test that the `canu generate switch config` command runs and returns valid primary cdu config."""
+    """Test that the `canu generate switch config` command returns the config while preserving LAG #s."""
     cdu_primary = "sw-cdu-001"
 
     with runner.isolated_filesystem():
@@ -4907,7 +4909,7 @@ def test_switch_config_leaf_bmc():
 
 
 def test_switch_config_leaf_bmc_preserve():
-    """Test that the `canu generate switch config` command runs and returns valid leaf-bmc config."""
+    """Test that the `canu generate switch config` command returns the config while preserving LAG #s."""
     leaf_bmc = "sw-leaf-bmc-001"
 
     with runner.isolated_filesystem():

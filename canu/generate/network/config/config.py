@@ -220,7 +220,7 @@ def config(
         sls_address: The address of SLS
         folder: Folder to store config files
         override: Input file that defines what config should be ignored
-        preserve: Folder where switch running configs exist.
+        preserve: Folder where switch running configs exist.  This folder should be populated from the "canu backup network" command.
     """
     # SHCD Parsing
     if shcd:

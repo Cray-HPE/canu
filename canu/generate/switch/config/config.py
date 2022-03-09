@@ -64,6 +64,21 @@ canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
 canu_version_file = path.join(project_root, "canu", ".version")
 
+# ttp preserve templates
+# pulls the interface and lag from switch configs.
+aruba_template = """
+interface {{ interface }}
+    lag {{ lag }}
+"""
+dell_template = """
+interface ethernet{{ interface }}
+  channel-group {{ lag }}
+  channel-group {{ lag }} mode active
+"""
+mellanox_template = """
+interface ethernet {{ interface }} {{ _line_ | contains("channel-group") }} {{ lag }} mode active
+"""
+
 # Import templates
 network_templates_folder = path.join(
     project_root,
@@ -420,21 +435,6 @@ def get_shasta_name(name, mapper):
             return shasta_name
 
 
-aruba_template = """
-interface {{ interface }}
-    lag {{ lag }}
-"""
-dell_template = """
-interface ethernet{{ interface }}
-  channel-group {{ lag }}
-  channel-group {{ lag }} mode active
-"""
-mellanox_template = """
-interface ethernet {{ interface }} channel-group {{ lag }} mode active
-interface ethernet {{ interface }} mlag-channel-group {{ lag }} mode active
-"""
-
-
 def generate_switch_config(
     csm,
     architecture,
@@ -459,7 +459,7 @@ def generate_switch_config(
         template_folder: Architecture folder contaning the switch templates
         vendor_folder: Vendor folder contaning the template_folder
         override: Input file that defines what config should be ignored
-        preserve: Folder where switch running configs exist.
+        preserve: Folder where switch running configs exist.  This folder should be populated from the "canu backup network"
 
     Returns:
         switch_config: The generated switch configuration
@@ -485,10 +485,13 @@ def generate_switch_config(
         try:
             with open(os.path.join(f"{preserve}/{switch_name}.cfg"), "r") as f:
                 device_running = f.read()
+                # Get mellanox Switches
                 if architecture == "network_v1" and "spine" in switch_name:
                     template = mellanox_template
+                # get Dell Switches
                 elif architecture == "network_v1":
                     template = dell_template
+                # get Aruba switches
                 else:
                     template = aruba_template
                 parser = ttp(device_running, template)
@@ -839,16 +842,16 @@ def preserve_port(
     Args:
         preserve: parsed running config
         source_port: port that is going to be assigned a LAG
-        mellanox: if switch is mellanox parse the interface differently.
+        mellanox: if switch is mellanox parse the interface differently. (mellanox = 1/1, aruba/dell = 1/1/1)
 
     Returns:
         The LAG Number of the old running config.
     """
     for port in preserve[0][0]:
         if "lag" in port.keys():
-            if str(source_port) == port["interface"][2:] and mellanox:
-                return port["lag"]
-            elif str(source_port) == port["interface"][4:]:
+            if (str(source_port) == port["interface"][2:] and mellanox) or str(
+                source_port,
+            ) == port["interface"][4:]:
                 return port["lag"]
 
 
@@ -944,7 +947,7 @@ def get_switch_nodes(
                 },
             }
             if preserve and architecture == "network_v1":
-                new_node["config"]["LAG_NUMBER"] = preserve_port(
+                new_node["config"]["LAG_NUMBER_V1"] = preserve_port(
                     preserve,
                     source_port,
                     mellanox=True,

@@ -1,4 +1,4 @@
-# 🛶 CANU v1.2.0-develop
+# 🛶 CANU v1.2.3-develop
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -833,6 +833,20 @@ sw-spine-001 Switch Config
 
 The output will display the config that has been ignored.
 
+#### Generate Switch Config while preserving LAG #s
+
+This option allows you to generate swtich configs while preserving the lag #s of the previous running config.
+
+The use case for this is if you have a running system and you don't want to take an outage to renumber the LAGs.
+
+It requires a folder with the config/s backed up.
+
+The recommended way to back these configs up is with **[Backup Network](#backup-network)**
+
+```
+canu generate switch config -a v1 --csm 1.0 --ccj ccj.json --sls-file sls_input_file.json --name sw-spine-001 --preserve ../backup_configs/
+```
+
 ### Generate Network Config
 
 **[Details](docs/generate_network_config.md)**<br>
@@ -882,6 +896,20 @@ sw-cdu-001 Override Config Generated
 sw-cdu-002 Override Config Generated
 sw-leaf-bmc-001 Override Config Generated
 
+```
+
+#### Generate Network Config while preserving LAG #s
+
+This option allows you to generate swtich configs while preserving the lag #s of the previous running config.
+
+The use case for this is if you have a running system and you don't want to take an outage to renumber the LAGs.
+
+It requires a folder with the config/s backed up.
+
+The recommended way to back these configs up is with **[Backup Network](#backup-network)**
+
+```bash
+$ canu generate network config --csm 1.0 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config --preserve FOLDER_WITH_SWITCH_CONFIGS
 ```
 
 ### Validate Switch Config
@@ -1115,6 +1143,7 @@ Options
 - `--username` defaults to admin
 
 #### Adding tests
+
 Additional tests can be easily added by updating the .yaml file at `canu/test/*/test_suite.yaml`
 More information on tests and how to write them can be found at https://nornir.tech/2021/08/06/testing-your-network-with-nornir-testsprocessor/
 
@@ -1202,6 +1231,10 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.2.3-develop]
+- Add the ability to retain lag #s from previous running configs when generating configs.
+- Fixed a few hard coded lag #s in templates.
 
 ## [1.2.0-develop]
 - Add `canu backup network`
