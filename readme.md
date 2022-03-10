@@ -1,4 +1,4 @@
-# 🛶 CANU v1.2.3-develop
+# 🛶 CANU v1.2.4-develop
 
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
@@ -1161,6 +1161,9 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+## [1.2.4-develop]
+- Add OSPF to vlan 1. Add 'ip ospf passive to vlan 1,4.
+
 ## [1.2.3-develop]
 - Config backup create /running.
 
