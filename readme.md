@@ -1161,6 +1161,8 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+## [1.2.3-develop]
+- Config backup create /running.
 ## [1.2.2-develop]
 - Add SHCD filename to paddle/ccj JSON to obtain originating SHCD version.
 
