@@ -941,7 +941,7 @@ def test_switch_config_leaf_bmc():
         print(result.output)
         assert (
             "interface vlan1\n"
-            + "  Description MTL\n"
+            + "  description MTL\n"
             + "  no shutdown\n"
             + "  mtu 9216\n"
             + "  ip address 192.168.1.12/16\n"
@@ -1199,7 +1199,7 @@ def test_switch_config_cdu_primary():
         ) in str(result.output)
         assert (
             "interface vlan1\n"
-            + "  Description MTL\n"
+            + "  description MTL\n"
             + "  no shutdown\n"
             + "  mtu 9216\n"
             + "  ip address 192.168.1.16/16\n"
@@ -1461,7 +1461,7 @@ def test_switch_config_cdu_secondary():
         ) in str(result.output)
         assert (
             "interface vlan1\n"
-            + "  Description MTL\n"
+            + "  description MTL\n"
             + "  no shutdown\n"
             + "  mtu 9216\n"
             + "  ip address 192.168.1.17/16\n"

@@ -1166,6 +1166,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Add 'ip ospf passive' to vlan 1,4.
 - Fix test cases: test_generate_switch_config_aruba_csm_1_2.py | test_generate_switch_config_dellanox_csm_1_2.py.
 - Fix missing OSPF configuration from VLAN 7 in /network_modeling/configs/templates/dellmellanox/1.2/*.
+- Fix descriptions for MTL
 
 ## [1.2.3-develop]
 - Config backup create /running.
