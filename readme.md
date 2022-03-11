@@ -1193,6 +1193,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 ## [1.2.5-develop]
 - Add the ability to preserve LAG #s with the `--preserve` flag when generating configs.
 - Add control plane ACL to customer VRF.
+- Remove dellanox TDS templates.
 
 ## [1.2.4-develop]
 - Add OSPF to vlan 1. 
