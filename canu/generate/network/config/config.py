@@ -370,6 +370,7 @@ def config(
         "storage",
         "uan",
         "worker",
+        "edge",
     }
     config_devices = set()
     all_unknown = []
@@ -377,7 +378,13 @@ def config(
         switch_name = node.common_name()
         node_shasta_name = get_shasta_name(switch_name, factory.lookup_mapper())
 
-        if node_shasta_name in ["sw-cdu", "sw-leaf-bmc", "sw-leaf", "sw-spine"]:
+        if node_shasta_name in [
+            "sw-cdu",
+            "sw-leaf-bmc",
+            "sw-leaf",
+            "sw-spine",
+            "sw-edge",
+        ]:
 
             switch_config, devices, unknown = generate_switch_config(
                 csm,
