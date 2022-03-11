@@ -51,6 +51,8 @@ interface loopback 0
 interface vlan 1
     ip mtu 9198
     ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}}
+    ip ospf 1 area 0.0.0.0
+    ip ospf passive
 interface vlan {{ variables.NMN_VLAN }}
     description NMN
     ip mtu 9198
@@ -61,6 +63,7 @@ interface vlan {{ variables.HMN_VLAN }}
     ip mtu 9198
     ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
     ip ospf 1 area 0.0.0.0
+    ip ospf passive
 interface vlan {{ variables.CMN_VLAN }}
     vrf attach Customer
     description CMN

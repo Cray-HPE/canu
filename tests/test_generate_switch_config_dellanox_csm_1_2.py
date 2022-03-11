@@ -381,9 +381,13 @@ def test_switch_config_spine_primary():
             + "router ospf 2 vrf Customer router-id 10.2.0.2\n"
             + "router ospf 2 vrf Customer default-information originate\n"
             + "interface loopback 0 ip ospf area 0.0.0.0\n"
+            + "interface vlan 1 ip ospf area 0.0.0.0\n"
             + "interface vlan 2 ip ospf area 0.0.0.0\n"
             + "interface vlan 4 ip ospf area 0.0.0.0\n"
             + "interface vlan 6 ip ospf area 0.0.0.0\n"
+            + "interface vlan 7 ip ospf area 0.0.0.0\n"
+            + "interface vlan 1 ip ospf passive-interface\n"
+            + "interface vlan 4 ip ospf passive-interface\n"
             + "router ospf 1 vrf default redistribute bgp\n"
         ) in str(result.output)
         print(result.output)
@@ -802,9 +806,13 @@ def test_switch_config_spine_secondary():
             + "router ospf 2 vrf Customer router-id 10.2.0.3\n"
             + "router ospf 2 vrf Customer default-information originate\n"
             + "interface loopback 0 ip ospf area 0.0.0.0\n"
+            + "interface vlan 1 ip ospf area 0.0.0.0\n"
             + "interface vlan 2 ip ospf area 0.0.0.0\n"
             + "interface vlan 4 ip ospf area 0.0.0.0\n"
             + "interface vlan 6 ip ospf area 0.0.0.0\n"
+            + "interface vlan 7 ip ospf area 0.0.0.0\n"
+            + "interface vlan 1 ip ospf passive-interface\n"
+            + "interface vlan 4 ip ospf passive-interface\n"
             + "router ospf 1 vrf default redistribute bgp\n"
         ) in str(result.output)
         print(result.output)
@@ -956,10 +964,12 @@ def test_switch_config_leaf_bmc():
         print(result.output)
         assert (
             "interface vlan1\n"
-            + "  Description MTL\n"
+            + "  description MTL\n"
             + "  no shutdown\n"
             + "  mtu 9216\n"
             + "  ip address 192.168.1.12/16\n"
+            + "  ip ospf 1 area 0.0.0.0\n"
+            + "  ip ospf passive\n"
             + "interface vlan2\n"
             + "  description RIVER_NMN\n"
             + "  no shutdown\n"
@@ -976,6 +986,7 @@ def test_switch_config_leaf_bmc():
             + "  ip access-group nmn-hmn in\n"
             + "  ip access-group nmn-hmn out\n"
             + "  ip ospf 1 area 0.0.0.0\n"
+            + "  ip ospf passive\n"
             + "interface vlan6\n"
             + "  description CMN\n"
             + "  no shutdown\n"
@@ -1218,10 +1229,12 @@ def test_switch_config_cdu_primary():
         print(result.output)
         assert (
             "interface vlan1\n"
-            + "  Description MTL\n"
+            + "  description MTL\n"
             + "  no shutdown\n"
             + "  mtu 9216\n"
             + "  ip address 192.168.1.16/16\n"
+            + "  ip ospf 1 area 0.0.0.0\n"
+            + "  ip ospf passive\n"
             + "interface vlan2\n"
             + "  description RIVER_NMN\n"
             + "  no shutdown\n"
@@ -1238,6 +1251,7 @@ def test_switch_config_cdu_primary():
             + "  ip access-group nmn-hmn in\n"
             + "  ip access-group nmn-hmn out\n"
             + "  ip ospf 1 area 0.0.0.0\n"
+            + "  ip ospf passive\n"
             + "interface vlan6\n"
             + "  description CMN\n"
             + "  no shutdown\n"
@@ -1484,10 +1498,12 @@ def test_switch_config_cdu_secondary():
         print(result.output)
         assert (
             "interface vlan1\n"
-            + "  Description MTL\n"
+            + "  description MTL\n"
             + "  no shutdown\n"
             + "  mtu 9216\n"
             + "  ip address 192.168.1.17/16\n"
+            + "  ip ospf 1 area 0.0.0.0\n"
+            + "  ip ospf passive\n"
             + "interface vlan2\n"
             + "  description RIVER_NMN\n"
             + "  no shutdown\n"
@@ -1504,6 +1520,7 @@ def test_switch_config_cdu_secondary():
             + "  ip access-group nmn-hmn in\n"
             + "  ip access-group nmn-hmn out\n"
             + "  ip ospf 1 area 0.0.0.0\n"
+            + "  ip ospf passive\n"
             + "interface vlan6\n"
             + "  description CMN\n"
             + "  no shutdown\n"

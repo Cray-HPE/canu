@@ -59,6 +59,8 @@ interface vlan {{ variables.NATIVE_VLAN }}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.MTL_IP_GATEWAY }}
     ip helper-address 10.92.100.222
+    ip ospf 1 area 0.0.0.0
+    ip ospf passive
 interface vlan {{ variables.NMN_VLAN }}
     description NMN
     ip mtu 9198
@@ -75,6 +77,7 @@ interface vlan {{ variables.HMN_VLAN }}
     active-gateway ip {{ variables.HMN_IP_GATEWAY }}
     ip helper-address 10.94.100.222
     ip ospf 1 area 0.0.0.0
+    ip ospf passive
 {%- if variables.CMN != None %}
 interface vlan {{ variables.CMN_VLAN }}
     vrf attach Customer
