@@ -18,7 +18,8 @@ CSM Automatic Network Utility
 
 %install
 mkdir -p %{buildroot}%{_bindir}
-install -m 755 canu %{buildroot}%{_bindir}/canu
+ls -lha
+install -m 755 dist/linux/canu %{buildroot}%{_bindir}/canu
 
 %files
 %{_bindir}/canu
