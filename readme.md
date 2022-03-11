@@ -1216,13 +1216,6 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 ## [1.2.0-develop]
 - Add `canu backup network`
 
-## [1.2.3-develop]
-- Add the ability to retain lag #s from previous running configs when generating configs.
-- Fixed a few hard coded lag #s in templates.
-
-## [1.2.0-develop]
-- Add `canu backup network`
-
 ## [1.1.11-develop]
 - `canu validate BGP` now has an option to choose what network to run against.
 - Remove `'lacp-individual` from mellanox spine02.
