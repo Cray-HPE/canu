@@ -23,7 +23,7 @@ name = canu
 
 version := $(shell cat canu/.version)
 
-build_image := cdrx/pyinstaller-linux:python3
+build_image := datle/pyinstaller:3.8.11
 
 # Default release if not set
 BUILD_METADATA ?= "1~development~$(shell git rev-parse --short HEAD)"
@@ -44,9 +44,6 @@ prepare:
 
 binary:
 		docker run --rm -v $(PWD):/src $(build_image) ./pyinstaller.sh
-
-test:
-		docker run --rm -v $(PWD):/src $(build_image) nox
 
 rpm_package_source:
 		tar --transform 'flags=r;s,^,/$(source_name)/,' --exclude .git --exclude .nox --exclude dist/rpmbuild -cvjf $(source_path) .
