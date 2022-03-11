@@ -49,14 +49,6 @@ pipeline {
             }
         }
 
-        stage("Test") {
-            steps {
-                script {
-                    sh "make test"
-                }
-            }
-        }
-
         stage("Build Binary") {
             steps {
                 script {
