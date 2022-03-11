@@ -47,10 +47,6 @@ added_files = [
         "network_modeling/configs/templates/1.0/dellmellanox/full",
     ),
     (
-        "network_modeling/configs/templates/1.0/dellmellanox/tds/*.j2",
-        "network_modeling/configs/templates/1.0/dellmellanox/tds",
-    ),
-    (
         "network_modeling/configs/templates/1.2/aruba/common/*.j2",
         "network_modeling/configs/templates/1.2/aruba/common",
     ),
