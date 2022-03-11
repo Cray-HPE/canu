@@ -116,9 +116,13 @@ router ospf 1 vrf default router-id {{ variables.LOOPBACK_IP }}
 router ospf 2 vrf Customer router-id {{ variables.LOOPBACK_IP }}
 router ospf 2 vrf Customer default-information originate
 interface loopback 0 ip ospf area 0.0.0.0
+interface vlan {{ variables.NATIVE_VLAN }} ip ospf area 0.0.0.0
 interface vlan {{ variables.NMN_VLAN }} ip ospf area 0.0.0.0
 interface vlan {{ variables.HMN_VLAN }} ip ospf area 0.0.0.0
 interface vlan {{ variables.CMN_VLAN }} ip ospf area 0.0.0.0
+interface vlan {{ variables.CAN_VLAN }} ip ospf area 0.0.0.0
+interface vlan {{ variables.NATIVE_VLAN }} ip ospf passive-interface
+interface vlan {{ variables.HMN_VLAN }} ip ospf passive-interface
 router ospf 1 vrf default redistribute bgp
 
 ip dhcp relay instance 2 vrf default
