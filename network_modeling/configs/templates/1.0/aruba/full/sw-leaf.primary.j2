@@ -91,11 +91,6 @@ vsx
     linkup-delay-timer 600
     vsx-sync vsx-global
 ip dns server-address {{ variables.NMNLB_DNS }}
-
-
-
-    router-id {{ variables.LOOPBACK_IP }}
-    area 0.0.0.0
 router ospf 1
     router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0

@@ -44,7 +44,6 @@ csm = "1.0"
 switch_name = "sw-spine-001"
 cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
-bang = "!"
 
 test_file_name_tds = "TDS_Architecture_Golden_Config_1.1.5.xlsx"
 test_file_tds = path.join(test_file_directory, "data", test_file_name_tds)
@@ -57,12 +56,12 @@ with open(canu_version_file, "r") as file:
     canu_version = file.readline()
 canu_version = canu_version.strip()
 banner_motd = (
-    f"banner motd {bang}\n"
+    "banner motd ^\n"
     "###############################################################################\n"
     f"# CSM version:  {csm}\n"
     f"# CANU version: {canu_version}\n"
     "###############################################################################\n"
-    f"{bang}\n"
+    "^\n"
 )
 
 runner = testing.CliRunner()
@@ -4170,7 +4169,6 @@ def test_switch_config_cdu_primary():
             + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
-            + "\n"
             + "router ospf 1\n"
             + "    router-id 10.2.0.16\n"
             + "    area 0.0.0.0\n"
@@ -4705,7 +4703,6 @@ def test_switch_config_cdu_secondary():
             + "    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive\n"
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
-            + "\n"
             + "router ospf 1\n"
             + "    router-id 10.2.0.17\n"
             + "    area 0.0.0.0\n"
@@ -5228,7 +5225,6 @@ def test_switch_config_leaf_bmc():
             + "    ip address 192.168.0.12/17\n"
             + "    ip ospf 1 area 0.0.0.0\n"
             + "snmp-server vrf default\n"
-            + "\n"
             + "router ospf 1\n"
             + "    router-id 10.2.0.12\n"
             + "    area 0.0.0.0\n"
@@ -8498,7 +8494,6 @@ def test_switch_config_tds_cdu_primary():
             + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
-            + "\n"
             + "router ospf 1\n"
             + "    router-id 10.2.0.16\n"
             + "    area 0.0.0.0\n"
@@ -9034,7 +9029,6 @@ def test_switch_config_tds_cdu_secondary():
             + "    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive\n"
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
-            + "\n"
             + "router ospf 1\n"
             + "    router-id 10.2.0.17\n"
             + "    area 0.0.0.0\n"
@@ -9556,7 +9550,6 @@ def test_switch_config_tds_leaf_bmc():
             + "    ip address 192.168.0.12/17\n"
             + "    ip ospf 1 area 0.0.0.0\n"
             + "snmp-server vrf default\n"
-            + "\n"
             + "router ospf 1\n"
             + "    router-id 10.2.0.12\n"
             + "    area 0.0.0.0\n"
