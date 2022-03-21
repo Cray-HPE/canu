@@ -733,6 +733,7 @@ def generate_switch_config(
             override_config_hier = HConfig(host=host)
             override_config_hier.load_from_string(switch_config)
             override_config_hier.add_tags(override[switch_name])
+            # add ! to the end of the aruba banner.
             banner = override_config_hier.get_child("contains", "banner")
             banner.add_child("!")
             for line in override_config_hier.all_children_sorted_by_tags(
