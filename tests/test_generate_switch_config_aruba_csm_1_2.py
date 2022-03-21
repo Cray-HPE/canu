@@ -460,6 +460,7 @@ def test_switch_config_spine_primary():
             + "            neighbor 192.168.12.4 activate\n"
             + "            neighbor 192.168.12.5 activate\n"
             + "            neighbor 192.168.12.6 activate\n"
+            + "            exit-address-family\n"
             + "https-server vrf Customer\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
@@ -855,6 +856,7 @@ def test_switch_config_spine_primary_override():
             + "        neighbor 192.168.12.4 activate\n"
             + "        neighbor 192.168.12.5 activate\n"
             + "        neighbor 192.168.12.6 activate\n"
+            + "        exit-address-family\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
@@ -1255,6 +1257,7 @@ def test_switch_config_spine_secondary():
             + "            neighbor 192.168.12.4 activate\n"
             + "            neighbor 192.168.12.5 activate\n"
             + "            neighbor 192.168.12.6 activate\n"
+            + "            exit-address-family\n"
             + "https-server vrf Customer\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
@@ -1653,6 +1656,7 @@ def test_switch_config_spine_secondary_override():
             + "        neighbor 192.168.12.4 activate\n"
             + "        neighbor 192.168.12.5 activate\n"
             + "        neighbor 192.168.12.6 activate\n"
+            + "        exit-address-family\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
@@ -7375,6 +7379,7 @@ def test_switch_config_tds_spine_primary():
             + "            neighbor 192.168.12.4 activate\n"
             + "            neighbor 192.168.12.5 activate\n"
             + "            neighbor 192.168.12.6 activate\n"
+            + "            exit-address-family\n"
             + "https-server vrf Customer\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
@@ -7957,6 +7962,7 @@ def test_switch_config_tds_spine_primary_override():
             + "        neighbor 192.168.12.4 activate\n"
             + "        neighbor 192.168.12.5 activate\n"
             + "        neighbor 192.168.12.6 activate\n"
+            + "        exit-address-family\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
@@ -8560,6 +8566,7 @@ def test_switch_config_tds_spine_secondary():
             + "            neighbor 192.168.12.4 activate\n"
             + "            neighbor 192.168.12.5 activate\n"
             + "            neighbor 192.168.12.6 activate\n"
+            + "            exit-address-family\n"
             + "https-server vrf Customer\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
@@ -9144,6 +9151,7 @@ def test_switch_config_tds_spine_secondary_override():
             + "        neighbor 192.168.12.4 activate\n"
             + "        neighbor 192.168.12.5 activate\n"
             + "        neighbor 192.168.12.6 activate\n"
+            + "        exit-address-family\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
