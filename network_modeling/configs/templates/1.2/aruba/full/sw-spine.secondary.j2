@@ -133,9 +133,6 @@ router ospf 1
     router-id {{ variables.LOOPBACK_IP }}
     redistribute bgp
     area 0.0.0.0
-router ospfv3 1
-    router-id {{ variables.LOOPBACK_IP }}
-    area 0.0.0.0
 {% include '1.2/aruba/common/bgp.secondary.j2' %}
 https-server vrf Customer
 https-server vrf default
