@@ -1166,7 +1166,7 @@ $$ [1.2.5-develop]
 - Add NMN network for 1.0 to ssh allowed into switches because of BGP DOCS in 1.0 allowing it. 
 - Fixed test templates for ACL.
 - Remove router ospfv3 from 1.0/1.2
-- 
+- Change Aruba banner to match running config.
 
 ## [1.2.4-develop]
 - Add OSPF to vlan 1. 
