@@ -146,3 +146,23 @@
     - leaf
     - leaf-bmc
     - cdu
+- name: Internal DNS check
+  task: ping 10.92.100.225
+  test: ncontains
+  pattern: bytes from
+  err_msg: Internal DNS does not respond to ping
+  device:
+    - leaf
+    - leaf-bmc
+    - cdu
+    - spine
+- name: External DNS check
+  task: ping 10.101.7.113
+  test: ncontains
+  pattern: bytes from
+  err_msg: External DNS does not respond to ping
+  device:
+    - leaf
+    - leaf-bmc
+    - cdu
+    - spine
