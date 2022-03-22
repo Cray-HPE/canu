@@ -56,12 +56,12 @@ with open(canu_version_file, "r") as file:
     canu_version = file.readline()
 canu_version = canu_version.strip()
 banner_motd = (
-    "banner motd ^\n"
+    "banner motd !\n"
     "###############################################################################\n"
     f"# CSM version:  {csm}\n"
     f"# CANU version: {canu_version}\n"
     "###############################################################################\n"
-    "^\n"
+    "!\n"
 )
 
 runner = testing.CliRunner()

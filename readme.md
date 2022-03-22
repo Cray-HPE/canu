@@ -1165,9 +1165,13 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 $$ [1.2.5-develop]
 - Add NMN network for 1.0 to ssh allowed into switches because of BGP DOCS in 1.0 allowing it.
 - Remove router ospfv3 from 1.0/1.2
+<<<<<<< HEAD
 - Fixed ACL, OSPF, BGP config files
 - Fixed test templates for ACL, OSPF, BGP
 - Fixed banner for Aruba
+=======
+- Change Aruba banner to match running config.
+>>>>>>> 049da13412ef5281f31d12ac032b590f00cc879c
 
 ## [1.2.4-develop]
 - Add OSPF to vlan 1. 
