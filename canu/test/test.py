@@ -119,8 +119,7 @@ def test(
             hide_input=True,
         )
     # set to ERROR otherwise nornir plugin logs debug messages to the screen.
-    logging.basicConfig(level="ERROR ")
-
+    logging.basicConfig(level="ERROR")
     inventory = {"groups": "shasta", "hosts": {}}
     if sls_variables[network + "_IPs"] == {}: 
         click.secho(
