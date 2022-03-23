@@ -146,9 +146,9 @@
     - leaf
     - leaf-bmc
     - cdu
-- name: Internal DNS check
+- name: Is internal DNS server alive (ping)
   task: ping 10.92.100.225
-  test: ncontains
+  test: contains
   pattern: bytes from
   err_msg: Internal DNS does not respond to ping
   device:
@@ -156,11 +156,31 @@
     - leaf-bmc
     - cdu
     - spine
-- name: External DNS check
-  task: ping 10.101.7.113
-  test: ncontains
+- name: Does internal DNS resolve ncn-m001-nmn
+  task: ping ncn-m001-nmn
+  test: contains
   pattern: bytes from
-  err_msg: External DNS does not respond to ping
+  err_msg: Internal DNS cannot resolve ncn-m001-nmn, is ncn-m001 alive?
+  device:
+    - leaf
+    - leaf-bmc
+    - cdu
+    - spine
+- name: Internet connection check CSM 1.0
+  task: ping 8.8.8.8 source vlan7
+  test: contains
+  pattern: bytes from
+  err_msg: External network (internet) does not respond. Ignore if running CSM 1.2.
+  device:
+    - leaf
+    - leaf-bmc
+    - cdu
+    - spine
+- name: Internet connection check CSM 1.2
+  task: ping 8.8.8.8 source vlan7 vrf Customer
+  test: contains
+  pattern: bytes from
+  err_msg: External network (internet) does not respond. Ignore if running CSM 1.0.
   device:
     - leaf
     - leaf-bmc

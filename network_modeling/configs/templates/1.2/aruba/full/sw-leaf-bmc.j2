@@ -69,7 +69,7 @@ interface vlan {{ variables.CMN_VLAN }}
     ip address {{ variables.CMN_IP }}/{{variables.CMN_PREFIX_LEN}}
     ip ospf 2 area 0.0.0.0
 snmp-server vrf default
-
+ip dns server-address {{ variables.NMNLB_DNS }}
 router ospf 2 vrf Customer
     router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0

@@ -1162,8 +1162,9 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 ## [1.2.6-develop]
-- add network test cases
-- 
+- Add network test cases
+- Add network test cases for DNS and site connectivity
+- Fixed missing DNS from Aruba switches
 
 ## [1.2.5-develop]
 - Add NMN network for 1.0 to ssh allowed into switches because of BGP DOCS in 1.0 allowing it.
