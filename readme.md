@@ -1161,6 +1161,15 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.2.5-develop]
+- Add NMN network for 1.0 to ssh allowed into switches because of BGP DOCS in 1.0 allowing it.
+- Remove router ospfv3 from 1.0/1.2
+- Fixed ACL, OSPF, BGP config files
+- Fixed test templates for ACL, OSPF, BGP
+- Change Aruba banner to match running config.
+- Fix Canu test --network
+
 ## [1.2.4-develop]
 - Add OSPF to vlan 1. 
 - Add 'ip ospf passive' to vlan 1,4.

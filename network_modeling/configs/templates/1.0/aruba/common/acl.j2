@@ -2,6 +2,7 @@
 access-list ip mgmt
 {% set sequence = 10 %}    {{ sequence }} comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET
 {% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq ssh
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }} any eq ssh
 {% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq https
 {% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq snmp
 {% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq snmp-trap

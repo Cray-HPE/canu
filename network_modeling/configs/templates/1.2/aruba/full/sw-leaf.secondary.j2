@@ -117,9 +117,6 @@ router ospf 2 vrf Customer
 router ospf 1
     router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
-router ospfv3 1
-    router-id {{ variables.LOOPBACK_IP }}
-    area 0.0.0.0
 https-server vrf Customer
 https-server vrf default
 https-server vrf mgmt
