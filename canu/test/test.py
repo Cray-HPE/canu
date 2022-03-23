@@ -121,7 +121,7 @@ def test(
     # set to ERROR otherwise nornir plugin logs debug messages to the screen.
     logging.basicConfig(level="ERROR")
     inventory = {"groups": "shasta", "hosts": {}}
-    if sls_variables[network + "_IPs"] == {}: 
+    if sls_variables[network + "_IPs"] == {}:
         click.secho(
                 f"The file {sls_file.name} is missing CMN Network.",
                 fg="red",
@@ -160,7 +160,6 @@ def test(
                         vendor = "dellanox"
                     else:
                         inventory["hosts"][host]["platform"] = "generic"
-                        print ("hello")
 
     nr = InitNornir(
         runner={
