@@ -1146,7 +1146,7 @@ def groupby_vlan_range(vlan_list):
 
     values = []
     vlans.sort()
-    for _group_id, members in groupby(enumerate(vlans), key=_group_id):
+    for _group_id, members in groupby(enumerate(vlans), key=_group_id):  # noqa: B020
         members = list(members)
         first, last = members[0][1], members[-1][1]
 
