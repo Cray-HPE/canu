@@ -123,8 +123,8 @@ def test(
     inventory = {"groups": "shasta", "hosts": {}}
     if sls_variables[network + "_IPs"] == {}:
         click.secho(
-                f"The file {sls_file.name} is missing CMN Network.",
-                fg="red",
+            f"The file {sls_file.name} is missing CMN Network.",
+            fg="red",
         )
         sys.exit(1)
     for k in sls_variables[network + "_IPs"]:
