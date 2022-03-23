@@ -733,6 +733,9 @@ def generate_switch_config(
             override_config_hier = HConfig(host=host)
             override_config_hier.load_from_string(switch_config)
             override_config_hier.add_tags(override[switch_name])
+            # add ! to the end of the aruba banner.
+            banner = override_config_hier.get_child("contains", "banner")
+            banner.add_child("!")
             for line in override_config_hier.all_children_sorted_by_tags(
                 "override",
                 None,
@@ -744,12 +747,17 @@ def generate_switch_config(
                 "override",
             ):
                 # add two spaces to indented config to match aruba formatting.
-                if line.cisco_style_text().startswith("  "):
+                if (
+                    line.cisco_style_text().startswith("  ")
+                    and "!" not in line.cisco_style_text()
+                ):
                     override_config = (
                         override_config + "\n" + "  " + line.cisco_style_text()
                     )
                 else:
-                    override_config = override_config + "\n" + line.cisco_style_text()
+                    override_config = (
+                        override_config + "\n" + line.cisco_style_text().lstrip()
+                    )
 
             return override_config, devices, unknown
     return switch_config, devices, unknown
@@ -1138,7 +1146,7 @@ def groupby_vlan_range(vlan_list):
 
     values = []
     vlans.sort()
-    for _group_id, members in groupby(enumerate(vlans), key=_group_id):
+    for _group_id, members in groupby(enumerate(vlans), key=_group_id):  # noqa: B020
         members = list(members)
         first, last = members[0][1], members[-1][1]
 

@@ -120,9 +120,15 @@ def test(
         )
     # set to ERROR otherwise nornir plugin logs debug messages to the screen.
     logging.basicConfig(level="ERROR")
-
     inventory = {"groups": "shasta", "hosts": {}}
+    if sls_variables[network + "_IPs"] == {}:
+        click.secho(
+            f"The file {sls_file.name} is missing CMN Network.",
+            fg="red",
+        )
+        sys.exit(1)
     for k in sls_variables[network + "_IPs"]:
+
         if "sw" in k:
             inventory["hosts"].update(
                 {
@@ -135,6 +141,7 @@ def test(
                 },
             )
     # pull in the platform type from sls hardware data
+    vendor = None
     for x in sls_hardware:
         if (
             x["Type"] == "comptype_hl_switch"
