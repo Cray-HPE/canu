@@ -1,4 +1,4 @@
-# 🛶 CANU v1.2.6-develop
+# 🛶 CANU v1.2.7-develop
 
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
@@ -1161,6 +1161,9 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+## [1.2.7-develop]
+- Fixed bug to allow canu to exit gracefully with sys.exit(1)
+
 ## [1.2.6-develop]
 - Add network test cases
 - Add network test cases for DNS and site connectivity
@@ -1175,7 +1178,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Fix Canu test --network
 
 ## [1.2.4-develop]
-- Add OSPF to vlan 1. 
+- Add OSPF to vlan 1.
 - Add 'ip ospf passive' to vlan 1,4.
 - Fix test cases: test_generate_switch_config_aruba_csm_1_2.py | test_generate_switch_config_dellanox_csm_1_2.py.
 - Fix missing OSPF configuration from VLAN 7 in /network_modeling/configs/templates/dellmellanox/1.2/*.
