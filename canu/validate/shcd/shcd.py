@@ -394,7 +394,7 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False, node_type=
                 "A port number must be specified. "
                 + f"Please correct the SHCD for {sheet}:{location} with an empty value",
             )
-            exit(1)
+            sys.exit(1)
         if port[0].lower() == "j":
             warnings["shcd_port_data"].append(f"{sheet}:{location}")
             log.warning(
@@ -437,7 +437,7 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False, node_type=
                 "A port number must be specified. "
                 + f"Please correct the SHCD for {sheet}:{cell.coordinate} with an empty value",
             )
-            exit(1)
+            sys.exit(1)
 
     return int(port)
 
@@ -716,7 +716,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                             fg="red",
                         ),
                     )
-                    exit(1)
+                    sys.exit(1)
                 # If the tmp_port is None, make one connection:
                 #   src ==> parent
                 # Continue to connect the rest of the nodes
@@ -822,7 +822,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                             fg="red",
                         ),
                     )
-                    exit(1)
+                    sys.exit(1)
 
     wb.close()
 
