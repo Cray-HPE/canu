@@ -363,7 +363,7 @@ def config(
                 "The override yaml file was not found, check that you entered the right file name and path.",
                 fg="red",
             )
-            exit(1)
+            sys.exit(1)
 
     switch_config, devices, unknown = generate_switch_config(
         csm,
@@ -501,14 +501,14 @@ def generate_switch_config(
             + "\nMake sure the --csm flag matches the CSM version you are using.",
             fg="red",
         )
-        exit(1)
+        sys.exit(1)
     elif sls_variables["CMN_VLAN"] is None and float(csm) >= 1.2:
         click.secho(
             "\nCMN network not found in SLS, this is required for csm 1.2 "
             + "\nHas the CSM 1.2 SLS upgrade procedure been run?",
             fg="red",
         )
-        exit(1)
+        sys.exit(1)
     spine_leaf_vlan = groupby_vlan_range(spine_leaf_vlan)
     leaf_bmc_vlan = groupby_vlan_range(leaf_bmc_vlan)
 
@@ -593,7 +593,7 @@ def generate_switch_config(
 
     if switch_name not in sls_variables["HMN_IPs"].keys():
         click.secho(f"Cannot find {switch_name} in CSI / SLS nodes.", fg="red")
-        exit(1)
+        sys.exit(1)
 
     cmm_switch_ip = sls_variables.get("CMN_IPs")
     if cmm_switch_ip:
@@ -820,7 +820,7 @@ def get_switch_nodes(switch_name, network_node_list, factory, sls_variables):
             f"For switch {switch_name}, the type cannot be determined. Please check the switch name and try again.",
             fg="red",
         )
-        exit(1)
+        sys.exit(1)
 
     for port in nodes_by_name[switch_name]["ports"]:
         destination_node_id = port["destination_node_id"]
