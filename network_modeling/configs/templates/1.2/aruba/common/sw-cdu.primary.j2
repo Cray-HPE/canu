@@ -31,6 +31,36 @@ vlan {{ variables.CMN_VLAN }}
     name CMN
     apply access-list ip cmn-can in
     apply access-list ip cmn-can out
+
+interface loopback 0
+    ip address {{ variables.LOOPBACK_IP }}/32
+    ip ospf 1 area 0.0.0.0
+interface vlan 1
+    ip mtu 9198
+    ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}}
+    ip ospf 1 area 0.0.0.0
+    ip ospf passive
+interface vlan {{ variables.NMN_VLAN }}
+    description NMN
+    ip mtu 9198
+    ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}}
+    ip ospf 1 area 0.0.0.0
+interface vlan {{ variables.HMN_VLAN }}
+    description HMN
+    ip mtu 9198
+    ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
+    ip ospf 1 area 0.0.0.0
+    ip ospf passive
+interface vlan {{ variables.CMN_VLAN }}
+    vrf attach Customer
+    description CMN
+    ip mtu 9198
+    ip address {{ variables.CMN_IP }}/{{variables.CMN_PREFIX_LEN}}
+    ip ospf 2 area 0.0.0.0
+
+{%- include '1.2/aruba/common/mtn_hmn_vlan.j2' %}
+{%- include '1.2/aruba/common/mtn_nmn_vlan.j2' %}
+
 spanning-tree
 {#- forward delay added to help with pxe boots. CASMNET-1099 + CASMTRIAGE-2793 #}
 spanning-tree forward-delay 4
@@ -70,35 +100,6 @@ interface 1/1/{{ variables.VSX_ISL_PORT2 }}
     mtu 9198
     description vsx isl
     lag 256
-
-interface loopback 0
-    ip address {{ variables.LOOPBACK_IP }}/32
-    ip ospf 1 area 0.0.0.0
-interface vlan 1
-    ip mtu 9198
-    ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}}
-    ip ospf 1 area 0.0.0.0
-    ip ospf passive
-interface vlan {{ variables.NMN_VLAN }}
-    description NMN
-    ip mtu 9198
-    ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}}
-    ip ospf 1 area 0.0.0.0
-interface vlan {{ variables.HMN_VLAN }}
-    description HMN
-    ip mtu 9198
-    ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
-    ip ospf 1 area 0.0.0.0
-    ip ospf passive
-interface vlan {{ variables.CMN_VLAN }}
-    vrf attach Customer
-    description CMN
-    ip mtu 9198
-    ip address {{ variables.CMN_IP }}/{{variables.CMN_PREFIX_LEN}}
-    ip ospf 2 area 0.0.0.0
-
-{%- include '1.2/aruba/common/mtn_hmn_vlan.j2' %}
-{%- include '1.2/aruba/common/mtn_nmn_vlan.j2' %}
 
 vsx
     system-mac 02:00:00:00:73:00
