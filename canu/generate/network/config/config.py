@@ -347,7 +347,7 @@ def config(
                 "The override yaml file was not found, check that you entered the right file name and path.",
                 fg="red",
             )
-            exit(1)
+            sys.exit(1)
 
     # make folder
     if not path.exists(folder):
