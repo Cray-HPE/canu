@@ -442,7 +442,7 @@ class NetworkNodeFactory:
                 + "Cannot generate and write Topology JSON file.",
                 fg="red",
             )
-            exit(1)
+            sys.exit(1)
 
         errors = sorted(validator.iter_errors(ccj_json), key=str)
 
@@ -450,4 +450,4 @@ class NetworkNodeFactory:
             click.secho("CCJ failed schema checks:", fg="red")
             for error in errors:
                 click.secho(f"    {error.message}", fg="red")
-            exit(1)
+            sys.exit(1)
