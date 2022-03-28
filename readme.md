@@ -1,4 +1,4 @@
-# 🛶 CANU v1.2.8-develop
+# 🛶 CANU v1.2.10-develop
 
 
 
