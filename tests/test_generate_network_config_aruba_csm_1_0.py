@@ -35,8 +35,6 @@ test_file_directory = Path(__file__).resolve().parent
 
 test_file_name = "Full_Architecture_Golden_Config_1.1.5.xlsx"
 test_file = path.join(test_file_directory, "data", test_file_name)
-override_file_name = "override.yaml"
-override_file = path.join(test_file_directory, "data", override_file_name)
 architecture = "full"
 tabs = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners = "J14,T44,J14,T48,J14,T28,J14,T27"
@@ -88,90 +86,6 @@ def test_network_config():
         assert "sw-cdu-001 Config Generated" in str(result.output)
         assert "sw-cdu-002 Config Generated" in str(result.output)
         assert "sw-leaf-bmc-001 Config Generated" in str(result.output)
-
-
-def test_network_override_config():
-    """Test that the `canu generate network config override` command runs and generates config override."""
-    with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
-
-        result = runner.invoke(
-            cli,
-            [
-                "--cache",
-                cache_minutes,
-                "generate",
-                "network",
-                "config",
-                "--csm",
-                csm,
-                "--architecture",
-                architecture,
-                "--shcd",
-                test_file,
-                "--tabs",
-                tabs,
-                "--corners",
-                corners,
-                "--sls-file",
-                sls_file,
-                "--folder",
-                folder_name,
-                "--override",
-                override_file,
-            ],
-        )
-        assert result.exit_code == 0
-        assert "sw-spine-001 Override Config Generated" in str(result.output)
-        assert "sw-spine-002 Override Config Generated" in str(result.output)
-        assert "sw-leaf-001 Override Config Generated" in str(result.output)
-        assert "sw-leaf-002 Override Config Generated" in str(result.output)
-        assert "sw-leaf-003 Override Config Generated" in str(result.output)
-        assert "sw-leaf-004 Override Config Generated" in str(result.output)
-        assert "sw-cdu-001 Override Config Generated" in str(result.output)
-        assert "sw-cdu-002 Override Config Generated" in str(result.output)
-        assert "sw-leaf-bmc-001 Override Config Generated" in str(result.output)
-
-
-def test_network_config_override_file_missing():
-    """Test that the `canu generate network config` command errors on override file missing."""
-    bad_override_file = "/bad_folder"
-    with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
-        result = runner.invoke(
-            cli,
-            [
-                "--cache",
-                cache_minutes,
-                "generate",
-                "network",
-                "config",
-                "--csm",
-                csm,
-                "--architecture",
-                architecture,
-                "--shcd",
-                test_file,
-                "--tabs",
-                tabs,
-                "--corners",
-                corners,
-                "--sls-file",
-                sls_file,
-                "--folder",
-                folder_name,
-                "--override",
-                bad_override_file,
-            ],
-        )
-        assert result.exit_code == 1
-
-        assert (
-            "The override yaml file was not found, check that you entered the right file name and path"
-            in str(result.output)
-        )
 
 
 def test_network_config_folder_prompt():

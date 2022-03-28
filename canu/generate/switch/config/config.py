@@ -32,18 +32,20 @@ import sys
 import click
 from click_help_colors import HelpColorsCommand
 from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
-from hier_config import HConfig, Host
+from hier_config import HConfig, Host, HConfigChild
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 import natsort
 import netaddr
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import requests
+from ttp import ttp
 from ruamel.yaml import YAML
 import urllib3
 
 from canu.utils.cache import cache_directory
 from canu.validate.paddle.paddle import node_model_from_paddle
 from canu.validate.shcd.shcd import node_model_from_shcd, shcd_to_sheets
+from canu.validate.switch.config.config import compare_config_heir
 
 yaml = YAML()
 
@@ -85,6 +87,8 @@ csm_options = canu_config["csm_versions"]
 with open(canu_version_file, "r") as file:
     canu_version = file.readline()
 canu_version = canu_version.strip()
+
+dash = "-" * 60
 
 
 @click.command(
@@ -155,8 +159,8 @@ canu_version = canu_version.strip()
     default="-",
 )
 @click.option(
-    "--override",
-    help="Switch configuration override",
+    "--custom-config",
+    help="Custom switch configuration",
     type=click.Path(),
 )
 @click.pass_context
@@ -173,7 +177,7 @@ def config(
     auth_token,
     sls_address,
     out,
-    override,
+    custom_config,
 ):
     """Generate switch config using the SHCD.
 
@@ -230,7 +234,6 @@ def config(
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         out: Name of the output file
-        override: Input file to ignore switch configuration
     """
     # SHCD Parsing
     if shcd:
@@ -279,7 +282,6 @@ def config(
         )
     else:
         network_node_list, network_warnings = node_model_from_paddle(factory, ccj_json)
-
     # Parse SLS input file.
     if sls_file:
         try:
@@ -354,17 +356,6 @@ def config(
         if float(csm) < 1.2:
             sls_variables = rename_sls_hostnames(sls_variables)
 
-    if override:
-        try:
-            with open(os.path.join(override), "r") as f:
-                override = yaml.load(f)
-        except FileNotFoundError:
-            click.secho(
-                "The override yaml file was not found, check that you entered the right file name and path.",
-                fg="red",
-            )
-            exit(1)
-
     switch_config, devices, unknown = generate_switch_config(
         csm,
         architecture,
@@ -374,17 +365,13 @@ def config(
         sls_variables,
         template_folder,
         vendor_folder,
-        override,
+        custom_config,
     )
 
-    dash = "-" * 60
     click.echo("\n")
-    click.echo(dash)
+    click.secho(dash, fg="bright_white")
 
-    if override:
-        click.secho(f"{switch_name} Override Switch Config", fg="yellow")
-    else:
-        click.secho(f"{switch_name} Switch Config", fg="bright_white")
+    click.secho(f"{switch_name} Switch Config", fg="bright_white")
     click.echo(switch_config, file=out)
 
     if len(unknown) > 0:
@@ -411,6 +398,67 @@ def get_shasta_name(name, mapper):
             return shasta_name
 
 
+def add_custom_config(custom_config, switch_config, host, switch_os):
+    # mellanox ttp template to get interfaces
+    mellanox_interface = """
+interface ethernet {{ interface }} {{ _line_ | contains("") }}
+"""
+    switch_config_hier = HConfig(host=host)
+    custom_config_hier = HConfig(host=host)
+    # load configs in HConfig Objects
+    custom_config_hier.load_from_string(custom_config)
+    switch_config_hier.load_from_string(switch_config)
+
+    # get the delta between the custom config and generated switch config
+    # text at the top of generated config
+    # TODO create better verbage
+    custom_config_merge = "# custom config injected"
+    diff = custom_config_hier.difference(switch_config_hier)
+    for line in diff.all_children_sorted():
+        custom_config_merge += "\n" + "# " + line.cisco_style_text()
+    custom_config_merge += "\n"
+
+    # delete custom config that exists in the generated config
+    # If interface 1/1 has any config under it, it will be deleted and overwritten with the custom config
+    for line in switch_config_hier.all_children_sorted():
+        for line_custom in custom_config_hier.all_children_sorted():
+            switch_config_hier.add_ancestor_copy_of(line_custom)
+            switch_config_hier.del_child_by_text(str(line_custom))
+
+    if switch_os == "onyx":
+        mellanox_config = ""
+        for line in custom_config_hier.all_children_sorted():
+            mellanox_config = mellanox_config + "\n" + str(line)
+
+        # parse out mellanox interfaces from custom config file
+        parser = ttp(mellanox_config, mellanox_interface)
+        parser.parse()
+        interfaces = parser.result()
+
+        # mellanox overwrite port configuration
+        for port in interfaces[0][0]:
+            override_port = port["interface"]
+            for line in switch_config_hier.all_children_sorted():
+                # match interfaces from custom config file
+                if line.text.startswith(f"interface ethernet {override_port} "):
+                    # delete interfaces from generated config
+                    switch_config_hier.del_child(line)
+
+    # merge custom config into generated switch config
+    switch_config_hier.merge(custom_config_hier)
+
+    # re-order config
+    switch_config_hier.set_order_weight()
+
+    for line in switch_config_hier.all_children_sorted():
+        # add two spaces to indented config to match aruba formatting.
+        if line.cisco_style_text().startswith("  ") and switch_os == "aoscx":
+            custom_config_merge += "\n" + "  " + line.cisco_style_text()
+        else:
+            custom_config_merge += "\n" + line.cisco_style_text()
+    return custom_config_merge
+
+
 def generate_switch_config(
     csm,
     architecture,
@@ -420,7 +468,7 @@ def generate_switch_config(
     sls_variables,
     template_folder,
     vendor_folder,
-    override,
+    custom_config,
 ):
     """Generate switch config.
 
@@ -433,7 +481,6 @@ def generate_switch_config(
         sls_variables: Dictionary containing SLS variables
         template_folder: Architecture folder contaning the switch templates
         vendor_folder: Vendor folder contaning the template_folder
-        override: Input file that defines what config should be ignored
 
     Returns:
         switch_config: The generated switch configuration
@@ -454,6 +501,17 @@ def generate_switch_config(
                 fg="red",
             ),
         )
+
+    if custom_config:
+        try:
+            with open(os.path.join(f"{custom_config}"), "r") as f:
+                custom_config = yaml.load(f)
+        except FileNotFoundError:
+            click.secho(
+                "The custom yaml file was not found, check that you entered the right file name and path",
+                fg="red",
+            )
+            exit(1)
 
     is_primary, primary, secondary = switch_is_primary(switch_name)
 
@@ -677,81 +735,57 @@ def generate_switch_config(
     devices = set()
     for node in cabling["nodes"]:
         devices.add(node["subtype"])
-    if architecture == "network_v1":
-        dell_options_file = os.path.join(
-            project_root,
-            "canu",
-            "validate",
-            "switch",
-            "config",
-            "dell_options.yaml",
-        )
-        mellanox_options_file = os.path.join(
-            project_root,
-            "canu",
-            "validate",
-            "switch",
-            "config",
-            "mellanox_options.yaml",
-        )
-        dell_options = yaml.load(open(dell_options_file))
-        mellanox_options = yaml.load(open(mellanox_options_file))
-        if "sw-cdu" or "sw-leaf-bmc" in node_shasta_name:
-            v1_config = ""
-            dell_switch = Host(node_shasta_name, "dellOS10", dell_options)
-            dell_config_hier = HConfig(host=dell_switch)
-            dell_config_hier.load_from_string(switch_config)
-            dell_config_hier.set_order_weight()
-            for line in dell_config_hier.all_children_sorted():
-                v1_config = v1_config + line.cisco_style_text() + "\n"
-        if "sw-spine" in node_shasta_name:
-            v1_config = ""
-            mellanox_switch = Host(node_shasta_name, "onyx", mellanox_options)
-            mellanox_config_hier = HConfig(host=mellanox_switch)
-            mellanox_config_hier.load_from_string(switch_config)
-            mellanox_config_hier.set_order_weight()
-            for line in mellanox_config_hier.all_children_sorted():
-                v1_config = v1_config + line.cisco_style_text() + "\n"
-        return v1_config, devices, unknown
 
-    if override:
+    def hier_options(switch_os):
         options_file = os.path.join(
             project_root,
             "canu",
             "validate",
             "switch",
             "config",
-            "options.yaml",
+            f"{switch_os}_options.yaml",
         )
-        if switch_name in override:
-            options = yaml.load(open(options_file))
-            host = Host(switch_name, "aoscx", options)
-            override_config = (
-                "# OVERRIDE CONFIG\n"
-                + "# The configuration below has been ignored and is not included in the GENERATED CONFIG\n"
-            )
-            override_config_hier = HConfig(host=host)
-            override_config_hier.load_from_string(switch_config)
-            override_config_hier.add_tags(override[switch_name])
-            for line in override_config_hier.all_children_sorted_by_tags(
-                "override",
-                None,
-            ):
-                override_config = override_config + "\n" + "#" + line.cisco_style_text()
-            override_config = override_config + "\n# GENERATED CONFIG\n"
-            for line in override_config_hier.all_children_sorted_by_tags(
-                None,
-                "override",
-            ):
-                # add two spaces to indented config to match aruba formatting.
-                if line.cisco_style_text().startswith("  "):
-                    override_config = (
-                        override_config + "\n" + "  " + line.cisco_style_text()
-                    )
-                else:
-                    override_config = override_config + "\n" + line.cisco_style_text()
+        return options_file
 
-            return override_config, devices, unknown
+    if architecture == "network_v1":
+        switch_config_v1 = ""
+        if "sw-cdu" in switch_name or "sw-leaf-bmc" in switch_name:
+            switch_os = "dellOS10"
+            options = yaml.load(open(hier_options(switch_os)))
+        elif "sw-spine" in switch_name:
+            switch_os = "onyx"
+            options = yaml.load(open(hier_options(switch_os)))
+        hier_host = Host(switch_name, switch_os, options)
+        if custom_config:
+            switch_custom_config = custom_config.get(switch_name)
+            if switch_custom_config != None:
+                switch_config_v1 = add_custom_config(
+                    switch_custom_config, switch_config, hier_host, switch_os
+                )
+        else:
+            hier_v1 = HConfig(host=hier_host)
+            hier_v1.load_from_string(switch_config)
+            hier_v1.set_order_weight()
+            for line in hier_v1.all_children_sorted():
+                switch_config_v1 += line.cisco_style_text() + "\n"
+
+        return switch_config_v1, devices, unknown
+
+    # defaults to aruba options file
+    else:
+        if custom_config:
+            switch_custom_config = custom_config.get(switch_name)
+            if switch_custom_config != None:
+                switch_os = "aoscx"
+                options = yaml.load(open(hier_options(switch_os)))
+
+                hier_host = Host(switch_name, switch_os, options)
+                switch_config = add_custom_config(
+                    switch_custom_config,
+                    switch_config,
+                    hier_host,
+                    switch_os,
+                )
     return switch_config, devices, unknown
 
 

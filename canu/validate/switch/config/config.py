@@ -53,7 +53,7 @@ options_file = path.join(
     "validate",
     "switch",
     "config",
-    "options.yaml",
+    "aoscx_options.yaml",
 )
 dell_options_file = path.join(
     project_root,
@@ -61,7 +61,7 @@ dell_options_file = path.join(
     "validate",
     "switch",
     "config",
-    "dell_options.yaml",
+    "dellos10_options.yaml",
 )
 mellanox_options_file = path.join(
     project_root,
@@ -69,7 +69,7 @@ mellanox_options_file = path.join(
     "validate",
     "switch",
     "config",
-    "mellanox_options.yaml",
+    "onyx_options.yaml",
 )
 tags_file = path.join(
     project_root,
