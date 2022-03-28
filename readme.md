@@ -1162,7 +1162,7 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
-## [1.3.0-develop]
+## [1.2.10-develop]
 - Change Aruba banner from motd to exec
 
 ## [1.2.8-develop]
