@@ -1110,7 +1110,6 @@ def print_node_list(node_list, title, out="-"):
                     port_string = f"{unused_block[0]:02}-{unused_block[len(unused_block)-1]:02}==>UNUSED"
                 unused_block = []  # reset
                 click.secho(f"        {port_string}", fg="green", file=out)
-
             destination_node_name = [
                 x.common_name()
                 for x in node_list
