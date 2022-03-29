@@ -44,7 +44,11 @@ import urllib3
 
 from canu.utils.cache import cache_directory
 from canu.validate.paddle.paddle import node_model_from_paddle
-from canu.validate.shcd.shcd import node_model_from_shcd, shcd_to_sheets
+from canu.validate.shcd.shcd import (
+    node_model_from_shcd,
+    shcd_to_sheets,
+    switch_unused_ports,
+)
 
 yaml = YAML()
 
@@ -283,6 +287,8 @@ def config(
     else:
         network_node_list, network_warnings = node_model_from_paddle(factory, ccj_json)
     # Parse SLS input file.
+    unused_ports = switch_unused_ports(network_node_list)
+
     if sls_file:
         try:
             input_json = json.load(sls_file)
@@ -366,6 +372,7 @@ def config(
         template_folder,
         vendor_folder,
         custom_config,
+        unused_ports,
     )
 
     click.echo("\n")
@@ -479,6 +486,7 @@ def generate_switch_config(
     template_folder,
     vendor_folder,
     custom_config,
+    unused_ports,
 ):
     """Generate switch config.
 
@@ -583,6 +591,7 @@ def generate_switch_config(
     leaf_bmc_vlan = groupby_vlan_range(leaf_bmc_vlan)
 
     variables = {
+        "UNUSED_PORTS": unused_ports[switch_name],
         "HOSTNAME": switch_name,
         "CSM_VERSION": csm,
         "CANU_VERSION": canu_version,
@@ -653,6 +662,7 @@ def generate_switch_config(
         "HMN_IPs": sls_variables["HMN_IPs"],
         "SWITCH_ASN": sls_variables["SWITCH_ASN"],
     }
+    print(variables["UNUSED_PORTS"])
     cabling = {}
     cabling["nodes"], unknown = get_switch_nodes(
         switch_name,

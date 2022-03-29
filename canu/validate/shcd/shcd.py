@@ -151,7 +151,7 @@ def shcd(ctx, architecture, shcd, tabs, corners, out, json_, log_):
 
         node_list_warnings(node_list, warnings, out)
 
-        switch_unused_ports(node_list, out)
+        switch_unused_ports(node_list)
 
 
 def shcd_to_sheets(shcd, tabs, corners):
@@ -1068,12 +1068,11 @@ def node_list_warnings(node_list, warnings, out="-"):
                 click.secho(f"{', '.join(cell_list)}\n", file=out)
 
 
-def switch_unused_ports(node_list, out):
+def switch_unused_ports(node_list):
     """Create a dictionary of unused ports.
 
     Args:
         node_list: A list of nodes
-        out: Defaults to stdout, but will print to the file name passed in
 
     Returns:
         unused_ports: Dictionary of switches and their unused ports

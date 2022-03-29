@@ -52,6 +52,7 @@ interface mgmt
 {% include '1.2/aruba/common/uan.j2' %}
 {% include '1.2/aruba/full/leaf-to-leaf-bmc.lag.j2' %}
 {% include '1.2/aruba/full/leaf-to-spine.lag.j2' %}
+{% include '1.2/aruba/common/spine_leaf_unused_port.j2' %}
 
 interface lag 256
     no shutdown
