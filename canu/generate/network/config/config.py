@@ -21,7 +21,6 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that generate the config of the entire Shasta network."""
 import json
-import os
 from os import environ, makedirs, path
 from pathlib import Path
 import sys
@@ -213,6 +212,7 @@ def config(
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         folder: Folder to store config files
+        custom_config: Config file that is merged with the generated config.
     """
     # SHCD Parsing
     if shcd:

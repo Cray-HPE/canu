@@ -331,7 +331,7 @@ def config(
                 "The override yaml file was not found, check that you entered the right file name and path.",
                 fg="red",
             )
-            exit(1)
+            sys.exit(1)
     compare_config_heir(
         running_config_hier.difference(generated_config_hier),
         generated_config_hier.difference(running_config_hier),

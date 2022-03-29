@@ -54,12 +54,12 @@ with open(canu_version_file, "r") as file:
     canu_version = file.readline()
 canu_version = canu_version.strip()
 banner_motd = (
-    "banner motd ^\n"
+    "banner motd !\n"
     "###############################################################################\n"
     f"# CSM version:  {csm}\n"
     f"# CANU version: {canu_version}\n"
     "###############################################################################\n"
-    "^\n"
+    "!\n"
 )
 
 runner = testing.CliRunner()
@@ -114,19 +114,20 @@ def test_switch_config_spine_primary():
             + "access-list ip mgmt\n"
             + "    10 comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET\n"
             + "    20 permit tcp 192.168.0.0/255.255.128.0 any eq ssh\n"
-            + "    30 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
-            + "    40 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
-            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
-            + "    60 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
-            + "    70 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
-            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
-            + "    90 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
-            + "    100 deny tcp any any eq ssh\n"
-            + "    110 deny tcp any any eq https\n"
-            + "    120 deny udp any any eq snmp\n"
-            + "    130 deny udp any any eq snmp-trap\n"
-            + "    140 comment ALLOW ANYTHING ELSE\n"
-            + "    150 permit any any any\n"
+            + "    30 permit tcp 192.168.3.0/255.255.128.0 any eq ssh\n"
+            + "    40 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
+            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
+            + "    60 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
+            + "    70 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
+            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
+            + "    90 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
+            + "    100 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
+            + "    110 deny tcp any any eq ssh\n"
+            + "    120 deny tcp any any eq https\n"
+            + "    130 deny udp any any eq snmp\n"
+            + "    140 deny udp any any eq snmp-trap\n"
+            + "    150 comment ALLOW ANYTHING ELSE\n"
+            + "    160 permit any any any\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
             + "    20 deny any 192.168.0.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
@@ -298,6 +299,7 @@ def test_switch_config_spine_primary():
             + "    vsx-sync vsx-global\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "ip prefix-list pl-can seq 10 permit 192.168.11.0/24 ge 24\n"
@@ -307,6 +309,7 @@ def test_switch_config_spine_primary():
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
         print(result.output)
+
         assert (
             "route-map ncn-w001 permit seq 10\n"
             + "     match ip address prefix-list tftp\n"
@@ -377,13 +380,11 @@ def test_switch_config_spine_primary():
             + "     set ip next-hop 192.168.4.6\n"
         ) in str(result.output)
         print(result.output)
+
         assert (
             "router ospf 1\n"
             + "    router-id 10.2.0.2\n"
             + "    redistribute bgp\n"
-            + "    area 0.0.0.0\n"
-            + "router ospfv3 1\n"
-            + "    router-id 10.2.0.2\n"
             + "    area 0.0.0.0\n"
             + "\n"
             + "router bgp 65533\n"
@@ -408,6 +409,7 @@ def test_switch_config_spine_primary():
             + "        neighbor 192.168.4.6 route-map ncn-w003 in\n"
             + "    exit-address-family\n"
         ) in str(result.output)
+        print(result.output)
 
 
 def test_switch_config_spine_secondary():
@@ -454,6 +456,8 @@ def test_switch_config_spine_secondary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
+        print(result.output)
+
         assert (
             "ssh server vrf default\n"
             + "ssh server vrf keepalive\n"
@@ -461,19 +465,20 @@ def test_switch_config_spine_secondary():
             + "access-list ip mgmt\n"
             + "    10 comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET\n"
             + "    20 permit tcp 192.168.0.0/255.255.128.0 any eq ssh\n"
-            + "    30 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
-            + "    40 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
-            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
-            + "    60 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
-            + "    70 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
-            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
-            + "    90 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
-            + "    100 deny tcp any any eq ssh\n"
-            + "    110 deny tcp any any eq https\n"
-            + "    120 deny udp any any eq snmp\n"
-            + "    130 deny udp any any eq snmp-trap\n"
-            + "    140 comment ALLOW ANYTHING ELSE\n"
-            + "    150 permit any any any\n"
+            + "    30 permit tcp 192.168.3.0/255.255.128.0 any eq ssh\n"
+            + "    40 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
+            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
+            + "    60 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
+            + "    70 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
+            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
+            + "    90 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
+            + "    100 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
+            + "    110 deny tcp any any eq ssh\n"
+            + "    120 deny tcp any any eq https\n"
+            + "    130 deny udp any any eq snmp\n"
+            + "    140 deny udp any any eq snmp-trap\n"
+            + "    150 comment ALLOW ANYTHING ELSE\n"
+            + "    160 permit any any any\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
             + "    20 deny any 192.168.0.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
@@ -512,6 +517,7 @@ def test_switch_config_spine_secondary():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
+        print(result.output)
         sw_spine_to_leaf = (
             "interface lag 101 multi-chassis\n"
             + "    no shutdown\n"
@@ -644,6 +650,7 @@ def test_switch_config_spine_secondary():
             + "    vsx-sync vsx-global\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "ip prefix-list pl-can seq 10 permit 192.168.11.0/24 ge 24\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24\n"
@@ -651,6 +658,7 @@ def test_switch_config_spine_secondary():
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "route-map ncn-w001 permit seq 10\n"
             + "     match ip address prefix-list tftp\n"
@@ -720,14 +728,12 @@ def test_switch_config_spine_secondary():
             + "     match ip address prefix-list pl-nmn\n"
             + "     set ip next-hop 192.168.4.6\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "router ospf 1\n"
             + "    router-id 10.2.0.3\n"
             + "    redistribute bgp\n"
-            + "    area 0.0.0.0\n"
-            + "router ospfv3 1\n"
-            + "    router-id 10.2.0.3\n"
             + "    area 0.0.0.0\n"
             + "\n"
             + "router bgp 65533\n"
@@ -754,6 +760,7 @@ def test_switch_config_spine_secondary():
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
+        print(result.output)
 
 
 def test_switch_config_leaf_primary():
@@ -799,6 +806,7 @@ def test_switch_config_leaf_primary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "ssh server vrf default\n"
             + "ssh server vrf keepalive\n"
@@ -806,19 +814,20 @@ def test_switch_config_leaf_primary():
             + "access-list ip mgmt\n"
             + "    10 comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET\n"
             + "    20 permit tcp 192.168.0.0/255.255.128.0 any eq ssh\n"
-            + "    30 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
-            + "    40 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
-            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
-            + "    60 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
-            + "    70 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
-            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
-            + "    90 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
-            + "    100 deny tcp any any eq ssh\n"
-            + "    110 deny tcp any any eq https\n"
-            + "    120 deny udp any any eq snmp\n"
-            + "    130 deny udp any any eq snmp-trap\n"
-            + "    140 comment ALLOW ANYTHING ELSE\n"
-            + "    150 permit any any any\n"
+            + "    30 permit tcp 192.168.3.0/255.255.128.0 any eq ssh\n"
+            + "    40 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
+            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
+            + "    60 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
+            + "    70 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
+            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
+            + "    90 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
+            + "    100 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
+            + "    110 deny tcp any any eq ssh\n"
+            + "    120 deny tcp any any eq https\n"
+            + "    130 deny udp any any eq snmp\n"
+            + "    140 deny udp any any eq snmp-trap\n"
+            + "    150 comment ALLOW ANYTHING ELSE\n"
+            + "    160 permit any any any\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
             + "    20 deny any 192.168.0.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
@@ -856,6 +865,7 @@ def test_switch_config_leaf_primary():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
+        print(result.output)
 
         ncn_m = (
             "interface lag 1 multi-chassis\n"
@@ -1053,6 +1063,7 @@ def test_switch_config_leaf_primary():
             + "    ip address 192.168.3.4/17\n"
             + "    ip ospf 1 area 0.0.0.0\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "interface vlan 4\n"
@@ -1061,6 +1072,7 @@ def test_switch_config_leaf_primary():
             + "    ip address 192.168.0.4/17\n"
             + "    ip ospf 1 area 0.0.0.0\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "vsx\n"
@@ -1071,17 +1083,16 @@ def test_switch_config_leaf_primary():
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "router ospf 1\n"
             + "    router-id 10.2.0.4\n"
             + "    area 0.0.0.0\n"
-            + "router ospfv3 1\n"
-            + "    router-id 10.2.0.4\n"
-            + "    area 0.0.0.0\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
+        print(result.output)
 
 
 def test_switch_config_leaf_primary_to_uan():
@@ -1127,6 +1138,7 @@ def test_switch_config_leaf_primary_to_uan():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "ssh server vrf default\n"
@@ -1135,19 +1147,20 @@ def test_switch_config_leaf_primary_to_uan():
             + "access-list ip mgmt\n"
             + "    10 comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET\n"
             + "    20 permit tcp 192.168.0.0/255.255.128.0 any eq ssh\n"
-            + "    30 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
-            + "    40 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
-            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
-            + "    60 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
-            + "    70 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
-            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
-            + "    90 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
-            + "    100 deny tcp any any eq ssh\n"
-            + "    110 deny tcp any any eq https\n"
-            + "    120 deny udp any any eq snmp\n"
-            + "    130 deny udp any any eq snmp-trap\n"
-            + "    140 comment ALLOW ANYTHING ELSE\n"
-            + "    150 permit any any any\n"
+            + "    30 permit tcp 192.168.3.0/255.255.128.0 any eq ssh\n"
+            + "    40 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
+            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
+            + "    60 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
+            + "    70 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
+            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
+            + "    90 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
+            + "    100 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
+            + "    110 deny tcp any any eq ssh\n"
+            + "    120 deny tcp any any eq https\n"
+            + "    130 deny udp any any eq snmp\n"
+            + "    140 deny udp any any eq snmp-trap\n"
+            + "    150 comment ALLOW ANYTHING ELSE\n"
+            + "    160 permit any any any\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
             + "    20 deny any 192.168.0.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
@@ -1185,6 +1198,7 @@ def test_switch_config_leaf_primary_to_uan():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
+        print(result.output)
 
         ncn_m = (
             "interface lag 1 multi-chassis\n"
@@ -1370,17 +1384,16 @@ def test_switch_config_leaf_primary_to_uan():
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "router ospf 1\n"
             + "    router-id 10.2.0.6\n"
             + "    area 0.0.0.0\n"
-            + "router ospfv3 1\n"
-            + "    router-id 10.2.0.6\n"
-            + "    area 0.0.0.0\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
+        print(result.output)
 
 
 def test_switch_config_leaf_secondary():
@@ -1426,6 +1439,7 @@ def test_switch_config_leaf_secondary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "ssh server vrf default\n"
@@ -1434,19 +1448,20 @@ def test_switch_config_leaf_secondary():
             + "access-list ip mgmt\n"
             + "    10 comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET\n"
             + "    20 permit tcp 192.168.0.0/255.255.128.0 any eq ssh\n"
-            + "    30 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
-            + "    40 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
-            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
-            + "    60 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
-            + "    70 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
-            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
-            + "    90 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
-            + "    100 deny tcp any any eq ssh\n"
-            + "    110 deny tcp any any eq https\n"
-            + "    120 deny udp any any eq snmp\n"
-            + "    130 deny udp any any eq snmp-trap\n"
-            + "    140 comment ALLOW ANYTHING ELSE\n"
-            + "    150 permit any any any\n"
+            + "    30 permit tcp 192.168.3.0/255.255.128.0 any eq ssh\n"
+            + "    40 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
+            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
+            + "    60 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
+            + "    70 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
+            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
+            + "    90 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
+            + "    100 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
+            + "    110 deny tcp any any eq ssh\n"
+            + "    120 deny tcp any any eq https\n"
+            + "    130 deny udp any any eq snmp\n"
+            + "    140 deny udp any any eq snmp-trap\n"
+            + "    150 comment ALLOW ANYTHING ELSE\n"
+            + "    160 permit any any any\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
             + "    20 deny any 192.168.0.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
@@ -1484,6 +1499,7 @@ def test_switch_config_leaf_secondary():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
+        print(result.output)
 
         ncn_m = (
             "interface lag 1 multi-chassis\n"
@@ -1693,17 +1709,16 @@ def test_switch_config_leaf_secondary():
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "router ospf 1\n"
             + "    router-id 10.2.0.5\n"
             + "    area 0.0.0.0\n"
-            + "router ospfv3 1\n"
-            + "    router-id 10.2.0.5\n"
-            + "    area 0.0.0.0\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
+        print(result.output)
 
 
 def test_switch_config_leaf_secondary_to_uan():
@@ -1749,6 +1764,7 @@ def test_switch_config_leaf_secondary_to_uan():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "ssh server vrf default\n"
@@ -1757,19 +1773,20 @@ def test_switch_config_leaf_secondary_to_uan():
             + "access-list ip mgmt\n"
             + "    10 comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET\n"
             + "    20 permit tcp 192.168.0.0/255.255.128.0 any eq ssh\n"
-            + "    30 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
-            + "    40 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
-            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
-            + "    60 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
-            + "    70 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
-            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
-            + "    90 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
-            + "    100 deny tcp any any eq ssh\n"
-            + "    110 deny tcp any any eq https\n"
-            + "    120 deny udp any any eq snmp\n"
-            + "    130 deny udp any any eq snmp-trap\n"
-            + "    140 comment ALLOW ANYTHING ELSE\n"
-            + "    150 permit any any any\n"
+            + "    30 permit tcp 192.168.3.0/255.255.128.0 any eq ssh\n"
+            + "    40 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
+            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
+            + "    60 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
+            + "    70 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
+            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
+            + "    90 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
+            + "    100 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
+            + "    110 deny tcp any any eq ssh\n"
+            + "    120 deny tcp any any eq https\n"
+            + "    130 deny udp any any eq snmp\n"
+            + "    140 deny udp any any eq snmp-trap\n"
+            + "    150 comment ALLOW ANYTHING ELSE\n"
+            + "    160 permit any any any\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
             + "    20 deny any 192.168.0.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
@@ -1807,6 +1824,7 @@ def test_switch_config_leaf_secondary_to_uan():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
+        print(result.output)
 
         ncn_m = (
             "interface lag 1 multi-chassis\n"
@@ -1993,17 +2011,16 @@ def test_switch_config_leaf_secondary_to_uan():
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "router ospf 1\n"
             + "    router-id 10.2.0.7\n"
             + "    area 0.0.0.0\n"
-            + "router ospfv3 1\n"
-            + "    router-id 10.2.0.7\n"
-            + "    area 0.0.0.0\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
+        print(result.output)
 
 
 def test_switch_config_cdu_primary():
@@ -2049,6 +2066,7 @@ def test_switch_config_cdu_primary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "ssh server vrf default\n"
             + "ssh server vrf keepalive\n"
@@ -2056,19 +2074,20 @@ def test_switch_config_cdu_primary():
             + "access-list ip mgmt\n"
             + "    10 comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET\n"
             + "    20 permit tcp 192.168.0.0/255.255.128.0 any eq ssh\n"
-            + "    30 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
-            + "    40 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
-            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
-            + "    60 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
-            + "    70 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
-            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
-            + "    90 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
-            + "    100 deny tcp any any eq ssh\n"
-            + "    110 deny tcp any any eq https\n"
-            + "    120 deny udp any any eq snmp\n"
-            + "    130 deny udp any any eq snmp-trap\n"
-            + "    140 comment ALLOW ANYTHING ELSE\n"
-            + "    150 permit any any any\n"
+            + "    30 permit tcp 192.168.3.0/255.255.128.0 any eq ssh\n"
+            + "    40 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
+            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
+            + "    60 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
+            + "    70 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
+            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
+            + "    90 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
+            + "    100 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
+            + "    110 deny tcp any any eq ssh\n"
+            + "    120 deny tcp any any eq https\n"
+            + "    130 deny udp any any eq snmp\n"
+            + "    140 deny udp any any eq snmp-trap\n"
+            + "    150 comment ALLOW ANYTHING ELSE\n"
+            + "    160 permit any any any\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
             + "    20 deny any 192.168.0.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
@@ -2102,6 +2121,7 @@ def test_switch_config_cdu_primary():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
+        print(result.output)
 
         cmm = (
             "interface lag 2 multi-chassis static\n"
@@ -2229,6 +2249,7 @@ def test_switch_config_cdu_primary():
             + "    ip mtu 9198\n"
             + "    ip address 192.168.1.16/16\n"
         ) in str(result.output)
+        print(result.output)
 
         mtn_hmn_vlan = (
             "vlan 3000\n"
@@ -2246,7 +2267,6 @@ def test_switch_config_cdu_primary():
             + "    ip ospf 1 area 0.0.0.0\n"
         )
         assert mtn_hmn_vlan in str(result.output)
-
         mtn_nmn_vlan = (
             "vlan 2000\n"
             + "    name cabinet_3002\n"
@@ -2262,7 +2282,6 @@ def test_switch_config_cdu_primary():
             + "    ip ospf 1 area 0.0.0.0\n"
         )
         assert mtn_nmn_vlan in str(result.output)
-
         assert (
             "vsx\n"
             + "    system-mac 02:00:00:00:73:00\n"
@@ -2271,16 +2290,13 @@ def test_switch_config_cdu_primary():
             + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
-            + "\n"
             + "router ospf 1\n"
-            + "    router-id 10.2.0.16\n"
-            + "    area 0.0.0.0\n"
-            + "router ospfv3 1\n"
             + "    router-id 10.2.0.16\n"
             + "    area 0.0.0.0\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
+        print(result.output)
 
 
 def test_switch_config_cdu_secondary():
@@ -2326,6 +2342,7 @@ def test_switch_config_cdu_secondary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "ssh server vrf default\n"
@@ -2334,19 +2351,20 @@ def test_switch_config_cdu_secondary():
             + "access-list ip mgmt\n"
             + "    10 comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET\n"
             + "    20 permit tcp 192.168.0.0/255.255.128.0 any eq ssh\n"
-            + "    30 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
-            + "    40 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
-            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
-            + "    60 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
-            + "    70 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
-            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
-            + "    90 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
-            + "    100 deny tcp any any eq ssh\n"
-            + "    110 deny tcp any any eq https\n"
-            + "    120 deny udp any any eq snmp\n"
-            + "    130 deny udp any any eq snmp-trap\n"
-            + "    140 comment ALLOW ANYTHING ELSE\n"
-            + "    150 permit any any any\n"
+            + "    30 permit tcp 192.168.3.0/255.255.128.0 any eq ssh\n"
+            + "    40 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
+            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
+            + "    60 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
+            + "    70 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
+            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
+            + "    90 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
+            + "    100 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
+            + "    110 deny tcp any any eq ssh\n"
+            + "    120 deny tcp any any eq https\n"
+            + "    130 deny udp any any eq snmp\n"
+            + "    140 deny udp any any eq snmp-trap\n"
+            + "    150 comment ALLOW ANYTHING ELSE\n"
+            + "    160 permit any any any\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
             + "    20 deny any 192.168.0.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
@@ -2380,6 +2398,7 @@ def test_switch_config_cdu_secondary():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
+        print(result.output)
 
         cmm = (
             "interface lag 2 multi-chassis static\n"
@@ -2495,6 +2514,7 @@ def test_switch_config_cdu_secondary():
             + "    ip mtu 9198\n"
             + "    ip address 192.168.1.17/16\n"
         ) in str(result.output)
+        print(result.output)
 
         mtn_hmn_vlan = (
             "vlan 3000\n"
@@ -2537,16 +2557,13 @@ def test_switch_config_cdu_secondary():
             + "    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive\n"
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
-            + "\n"
             + "router ospf 1\n"
-            + "    router-id 10.2.0.17\n"
-            + "    area 0.0.0.0\n"
-            + "router ospfv3 1\n"
             + "    router-id 10.2.0.17\n"
             + "    area 0.0.0.0\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
+        print(result.output)
 
 
 def test_switch_config_leaf_bmc():
@@ -2591,6 +2608,7 @@ def test_switch_config_leaf_bmc():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "ssh server vrf default\n"
@@ -2598,19 +2616,20 @@ def test_switch_config_leaf_bmc():
             + "access-list ip mgmt\n"
             + "    10 comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET\n"
             + "    20 permit tcp 192.168.0.0/255.255.128.0 any eq ssh\n"
-            + "    30 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
-            + "    40 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
-            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
-            + "    60 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
-            + "    70 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
-            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
-            + "    90 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
-            + "    100 deny tcp any any eq ssh\n"
-            + "    110 deny tcp any any eq https\n"
-            + "    120 deny udp any any eq snmp\n"
-            + "    130 deny udp any any eq snmp-trap\n"
-            + "    140 comment ALLOW ANYTHING ELSE\n"
-            + "    150 permit any any any\n"
+            + "    30 permit tcp 192.168.3.0/255.255.128.0 any eq ssh\n"
+            + "    40 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
+            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
+            + "    60 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
+            + "    70 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
+            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
+            + "    90 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
+            + "    100 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
+            + "    110 deny tcp any any eq ssh\n"
+            + "    120 deny tcp any any eq https\n"
+            + "    130 deny udp any any eq snmp\n"
+            + "    140 deny udp any any eq snmp-trap\n"
+            + "    150 comment ALLOW ANYTHING ELSE\n"
+            + "    160 permit any any any\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
             + "    20 deny any 192.168.0.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
@@ -2645,6 +2664,7 @@ def test_switch_config_leaf_bmc():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
+        print(result.output)
         compute_leaf_bmc = (
             "interface 1/1/24\n"
             + "    no shutdown\n"
@@ -2803,16 +2823,13 @@ def test_switch_config_leaf_bmc():
             + "    ip address 192.168.0.12/17\n"
             + "    ip ospf 1 area 0.0.0.0\n"
             + "snmp-server vrf default\n"
-            + "\n"
             + "router ospf 1\n"
-            + "    router-id 10.2.0.12\n"
-            + "    area 0.0.0.0\n"
-            + "router ospfv3 1\n"
             + "    router-id 10.2.0.12\n"
             + "    area 0.0.0.0\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
+        print(result.output)
 
 
 def test_switch_config_csi_file_missing():
@@ -2881,6 +2898,7 @@ def test_switch_config_missing_file():
             "  '--ccj'\n"
             "  '--shcd'\n"
         ) in str(result.output)
+        print(result.output)
 
 
 def test_switch_config_bad_file():
@@ -3438,6 +3456,7 @@ def test_switch_config_tds_spine_primary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "ssh server vrf default\n"
@@ -3446,19 +3465,20 @@ def test_switch_config_tds_spine_primary():
             + "access-list ip mgmt\n"
             + "    10 comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET\n"
             + "    20 permit tcp 192.168.0.0/255.255.128.0 any eq ssh\n"
-            + "    30 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
-            + "    40 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
-            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
-            + "    60 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
-            + "    70 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
-            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
-            + "    90 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
-            + "    100 deny tcp any any eq ssh\n"
-            + "    110 deny tcp any any eq https\n"
-            + "    120 deny udp any any eq snmp\n"
-            + "    130 deny udp any any eq snmp-trap\n"
-            + "    140 comment ALLOW ANYTHING ELSE\n"
-            + "    150 permit any any any\n"
+            + "    30 permit tcp 192.168.3.0/255.255.128.0 any eq ssh\n"
+            + "    40 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
+            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
+            + "    60 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
+            + "    70 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
+            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
+            + "    90 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
+            + "    100 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
+            + "    110 deny tcp any any eq ssh\n"
+            + "    120 deny tcp any any eq https\n"
+            + "    130 deny udp any any eq snmp\n"
+            + "    140 deny udp any any eq snmp-trap\n"
+            + "    150 comment ALLOW ANYTHING ELSE\n"
+            + "    160 permit any any any\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
             + "    20 deny any 192.168.0.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
@@ -3497,6 +3517,7 @@ def test_switch_config_tds_spine_primary():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
+        print(result.output)
 
         ncn_m = (
             "interface lag 1 multi-chassis\n"
@@ -3833,6 +3854,7 @@ def test_switch_config_tds_spine_primary():
             + "    vsx-sync vsx-global\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "ip prefix-list pl-can seq 10 permit 192.168.11.0/24 ge 24\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24\n"
@@ -3840,6 +3862,7 @@ def test_switch_config_tds_spine_primary():
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "route-map ncn-w001 permit seq 10\n"
             + "     match ip address prefix-list tftp\n"
@@ -3909,17 +3932,17 @@ def test_switch_config_tds_spine_primary():
             + "     match ip address prefix-list pl-nmn\n"
             + "     set ip next-hop 192.168.4.6\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "router ospf 1\n"
             + "    router-id 10.2.0.2\n"
             + "    redistribute bgp\n"
             + "    area 0.0.0.0\n"
-            + "router ospfv3 1\n"
-            + "    router-id 10.2.0.2\n"
-            + "    area 0.0.0.0\n"
-            + "\n"
-            + "router bgp 65533\n"
+        ) in str(result.output)
+        print(result.output)
+        assert (
+            "router bgp 65533\n"
             + "    bgp router-id 10.2.0.2\n"
             + "    maximum-paths 8\n"
             + "    timers bgp 1 3\n"
@@ -3943,6 +3966,7 @@ def test_switch_config_tds_spine_primary():
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
+        print(result.output)
 
 
 def test_switch_config_tds_spine_secondary():
@@ -3988,6 +4012,7 @@ def test_switch_config_tds_spine_secondary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "ssh server vrf default\n"
@@ -3996,19 +4021,20 @@ def test_switch_config_tds_spine_secondary():
             + "access-list ip mgmt\n"
             + "    10 comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET\n"
             + "    20 permit tcp 192.168.0.0/255.255.128.0 any eq ssh\n"
-            + "    30 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
-            + "    40 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
-            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
-            + "    60 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
-            + "    70 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
-            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
-            + "    90 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
-            + "    100 deny tcp any any eq ssh\n"
-            + "    110 deny tcp any any eq https\n"
-            + "    120 deny udp any any eq snmp\n"
-            + "    130 deny udp any any eq snmp-trap\n"
-            + "    140 comment ALLOW ANYTHING ELSE\n"
-            + "    150 permit any any any\n"
+            + "    30 permit tcp 192.168.3.0/255.255.128.0 any eq ssh\n"
+            + "    40 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
+            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
+            + "    60 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
+            + "    70 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
+            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
+            + "    90 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
+            + "    100 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
+            + "    110 deny tcp any any eq ssh\n"
+            + "    120 deny tcp any any eq https\n"
+            + "    130 deny udp any any eq snmp\n"
+            + "    140 deny udp any any eq snmp-trap\n"
+            + "    150 comment ALLOW ANYTHING ELSE\n"
+            + "    160 permit any any any\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
             + "    20 deny any 192.168.0.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
@@ -4047,6 +4073,7 @@ def test_switch_config_tds_spine_secondary():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
+        print(result.output)
 
         ncn_m = (
             "interface lag 1 multi-chassis\n"
@@ -4382,6 +4409,7 @@ def test_switch_config_tds_spine_secondary():
             + "    vsx-sync vsx-global\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "ip prefix-list pl-can seq 10 permit 192.168.11.0/24 ge 24\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24\n"
@@ -4389,6 +4417,7 @@ def test_switch_config_tds_spine_secondary():
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "route-map ncn-w001 permit seq 10\n"
             + "     match ip address prefix-list tftp\n"
@@ -4458,14 +4487,12 @@ def test_switch_config_tds_spine_secondary():
             + "     match ip address prefix-list pl-nmn\n"
             + "     set ip next-hop 192.168.4.6\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "router ospf 1\n"
             + "    router-id 10.2.0.3\n"
             + "    redistribute bgp\n"
-            + "    area 0.0.0.0\n"
-            + "router ospfv3 1\n"
-            + "    router-id 10.2.0.3\n"
             + "    area 0.0.0.0\n"
             + "\n"
             + "router bgp 65533\n"
@@ -4492,6 +4519,7 @@ def test_switch_config_tds_spine_secondary():
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
+        print(result.output)
 
 
 def test_switch_config_tds_cdu_primary():
@@ -4537,6 +4565,7 @@ def test_switch_config_tds_cdu_primary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "ssh server vrf default\n"
@@ -4545,19 +4574,20 @@ def test_switch_config_tds_cdu_primary():
             + "access-list ip mgmt\n"
             + "    10 comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET\n"
             + "    20 permit tcp 192.168.0.0/255.255.128.0 any eq ssh\n"
-            + "    30 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
-            + "    40 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
-            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
-            + "    60 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
-            + "    70 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
-            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
-            + "    90 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
-            + "    100 deny tcp any any eq ssh\n"
-            + "    110 deny tcp any any eq https\n"
-            + "    120 deny udp any any eq snmp\n"
-            + "    130 deny udp any any eq snmp-trap\n"
-            + "    140 comment ALLOW ANYTHING ELSE\n"
-            + "    150 permit any any any\n"
+            + "    30 permit tcp 192.168.3.0/255.255.128.0 any eq ssh\n"
+            + "    40 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
+            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
+            + "    60 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
+            + "    70 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
+            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
+            + "    90 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
+            + "    100 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
+            + "    110 deny tcp any any eq ssh\n"
+            + "    120 deny tcp any any eq https\n"
+            + "    130 deny udp any any eq snmp\n"
+            + "    140 deny udp any any eq snmp-trap\n"
+            + "    150 comment ALLOW ANYTHING ELSE\n"
+            + "    160 permit any any any\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
             + "    20 deny any 192.168.0.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
@@ -4591,6 +4621,7 @@ def test_switch_config_tds_cdu_primary():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
+        print(result.output)
 
         cmm = (
             "interface lag 2 multi-chassis static\n"
@@ -4718,6 +4749,7 @@ def test_switch_config_tds_cdu_primary():
             + "    ip mtu 9198\n"
             + "    ip address 192.168.1.16/16\n"
         ) in str(result.output)
+        print(result.output)
 
         mtn_hmn_vlan = (
             "vlan 3000\n"
@@ -4760,16 +4792,13 @@ def test_switch_config_tds_cdu_primary():
             + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
-            + "\n"
             + "router ospf 1\n"
-            + "    router-id 10.2.0.16\n"
-            + "    area 0.0.0.0\n"
-            + "router ospfv3 1\n"
             + "    router-id 10.2.0.16\n"
             + "    area 0.0.0.0\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
+        print(result.output)
 
 
 def test_switch_config_tds_cdu_secondary():
@@ -4815,6 +4844,7 @@ def test_switch_config_tds_cdu_secondary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "ssh server vrf default\n"
@@ -4823,19 +4853,20 @@ def test_switch_config_tds_cdu_secondary():
             + "access-list ip mgmt\n"
             + "    10 comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET\n"
             + "    20 permit tcp 192.168.0.0/255.255.128.0 any eq ssh\n"
-            + "    30 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
-            + "    40 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
-            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
-            + "    60 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
-            + "    70 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
-            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
-            + "    90 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
-            + "    100 deny tcp any any eq ssh\n"
-            + "    110 deny tcp any any eq https\n"
-            + "    120 deny udp any any eq snmp\n"
-            + "    130 deny udp any any eq snmp-trap\n"
-            + "    140 comment ALLOW ANYTHING ELSE\n"
-            + "    150 permit any any any\n"
+            + "    30 permit tcp 192.168.3.0/255.255.128.0 any eq ssh\n"
+            + "    40 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
+            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
+            + "    60 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
+            + "    70 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
+            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
+            + "    90 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
+            + "    100 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
+            + "    110 deny tcp any any eq ssh\n"
+            + "    120 deny tcp any any eq https\n"
+            + "    130 deny udp any any eq snmp\n"
+            + "    140 deny udp any any eq snmp-trap\n"
+            + "    150 comment ALLOW ANYTHING ELSE\n"
+            + "    160 permit any any any\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
             + "    20 deny any 192.168.0.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
@@ -4869,6 +4900,7 @@ def test_switch_config_tds_cdu_secondary():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
+        print(result.output)
 
         cmm = (
             "interface lag 2 multi-chassis static\n"
@@ -4984,6 +5016,7 @@ def test_switch_config_tds_cdu_secondary():
             + "    ip mtu 9198\n"
             + "    ip address 192.168.1.17/16\n"
         ) in str(result.output)
+        print(result.output)
 
         mtn_hmn_vlan = (
             "vlan 3000\n"
@@ -5026,16 +5059,13 @@ def test_switch_config_tds_cdu_secondary():
             + "    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive\n"
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
-            + "\n"
             + "router ospf 1\n"
-            + "    router-id 10.2.0.17\n"
-            + "    area 0.0.0.0\n"
-            + "router ospfv3 1\n"
             + "    router-id 10.2.0.17\n"
             + "    area 0.0.0.0\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
+        print(result.output)
 
 
 def test_switch_config_tds_leaf_bmc():
@@ -5080,6 +5110,7 @@ def test_switch_config_tds_leaf_bmc():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
+        print(result.output)
 
         assert "ssh server vrf default\n"
         assert banner_motd in str(result.output)
@@ -5088,19 +5119,20 @@ def test_switch_config_tds_leaf_bmc():
             + "access-list ip mgmt\n"
             + "    10 comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET\n"
             + "    20 permit tcp 192.168.0.0/255.255.128.0 any eq ssh\n"
-            + "    30 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
-            + "    40 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
-            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
-            + "    60 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
-            + "    70 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
-            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
-            + "    90 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
-            + "    100 deny tcp any any eq ssh\n"
-            + "    110 deny tcp any any eq https\n"
-            + "    120 deny udp any any eq snmp\n"
-            + "    130 deny udp any any eq snmp-trap\n"
-            + "    140 comment ALLOW ANYTHING ELSE\n"
-            + "    150 permit any any any\n"
+            + "    30 permit tcp 192.168.3.0/255.255.128.0 any eq ssh\n"
+            + "    40 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
+            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
+            + "    60 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
+            + "    70 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
+            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
+            + "    90 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
+            + "    100 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
+            + "    110 deny tcp any any eq ssh\n"
+            + "    120 deny tcp any any eq https\n"
+            + "    130 deny udp any any eq snmp\n"
+            + "    140 deny udp any any eq snmp-trap\n"
+            + "    150 comment ALLOW ANYTHING ELSE\n"
+            + "    160 permit any any any\n"
             + "access-list ip nmn-hmn\n"
             + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
             + "    20 deny any 192.168.0.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
@@ -5135,6 +5167,7 @@ def test_switch_config_tds_leaf_bmc():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
+        print(result.output)
         leaf_bmc_to_leaf = (
             "interface lag 255\n"
             + "    no shutdown\n"
@@ -5290,16 +5323,13 @@ def test_switch_config_tds_leaf_bmc():
             + "    ip address 192.168.0.12/17\n"
             + "    ip ospf 1 area 0.0.0.0\n"
             + "snmp-server vrf default\n"
-            + "\n"
             + "router ospf 1\n"
-            + "    router-id 10.2.0.12\n"
-            + "    area 0.0.0.0\n"
-            + "router ospfv3 1\n"
             + "    router-id 10.2.0.12\n"
             + "    area 0.0.0.0\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
+        print(result.output)
 
 
 sls_input = {

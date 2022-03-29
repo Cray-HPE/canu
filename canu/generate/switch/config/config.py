@@ -32,20 +32,19 @@ import sys
 import click
 from click_help_colors import HelpColorsCommand
 from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
-from hier_config import HConfig, Host, HConfigChild
+from hier_config import HConfig, Host
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 import natsort
 import netaddr
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import requests
-from ttp import ttp
 from ruamel.yaml import YAML
+from ttp import ttp
 import urllib3
 
 from canu.utils.cache import cache_directory
 from canu.validate.paddle.paddle import node_model_from_paddle
 from canu.validate.shcd.shcd import node_model_from_shcd, shcd_to_sheets
-from canu.validate.switch.config.config import compare_config_heir
 
 yaml = YAML()
 
@@ -234,6 +233,7 @@ def config(
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         out: Name of the output file
+        custom_config: Config file that is merged with the generated config.
     """
     # SHCD Parsing
     if shcd:
@@ -399,6 +399,7 @@ def get_shasta_name(name, mapper):
 
 
 def add_custom_config(custom_config, switch_config, host, switch_os):
+    """Merge custom config into generated config."""
     # mellanox ttp template to get interfaces
     mellanox_interface = """
 interface ethernet {{ interface }} {{ _line_ | contains("") }}
@@ -420,10 +421,9 @@ interface ethernet {{ interface }} {{ _line_ | contains("") }}
 
     # delete custom config that exists in the generated config
     # If interface 1/1 has any config under it, it will be deleted and overwritten with the custom config
-    for line in switch_config_hier.all_children_sorted():
-        for line_custom in custom_config_hier.all_children_sorted():
-            switch_config_hier.add_ancestor_copy_of(line_custom)
-            switch_config_hier.del_child_by_text(str(line_custom))
+    for line_custom in custom_config_hier.all_children_sorted():
+        switch_config_hier.add_ancestor_copy_of(line_custom)
+        switch_config_hier.del_child_by_text(str(line_custom))
 
     if switch_os == "onyx":
         mellanox_config = ""
@@ -449,13 +449,23 @@ interface ethernet {{ interface }} {{ _line_ | contains("") }}
 
     # re-order config
     switch_config_hier.set_order_weight()
-
+    if switch_os == "aoscx":
+        # add ! to the end of the aruba banner.
+        banner = switch_config_hier.get_child("contains", "banner")
+        banner.add_child("!")
     for line in switch_config_hier.all_children_sorted():
         # add two spaces to indented config to match aruba formatting.
-        if line.cisco_style_text().startswith("  ") and switch_os == "aoscx":
+        if (
+            line.cisco_style_text().startswith("  ")
+            and "!" not in line.cisco_style_text()
+            and switch_os == "aoscx"
+        ):
             custom_config_merge += "\n" + "  " + line.cisco_style_text()
-        else:
+        elif switch_os == "dellOS10":
             custom_config_merge += "\n" + line.cisco_style_text()
+        else:
+            custom_config_merge += "\n" + line.cisco_style_text().lstrip()
+
     return custom_config_merge
 
 
@@ -481,6 +491,8 @@ def generate_switch_config(
         sls_variables: Dictionary containing SLS variables
         template_folder: Architecture folder contaning the switch templates
         vendor_folder: Vendor folder contaning the template_folder
+        custom_config: Config file that is merged with the generated config.
+
 
     Returns:
         switch_config: The generated switch configuration
@@ -559,14 +571,14 @@ def generate_switch_config(
             + "\nMake sure the --csm flag matches the CSM version you are using.",
             fg="red",
         )
-        exit(1)
+        sys.exit(1)
     elif sls_variables["CMN_VLAN"] is None and float(csm) >= 1.2:
         click.secho(
             "\nCMN network not found in SLS, this is required for csm 1.2 "
             + "\nHas the CSM 1.2 SLS upgrade procedure been run?",
             fg="red",
         )
-        exit(1)
+        sys.exit(1)
     spine_leaf_vlan = groupby_vlan_range(spine_leaf_vlan)
     leaf_bmc_vlan = groupby_vlan_range(leaf_bmc_vlan)
 
@@ -651,7 +663,7 @@ def generate_switch_config(
 
     if switch_name not in sls_variables["HMN_IPs"].keys():
         click.secho(f"Cannot find {switch_name} in CSI / SLS nodes.", fg="red")
-        exit(1)
+        sys.exit(1)
 
     cmm_switch_ip = sls_variables.get("CMN_IPs")
     if cmm_switch_ip:
@@ -758,9 +770,12 @@ def generate_switch_config(
         hier_host = Host(switch_name, switch_os, options)
         if custom_config:
             switch_custom_config = custom_config.get(switch_name)
-            if switch_custom_config != None:
+            if switch_custom_config is not None:
                 switch_config_v1 = add_custom_config(
-                    switch_custom_config, switch_config, hier_host, switch_os
+                    switch_custom_config,
+                    switch_config,
+                    hier_host,
+                    switch_os,
                 )
         else:
             hier_v1 = HConfig(host=hier_host)
@@ -775,7 +790,7 @@ def generate_switch_config(
     else:
         if custom_config:
             switch_custom_config = custom_config.get(switch_name)
-            if switch_custom_config != None:
+            if switch_custom_config is not None:
                 switch_os = "aoscx"
                 options = yaml.load(open(hier_options(switch_os)))
 
@@ -846,7 +861,7 @@ def get_switch_nodes(switch_name, network_node_list, factory, sls_variables):
             f"For switch {switch_name}, the type cannot be determined. Please check the switch name and try again.",
             fg="red",
         )
-        exit(1)
+        sys.exit(1)
 
     for port in nodes_by_name[switch_name]["ports"]:
         destination_node_id = port["destination_node_id"]
@@ -1172,7 +1187,7 @@ def groupby_vlan_range(vlan_list):
 
     values = []
     vlans.sort()
-    for _group_id, members in groupby(enumerate(vlans), key=_group_id):
+    for _group_id, members in groupby(enumerate(vlans), key=_group_id):  # noqa: B020
         members = list(members)
         first, last = members[0][1], members[-1][1]
 
