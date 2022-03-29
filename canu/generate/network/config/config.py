@@ -212,7 +212,7 @@ def config(
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         folder: Folder to store config files
-        custom_config: Config file that is merged with the generated config.
+        custom_config: yaml file containing customized switch configurations which is merged with the generated config.
     """
     # SHCD Parsing
     if shcd:
@@ -375,8 +375,11 @@ def config(
             config_devices.update(devices)
             with open(f"{folder}/{switch_name}.cfg", "w+") as f:
                 f.write(switch_config)
-            if "# custom config" in switch_config:
-                click.secho(f"{switch_name} Custom Config Generated", fg="yellow")
+            if "# Custom configurations" in switch_config:
+                click.secho(
+                    f"{switch_name} Customized Configurations have been detected in the generated switch configurations",
+                    fg="yellow",
+                )
             else:
                 click.secho(f"{switch_name} Config Generated", fg="bright_white")
     missing_devices = all_devices.difference(config_devices)

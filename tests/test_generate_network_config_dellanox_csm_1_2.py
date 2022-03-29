@@ -119,11 +119,20 @@ def test_network_config_custom():
             ],
         )
         assert result.exit_code == 0
-        assert "sw-spine-001 Custom Config Generated" in str(result.output)
-        assert "sw-spine-002 Custom Config Generated" in str(result.output)
+        assert (
+            "sw-spine-001 Customized Configurations have been detected in the generated switch configurations"
+            in str(result.output)
+        )
+        assert (
+            "sw-spine-002 Customized Configurations have been detected in the generated switch configurations"
+            in str(result.output)
+        )
         assert "sw-cdu-001 Config Generated" in str(result.output)
         assert "sw-cdu-002 Config Generated" in str(result.output)
-        assert "sw-leaf-bmc-001 Custom Config Generated" in str(result.output)
+        assert (
+            "sw-leaf-bmc-001 Customized Configurations have been detected in the generated switch configurations"
+            in str(result.output)
+        )
 
 
 def test_network_config_folder_prompt():

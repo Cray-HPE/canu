@@ -1,4 +1,4 @@
-# 🛶 CANU v1.2.9-develop
+# 🛶 CANU v1.3.0-develop
 
 
 
@@ -725,14 +725,14 @@ vrf keepalive
 
 ```
 
-#### Generate Switch Config With Custom Config Injection
+#### Generate Switch Configs Including Custom Configurations
 
 Pass in a switch config file that CANU will inject into the generated config. A use case would be to add custom site connections.
 This config file will overwrite previously generate config.
 
 
 
-The `custom-config` file type is yaml and a single file can be used for multiple switches. You will need to specify the switch name and what config inject.  The `custom-config` feature is using the hierarchical configuration library, documentation can be found here https://netdevops.io/hier_config/.
+The `custom-config` file type is YAML and a single file can be used for multiple switches. You will need to specify the switch name and what config inject.  The `custom-config` feature is using the hierarchical configuration library, documentation can be found here https://netdevops.io/hier_config/.
 
 custom config file examples
 
@@ -842,7 +842,9 @@ sw-leaf-bmc-001 Config Generated
 
 #### Generate Network Config With Custom Config Injection
 
-This option allows you to pass in a custom config file and inject it into the generated switch configs.
+This option allows extension and maintenance of switch configurations beyond plan-of-record. A YAML file expresses custom configurations across the network and these configurations are merged with the plan-of-record configurations.
+
+WARNING: Extreme diligence should be used applying custom configurations which override plan-of-record generated configurations. Custom configurations will overwrite generated configurations! Override/overwrite is by design to support and document cases where site-interconnects demand "nonstandard" configurations or a bug must be worked around.
 
 The instructions are exactly the same as **[Generate Switch Config with Custom Config Injection](#generate-switch-config-withcustom-config-injection)**
 
@@ -1071,7 +1073,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [1.2.9-develop]
+## [1.3.0-develop]
 - Removed the override feature
 - Add feature to inject custom configs into generated switch configs
 

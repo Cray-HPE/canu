@@ -502,8 +502,7 @@ def test_switch_config_spine_primary_custom():
         assert banner_motd in str(result.output)
         print(result.output)
         assert (
-            "# custom config injected\n"
-            + "# ip route 0.0.0.0/0 10.103.15.185\n"
+            "# ip route 0.0.0.0/0 10.103.15.185\n"
             + "# interface 1/1/36\n"
             + "#   no shutdown\n"
             + "#   ip address 10.103.15.186/30\n"
@@ -913,8 +912,7 @@ def test_switch_config_spine_secondary_custom():
         assert banner_motd in str(result.output)
         print(result.output)
         assert (
-            "# custom config injected\n"
-            + "# ip route 0.0.0.0/0 10.103.15.189\n"
+            "# ip route 0.0.0.0/0 10.103.15.189\n"
             + "# interface 1/1/36\n"
             + "#   no shutdown\n"
             + "#   ip address 10.103.15.190/30\n"

@@ -519,8 +519,7 @@ def test_switch_config_spine_primary_custom():
         assert result.exit_code == 0
         print(result.output)
         assert (
-            "# custom config injected\n"
-            + "# interface ethernet 1/1 speed 10G force\n"
+            "# interface ethernet 1/1 speed 10G force\n"
             + '# interface ethernet 1/1 description "sw-spine02-1/16"\n'
             + "# interface ethernet 1/1 no switchport force\n"
             + "# interface ethernet 1/1 ip address 10.102.255.14/30 primary\n"
@@ -1611,8 +1610,7 @@ def test_switch_config_leaf_bmc_custom():
         assert result.exit_code == 0
         print(result.output)
         assert (
-            "# custom config injected\n"
-            + "# interface ethernet1/1/12\n"
+            "# interface ethernet1/1/12\n"
             + "#   description sw-leaf-bmc-001:12==>cn003:2\n"
             + "#   switchport access vlan 2\n"
             + "# interface vlan6\n"
