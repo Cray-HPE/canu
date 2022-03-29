@@ -60,7 +60,7 @@ dell_options_file = path.join(
     "validate",
     "switch",
     "config",
-    "dellos10_options.yaml",
+    "dellOS10_options.yaml",
 )
 mellanox_options_file = path.join(
     project_root,
