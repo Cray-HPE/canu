@@ -1069,10 +1069,15 @@ def node_list_warnings(node_list, warnings, out="-"):
 
 
 def switch_unused_ports(node_list, out):
-    dash = "-" * 60
-    click.echo("\n", file=out)
-    click.echo(dash, file=out)
+    """Create a dictionary of unused ports.
 
+    Args:
+        node_list: A list of nodes
+        out: Defaults to stdout, but will print to the file name passed in
+
+    Returns:
+        unused_ports: Dictionary of switches and their unused ports
+    """
     unused_ports = {}
     for node in node_list:
         if "sw" in node.common_name() and "sw-hsn" not in node.common_name():
