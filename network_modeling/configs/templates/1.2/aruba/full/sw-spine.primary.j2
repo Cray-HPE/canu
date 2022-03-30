@@ -115,6 +115,7 @@ interface vlan {{ variables.CAN_VLAN }}
     ip address {{ variables.CAN_IP_PRIMARY }}/{{ variables.CAN_PREFIX_LEN }}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.CAN_IP_GATEWAY }}
+    ip ospf 2 area 0.0.0.0
 vsx
     system-mac 02:00:00:00:6b:00
     inter-switch-link lag 256
