@@ -1,4 +1,4 @@
-# 🛶 CANU v1.2.9-develop
+# 🛶 CANU v1.3.1-develop
 
 
 
@@ -1070,6 +1070,9 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.3.1-develop]
+- shutdown unused ports by default on aruba 6300+dell+mellanox
 
 ## [1.2.9-develop]
 - Removed the override feature
