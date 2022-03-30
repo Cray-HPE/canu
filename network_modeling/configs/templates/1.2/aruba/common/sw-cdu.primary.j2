@@ -40,6 +40,8 @@ interface mgmt
     shutdown
     ip dhcp
 
+{%- include '1.2/aruba/common/mtn_hmn_vlan.j2' %}
+{%- include '1.2/aruba/common/mtn_nmn_vlan.j2' %}
 {% include '1.2/aruba/common/cmm.j2' %}
 {% include '1.2/aruba/common/cec.j2' %}
 {% include '1.2/aruba/common/cdu-to-spine.lag.j2' %}
@@ -96,9 +98,6 @@ interface vlan {{ variables.CMN_VLAN }}
     ip mtu 9198
     ip address {{ variables.CMN_IP }}/{{variables.CMN_PREFIX_LEN}}
     ip ospf 2 area 0.0.0.0
-
-{%- include '1.2/aruba/common/mtn_hmn_vlan.j2' %}
-{%- include '1.2/aruba/common/mtn_nmn_vlan.j2' %}
 
 vsx
     system-mac 02:00:00:00:73:00
