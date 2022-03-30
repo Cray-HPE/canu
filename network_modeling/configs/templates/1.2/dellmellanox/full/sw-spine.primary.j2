@@ -108,6 +108,7 @@ interface port-channel 100 dcb priority-flow-control mode on force
 {% include '1.2/dellmellanox/common/uan.j2' %}
 {% include '1.2/dellmellanox/full/spine-to-leaf-bmc.lag.j2' %}
 {% include '1.2/dellmellanox/common/spine-to-cdu.lag.j2' %}
+{% include '1.2/dellmellanox/common/mellanox-unused.j2' %}
       
 protocol ospf
 router ospf 1 vrf default
