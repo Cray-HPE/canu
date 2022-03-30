@@ -564,3 +564,54 @@ network_v1:
     - lookup_name: ["SubRack", "subrack"]
       shasta_name: "SubRack"
       architecture_type: "subrack"
+# TESTING FOR KJ and CDS model development
+csms_v1:
+  name: "CSMS Storage Network Architecture v1"
+  description: "Aruba Hardware"
+  version: 1
+  components:
+    - name: "leaf"
+      model: "8360_JL707A"
+      connections:
+        - name: "none"
+          speed: 100
+    - name: "csms_2_port_server"
+      model: "csms_2_port_server"
+      connections:
+        - name: "leaf"
+          speed: 10
+          number: 2
+        # - name: "leaf"
+        #   speed: 1
+    - name: "river_ncn_node_4_port"
+      model: "river_ncn_node_4_port"
+      connections:
+        - name: "spine"
+          speed: 25
+        - name: "river_bmc_leaf"
+          speed: 1
+    - name: "customer_edge_router"
+      model: "customer_edge_router"
+      connections:
+        - name: "spine"
+          speed: 100
+  lookup_mapper:
+    - lookup_name:
+        - "meru-sw"
+      shasta_name: "leaf-"
+      architecture_type: "leaf"
+    - lookup_name:
+        - "meru"
+      shasta_name: "csms-server-"
+      architecture_type: "csms_2_port_server"
+    - lookup_name:
+        - "wn"
+      shasta_name: "ncn-w"
+      architecture_type: "river_ncn_node_2_port"
+    - lookup_name:
+        - '^x\d+p\d+$'
+        - '^x\d+pdu\d+$'
+        - '^pdu\d+$'
+      shasta_name: "pdu"
+      architecture_type: "pdu"
+      regex: true

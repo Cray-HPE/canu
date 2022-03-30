@@ -281,3 +281,14 @@ network_hardware:
       - count: 1
         speed: 1
         slot: "bmc"
+  - name: "CSMS - Generic 2 port HPE Server"
+    vendor: "hpe"
+    type: "server"
+    model: "csms_2_port_server"
+    ports:
+      - count: 2
+        speed: 10
+        slot: ocp
+      - count: 1
+        speed: 1
+        slot: "bmc"
