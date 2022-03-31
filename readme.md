@@ -1,5 +1,6 @@
 # 🛶 CANU v1.3.0-develop
 
+
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
 CANU can be used to:
@@ -1071,10 +1072,12 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-
 ## [1.3.0-develop]
 - Removed the override feature
 - Add feature to inject custom configs into generated switch configs
+
+## [1.2.10-develop]
+- Change Aruba banner from motd to exec
 
 ## [1.2.9-develop]
 - Reordered the configuration output so that vlans are defined before being applied to ports.
