@@ -1,0 +1,40 @@
+sw-spine-001:  |
+    ip route 0.0.0.0/0 10.103.15.185
+    interface 1/1/36
+        no shutdown
+        ip address 10.103.15.186/30
+        exit
+    interface 1/1/1
+        no shutdown
+        ip address 10.103.15.10/30
+        exit
+    system interface-group 3 speed 10g
+    interface 1/1/20
+        no shutdown
+        mtu 9198
+        description sw-spine-001:16==>ion-node
+        no routing
+        vlan access 7
+        spanning-tree bpdu-guard
+        spanning-tree port-type admin-edge
+sw-spine-002:  |
+    ip route 0.0.0.0/0 10.103.15.189
+    interface 1/1/36
+        no shutdown
+        ip address 10.103.15.190/30
+        exit
+    system interface-group 3 speed 10g
+    interface 1/1/20
+        no shutdown
+        mtu 9198
+        description sw-spine-002:16==>ion-node
+        no routing
+        vlan access 7
+        spanning-tree bpdu-guard
+        spanning-tree port-type admin-edge
+sw-leaf-bmc-001:  |
+    interface 1/1/20
+        no routing
+        vlan access 4
+        spanning-tree bpdu-guard
+        spanning-tree port-type admin-edge
