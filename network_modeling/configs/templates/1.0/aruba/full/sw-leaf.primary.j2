@@ -54,7 +54,6 @@ interface lag 256
     lacp mode active
 interface 1/1/{{ variables.VSX_KEEPALIVE }}
     no shutdown
-    mtu 9198
     vrf attach keepalive
     description vsx keepalive
     ip address 192.168.255.0/31
@@ -68,7 +67,6 @@ interface 1/1/{{ variables.VSX_ISL_PORT2 }}
     mtu 9198
     description vsx isl
     lag 256
-
 interface loopback 0
     ip address {{ variables.LOOPBACK_IP }}/32
     ip ospf 1 area 0.0.0.0
@@ -86,7 +84,7 @@ interface vlan {{ variables.HMN_VLAN }}
     ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
     ip ospf 1 area 0.0.0.0
 vsx
-    system-mac 02:00:00:00:73:00
+    system-mac 02:00:00:00:65:00
     inter-switch-link lag 256
     role primary
     keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive
