@@ -108,6 +108,7 @@ interface port-channel 100 dcb priority-flow-control mode on force
 {% include '1.2/dellmellanox/common/uan.j2' %}
 {% include '1.2/dellmellanox/full/spine-to-leaf-bmc.lag.j2' %}
 {% include '1.2/dellmellanox/common/spine-to-cdu.lag.j2' %}
+{% include '1.2/dellmellanox/common/mellanox-unused.j2' %}
       
 protocol ospf
 router ospf 1 vrf default
@@ -116,9 +117,13 @@ router ospf 1 vrf default router-id {{ variables.LOOPBACK_IP }}
 router ospf 2 vrf Customer router-id {{ variables.LOOPBACK_IP }}
 router ospf 2 vrf Customer default-information originate
 interface loopback 0 ip ospf area 0.0.0.0
+interface vlan {{ variables.NATIVE_VLAN }} ip ospf area 0.0.0.0
 interface vlan {{ variables.NMN_VLAN }} ip ospf area 0.0.0.0
 interface vlan {{ variables.HMN_VLAN }} ip ospf area 0.0.0.0
 interface vlan {{ variables.CMN_VLAN }} ip ospf area 0.0.0.0
+interface vlan {{ variables.CAN_VLAN }} ip ospf area 0.0.0.0
+interface vlan {{ variables.NATIVE_VLAN }} ip ospf passive-interface
+interface vlan {{ variables.HMN_VLAN }} ip ospf passive-interface
 router ospf 1 vrf default redistribute bgp
 
 ip dhcp relay instance 2 vrf default

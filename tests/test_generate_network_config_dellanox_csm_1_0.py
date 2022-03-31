@@ -35,8 +35,6 @@ test_file_directory = Path(__file__).resolve().parent
 
 test_file_name = "Architecture_Golden_Config_Dellanox.xlsx"
 test_file = path.join(test_file_directory, "data", test_file_name)
-override_file_name = "override.yaml"
-override_file = path.join(test_file_directory, "data", override_file_name)
 architecture = "v1"
 tabs = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners = "J14,T30,J14,T34,J14,T28,J14,T27"

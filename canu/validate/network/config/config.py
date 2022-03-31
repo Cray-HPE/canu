@@ -69,7 +69,7 @@ options_file = path.join(
     "validate",
     "switch",
     "config",
-    "options.yaml",
+    "aoscx_options.yaml",
 )
 with open(options_file, "r") as options_f:
     options = yaml.load(options_f)

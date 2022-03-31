@@ -8,7 +8,6 @@ CANU
 
    
    init.md
-   config_bgp.md
    generate_network_config.md
    generate_switch_config.md
    report_network_cabling.md

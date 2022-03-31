@@ -73,10 +73,6 @@ Generated config file
 Output results to a file
 
 
-### --override( <override>)
-Switch configuration override
-
-
 ### --remediation()
 Outputs commands to get from the running-config to generated config
 
