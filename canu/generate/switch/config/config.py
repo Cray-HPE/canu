@@ -1402,10 +1402,6 @@ def parse_sls_for_config(input_json):
                 "MyASN",
                 {},
             )
-            sls_variables["NMN_ASN"] = sls_network.get("ExtraProperties", {}).get(
-                "MyASN",
-                {},
-            )
             sls_variables["NMN_NETMASK"] = sls_variables["NMN"].netmask
             sls_variables["NMN_PREFIX_LEN"] = sls_variables["NMN"].prefixlen
             sls_variables["NMN_NETWORK_IP"] = sls_variables["NMN"].ip
