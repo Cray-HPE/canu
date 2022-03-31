@@ -1,10 +1,4 @@
-<<<<<<< HEAD
 # 🛶 CANU v1.3.1-develop
-
-=======
-# 🛶 CANU v1.3.0-develop
->>>>>>> develop
-
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -729,27 +723,12 @@ vrf keepalive
 
 ```
 
-<<<<<<< HEAD
 #### Generate Switch Config With Custom Config Injection
 
 Pass in a switch config file that CANU will inject into the generated config. A use case would be to add custom site connections.
 This config file will overwrite previously generate config.
 
 
-=======
-#### Generate Switch Configs Including Custom Configurations
-
-Pass in a switch config file that CANU will inject into the generated config. A use case would be to add custom site connections.
-This config file will overwrite previously generate config.
-
-
-
-The `custom-config` file type is YAML and a single file can be used for multiple switches. You will need to specify the switch name and what config inject.  The `custom-config` feature is using the hierarchical configuration library, documentation can be found here https://netdevops.io/hier_config/.
-
-custom config file examples
-
-Aruba
->>>>>>> develop
 
 The `custom-config` file type is yaml and a single file can be used for multiple switches. You will need to specify the switch name and what config inject.  The `custom-config` feature is using the hierarchical configuration library, documentation can be found here https://netdevops.io/hier_config/.
 
@@ -791,7 +770,6 @@ sw-leaf-bmc-001:  |
 Mellanox/Dell
 ```
 sw-spine-001:  |
-<<<<<<< HEAD
     interface ethernet 1/1 speed 10G force
     interface ethernet 1/1 description "sw-spine02-1/16"
     interface ethernet 1/1 no switchport force
@@ -831,79 +809,6 @@ To generate switch configuration with custom config injection.
 ```bash
 $ canu generate switch config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --name sw-spine-001 --custom-config CUSTOM_CONFIG_FILE.yaml
 
-=======
-    ip route 0.0.0.0/0 10.103.15.185
-    interface 1/1/36
-        no shutdown
-        ip address 10.103.15.186/30
-        exit
-    system interface-group 3 speed 10g
-    interface 1/1/2
-        no shutdown
-        mtu 9198
-        description sw-spine-001:16==>ion-node
-        no routing
-        vlan access 7
-        spanning-tree bpdu-guard
-        spanning-tree port-type admin-edge
-sw-spine-002:  |
-    ip route 0.0.0.0/0 10.103.15.189
-    interface 1/1/36
-        no shutdown
-        ip address 10.103.15.190/30
-        exit
-    system interface-group 3 speed 10g
-sw-leaf-bmc-001:  |
-    interface 1/1/20
-        no routing
-        vlan access 4
-        spanning-tree bpdu-guard
-        spanning-tree port-type admin-edge
-```
-
-Mellanox/Dell
-```
-sw-spine-001:  |
-    interface ethernet 1/1 speed 10G force
-    interface ethernet 1/1 description "sw-spine02-1/16"
-    interface ethernet 1/1 no switchport force
-    interface ethernet 1/1 ip address 10.102.255.14/30 primary
-    interface ethernet 1/1 dcb priority-flow-control mode on force
-    ip route vrf default 0.0.0.0/0 10.102.255.13
-sw-spine-002:  |
-    interface ethernet 1/16 speed 10G force
-    interface ethernet 1/16 description "sw-spine01-1/16"
-    interface ethernet 1/16 no switchport force
-    interface ethernet 1/16 ip address 10.102.255.34/30 primary
-    interface ethernet 1/16 dcb priority-flow-control mode on force
-    ip route vrf default 0.0.0.0/0 10.102.255.33
-sw-leaf-bmc-001:  |
-    interface ethernet1/1/12
-      description sw-leaf-bmc-001:12==>cn003:2
-      no shutdown
-      switchport access vlan 4
-      mtu 9216
-      flowcontrol receive off
-      flowcontrol transmit off
-      spanning-tree bpduguard enable
-      spanning-tree port type edge
-    interface vlan7
-        description CMN
-        no shutdown
-        ip vrf forwarding Customer
-        mtu 9216
-        ip address 10.102.4.100/25
-        ip access-group cmn-can in
-        ip access-group cmn-can out
-        ip ospf 2 area 0.0.0.0
-```
-
-To generate switch configuration with custom config injection.
-
-```bash
-$ canu generate switch config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --name sw-spine-001 --custom-config CUSTOM_CONFIG_FILE.yaml
-
->>>>>>> develop
 
 ### Generate Network Config
 
@@ -935,23 +840,12 @@ sw-leaf-bmc-001 Config Generated
 
 #### Generate Network Config With Custom Config Injection
 
-<<<<<<< HEAD
 This option allows you to pass in a custom config file and inject it into the generated switch configs.
 
 The instructions are exactly the same as **[Generate Switch Config with Custom Config Injection](#generate-switch-config-withcustom-config-injection)**
 
 To generate network configuration with custom config injection run
 
-=======
-This option allows extension and maintenance of switch configurations beyond plan-of-record. A YAML file expresses custom configurations across the network and these configurations are merged with the plan-of-record configurations.
-
-WARNING: Extreme diligence should be used applying custom configurations which override plan-of-record generated configurations. Custom configurations will overwrite generated configurations! Override/overwrite is by design to support and document cases where site-interconnects demand "nonstandard" configurations or a bug must be worked around.
-
-The instructions are exactly the same as **[Generate Switch Config with Custom Config Injection](#generate-switch-config-withcustom-config-injection)**
-
-To generate network configuration with custom config injection run
-
->>>>>>> develop
 ```bash
 $ canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config --custom-config CUSTOM_CONFIG_FILE.yaml
 ```
@@ -1175,7 +1069,6 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-<<<<<<< HEAD
 ## [1.3.1-develop]
 - shutdown unused ports by default on aruba 6300+dell+mellanox
 
@@ -1183,19 +1076,6 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Removed the override feature
 - Add feature to inject custom configs into generated switch configs
 
-=======
-## [1.3.0-develop]
-- Removed the override feature
-- Add feature to inject custom configs into generated switch configs
-
-## [1.2.10-develop]
-- Change Aruba banner from motd to exec
-
-## [1.2.9-develop]
-- Reordered the configuration output so that vlans are defined before being applied to ports.
-
-
->>>>>>> develop
 ## [1.2.8-develop]
 - Fix Leaf-bmc naming corner case: leaf-bmc-bmc to leaf-bmc
 - Fix OSPF CAN vlan for 1.2 in full/tds
