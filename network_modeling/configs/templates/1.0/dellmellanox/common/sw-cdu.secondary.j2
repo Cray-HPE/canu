@@ -60,6 +60,8 @@ spanning-tree mst configuration
 
 {% include '1.0/dellmellanox/common/cdu-to-spine.lag.j2' %}
 
+{% include '1.0/dellmellanox/common/dell-unused.j2' %}
+
 interface mgmt1/1/1
  no shutdown
  no ip address dhcp

@@ -45,7 +45,11 @@ import urllib3
 from canu.utils.cache import cache_directory
 from canu.utils.yaml_load import load_yaml
 from canu.validate.paddle.paddle import node_model_from_paddle
-from canu.validate.shcd.shcd import node_model_from_shcd, shcd_to_sheets
+from canu.validate.shcd.shcd import (
+    node_model_from_shcd,
+    shcd_to_sheets,
+    switch_unused_ports,
+)
 
 yaml = YAML()
 
@@ -284,6 +288,7 @@ def config(
     else:
         network_node_list, network_warnings = node_model_from_paddle(factory, ccj_json)
     # Parse SLS input file.
+
     if sls_file:
         try:
             input_json = json.load(sls_file)
@@ -510,6 +515,7 @@ def generate_switch_config(
     """
     node_shasta_name = get_shasta_name(switch_name, factory.lookup_mapper())
 
+    print(node_shasta_name)
     if node_shasta_name is None:
         return Exception(
             click.secho(
@@ -657,6 +663,7 @@ def generate_switch_config(
         "HMN_IPs": sls_variables["HMN_IPs"],
         "SWITCH_ASN": sls_variables["SWITCH_ASN"],
     }
+
     cabling = {}
     cabling["nodes"], unknown = get_switch_nodes(
         switch_name,
@@ -664,6 +671,8 @@ def generate_switch_config(
         factory,
         sls_variables,
     )
+    unused_ports = switch_unused_ports(network_node_list)
+    variables["UNUSED_PORTS"] = unused_ports[switch_name]
 
     if switch_name not in sls_variables["HMN_IPs"].keys():
         click.secho(f"Cannot find {switch_name} in CSI / SLS nodes.", fg="red")

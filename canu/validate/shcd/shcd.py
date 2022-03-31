@@ -151,6 +151,8 @@ def shcd(ctx, architecture, shcd, tabs, corners, out, json_, log_):
 
         node_list_warnings(node_list, warnings, out)
 
+        switch_unused_ports(node_list)
+
 
 def shcd_to_sheets(shcd, tabs, corners):
     """Parse SHCD tabs and corners into sheets.
@@ -1066,6 +1068,35 @@ def node_list_warnings(node_list, warnings, out="-"):
                 click.secho(f"{', '.join(cell_list)}\n", file=out)
 
 
+def switch_unused_ports(node_list):
+    """Create a dictionary of unused ports.
+
+    Args:
+        node_list: A list of nodes
+
+    Returns:
+        unused_ports: Dictionary of switches and their unused ports
+    """
+    unused_ports = {}
+    for node in node_list:
+        if "sw" in node.common_name() and "sw-hsn" not in node.common_name():
+
+            unused_ports[node.common_name()] = []
+            unused_block = []
+            logical_index = 1
+            for port in node.ports():
+                if port is None:
+                    unused_ports[node.common_name()].append(logical_index)
+                    unused_block.append(logical_index)
+                    logical_index += 1
+                    continue
+                if unused_block:
+                    unused_block = []  # reset
+                logical_index += 1
+            unused_ports[node.common_name()].pop()
+    return unused_ports
+
+
 def print_node_list(node_list, title, out="-"):
     """Print the nodes found in the SHCD.
 
@@ -1110,6 +1141,7 @@ def print_node_list(node_list, title, out="-"):
                     port_string = f"{unused_block[0]:02}-{unused_block[len(unused_block)-1]:02}==>UNUSED"
                 unused_block = []  # reset
                 click.secho(f"        {port_string}", fg="green", file=out)
+
             destination_node_name = [
                 x.common_name()
                 for x in node_list
