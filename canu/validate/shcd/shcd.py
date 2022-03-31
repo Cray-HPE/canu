@@ -825,7 +825,6 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     sys.exit(1)
 
     wb.close()
-
     return node_list, warnings
 
 

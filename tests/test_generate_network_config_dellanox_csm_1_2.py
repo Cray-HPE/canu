@@ -35,8 +35,8 @@ test_file_directory = Path(__file__).resolve().parent
 
 test_file_name = "Architecture_Golden_Config_Dellanox.xlsx"
 test_file = path.join(test_file_directory, "data", test_file_name)
-override_file_name = "override.yaml"
-override_file = path.join(test_file_directory, "data", override_file_name)
+custom_file_name = "dellanox_custom.yaml"
+custom_file = path.join(test_file_directory, "data", custom_file_name)
 architecture = "v1"
 tabs = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners = "J14,T30,J14,T34,J14,T28,J14,T27"
@@ -84,6 +84,55 @@ def test_network_config():
         assert "sw-cdu-001 Config Generated" in str(result.output)
         assert "sw-cdu-002 Config Generated" in str(result.output)
         assert "sw-leaf-bmc-001 Config Generated" in str(result.output)
+
+
+def test_network_config_custom():
+    """Test that the `canu generate network config` command runs and generates config."""
+    with runner.isolated_filesystem():
+        with open(sls_file, "w") as f:
+            json.dump(sls_input, f)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "generate",
+                "network",
+                "config",
+                "--csm",
+                csm,
+                "--architecture",
+                architecture,
+                "--shcd",
+                test_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--sls-file",
+                sls_file,
+                "--folder",
+                folder_name,
+                "--custom-config",
+                custom_file,
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "sw-spine-001 Customized Configurations have been detected in the generated switch configurations"
+            in str(result.output)
+        )
+        assert (
+            "sw-spine-002 Customized Configurations have been detected in the generated switch configurations"
+            in str(result.output)
+        )
+        assert "sw-cdu-001 Config Generated" in str(result.output)
+        assert "sw-cdu-002 Config Generated" in str(result.output)
+        assert (
+            "sw-leaf-bmc-001 Customized Configurations have been detected in the generated switch configurations"
+            in str(result.output)
+        )
 
 
 def test_network_config_folder_prompt():
