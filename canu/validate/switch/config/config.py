@@ -568,6 +568,14 @@ def print_difference_line(additions, additions_int, deletions, deletions_int, ou
 
 
 def aruba_banner(config):
+    """Hier config removes the ! from the end of the Aruba banner, this function adds it back.
+
+    Args:
+        config: hier config object
+
+    Returns:
+        corrected banner
+    """
     banner = config.get_child("contains", "banner")
     if banner is None:
         return
