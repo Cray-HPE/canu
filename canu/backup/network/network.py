@@ -150,6 +150,9 @@ def network(
             )
         click.secho("\nRunning Configs Saved\n---------------------", fg="green")
         for hostname in backup_results:
+            exist = os.path.exists(folder)
+            if not exist:
+                os.makedirs(folder)
             save_config_to_file(
                 hostname=hostname,
                 config=backup_results[hostname][0].result,

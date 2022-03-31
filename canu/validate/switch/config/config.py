@@ -21,7 +21,6 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate switch running config against a config file."""
 import difflib
-import os
 from os import path
 from pathlib import Path
 import sys
@@ -53,7 +52,7 @@ options_file = path.join(
     "validate",
     "switch",
     "config",
-    "options.yaml",
+    "aoscx_options.yaml",
 )
 dell_options_file = path.join(
     project_root,
@@ -61,7 +60,7 @@ dell_options_file = path.join(
     "validate",
     "switch",
     "config",
-    "dell_options.yaml",
+    "dellOS10_options.yaml",
 )
 mellanox_options_file = path.join(
     project_root,
@@ -69,7 +68,7 @@ mellanox_options_file = path.join(
     "validate",
     "switch",
     "config",
-    "mellanox_options.yaml",
+    "onyx_options.yaml",
 )
 tags_file = path.join(
     project_root,
@@ -159,11 +158,6 @@ with open(mellanox_options_file, "r") as options_f:
     default="-",
 )
 @click.option(
-    "--override",
-    help="Switch configuration override",
-    type=click.Path(),
-)
-@click.option(
     "--remediation",
     is_flag=True,
     help="Outputs commands to get from the running-config to generated config",
@@ -178,7 +172,6 @@ def config(
     password,
     generated_config,
     out,
-    override,
     vendor,
     remediation,
 ):
@@ -211,7 +204,6 @@ def config(
         password: Switch password
         generated_config: Generated config file
         out: Name of the output file
-        override: Input file to ignore switch configuration
         vendor: Switch vendor. Aruba, Dell, or Mellanox
         remediation: output remediation config
     """
@@ -296,42 +288,6 @@ def config(
     generated_config_hier.load_from_file(generated_config)
 
     dash = "-" * 73
-
-    if override:
-        try:
-            with open(os.path.join(override), "r") as f:
-                override_tags = yaml.load(f)
-                running_config_hier.add_tags(override_tags[hostname])
-                generated_config_hier.add_tags(override_tags[hostname])
-                click.secho(
-                    "\n"
-                    + "Ignored config"
-                    + "\n"
-                    + "The commands below come from the override file that was provided.",
-                    fg="blue",
-                    file=out,
-                )
-                click.echo(dash)
-                for line in running_config_hier.all_children_sorted_by_tags(
-                    "override",
-                    None,
-                ):
-                    click.echo(line.cisco_style_text())
-                    running_config_hier.del_child_by_text(line.cisco_style_text())
-
-                click.echo(dash)
-                for line in generated_config_hier.all_children_sorted_by_tags(
-                    "override",
-                    None,
-                ):
-                    generated_config_hier.del_child_by_text(line.cisco_style_text())
-
-        except FileNotFoundError:
-            click.secho(
-                "The override yaml file was not found, check that you entered the right file name and path.",
-                fg="red",
-            )
-            exit(1)
     compare_config_heir(
         running_config_hier.difference(generated_config_hier),
         generated_config_hier.difference(running_config_hier),
@@ -371,6 +327,8 @@ def config(
             generated_config_hier,
         )
 
+        if vendor == "aruba":
+            aruba_banner(remediation_config_hier)
         for line in remediation_config_hier.all_children():
             click.echo(line.cisco_style_text(), file=out)
 
@@ -609,6 +567,25 @@ def print_difference_line(additions, additions_int, deletions, deletions_int, ou
     )
 
 
+def aruba_banner(config):
+    """Hier config removes the ! from the end of the Aruba banner, this function adds it back.
+
+    Args:
+        config: hier config object
+
+    Returns:
+        corrected banner
+    """
+    banner = config.get_child("contains", "banner")
+    if banner is None:
+        return
+    else:
+        banner_str = str(banner) + "\n!"
+        config.del_child(banner)
+        config.add_child(banner_str)
+        return config
+
+
 def compare_config_heir(config1, config2, vendor, out="-"):
     """Compare and print two switch configurations.
 
@@ -627,6 +604,10 @@ def compare_config_heir(config1, config2, vendor, out="-"):
     config1.set_order_weight()
     config2.set_order_weight()
 
+    # fix aruba banner
+    if vendor == "aruba":
+        aruba_banner(config1)
+        aruba_banner(config2)
     for config1_line in config1.all_children_sorted():
         one.append(config1_line.cisco_style_text())
     for config2_line in config2.all_children_sorted():
