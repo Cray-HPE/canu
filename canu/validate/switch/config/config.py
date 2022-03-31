@@ -288,7 +288,6 @@ def config(
     generated_config_hier.load_from_file(generated_config)
 
     dash = "-" * 73
-
     compare_config_heir(
         running_config_hier.difference(generated_config_hier),
         generated_config_hier.difference(running_config_hier),
@@ -328,6 +327,8 @@ def config(
             generated_config_hier,
         )
 
+        if vendor == "aruba":
+            aruba_banner(remediation_config_hier)
         for line in remediation_config_hier.all_children():
             click.echo(line.cisco_style_text(), file=out)
 
@@ -566,6 +567,25 @@ def print_difference_line(additions, additions_int, deletions, deletions_int, ou
     )
 
 
+def aruba_banner(config):
+    """Hier config removes the ! from the end of the Aruba banner, this function adds it back.
+
+    Args:
+        config: hier config object
+
+    Returns:
+        corrected banner
+    """
+    banner = config.get_child("contains", "banner")
+    if banner is None:
+        return
+    else:
+        banner_str = str(banner) + "\n!"
+        config.del_child(banner)
+        config.add_child(banner_str)
+        return config
+
+
 def compare_config_heir(config1, config2, vendor, out="-"):
     """Compare and print two switch configurations.
 
@@ -584,6 +604,10 @@ def compare_config_heir(config1, config2, vendor, out="-"):
     config1.set_order_weight()
     config2.set_order_weight()
 
+    # fix aruba banner
+    if vendor == "aruba":
+        aruba_banner(config1)
+        aruba_banner(config2)
     for config1_line in config1.all_children_sorted():
         one.append(config1_line.cisco_style_text())
     for config2_line in config2.all_children_sorted():
