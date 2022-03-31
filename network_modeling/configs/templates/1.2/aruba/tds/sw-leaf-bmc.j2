@@ -42,6 +42,7 @@ interface mgmt
 {% include '1.2/aruba/common/compute.j2' %}
 {% include '1.2/aruba/common/bmc.j2' %}
 {% include '1.2/aruba/tds/leaf-bmc-to-spine.lag.j2' %}
+{% include '1.2/aruba/common/leaf_bmc_unused_port.j2' %}
 
 interface loopback 0
     ip address {{ variables.LOOPBACK_IP }}/32

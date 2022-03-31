@@ -55,6 +55,7 @@ spanning-tree mst configuration
 {% include '1.0/dellmellanox/common/bmc.j2' %}
 {% include '1.0/dellmellanox/common/uan-nmn.j2' %}
 {% include '1.0/dellmellanox/common/compute.j2' %}
+{% include '1.0/dellmellanox/common/dell-unused.j2' %}
 router ospf 1
  router-id {{ variables.LOOPBACK_IP }}
 
