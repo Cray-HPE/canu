@@ -42,6 +42,7 @@ interface mgmt
 {% include '1.2/aruba/common/compute.j2' %}
 {% include '1.2/aruba/common/bmc.j2' %}
 {% include '1.2/aruba/full/leaf-bmc-to-leaf.lag.j2' %}
+{% include '1.2/aruba/common/leaf_bmc_unused_port.j2' %}
 
 interface loopback 0
     ip address {{ variables.LOOPBACK_IP }}/32
@@ -49,6 +50,8 @@ interface loopback 0
 interface vlan {{ variables.NATIVE_VLAN }}
     ip mtu 9198
     ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}}
+    ip ospf 1 area 0.0.0.0
+    ip ospf passive
 interface vlan {{ variables.NMN_VLAN }}
     description NMN
     ip mtu 9198
@@ -59,6 +62,7 @@ interface vlan {{ variables.HMN_VLAN }}
     ip mtu 9198
     ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
     ip ospf 1 area 0.0.0.0
+    ip ospf passive
 interface vlan {{ variables.CMN_VLAN }}
     vrf attach Customer
     description CMN
@@ -66,14 +70,11 @@ interface vlan {{ variables.CMN_VLAN }}
     ip address {{ variables.CMN_IP }}/{{variables.CMN_PREFIX_LEN}}
     ip ospf 2 area 0.0.0.0
 snmp-server vrf default
-
+ip dns server-address {{ variables.NMNLB_DNS }}
 router ospf 2 vrf Customer
     router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 router ospf 1
-    router-id {{ variables.LOOPBACK_IP }}
-    area 0.0.0.0
-router ospfv3 1
     router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 https-server vrf Customer
