@@ -1,6 +1,7 @@
 {
   "canu_version": "1.1.5~develop",
   "architecture": "network_v2",
+  "shcd_file": "Full_Architecture_Golden_Config_1.1.5.xlsx",
   "updated_at": "2022-01-27 18:26:37",
   "topology": [
     {

@@ -34,6 +34,8 @@ interface mgmt
     shutdown
     ip dhcp
 
+{%- include '1.0/aruba/common/mtn_hmn_vlan.j2' %}
+{%- include '1.0/aruba/common/mtn_nmn_vlan.j2' %}
 {% include '1.0/aruba/common/cmm.j2' %}
 {% include '1.0/aruba/common/cec.j2' %}
 {% include '1.0/aruba/common/cdu-to-spine.lag.j2' %}
@@ -71,6 +73,8 @@ interface loopback 0
 interface vlan 1
     ip mtu 9198
     ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}}
+    ip ospf 1 area 0.0.0.0
+    ip ospf passive
 interface vlan {{ variables.NMN_VLAN }}
     description NMN
     ip mtu 9198
@@ -81,9 +85,7 @@ interface vlan {{ variables.HMN_VLAN }}
     ip mtu 9198
     ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
     ip ospf 1 area 0.0.0.0
-
-{%- include '1.0/aruba/common/mtn_hmn_vlan.j2' %}
-{%- include '1.0/aruba/common/mtn_nmn_vlan.j2' %}
+    ip ospf passive
 
 vsx
     system-mac 02:00:00:00:73:00
@@ -92,11 +94,7 @@ vsx
     keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive
     linkup-delay-timer 600
     vsx-sync vsx-global
-
 router ospf 1
-    router-id {{ variables.LOOPBACK_IP }}
-    area 0.0.0.0
-router ospfv3 1
     router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 https-server vrf default

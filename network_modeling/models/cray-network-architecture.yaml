@@ -536,7 +536,6 @@ network_v1:
       architecture_type: "slingshot_hsn_switch"
     - lookup_name:
         - "sw-smn"
-        - "sw-leaf"
       shasta_name: "sw-leaf-bmc"
       architecture_type: "river_bmc_leaf"
     - lookup_name:
