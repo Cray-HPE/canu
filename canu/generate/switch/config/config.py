@@ -515,7 +515,6 @@ def generate_switch_config(
     """
     node_shasta_name = get_shasta_name(switch_name, factory.lookup_mapper())
 
-    print(node_shasta_name)
     if node_shasta_name is None:
         return Exception(
             click.secho(
