@@ -34,6 +34,8 @@ interface mgmt
     shutdown
     ip dhcp
 
+{%- include '1.0/aruba/common/mtn_hmn_vlan.j2' %}
+{%- include '1.0/aruba/common/mtn_nmn_vlan.j2' %}
 {% include '1.0/aruba/common/cmm.j2' %}
 {% include '1.0/aruba/common/cec.j2' %}
 {% include '1.0/aruba/common/cdu-to-spine.lag.j2' %}
@@ -84,9 +86,6 @@ interface vlan {{ variables.HMN_VLAN }}
     ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
     ip ospf 1 area 0.0.0.0
     ip ospf passive
-
-{%- include '1.0/aruba/common/mtn_hmn_vlan.j2' %}
-{%- include '1.0/aruba/common/mtn_nmn_vlan.j2' %}
 
 vsx
     system-mac 02:00:00:00:73:00

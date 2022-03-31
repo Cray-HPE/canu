@@ -43,6 +43,7 @@ from ttp import ttp
 import urllib3
 
 from canu.utils.cache import cache_directory
+from canu.utils.yaml_load import load_yaml
 from canu.validate.paddle.paddle import node_model_from_paddle
 from canu.validate.shcd.shcd import (
     node_model_from_shcd,
@@ -163,7 +164,7 @@ dash = "-" * 60
 )
 @click.option(
     "--custom-config",
-    help="Custom switch configuration",
+    help="Create and maintain custom switch configurations beyond generated plan-of-record",
     type=click.Path(),
 )
 @click.pass_context
@@ -237,7 +238,7 @@ def config(
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         out: Name of the output file
-        custom_config: Config file that is merged with the generated config.
+        custom_config: yaml file containing customized switch configurations which is merged with the generated config.
     """
     # SHCD Parsing
     if shcd:
@@ -376,8 +377,15 @@ def config(
     click.echo("\n")
     click.secho(dash, fg="bright_white")
 
-    click.secho(f"{switch_name} Switch Config", fg="bright_white")
-    click.echo(switch_config, file=out)
+    if custom_config:
+        click.secho(
+            f"{switch_name} Customized Configurations have been detected in the generated switch configurations",
+            fg="yellow",
+        )
+        click.echo(switch_config, file=out)
+    else:
+        click.secho(f"{switch_name} Switch Config", fg="bright_white")
+        click.echo(switch_config, file=out)
 
     if len(unknown) > 0:
         click.secho("\nWarning", fg="red")
@@ -403,7 +411,7 @@ def get_shasta_name(name, mapper):
             return shasta_name
 
 
-def add_custom_config(custom_config, switch_config, host, switch_os):
+def add_custom_config(custom_config, switch_config, host, switch_os, custom_file_name):
     """Merge custom config into generated config."""
     # mellanox ttp template to get interfaces
     mellanox_interface = """
@@ -417,8 +425,11 @@ interface ethernet {{ interface }} {{ _line_ | contains("") }}
 
     # get the delta between the custom config and generated switch config
     # text at the top of generated config
-    # TODO create better verbage
-    custom_config_merge = "# custom config injected"
+    custom_config_merge = (
+        f"# The following switch configurations were inserted into the plan-of-record configuration from {custom_file_name}\n"
+        + "# Custom configurations are merged into the generated configuration to maintain"
+        + "site-specific behaviors and (less frequently) to override known issues.\n"
+    )
     diff = custom_config_hier.difference(switch_config_hier)
     for line in diff.all_children_sorted():
         custom_config_merge += "\n" + "# " + line.cisco_style_text()
@@ -496,7 +507,7 @@ def generate_switch_config(
         sls_variables: Dictionary containing SLS variables
         template_folder: Architecture folder contaning the switch templates
         vendor_folder: Vendor folder contaning the template_folder
-        custom_config: Config file that is merged with the generated config.
+        custom_config: yaml file containing customized switch configurations which is merged with the generated config.
 
 
     Returns:
@@ -521,15 +532,8 @@ def generate_switch_config(
         )
 
     if custom_config:
-        try:
-            with open(os.path.join(f"{custom_config}"), "r") as f:
-                custom_config = yaml.load(f)
-        except FileNotFoundError:
-            click.secho(
-                "The custom yaml file was not found, check that you entered the right file name and path",
-                fg="red",
-            )
-            exit(1)
+        custom_config_file = os.path.basename(custom_config)
+        custom_config = load_yaml(custom_config)
 
     is_primary, primary, secondary = switch_is_primary(switch_name)
 
@@ -785,6 +789,7 @@ def generate_switch_config(
                     switch_config,
                     hier_host,
                     switch_os,
+                    custom_config_file,
                 )
         else:
             hier_v1 = HConfig(host=hier_host)
@@ -809,6 +814,7 @@ def generate_switch_config(
                     switch_config,
                     hier_host,
                     switch_os,
+                    custom_config_file,
                 )
     return switch_config, devices, unknown
 

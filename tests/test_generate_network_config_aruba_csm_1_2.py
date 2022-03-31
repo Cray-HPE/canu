@@ -123,15 +123,25 @@ def test_network_custom_config():
             ],
         )
         assert result.exit_code == 0
-        assert "sw-spine-001 Custom Config Generated" in str(result.output)
-        assert "sw-spine-002 Custom Config Generated" in str(result.output)
+        print(result.output)
+        assert (
+            "sw-spine-001 Customized Configurations have been detected in the generated switch configurations"
+            in str(result.output)
+        )
+        assert (
+            "sw-spine-002 Customized Configurations have been detected in the generated switch configurations"
+            in str(result.output)
+        )
         assert "sw-leaf-001 Config Generated" in str(result.output)
         assert "sw-leaf-002 Config Generated" in str(result.output)
         assert "sw-leaf-003 Config Generated" in str(result.output)
         assert "sw-leaf-004 Config Generated" in str(result.output)
         assert "sw-cdu-001 Config Generated" in str(result.output)
         assert "sw-cdu-002 Config Generated" in str(result.output)
-        assert "sw-leaf-bmc-001 Custom Config Generated" in str(result.output)
+        assert (
+            "sw-leaf-bmc-001 Customized Configurations have been detected in the generated switch configurations"
+            in str(result.output)
+        )
 
 
 def test_network_config_custom_file_missing():
@@ -167,11 +177,11 @@ def test_network_config_custom_file_missing():
             ],
         )
         assert result.exit_code == 1
-
         assert (
-            "The custom yaml file was not found, check that you entered the right file name and path"
+            "The /bad_folder file was not found, check that you entered the right file name and path"
             in str(result.output)
         )
+        print(result.output)
 
 
 def test_network_config_folder_prompt():
