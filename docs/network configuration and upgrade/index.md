@@ -17,7 +17,7 @@ __________________________________
 - [Logging and updates](logging_and_updates.md)
 - [Generate CSM switch config](generate_config.md)
 - [Compare CSM switch configs with running configs](compare_config.md)
-- [Custom config injection](customer_config.md)
+- [Custom config injection](custom_config.md)
 - [Analyze CSM configuration upgrade](analyze_config.md)
 - [Typical CANU validation errors and how to fix them](validation_errors.md)
 
