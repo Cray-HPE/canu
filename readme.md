@@ -1,4 +1,4 @@
-# 🛶 CANU v1.3.2-develop
+# 🛶 CANU v1.4.0-develop
 
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
@@ -1100,6 +1100,12 @@ $ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.4.0-develop]
+- Add the ability to preserve LAG #s when generating switch configs.
+- Fix hard coded LAG numbers in templates.
+- Fix hard coded VLAN IDs in templates.
+- Remove unused Dellanox TDS templates.
 
 ## [1.3.2-develop]
 - Fix aruba banner output during canu validate

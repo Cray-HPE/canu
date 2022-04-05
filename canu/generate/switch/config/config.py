@@ -820,6 +820,17 @@ def generate_switch_config(
         )
         return options_file
 
+    def add_preserve_config(switch_config):
+        preserve_lag_config = "# The interface to LAG mappings below have been preserved in the generated config\n"
+        for port in preserve[0][0]:
+            interface = port.get("interface")
+            lag = port.get("lag")
+            if lag is not None:
+                preserve_lag_config += f"# interface {interface} LAG id {lag}\n"
+        preserve_lag_config += "\n"
+        preserve_lag_config += switch_config
+        return preserve_lag_config
+
     if architecture == "network_v1":
         switch_config_v1 = ""
         if "sw-cdu" in switch_name or "sw-leaf-bmc" in switch_name:
@@ -846,6 +857,9 @@ def generate_switch_config(
             for line in hier_v1.all_children_sorted():
                 switch_config_v1 += line.cisco_style_text() + "\n"
 
+        if preserve:
+            preserve_lag_config = add_preserve_config(switch_config_v1)
+            return (preserve_lag_config, devices, unknown)
         return switch_config_v1, devices, unknown
 
     # defaults to aruba options file
@@ -864,6 +878,11 @@ def generate_switch_config(
                     switch_os,
                     custom_config_file,
                 )
+
+    if preserve:
+        preserve_lag_config = add_preserve_config(switch_config)
+        return (preserve_lag_config, devices, unknown)
+
     return switch_config, devices, unknown
 
 
