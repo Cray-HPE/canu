@@ -63,11 +63,7 @@ interface vlan {{ variables.HMN_VLAN }}
     ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
     ip ospf 1 area 0.0.0.0
 ip dns server-address {{ variables.NMNLB_DNS }}
-
 router ospf 1
-    router-id {{ variables.LOOPBACK_IP }}
-    area 0.0.0.0
-router ospfv3 1
     router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 https-server vrf default

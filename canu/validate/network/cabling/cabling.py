@@ -484,7 +484,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                                 fg="red",
                             ),
                         )
-                        exit(1)
+                        sys.exit(1)
                     if connected:
                         log.info(
                             f"Connected {src_node.common_name()} to"

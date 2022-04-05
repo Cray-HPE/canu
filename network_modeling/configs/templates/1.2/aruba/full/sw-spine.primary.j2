@@ -95,6 +95,7 @@ interface vlan {{ variables.CAN_VLAN }}
     ip address {{ variables.CAN_IP_PRIMARY }}/{{ variables.CAN_PREFIX_LEN }}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.CAN_IP_GATEWAY }}
+    ip ospf 2 area 0.0.0.0
 ip dns server-address {{ variables.NMNLB_DNS }}
 {% include '1.2/aruba/common/prefix-list.j2' %}
 {% include '1.2/aruba/common/route-map.j2' %}
@@ -105,9 +106,6 @@ router ospf 2 vrf Customer
 router ospf 1
     router-id {{ variables.LOOPBACK_IP }}
     redistribute bgp
-    area 0.0.0.0
-router ospfv3 1
-    router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 {% include '1.2/aruba/common/bgp.primary.j2' %}
 https-server vrf Customer
