@@ -1072,7 +1072,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [1.3.3-develop]
+## [1.3.5-develop]
 - Fix BGP output of canu validate
 - Ignore `user admin` and `snmpv3` config during canu validate
 
