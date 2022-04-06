@@ -1023,6 +1023,7 @@ def get_switch_nodes(switch_name, network_node_list, factory, sls_variables):
                     "INTERFACE_NUMBER": f"{source_port}",
                 },
             }
+            nodes.append(new_node)
         elif shasta_name == "SubRack":
             new_node = {
                 "subtype": "bmc",
