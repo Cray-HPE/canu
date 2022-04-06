@@ -1079,8 +1079,10 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 # Changelog
 
 ## [1.3.4-develop]
-
 - fixed PDU and sw-hsn ports being generated for sw-leaf-bmc switches
+
+## [1.3.3-develop]
+- Define warnings variable as defaultdict(list) to handle invalid key errors
 
 ## [1.3.2-develop]
 
