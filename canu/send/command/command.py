@@ -20,16 +20,13 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU send command."""
-import os
 from pathlib import Path
 import sys
 
 import click
 from click_help_colors import HelpColorsCommand
 import click_spinner
-from netutils.config.clean import sanitize_config
 from nornir import InitNornir
-from nornir.core.filter import F
 from nornir_netmiko import netmiko_send_command
 from nornir_utils.plugins.functions import print_result
 
@@ -124,7 +121,6 @@ def command(
         logging={"enabled": log_, "to_console": True, "level": "DEBUG"},
     )
 
-    # Use netmiko to SSH to switches and run a command
     def send_command():
         if switch_type:
             nr_switch_type = nr.filter(type=switch_type)
