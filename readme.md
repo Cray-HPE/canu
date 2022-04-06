@@ -1049,7 +1049,6 @@ You can either use an SLS file or pull the SLS file from the API-Gateway using a
 - `--log` outputs the nornir debug logs
 - `--network [HMN|CMN]` This gives the user the ability to connect to the switches over the CMN.  This allows the use of this tool from outside the Mgmt Network.  The default network used is the HMN.
 - `--command` command to send to the switch/switches.
-- `--switch-type` The type of switches to run the command on, the default for this is all switches e.g. spine
 - `--password` prompts if password is not entered
 - `--username` defaults to admin
 - `--name` The name of the switch that you want to back up. e.g. 'sw-spine-001'

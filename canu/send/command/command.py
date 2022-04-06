@@ -78,11 +78,6 @@ else:
     prompt="command to send to the switches e.g. show version",
 )
 @click.option(
-    "--switch-type",
-    required=False,
-    help="The type of switches to run the command on, the default for this is all switches e.g. spine",
-)
-@click.option(
     "--name",
     required=False,
     help="The name of the switch to run the command on, the default for this is all switches e.g. sw-leaf-bmc-001",
@@ -98,7 +93,6 @@ def command(
     network,
     log_,
     command,
-    switch_type,
     name,
 ):
     """Canu send command."""
@@ -122,12 +116,6 @@ def command(
     )
 
     def send_command():
-        if switch_type:
-            nr_switch_type = nr.filter(type=switch_type)
-            results = nr_switch_type.run(
-                task=netmiko_send_command,
-                command_string=command,
-            )
         if name:
             nr_switch_type = nr.filter(filter_func=lambda h: name in h.name)
             results = nr_switch_type.run(
