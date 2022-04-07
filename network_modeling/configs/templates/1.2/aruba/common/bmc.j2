@@ -1,5 +1,5 @@
 {#- bmc #}
-{%- for node in cabling.nodes if node.slot == "bmc" %}
+{%- for node in cabling.nodes if node.slot == "bmc"  or node.subtype == "sw-hsn" or node.subtype == "pdu" %}
 interface 1/1/{{ node.config.PORT }}
     no shutdown
     mtu 9198

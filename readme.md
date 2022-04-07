@@ -1,6 +1,5 @@
 # 🛶 CANU v1.5.0-develop
 
-
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
 CANU can be used to:
@@ -730,9 +729,7 @@ vrf keepalive
 Pass in a switch config file that CANU will inject into the generated config. A use case would be to add custom site connections.
 This config file will overwrite previously generate config.
 
-
-
-The `custom-config` file type is YAML and a single file can be used for multiple switches. You will need to specify the switch name and what config inject.  The `custom-config` feature is using the hierarchical configuration library, documentation can be found here https://netdevops.io/hier_config/.
+The `custom-config` file type is YAML and a single file can be used for multiple switches. You will need to specify the switch name and what config inject.  The `custom-config` feature is using the hierarchical configuration library, documentation can be found here <https://netdevops.io/hier_config/>.
 
 custom config file examples
 
@@ -770,6 +767,7 @@ sw-leaf-bmc-001:  |
 ```
 
 Mellanox/Dell
+
 ```
 sw-spine-001:  |
     interface ethernet 1/1 speed 10G force
@@ -812,6 +810,20 @@ To generate switch configuration with custom config injection.
 $ canu generate switch config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --name sw-spine-001 --custom-config CUSTOM_CONFIG_FILE.yaml
 
 
+#### Generate Switch Config while preserving LAG #s
+
+This option allows you to generate swtich configs while preserving the lag #s of the previous running config.
+
+The use case for this is if you have a running system and you don't want to take an outage to renumber the LAGs.
+
+It requires a folder with the config/s backed up.
+
+The recommended way to back these configs up is with **[Backup Network](#backup-network)**
+
+```
+canu generate switch config -a v1 --csm 1.0 --ccj ccj.json --sls-file sls_input_file.json --name sw-spine-001 --preserve ../backup_configs/
+```
+
 ### Generate Network Config
 
 **[Details](docs/generate_network_config.md)**<br>
@@ -851,7 +863,21 @@ The instructions are exactly the same as **[Generate Switch Config with Custom C
 To generate network configuration with custom config injection run
 
 ```bash
-$ canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config --custom-config CUSTOM_CONFIG_FILE.yaml
+canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config --custom-config CUSTOM_CONFIG_FILE.yaml
+```
+
+#### Generate Network Config while preserving LAG #s
+
+This option allows you to generate swtich configs while preserving the lag #s of the previous running config.
+
+The use case for this is if you have a running system and you don't want to take an outage to renumber the LAGs.
+
+It requires a folder with the config/s backed up.
+
+The recommended way to back these configs up is with **[Backup Network](#backup-network)**
+
+```bash
+$ canu generate network config --csm 1.0 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config --preserve FOLDER_WITH_SWITCH_CONFIGS
 ```
 
 ### Validate Switch Config
@@ -968,16 +994,19 @@ CANU has the ability to run a set of tests against all of the switches in the ma
 It is utilizing the nornir automation framework and additional nornir plugins to do this.
 
 More info can be found at
-- https://nornir.tech/2021/08/06/testing-your-network-with-nornir-testsprocessor/
-- https://github.com/nornir-automation/nornir
-- https://github.com/dmulyalin/salt-nornir
+
+- <https://nornir.tech/2021/08/06/testing-your-network-with-nornir-testsprocessor/>
+- <https://github.com/nornir-automation/nornir>
+- <https://github.com/dmulyalin/salt-nornir>
 
 Required Input
 You can either use an SLS file or pull the SLS file from the API-Gateway using a token.
+
 - `--sls-file`
 - `--auth-token`
 
 Options
+
 - `--log` outputs the nornir debug logs
 - `--network [HMN|CMN]` This gives the user the ability to connect to the switches over the CMN.  This allows the use of this tool from outside the Mgmt Network.  The default network used is the HMN.
 - `--json` outputs the results in json format.
@@ -985,10 +1014,12 @@ Options
 - `--username` defaults to admin
 
 #### Adding tests
+
 Additional tests can be easily added by updating the .yaml file at `canu/test/*/test_suite.yaml`
-More information on tests and how to write them can be found at https://nornir.tech/2021/08/06/testing-your-network-with-nornir-testsprocessor/
+More information on tests and how to write them can be found at <https://nornir.tech/2021/08/06/testing-your-network-with-nornir-testsprocessor/>
 
 Example test
+
 ```
 - name: Software version test
   task: show version
@@ -1001,6 +1032,7 @@ Example test
     - leaf-bmc
     - spine
 ```
+
 This test logs into the cdu, leaf, leaf-bmc, and spine switches and runs the command `show version` and checks that `10.09.0010` is in the output.  If it's not the test fails.
 
 ### Backup Network
@@ -1010,10 +1042,12 @@ It backs up the entire switch inventory from SLS by defualt, if you want to back
 
 Required Input
 You can either use an SLS file or pull the SLS file from the API-Gateway using a token.
+
 - `--sls-file`
 - `--folder` "Folder to store running config files"
 
 Options
+
 - `--log` outputs the nornir debug logs
 - `--network [HMN|CMN]` This gives the user the ability to connect to the switches over the CMN.  This allows the use of this tool from outside the Mgmt Network.  The default network used is the HMN.
 - `--password` prompts if password is not entered
@@ -1022,6 +1056,7 @@ Options
 - `--name` The name of the switch that you want to back up. e.g. 'sw-spine-001'
 
 Example
+
 ```bash
   $ canu backup network --sls-file ./sls_input_file.json --network CMN --folder ./ --unsanitized
   Running Configs Saved
@@ -1085,8 +1120,6 @@ Examples
   ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ```
 
-
-
 ## Uninstallation
 
 `pip3 uninstall canu`
@@ -1096,25 +1129,25 @@ Examples
 To run the full set of tests, linting, coverage map, and docs building run:
 
 ```bash
-$ nox
+nox
 ```
 
 To just run tests:
 
 ```bash
-$ nox -s tests
+nox -s tests
 ```
 
 To just run linting:
 
 ```bash
-$ nox -s lint
+nox -s lint
 ```
 
 To run a specific test file:
 
 ```bash
-$ nox -s tests -- tests/test_report_switch_firmware.py
+nox -s tests -- tests/test_report_switch_firmware.py
 ```
 
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
@@ -1122,38 +1155,71 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 # Changelog
 
 ## [1.5.0-develop]
+
 - Add `canu send command` feature.
 
+## [1.4.1-develop]
+
+- Added new guide for network install
+
+## [1.4.0-develop]
+
+- Add the ability to preserve LAG #s when generating switch configs.
+- Fix hard coded LAG numbers in templates.
+- Fix hard coded VLAN IDs in templates.
+- Remove unused Dellanox TDS templates.
+
+## [1.3.5-develop]
+
+- Fix BGP output of canu validate
+- Ignore `user admin` and `snmpv3` config during canu validate
+
+## [1.3.4-develop]
+
+- fixed PDU and sw-hsn ports being generated for sw-leaf-bmc switches
+
+## [1.3.3-develop]
+
+- Define warnings variable as defaultdict(list) to handle invalid key errors
+
 ## [1.3.2-develop]
+
 - Fix aruba banner output during canu validate
 
 ## [1.3.1-develop]
+
 - shutdown unused ports by default on aruba 6300+dell+mellanox
 
 ## [1.3.0-develop]
+
 - Removed the override feature
 - Add feature to inject custom configs into generated switch configs
 
 ## [1.2.10-develop]
+
 - Change Aruba banner from motd to exec
 
 ## [1.2.9-develop]
+
 - Reordered the configuration output so that vlans are defined before being applied to ports.
 
-
 ## [1.2.8-develop]
+
 - Fix Leaf-bmc naming corner case: leaf-bmc-bmc to leaf-bmc
 - Fix OSPF CAN vlan for 1.2 in full/tds
 
 ## [1.2.7-develop]
+
 - Fixed bug to allow canu to exit gracefully with sys.exit(1)
 
 ## [1.2.6-develop]
+
 - Add network test cases
 - Add network test cases for DNS and site connectivity
 - Fixed missing DNS from Aruba switches
 
 ## [1.2.5-develop]
+
 - Add NMN network for 1.0 to ssh allowed into switches because of BGP DOCS in 1.0 allowing it.
 - Remove router ospfv3 from 1.0/1.2
 - Fixed ACL, OSPF, BGP config files
@@ -1162,6 +1228,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Fix Canu test --network
 
 ## [1.2.4-develop]
+
 - Add OSPF to vlan 1.
 - Add 'ip ospf passive' to vlan 1,4.
 - Fix test cases: test_generate_switch_config_aruba_csm_1_2.py | test_generate_switch_config_dellanox_csm_1_2.py.
@@ -1169,41 +1236,50 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Fix descriptions for MTL
 
 ## [1.2.3-develop]
+
 - Config backup create /running.
 
 ## [1.2.2-develop]
+
 - Add SHCD filename to paddle/ccj JSON to obtain originating SHCD version.
 
 ## [1.2.1-develop]
+
 - Remove `canu config bgp`, there is no need for this as it's configured during `canu generated switch/network config`
 - Move Aruba CMN ospf instance from 1 to 2.
 - `canu validate` output enahncements & bug fixes.
 - Template fixes/enhancements.
 
 ## [1.2.0-develop]
+
 - Add `canu backup network`
 
 ## [1.1.11-develop]
+
 - `canu validate BGP` now has an option to choose what network to run against.
 - Remove `'lacp-individual` from mellanox spine02.
 - Generate unique MAC address for each Mellanox magp virtual router.
 
 ## [1.1.10-develop]
+
 - Update canu validate to user heir config diff and cleaner output.
 - Add --remediate option for canu validate
 - bump heir config version
 
 ## [1.1.9-develop]
+
 - Fix Mellanox web interface command
 - Remove hard coded BGP ASN #
 - Add CMN to CAN ACL
 - Level set CSM 1.0 templates with CSM 1.2 minus CMN, VRF, etc..
 
 ## [1.1.8-develop]
+
 - Add banner motd to all switch configs with CSM and CANU versions.
 - Add documentation to install from RPM (for SLES).
 
 ## [1.1.7-develop]
+
 - Remove CMN ip helper on mellanox.
 - Remove broken tests.
 - Fix Aruba OSPF process.
@@ -1212,6 +1288,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Mellanox NTP command fix.
 
 ## [1.1.5-develop]
+
 - Add ACLs to VLAN interfaces.
 - Add maximum paths to mellanox BGP template for customer VRF.
 - Fix Mellanox ISL speed setting.
@@ -1220,17 +1297,21 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Add gateway: `gateway<#>, gw<#> map to gateway-<###>`
 
 ## [1.1.4-develop]
+
 - fix sls url
 
 ## [1.1.3-develop]
+
 - validate BGP now reads IPs from the SLS API
 - Added a feature to run tests against a live network. (Aruba only)
 
 ## [1.1.2-develop]
+
 - Enabled webui for mellanox.
 - Added speed commands to dell/mellanox templates.
 
 ## [1.1.1-develop] 2022-12-07
+
 - Updated pull_request_template.md
 - Adjusted the STP timeout to 4 seconds from the default of 15.
 - Changed setup.py file glob to follow previously updated Jinja2 template locations.
@@ -1264,6 +1345,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Added `canu test` to run tests against the network (aruba only).
 
 ## [0.0.6] - 2021-9-23
+
 - Added alpha version of schema-checked JSON output in `validate shcd` as a machine-readable exchange for SHCD data.
 - Add ability to run CANU in a container, and update Python virtual environment documentation.
 - Added `canu generate switch config` to generate switch configuration for Aruba systems.
@@ -1279,11 +1361,13 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
   - Switch and SNMP passwords have been removed from generated configurations until the handling code is secure.
 
 ## [0.0.5] - 2021-5-14
+
 - Updated license
 - Updated the plan-of-record firmware for the 8360 in Shasta 1.4 and 1.5
 - Added `config bgp` command to update bgp configuration for a pair of switches.
 
 ## [0.0.4] - 2021-05-07
+
 - Added `verify shcd` command to allow verification of SHCD spreadsheets
 - Added `verify cabling` command to run verifications on network IPs
 - Added additional documentation for each command, added docstring checks to lint tests, and updated testing feedback
@@ -1291,7 +1375,9 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Added `validate bgp` command to validate spine switch neighbors
 
 ## [0.0.3] - 2021-04-16
+
 ### Added
+
 - Cache firmware API calls to canu_cache.yaml file.
 - Able to check cabling with LLDP on a switch using the `canu switch cabling` command.
 - Cache cabling information to canu_cache.yaml file.
@@ -1299,7 +1385,9 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Able to check cabling with LLDP on the whole network using the `canu network cabling` command.
 
 ## [0.0.2] - 2021-03-29
+
 ### Added
+
 - Added ability to initialize CANU by reading IP addresses from the CSI output folder, or from the Shasta SLS API by running `canu init`. The initialization will output the IP addresses to an output file.
 - Added ability for the network firmware command to read IPv4 address from a file using the --ips-file flag
 - Added the --out flag to the switch firmware and network firmware commands to output to a file.
@@ -1309,10 +1397,13 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Docstring checks and improvements
 
 ## [0.0.1] - 2021-03-19
+
 ### Added
+
 - Initial release!
 - Ability for CANU to get the firmware of a single or multiple Aruba switches
 - Standardized the canu.yaml file to show currently supported switch firmware versions.
+
 [development]: https://github.com/Cray-HPE/canu/tree/develop
 [unreleased]: https://github.com/Cray-HPE/canu/tree/main
 [0.0.6]: https://github.com/Cray-HPE/canu/tree/0.0.6
