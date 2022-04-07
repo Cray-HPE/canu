@@ -852,16 +852,16 @@ def generate_switch_config(
             switch_os = "onyx"
             options = yaml.load(open(hier_options(switch_os)))
         hier_host = Host(switch_name, switch_os, options)
-        if custom_config:
+        if custom_config and custom_config.get(switch_name) is not None:
             switch_custom_config = custom_config.get(switch_name)
-            if switch_custom_config is not None:
-                switch_config_v1 = add_custom_config(
-                    switch_custom_config,
-                    switch_config,
-                    hier_host,
-                    switch_os,
-                    custom_config_file,
-                )
+            switch_config_v1 = add_custom_config(
+                switch_custom_config,
+                switch_config,
+                hier_host,
+                switch_os,
+                custom_config_file,
+            )
+
         else:
             hier_v1 = HConfig(host=hier_host)
             hier_v1.load_from_string(switch_config)
