@@ -21,7 +21,6 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU generate switch config commands."""
 from collections import defaultdict
-from distutils.log import error
 from itertools import groupby
 import json
 import os
