@@ -19,7 +19,7 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-"""nornir hook file."""
+"""pyinstaller hook file."""
 from PyInstaller.utils.hooks import (
     collect_dynamic_libs,
     collect_submodules,
@@ -30,16 +30,19 @@ datas = (
     copy_metadata("nornir")
     + copy_metadata("nornir_salt")
     + copy_metadata("nornir_netmiko")
+    + copy_metadata("ttp")
 )
 
 hiddenimports = (
     collect_submodules("nornir")
     + collect_submodules("nornir_salt")
     + collect_submodules("nornir_netmiko")
+    + collect_submodules("ttp")
 )
 
 binaries = (
     collect_dynamic_libs("nornir")
     + collect_dynamic_libs("nornir_salt")
     + collect_dynamic_libs("nornir_netmiko")
+    + collect_dynamic_libs("ttp")
 )
