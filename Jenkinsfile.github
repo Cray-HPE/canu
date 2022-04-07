@@ -86,7 +86,7 @@ pipeline {
                 }
             }
         }
-                stage("Build SP3") {
+        stage("Build SP3") {
             agent {
                 docker {
                     image "arti.dev.cray.com/dstbuildenv-docker-master-local/cray-sle15sp3_build_environment:latest"
