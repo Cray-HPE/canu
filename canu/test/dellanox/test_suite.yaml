@@ -113,3 +113,23 @@
 #   pattern: (.*?)
 #   err_msg: running-config does not match startup-config
 #   device: leaf-bmc
+- name: Is internal DNS server alive (ping)
+  task: ping 10.92.100.225
+  test: contains
+  pattern: bytes from
+  err_msg: Internal DNS does not respond to ping
+  device:
+    - leaf
+    - leaf-bmc
+    - cdu
+    - spine
+- name: Does internal DNS resolve ncn-m001-nmn
+  task: ping ncn-m001-nmn
+  test: contains
+  pattern: bytes from
+  err_msg: Internal DNS cannot resolve ncn-m001-nmn, is ncn-m001 alive?
+  device:
+    - leaf
+    - leaf-bmc
+    - cdu
+    - spine
