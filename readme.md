@@ -1,4 +1,4 @@
-# 🛶 CANU v1.3.4-develop
+# 🛶 CANU v1.3.5-develop
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1078,10 +1078,17 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
+## [1.3.5-develop]
+
+- Fix BGP output of canu validate
+- Ignore `user admin` and `snmpv3` config during canu validate
+
 ## [1.3.4-develop]
+
 - fixed PDU and sw-hsn ports being generated for sw-leaf-bmc switches
 
 ## [1.3.3-develop]
+
 - Define warnings variable as defaultdict(list) to handle invalid key errors
 
 ## [1.3.2-develop]
@@ -1305,11 +1312,12 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Initial release!
 - Ability for CANU to get the firmware of a single or multiple Aruba switches
 - Standardized the canu.yaml file to show currently supported switch firmware versions.
-[development]: <https://github.com/Cray-HPE/canu/tree/develop>
-[unreleased]: <https://github.com/Cray-HPE/canu/tree/main>
-[0.0.6]: <https://github.com/Cray-HPE/canu/tree/0.0.6>
-[0.0.5]: <https://github.com/Cray-HPE/canu/tree/0.0.5>
-[0.0.4]: <https://github.com/Cray-HPE/canu/tree/0.0.4>
-[0.0.3]: <https://github.com/Cray-HPE/canu/tree/0.0.3>
-[0.0.2]: <https://github.com/Cray-HPE/canu/tree/0.0.2>
-[0.0.1]: <https://github.com/Cray-HPE/canu/tree/0.0.1>
+
+[development]: https://github.com/Cray-HPE/canu/tree/develop
+[unreleased]: https://github.com/Cray-HPE/canu/tree/main
+[0.0.6]: https://github.com/Cray-HPE/canu/tree/0.0.6
+[0.0.5]: https://github.com/Cray-HPE/canu/tree/0.0.5
+[0.0.4]: https://github.com/Cray-HPE/canu/tree/0.0.4
+[0.0.3]: https://github.com/Cray-HPE/canu/tree/0.0.3
+[0.0.2]: https://github.com/Cray-HPE/canu/tree/0.0.2
+[0.0.1]: https://github.com/Cray-HPE/canu/tree/0.0.1
