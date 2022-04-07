@@ -21,6 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU generate switch config commands."""
 from collections import defaultdict
+from distutils.log import error
 from itertools import groupby
 import json
 import os
@@ -831,6 +832,18 @@ def generate_switch_config(
         preserve_lag_config += switch_config
         return preserve_lag_config
 
+    def error_check_preserve_config(switch_config):
+        if (
+            "mlag-channel-group None" in switch_config
+            or "lag None" in switch_config
+            or "channel-group None" in switch_config
+        ):
+            click.secho(
+                "Incorrect port > MLAG mapping, please verify that all the ports have a correct MLAG mapping.",
+                fg="red",
+            )
+            sys.exit(1)
+
     if architecture == "network_v1":
         switch_config_v1 = ""
         if "sw-cdu" in switch_name or "sw-leaf-bmc" in switch_name:
@@ -859,7 +872,9 @@ def generate_switch_config(
 
         if preserve:
             preserve_lag_config = add_preserve_config(switch_config_v1)
+            error_check_preserve_config(preserve_lag_config)
             return (preserve_lag_config, devices, unknown)
+
         return switch_config_v1, devices, unknown
 
     # defaults to aruba options file
@@ -881,6 +896,7 @@ def generate_switch_config(
 
     if preserve:
         preserve_lag_config = add_preserve_config(switch_config)
+        error_check_preserve_config(preserve_lag_config)
         return (preserve_lag_config, devices, unknown)
 
     return switch_config, devices, unknown
