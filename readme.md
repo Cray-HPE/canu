@@ -1,4 +1,4 @@
-# 🛶 CANU v1.4.1-develop
+# 🛶 CANU v1.5.0-develop
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -70,6 +70,7 @@ The SHCD can easily be converted into CCJ by using `canu validate shcd --shcd SH
 **[Validate Switch Config](#validate-switch-config)**<br>
 **[Validate Network Config](#validate-network-config)**<br>
 **[Backup Network](#backup-network)**<br>
+**[Send Command](#send-)**<br>
 **[Cache](#cache)**<br>
 **[Uninstallation](#uninstallation)**<br>
 **[Road Map](#road-map)**<br>
@@ -1037,7 +1038,7 @@ This test logs into the cdu, leaf, leaf-bmc, and spine switches and runs the com
 ### Backup Network
 
 Canu can backup the running configurations for switches in the management network.
-It backs up the entire swithc inventory from SLS by defualt, if you want to backup just one switch use the `--name` flag.
+It backs up the entire switch inventory from SLS by defualt, if you want to backup just one switch use the `--name` flag.
 
 Required Input
 You can either use an SLS file or pull the SLS file from the API-Gateway using a token.
@@ -1057,19 +1058,66 @@ Options
 Example
 
 ```bash
-$ canu backup network --sls-file ./sls_input_file.json --network CMN --folder ./ --unsanitized
-Running Configs Saved
----------------------
-sw-spine-001.cfg
-sw-spine-002.cfg
-sw-leaf-001.cfg
-sw-leaf-002.cfg
-sw-leaf-003.cfg
-sw-leaf-004.cfg
-sw-leaf-bmc-001.cfg
-sw-leaf-bmc-002.cfg
-sw-cdu-001.cfg
-sw-cdu-002.cfg
+  $ canu backup network --sls-file ./sls_input_file.json --network CMN --folder ./ --unsanitized
+  Running Configs Saved
+  ---------------------
+  sw-spine-001.cfg
+  sw-spine-002.cfg
+  sw-leaf-001.cfg
+  sw-leaf-002.cfg
+  sw-leaf-003.cfg
+  sw-leaf-004.cfg
+  sw-leaf-bmc-001.cfg
+  sw-leaf-bmc-002.cfg
+  sw-cdu-001.cfg
+  sw-cdu-002.cfg
+```
+
+### Send Command
+
+Canu can send commands to the switches via the CLI.
+This is primarily used for `show` commands since we do not elevate to configuration mode.
+
+
+You can either use an SLS file or pull the SLS file from the API-Gateway using a token.
+- `--sls-file`
+- `--log` outputs the nornir debug logs
+- `--network [HMN|CMN]` This gives the user the ability to connect to the switches over the CMN.  This allows the use of this tool from outside the Mgmt Network.  The default network used is the HMN.
+- `--command` command to send to the switch/switches.
+- `--password` prompts if password is not entered
+- `--username` defaults to admin
+- `--name` The name of the switch that you want to back up. e.g. 'sw-spine-001'
+
+Examples
+
+```bash
+  canu send command --sls-file ./sls_input_file.json --network cmn --command "show banner exec" --name sw-spine-001
+  -netmiko_send_command************************************************************
+  * sw-spine-001 ** changed : False **********************************************
+  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+  ###############################################################################
+  # CSM version:  1.2
+  # CANU version: 1.3.2
+  ###############################################################################
+
+  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+```
+
+```bash
+  canu send command --command 'show version | include "Version      :"'
+  \netmiko_send_command************************************************************
+  * sw-leaf-bmc-001 ** changed : False *******************************************
+  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+  Version      : FL.10.09.0010                                                 
+  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  * sw-spine-001 ** changed : False **********************************************
+  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+  Version      : GL.10.09.0010                                                 
+  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  * sw-spine-002 ** changed : False **********************************************
+  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+  Version      : GL.10.09.0010                                                 
+  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ```
 
 ## Uninstallation
@@ -1105,6 +1153,10 @@ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.5.0-develop]
+
+- Add `canu send command` feature.
 
 ## [1.4.1-develop]
 
