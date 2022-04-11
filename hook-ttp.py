@@ -26,7 +26,6 @@ from PyInstaller.utils.hooks import (
     collect_dynamic_libs,
     collect_submodules,
     copy_metadata,
-    get_package_paths,
 )
 
 # package_path = get_package_paths("ttp")
@@ -34,7 +33,9 @@ from PyInstaller.utils.hooks import (
 # if os.path.exists(ttp_path):
 #     datas = [(ttp_path, "ttp")]
 
-datas = collect_data_files("ttp")
+datas += collect_data_files("ttp", True)
+
+datas += copy_metadata("ttp")
 
 hiddenimports = collect_submodules("ttp")
 
