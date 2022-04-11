@@ -493,9 +493,11 @@ def add_custom_config(custom_config, switch_config, host, switch_os, custom_file
         # parse out mellanox interfaces from custom config file
         print(mellanox_config)
         print(mellanox_interface)
-        parsed = ttp(data=mellanox_config, template=mellanox_interface)
-        parsed.parse()
-        interfaces = parsed.result()
+        parser = ttp()
+        parser.add_template(mellanox_interface)
+        parser.add_input(mellanox_config)
+        parser.parse()
+        interfaces = parser.result()
 
         # mellanox overwrite port configuration
         for port in interfaces[0][0]:
