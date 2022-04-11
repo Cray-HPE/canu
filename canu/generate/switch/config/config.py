@@ -470,7 +470,7 @@ interface ethernet {{ interface }} {{ _line_ | contains("") }}
             mellanox_config = mellanox_config + "\n" + str(line)
 
         # parse out mellanox interfaces from custom config file
-        parser = ttp(mellanox_config, mellanox_interface)
+        parser = ttp(data=mellanox_config, template=mellanox_interface)
         parser.parse()
         interfaces = parser.result()
 

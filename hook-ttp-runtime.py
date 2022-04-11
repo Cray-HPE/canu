@@ -25,6 +25,6 @@ import os
 import sys
 
 
-ttp_data = os.path.join(sys._MEIPASS, "ttp", "ttp_dict_cache.pickle")
+ttp_data = os.path.join("./")
 
 os.environ["TTPCACHEFOLDER"] = ttp_data
