@@ -102,7 +102,6 @@ pydash==5.1.0
 pydocstyle==6.1.1
 pyflakes==2.3.1
 Pygments==2.10.0
-pyinstaller==4.10
 pylint==2.11.1
 PyNaCl==1.4.0
 pyparsing==2.4.7
@@ -141,7 +140,7 @@ termcolor==1.1.0
 testfixtures==6.18.3
 textfsm==1.1.2
 toml==0.10.2
-ttp==0.7.2
+ttp==0.8.4
 typed-ast==1.4.3
 typing-extensions==3.10.0.2
 unify==0.5
