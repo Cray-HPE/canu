@@ -96,7 +96,7 @@ exe = EXE(
     a.datas,
     [],
     name="canu",
-    debug=False,
+    debug=True,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
