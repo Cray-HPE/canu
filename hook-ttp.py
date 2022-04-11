@@ -27,6 +27,18 @@ from PyInstaller.utils.hooks import (
     copy_metadata,
 )
 
+import sys
+import os
+import shutil
+
+path = getattr(sys, "_MEIPASS", os.getcwd())
+
+full_path = path + "\\ttp"
+try:
+    shutil.move(full_path, ".\\ttp")
+except:
+    print("Cannot create 'images' folder. Already exists.")
+
 datas = copy_metadata("ttp")
 
 data_file = collect_data_files("ttp", include_py_files=True)
