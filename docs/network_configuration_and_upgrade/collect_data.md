@@ -22,11 +22,13 @@ If /etc/hosts is not available because the system is being installed you will be
 cat /var/www/ephemeral/prep/redbull/sls_input_file.json | jq ‘.Networks | .HMN | .ExtraProperties.Subnets | .[] | select(.Name==“network_hardware”)'
 ```
 
-Run the script below to automatically collect all switch configs.  If the command fails then log in to each individual switch and run show run.
+Run the script below to automatically collect all switch configs.  If the command fails then log in to each individual switch and run 'show run'.
 
 ```text
-canu backup network  --sls-file sls_file.json
+canu backup network --sls-file sls_input_file.json --network CMN --folder running
 ```
+
+NOTE: --network CMN / HMN
 
 * (optional): Retrieve customizations file. (log in from ncn-m001)
 
