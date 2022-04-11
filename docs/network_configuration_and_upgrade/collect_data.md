@@ -25,10 +25,12 @@ cat /var/www/ephemeral/prep/redbull/sls_input_file.json | jq ‘.Networks | .HMN
 Run the script below to automatically collect all switch configs.  If the command fails then log in to each individual switch and run 'show run'.
 
 ```text
-canu backup network --sls-file sls_input_file.json --network CMN --folder running
+canu backup network --sls-file sls_input_file.json --network HMN --folder running
 ```
 
 NOTE: --network CMN / HMN
+    * CMN = connecting from external network
+    * HMN = connecting from internal network
 
 * (optional): Retrieve customizations file. (log in from ncn-m001)
 
