@@ -140,7 +140,7 @@ termcolor==1.1.0
 testfixtures==6.18.3
 textfsm==1.1.2
 toml==0.10.2
-ttp==0.6.0
+ttp==0.7.2
 typed-ast==1.4.3
 typing-extensions==3.10.0.2
 unify==0.5
