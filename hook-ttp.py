@@ -29,11 +29,13 @@ from PyInstaller.utils.hooks import (
     get_package_paths,
 )
 
-package_path = get_package_paths("ttp")
-ttp_path = os.path.join(package_path[1], "ttp_dict_cache.pickle")
-if os.path.exists(ttp_path):
-    datas = [(ttp_path, "ttp")]
+# package_path = get_package_paths("ttp")
+# ttp_path = os.path.join(package_path[1], "ttp_dict_cache.pickle")
+# if os.path.exists(ttp_path):
+#     datas = [(ttp_path, "ttp")]
 
-hiddenimports = collect_submodules("ttp.ttp")
+datas = collect_data_files("ttp")
 
-binaries = collect_dynamic_libs("ttp.ttp")
+hiddenimports = collect_submodules("ttp")
+
+binaries = collect_dynamic_libs("ttp")
