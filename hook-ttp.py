@@ -33,9 +33,7 @@ from PyInstaller.utils.hooks import (
 # if os.path.exists(ttp_path):
 #     datas = [(ttp_path, "ttp")]
 
-datas += collect_data_files("ttp", True)
-
-datas += copy_metadata("ttp")
+datas = collect_data_files("ttp", True) + copy_metadata("ttp")
 
 hiddenimports = collect_submodules("ttp")
 
