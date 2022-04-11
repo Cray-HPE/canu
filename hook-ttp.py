@@ -21,12 +21,15 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """ttp hook file."""
 from PyInstaller.utils.hooks import (
+    collect_data_files,
     collect_dynamic_libs,
     collect_submodules,
     copy_metadata,
 )
 
 datas = copy_metadata("ttp")
+
+data_file = collect_data_files("ttp")
 
 hiddenimports = collect_submodules("ttp")
 
