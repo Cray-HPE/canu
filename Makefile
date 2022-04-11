@@ -45,8 +45,8 @@ prepare:
 binary:
 		docker run --rm -v $(PWD):/src $(build_image) ./pyinstaller.sh
 
-test:
-		docker run --rm -v $(PWD):/src $(build_image) nox
+# test:
+# 		docker run --rm -v $(PWD):/src $(build_image) nox
 
 rpm_package_source:
 		tar --transform 'flags=r;s,^,/$(source_name)/,' --exclude .git --exclude .nox --exclude dist/rpmbuild -cvjf $(source_path) .

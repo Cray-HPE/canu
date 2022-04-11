@@ -29,7 +29,7 @@ from PyInstaller.utils.hooks import (
 
 datas = copy_metadata("ttp")
 
-data_file = collect_data_files("ttp")
+data_file = collect_data_files("ttp", include_py_files=True)
 
 hiddenimports = collect_submodules("ttp")
 
