@@ -72,6 +72,10 @@ added_files = [
     ),
     ("canu/test/aruba/test_suite.yaml", "canu/test/aruba"),
     ("canu/test/dellanox/test_suite.yaml", "canu/test/dellanox"),
+    (
+        "canu/generate/switch/config/ttp_templates/*.txt",
+        "canu/generate/switch/config/ttp_templates",
+    ),
 ]
 a = Analysis(
     ["canu/cli.py"],
