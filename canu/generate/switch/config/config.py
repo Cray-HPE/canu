@@ -460,7 +460,6 @@ def get_shasta_name(name, mapper):
 
 def add_custom_config(custom_config, switch_config, host, switch_os, custom_file_name):
     """Merge custom config into generated config."""
-
     switch_config_hier = HConfig(host=host)
     custom_config_hier = HConfig(host=host)
     # load configs in HConfig Objects
