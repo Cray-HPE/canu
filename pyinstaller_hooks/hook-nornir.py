@@ -21,7 +21,6 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """nornir hook file."""
 from PyInstaller.utils.hooks import (
-    collect_dynamic_libs,
     collect_submodules,
     copy_metadata,
 )
@@ -36,10 +35,4 @@ hiddenimports = (
     collect_submodules("nornir")
     + collect_submodules("nornir_salt")
     + collect_submodules("nornir_netmiko")
-)
-
-binaries = (
-    collect_dynamic_libs("nornir")
-    + collect_dynamic_libs("nornir_salt")
-    + collect_dynamic_libs("nornir_netmiko")
 )

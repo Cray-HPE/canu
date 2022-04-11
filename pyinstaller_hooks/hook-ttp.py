@@ -20,21 +20,12 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """ttp hook file."""
-import os
 from PyInstaller.utils.hooks import (
     collect_data_files,
-    collect_dynamic_libs,
     collect_submodules,
     copy_metadata,
 )
 
-# package_path = get_package_paths("ttp")
-# ttp_path = os.path.join(package_path[1], "ttp_dict_cache.pickle")
-# if os.path.exists(ttp_path):
-#     datas = [(ttp_path, "ttp")]
-
 datas = collect_data_files("ttp", True) + copy_metadata("ttp")
 
 hiddenimports = collect_submodules("ttp")
-
-binaries = collect_dynamic_libs("ttp")
