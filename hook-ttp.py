@@ -27,8 +27,8 @@ from PyInstaller.utils.hooks import (
     copy_metadata,
 )
 
-datas = collect_data_files("ttp")
+datas = collect_data_files("ttp.ttp")
 
-hiddenimports = collect_submodules("ttp")
+hiddenimports = collect_submodules("ttp.ttp")
 
-binaries = collect_dynamic_libs("ttp")
+binaries = collect_dynamic_libs("ttp.ttp")
