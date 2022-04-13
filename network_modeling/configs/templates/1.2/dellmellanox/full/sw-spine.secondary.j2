@@ -80,7 +80,7 @@ interface vlan {{ variables.CMN_VLAN }} ipv4 port access-group cmn-can
 {%- endif %}
 ip load-sharing source-ip-port
 ip load-sharing type consistent
-   
+port-channel load-balance ethernet source-destination-ip ingress-port
 no interface mgmt0 dhcp
 interface mgmt0 ip address 192.168.255.243 /29
 
