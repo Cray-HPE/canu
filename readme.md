@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # 🛶 CANU v1.5.3-develop
+=======
+# 🛶 CANU v1.5.1-develop
+>>>>>>> CASMNET-1395
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1154,6 +1158,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
+<<<<<<< HEAD
 ## [1.5.3-develop]
 
 - Fixed aruba and dell 1.2 templates so CAN config is only generated when it's detected in SLS.
@@ -1161,6 +1166,13 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 ## [1.5.1-develop]
 
 - Add DNS test to canu/test. remove folder "network configuration and upgrade"
+=======
+## [1.5.1-develop]
+
+- add ttp pyinstaller hook file.
+- bump ttp version
+- move ttp templates to `canu/generate/switch/config/ttp_templates`
+>>>>>>> CASMNET-1395
 
 ## [1.5.0-develop]
 
