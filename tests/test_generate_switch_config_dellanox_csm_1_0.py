@@ -189,20 +189,6 @@ def test_switch_config_spine_primary():
         print(result.output)
         assert (
             "interface mlag-port-channel 1 no shutdown\n"
-            + "interface ethernet 1/10 shutdown\n"
-            + "interface ethernet 1/11 shutdown\n"
-            + "interface ethernet 1/12 shutdown\n"
-            + "interface ethernet 1/14 shutdown\n"
-            + "interface ethernet 1/15 shutdown\n"
-            + "interface ethernet 1/16 shutdown\n"
-            + "interface ethernet 1/17 shutdown\n"
-            + "interface ethernet 1/18 shutdown\n"
-            + "interface ethernet 1/19 shutdown\n"
-            + "interface ethernet 1/21 shutdown\n"
-            + "interface ethernet 1/22 shutdown\n"
-            + "interface ethernet 1/23 shutdown\n"
-            + "interface ethernet 1/24 shutdown\n"
-            + "interface ethernet 1/25 shutdown\n"
             + "interface mlag-port-channel 2 no shutdown\n"
             + "interface mlag-port-channel 3 no shutdown\n"
             + "interface mlag-port-channel 4 no shutdown\n"
@@ -300,7 +286,6 @@ def test_switch_config_spine_primary():
             + "interface vlan 4 mtu 9184\n"
             + "no interface vlan 7 ip icmp redirect\n"
             + "interface vlan 7 mtu 9184\n"
-            + "interface vlan 4000 mtu 9216\n"
         ) in str(result.output)
         print(result.output)
         assert (
@@ -563,20 +548,6 @@ def test_switch_config_spine_primary_preserve():
         print(result.output)
         assert (
             "interface mlag-port-channel 1 no shutdown\n"
-            + "interface ethernet 1/10 shutdown\n"
-            + "interface ethernet 1/11 shutdown\n"
-            + "interface ethernet 1/12 shutdown\n"
-            + "interface ethernet 1/14 shutdown\n"
-            + "interface ethernet 1/15 shutdown\n"
-            + "interface ethernet 1/16 shutdown\n"
-            + "interface ethernet 1/17 shutdown\n"
-            + "interface ethernet 1/18 shutdown\n"
-            + "interface ethernet 1/19 shutdown\n"
-            + "interface ethernet 1/21 shutdown\n"
-            + "interface ethernet 1/22 shutdown\n"
-            + "interface ethernet 1/23 shutdown\n"
-            + "interface ethernet 1/24 shutdown\n"
-            + "interface ethernet 1/25 shutdown\n"
             + "interface mlag-port-channel 2 no shutdown\n"
             + "interface mlag-port-channel 3 no shutdown\n"
             + "interface mlag-port-channel 4 no shutdown\n"
@@ -674,7 +645,6 @@ def test_switch_config_spine_primary_preserve():
             + "interface vlan 4 mtu 9184\n"
             + "no interface vlan 7 ip icmp redirect\n"
             + "interface vlan 7 mtu 9184\n"
-            + "interface vlan 4000 mtu 9216\n"
         ) in str(result.output)
         print(result.output)
         assert (
@@ -936,20 +906,6 @@ def test_switch_config_spine_secondary():
         print(result.output)
         assert (
             "interface mlag-port-channel 1 no shutdown\n"
-            + "interface ethernet 1/10 shutdown\n"
-            + "interface ethernet 1/11 shutdown\n"
-            + "interface ethernet 1/12 shutdown\n"
-            + "interface ethernet 1/14 shutdown\n"
-            + "interface ethernet 1/15 shutdown\n"
-            + "interface ethernet 1/16 shutdown\n"
-            + "interface ethernet 1/17 shutdown\n"
-            + "interface ethernet 1/18 shutdown\n"
-            + "interface ethernet 1/19 shutdown\n"
-            + "interface ethernet 1/21 shutdown\n"
-            + "interface ethernet 1/22 shutdown\n"
-            + "interface ethernet 1/23 shutdown\n"
-            + "interface ethernet 1/24 shutdown\n"
-            + "interface ethernet 1/25 shutdown\n"
             + "interface mlag-port-channel 2 no shutdown\n"
             + "interface mlag-port-channel 3 no shutdown\n"
             + "interface mlag-port-channel 4 no shutdown\n"
@@ -1035,7 +991,6 @@ def test_switch_config_spine_secondary():
             + "interface vlan 4 mtu 9184\n"
             + "no interface vlan 7 ip icmp redirect\n"
             + "interface vlan 7 mtu 9184\n"
-            + "interface vlan 4000 mtu 9216\n"
         ) in str(result.output)
         print(result.output)
         assert (

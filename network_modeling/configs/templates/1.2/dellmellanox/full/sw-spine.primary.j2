@@ -75,7 +75,9 @@ no interface vlan {{ variables.CMN_VLAN }} ip icmp redirect
 interface vlan {{ variables.CMN_VLAN }} mtu 9184
 interface vlan {{ variables.NMN_VLAN }} ipv4 port access-group nmn-hmn
 interface vlan {{ variables.HMN_VLAN }} ipv4 port access-group nmn-hmn
+{%- if variables.CAN != None %}
 interface vlan {{ variables.CMN_VLAN }} ipv4 port access-group cmn-can
+{%- endif %}
 ip load-sharing source-ip-port
 ip load-sharing type consistent
    
