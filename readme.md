@@ -1108,15 +1108,15 @@ Examples
   \netmiko_send_command************************************************************
   * sw-leaf-bmc-001 ** changed : False *******************************************
   vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-  Version      : FL.10.09.0010                                                 
+  Version      : FL.10.09.0010
   ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   * sw-spine-001 ** changed : False **********************************************
   vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-  Version      : GL.10.09.0010                                                 
+  Version      : GL.10.09.0010
   ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   * sw-spine-002 ** changed : False **********************************************
   vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-  Version      : GL.10.09.0010                                                 
+  Version      : GL.10.09.0010
   ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ```
 
