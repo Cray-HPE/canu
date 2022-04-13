@@ -117,6 +117,8 @@ network_v2:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
+        - name: "river_ncn_leaf"
+          speed: 1
     - name: "river_compute_node"
       model: "river_compute_node"
       connections:
