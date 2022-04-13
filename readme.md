@@ -1157,7 +1157,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 ## [1.5.2-develop]
 
 - Fixed aruba and dell 1.2 templates so CAN config is only generated when it's detected in SLS.
-- Fix `canu generate --custom` and `canu generate --preserve` usage with RPM
+- Fix `canu generate --custom` and `canu generate --preserve` usage with RPM, this requried a new pyinstaller hook file.
 - Remove MTU from mellanox templates
 - Add negate commands to templates to remove switch defaults.
 - Fix a couple `canu validate` issues
