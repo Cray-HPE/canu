@@ -11,13 +11,21 @@ protocol bgp
 vlan {{ variables.NMN_VLAN }}
 vlan {{ variables.HMN_VLAN }}
 vlan {{ variables.CMN_VLAN }}
-vlan {{ variables.CAN_VLAN }}
 vlan 4000
 vlan {{ variables.NMN_VLAN }} name "RVR_NMN"
 vlan {{ variables.HMN_VLAN }} name "RVR_HMN"
 vlan {{ variables.CMN_VLAN }} name "CMN"
-vlan {{ variables.CAN_VLAN }} name "CAN"
 vlan 4000 name "MLAG" 
+
+{%- if variables.CAN != None %}
+vlan {{ variables.CAN_VLAN }}
+vlan {{ variables.CAN_VLAN }} name "CAN"
+interface vlan {{ variables.CAN_VLAN }} vrf forwarding Customer
+interface vlan {{ variables.CAN_VLAN }} ip address {{ variables.CAN_IP_PRIMARY }}/{{variables.CAN_PREFIX_LEN}} primary
+no interface vlan {{ variables.CAN_VLAN }} ip icmp redirect
+interface vlan {{ variables.CAN_VLAN }} mtu 9184
+interface vlan {{ variables.CAN_VLAN }} ipv4 port access-group cmn-can
+{%- endif %}
 
 no ntp server {{ variables.NCN_W001 }} disable
 ntp server {{ variables.NCN_W001 }} keyID 0
@@ -49,7 +57,6 @@ interface vlan {{ variables.NATIVE_VLAN }}
 interface vlan {{ variables.NMN_VLAN }}
 interface vlan {{ variables.HMN_VLAN }}
 interface vlan {{ variables.CMN_VLAN }} vrf forwarding Customer
-interface vlan {{ variables.CAN_VLAN }} vrf forwarding Customer
 interface vlan 10
 interface vlan 4000
 interface loopback 0 ip address {{ variables.LOOPBACK_IP }}/32 primary
@@ -57,7 +64,6 @@ interface vlan 1 ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}} 
 interface vlan {{ variables.NMN_VLAN }} ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}} primary
 interface vlan {{ variables.HMN_VLAN }} ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}} primary
 interface vlan {{ variables.CMN_VLAN }} ip address {{ variables.CMN_IP }}/{{variables.CMN_PREFIX_LEN}} primary
-interface vlan {{ variables.CAN_VLAN }} ip address {{ variables.CAN_IP_PRIMARY }}/{{variables.CAN_PREFIX_LEN}} primary
 interface vlan 4000 ip address 192.168.255.253/30 primary
 no interface vlan {{ variables.NATIVE_VLAN }} ip icmp redirect
 interface vlan {{ variables.NATIVE_VLAN }} mtu 9184
@@ -67,13 +73,10 @@ no interface vlan {{ variables.HMN_VLAN }} ip icmp redirect
 interface vlan {{ variables.HMN_VLAN }} mtu 9184
 no interface vlan {{ variables.CMN_VLAN }} ip icmp redirect
 interface vlan {{ variables.CMN_VLAN }} mtu 9184
-no interface vlan {{ variables.CAN_VLAN }} ip icmp redirect
-interface vlan {{ variables.CAN_VLAN }} mtu 9184
 interface vlan 4000 mtu 9216 
 interface vlan {{ variables.NMN_VLAN }} ipv4 port access-group nmn-hmn
 interface vlan {{ variables.HMN_VLAN }} ipv4 port access-group nmn-hmn
 interface vlan {{ variables.CMN_VLAN }} ipv4 port access-group cmn-can
-interface vlan {{ variables.CAN_VLAN }} ipv4 port access-group cmn-can
 ip load-sharing source-ip-port
 ip load-sharing type consistent
    
@@ -111,7 +114,9 @@ interface vlan {{ variables.NATIVE_VLAN }} ip ospf area 0.0.0.0
 interface vlan {{ variables.NMN_VLAN }} ip ospf area 0.0.0.0
 interface vlan {{ variables.HMN_VLAN }} ip ospf area 0.0.0.0
 interface vlan {{ variables.CMN_VLAN }} ip ospf area 0.0.0.0
+{%- if variables.CAN != None %}
 interface vlan {{ variables.CAN_VLAN }} ip ospf area 0.0.0.0
+{%- endif %}
 interface vlan {{ variables.NATIVE_VLAN }} ip ospf passive-interface
 interface vlan {{ variables.HMN_VLAN }} ip ospf passive-interface
 router ospf 1 vrf default redistribute bgp

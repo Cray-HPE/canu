@@ -257,13 +257,13 @@ def test_switch_config_spine_primary():
             "vlan 2\n"
             + "vlan 4\n"
             + "vlan 6\n"
-            + "vlan 7\n"
             + "vlan 4000\n"
             + 'vlan 2 name "RVR_NMN"\n'
             + 'vlan 4 name "RVR_HMN"\n'
             + 'vlan 6 name "CMN"\n'
-            + 'vlan 7 name "CAN"\n'
             + 'vlan 4000 name "MLAG"\n'
+            + "vlan 7\n"
+            + 'vlan 7 name "CAN"\n'
         ) in str(result.output)
         print(result.output)
         assert (
@@ -323,18 +323,20 @@ def test_switch_config_spine_primary():
             + "ip name-server vrf vrf-default 10.92.100.225\n"
             + "interface loopback 0\n"
             + "interface loopback 0 ip address 10.2.0.2/32 primary\n"
+            + "interface vlan 7 vrf forwarding Customer\n"
+            + "interface vlan 7 ip address 192.168.11.2/24 primary\n"
+            + "no interface vlan 7 ip icmp redirect\n"
+            + "interface vlan 7 mtu 9184\n"
             + "interface vlan 1\n"
             + "interface vlan 2\n"
             + "interface vlan 4\n"
             + "interface vlan 6 vrf forwarding Customer\n"
-            + "interface vlan 7 vrf forwarding Customer\n"
             + "interface vlan 10\n"
             + "interface vlan 4000\n"
             + "interface vlan 1 ip address 192.168.1.2/16 primary\n"
             + "interface vlan 2 ip address 192.168.3.2/17 primary\n"
             + "interface vlan 4 ip address 192.168.0.2/17 primary\n"
             + "interface vlan 6 ip address 192.168.12.2/24 primary\n"
-            + "interface vlan 7 ip address 192.168.11.2/24 primary\n"
             + "interface vlan 4000 ip address 192.168.255.253/30 primary\n"
             + "no interface vlan 1 ip icmp redirect\n"
             + "interface vlan 1 mtu 9184\n"
@@ -344,8 +346,6 @@ def test_switch_config_spine_primary():
             + "interface vlan 4 mtu 9184\n"
             + "no interface vlan 6 ip icmp redirect\n"
             + "interface vlan 6 mtu 9184\n"
-            + "no interface vlan 7 ip icmp redirect\n"
-            + "interface vlan 7 mtu 9184\n"
             + "interface vlan 4000 mtu 9216\n"
         ) in str(result.output)
         print(result.output)
@@ -381,10 +381,10 @@ def test_switch_config_spine_primary():
             + "ipv4 access-list cmn-can seq-number 10 deny ip 192.168.12.0 mask 255.255.255.0 192.168.11.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 20 deny ip 192.168.11.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 30 permit ip any any\n"
+            + "interface vlan 7 ipv4 port access-group cmn-can\n"
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 6 ipv4 port access-group cmn-can\n"
-            + "interface vlan 7 ipv4 port access-group cmn-can\n"
         ) in str(result.output)
         print(result.output)
         assert (
@@ -706,13 +706,13 @@ def test_switch_config_spine_primary_custom():
             "vlan 2\n"
             + "vlan 4\n"
             + "vlan 6\n"
-            + "vlan 7\n"
             + "vlan 4000\n"
             + 'vlan 2 name "RVR_NMN"\n'
             + 'vlan 4 name "RVR_HMN"\n'
             + 'vlan 6 name "CMN"\n'
-            + 'vlan 7 name "CAN"\n'
             + 'vlan 4000 name "MLAG"\n'
+            + "vlan 7\n"
+            + 'vlan 7 name "CAN"\n'
         ) in str(result.output)
         print(result.output)
 
@@ -773,18 +773,20 @@ def test_switch_config_spine_primary_custom():
             + "ip name-server vrf vrf-default 10.92.100.225\n"
             + "interface loopback 0\n"
             + "interface loopback 0 ip address 10.2.0.2/32 primary\n"
+            + "interface vlan 7 vrf forwarding Customer\n"
+            + "interface vlan 7 ip address 192.168.11.2/24 primary\n"
+            + "no interface vlan 7 ip icmp redirect\n"
+            + "interface vlan 7 mtu 9184\n"
             + "interface vlan 1\n"
             + "interface vlan 2\n"
             + "interface vlan 4\n"
             + "interface vlan 6 vrf forwarding Customer\n"
-            + "interface vlan 7 vrf forwarding Customer\n"
             + "interface vlan 10\n"
             + "interface vlan 4000\n"
             + "interface vlan 1 ip address 192.168.1.2/16 primary\n"
             + "interface vlan 2 ip address 192.168.3.2/17 primary\n"
             + "interface vlan 4 ip address 192.168.0.2/17 primary\n"
             + "interface vlan 6 ip address 192.168.12.2/24 primary\n"
-            + "interface vlan 7 ip address 192.168.11.2/24 primary\n"
             + "interface vlan 4000 ip address 192.168.255.253/30 primary\n"
             + "no interface vlan 1 ip icmp redirect\n"
             + "interface vlan 1 mtu 9184\n"
@@ -794,8 +796,6 @@ def test_switch_config_spine_primary_custom():
             + "interface vlan 4 mtu 9184\n"
             + "no interface vlan 6 ip icmp redirect\n"
             + "interface vlan 6 mtu 9184\n"
-            + "no interface vlan 7 ip icmp redirect\n"
-            + "interface vlan 7 mtu 9184\n"
             + "interface vlan 4000 mtu 9216\n"
         ) in str(result.output)
         print(result.output)
@@ -833,10 +833,10 @@ def test_switch_config_spine_primary_custom():
             + "ipv4 access-list cmn-can seq-number 10 deny ip 192.168.12.0 mask 255.255.255.0 192.168.11.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 20 deny ip 192.168.11.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 30 permit ip any any\n"
+            + "interface vlan 7 ipv4 port access-group cmn-can\n"
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 6 ipv4 port access-group cmn-can\n"
-            + "interface vlan 7 ipv4 port access-group cmn-can\n"
         ) in str(result.output)
         print(result.output)
         assert (
@@ -1146,13 +1146,13 @@ def test_switch_config_spine_secondary():
             "vlan 2\n"
             + "vlan 4\n"
             + "vlan 6\n"
-            + "vlan 7\n"
             + "vlan 4000\n"
             + 'vlan 2 name "RVR_NMN"\n'
             + 'vlan 4 name "RVR_HMN"\n'
             + 'vlan 6 name "CMN"\n'
-            + 'vlan 7 name "CAN"\n'
             + 'vlan 4000 name "MLAG"\n'
+            + "vlan 7\n"
+            + 'vlan 7 name "CAN"\n'
         ) in str(result.output)
         print(result.output)
         assert (
@@ -1211,18 +1211,20 @@ def test_switch_config_spine_secondary():
             + "ip name-server vrf vrf-default 10.92.100.225\n"
             + "interface loopback 0\n"
             + "interface loopback 0 ip address 10.2.0.3/32 primary\n"
+            + "interface vlan 7 vrf forwarding Customer\n"
+            + "interface vlan 7 ip address 192.168.11.3/24 primary\n"
+            + "no interface vlan 7 ip icmp redirect\n"
+            + "interface vlan 7 mtu 9184\n"
             + "interface vlan 1\n"
             + "interface vlan 2\n"
             + "interface vlan 4\n"
             + "interface vlan 6 vrf forwarding Customer\n"
-            + "interface vlan 7 vrf forwarding Customer\n"
             + "interface vlan 10\n"
             + "interface vlan 4000\n"
             + "interface vlan 1 ip address 192.168.1.3/16 primary\n"
             + "interface vlan 2 ip address 192.168.3.3/17 primary\n"
             + "interface vlan 4 ip address 192.168.0.3/17 primary\n"
             + "interface vlan 6 ip address 192.168.12.3/24 primary\n"
-            + "interface vlan 7 ip address 192.168.11.3/24 primary\n"
             + "interface vlan 4000 ip address 192.168.255.254/30 primary\n"
             + "no interface vlan 1 ip icmp redirect\n"
             + "interface vlan 1 mtu 9184\n"
@@ -1232,8 +1234,6 @@ def test_switch_config_spine_secondary():
             + "interface vlan 4 mtu 9184\n"
             + "no interface vlan 6 ip icmp redirect\n"
             + "interface vlan 6 mtu 9184\n"
-            + "no interface vlan 7 ip icmp redirect\n"
-            + "interface vlan 7 mtu 9184\n"
             + "interface vlan 4000 mtu 9216\n"
         ) in str(result.output)
         assert (
@@ -1266,10 +1266,10 @@ def test_switch_config_spine_secondary():
             + "ipv4 access-list cmn-can seq-number 10 deny ip 192.168.12.0 mask 255.255.255.0 192.168.11.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 20 deny ip 192.168.11.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 30 permit ip any any\n"
+            + "interface vlan 7 ipv4 port access-group cmn-can\n"
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 6 ipv4 port access-group cmn-can\n"
-            + "interface vlan 7 ipv4 port access-group cmn-can\n"
         ) in str(result.output)
         assert (
             "protocol ospf\n"
