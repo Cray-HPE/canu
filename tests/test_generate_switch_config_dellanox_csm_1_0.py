@@ -262,9 +262,14 @@ def test_switch_config_spine_primary():
         ) in str(result.output)
         print(result.output)
         assert (
-            "web vrf default enable force\n"
+            "web vrf default enable\n"
             + "ip routing vrf default\n"
             + "ip name-server vrf vrf-default 10.92.100.225\n"
+            + "no ldap vrf mgmt enable\n"
+            + "no radius-server vrf mgmt enable\n"
+            + "no snmp-server vrf mgmt enable\n"
+            + "no tacacs-server vrf mgmt enable\n"
+            + "vrf definition mgmt\n"
             + "interface loopback 0\n"
             + "interface loopback 0 ip address 10.2.0.2/32 primary\n"
             + "interface vlan 1\n"
@@ -361,11 +366,17 @@ def test_switch_config_spine_primary():
             + "no interface mgmt0 dhcp\n"
             + "interface mgmt0 ip address 192.168.255.241 /29\n"
             + "ip prefix-list pl-can\n"
+            + "ip prefix-list pl-can bulk-mode\n"
             + "ip prefix-list pl-can seq 10 permit 192.168.11.0 /24 ge 24\n"
+            + "ip prefix-list pl-can commit\n"
             + "ip prefix-list pl-hmn\n"
+            + "ip prefix-list pl-hmn bulk-mode\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0 /24 ge 24\n"
+            + "ip prefix-list pl-hmn commit\n"
             + "ip prefix-list pl-nmn\n"
+            + "ip prefix-list pl-nmn bulk-mode\n"
             + "ip prefix-list pl-nmn seq 30 permit 10.92.100.0 /24 ge 24\n"
+            + "ip prefix-list pl-nmn commit\n"
             + "route-map ncn-w001 permit 10 match ip address pl-can\n"
             + "route-map ncn-w001 permit 10 set ip next-hop 192.168.11.4\n"
             + "route-map ncn-w001 permit 20 match ip address pl-hmn\n"
@@ -448,6 +459,7 @@ def test_switch_config_spine_primary_preserve():
                 switch_backups_folder,
             ],
         )
+        print(result.output)
         assert result.exit_code == 0
         print(result.output)
         assert (
@@ -621,9 +633,14 @@ def test_switch_config_spine_primary_preserve():
         ) in str(result.output)
         print(result.output)
         assert (
-            "web vrf default enable force\n"
+            "web vrf default enable\n"
             + "ip routing vrf default\n"
             + "ip name-server vrf vrf-default 10.92.100.225\n"
+            + "no ldap vrf mgmt enable\n"
+            + "no radius-server vrf mgmt enable\n"
+            + "no snmp-server vrf mgmt enable\n"
+            + "no tacacs-server vrf mgmt enable\n"
+            + "vrf definition mgmt\n"
             + "interface loopback 0\n"
             + "interface loopback 0 ip address 10.2.0.2/32 primary\n"
             + "interface vlan 1\n"
@@ -720,11 +737,17 @@ def test_switch_config_spine_primary_preserve():
             + "no interface mgmt0 dhcp\n"
             + "interface mgmt0 ip address 192.168.255.241 /29\n"
             + "ip prefix-list pl-can\n"
+            + "ip prefix-list pl-can bulk-mode\n"
             + "ip prefix-list pl-can seq 10 permit 192.168.11.0 /24 ge 24\n"
+            + "ip prefix-list pl-can commit\n"
             + "ip prefix-list pl-hmn\n"
+            + "ip prefix-list pl-hmn bulk-mode\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0 /24 ge 24\n"
+            + "ip prefix-list pl-hmn commit\n"
             + "ip prefix-list pl-nmn\n"
+            + "ip prefix-list pl-nmn bulk-mode\n"
             + "ip prefix-list pl-nmn seq 30 permit 10.92.100.0 /24 ge 24\n"
+            + "ip prefix-list pl-nmn commit\n"
             + "route-map ncn-w001 permit 10 match ip address pl-can\n"
             + "route-map ncn-w001 permit 10 set ip next-hop 192.168.11.4\n"
             + "route-map ncn-w001 permit 20 match ip address pl-hmn\n"
@@ -771,7 +794,7 @@ def test_switch_config_spine_primary_preserve():
             + "ntp server 192.168.4.6 keyID 0\n"
             + "no ntp server 192.168.4.6 trusted-enable\n"
             + "ntp server 192.168.4.6 version 4\n"
-            + "ntp vrf default enable force\n"
+            + "ntp vrf default enable\n"
         ) in str(result.output)
         print(result.output)
 
@@ -967,9 +990,14 @@ def test_switch_config_spine_secondary():
         ) in str(result.output)
         print(result.output)
         assert (
-            "web vrf default enable force\n"
+            "web vrf default enable\n"
             + "ip routing vrf default\n"
             + "ip name-server vrf vrf-default 10.92.100.225\n"
+            + "no ldap vrf mgmt enable\n"
+            + "no radius-server vrf mgmt enable\n"
+            + "no snmp-server vrf mgmt enable\n"
+            + "no tacacs-server vrf mgmt enable\n"
+            + "vrf definition mgmt\n"
             + "interface loopback 0\n"
             + "interface loopback 0 ip address 10.2.0.3/32 primary\n"
             + "interface vlan 1\n"
@@ -1066,11 +1094,17 @@ def test_switch_config_spine_secondary():
             + "no interface mgmt0 dhcp\n"
             + "interface mgmt0 ip address 192.168.255.243 /29\n"
             + "ip prefix-list pl-can\n"
+            + "ip prefix-list pl-can bulk-mode\n"
             + "ip prefix-list pl-can seq 10 permit 192.168.11.0 /24 ge 24\n"
+            + "ip prefix-list pl-can commit\n"
             + "ip prefix-list pl-hmn\n"
+            + "ip prefix-list pl-hmn bulk-mode\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0 /24 ge 24\n"
+            + "ip prefix-list pl-hmn commit\n"
             + "ip prefix-list pl-nmn\n"
+            + "ip prefix-list pl-nmn bulk-mode\n"
             + "ip prefix-list pl-nmn seq 30 permit 10.92.100.0 /24 ge 24\n"
+            + "ip prefix-list pl-nmn commit\n"
             + "route-map ncn-w001 permit 10 match ip address pl-can\n"
             + "route-map ncn-w001 permit 10 set ip next-hop 192.168.11.4\n"
             + "route-map ncn-w001 permit 20 match ip address pl-hmn\n"
@@ -1117,7 +1151,7 @@ def test_switch_config_spine_secondary():
             + "ntp server 192.168.4.6 keyID 0\n"
             + "no ntp server 192.168.4.6 trusted-enable\n"
             + "ntp server 192.168.4.6 version 4\n"
-            + "ntp vrf default enable force\n"
+            + "ntp vrf default enable\n"
         ) in str(result.output)
         print(result.output)
 
@@ -1376,6 +1410,7 @@ def test_switch_config_leaf_bmc_preserve():
                 switch_backups_folder,
             ],
         )
+        print(result.output)
         assert result.exit_code == 0
         print(result.output)
         assert (
@@ -2016,6 +2051,7 @@ def test_switch_config_cdu_primary_preserve():
                 switch_backups_folder,
             ],
         )
+        print(result.output)
         assert result.exit_code == 0
         assert (
             "ip name-server 10.92.100.225\n"

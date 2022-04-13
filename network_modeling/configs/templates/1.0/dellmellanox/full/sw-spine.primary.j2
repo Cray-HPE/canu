@@ -29,8 +29,8 @@ no ntp server {{ variables.NCN_W003 }} disable
 ntp server {{ variables.NCN_W003 }} keyID 0
 no ntp server {{ variables.NCN_W003 }} trusted-enable
 ntp server {{ variables.NCN_W003 }} version 4
-ntp vrf default enable force
-web vrf default enable force
+ntp vrf default enable
+web vrf default enable
 
 {%- include '1.0/dellmellanox/common/acl-mellanox.j2' %}
 
@@ -110,5 +110,11 @@ mlag-vip mlag-domain ip 192.168.255.242 /29 force
 no mlag shutdown
 mlag system-mac 00:00:5E:00:01:01
 interface vlan 4000 ipl 1 peer-address 192.168.255.254
+
+no ldap vrf mgmt enable
+no radius-server vrf mgmt enable
+no snmp-server vrf mgmt enable
+no tacacs-server vrf mgmt enable
+vrf definition mgmt
    
 {# end dm-sw-spine.primary #}
