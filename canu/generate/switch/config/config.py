@@ -71,33 +71,18 @@ canu_version_file = path.join(project_root, "canu", ".version")
 
 # ttp preserve templates
 # pulls the interface and lag from switch configs.
-aruba_template = path.join(
-    project_root,
-    "canu",
-    "generate",
-    "switch",
-    "config",
-    "ttp_templates",
-    "aruba_lag.txt",
-)
-dell_template = path.join(
-    project_root,
-    "canu",
-    "generate",
-    "switch",
-    "config",
-    "ttp_templates",
-    "dell_lag.txt",
-)
-mellanox_template = path.join(
-    project_root,
-    "canu",
-    "generate",
-    "switch",
-    "config",
-    "ttp_templates",
-    "mellanox_lag.txt",
-)
+ttp_templates = defaultdict()
+for vendor in ["aruba", "dell", "mellanox"]:
+    ttp_templates[vendor] = path.join(
+        project_root,
+        "canu",
+        "generate",
+        "switch",
+        "config",
+        "ttp_templates",
+        f"{vendor}_lag.txt",
+    )
+
 mellanox_interface = path.join(
     project_root,
     "canu",
@@ -581,7 +566,7 @@ def generate_switch_config(
                 device_running = f.read()
                 # Get mellanox Switches
                 if architecture == "network_v1" and "spine" in switch_name:
-                    template = mellanox_template
+                    template = ttp_templates["mellanox"]
                     switch_config_list = []
                     for line in device_running.splitlines():
                         if line.startswith("   "):
@@ -591,10 +576,10 @@ def generate_switch_config(
                     device_running = ("\n").join(switch_config_list)
                 # get Dell Switches
                 elif architecture == "network_v1":
-                    template = dell_template
+                    template = ttp_templates["dell"]
                 # get Aruba switches
                 else:
-                    template = aruba_template
+                    template = ttp_templates["aruba"]
                 parser = ttp(device_running, template)
                 parser.parse()
                 preserve = parser.result()
