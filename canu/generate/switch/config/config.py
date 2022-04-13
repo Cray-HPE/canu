@@ -582,6 +582,13 @@ def generate_switch_config(
                 # Get mellanox Switches
                 if architecture == "network_v1" and "spine" in switch_name:
                     template = mellanox_template
+                    switch_config_list = []
+                    for line in device_running.splitlines():
+                        if line.startswith("   "):
+                            switch_config_list.append(line.strip())
+                        else:
+                            switch_config_list.append(line)
+                    device_running = ("\n").join(switch_config_list)
                 # get Dell Switches
                 elif architecture == "network_v1":
                     template = dell_template
