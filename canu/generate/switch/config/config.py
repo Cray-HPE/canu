@@ -530,8 +530,8 @@ def generate_switch_config(
             "secondary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf-bmc.j2",
         },
         "sw-edge": {
-            "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-edge.primary.j2",
-            "secondary": f"{csm}/{vendor_folder}/{template_folder}/sw-edge.secondary.j2",
+            "primary": f"{csm}/arista/sw-edge.primary.j2",
+            "secondary": f"{csm}/arista/sw-edge.secondary.j2",
         },
     }
     template_name = templates[node_shasta_name][
@@ -670,9 +670,14 @@ def generate_switch_config(
         exit(1)
 
     cmm_switch_ip = sls_variables.get("CMN_IPs")
-    if cmm_switch_ip and "sw-edge" not in switch_name:
+    # hack to rename edge switch to chn switch, this is a temporary fix until SLS/CSI is updated
+    if switch_name == "sw-edge-001":
+        switch_name = "chn-switch-1"
+    if switch_name == "sw-edge-002":
+        switch_name = "chn-switch-2"
+    if cmm_switch_ip and "chn-switch" not in switch_name:
         variables["CMN_IP"] = sls_variables["CMN_IPs"][switch_name]
-    if "sw-edge" not in switch_name:
+    if "chn-switch" not in switch_name:
         variables["HMN_IP"] = sls_variables["HMN_IPs"][switch_name]
         variables["MTL_IP"] = sls_variables["MTL_IPs"][switch_name]
         variables["NMN_IP"] = sls_variables["NMN_IPs"][switch_name]
@@ -1479,9 +1484,9 @@ def parse_sls_for_config(input_json):
                     sls_variables["CHN_IP_GATEWAY"] = subnets["Gateway"]
                     sls_variables["CHN_VLAN"] = subnets["VlanID"]
                     for ip in subnets["IPReservations"]:
-                        if ip["Name"] == "sw-edge-001":
+                        if ip["Name"] == "chn-switch-1":
                             sls_variables["CHN_IP_PRIMARY"] = ip["IPAddress"]
-                        elif ip["Name"] == "sw-edge-002":
+                        elif ip["Name"] == "chn-switch-2":
                             sls_variables["CHN_IP_SECONDARY"] = ip["IPAddress"]
                 if subnets["Name"] == "bootstrap_dhcp":
                     for ip in subnets["IPReservations"]:
