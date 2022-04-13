@@ -19,6 +19,8 @@ interface ethernet 1/{{ node.config.PORT }} description "{{ node.config.DESCRIPT
 interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport hybrid allowed-vlan add {{ variables.NMN_VLAN }}
 interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport hybrid allowed-vlan add {{ variables.HMN_VLAN }}
 interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport hybrid allowed-vlan add {{ variables.CMN_VLAN }}
+{%- if variables.CAN != None %}
 interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport hybrid allowed-vlan add {{ variables.CAN_VLAN }}
+{%- endif %}
 {%- endfor %}
 {#- end master #}
