@@ -42,6 +42,8 @@ csm = "1.0"
 switch_name = "sw-spine-001"
 cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
+switch_backups = "switch_backups/aruba"
+switch_backups_folder = path.join(test_file_directory, "data", switch_backups)
 
 test_file_name_tds = "TDS_Architecture_Golden_Config_1.1.5.xlsx"
 test_file_tds = path.join(test_file_directory, "data", test_file_name_tds)
@@ -247,6 +249,7 @@ def test_switch_config_spine_primary():
             + "interface 1/1/30\n"
             + "    no shutdown\n"
             + "    vrf attach keepalive\n"
+            + "    description VSX keepalive\n"
             + "    ip address 192.168.255.0/31\n"
             + "interface 1/1/31\n"
             + "    no shutdown\n"
@@ -258,6 +261,14 @@ def test_switch_config_spine_primary():
             + "    mtu 9198\n"
             + "    description vsx isl\n"
             + "    lag 256\n"
+            + "vsx\n"
+            + "    system-mac 02:00:00:00:6b:00\n"
+            + "    inter-switch-link lag 256\n"
+            + "    role primary\n"
+            + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
+            + "    linkup-delay-timer 600\n"
+            + "    vsx-sync vsx-global\n"
+            + "\n"
             + "interface loopback 0\n"
             + "    ip address 10.2.0.2/32\n"
             + "    ip ospf 1 area 0.0.0.0\n"
@@ -290,13 +301,6 @@ def test_switch_config_spine_primary():
             + "    active-gateway ip mac 12:00:00:00:6b:00\n"
             + "    active-gateway ip 192.168.11.1\n"
             + "    ip helper-address 10.92.100.222\n"
-            + "vsx\n"
-            + "    system-mac 02:00:00:00:6b:00\n"
-            + "    inter-switch-link lag 256\n"
-            + "    role primary\n"
-            + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
-            + "    linkup-delay-timer 600\n"
-            + "    vsx-sync vsx-global\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
         print(result.output)
@@ -408,6 +412,179 @@ def test_switch_config_spine_primary():
             + "        neighbor 192.168.4.6 activate\n"
             + "        neighbor 192.168.4.6 route-map ncn-w003 in\n"
             + "    exit-address-family\n"
+        ) in str(result.output)
+        print(result.output)
+
+
+def test_switch_config_spine_primary_preserve():
+    """Test that the `canu generate switch config` command returns the config while preserving LAG #s."""
+    with runner.isolated_filesystem():
+        with open(sls_file, "w") as f:
+            json.dump(sls_input, f)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "generate",
+                "switch",
+                "config",
+                "--csm",
+                csm,
+                "--architecture",
+                architecture,
+                "--shcd",
+                test_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--sls-file",
+                sls_file,
+                "--name",
+                switch_name,
+                "--preserve",
+                switch_backups_folder,
+            ],
+        )
+        assert result.exit_code == 0
+        print(result.output)
+        assert "hostname sw-spine-001\n"
+
+        sw_spine_to_leaf = (
+            "interface lag 101 multi-chassis\n"
+            + "    no shutdown\n"
+            + "    description spine_to_leaf_lag\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 1-2,4,7\n"
+            + "    lacp mode active\n"
+            + "    spanning-tree root-guard\n"
+            + "\n"
+            + "interface 1/1/1\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-spine-001:1==>sw-leaf-001:53\n"
+            + "    lag 101\n"
+            + "\n"
+            + "interface 1/1/2\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-spine-001:2==>sw-leaf-002:53\n"
+            + "    lag 101\n"
+            + "\n"
+            + "interface lag 3 multi-chassis\n"
+            + "    no shutdown\n"
+            + "    description spine_to_leaf_lag\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 1-2,4,7\n"
+            + "    lacp mode active\n"
+            + "    spanning-tree root-guard\n"
+            + "\n"
+            + "interface 1/1/3\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-spine-001:3==>sw-leaf-003:53\n"
+            + "    lag 3\n"
+            + "\n"
+            + "interface 1/1/4\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-spine-001:4==>sw-leaf-004:53\n"
+            + "    lag 3\n"
+        )
+        assert sw_spine_to_leaf in str(result.output)
+
+        spine_to_cdu = (
+            "interface lag 20 multi-chassis\n"
+            + "    no shutdown\n"
+            + "    description sw-spine-001:5==>sw-cdu-001:50\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 1-2,4\n"
+            + "    lacp mode active\n"
+            + "    spanning-tree root-guard\n"
+            + "\n"
+            + "interface 1/1/5\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-spine-001:5==>sw-cdu-001:50\n"
+            + "    lag 20\n"
+            + "\n"
+            + "interface 1/1/6\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-spine-001:6==>sw-cdu-002:50\n"
+            + "    lag 20\n"
+        )
+        assert spine_to_cdu in str(result.output)
+
+        assert (
+            "interface lag 99\n"
+            + "    no shutdown\n"
+            + "    description ISL link\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1 tag\n"
+            + "    vlan trunk allowed all\n"
+            + "    lacp mode active\n"
+            + "interface 1/1/30\n"
+            + "    no shutdown\n"
+            + "    vrf attach keepalive\n"
+            + "    description VSX keepalive\n"
+            + "    ip address 192.168.255.0/31\n"
+            + "interface 1/1/31\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description vsx isl\n"
+            + "    lag 99\n"
+            + "interface 1/1/32\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description vsx isl\n"
+            + "    lag 99\n"
+            + "vsx\n"
+            + "    system-mac 02:00:00:00:6b:00\n"
+            + "    inter-switch-link lag 99\n"
+            + "    role primary\n"
+            + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
+            + "    linkup-delay-timer 600\n"
+            + "    vsx-sync vsx-global\n"
+            + "\n"
+            + "interface loopback 0\n"
+            + "    ip address 10.2.0.2/32\n"
+            + "    ip ospf 1 area 0.0.0.0\n"
+            + "interface vlan 1\n"
+            + "    ip mtu 9198\n"
+            + "    ip address 192.168.1.2/16\n"
+            + "    active-gateway ip mac 12:00:00:00:6b:00\n"
+            + "    active-gateway ip 192.168.1.1\n"
+            + "    ip helper-address 10.92.100.222\n"
+            + "interface vlan 2\n"
+            + "    description NMN\n"
+            + "    ip mtu 9198\n"
+            + "    ip address 192.168.3.2/17\n"
+            + "    active-gateway ip mac 12:00:00:00:6b:00\n"
+            + "    active-gateway ip 192.168.3.1\n"
+            + "    ip helper-address 10.92.100.222\n"
+            + "    ip ospf 1 area 0.0.0.0\n"
+            + "interface vlan 4\n"
+            + "    description HMN\n"
+            + "    ip mtu 9198\n"
+            + "    ip address 192.168.0.2/17\n"
+            + "    active-gateway ip mac 12:00:00:00:6b:00\n"
+            + "    active-gateway ip 192.168.0.1\n"
+            + "    ip helper-address 10.94.100.222\n"
+            + "    ip ospf 1 area 0.0.0.0\n"
+            + "interface vlan 7\n"
+            + "    description CAN\n"
+            + "    ip mtu 9198\n"
+            + "    ip address 192.168.11.2/24\n"
+            + "    active-gateway ip mac 12:00:00:00:6b:00\n"
+            + "    active-gateway ip 192.168.11.1\n"
+            + "    ip helper-address 10.92.100.222\n"
+            + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
         print(result.output)
 
@@ -598,6 +775,7 @@ def test_switch_config_spine_secondary():
             + "interface 1/1/30\n"
             + "    no shutdown\n"
             + "    vrf attach keepalive\n"
+            + "    description VSX keepalive\n"
             + "    ip address 192.168.255.1/31\n"
             + "interface 1/1/31\n"
             + "    no shutdown\n"
@@ -609,6 +787,14 @@ def test_switch_config_spine_secondary():
             + "    mtu 9198\n"
             + "    description vsx isl\n"
             + "    lag 256\n"
+            + "vsx\n"
+            + "    system-mac 02:00:00:00:6b:00\n"
+            + "    inter-switch-link lag 256\n"
+            + "    role secondary\n"
+            + "    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive\n"
+            + "    linkup-delay-timer 600\n"
+            + "    vsx-sync vsx-global\n"
+            + "\n"
             + "interface loopback 0\n"
             + "    ip address 10.2.0.3/32\n"
             + "    ip ospf 1 area 0.0.0.0\n"
@@ -641,13 +827,6 @@ def test_switch_config_spine_secondary():
             + "    active-gateway ip mac 12:00:00:00:6b:00\n"
             + "    active-gateway ip 192.168.11.1\n"
             + "    ip helper-address 10.92.100.222\n"
-            + "vsx\n"
-            + "    system-mac 02:00:00:00:6b:00\n"
-            + "    inter-switch-link lag 256\n"
-            + "    role secondary\n"
-            + "    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive\n"
-            + "    linkup-delay-timer 600\n"
-            + "    vsx-sync vsx-global\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
         print(result.output)
@@ -759,6 +938,181 @@ def test_switch_config_spine_secondary():
             + "    exit-address-family\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
+        ) in str(result.output)
+        print(result.output)
+
+
+def test_switch_config_spine_secondary_preserve():
+    """Test that the `canu generate switch config` command returns the config while preserving LAG #s."""
+    spine_secondary = "sw-spine-002"
+
+    with runner.isolated_filesystem():
+        with open(sls_file, "w") as f:
+            json.dump(sls_input, f)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "generate",
+                "switch",
+                "config",
+                "--csm",
+                csm,
+                "--architecture",
+                architecture,
+                "--shcd",
+                test_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--sls-file",
+                sls_file,
+                "--name",
+                spine_secondary,
+                "--preserve",
+                switch_backups_folder,
+            ],
+        )
+        assert result.exit_code == 0
+
+        assert "hostname sw-spine-002\n"
+
+        sw_spine_to_leaf = (
+            "interface lag 101 multi-chassis\n"
+            + "    no shutdown\n"
+            + "    description spine_to_leaf_lag\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 1-2,4,7\n"
+            + "    lacp mode active\n"
+            + "    spanning-tree root-guard\n"
+            + "\n"
+            + "interface 1/1/1\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-spine-002:1==>sw-leaf-001:52\n"
+            + "    lag 101\n"
+            + "\n"
+            + "interface 1/1/2\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-spine-002:2==>sw-leaf-002:52\n"
+            + "    lag 101\n"
+            + "\n"
+            + "interface lag 3 multi-chassis\n"
+            + "    no shutdown\n"
+            + "    description spine_to_leaf_lag\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 1-2,4,7\n"
+            + "    lacp mode active\n"
+            + "    spanning-tree root-guard\n"
+            + "\n"
+            + "interface 1/1/3\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-spine-002:3==>sw-leaf-003:52\n"
+            + "    lag 3\n"
+            + "\n"
+            + "interface 1/1/4\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-spine-002:4==>sw-leaf-004:52\n"
+            + "    lag 3\n"
+        )
+        assert sw_spine_to_leaf in str(result.output)
+
+        spine_to_cdu = (
+            "interface lag 20 multi-chassis\n"
+            + "    no shutdown\n"
+            + "    description sw-spine-002:5==>sw-cdu-001:49\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 1-2,4\n"
+            + "    lacp mode active\n"
+            + "    spanning-tree root-guard\n"
+            + "\n"
+            + "interface 1/1/5\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-spine-002:5==>sw-cdu-001:49\n"
+            + "    lag 20\n"
+            + "\n"
+            + "interface 1/1/6\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-spine-002:6==>sw-cdu-002:49\n"
+            + "    lag 20\n"
+        )
+        assert spine_to_cdu in str(result.output)
+
+        assert (
+            "interface lag 99\n"
+            + "    no shutdown\n"
+            + "    description ISL link\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1 tag\n"
+            + "    vlan trunk allowed all\n"
+            + "    lacp mode active\n"
+            + "interface 1/1/30\n"
+            + "    no shutdown\n"
+            + "    vrf attach keepalive\n"
+            + "    description VSX keepalive\n"
+            + "    ip address 192.168.255.1/31\n"
+            + "interface 1/1/31\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description vsx isl\n"
+            + "    lag 99\n"
+            + "interface 1/1/32\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description vsx isl\n"
+            + "    lag 99\n"
+            + "vsx\n"
+            + "    system-mac 02:00:00:00:6b:00\n"
+            + "    inter-switch-link lag 99\n"
+            + "    role secondary\n"
+            + "    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive\n"
+            + "    linkup-delay-timer 600\n"
+            + "    vsx-sync vsx-global\n"
+            + "\n"
+            + "interface loopback 0\n"
+            + "    ip address 10.2.0.3/32\n"
+            + "    ip ospf 1 area 0.0.0.0\n"
+            + "interface vlan 1\n"
+            + "    ip mtu 9198\n"
+            + "    ip address 192.168.1.3/16\n"
+            + "    active-gateway ip mac 12:00:00:00:6b:00\n"
+            + "    active-gateway ip 192.168.1.1\n"
+            + "    ip helper-address 10.92.100.222\n"
+            + "interface vlan 2\n"
+            + "    description NMN\n"
+            + "    ip mtu 9198\n"
+            + "    ip address 192.168.3.3/17\n"
+            + "    active-gateway ip mac 12:00:00:00:6b:00\n"
+            + "    active-gateway ip 192.168.3.1\n"
+            + "    ip helper-address 10.92.100.222\n"
+            + "    ip ospf 1 area 0.0.0.0\n"
+            + "interface vlan 4\n"
+            + "    description HMN\n"
+            + "    ip mtu 9198\n"
+            + "    ip address 192.168.0.3/17\n"
+            + "    active-gateway ip mac 12:00:00:00:6b:00\n"
+            + "    active-gateway ip 192.168.0.1\n"
+            + "    ip helper-address 10.94.100.222\n"
+            + "    ip ospf 1 area 0.0.0.0\n"
+            + "interface vlan 7\n"
+            + "    description CAN\n"
+            + "    ip mtu 9198\n"
+            + "    ip address 192.168.11.3/24\n"
+            + "    active-gateway ip mac 12:00:00:00:6b:00\n"
+            + "    active-gateway ip 192.168.11.1\n"
+            + "    ip helper-address 10.92.100.222\n"
+            + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
         print(result.output)
 
@@ -1039,7 +1393,7 @@ def test_switch_config_leaf_primary():
             + "interface 1/1/54\n"
             + "    no shutdown\n"
             + "    vrf attach keepalive\n"
-            + "    description vsx keepalive\n"
+            + "    description VSX keepalive\n"
             + "    ip address 192.168.255.0/31\n"
             + "interface 1/1/55\n"
             + "    no shutdown\n"
@@ -1051,6 +1405,14 @@ def test_switch_config_leaf_primary():
             + "    mtu 9198\n"
             + "    description vsx isl\n"
             + "    lag 256\n"
+            + "vsx\n"
+            + "    system-mac 02:00:00:00:6b:00\n"
+            + "    inter-switch-link lag 256\n"
+            + "    role primary\n"
+            + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
+            + "    linkup-delay-timer 600\n"
+            + "    vsx-sync vsx-global\n"
+            + "\n"
             + "interface loopback 0\n"
             + "    ip address 10.2.0.4/32\n"
             + "    ip ospf 1 area 0.0.0.0\n"
@@ -1075,22 +1437,261 @@ def test_switch_config_leaf_primary():
         print(result.output)
 
         assert (
-            "vsx\n"
-            + "    system-mac 02:00:00:00:65:00\n"
-            + "    inter-switch-link lag 256\n"
-            + "    role primary\n"
-            + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
-            + "    linkup-delay-timer 600\n"
-            + "    vsx-sync vsx-global\n"
-        ) in str(result.output)
-        print(result.output)
-
-        assert (
             "router ospf 1\n"
             + "    router-id 10.2.0.4\n"
             + "    area 0.0.0.0\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
+        ) in str(result.output)
+        print(result.output)
+
+
+def test_switch_config_leaf_primary_preserve():
+    """Test that the `canu generate switch config` command returns the config while preserving LAG #s."""
+    leaf_primary = "sw-leaf-001"
+
+    with runner.isolated_filesystem():
+        with open(sls_file, "w") as f:
+            json.dump(sls_input, f)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "generate",
+                "switch",
+                "config",
+                "--csm",
+                csm,
+                "--architecture",
+                architecture,
+                "--shcd",
+                test_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--sls-file",
+                sls_file,
+                "--name",
+                leaf_primary,
+                "--preserve",
+                switch_backups_folder,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "hostname sw-leaf-001\n"
+
+        ncn_m = (
+            "interface lag 10 multi-chassis\n"
+            + "    no shutdown\n"
+            + "    description sw-leaf-001:1==>ncn-m001:ocp:1\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 1-2,4,7\n"
+            + "    lacp mode active\n"
+            + "    lacp fallback\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "\n"
+            + "interface 1/1/1\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-001:1==>ncn-m001:ocp:1\n"
+            + "    lag 10\n"
+            + "\n"
+            + "interface lag 3 multi-chassis\n"
+            + "    no shutdown\n"
+            + "    description sw-leaf-001:3==>ncn-m002:ocp:1\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 1-2,4,7\n"
+            + "    lacp mode active\n"
+            + "    lacp fallback\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "\n"
+            + "interface 1/1/3\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-001:3==>ncn-m002:ocp:1\n"
+            + "    lag 3\n"
+        )
+        assert ncn_m in str(result.output)
+
+        ncn_w = (
+            "interface lag 5 multi-chassis\n"
+            + "    no shutdown\n"
+            + "    description sw-leaf-001:5==>ncn-w001:ocp:1\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 1-2,4,7\n"
+            + "    lacp mode active\n"
+            + "    lacp fallback\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "\n"
+            + "interface 1/1/5\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-001:5==>ncn-w001:ocp:1\n"
+            + "    lag 5\n"
+        )
+        assert ncn_w in str(result.output)
+
+        ncn_s = (
+            "interface lag 7 multi-chassis\n"
+            + "    no shutdown\n"
+            + "    description sw-leaf-001:7==>ncn-s001:ocp:1\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 1-2,4,7\n"
+            + "    lacp mode active\n"
+            + "    lacp fallback\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "\n"
+            + "interface 1/1/7\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-001:7==>ncn-s001:ocp:1\n"
+            + "    lag 7\n"
+            + "\n"
+            + "interface lag 8 multi-chassis\n"
+            + "    no shutdown\n"
+            + "    description sw-leaf-001:8==>ncn-s001:ocp:2\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 10\n"
+            + "    lacp mode active\n"
+            + "    lacp fallback\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "\n"
+            + "interface 1/1/8\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-001:8==>ncn-s001:ocp:2\n"
+            + "    lag 8\n"
+            + "\n"
+            + "interface lag 9 multi-chassis\n"
+            + "    no shutdown\n"
+            + "    description sw-leaf-001:9==>ncn-s002:ocp:1\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 1-2,4,7\n"
+            + "    lacp mode active\n"
+            + "    lacp fallback\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "\n"
+            + "interface 1/1/9\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-001:9==>ncn-s002:ocp:1\n"
+            + "    lag 9\n"
+            + "\n"
+            + "interface lag 10 multi-chassis\n"
+            + "    no shutdown\n"
+            + "    description sw-leaf-001:10==>ncn-s002:ocp:2\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 10\n"
+            + "    lacp mode active\n"
+            + "    lacp fallback\n"
+            + "    spanning-tree port-type admin-edge\n"
+            + "\n"
+            + "interface 1/1/10\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-001:10==>ncn-s002:ocp:2\n"
+            + "    lag 10\n"
+        )
+        assert ncn_s in str(result.output)
+
+        leaf_to_leaf_bmc = (
+            "interface lag 115 multi-chassis\n"
+            + "    no shutdown\n"
+            + "    description sw-leaf-001:51==>sw-leaf-bmc-001:48\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 1-2,4\n"
+            + "    lacp mode active\n"
+            + "\n"
+            + "interface 1/1/51\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-001:51==>sw-leaf-bmc-001:48\n"
+            + "    lag 115\n"
+        )
+        assert leaf_to_leaf_bmc in str(result.output)
+
+        leaf_to_spine = (
+            "interface lag 101 multi-chassis\n"
+            + "    no shutdown\n"
+            + "    description leaf_to_spines_lag\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 1-2,4,7\n"
+            + "    lacp mode active\n"
+            + "\n"
+            + "interface 1/1/52\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-001:52==>sw-spine-002:1\n"
+            + "    lag 101\n"
+            + "\n"
+            + "interface 1/1/53\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-001:53==>sw-spine-001:1\n"
+            + "    lag 101\n"
+        )
+        assert leaf_to_spine in str(result.output)
+
+        assert (
+            "interface lag 100\n"
+            + "    no shutdown\n"
+            + "    description ISL link\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1 tag\n"
+            + "    vlan trunk allowed all\n"
+            + "    lacp mode active\n"
+            + "interface 1/1/54\n"
+            + "    no shutdown\n"
+            + "    vrf attach keepalive\n"
+            + "    description VSX keepalive\n"
+            + "    ip address 192.168.255.0/31\n"
+            + "interface 1/1/55\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description vsx isl\n"
+            + "    lag 100\n"
+            + "interface 1/1/56\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description vsx isl\n"
+            + "    lag 100\n"
+            + "vsx\n"
+            + "    system-mac 02:00:00:00:6b:00\n"
+            + "    inter-switch-link lag 100\n"
+            + "    role primary\n"
+            + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
+            + "    linkup-delay-timer 600\n"
+            + "    vsx-sync vsx-global\n"
+            + "\n"
+            + "interface loopback 0\n"
+            + "    ip address 10.2.0.4/32\n"
+            + "    ip ospf 1 area 0.0.0.0\n"
+            + "interface vlan 1\n"
+            + "    ip mtu 9198\n"
+            + "    ip address 192.168.1.4/16\n"
+            + "interface vlan 2\n"
+            + "    description NMN\n"
+            + "    ip mtu 9198\n"
+            + "    ip address 192.168.3.4/17\n"
+            + "    ip ospf 1 area 0.0.0.0\n"
+            + "interface vlan 4\n"
+            + "    description HMN\n"
+            + "    ip mtu 9198\n"
+            + "    ip address 192.168.0.4/17\n"
+            + "    ip ospf 1 area 0.0.0.0\n"
+            + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
         print(result.output)
 
@@ -1129,165 +1730,6 @@ def test_switch_config_leaf_primary_to_uan():
         )
         assert result.exit_code == 0
         assert "hostname sw-leaf-003\n"
-        assert banner_motd in str(result.output)
-        assert (
-            "no ip icmp redirect\n"
-            + "vrf keepalive\n"
-            + "ntp server 192.168.4.4\n"
-            + "ntp server 192.168.4.5\n"
-            + "ntp server 192.168.4.6\n"
-            + "ntp enable\n"
-        ) in str(result.output)
-        print(result.output)
-
-        assert (
-            "ssh server vrf default\n"
-            + "ssh server vrf keepalive\n"
-            + "ssh server vrf mgmt\n"
-            + "access-list ip mgmt\n"
-            + "    10 comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET\n"
-            + "    20 permit tcp 192.168.0.0/255.255.128.0 any eq ssh\n"
-            + "    30 permit tcp 192.168.3.0/255.255.128.0 any eq ssh\n"
-            + "    40 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
-            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
-            + "    60 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
-            + "    70 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
-            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
-            + "    90 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
-            + "    100 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
-            + "    110 deny tcp any any eq ssh\n"
-            + "    120 deny tcp any any eq https\n"
-            + "    130 deny udp any any eq snmp\n"
-            + "    140 deny udp any any eq snmp-trap\n"
-            + "    150 comment ALLOW ANYTHING ELSE\n"
-            + "    160 permit any any any\n"
-            + "access-list ip nmn-hmn\n"
-            + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
-            + "    20 deny any 192.168.0.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
-            + "    30 deny any 192.168.3.0/255.255.128.0 192.168.200.0/255.255.128.0\n"
-            + "    40 deny any 192.168.0.0/255.255.128.0 192.168.100.0/255.255.128.0\n"
-            + "    50 deny any 192.168.100.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
-            + "    60 deny any 192.168.100.0/255.255.128.0 192.168.200.0/255.255.128.0\n"
-            + "    70 deny any 192.168.200.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
-            + "    80 deny any 192.168.200.0/255.255.128.0 192.168.100.0/255.255.128.0\n"
-            + "    90 deny any 10.92.100.0/255.255.255.0 192.168.0.0/255.255.128.0\n"
-            + "    100 deny any 10.94.100.0/255.255.255.0 192.168.3.0/255.255.128.0\n"
-            + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
-            + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
-            + "    130 permit any any any\n"
-            + "apply access-list ip mgmt control-plane vrf default\n"
-            + "\n"
-            + "vlan 1\n"
-            + "vlan 2\n"
-            + "    name NMN\n"
-            + "    apply access-list ip nmn-hmn in\n"
-            + "    apply access-list ip nmn-hmn out\n"
-            + "vlan 4\n"
-            + "    name HMN\n"
-            + "    apply access-list ip nmn-hmn in\n"
-            + "    apply access-list ip nmn-hmn out\n"
-            + "vlan 7\n"
-            + "    name CAN\n"
-            + "vlan 10\n"
-            + "    name SUN\n"
-            + "spanning-tree\n"
-            + "spanning-tree forward-delay 4\n"
-            + "spanning-tree config-name MST0\n"
-            + "spanning-tree config-revision 1\n"
-            + "interface mgmt\n"
-            + "    shutdown\n"
-            + "    ip dhcp\n"
-        ) in str(result.output)
-        print(result.output)
-
-        ncn_m = (
-            "interface lag 1 multi-chassis\n"
-            + "    no shutdown\n"
-            + "    description sw-leaf-003:1==>ncn-m003:ocp:1\n"
-            + "    no routing\n"
-            + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 1-2,4,7\n"
-            + "    lacp mode active\n"
-            + "    lacp fallback\n"
-            + "    spanning-tree port-type admin-edge\n"
-            + "\n"
-            + "interface 1/1/1\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-leaf-003:1==>ncn-m003:ocp:1\n"
-            + "    lag 1\n"
-        )
-        assert ncn_m in str(result.output)
-
-        ncn_w = (
-            "interface lag 3 multi-chassis\n"
-            + "    no shutdown\n"
-            + "    description sw-leaf-003:3==>ncn-w002:ocp:1\n"
-            + "    no routing\n"
-            + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 1-2,4,7\n"
-            + "    lacp mode active\n"
-            + "    lacp fallback\n"
-            + "    spanning-tree port-type admin-edge\n"
-            + "\n"
-            + "interface 1/1/3\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-leaf-003:3==>ncn-w002:ocp:1\n"
-            + "    lag 3\n"
-            + "\n"
-            + "interface lag 4 multi-chassis\n"
-            + "    no shutdown\n"
-            + "    description sw-leaf-003:4==>ncn-w003:ocp:1\n"
-            + "    no routing\n"
-            + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 1-2,4,7\n"
-            + "    lacp mode active\n"
-            + "    lacp fallback\n"
-            + "    spanning-tree port-type admin-edge\n"
-            + "\n"
-            + "interface 1/1/4\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-leaf-003:4==>ncn-w003:ocp:1\n"
-            + "    lag 4\n"
-        )
-        assert ncn_w in str(result.output)
-
-        ncn_s = (
-            "interface lag 5 multi-chassis\n"
-            + "    no shutdown\n"
-            + "    description sw-leaf-003:5==>ncn-s003:ocp:1\n"
-            + "    no routing\n"
-            + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 1-2,4,7\n"
-            + "    lacp mode active\n"
-            + "    lacp fallback\n"
-            + "    spanning-tree port-type admin-edge\n"
-            + "\n"
-            + "interface 1/1/5\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-leaf-003:5==>ncn-s003:ocp:1\n"
-            + "    lag 5\n"
-            + "\n"
-            + "interface lag 6 multi-chassis\n"
-            + "    no shutdown\n"
-            + "    description sw-leaf-003:6==>ncn-s003:ocp:2\n"
-            + "    no routing\n"
-            + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 10\n"
-            + "    lacp mode active\n"
-            + "    lacp fallback\n"
-            + "    spanning-tree port-type admin-edge\n"
-            + "\n"
-            + "interface 1/1/6\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-leaf-003:6==>ncn-s003:ocp:2\n"
-            + "    lag 6\n"
-        )
-        assert ncn_s in str(result.output)
         uan = (
             "interface 1/1/7\n"
             + "    no shutdown\n"
@@ -1315,85 +1757,6 @@ def test_switch_config_leaf_primary_to_uan():
             + "    lag 8\n"
         )
         assert uan in str(result.output)
-        leaf_to_spine = (
-            "interface lag 103 multi-chassis\n"
-            + "    no shutdown\n"
-            + "    description leaf_to_spines_lag\n"
-            + "    no routing\n"
-            + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 1-2,4,7\n"
-            + "    lacp mode active\n"
-            + "\n"
-            + "interface 1/1/52\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-leaf-003:52==>sw-spine-002:3\n"
-            + "    lag 103\n"
-            + "\n"
-            + "interface 1/1/53\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-leaf-003:53==>sw-spine-001:3\n"
-            + "    lag 103\n"
-        )
-        assert leaf_to_spine in str(result.output)
-        assert (
-            "interface lag 256\n"
-            + "    no shutdown\n"
-            + "    description ISL link\n"
-            + "    no routing\n"
-            + "    vlan trunk native 1 tag\n"
-            + "    vlan trunk allowed all\n"
-            + "    lacp mode active\n"
-            + "interface 1/1/54\n"
-            + "    no shutdown\n"
-            + "    vrf attach keepalive\n"
-            + "    description vsx keepalive\n"
-            + "    ip address 192.168.255.0/31\n"
-            + "interface 1/1/55\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description vsx isl\n"
-            + "    lag 256\n"
-            + "interface 1/1/56\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description vsx isl\n"
-            + "    lag 256\n"
-            + "interface loopback 0\n"
-            + "    ip address 10.2.0.6/32\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
-            + "interface vlan 1\n"
-            + "    ip mtu 9198\n"
-            + "    ip address 192.168.1.6/16\n"
-            + "interface vlan 2\n"
-            + "    description NMN\n"
-            + "    ip mtu 9198\n"
-            + "    ip address 192.168.3.6/17\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
-            + "interface vlan 4\n"
-            + "    description HMN\n"
-            + "    ip mtu 9198\n"
-            + "    ip address 192.168.0.6/17\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
-            + "vsx\n"
-            + "    system-mac 02:00:00:00:65:00\n"
-            + "    inter-switch-link lag 256\n"
-            + "    role primary\n"
-            + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
-            + "    linkup-delay-timer 600\n"
-            + "    vsx-sync vsx-global\n"
-        ) in str(result.output)
-        print(result.output)
-
-        assert (
-            "router ospf 1\n"
-            + "    router-id 10.2.0.6\n"
-            + "    area 0.0.0.0\n"
-            + "https-server vrf default\n"
-            + "https-server vrf mgmt\n"
-        ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_leaf_secondary():
@@ -1673,7 +2036,7 @@ def test_switch_config_leaf_secondary():
             + "interface 1/1/54\n"
             + "    no shutdown\n"
             + "    vrf attach keepalive\n"
-            + "    description vsx keepalive\n"
+            + "    description VSX keepalive\n"
             + "    ip address 192.168.255.1/31\n"
             + "interface 1/1/55\n"
             + "    no shutdown\n"
@@ -1685,6 +2048,14 @@ def test_switch_config_leaf_secondary():
             + "    mtu 9198\n"
             + "    description vsx isl\n"
             + "    lag 256\n"
+            + "vsx\n"
+            + "    system-mac 02:00:00:00:6b:00\n"
+            + "    inter-switch-link lag 256\n"
+            + "    role secondary\n"
+            + "    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive\n"
+            + "    linkup-delay-timer 600\n"
+            + "    vsx-sync vsx-global\n"
+            + "\n"
             + "interface loopback 0\n"
             + "    ip address 10.2.0.5/32\n"
             + "    ip ospf 1 area 0.0.0.0\n"
@@ -1701,13 +2072,6 @@ def test_switch_config_leaf_secondary():
             + "    ip mtu 9198\n"
             + "    ip address 192.168.0.5/17\n"
             + "    ip ospf 1 area 0.0.0.0\n"
-            + "vsx\n"
-            + "    system-mac 02:00:00:00:65:00\n"
-            + "    inter-switch-link lag 256\n"
-            + "    role secondary\n"
-            + "    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive\n"
-            + "    linkup-delay-timer 600\n"
-            + "    vsx-sync vsx-global\n"
         ) in str(result.output)
         print(result.output)
 
@@ -1755,165 +2119,6 @@ def test_switch_config_leaf_secondary_to_uan():
         )
         assert result.exit_code == 0
         assert "hostname sw-leaf-004\n"
-        assert banner_motd in str(result.output)
-        assert (
-            "no ip icmp redirect\n"
-            + "vrf keepalive\n"
-            + "ntp server 192.168.4.4\n"
-            + "ntp server 192.168.4.5\n"
-            + "ntp server 192.168.4.6\n"
-            + "ntp enable\n"
-        ) in str(result.output)
-        print(result.output)
-
-        assert (
-            "ssh server vrf default\n"
-            + "ssh server vrf keepalive\n"
-            + "ssh server vrf mgmt\n"
-            + "access-list ip mgmt\n"
-            + "    10 comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET\n"
-            + "    20 permit tcp 192.168.0.0/255.255.128.0 any eq ssh\n"
-            + "    30 permit tcp 192.168.3.0/255.255.128.0 any eq ssh\n"
-            + "    40 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
-            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
-            + "    60 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
-            + "    70 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
-            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
-            + "    90 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
-            + "    100 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
-            + "    110 deny tcp any any eq ssh\n"
-            + "    120 deny tcp any any eq https\n"
-            + "    130 deny udp any any eq snmp\n"
-            + "    140 deny udp any any eq snmp-trap\n"
-            + "    150 comment ALLOW ANYTHING ELSE\n"
-            + "    160 permit any any any\n"
-            + "access-list ip nmn-hmn\n"
-            + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
-            + "    20 deny any 192.168.0.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
-            + "    30 deny any 192.168.3.0/255.255.128.0 192.168.200.0/255.255.128.0\n"
-            + "    40 deny any 192.168.0.0/255.255.128.0 192.168.100.0/255.255.128.0\n"
-            + "    50 deny any 192.168.100.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
-            + "    60 deny any 192.168.100.0/255.255.128.0 192.168.200.0/255.255.128.0\n"
-            + "    70 deny any 192.168.200.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
-            + "    80 deny any 192.168.200.0/255.255.128.0 192.168.100.0/255.255.128.0\n"
-            + "    90 deny any 10.92.100.0/255.255.255.0 192.168.0.0/255.255.128.0\n"
-            + "    100 deny any 10.94.100.0/255.255.255.0 192.168.3.0/255.255.128.0\n"
-            + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
-            + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
-            + "    130 permit any any any\n"
-            + "apply access-list ip mgmt control-plane vrf default\n"
-            + "\n"
-            + "vlan 1\n"
-            + "vlan 2\n"
-            + "    name NMN\n"
-            + "    apply access-list ip nmn-hmn in\n"
-            + "    apply access-list ip nmn-hmn out\n"
-            + "vlan 4\n"
-            + "    name HMN\n"
-            + "    apply access-list ip nmn-hmn in\n"
-            + "    apply access-list ip nmn-hmn out\n"
-            + "vlan 7\n"
-            + "    name CAN\n"
-            + "vlan 10\n"
-            + "    name SUN\n"
-            + "spanning-tree\n"
-            + "spanning-tree forward-delay 4\n"
-            + "spanning-tree config-name MST0\n"
-            + "spanning-tree config-revision 1\n"
-            + "interface mgmt\n"
-            + "    shutdown\n"
-            + "    ip dhcp\n"
-        ) in str(result.output)
-        print(result.output)
-
-        ncn_m = (
-            "interface lag 1 multi-chassis\n"
-            + "    no shutdown\n"
-            + "    description sw-leaf-004:1==>ncn-m003:pcie-slot1:1\n"
-            + "    no routing\n"
-            + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 1-2,4,7\n"
-            + "    lacp mode active\n"
-            + "    lacp fallback\n"
-            + "    spanning-tree port-type admin-edge\n"
-            + "\n"
-            + "interface 1/1/1\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-leaf-004:1==>ncn-m003:pcie-slot1:1\n"
-            + "    lag 1\n"
-        )
-        assert ncn_m in str(result.output)
-
-        ncn_w = (
-            "interface lag 3 multi-chassis\n"
-            + "    no shutdown\n"
-            + "    description sw-leaf-004:3==>ncn-w002:ocp:2\n"
-            + "    no routing\n"
-            + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 1-2,4,7\n"
-            + "    lacp mode active\n"
-            + "    lacp fallback\n"
-            + "    spanning-tree port-type admin-edge\n"
-            + "\n"
-            + "interface 1/1/3\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-leaf-004:3==>ncn-w002:ocp:2\n"
-            + "    lag 3\n"
-            + "\n"
-            + "interface lag 4 multi-chassis\n"
-            + "    no shutdown\n"
-            + "    description sw-leaf-004:4==>ncn-w003:ocp:2\n"
-            + "    no routing\n"
-            + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 1-2,4,7\n"
-            + "    lacp mode active\n"
-            + "    lacp fallback\n"
-            + "    spanning-tree port-type admin-edge\n"
-            + "\n"
-            + "interface 1/1/4\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-leaf-004:4==>ncn-w003:ocp:2\n"
-            + "    lag 4\n"
-        )
-        assert ncn_w in str(result.output)
-
-        ncn_s = (
-            "interface lag 5 multi-chassis\n"
-            + "    no shutdown\n"
-            + "    description sw-leaf-004:5==>ncn-s003:pcie-slot1:1\n"
-            + "    no routing\n"
-            + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 1-2,4,7\n"
-            + "    lacp mode active\n"
-            + "    lacp fallback\n"
-            + "    spanning-tree port-type admin-edge\n"
-            + "\n"
-            + "interface 1/1/5\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-leaf-004:5==>ncn-s003:pcie-slot1:1\n"
-            + "    lag 5\n"
-            + "\n"
-            + "interface lag 6 multi-chassis\n"
-            + "    no shutdown\n"
-            + "    description sw-leaf-004:6==>ncn-s003:pcie-slot1:2\n"
-            + "    no routing\n"
-            + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 10\n"
-            + "    lacp mode active\n"
-            + "    lacp fallback\n"
-            + "    spanning-tree port-type admin-edge\n"
-            + "\n"
-            + "interface 1/1/6\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-leaf-004:6==>ncn-s003:pcie-slot1:2\n"
-            + "    lag 6\n"
-        )
-        assert ncn_s in str(result.output)
 
         uan = (
             "interface 1/1/7\n"
@@ -1941,86 +2146,6 @@ def test_switch_config_leaf_secondary_to_uan():
             + "    lag 8\n"
         )
         assert uan in str(result.output)
-
-        leaf_to_spine = (
-            "interface lag 103 multi-chassis\n"
-            + "    no shutdown\n"
-            + "    description leaf_to_spines_lag\n"
-            + "    no routing\n"
-            + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 1-2,4,7\n"
-            + "    lacp mode active\n"
-            + "\n"
-            + "interface 1/1/52\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-leaf-004:52==>sw-spine-002:4\n"
-            + "    lag 103\n"
-            + "\n"
-            + "interface 1/1/53\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-leaf-004:53==>sw-spine-001:4\n"
-            + "    lag 103\n"
-        )
-        assert leaf_to_spine in str(result.output)
-        assert (
-            "interface lag 256\n"
-            + "    no shutdown\n"
-            + "    description ISL link\n"
-            + "    no routing\n"
-            + "    vlan trunk native 1 tag\n"
-            + "    vlan trunk allowed all\n"
-            + "    lacp mode active\n"
-            + "interface 1/1/54\n"
-            + "    no shutdown\n"
-            + "    vrf attach keepalive\n"
-            + "    description vsx keepalive\n"
-            + "    ip address 192.168.255.1/31\n"
-            + "interface 1/1/55\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description vsx isl\n"
-            + "    lag 256\n"
-            + "interface 1/1/56\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description vsx isl\n"
-            + "    lag 256\n"
-            + "interface loopback 0\n"
-            + "    ip address 10.2.0.7/32\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
-            + "interface vlan 1\n"
-            + "    ip mtu 9198\n"
-            + "    ip address 192.168.1.7/16\n"
-            + "interface vlan 2\n"
-            + "    description NMN\n"
-            + "    ip mtu 9198\n"
-            + "    ip address 192.168.3.7/17\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
-            + "interface vlan 4\n"
-            + "    description HMN\n"
-            + "    ip mtu 9198\n"
-            + "    ip address 192.168.0.7/17\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
-            + "vsx\n"
-            + "    system-mac 02:00:00:00:65:00\n"
-            + "    inter-switch-link lag 256\n"
-            + "    role secondary\n"
-            + "    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive\n"
-            + "    linkup-delay-timer 600\n"
-            + "    vsx-sync vsx-global\n"
-        ) in str(result.output)
-        print(result.output)
-
-        assert (
-            "router ospf 1\n"
-            + "    router-id 10.2.0.7\n"
-            + "    area 0.0.0.0\n"
-            + "https-server vrf default\n"
-            + "https-server vrf mgmt\n"
-        ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_cdu_primary():
@@ -2222,25 +2347,28 @@ def test_switch_config_cdu_primary():
             + "    vlan trunk native 1 tag\n"
             + "    vlan trunk allowed all\n"
             + "    lacp mode active\n"
-            + "\n"
             + "interface 1/1/48\n"
             + "    no shutdown\n"
-            + "    mtu 9198\n"
             + "    vrf attach keepalive\n"
-            + "    description vsx keepalive\n"
+            + "    description VSX keepalive\n"
             + "    ip address 192.168.255.0/31\n"
-            + "\n"
             + "interface 1/1/51\n"
             + "    no shutdown\n"
             + "    mtu 9198\n"
             + "    description vsx isl\n"
             + "    lag 256\n"
-            + "\n"
             + "interface 1/1/52\n"
             + "    no shutdown\n"
             + "    mtu 9198\n"
             + "    description vsx isl\n"
             + "    lag 256\n"
+            + "vsx\n"
+            + "    system-mac 02:00:00:00:6b:00\n"
+            + "    inter-switch-link lag 256\n"
+            + "    role primary\n"
+            + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
+            + "    linkup-delay-timer 600\n"
+            + "    vsx-sync vsx-global\n"
             + "\n"
             + "interface loopback 0\n"
             + "    ip address 10.2.0.16/32\n"
@@ -2248,6 +2376,8 @@ def test_switch_config_cdu_primary():
             + "interface vlan 1\n"
             + "    ip mtu 9198\n"
             + "    ip address 192.168.1.16/16\n"
+            + "    ip ospf 1 area 0.0.0.0\n"
+            + "    ip ospf passive\n"
         ) in str(result.output)
         print(result.output)
 
@@ -2283,18 +2413,161 @@ def test_switch_config_cdu_primary():
         )
         assert mtn_nmn_vlan in str(result.output)
         assert (
-            "vsx\n"
-            + "    system-mac 02:00:00:00:73:00\n"
-            + "    inter-switch-link lag 256\n"
-            + "    role primary\n"
-            + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
-            + "    linkup-delay-timer 600\n"
-            + "    vsx-sync vsx-global\n"
-            + "router ospf 1\n"
+            "router ospf 1\n"
             + "    router-id 10.2.0.16\n"
             + "    area 0.0.0.0\n"
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
+        ) in str(result.output)
+        print(result.output)
+
+
+def test_switch_config_cdu_primary_preserve():
+    """Test that the `canu generate switch config` command returns the config while preserving LAG #s."""
+    cdu_primary = "sw-cdu-001"
+
+    with runner.isolated_filesystem():
+        with open(sls_file, "w") as f:
+            json.dump(sls_input, f)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "generate",
+                "switch",
+                "config",
+                "--csm",
+                csm,
+                "--architecture",
+                architecture,
+                "--shcd",
+                test_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--sls-file",
+                sls_file,
+                "--name",
+                cdu_primary,
+                "--preserve",
+                switch_backups_folder,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "hostname sw-cdu-001\n"
+
+        cmm = (
+            "interface lag 20 multi-chassis static\n"
+            + "    no shutdown\n"
+            + "    description sw-cdu-001:2==>cmm-x3002-000:1\n"
+            + "    no routing\n"
+            + "    vlan trunk native 2000\n"
+            + "    vlan trunk allowed 2000,3000\n"
+            + "    spanning-tree root-guard\n"
+            + "\n"
+            + "interface 1/1/2\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-cdu-001:2==>cmm-x3002-000:1\n"
+            + "    lag 20\n"
+            + "interface lag 3 multi-chassis static\n"
+            + "    no shutdown\n"
+            + "    description sw-cdu-001:3==>cmm-x3002-001:1\n"
+            + "    no routing\n"
+            + "    vlan trunk native 2000\n"
+            + "    vlan trunk allowed 2000,3000\n"
+            + "    spanning-tree root-guard\n"
+            + "\n"
+            + "interface 1/1/3\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-cdu-001:3==>cmm-x3002-001:1\n"
+            + "    lag 3\n"
+            + "interface lag 4 multi-chassis static\n"
+            + "    no shutdown\n"
+            + "    description sw-cdu-001:4==>cmm-x3002-002:1\n"
+            + "    no routing\n"
+            + "    vlan trunk native 2000\n"
+            + "    vlan trunk allowed 2000,3000\n"
+            + "    spanning-tree root-guard\n"
+            + "\n"
+            + "interface 1/1/4\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-cdu-001:4==>cmm-x3002-002:1\n"
+            + "    lag 4\n"
+            + "interface lag 5 multi-chassis static\n"
+            + "    no shutdown\n"
+            + "    description sw-cdu-001:5==>cmm-x3002-003:1\n"
+            + "    no routing\n"
+            + "    vlan trunk native 2000\n"
+            + "    vlan trunk allowed 2000,3000\n"
+            + "    spanning-tree root-guard\n"
+            + "\n"
+            + "interface 1/1/5\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-cdu-001:5==>cmm-x3002-003:1\n"
+            + "    lag 5\n"
+        )
+        assert cmm in str(result.output)
+
+        cdu_to_spine = (
+            "interface lag 25 multi-chassis\n"
+            + "    no shutdown\n"
+            + "    description cdu_to_spines_lag\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 1-2,4\n"
+            + "    lacp mode active\n"
+            + "\n"
+            + "interface 1/1/49\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-cdu-001:49==>sw-spine-002:5\n"
+            + "    lag 25\n"
+            + "\n"
+            + "interface 1/1/50\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-cdu-001:50==>sw-spine-001:5\n"
+            + "    lag 25\n"
+        )
+        assert cdu_to_spine in str(result.output)
+
+        assert (
+            "interface lag 200\n"
+            + "    no shutdown\n"
+            + "    description ISL link\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1 tag\n"
+            + "    vlan trunk allowed all\n"
+            + "    lacp mode active\n"
+            + "interface 1/1/48\n"
+            + "    no shutdown\n"
+            + "    vrf attach keepalive\n"
+            + "    description VSX keepalive\n"
+            + "    ip address 192.168.255.0/31\n"
+            + "interface 1/1/51\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description vsx isl\n"
+            + "    lag 200\n"
+            + "interface 1/1/52\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description vsx isl\n"
+            + "    lag 200\n"
+            + "vsx\n"
+            + "    system-mac 02:00:00:00:6b:00\n"
+            + "    inter-switch-link lag 200\n"
+            + "    role primary\n"
+            + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
+            + "    linkup-delay-timer 600\n"
+            + "    vsx-sync vsx-global\n"
         ) in str(result.output)
         print(result.output)
 
@@ -2487,25 +2760,28 @@ def test_switch_config_cdu_secondary():
             + "    vlan trunk native 1 tag\n"
             + "    vlan trunk allowed all\n"
             + "    lacp mode active\n"
-            + "\n"
             + "interface 1/1/48\n"
             + "    no shutdown\n"
-            + "    mtu 9198\n"
             + "    vrf attach keepalive\n"
-            + "    description vsx keepalive\n"
+            + "    description VSX keepalive\n"
             + "    ip address 192.168.255.1/31\n"
-            + "\n"
             + "interface 1/1/51\n"
             + "    no shutdown\n"
             + "    mtu 9198\n"
             + "    description vsx isl\n"
             + "    lag 256\n"
-            + "\n"
             + "interface 1/1/52\n"
             + "    no shutdown\n"
             + "    mtu 9198\n"
             + "    description vsx isl\n"
             + "    lag 256\n"
+            + "vsx\n"
+            + "    system-mac 02:00:00:00:6b:00\n"
+            + "    inter-switch-link lag 256\n"
+            + "    role secondary\n"
+            + "    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive\n"
+            + "    linkup-delay-timer 600\n"
+            + "    vsx-sync vsx-global\n"
             + "\n"
             + "interface loopback 0\n"
             + "    ip address 10.2.0.17/32\n"
@@ -2513,6 +2789,8 @@ def test_switch_config_cdu_secondary():
             + "interface vlan 1\n"
             + "    ip mtu 9198\n"
             + "    ip address 192.168.1.17/16\n"
+            + "    ip ospf 1 area 0.0.0.0\n"
+            + "    ip ospf passive\n"
         ) in str(result.output)
         print(result.output)
 
@@ -2550,14 +2828,7 @@ def test_switch_config_cdu_secondary():
         assert mtn_nmn_vlan in str(result.output)
 
         assert (
-            "vsx\n"
-            + "    system-mac 02:00:00:00:73:00\n"
-            + "    inter-switch-link lag 256\n"
-            + "    role secondary\n"
-            + "    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive\n"
-            + "    linkup-delay-timer 600\n"
-            + "    vsx-sync vsx-global\n"
-            + "router ospf 1\n"
+            "router ospf 1\n"
             + "    router-id 10.2.0.17\n"
             + "    area 0.0.0.0\n"
             + "https-server vrf default\n"
@@ -2899,6 +3170,66 @@ def test_switch_config_missing_file():
             "  '--shcd'\n"
         ) in str(result.output)
         print(result.output)
+
+
+def test_switch_config_leaf_bmc_preserve():
+    """Test that the `canu generate switch config` command returns the config while preserving LAG #s."""
+    leaf_bmc = "sw-leaf-bmc-001"
+
+    with runner.isolated_filesystem():
+        with open(sls_file, "w") as f:
+            json.dump(sls_input, f)
+
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "generate",
+                "switch",
+                "config",
+                "--csm",
+                csm,
+                "--architecture",
+                architecture,
+                "--shcd",
+                test_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--sls-file",
+                sls_file,
+                "--name",
+                leaf_bmc,
+                "--preserve",
+                switch_backups_folder,
+            ],
+        )
+        assert result.exit_code == 0
+
+        leaf_bmc_to_leaf = (
+            "interface lag 2\n"
+            + "    no shutdown\n"
+            + "    description leaf_bmc_to_leaf_lag\n"
+            + "    no routing\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 1-2,4\n"
+            + "    lacp mode active\n"
+            + "\n"
+            + "interface 1/1/47\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-bmc-001:47==>sw-leaf-002:51\n"
+            + "    lag 2\n"
+            + "\n"
+            + "interface 1/1/48\n"
+            + "    no shutdown\n"
+            + "    mtu 9198\n"
+            + "    description sw-leaf-bmc-001:48==>sw-leaf-001:51\n"
+            + "    lag 2\n"
+        )
+        assert leaf_bmc_to_leaf in str(result.output)
 
 
 def test_switch_config_bad_file():
@@ -3802,6 +4133,7 @@ def test_switch_config_tds_spine_primary():
             + "interface 1/1/54\n"
             + "    no shutdown\n"
             + "    vrf attach keepalive\n"
+            + "    description VSX keepalive\n"
             + "    ip address 192.168.255.0/31\n"
             + "interface 1/1/55\n"
             + "    no shutdown\n"
@@ -3813,6 +4145,14 @@ def test_switch_config_tds_spine_primary():
             + "    mtu 9198\n"
             + "    description vsx isl\n"
             + "    lag 256\n"
+            + "vsx\n"
+            + "    system-mac 02:00:00:00:6b:00\n"
+            + "    inter-switch-link lag 256\n"
+            + "    role primary\n"
+            + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
+            + "    linkup-delay-timer 600\n"
+            + "    vsx-sync vsx-global\n"
+            + "\n"
             + "interface loopback 0\n"
             + "    ip address 10.2.0.2/32\n"
             + "    ip ospf 1 area 0.0.0.0\n"
@@ -3845,13 +4185,6 @@ def test_switch_config_tds_spine_primary():
             + "    active-gateway ip mac 12:00:00:00:6b:00\n"
             + "    active-gateway ip 192.168.11.1\n"
             + "    ip helper-address 10.92.100.222\n"
-            + "vsx\n"
-            + "    system-mac 02:00:00:00:6b:00\n"
-            + "    inter-switch-link lag 256\n"
-            + "    role primary\n"
-            + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
-            + "    linkup-delay-timer 600\n"
-            + "    vsx-sync vsx-global\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
         print(result.output)
@@ -4357,6 +4690,7 @@ def test_switch_config_tds_spine_secondary():
             + "interface 1/1/54\n"
             + "    no shutdown\n"
             + "    vrf attach keepalive\n"
+            + "    description VSX keepalive\n"
             + "    ip address 192.168.255.1/31\n"
             + "interface 1/1/55\n"
             + "    no shutdown\n"
@@ -4368,6 +4702,14 @@ def test_switch_config_tds_spine_secondary():
             + "    mtu 9198\n"
             + "    description vsx isl\n"
             + "    lag 256\n"
+            + "vsx\n"
+            + "    system-mac 02:00:00:00:6b:00\n"
+            + "    inter-switch-link lag 256\n"
+            + "    role secondary\n"
+            + "    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive\n"
+            + "    linkup-delay-timer 600\n"
+            + "    vsx-sync vsx-global\n"
+            + "\n"
             + "interface loopback 0\n"
             + "    ip address 10.2.0.3/32\n"
             + "    ip ospf 1 area 0.0.0.0\n"
@@ -4400,13 +4742,6 @@ def test_switch_config_tds_spine_secondary():
             + "    active-gateway ip mac 12:00:00:00:6b:00\n"
             + "    active-gateway ip 192.168.11.1\n"
             + "    ip helper-address 10.92.100.222\n"
-            + "vsx\n"
-            + "    system-mac 02:00:00:00:6b:00\n"
-            + "    inter-switch-link lag 256\n"
-            + "    role secondary\n"
-            + "    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive\n"
-            + "    linkup-delay-timer 600\n"
-            + "    vsx-sync vsx-global\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
         print(result.output)
@@ -4522,552 +4857,6 @@ def test_switch_config_tds_spine_secondary():
         print(result.output)
 
 
-def test_switch_config_tds_cdu_primary():
-    """Test that the `canu generate switch config` command runs and returns valid tds primary cdu config."""
-    cdu_primary_tds = "sw-cdu-001"
-
-    with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
-
-        result = runner.invoke(
-            cli,
-            [
-                "--cache",
-                cache_minutes,
-                "generate",
-                "switch",
-                "config",
-                "--csm",
-                csm,
-                "--architecture",
-                architecture_tds,
-                "--shcd",
-                test_file_tds,
-                "--tabs",
-                tabs_tds,
-                "--corners",
-                corners_tds,
-                "--sls-file",
-                sls_file,
-                "--name",
-                cdu_primary_tds,
-            ],
-        )
-        assert result.exit_code == 0
-        assert "hostname sw-cdu-001\n"
-        assert banner_motd in str(result.output)
-        assert (
-            "no ip icmp redirect\n"
-            + "vrf keepalive\n"
-            + "ntp server 192.168.4.4\n"
-            + "ntp server 192.168.4.5\n"
-            + "ntp server 192.168.4.6\n"
-            + "ntp enable\n"
-        ) in str(result.output)
-        print(result.output)
-
-        assert (
-            "ssh server vrf default\n"
-            + "ssh server vrf keepalive\n"
-            + "ssh server vrf mgmt\n"
-            + "access-list ip mgmt\n"
-            + "    10 comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET\n"
-            + "    20 permit tcp 192.168.0.0/255.255.128.0 any eq ssh\n"
-            + "    30 permit tcp 192.168.3.0/255.255.128.0 any eq ssh\n"
-            + "    40 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
-            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
-            + "    60 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
-            + "    70 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
-            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
-            + "    90 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
-            + "    100 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
-            + "    110 deny tcp any any eq ssh\n"
-            + "    120 deny tcp any any eq https\n"
-            + "    130 deny udp any any eq snmp\n"
-            + "    140 deny udp any any eq snmp-trap\n"
-            + "    150 comment ALLOW ANYTHING ELSE\n"
-            + "    160 permit any any any\n"
-            + "access-list ip nmn-hmn\n"
-            + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
-            + "    20 deny any 192.168.0.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
-            + "    30 deny any 192.168.3.0/255.255.128.0 192.168.200.0/255.255.128.0\n"
-            + "    40 deny any 192.168.0.0/255.255.128.0 192.168.100.0/255.255.128.0\n"
-            + "    50 deny any 192.168.100.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
-            + "    60 deny any 192.168.100.0/255.255.128.0 192.168.200.0/255.255.128.0\n"
-            + "    70 deny any 192.168.200.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
-            + "    80 deny any 192.168.200.0/255.255.128.0 192.168.100.0/255.255.128.0\n"
-            + "    90 deny any 10.92.100.0/255.255.255.0 192.168.0.0/255.255.128.0\n"
-            + "    100 deny any 10.94.100.0/255.255.255.0 192.168.3.0/255.255.128.0\n"
-            + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
-            + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
-            + "    130 permit any any any\n"
-            + "apply access-list ip mgmt control-plane vrf default\n"
-            + "\n"
-            + "vlan 1\n"
-            + "vlan 2\n"
-            + "    name NMN\n"
-            + "    apply access-list ip nmn-hmn in\n"
-            + "    apply access-list ip nmn-hmn out\n"
-            + "vlan 4\n"
-            + "    name HMN\n"
-            + "    apply access-list ip nmn-hmn in\n"
-            + "    apply access-list ip nmn-hmn out\n"
-            + "spanning-tree\n"
-            + "spanning-tree forward-delay 4\n"
-            + "spanning-tree config-name MST0\n"
-            + "spanning-tree config-revision 1\n"
-            + "interface mgmt\n"
-            + "    shutdown\n"
-            + "    ip dhcp\n"
-        ) in str(result.output)
-        print(result.output)
-
-        cmm = (
-            "interface lag 2 multi-chassis static\n"
-            + "    no shutdown\n"
-            + "    description sw-cdu-001:2==>cmm-x3002-000:1\n"
-            + "    no routing\n"
-            + "    vlan trunk native 2000\n"
-            + "    vlan trunk allowed 2000,3000\n"
-            + "    spanning-tree root-guard\n"
-            + "\n"
-            + "interface 1/1/2\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-cdu-001:2==>cmm-x3002-000:1\n"
-            + "    lag 2\n"
-            + "interface lag 3 multi-chassis static\n"
-            + "    no shutdown\n"
-            + "    description sw-cdu-001:3==>cmm-x3002-001:1\n"
-            + "    no routing\n"
-            + "    vlan trunk native 2000\n"
-            + "    vlan trunk allowed 2000,3000\n"
-            + "    spanning-tree root-guard\n"
-            + "\n"
-            + "interface 1/1/3\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-cdu-001:3==>cmm-x3002-001:1\n"
-            + "    lag 3\n"
-            + "interface lag 4 multi-chassis static\n"
-            + "    no shutdown\n"
-            + "    description sw-cdu-001:4==>cmm-x3002-002:1\n"
-            + "    no routing\n"
-            + "    vlan trunk native 2000\n"
-            + "    vlan trunk allowed 2000,3000\n"
-            + "    spanning-tree root-guard\n"
-            + "\n"
-            + "interface 1/1/4\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-cdu-001:4==>cmm-x3002-002:1\n"
-            + "    lag 4\n"
-            + "interface lag 5 multi-chassis static\n"
-            + "    no shutdown\n"
-            + "    description sw-cdu-001:5==>cmm-x3002-003:1\n"
-            + "    no routing\n"
-            + "    vlan trunk native 2000\n"
-            + "    vlan trunk allowed 2000,3000\n"
-            + "    spanning-tree root-guard\n"
-            + "\n"
-            + "interface 1/1/5\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-cdu-001:5==>cmm-x3002-003:1\n"
-            + "    lag 5\n"
-        )
-        assert cmm in str(result.output)
-
-        cec = (
-            "interface 1/1/1\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-cdu-001:1==>cec-x3002-000:1\n"
-            + "    no routing\n"
-            + "    vlan access 3000\n"
-            + "    spanning-tree bpdu-guard\n"
-            + "    spanning-tree port-type admin-edge\n"
-        )
-        assert cec in str(result.output)
-
-        cdu_to_spine = (
-            "interface lag 255 multi-chassis\n"
-            + "    no shutdown\n"
-            + "    description cdu_to_spines_lag\n"
-            + "    no routing\n"
-            + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 1-2,4\n"
-            + "    lacp mode active\n"
-            + "\n"
-            + "interface 1/1/49\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-cdu-001:49==>sw-spine-002:50\n"
-            + "    lag 255\n"
-            + "\n"
-            + "interface 1/1/50\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-cdu-001:50==>sw-spine-001:50\n"
-            + "    lag 255\n"
-        )
-        assert cdu_to_spine in str(result.output)
-
-        assert (
-            "interface lag 256\n"
-            + "    no shutdown\n"
-            + "    description ISL link\n"
-            + "    no routing\n"
-            + "    vlan trunk native 1 tag\n"
-            + "    vlan trunk allowed all\n"
-            + "    lacp mode active\n"
-            + "\n"
-            + "interface 1/1/48\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    vrf attach keepalive\n"
-            + "    description vsx keepalive\n"
-            + "    ip address 192.168.255.0/31\n"
-            + "\n"
-            + "interface 1/1/51\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description vsx isl\n"
-            + "    lag 256\n"
-            + "\n"
-            + "interface 1/1/52\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description vsx isl\n"
-            + "    lag 256\n"
-            + "\n"
-            + "interface loopback 0\n"
-            + "    ip address 10.2.0.16/32\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
-            + "interface vlan 1\n"
-            + "    ip mtu 9198\n"
-            + "    ip address 192.168.1.16/16\n"
-        ) in str(result.output)
-        print(result.output)
-
-        mtn_hmn_vlan = (
-            "vlan 3000\n"
-            + "    name cabinet_3002\n"
-            + "    apply access-list ip nmn-hmn in\n"
-            + "    apply access-list ip nmn-hmn out\n"
-            + "\n"
-            + "interface vlan 3000\n"
-            + "    ip mtu 9198\n"
-            + "    ip address 192.168.104.2/22\n"
-            + "    active-gateway ip mac 12:00:00:00:73:00\n"
-            + "    active-gateway ip 192.168.104.1\n"
-            + "    ipv6 address autoconfig\n"
-            + "    ip helper-address 10.94.100.222\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
-        )
-        assert mtn_hmn_vlan in str(result.output)
-
-        mtn_nmn_vlan = (
-            "vlan 2000\n"
-            + "    name cabinet_3002\n"
-            + "    apply access-list ip nmn-hmn in\n"
-            + "    apply access-list ip nmn-hmn out\n"
-            + "\n"
-            + "interface vlan 2000\n"
-            + "    ip mtu 9198\n"
-            + "    ip address 192.168.100.2/22\n"
-            + "    active-gateway ip mac 12:00:00:00:73:00\n"
-            + "    active-gateway ip 192.168.100.1\n"
-            + "    ip helper-address 10.92.100.222\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
-        )
-        assert mtn_nmn_vlan in str(result.output)
-
-        assert (
-            "vsx\n"
-            + "    system-mac 02:00:00:00:73:00\n"
-            + "    inter-switch-link lag 256\n"
-            + "    role primary\n"
-            + "    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive\n"
-            + "    linkup-delay-timer 600\n"
-            + "    vsx-sync vsx-global\n"
-            + "router ospf 1\n"
-            + "    router-id 10.2.0.16\n"
-            + "    area 0.0.0.0\n"
-            + "https-server vrf default\n"
-            + "https-server vrf mgmt\n"
-        ) in str(result.output)
-        print(result.output)
-
-
-def test_switch_config_tds_cdu_secondary():
-    """Test that the `canu generate switch config` command runs and returns valid tds secondary cdu config."""
-    cdu_secondary_tds = "sw-cdu-002"
-
-    with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
-
-        result = runner.invoke(
-            cli,
-            [
-                "--cache",
-                cache_minutes,
-                "generate",
-                "switch",
-                "config",
-                "--csm",
-                csm,
-                "--architecture",
-                architecture_tds,
-                "--shcd",
-                test_file_tds,
-                "--tabs",
-                tabs_tds,
-                "--corners",
-                corners_tds,
-                "--sls-file",
-                sls_file,
-                "--name",
-                cdu_secondary_tds,
-            ],
-        )
-        assert result.exit_code == 0
-        assert "hostname sw-cdu-002\n"
-        assert banner_motd in str(result.output)
-        assert (
-            "no ip icmp redirect\n"
-            + "vrf keepalive\n"
-            + "ntp server 192.168.4.4\n"
-            + "ntp server 192.168.4.5\n"
-            + "ntp server 192.168.4.6\n"
-            + "ntp enable\n"
-        ) in str(result.output)
-        print(result.output)
-
-        assert (
-            "ssh server vrf default\n"
-            + "ssh server vrf keepalive\n"
-            + "ssh server vrf mgmt\n"
-            + "access-list ip mgmt\n"
-            + "    10 comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET\n"
-            + "    20 permit tcp 192.168.0.0/255.255.128.0 any eq ssh\n"
-            + "    30 permit tcp 192.168.3.0/255.255.128.0 any eq ssh\n"
-            + "    40 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
-            + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
-            + "    60 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
-            + "    70 comment ALLOW SNMP FROM HMN METALLB SUBNET\n"
-            + "    80 permit udp 10.94.100.0/255.255.255.0 any eq snmp\n"
-            + "    90 permit udp 10.94.100.0/255.255.255.0 any eq snmp-trap\n"
-            + "    100 comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE\n"
-            + "    110 deny tcp any any eq ssh\n"
-            + "    120 deny tcp any any eq https\n"
-            + "    130 deny udp any any eq snmp\n"
-            + "    140 deny udp any any eq snmp-trap\n"
-            + "    150 comment ALLOW ANYTHING ELSE\n"
-            + "    160 permit any any any\n"
-            + "access-list ip nmn-hmn\n"
-            + "    10 deny any 192.168.3.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
-            + "    20 deny any 192.168.0.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
-            + "    30 deny any 192.168.3.0/255.255.128.0 192.168.200.0/255.255.128.0\n"
-            + "    40 deny any 192.168.0.0/255.255.128.0 192.168.100.0/255.255.128.0\n"
-            + "    50 deny any 192.168.100.0/255.255.128.0 192.168.0.0/255.255.128.0\n"
-            + "    60 deny any 192.168.100.0/255.255.128.0 192.168.200.0/255.255.128.0\n"
-            + "    70 deny any 192.168.200.0/255.255.128.0 192.168.3.0/255.255.128.0\n"
-            + "    80 deny any 192.168.200.0/255.255.128.0 192.168.100.0/255.255.128.0\n"
-            + "    90 deny any 10.92.100.0/255.255.255.0 192.168.0.0/255.255.128.0\n"
-            + "    100 deny any 10.94.100.0/255.255.255.0 192.168.3.0/255.255.128.0\n"
-            + "    110 deny any 192.168.0.0/255.255.128.0 10.92.100.0/255.255.255.0\n"
-            + "    120 deny any 192.168.3.0/255.255.128.0 10.94.100.0/255.255.255.0\n"
-            + "    130 permit any any any\n"
-            + "apply access-list ip mgmt control-plane vrf default\n"
-            + "\n"
-            + "vlan 1\n"
-            + "vlan 2\n"
-            + "    name NMN\n"
-            + "    apply access-list ip nmn-hmn in\n"
-            + "    apply access-list ip nmn-hmn out\n"
-            + "vlan 4\n"
-            + "    name HMN\n"
-            + "    apply access-list ip nmn-hmn in\n"
-            + "    apply access-list ip nmn-hmn out\n"
-            + "spanning-tree\n"
-            + "spanning-tree forward-delay 4\n"
-            + "spanning-tree config-name MST0\n"
-            + "spanning-tree config-revision 1\n"
-            + "interface mgmt\n"
-            + "    shutdown\n"
-            + "    ip dhcp\n"
-        ) in str(result.output)
-        print(result.output)
-
-        cmm = (
-            "interface lag 2 multi-chassis static\n"
-            + "    no shutdown\n"
-            + "    description sw-cdu-002:2==>cmm-x3002-000:2\n"
-            + "    no routing\n"
-            + "    vlan trunk native 2000\n"
-            + "    vlan trunk allowed 2000,3000\n"
-            + "    spanning-tree root-guard\n"
-            + "\n"
-            + "interface 1/1/2\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-cdu-002:2==>cmm-x3002-000:2\n"
-            + "    lag 2\n"
-            + "interface lag 3 multi-chassis static\n"
-            + "    no shutdown\n"
-            + "    description sw-cdu-002:3==>cmm-x3002-001:2\n"
-            + "    no routing\n"
-            + "    vlan trunk native 2000\n"
-            + "    vlan trunk allowed 2000,3000\n"
-            + "    spanning-tree root-guard\n"
-            + "\n"
-            + "interface 1/1/3\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-cdu-002:3==>cmm-x3002-001:2\n"
-            + "    lag 3\n"
-            + "interface lag 4 multi-chassis static\n"
-            + "    no shutdown\n"
-            + "    description sw-cdu-002:4==>cmm-x3002-002:2\n"
-            + "    no routing\n"
-            + "    vlan trunk native 2000\n"
-            + "    vlan trunk allowed 2000,3000\n"
-            + "    spanning-tree root-guard\n"
-            + "\n"
-            + "interface 1/1/4\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-cdu-002:4==>cmm-x3002-002:2\n"
-            + "    lag 4\n"
-            + "interface lag 5 multi-chassis static\n"
-            + "    no shutdown\n"
-            + "    description sw-cdu-002:5==>cmm-x3002-003:2\n"
-            + "    no routing\n"
-            + "    vlan trunk native 2000\n"
-            + "    vlan trunk allowed 2000,3000\n"
-            + "    spanning-tree root-guard\n"
-            + "\n"
-            + "interface 1/1/5\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-cdu-002:5==>cmm-x3002-003:2\n"
-            + "    lag 5\n"
-        )
-        assert cmm in str(result.output)
-
-        cdu_to_spine = (
-            "interface lag 255 multi-chassis\n"
-            + "    no shutdown\n"
-            + "    description cdu_to_spines_lag\n"
-            + "    no routing\n"
-            + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 1-2,4\n"
-            + "    lacp mode active\n"
-            + "\n"
-            + "interface 1/1/49\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-cdu-002:49==>sw-spine-002:49\n"
-            + "    lag 255\n"
-            + "\n"
-            + "interface 1/1/50\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description sw-cdu-002:50==>sw-spine-001:49\n"
-            + "    lag 255\n"
-        )
-        assert cdu_to_spine in str(result.output)
-
-        assert (
-            "interface lag 256\n"
-            + "    no shutdown\n"
-            + "    description ISL link\n"
-            + "    no routing\n"
-            + "    vlan trunk native 1 tag\n"
-            + "    vlan trunk allowed all\n"
-            + "    lacp mode active\n"
-            + "\n"
-            + "interface 1/1/48\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    vrf attach keepalive\n"
-            + "    description vsx keepalive\n"
-            + "    ip address 192.168.255.1/31\n"
-            + "\n"
-            + "interface 1/1/51\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description vsx isl\n"
-            + "    lag 256\n"
-            + "\n"
-            + "interface 1/1/52\n"
-            + "    no shutdown\n"
-            + "    mtu 9198\n"
-            + "    description vsx isl\n"
-            + "    lag 256\n"
-            + "\n"
-            + "interface loopback 0\n"
-            + "    ip address 10.2.0.17/32\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
-            + "interface vlan 1\n"
-            + "    ip mtu 9198\n"
-            + "    ip address 192.168.1.17/16\n"
-        ) in str(result.output)
-        print(result.output)
-
-        mtn_hmn_vlan = (
-            "vlan 3000\n"
-            + "    name cabinet_3002\n"
-            + "    apply access-list ip nmn-hmn in\n"
-            + "    apply access-list ip nmn-hmn out\n"
-            + "\n"
-            + "interface vlan 3000\n"
-            + "    ip mtu 9198\n"
-            + "    ip address 192.168.104.3/22\n"
-            + "    active-gateway ip mac 12:00:00:00:73:00\n"
-            + "    active-gateway ip 192.168.104.1\n"
-            + "    ipv6 address autoconfig\n"
-            + "    ip helper-address 10.94.100.222\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
-        )
-        assert mtn_hmn_vlan in str(result.output)
-
-        mtn_nmn_vlan = (
-            "vlan 2000\n"
-            + "    name cabinet_3002\n"
-            + "    apply access-list ip nmn-hmn in\n"
-            + "    apply access-list ip nmn-hmn out\n"
-            + "\n"
-            + "interface vlan 2000\n"
-            + "    ip mtu 9198\n"
-            + "    ip address 192.168.100.3/22\n"
-            + "    active-gateway ip mac 12:00:00:00:73:00\n"
-            + "    active-gateway ip 192.168.100.1\n"
-            + "    ip helper-address 10.92.100.222\n"
-            + "    ip ospf 1 area 0.0.0.0\n"
-        )
-        assert mtn_nmn_vlan in str(result.output)
-
-        assert (
-            "vsx\n"
-            + "    system-mac 02:00:00:00:73:00\n"
-            + "    inter-switch-link lag 256\n"
-            + "    role secondary\n"
-            + "    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive\n"
-            + "    linkup-delay-timer 600\n"
-            + "    vsx-sync vsx-global\n"
-            + "router ospf 1\n"
-            + "    router-id 10.2.0.17\n"
-            + "    area 0.0.0.0\n"
-            + "https-server vrf default\n"
-            + "https-server vrf mgmt\n"
-        ) in str(result.output)
-        print(result.output)
-
-
 def test_switch_config_tds_leaf_bmc():
     """Test that the `canu generate switch config` command runs and returns valid tds leaf-bmc config."""
     leaf_bmc_tds = "sw-leaf-bmc-001"
@@ -5169,7 +4958,7 @@ def test_switch_config_tds_leaf_bmc():
         ) in str(result.output)
         print(result.output)
         leaf_bmc_to_leaf = (
-            "interface lag 255\n"
+            "interface lag 101\n"
             + "    no shutdown\n"
             + "    description leaf_bmc_to_spine_lag\n"
             + "    no routing\n"
@@ -5180,12 +4969,12 @@ def test_switch_config_tds_leaf_bmc():
             + "    no shutdown\n"
             + "    mtu 9198\n"
             + "    description sw-leaf-bmc-001:47==>sw-spine-002:51\n"
-            + "    lag 255\n"
+            + "    lag 101\n"
             + "interface 1/1/48\n"
             + "    no shutdown\n"
             + "    mtu 9198\n"
             + "    description sw-leaf-bmc-001:48==>sw-spine-001:51\n"
-            + "    lag 255\n"
+            + "    lag 101\n"
         )
         assert leaf_bmc_to_leaf in str(result.output)
 
