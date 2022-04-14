@@ -1,9 +1,15 @@
 {#- bgp #}
 {% set sequence = 10 %}
 ip prefix-list pl-cmn
+ip prefix-list pl-cmn bulk-mode
 ip prefix-list pl-cmn seq {{ sequence }} permit {{ variables.CMN_NETWORK_IP }} /{{ variables.CMN_PREFIX_LEN }} ge {{ variables.CMN_PREFIX_LEN }}
+ip prefix-list pl-cmn commit
 ip prefix-list pl-hmn
+ip prefix-list pl-hmn bulk-mode
 ip prefix-list pl-hmn {% set sequence = sequence+10 %}seq {{ sequence }} permit {{ variables.HMNLB_NETWORK_IP }} /{{ variables.HMNLB_PREFIX_LEN }} ge {{ variables.HMNLB_PREFIX_LEN }}
+ip prefix-list pl-hmn commit
 ip prefix-list pl-nmn
+ip prefix-list pl-nmn bulk-mode
 ip prefix-list pl-nmn {% set sequence = sequence+10 %}seq {{ sequence }} permit {{ variables.NMNLB_NETWORK_IP }} /{{ variables.HMNLB_PREFIX_LEN }} ge {{ variables.HMNLB_PREFIX_LEN }}
+ip prefix-list pl-nmn commit
 {#- end bgp #}
