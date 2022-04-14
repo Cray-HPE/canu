@@ -29,8 +29,8 @@ no ntp server {{ variables.NCN_W003 }} disable
 ntp server {{ variables.NCN_W003 }} keyID 0
 no ntp server {{ variables.NCN_W003 }} trusted-enable
 ntp server {{ variables.NCN_W003 }} version 4
-ntp vrf default enable force
-web vrf default enable force
+ntp vrf default enable
+web vrf default enable
 
 {%- include '1.0/dellmellanox/common/acl-mellanox.j2' %}
 
@@ -60,7 +60,6 @@ no interface vlan {{ variables.HMN_VLAN }} ip icmp redirect
 interface vlan {{ variables.HMN_VLAN }} mtu 9184
 no interface vlan {{ variables.CAN_VLAN }} ip icmp redirect
 interface vlan {{ variables.CAN_VLAN }} mtu 9184
-interface vlan 4000 mtu 9216 
 interface vlan {{ variables.NMN_VLAN }} ipv4 port access-group nmn-hmn
 interface vlan {{ variables.HMN_VLAN }} ipv4 port access-group nmn-hmn
 ip load-sharing source-ip-port
@@ -87,7 +86,6 @@ spanning-tree mst revision 2
 {% include '1.0/dellmellanox/common/uan.j2' %}
 {% include '1.0/dellmellanox/full/spine-to-leaf-bmc.lag.j2' %}
 {% include '1.0/dellmellanox/common/spine-to-cdu.lag.j2' %}
-{% include '1.0/dellmellanox/common/mellanox-unused.j2' %}
       
 protocol ospf
 router ospf 1 vrf default
@@ -112,5 +110,11 @@ mlag-vip mlag-domain ip 192.168.255.242 /29 force
 no mlag shutdown
 mlag system-mac 00:00:5E:00:01:01
 interface vlan 4000 ipl 1 peer-address 192.168.255.254
+
+no ldap vrf mgmt enable
+no radius-server vrf mgmt enable
+no snmp-server vrf mgmt enable
+no tacacs-server vrf mgmt enable
+vrf definition mgmt
    
 {# end dm-sw-spine.primary #}

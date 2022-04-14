@@ -1,0 +1,3 @@
+interface ethernet{{ interface }}
+ channel-group {{ lag }}
+ channel-group {{ lag }} mode active
