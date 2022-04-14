@@ -19,7 +19,7 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-from python:buster
+from python:bullseye
 
 # create canu user
 RUN useradd -ms /bin/bash canu
@@ -33,7 +33,7 @@ COPY requirements.txt /app/canu/
 RUN apt-get -yq update && apt-get -yq install gcc openssl jq vim libffi-dev musl-dev \
     python3 python3-dev python3-pip
 
-RUN pip install --upgrade pip && pip3 install -r /app/canu/requirements.txt
+RUN pip3 install --upgrade pip && pip3 install -r /app/canu/requirements.txt
 
 # copy canu files
 COPY . /app/canu
