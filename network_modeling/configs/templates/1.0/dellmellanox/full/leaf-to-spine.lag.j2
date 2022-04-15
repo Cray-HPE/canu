@@ -1,8 +1,9 @@
-{#- leaf-bmc-to-spine #}
+{#- leaf-to-spine.lag #}
 {%- set ns = namespace(lag_displayed=false) %}
-{%- for node in cabling.nodes if node.subtype == "leaf" or node.subtype == "spine" %}
+{%- for node in cabling.nodes if node.subtype == "spine" %}
 {%- if ns.lag_displayed == false %}
 {%- set ns.lag_displayed = true %}
+
 interface port-channel{{ node.config.LAG_NUMBER }}
  description {{ node.config.DESCRIPTION }}
  no shutdown
@@ -10,19 +11,20 @@ interface port-channel{{ node.config.LAG_NUMBER }}
  switchport access vlan {{ variables.NATIVE_VLAN }}
  switchport trunk allowed vlan {{ variables.NMN_VLAN }},{{ variables.HMN_VLAN }}
  mtu 9216
+ vlt-port-channel {{ node.config.LAG_NUMBER }}
+ !
 {%- endif %}
 {%- endfor %}
 
-{%- for node in cabling.nodes if node.subtype == "leaf"or node.subtype == "spine" %}
-
+{%- for node in cabling.nodes if node.subtype == "spine"%}
 interface ethernet1/1/{{ node.config.PORT }}
  no shutdown
  channel-group {{ node.config.LAG_NUMBER }} mode active
  no switchport
+ speed 40000
  mtu 9216
- speed 10000
  flowcontrol receive off
  flowcontrol transmit off
-
+!
 {%- endfor %}
-{#- end leaf-bmc-to-spine #}
+{#- end leaf-to-spine.lag #}

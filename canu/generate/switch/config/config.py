@@ -544,7 +544,6 @@ def generate_switch_config(
         switch_config: The generated switch configuration
     """
     node_shasta_name = get_shasta_name(switch_name, factory.lookup_mapper())
-
     if node_shasta_name is None:
         return Exception(
             click.secho(
@@ -857,7 +856,7 @@ def generate_switch_config(
 
     if architecture == "network_v1":
         switch_config_v1 = ""
-        if "sw-cdu" in switch_name or "sw-leaf-bmc" in switch_name:
+        if "sw-cdu" in switch_name or "sw-leaf" in switch_name:
             switch_os = "dellOS10"
             options = yaml.load(open(hier_options(switch_os)))
         elif "sw-spine" in switch_name:
