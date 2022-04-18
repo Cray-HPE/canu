@@ -104,11 +104,13 @@ pipeline {
             }
         }
         stage("Build") {
-            stage('Image') {
-                steps {
-                    script {
-                        sh "printenv"
-                        sh "make image"
+            parallel {
+                stage('Image') {
+                    steps {
+                        script {
+                            sh "printenv"
+                            sh "make image"
+                        }
                     }
                 }
             }
@@ -119,6 +121,13 @@ pipeline {
                 script {
                     publishCsmRpms(component: env.RPM_NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: env.PUBLISH_SP3, arch: "x86_64", isStable: env.IS_STABLE)
                     publishCsmRpms(component: env.RPM_NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: env.PUBLISH_SP3, arch: "src", isStable: env.IS_STABLE)
+                }
+            }
+        }
+            stage('Publish ') {
+            steps {
+                script {
+                    publishCsmDockerImage(image: env.NAME, tag: env.VERSION, isStable: env.IS_STABLE)
                 }
             }
         }
