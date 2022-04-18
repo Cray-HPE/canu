@@ -31,12 +31,16 @@ pipeline {
     }
 
     environment {
+        NAME "cray-canu"
+        DESCRIPTION = "CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze."
         RPM_NAME = "canu"
         SPEC_FILE = "canu.spec"
         IS_STABLE = getBuildIsStable()
         BUILD_METADATA = getRpmRevision(isStable: env.IS_STABLE)
         PUBLISH_SP2 = "sle-15sp2"
         PUBLISH_SP3 = "sle-15sp3"
+        VERSION = getDockerBuildVersion(isStable: env.IS_STABLE)
+        DOCKER_ARGS = getDockerBuildArgs(name: env.NAME, description: env.DESCRIPTION)
     }
 
     stages {
