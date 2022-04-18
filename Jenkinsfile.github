@@ -44,6 +44,26 @@ pipeline {
     }
 
     stages {
+
+        stage("Build") {
+            parallel {
+                stage('Image') {
+                    steps {
+                        script {
+                            sh "printenv"
+                            sh "make image"
+                        }
+                    }
+                }
+            }
+        }
+        stage('Publish ') {
+            steps {
+                script {
+                    publishCsmDockerImage(image: env.NAME, tag: env.VERSION, isStable: env.IS_STABLE)
+                }
+            }
+        }
         stage("Prepare") {
             steps {
                 script {
@@ -103,18 +123,6 @@ pipeline {
                 sh "make rpm"
             }
         }
-        stage("Build") {
-            parallel {
-                stage('Image') {
-                    steps {
-                        script {
-                            sh "printenv"
-                            sh "make image"
-                        }
-                    }
-                }
-            }
-        }
 
         stage('Publish SP3') {
             steps {
@@ -124,13 +132,7 @@ pipeline {
                 }
             }
         }
-            stage('Publish ') {
-            steps {
-                script {
-                    publishCsmDockerImage(image: env.NAME, tag: env.VERSION, isStable: env.IS_STABLE)
-                }
-            }
-        }
+
     }
     post {
         cleanup {
