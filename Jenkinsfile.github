@@ -99,6 +99,16 @@ pipeline {
                 sh "make rpm"
             }
         }
+        stage("Build Container") {
+            stage('Image') {
+                steps {
+                    script {
+                        sh "printenv"
+                        sh "make image"
+                    }
+                }
+            }
+        }
 
         stage('Publish SP3') {
             steps {
