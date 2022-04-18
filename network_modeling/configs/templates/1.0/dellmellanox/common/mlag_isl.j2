@@ -1,0 +1,20 @@
+{#- mlag_isl #}
+{%- set ns = namespace(lag_displayed=false) %}
+{%- for node in cabling.nodes if node.subtype in variables.HOSTNAME and node.config.LAG_NUMBER %}
+{%- if ns.lag_displayed == false %}
+{%- set ns.lag_displayed = true %}
+
+interface port-channel {{ node.config.LAG_NUMBER }}
+interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} speed 40G force
+interface ethernet 1/{{ variables.VSX_ISL_PORT2 }} speed 40G force
+interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} channel-group {{ node.config.LAG_NUMBER }} mode active
+interface ethernet 1/{{ variables.VSX_ISL_PORT2 }} channel-group {{ node.config.LAG_NUMBER }} mode active
+interface ethernet 1/{{ variables.VSX_ISL_PORT1 }} description "mlag-isl"
+interface ethernet 1/{{ variables.VSX_ISL_PORT2 }} description "mlag-isl"
+interface port-channel {{ node.config.LAG_NUMBER }} description "mlag-isl"
+interface port-channel {{ node.config.LAG_NUMBER }} ipl 1
+interface port-channel {{ node.config.LAG_NUMBER }} dcb priority-flow-control mode on force
+
+{%- endif %}
+{%- endfor %}
+{#- end mlag_isl #}

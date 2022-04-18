@@ -106,7 +106,7 @@ def node_model_from_paddle(factory, ccj_json):
     # Add location and Connect Ports
     add_location_and_ports_from_ccj_json(node_list, ccj_json)
 
-    warnings = []
+    warnings = defaultdict(list)
     # FUTURE ==> warnings = factory.check_connections()
     return node_list, warnings
 

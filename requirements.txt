@@ -85,6 +85,7 @@ netutils==1.0.0
 nornir==3.2.0
 nornir-netmiko==0.1.2
 nornir-salt==0.9.0
+nornir-utils==0.2.0
 nox==2021.10.1
 ntc-templates==2.3.2
 openpyxl==3.0.9
@@ -144,7 +145,7 @@ textfsm==1.1.2
 toml==0.10.2
 tomli==1.1.0
 tokenize-rt==3.2.0
-ttp==0.7.2
+ttp==0.8.4
 typed-ast==1.4.3
 typing-extensions==3.10.0.2
 unify==0.5
