@@ -41,10 +41,12 @@ COPY . /app/canu
 # install canu
 RUN pip3 install --editable /app/canu/
 
+# make files dir
+RUN mkdir /files
+
 # set file perms for canu
-RUN chown -R canu /app/canu
+RUN chown -R canu /app/canu /files
 
 # set none root user: canu
 USER canu
 
-WORKDIR /files
