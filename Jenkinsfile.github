@@ -103,7 +103,7 @@ pipeline {
                 sh "make rpm"
             }
         }
-        stage("Build Container") {
+        stage("Build") {
             stage('Image') {
                 steps {
                     script {
