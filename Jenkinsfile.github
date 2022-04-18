@@ -51,7 +51,7 @@ pipeline {
                     steps {
                         script {
                             sh "printenv"
-                            sh "make image"
+                            sh "make -f Makefile_image image"
                         }
                     }
                 }
