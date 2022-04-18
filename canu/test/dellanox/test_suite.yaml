@@ -29,7 +29,7 @@
 # - name: BGP test
 #   task: show ip bgp vrf all summary
 #   test: contains_lines
-#   pattern: 
+#   pattern:
 #     - IDLE
 #     - ACTIVE
 #     - CONNECT
@@ -69,7 +69,7 @@
   task: show interfaces mlag-port-channel summary | include LACP
   test: ncontains
   pattern: "(S)"
-  err_msg: MLAG port in suspended mode 
+  err_msg: MLAG port in suspended mode
   device: spine
 - name: OSPF check
   task: show ip ospf neighbors vrf all
@@ -87,13 +87,13 @@
   task: show ip ospf neighbor
   test: ncontains
   pattern: EXSTART
-  err_msg: ospf neighbor down 
+  err_msg: ospf neighbor down
   device: leaf-bmc
 - name: OSPF check vrf customer
   task: show ip ospf vrf Customer neighbor
   test: ncontains
   pattern: EXSTART
-  err_msg: ospf neighbor down 
+  err_msg: ospf neighbor down in Customer VRF
   device: leaf-bmc
 - name: STP check for root bridge
   task: show spanning-tree brief
@@ -108,13 +108,13 @@
   err_msg: Interfaces errors above 999
   device: leaf-bmc
 # - name: running-config different from startup-config
-#   task: show diff running-configuration startup-configuration 
+#   task: show diff running-configuration startup-configuration
 #   test: "!contains_re"
 #   pattern: (.*?)
 #   err_msg: running-config does not match startup-config
 #   device: leaf-bmc
 - name: Is internal DNS server alive (ping)
-  task: ping 10.92.100.225
+  task: ping 10.92.100.225 -c 1
   test: contains
   pattern: bytes from
   err_msg: Internal DNS does not respond to ping
@@ -124,7 +124,7 @@
     - cdu
     - spine
 - name: Does internal DNS resolve ncn-m001-nmn
-  task: ping ncn-m001-nmn
+  task: ping ncn-m001-nmn -c 1
   test: contains
   pattern: bytes from
   err_msg: Internal DNS cannot resolve ncn-m001-nmn, is ncn-m001 alive?
