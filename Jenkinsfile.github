@@ -31,7 +31,7 @@ pipeline {
     }
 
     environment {
-        NAME "cray-canu"
+        NAME = "cray-canu"
         DESCRIPTION = "CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze."
         RPM_NAME = "canu"
         SPEC_FILE = "canu.spec"
