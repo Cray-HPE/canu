@@ -27,15 +27,14 @@ import sys
 import click
 from click_help_colors import HelpColorsCommand
 import click_spinner
-from nornir.core.filter import F
 from netutils.config.clean import sanitize_config
 from nornir import InitNornir
-from nornir.core.inventory import Host
+from nornir.core.filter import F
 from nornir_netmiko import netmiko_send_command
 from nornir_salt.plugins.functions import ResultSerializer
 from nornir_salt.plugins.tasks import tcp_ping
+
 from canu.utils.inventory import inventory
-from nornir_utils.plugins.functions import print_result
 
 # Get project root directory
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
@@ -127,7 +126,7 @@ def network(
     unreachable_hosts = []
 
     for hostname, result in result_dictionary.items():
-        if result["tcp_ping"][22] == False:
+        if result["tcp_ping"][22] is False:
             click.secho(
                 f"{hostname} is not reachable via SSH, skipping backup.",
                 fg="red",
@@ -195,4 +194,8 @@ def network(
         },
     ]
     with click_spinner.spinner():
+        print(
+            "  Connecting",
+            end="\r",
+        )
         get_netmiko_backups()
