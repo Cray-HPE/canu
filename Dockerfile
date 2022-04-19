@@ -20,12 +20,16 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 from python:bullseye
+#from ubuntu:22.04
 
 # create canu user
 RUN useradd -ms /bin/bash canu
 
 # update command prompt
 RUN echo 'export PS1="canu \w : "' >> /etc/bash.bashrc
+
+# make files dir
+RUN mkdir /files
 
 # prep image layer for faster builds
 COPY requirements.txt /app/canu/
@@ -41,12 +45,10 @@ COPY . /app/canu
 # install canu
 RUN pip3 install --editable /app/canu/
 
-# make files dir
-RUN mkdir /files
-
 # set file perms for canu
 RUN chown -R canu /app/canu /files
 
 # set none root user: canu
 USER canu
 
+WORKDIR /files
