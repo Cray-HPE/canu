@@ -20,7 +20,6 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 from python:bullseye
-#from ubuntu:22.04
 
 # create canu user
 RUN useradd -ms /bin/bash canu
