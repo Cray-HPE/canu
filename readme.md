@@ -1,4 +1,4 @@
-# 🛶 CANU v1.5.3-develop
+# 🛶 CANU v1.5.4-develop
 
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
@@ -1154,7 +1154,16 @@ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
 ## [1.5.3-develop]
+
+- `canu backup network` and `canu test` now checks for connectivity before running commands against the switch.
+- Refactored `canu test` code.
+- Fixed mellanox backup config.  It requires `show running-config expanded` vs `show run`
+
+
+## [1.5.3-develop]
+
 - Update base packages required by Canu to function and fix known CVE from paramiko
 
 ## [1.5.2-develop]

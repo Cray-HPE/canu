@@ -27,11 +27,15 @@ import sys
 import click
 from click_help_colors import HelpColorsCommand
 import click_spinner
+from nornir.core.filter import F
 from netutils.config.clean import sanitize_config
 from nornir import InitNornir
+from nornir.core.inventory import Host
 from nornir_netmiko import netmiko_send_command
-
+from nornir_salt.plugins.functions import ResultSerializer
+from nornir_salt.plugins.tasks import tcp_ping
 from canu.utils.inventory import inventory
+from nornir_utils.plugins.functions import print_result
 
 # Get project root directory
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
@@ -84,12 +88,6 @@ else:
     is_flag=True,
     required=False,
 )
-@click.option(
-    "--name",
-    "switch_name",
-    required=False,
-    help="The name of the switch that you want to back up. e.g. 'sw-spine-001'",
-)
 @click.option("--sls-address", default="api-gw-service-nmn.local", show_default=True)
 @click.pass_context
 def network(
@@ -102,7 +100,6 @@ def network(
     log_,
     folder,
     unsanitized,
-    switch_name,
 ):
     """Canu backup network config."""
     if not password:
@@ -123,6 +120,26 @@ def network(
         logging={"enabled": log_, "to_console": True, "level": "DEBUG"},
     )
 
+    # check if switch is reachable before backing up config
+
+    ping_check = nr.run(task=tcp_ping)
+    result_dictionary = ResultSerializer(ping_check)
+    unreachable_hosts = []
+
+    for hostname, result in result_dictionary.items():
+        if result["tcp_ping"][22] == False:
+            click.secho(
+                f"{hostname} is not reachable via SSH, skipping backup.",
+                fg="red",
+            )
+            unreachable_hosts.append(hostname)
+
+    online_hosts = nr.filter(~F(name__in=unreachable_hosts))
+
+    # Filter nornir inventory since mellanox requires a different show run command.
+    not_mellanox_switches = online_hosts.filter(~F(platform__in="mellanox"))
+    mellanox_switches = online_hosts.filter(platform="mellanox")
+
     # Save the netmiko config.
     def save_config_to_file(hostname, config):
         if not unsanitized:
@@ -134,21 +151,21 @@ def network(
 
     # Use netmiko to SSH to switches and retrieve config.
     def get_netmiko_backups():
-        # If we only want to backup one switch.
-        if switch_name:
-            nr_name = nr.filter(filter_func=lambda h: switch_name in h.name)
-            backup_results = nr_name.run(
-                task=netmiko_send_command,
-                enable=True,
-                command_string="show run",
-            )
-        else:
-            backup_results = nr.run(
-                task=netmiko_send_command,
-                enable=True,
-                command_string="show run",
-            )
+
+        mellanox_backup = mellanox_switches.run(
+            task=netmiko_send_command,
+            enable=True,
+            command_string="show running-config expanded",
+        )
+
+        backup_results = not_mellanox_switches.run(
+            task=netmiko_send_command,
+            enable=True,
+            command_string="show run",
+        )
         click.secho("\nRunning Configs Saved\n---------------------", fg="green")
+
+        backup_results.update(mellanox_backup)
         for hostname in backup_results:
             exist = os.path.exists(folder)
             if not exist:
