@@ -44,26 +44,6 @@ pipeline {
     }
 
     stages {
-
-        stage("Build") {
-            parallel {
-                stage('Image') {
-                    steps {
-                        script {
-                            sh "printenv"
-                            sh "make -f Makefile_image image"
-                        }
-                    }
-                }
-            }
-        }
-        stage('Publish ') {
-            steps {
-                script {
-                    publishCsmDockerImage(image: env.NAME, tag: env.VERSION, isStable: env.IS_STABLE)
-                }
-            }
-        }
         stage("Prepare") {
             steps {
                 script {
@@ -132,7 +112,25 @@ pipeline {
                 }
             }
         }
-
+            stage("Build") {
+            parallel {
+                stage('Image') {
+                    steps {
+                        script {
+                            sh "printenv"
+                            sh "make -f Makefile_image image"
+                        }
+                    }
+                }
+            }
+        }
+        stage('Publish ') {
+            steps {
+                script {
+                    publishCsmDockerImage(image: env.NAME, tag: env.VERSION, isStable: env.IS_STABLE)
+                }
+            }
+        }
     }
     post {
         cleanup {
