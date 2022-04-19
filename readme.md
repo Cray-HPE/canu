@@ -1158,9 +1158,10 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 ## [1.5.4-develop]
 
 - `canu backup network` and `canu test` now checks for connectivity before running commands against the switch.
-- Refactored `canu test` code.
+- Refactored canu `test.py`.
 - Fixed mellanox backup config.  It requires `show running-config expanded` vs `show run`
 - Add test for out of sync LAG on aruba.
+- Fixed mellanox ping test.
 
 
 ## [1.5.3-develop]
