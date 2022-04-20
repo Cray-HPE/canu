@@ -1,0 +1,5 @@
+{#- unused #}
+{%- for port in variables.UNUSED_PORTS %}
+interface ethernet 1/{{ port }} shutdown
+{%- endfor %}
+{#- end unused #}

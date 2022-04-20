@@ -68,6 +68,10 @@ added_files = [
     ),
     ("canu/test/aruba/test_suite.yaml", "canu/test/aruba"),
     ("canu/test/dellanox/test_suite.yaml", "canu/test/dellanox"),
+    (
+        "canu/generate/switch/config/ttp_templates/*.txt",
+        "canu/generate/switch/config/ttp_templates",
+    ),
 ]
 a = Analysis(
     ["canu/cli.py"],
@@ -75,7 +79,7 @@ a = Analysis(
     binaries=[],
     datas=added_files,
     hiddenimports=["network_modeling"],
-    hookspath=["./"],
+    hookspath=["./pyinstaller_hooks"],
     runtime_hooks=[],
     excludes=["tests"],
     win_no_prefer_redirects=False,

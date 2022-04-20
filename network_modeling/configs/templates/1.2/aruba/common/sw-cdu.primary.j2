@@ -40,6 +40,8 @@ interface mgmt
     shutdown
     ip dhcp
 
+{%- include '1.2/aruba/common/mtn_hmn_vlan.j2' %}
+{%- include '1.2/aruba/common/mtn_nmn_vlan.j2' %}
 {% include '1.2/aruba/common/cmm.j2' %}
 {% include '1.2/aruba/common/cec.j2' %}
 {% include '1.2/aruba/common/cdu-to-spine.lag.j2' %}
@@ -71,16 +73,11 @@ interface vlan {{ variables.CMN_VLAN }}
     ip address {{ variables.CMN_IP }}/{{variables.CMN_PREFIX_LEN}}
     ip ospf 2 area 0.0.0.0
 
-{%- include '1.2/aruba/common/mtn_hmn_vlan.j2' %}
-{%- include '1.2/aruba/common/mtn_nmn_vlan.j2' %}
-
+ip dns server-address {{ variables.NMNLB_DNS }}
 router ospf 2 vrf Customer
     router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 router ospf 1
-    router-id {{ variables.LOOPBACK_IP }}
-    area 0.0.0.0
-router ospfv3 1
     router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 https-server vrf Customer

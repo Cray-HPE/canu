@@ -28,12 +28,14 @@ vlan {{ variables.HMN_VLAN }}
     apply access-list ip nmn-hmn out
 vlan {{ variables.CMN_VLAN }}
     name CMN
+{%- if variables.CAN != None %}
     apply access-list ip cmn-can in
     apply access-list ip cmn-can out
 vlan {{ variables.CAN_VLAN }}
     name CAN
     apply access-list ip cmn-can in
     apply access-list ip cmn-can out
+{%- endif %}
 vlan 10
     name SUN
 spanning-tree
@@ -88,6 +90,7 @@ interface vlan {{ variables.CMN_VLAN }}
     active-gateway ip {{ variables.CMN_IP_GATEWAY }}
     ip ospf 2 area 0.0.0.0
 {%- endif %}
+{%- if variables.CAN != None %}
 interface vlan {{ variables.CAN_VLAN }}
     vrf attach Customer
     description CAN
@@ -95,6 +98,8 @@ interface vlan {{ variables.CAN_VLAN }}
     ip address {{ variables.CAN_IP_SECONDARY }}/{{ variables.CAN_PREFIX_LEN }}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.CAN_IP_GATEWAY }}
+    ip ospf 2 area 0.0.0.0
+{%- endif %}
 ip dns server-address {{ variables.NMNLB_DNS }}
 {% include '1.2/aruba/common/prefix-list.j2' %}
 {% include '1.2/aruba/common/route-map.j2' %}
@@ -105,9 +110,6 @@ router ospf 2 vrf Customer
 router ospf 1
     router-id {{ variables.LOOPBACK_IP }}
     redistribute bgp
-    area 0.0.0.0
-router ospfv3 1
-    router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 {% include '1.2/aruba/common/bgp.secondary.j2' %}
 https-server vrf Customer
