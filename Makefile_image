@@ -1,5 +1,5 @@
 NAME ?= cray-canu
-VERSION ?= $(shell cat canu/.version |cut -d '~' -f1)
+VERSION ?= $(shell "cat canu/.version |cut -d '~' -f1")
 
 
 IMAGE ?= artifactory.algol60.net/csm-docker/stable/${NAME}
