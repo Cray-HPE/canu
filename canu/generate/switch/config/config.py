@@ -196,11 +196,6 @@ dash = "-" * 60
     help="Path to current running configs.",
     type=click.Path(),
 )
-@click.option(
-    "--preserve",
-    help="Path to current running configs.",
-    type=click.Path(),
-)
 @click.pass_context
 def config(
     ctx,
