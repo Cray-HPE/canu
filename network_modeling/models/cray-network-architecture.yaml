@@ -347,7 +347,7 @@ network_v2_tds:
         - "slurm"
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port"
-    - lookup_name: 
+    - lookup_name:
         - "lm"
         - "lmem"
       shasta_name: "lm"
@@ -356,7 +356,7 @@ network_v2_tds:
         - "lnet"
       shasta_name: "lnet"
       architecture_type: "river_ncn_node_4_port"
-    - lookup_name: 
+    - lookup_name:
         - "gw"
         - "gateway"
       shasta_name: "gateway"
@@ -424,6 +424,8 @@ network_v1:
       connections:
         - name: "spine"
           speed: 40
+        - name: "river_ncn_leaf"
+          speed: 10
     - name: "slingshot_hsn_switch"
       model: "slingshot_hsn_switch"
       connections:
@@ -442,6 +444,20 @@ network_v1:
         - name: "mountain_compute_leaf"
           speed: 1
           number: 1
+          comment: "keepalive"
+    - name: "river_ncn_leaf"
+      model: "S4148T-ON"
+      connections:
+        - name: "spine"
+          speed: 100
+          number: 2
+        - name: "river_ncn_leaf"
+          speed: 100
+          number: 4
+          comment: "isl"
+        - name: "river_ncn_leaf"
+          speed: 1
+          number: 10
           comment: "keepalive"
     - name: "river_ncn_node_2_port_gigabyte"
       model: "river_ncn_node_2_port_gigabyte"
@@ -538,6 +554,10 @@ network_v1:
         - "sw-smn"
       shasta_name: "sw-leaf-bmc"
       architecture_type: "river_bmc_leaf"
+    - lookup_name:
+        - "sw-10g"
+      shasta_name: "sw-leaf"
+      architecture_type: "river_ncn_leaf"
     - lookup_name:
         - "sw-40g"
       shasta_name: "sw-spine"
