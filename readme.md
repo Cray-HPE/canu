@@ -1153,6 +1153,17 @@ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+## [1.5.3-develop]
+- Update base packages required by Canu to function and fix known CVE from paramiko
+
+## [1.5.2-develop]
+
+- Fixed aruba and dell 1.2 templates so CAN config is only generated when it's detected in SLS.
+- Fix `canu generate --custom` and `canu generate --preserve` usage with RPM, this requried a new pyinstaller hook file.
+- Remove MTU from mellanox templates
+- Add negate commands to templates to remove switch defaults.
+- Fix a couple `canu validate` issues
+- Bump ttp version
 
 ## [1.5.2-develop]
 

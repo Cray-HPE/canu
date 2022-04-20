@@ -71,18 +71,27 @@ canu_version_file = path.join(project_root, "canu", ".version")
 
 # ttp preserve templates
 # pulls the interface and lag from switch configs.
-aruba_template = """
-interface {{ interface }}
-    lag {{ lag }}
-"""
-dell_template = """
-interface ethernet{{ interface }}
-  channel-group {{ lag }}
-  channel-group {{ lag }} mode active
-"""
-mellanox_template = """
-interface ethernet {{ interface }} {{ _line_ | contains("channel-group") }} {{ lag }} mode active
-"""
+ttp_templates = defaultdict()
+for vendor in ["aruba", "dell", "mellanox"]:
+    ttp_templates[vendor] = path.join(
+        project_root,
+        "canu",
+        "generate",
+        "switch",
+        "config",
+        "ttp_templates",
+        f"{vendor}_lag.txt",
+    )
+
+mellanox_interface = path.join(
+    project_root,
+    "canu",
+    "generate",
+    "switch",
+    "config",
+    "ttp_templates",
+    "mellanox_interface.txt",
+)
 
 # Import templates
 network_templates_folder = path.join(
@@ -436,10 +445,6 @@ def get_shasta_name(name, mapper):
 
 def add_custom_config(custom_config, switch_config, host, switch_os, custom_file_name):
     """Merge custom config into generated config."""
-    # mellanox ttp template to get interfaces
-    mellanox_interface = """
-interface ethernet {{ interface }} {{ _line_ | contains("") }}
-"""
     switch_config_hier = HConfig(host=host)
     custom_config_hier = HConfig(host=host)
     # load configs in HConfig Objects
@@ -467,10 +472,10 @@ interface ethernet {{ interface }} {{ _line_ | contains("") }}
     if switch_os == "onyx":
         mellanox_config = ""
         for line in custom_config_hier.all_children_sorted():
-            mellanox_config = mellanox_config + "\n" + str(line)
+            mellanox_config += "\n" + str(line)
 
         # parse out mellanox interfaces from custom config file
-        parser = ttp(mellanox_config, mellanox_interface)
+        parser = ttp(data=mellanox_config, template=mellanox_interface)
         parser.parse()
         interfaces = parser.result()
 
@@ -567,13 +572,20 @@ def generate_switch_config(
                 device_running = f.read()
                 # Get mellanox Switches
                 if architecture == "network_v1" and "spine" in switch_name:
-                    template = mellanox_template
+                    template = ttp_templates["mellanox"]
+                    switch_config_list = []
+                    for line in device_running.splitlines():
+                        if line.startswith("   "):
+                            switch_config_list.append(line.strip())
+                        else:
+                            switch_config_list.append(line)
+                    device_running = ("\n").join(switch_config_list)
                 # get Dell Switches
                 elif architecture == "network_v1":
-                    template = dell_template
+                    template = ttp_templates["dell"]
                 # get Aruba switches
                 else:
-                    template = aruba_template
+                    template = ttp_templates["aruba"]
                 parser = ttp(device_running, template)
                 parser.parse()
                 preserve = parser.result()
@@ -886,16 +898,16 @@ def generate_switch_config(
             switch_os = "onyx"
             options = yaml.load(open(hier_options(switch_os)))
         hier_host = Host(switch_name, switch_os, options)
-        if custom_config:
+        if custom_config and custom_config.get(switch_name) is not None:
             switch_custom_config = custom_config.get(switch_name)
-            if switch_custom_config is not None:
-                switch_config_v1 = add_custom_config(
-                    switch_custom_config,
-                    switch_config,
-                    hier_host,
-                    switch_os,
-                    custom_config_file,
-                )
+            switch_config_v1 = add_custom_config(
+                switch_custom_config,
+                switch_config,
+                hier_host,
+                switch_os,
+                custom_config_file,
+            )
+
         else:
             hier_v1 = HConfig(host=hier_host)
             hier_v1.load_from_string(switch_config)

@@ -1,0 +1,1 @@
+interface ethernet {{ interface }} {{ _line_ | contains("channel-group") }} {{ lag }} mode active
