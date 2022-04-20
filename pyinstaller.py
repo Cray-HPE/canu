@@ -51,8 +51,8 @@ added_files = [
         "network_modeling/configs/templates/1.0/dellmellanox/full",
     ),
     (
-        "network_modeling/configs/templates/1.2/Arista/*.j2",
-        "network_modeling/configs/templates/1.2/Arista",
+        "network_modeling/configs/templates/1.2/arista/*.j2",
+        "network_modeling/configs/templates/1.2/arista",
     ),
     (
         "network_modeling/configs/templates/1.2/aruba/common/*.j2",
