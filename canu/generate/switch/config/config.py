@@ -529,10 +529,6 @@ def generate_switch_config(
             "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf-bmc.j2",
             "secondary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf-bmc.j2",
         },
-        "sw-edge": {
-            "primary": f"{csm}/arista/sw-edge.primary.j2",
-            "secondary": f"{csm}/arista/sw-edge.secondary.j2",
-        },
     }
     template_name = templates[node_shasta_name][
         "primary" if is_primary else "secondary"
@@ -554,6 +550,12 @@ def generate_switch_config(
     if sls_variables["CMN_VLAN"] and float(csm) >= 1.2:
         spine_leaf_vlan.append(sls_variables["CMN_VLAN"])
         leaf_bmc_vlan.append(sls_variables["CMN_VLAN"])
+        templates["edge_switch"] = {
+            "sw-edge": {
+                "primary": f"{csm}/arista/sw-edge.primary.j2",
+                "secondary": f"{csm}/arista/sw-edge.secondary.j2",
+            },
+        }
     elif sls_variables["CMN_VLAN"] and float(csm) < 1.2:
         click.secho(
             "\nCMN network found in SLS, the CSM version required to use this network has to be 1.2 or greater. "
