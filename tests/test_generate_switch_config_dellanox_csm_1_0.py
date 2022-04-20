@@ -301,10 +301,10 @@ def test_switch_config_spine_primary():
             + "spanning-tree port type edge default\n"
             + "spanning-tree mst name cray\n"
             + "spanning-tree mst revision 2\n"
-            + "interface mlag-port-channel 15 spanning-tree port type network\n"
-            + "interface mlag-port-channel 15 spanning-tree guard root\n"
-            + "interface mlag-port-channel 20 spanning-tree port type network\n"
-            + "interface mlag-port-channel 20 spanning-tree guard root\n"
+            + "interface mlag-port-channel 151 spanning-tree port type network\n"
+            + "interface mlag-port-channel 151 spanning-tree guard root\n"
+            + "interface mlag-port-channel 201 spanning-tree port type network\n"
+            + "interface mlag-port-channel 201 spanning-tree guard root\n"
         ) in str(result.output)
         print(result.output)
         assert (
@@ -2150,7 +2150,7 @@ def test_switch_config_cdu_primary_preserve():
         ) in str(result.output)
         print(result.output)
         assert (
-            "interface port-channel255\n"
+            "interface port-channel100\n"
             + "  description sw-cdu-001:27==>sw-spine-001:29\n"
             + "  no shutdown\n"
             + "  switchport mode trunk\n"

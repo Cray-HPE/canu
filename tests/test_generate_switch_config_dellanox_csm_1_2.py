@@ -661,6 +661,7 @@ def test_switch_config_spine_primary_custom():
             + 'vlan 7 name "CAN"\n'
         ) in str(result.output)
         print(result.output)
+
         assert (
             "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 2\n"
             + "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 4\n"
@@ -1599,7 +1600,6 @@ def test_switch_config_leaf_bmc_custom():
             + "hostname sw-leaf-bmc-001\n"
             + "rest api restconf\n"
         ) in str(result.output)
-        print(result.output)
         print(result.output)
         assert (
             "interface vlan1\n"
@@ -2903,6 +2903,38 @@ sls_input = {
                         "Name": "bootstrap_dhcp",
                         "VlanID": 7,
                         "Gateway": "192.168.11.1",
+                    },
+                ],
+            },
+        },
+        "CHN": {
+            "Name": "CHN",
+            "ExtraProperties": {
+                "CIDR": "192.168.200.0/24",
+                "MyASN": 65530,
+                "PeerASN": 65533,
+                "Subnets": [
+                    {
+                        "Name": "bootstrap_dhcp",
+                        "CIDR": "192.168.200.0/24",
+                        "IPReservations": [
+                            {"Name": "chn-switch-1", "IPAddress": "192.168.200.2"},
+                            {"Name": "chn-switch-2", "IPAddress": "192.168.200.3"},
+                        ],
+                        "VlanID": 5,
+                        "Gateway": "192.168.200.1",
+                    },
+                    {
+                        "FullName": "CHN Bootstrap DHCP Subnet",
+                        "CIDR": "192.168.200.0/24",
+                        "IPReservations": [
+                            {"Name": "ncn-w001", "IPAddress": "192.168.200.4"},
+                            {"Name": "ncn-w002", "IPAddress": "192.168.200.5"},
+                            {"Name": "ncn-w003", "IPAddress": "192.168.200.6"},
+                        ],
+                        "Name": "bootstrap_dhcp",
+                        "VlanID": 5,
+                        "Gateway": "192.168.200.1",
                     },
                 ],
             },

@@ -166,13 +166,8 @@ def config(
     auth_token,
     sls_address,
     folder,
-<<<<<<< HEAD
-    override,
-    preserve,
-=======
     preserve,
     custom_config,
->>>>>>> develop
 ):
     """Generate the config of all switches (Aruba, Dell, or Mellanox) on the network using the SHCD.
 
@@ -228,13 +223,8 @@ def config(
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         folder: Folder to store config files
-<<<<<<< HEAD
-        override: Input file that defines what config should be ignored
-        preserve: Folder where switch running configs exist.  This folder should be populated from the "canu backup network" command.
-=======
         preserve: Folder where switch running configs exist.  This folder should be populated from the "canu backup network" command.
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
->>>>>>> develop
     """
     # SHCD Parsing
     if shcd:
@@ -381,13 +371,17 @@ def config(
         switch_name = node.common_name()
         node_shasta_name = get_shasta_name(switch_name, factory.lookup_mapper())
 
-        if node_shasta_name in [
-            "sw-cdu",
-            "sw-leaf-bmc",
-            "sw-leaf",
-            "sw-spine",
-            "sw-edge",
-        ]:
+        if (
+            node_shasta_name
+            in [
+                "sw-cdu",
+                "sw-leaf-bmc",
+                "sw-leaf",
+                "sw-spine",
+            ]
+            or node_shasta_name == "sw-edge"
+            and float(csm) >= 1.2
+        ):
 
             switch_config, devices, unknown = generate_switch_config(
                 csm,
@@ -398,13 +392,8 @@ def config(
                 sls_variables,
                 template_folder,
                 vendor_folder,
-<<<<<<< HEAD
-                override,
-                preserve,
-=======
                 preserve,
                 custom_config,
->>>>>>> develop
             )
             all_unknown.extend(unknown)
             config_devices.update(devices)

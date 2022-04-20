@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-# 🛶 CANU v1.2.5-develop
-=======
-# 🛶 CANU v1.5.3-develop
+# 🛶 CANU v1.5.4-develop
 
->>>>>>> develop
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1186,14 +1182,13 @@ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
-<<<<<<< HEAD
 
-## [1.2.5-develop]
-- Add the ability to preserve LAG #s with the `--preserve` flag when generating configs.
-- Add control plane ACL to customer VRF.
-- Remove dellanox TDS templates.
-=======
+## [1.5.4-develop]
+
+- Add the ability to generate BGP config for Arista edge switches.
+
 ## [1.5.3-develop]
+
 - Update base packages required by Canu to function and fix known CVE from paramiko
 
 ## [1.5.2-develop]
@@ -1281,7 +1276,6 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Fixed test templates for ACL, OSPF, BGP
 - Change Aruba banner to match running config.
 - Fix Canu test --network
->>>>>>> develop
 
 ## [1.2.4-develop]
 

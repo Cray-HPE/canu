@@ -111,7 +111,6 @@ def test_switch_config_spine_primary():
             + "ntp enable\n"
         ) in str(result.output)
         print(result.output)
-        print(result.output)
         assert (
             "ssh server vrf Customer\n"
             + "ssh server vrf default\n"
@@ -2270,8 +2269,11 @@ def test_switch_config_leaf_secondary():
             + "    mtu 9198\n"
             + "    description sw-leaf-002:3==>ncn-m002:pcie-slot1:1\n"
             + "    lag 3\n"
-            + "\n"
-            + "interface lag 4 multi-chassis\n"
+        )
+        assert ncn_m in str(result.output)
+
+        ncn_w = (
+            "interface lag 5 multi-chassis\n"
             + "    no shutdown\n"
             + "    description sw-leaf-002:6==>ncn-w001:ocp:2\n"
             + "    no routing\n"
@@ -2290,7 +2292,7 @@ def test_switch_config_leaf_secondary():
         assert ncn_w in str(result.output)
 
         ncn_s = (
-            "interface lag 5 multi-chassis\n"
+            "interface lag 7 multi-chassis\n"
             + "    no shutdown\n"
             + "    description sw-leaf-002:7==>ncn-s001:pcie-slot1:1\n"
             + "    no routing\n"
@@ -2326,8 +2328,10 @@ def test_switch_config_leaf_secondary():
             + "    no shutdown\n"
             + "    description sw-leaf-002:9==>ncn-s002:pcie-slot1:1\n"
             + "    no routing\n"
-            + "    vlan access 2\n"
-            + "    spanning-tree bpdu-guard\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 1-2,4,6-7\n"
+            + "    lacp mode active\n"
+            + "    lacp fallback\n"
             + "    spanning-tree port-type admin-edge\n"
             + "\n"
             + "interface 1/1/9\n"
@@ -2341,7 +2345,7 @@ def test_switch_config_leaf_secondary():
             + "    description sw-leaf-002:10==>ncn-s002:pcie-slot1:2\n"
             + "    no routing\n"
             + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 7\n"
+            + "    vlan trunk allowed 10\n"
             + "    lacp mode active\n"
             + "    lacp fallback\n"
             + "    spanning-tree port-type admin-edge\n"
@@ -2369,9 +2373,10 @@ def test_switch_config_leaf_secondary():
             + "    description sw-leaf-002:51==>sw-leaf-bmc-001:47\n"
             + "    lag 151\n"
         )
-        assert uan in str(result.output)
+        assert leaf_to_leaf_bmc in str(result.output)
+
         leaf_to_spine = (
-            "interface lag 103 multi-chassis\n"
+            "interface lag 101 multi-chassis\n"
             + "    no shutdown\n"
             + "    description leaf_to_spines_lag\n"
             + "    no routing\n"
@@ -2392,6 +2397,7 @@ def test_switch_config_leaf_secondary():
             + "    lag 101\n"
         )
         assert leaf_to_spine in str(result.output)
+
         print(result.output)
         assert (
             "interface lag 256\n"
@@ -2677,7 +2683,7 @@ def test_switch_config_cdu_primary():
             + "    vlan trunk allowed 2000,3000\n"
             + "    spanning-tree root-guard\n"
             + "\n"
-            + "interface 1/1/6\n"
+            + "interface 1/1/4\n"
             + "    no shutdown\n"
             + "    mtu 9198\n"
             + "    description sw-cdu-001:4==>cmm-x3002-002:1\n"
@@ -2690,7 +2696,7 @@ def test_switch_config_cdu_primary():
             + "    vlan trunk allowed 2000,3000\n"
             + "    spanning-tree root-guard\n"
             + "\n"
-            + "interface 1/1/7\n"
+            + "interface 1/1/5\n"
             + "    no shutdown\n"
             + "    mtu 9198\n"
             + "    description sw-cdu-001:5==>cmm-x3002-003:1\n"
@@ -3151,10 +3157,12 @@ def test_switch_config_leaf_bmc():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
+
         print(result.output)
         assert (
             "ssh server vrf default\n"
             + "ssh server vrf mgmt\n"
+            + "ssh server vrf Customer\n"
             + "access-list ip mgmt\n"
             + "    10 comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET and CMN\n"
             + "    20 permit tcp 192.168.0.0/255.255.128.0 any eq ssh\n"
@@ -3379,16 +3387,9 @@ def test_switch_config_leaf_bmc():
             + "    ip address 192.168.0.12/17\n"
             + "    ip ospf 1 area 0.0.0.0\n"
             + "    ip ospf passive\n"
-        )
-        assert interfaces in str(result.output)
-
-        mtn_hmn_vlan = (
-            "vlan 3000\n"
-            + "    name cabinet_3002\n"
-            + "    apply access-list ip nmn-hmn in\n"
-            + "    apply access-list ip nmn-hmn out\n"
-            + "\n"
-            + "interface vlan 3000\n"
+            + "interface vlan 6\n"
+            + "    vrf attach Customer\n"
+            + "    description CMN\n"
             + "    ip mtu 9198\n"
             + "    ip address 192.168.12.12/24\n"
             + "    ip ospf 2 area 0.0.0.0\n"
@@ -4636,7 +4637,6 @@ def test_switch_config_tds_spine_secondary():
         print(result.output)
         assert (
             "no ip icmp redirect\n"
-            + "vrf keepalive\n"
             + "vrf Customer\n"
             + "vrf keepalive\n"
             + "ntp server 192.168.4.4\n"
@@ -5525,6 +5525,38 @@ sls_input = {
                         "Name": "bootstrap_dhcp",
                         "VlanID": 7,
                         "Gateway": "192.168.11.1",
+                    },
+                ],
+            },
+        },
+        "CHN": {
+            "Name": "CHN",
+            "ExtraProperties": {
+                "CIDR": "192.168.200.0/24",
+                "MyASN": 65530,
+                "PeerASN": 65533,
+                "Subnets": [
+                    {
+                        "Name": "bootstrap_dhcp",
+                        "CIDR": "192.168.200.0/24",
+                        "IPReservations": [
+                            {"Name": "chn-switch-1", "IPAddress": "192.168.200.2"},
+                            {"Name": "chn-switch-2", "IPAddress": "192.168.200.3"},
+                        ],
+                        "VlanID": 5,
+                        "Gateway": "192.168.200.1",
+                    },
+                    {
+                        "FullName": "CHN Bootstrap DHCP Subnet",
+                        "CIDR": "192.168.200.0/24",
+                        "IPReservations": [
+                            {"Name": "ncn-w001", "IPAddress": "192.168.200.4"},
+                            {"Name": "ncn-w002", "IPAddress": "192.168.200.5"},
+                            {"Name": "ncn-w003", "IPAddress": "192.168.200.6"},
+                        ],
+                        "Name": "bootstrap_dhcp",
+                        "VlanID": 5,
+                        "Gateway": "192.168.200.1",
                     },
                 ],
             },
