@@ -1,0 +1,38 @@
+{#- edge_router #}
+
+interface loopback 0
+    ip address {{ variables.LOOPBACK_IP }}/32
+   
+vlan 4091
+ name mlag-ibgp
+ trunk group mlag-peer
+!
+int vlan 4091
+ ip address {{ variables.EDGE_BGP_IP_SECONDARY }}/31
+ mtu 9214
+!
+ no spanning-tree vlan-id 4091
+
+interface Vlan{{ variables.CHN_VLAN }}
+   ip address {{ variables.CHN_IP }}/{{variables.CHN_PREFIX_LEN}}
+   ip virtual-router address {{ variables.CHN_IP_GATEWAY }}
+ip routing
+
+ip prefix-list HSN seq 10 permit {{ variables.CHN }} ge {{ variables.CHN_PREFIX_LEN }}
+!
+route-map HSN permit 5
+   match ip address prefix-list HSN
+
+router bgp {{ variables.SWITCH_ASN }}
+   distance bgp 20 200 200
+   router-id {{ variables.LOOPBACK_IP }}
+   maximum-paths 32
+   neighbor {{ variables.EDGE_BGP_IP_PRIMARY }} remote-as {{ variables.SWITCH_ASN }}
+   neighbor {{ variables.EDGE_BGP_IP_PRIMARY }} next-hop-self
+   {%- for name, ip in variables.CHN_IPs.items() if "ncn-w" in name %}
+   neighbor {{ ip }} remote-as {{ variables.CHN_ASN }}
+   neighbor {{ ip }} passive
+   neighbor {{ ip }} route-map HSN in
+   {%- endfor %}
+
+{#- end edge_router #}
