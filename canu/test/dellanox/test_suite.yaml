@@ -133,3 +133,17 @@
     - leaf-bmc
     - cdu
     - spine
+- name: Internet connection check CSM 1.0
+  task: ping 8.8.8.8
+  test: contains
+  pattern: bytes from
+  err_msg: External network (internet) does not respond. Ignore if running CSM 1.2.
+  device:
+    - spine
+- name: Internet connection check CSM 1.2
+  task: ping vrf Customer 8.8.8.8
+  test: contains
+  pattern: bytes from
+  err_msg: External network (internet) does not respond. Ignore if running CSM 1.0.
+  device:
+    - spine
