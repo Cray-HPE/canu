@@ -19,18 +19,25 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-from opensuse/leap:15.3
+
+from artifactory.algol60.net/csm-docker/stable/docker.io/python:slim-bullseye
 
 # create canu user
-RUN useradd -u 1001 -m canu -d /home/canu
+RUN useradd -ms /bin/bash canu
 
 # update command prompt
 RUN echo 'export PS1="canu \w : "' >> /etc/bash.bashrc
 
+# make files dir
+RUN mkdir /files
+
 # prep image layer for faster builds
 COPY requirements.txt /app/canu/
-RUN zypper -n install python3 python3-pip vim jq
-RUN pip3 install -r /app/canu/requirements.txt
+
+RUN apt-get -yq update && apt-get -yq install gcc openssl jq vim libffi-dev musl-dev \
+    python3 python3-dev python3-pip
+
+RUN pip3 install --upgrade pip && pip3 install -r /app/canu/requirements.txt
 
 # copy canu files
 COPY . /app/canu
@@ -39,9 +46,9 @@ COPY . /app/canu
 RUN pip3 install --editable /app/canu/
 
 # set file perms for canu
-RUN chown -R canu /app/canu
+RUN chown -R canu /app/canu /files
 
 # set none root user: canu
 USER canu
 
-WORKDIR /app/canu
+WORKDIR /files
