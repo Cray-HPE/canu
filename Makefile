@@ -21,7 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 name = canu
 
-version := $(shell cat can/.version)
+version := $(shell cat canu/.version)
 
 build_image := cdrx/pyinstaller-linux:python3
 
