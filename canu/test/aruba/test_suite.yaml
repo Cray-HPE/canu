@@ -32,9 +32,11 @@
     - spine
 - name: lacp interfaces test
   task: show lacp interfaces
-  test: ncontains
-  pattern: "lacp-block"
-  err_msg: lacp port in blocking
+  test: ncontains_lines
+  pattern:
+    - "lacp-block"
+    - "ASFO"
+  err_msg: lacp port blocking or out of sync
   device:
     - cdu
     - leaf
@@ -68,7 +70,7 @@
 - name: STP check for blocked ports
   task: show spanning-tree inconsistent-ports
   test: ncontains_lines
-  pattern: 
+  pattern:
     - BPDU
     - Loop
     - Root
@@ -103,40 +105,46 @@
   test: contains
   pattern: 10.92.100.222
   err_msg: IP-Helper is missing
-  device: spine
+  device:
+    - spine
 - name: vlan 2 ip-helper test
   task: show run interface vlan 2
   test: contains
   pattern: 10.92.100.222
   err_msg: IP-Helper is missing
-  device: spine
+  device:
+    - spine
 - name: vlan 4 ip-helper test
   task: show run interface vlan 4
   test: contains
   pattern: 10.94.100.222
   err_msg: IP-Helper is missing
-  device: spine
+  device:
+    - spine
 - name: tftp route
   task: show ip route 10.92.100.60
   test: contains
   pattern: Nexthop
   err_msg: route to tftp incorrect
-  device: spine
+  device:
+    - spine
 - name: BGP Test
   task: show bgp all-vrf all summary
   test: ncontains_lines
-  pattern: 
+  pattern:
     - Idle
     - Active
     - connect
   err_msg: BGP has Neighbors in active or idle
-  device: spine
+  device:
+    - spine
 - name: STP check for root bridge spine
   task: show spanning-tree
   test: contains
   pattern: This bridge is the root
   err_msg: Not the root bridge
-  device: spine
+  device:
+    - spine
 - name: STP check for root bridge leaf
   task: show spanning
   test: ncontains

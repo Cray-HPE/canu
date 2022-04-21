@@ -28,12 +28,14 @@ vlan {{ variables.HMN_VLAN }}
     apply access-list ip nmn-hmn out
 vlan {{ variables.CMN_VLAN }}
     name CMN
+{%- if variables.CAN != None %}
     apply access-list ip cmn-can in
     apply access-list ip cmn-can out
 vlan {{ variables.CAN_VLAN }}
     name CAN
     apply access-list ip cmn-can in
     apply access-list ip cmn-can out
+{%- endif %}
 vlan 10
     name SUN
 spanning-tree
@@ -52,28 +54,8 @@ interface mgmt
 {% include '1.2/aruba/common/uan.j2' %}
 {% include '1.2/aruba/tds/spine-to-leaf-bmc.lag.j2' %}
 {% include '1.2/aruba/common/spine-to-cdu.lag.j2' %}
+{% include '1.2/aruba/common/vsx_isl.secondary.j2' %}
 
-interface lag 256
-    no shutdown
-    description ISL link
-    no routing
-    vlan trunk native 1 tag
-    vlan trunk allowed all
-    lacp mode active
-interface 1/1/{{ variables.VSX_KEEPALIVE }}
-    no shutdown
-    vrf attach keepalive
-    ip address 192.168.255.1/31
-interface 1/1/{{ variables.VSX_ISL_PORT1 }}
-    no shutdown
-    mtu 9198
-    description vsx isl
-    lag 256
-interface 1/1/{{ variables.VSX_ISL_PORT2 }}
-    no shutdown
-    mtu 9198
-    description vsx isl
-    lag 256
 interface loopback 0
     ip address {{ variables.LOOPBACK_IP }}/32
     ip ospf 1 area 0.0.0.0
@@ -112,6 +94,7 @@ interface vlan {{ variables.CMN_VLAN }}
     active-gateway ip {{ variables.CMN_IP_GATEWAY }}
     ip ospf 2 area 0.0.0.0
 {%- endif %}
+{%- if variables.CAN != None %}
 interface vlan {{ variables.CAN_VLAN }}
     vrf attach Customer
     description CAN
@@ -120,13 +103,7 @@ interface vlan {{ variables.CAN_VLAN }}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.CAN_IP_GATEWAY }}
     ip ospf 2 area 0.0.0.0
-vsx
-    system-mac 02:00:00:00:6b:00
-    inter-switch-link lag 256
-    role secondary
-    keepalive peer 192.168.255.0 source 192.168.255.1 vrf keepalive
-    linkup-delay-timer 600
-    vsx-sync vsx-global
+{%- endif %}
 ip dns server-address {{ variables.NMNLB_DNS }}
 {% include '1.2/aruba/common/prefix-list.j2' %}
 {% include '1.2/aruba/common/route-map.j2' %}

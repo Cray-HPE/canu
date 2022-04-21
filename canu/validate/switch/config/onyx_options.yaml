@@ -20,1020 +20,1031 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 ---
-    # Indicates the style of the configuration
-    style: onyx
-    
-    # if there is a delta, negate the parents and re-write the parents with children
-    sectional_overwrite: []
-    
-    # if there is a delta, overwrite these parents instead of one of their children
-    sectional_overwrite_no_negate: []
-    
-    # The default order value is 500, with a range between 1 - 999.
-    # Commands with smaller order values float to the top in the order of execution.
-    # Commands with larger order values float to the bottom in the order of execution.
-    # Syntax Example:
-    # - lineage:
-    #   - startswith:
-    #     - no route-map
-    #   order: 600
-    ordering:
-    - lineage:
+# Indicates the style of the configuration
+style: onyx
+
+# if there is a delta, negate the parents and re-write the parents with children
+sectional_overwrite: []
+
+# if there is a delta, overwrite these parents instead of one of their children
+sectional_overwrite_no_negate: []
+
+# The default order value is 500, with a range between 1 - 999.
+# Commands with smaller order values float to the top in the order of execution.
+# Commands with larger order values float to the bottom in the order of execution.
+# Syntax Example:
+# - lineage:
+#   - startswith:
+#     - no route-map
+#   order: 600
+ordering:
+  - lineage:
       - startswith: hostname
-      order: 5
-    - lineage:
+    order: 5
+  - lineage:
       - startswith: no cli default prefix-modes enable
-      order: 10
-    - lineage:
+    order: 10
+  - lineage:
       - startswith: protocol mlag
-      order: 15
-    - lineage:
+    order: 15
+  - lineage:
       - startswith: protocol bgp
-      order: 16
-    - lineage:
+    order: 16
+  - lineage:
       - equals: lacp
-      order: 17
-    - lineage:
+    order: 17
+  - lineage:
       - equals: interface mlag-port-channel 1
-      order: 20
-    - lineage:
+    order: 20
+  - lineage:
       - equals: interface mlag-port-channel 2
-      order: 21
-    - lineage:
+    order: 21
+  - lineage:
       - equals: interface mlag-port-channel 3
-      order: 22
-    - lineage:
+    order: 22
+  - lineage:
       - equals: interface mlag-port-channel 4
-      order: 23
-    - lineage:
+    order: 23
+  - lineage:
       - equals: interface mlag-port-channel 5
-      order: 24
-    - lineage:
+    order: 24
+  - lineage:
       - equals: interface mlag-port-channel 6
-      order: 25
-    - lineage:
+    order: 25
+  - lineage:
       - equals: interface mlag-port-channel 7
-      order: 26
-    - lineage:
+    order: 26
+  - lineage:
       - equals: interface mlag-port-channel 8
-      order: 27
-    - lineage:
+    order: 27
+  - lineage:
       - equals: interface mlag-port-channel 9
-      order: 28
-    - lineage:
+    order: 28
+  - lineage:
       - equals: interface mlag-port-channel 10
-      order: 29
-    - lineage:
+    order: 29
+  - lineage:
       - equals: interface mlag-port-channel 11
-      order: 30
-    - lineage:
+    order: 30
+  - lineage:
       - equals: interface mlag-port-channel 12
-      order: 31
-    - lineage:
+    order: 31
+  - lineage:
       - equals: interface mlag-port-channel 13
-      order: 32
-    - lineage:
+    order: 32
+  - lineage:
       - equals: interface mlag-port-channel 14
-      order: 33
-    - lineage:
+    order: 33
+  - lineage:
       - equals: interface mlag-port-channel 15
-      order: 34
-    - lineage:
+    order: 34
+  - lineage:
       - equals: interface mlag-port-channel 16
-      order: 35
-    - lineage:
+    order: 35
+  - lineage:
       - equals: interface mlag-port-channel 17
-      order: 36
-    - lineage:
+    order: 36
+  - lineage:
       - equals: interface mlag-port-channel 18
-      order: 37
-    - lineage:
+    order: 37
+  - lineage:
       - equals: interface mlag-port-channel 19
-      order: 38
-    - lineage:
+    order: 38
+  - lineage:
       - equals: interface mlag-port-channel 20
-      order: 39
-    - lineage:
+    order: 39
+  - lineage:
       - equals: interface mlag-port-channel 114
-      order: 40
-    - lineage:
+    order: 40
+  - lineage:
       - equals: interface mlag-port-channel 115
-      order: 40
-    - lineage:
+    order: 40
+  - lineage:
       - equals: interface mlag-port-channel 151
-      order: 42
-    - lineage:
+    order: 42
+  - lineage:
       - equals: interface mlag-port-channel 152
-      order: 43
-    - lineage:
+    order: 43
+  - lineage:
       - equals: interface mlag-port-channel 153
-      order: 44
-    - lineage:
+    order: 44
+  - lineage:
       - equals: interface mlag-port-channel 201
-      order: 45
-    - lineage:
+    order: 45
+  - lineage:
       - equals: interface ethernet 1/1 mtu 9216 force
-      order: 60
-    - lineage:
+    order: 60
+  - lineage:
       - equals: interface ethernet 1/2 mtu 9216 force
-      order: 61
-    - lineage:
+    order: 61
+  - lineage:
       - equals: interface ethernet 1/3 mtu 9216 force
-      order: 62
-    - lineage:
+    order: 62
+  - lineage:
       - equals: interface ethernet 1/4 mtu 9216 force
-      order: 63
-    - lineage:
+    order: 63
+  - lineage:
       - equals: interface ethernet 1/5 mtu 9216 force
-      order: 64
-    - lineage:
+    order: 64
+  - lineage:
       - equals: interface ethernet 1/6 mtu 9216 force
-      order: 65
-    - lineage:
+    order: 65
+  - lineage:
       - equals: interface ethernet 1/7 mtu 9216 force
-      order: 66
-    - lineage:
+    order: 66
+  - lineage:
       - equals: interface ethernet 1/8 mtu 9216 force
-      order: 67
-    - lineage:
+    order: 67
+  - lineage:
       - equals: interface ethernet 1/9 mtu 9216 force
-      order: 68
-    - lineage:
+    order: 68
+  - lineage:
       - equals: interface ethernet 1/10 mtu 9216 force
-      order: 69
-    - lineage:
+    order: 69
+  - lineage:
       - equals: interface ethernet 1/11 mtu 9216 force
-      order: 70
-    - lineage:
+    order: 70
+  - lineage:
       - equals: interface ethernet 1/12 mtu 9216 force
-      order: 71
-    - lineage:
+    order: 71
+  - lineage:
       - equals: interface ethernet 1/13 mtu 9216 force
-      order: 72
-    - lineage:
+    order: 72
+  - lineage:
       - equals: interface ethernet 1/14 mtu 9216 force
-      order: 73
-    - lineage:
+    order: 73
+  - lineage:
       - equals: interface ethernet 1/15 mtu 9216 force
-      order: 74
-    - lineage:
+    order: 74
+  - lineage:
       - equals: interface ethernet 1/16 mtu 9216 force
-      order: 75
-    - lineage:
+    order: 75
+  - lineage:
       - equals: interface ethernet 1/17 mtu 9216 force
-      order: 76
-    - lineage:
+    order: 76
+  - lineage:
       - equals: interface ethernet 1/18 mtu 9216 force
-      order: 77
-    - lineage:
+    order: 77
+  - lineage:
       - equals: interface ethernet 1/19 mtu 9216 force
-      order: 78
-    - lineage:
+    order: 78
+  - lineage:
       - equals: interface ethernet 1/20 mtu 9216 force
-      order: 79
-    - lineage:
+    order: 79
+  - lineage:
       - equals: interface ethernet 1/21 mtu 9216 force
-      order: 80
-    - lineage:
+    order: 80
+  - lineage:
       - equals: interface ethernet 1/22 mtu 9216 force
-      order: 81
-    - lineage:
+    order: 81
+  - lineage:
       - equals: interface ethernet 1/23 mtu 9216 force
-      order: 82
-    - lineage:
+    order: 82
+  - lineage:
       - equals: interface ethernet 1/24 mtu 9216 force
-      order: 83
-    - lineage:
+    order: 83
+  - lineage:
       - equals: interface ethernet 1/25 mtu 9216 force
-      order: 84
-    - lineage:
+    order: 84
+  - lineage:
       - equals: interface ethernet 1/26 mtu 9216 force
-      order: 85
-    - lineage:
+    order: 85
+  - lineage:
       - equals: interface ethernet 1/27 mtu 9216 force
-      order: 86
-    - lineage:
+    order: 86
+  - lineage:
       - equals: interface ethernet 1/28 mtu 9216 force
-      order: 87
-    - lineage:
+    order: 87
+  - lineage:
       - equals: interface ethernet 1/29 mtu 9216 force
-      order: 88
-    - lineage:
+    order: 88
+  - lineage:
       - equals: interface ethernet 1/30 mtu 9216 force
-      order: 89
-    - lineage:
+    order: 89
+  - lineage:
       - equals: interface ethernet 1/31 mtu 9216 force
-      order: 90
-    - lineage:
+    order: 90
+  - lineage:
       - equals: interface ethernet 1/32 mtu 9216 force
-      order: 91
-    - lineage:
+    order: 91
+  - lineage:
       - contains: speed
-      order: 100
-    - lineage:
+    order: 100
+  - lineage:
       - equals: interface mlag-port-channel 1 mtu 9216 force
-      order: 160
-    - lineage:
+    order: 160
+  - lineage:
       - equals: interface mlag-port-channel 2 mtu 9216 force
-      order: 161
-    - lineage:
+    order: 161
+  - lineage:
       - equals: interface mlag-port-channel 3 mtu 9216 force
-      order: 162
-    - lineage:
+    order: 162
+  - lineage:
       - equals: interface mlag-port-channel 4 mtu 9216 force
-      order: 163
-    - lineage:
+    order: 163
+  - lineage:
       - equals: interface mlag-port-channel 5 mtu 9216 force
-      order: 164
-    - lineage:
+    order: 164
+  - lineage:
       - equals: interface mlag-port-channel 6 mtu 9216 force
-      order: 165
-    - lineage:
+    order: 165
+  - lineage:
       - equals: interface mlag-port-channel 7 mtu 9216 force
-      order: 166
-    - lineage:
+    order: 166
+  - lineage:
       - equals: interface mlag-port-channel 8 mtu 9216 force
-      order: 167
-    - lineage:
+    order: 167
+  - lineage:
       - equals: interface mlag-port-channel 9 mtu 9216 force
-      order: 168
-    - lineage:
+    order: 168
+  - lineage:
       - equals: interface mlag-port-channel 10 mtu 9216 force
-      order: 169
-    - lineage:
+    order: 169
+  - lineage:
       - equals: interface mlag-port-channel 11 mtu 9216 force
-      order: 170
-    - lineage:
+    order: 170
+  - lineage:
       - equals: interface mlag-port-channel 12 mtu 9216 force
-      order: 171
-    - lineage:
+    order: 171
+  - lineage:
       - equals: interface mlag-port-channel 13 mtu 9216 force
-      order: 172
-    - lineage:
+    order: 172
+  - lineage:
       - equals: interface mlag-port-channel 14 mtu 9216 force
-      order: 173
-    - lineage:
+    order: 173
+  - lineage:
       - equals: interface mlag-port-channel 15 mtu 9216 force
-      order: 174
-    - lineage:
+    order: 174
+  - lineage:
       - equals: interface mlag-port-channel 16 mtu 9216 force
-      order: 175
-    - lineage:
+    order: 175
+  - lineage:
       - equals: interface mlag-port-channel 17 mtu 9216 force
-      order: 176
-    - lineage:
+    order: 176
+  - lineage:
       - equals: interface mlag-port-channel 18 mtu 9216 force
-      order: 177
-    - lineage:
+    order: 177
+  - lineage:
       - equals: interface mlag-port-channel 19 mtu 9216 force
-      order: 178
-    - lineage:
+    order: 178
+  - lineage:
       - equals: interface mlag-port-channel 20 mtu 9216 force
-      order: 179
-    - lineage:
+    order: 179
+  - lineage:
       - equals: interface mlag-port-channel 114 mtu 9216 force
-      order: 180
-    - lineage:
+    order: 180
+  - lineage:
       - equals: interface mlag-port-channel 115 mtu 9216 force
-      order: 181
-    - lineage:
+    order: 181
+  - lineage:
       - equals: interface mlag-port-channel 151 mtu 9216 force
-      order: 182
-    - lineage:
+    order: 182
+  - lineage:
       - equals: interface mlag-port-channel 152 mtu 9216 force
-      order: 183
-    - lineage:
+    order: 183
+  - lineage:
       - equals: interface mlag-port-channel 153 mtu 9216 force
-      order: 184
-    - lineage:
+    order: 184
+  - lineage:
       - equals: interface mlag-port-channel 201 mtu 9216 force
-      order: 185
-    - lineage:
+    order: 185
+  - lineage:
       - startswith: interface ethernet 1/1 mlag-channel-group
-      order: 260
-    - lineage:
+    order: 260
+  - lineage:
       - startswith: interface ethernet 1/2 mlag-channel-group
-      order: 261
-    - lineage:
+    order: 261
+  - lineage:
       - startswith: interface ethernet 1/3 mlag-channel-group
-      order: 262
-    - lineage:
+    order: 262
+  - lineage:
       - startswith: interface ethernet 1/4 mlag-channel-group
-      order: 263
-    - lineage:
+    order: 263
+  - lineage:
       - startswith: interface ethernet 1/5 mlag-channel-group
-      order: 264
-    - lineage:
+    order: 264
+  - lineage:
       - startswith: interface ethernet 1/6 mlag-channel-group
-      order: 265
-    - lineage:
+    order: 265
+  - lineage:
       - startswith: interface ethernet 1/7 mlag-channel-group
-      order: 266
-    - lineage:
+    order: 266
+  - lineage:
       - startswith: interface ethernet 1/8 mlag-channel-group
-      order: 267
-    - lineage:
+    order: 267
+  - lineage:
       - startswith: interface ethernet 1/9 mlag-channel-group
-      order: 268
-    - lineage:
+    order: 268
+  - lineage:
       - startswith: interface ethernet 1/10 mlag-channel-group
-      order: 269
-    - lineage:
+    order: 269
+  - lineage:
       - startswith: interface ethernet 1/11 mlag-channel-group
-      order: 270
-    - lineage:
+    order: 270
+  - lineage:
       - startswith: interface ethernet 1/12 mlag-channel-group
-      order: 271
-    - lineage:
+    order: 271
+  - lineage:
       - startswith: interface ethernet 1/13 mlag-channel-group
-      order: 272
-    - lineage:
+    order: 272
+  - lineage:
       - startswith: interface ethernet 1/14 mlag-channel-group
-      order: 273
-    - lineage:
+    order: 273
+  - lineage:
       - startswith: interface ethernet 1/15 mlag-channel-group
-      order: 274
-    - lineage:
+    order: 274
+  - lineage:
       - startswith: interface ethernet 1/16 mlag-channel-group
-      order: 275
-    - lineage:
+    order: 275
+  - lineage:
       - startswith: interface ethernet 1/17 mlag-channel-group
-      order: 276
-    - lineage:
+    order: 276
+  - lineage:
       - startswith: interface ethernet 1/18 mlag-channel-group
-      order: 277
-    - lineage:
+    order: 277
+  - lineage:
       - startswith: interface ethernet 1/19 mlag-channel-group
-      order: 278
-    - lineage:
+    order: 278
+  - lineage:
       - startswith: interface ethernet 1/20 mlag-channel-group
-      order: 279
-    - lineage:
+    order: 279
+  - lineage:
       - startswith: interface ethernet 1/21 mlag-channel-group
-      order: 280
-    - lineage:
+    order: 280
+  - lineage:
       - startswith: interface ethernet 1/22 mlag-channel-group
-      order: 281
-    - lineage:
+    order: 281
+  - lineage:
       - startswith: interface ethernet 1/23 mlag-channel-group
-      order: 282
-    - lineage:
+    order: 282
+  - lineage:
       - startswith: interface ethernet 1/24 mlag-channel-group
-      order: 283
-    - lineage:
+    order: 283
+  - lineage:
       - startswith: interface ethernet 1/25 mlag-channel-group
-      order: 284
-    - lineage:
+    order: 284
+  - lineage:
       - startswith: interface ethernet 1/26 mlag-channel-group
-      order: 285
-    - lineage:
+    order: 285
+  - lineage:
       - startswith: interface ethernet 1/27 mlag-channel-group
-      order: 286
-    - lineage:
+    order: 286
+  - lineage:
       - startswith: interface ethernet 1/28 mlag-channel-group
-      order: 287
-    - lineage:
+    order: 287
+  - lineage:
       - startswith: interface ethernet 1/29 mlag-channel-group
-      order: 288
-    - lineage:
+    order: 288
+  - lineage:
       - startswith: interface ethernet 1/30 mlag-channel-group
-      order: 289
-    - lineage:
+    order: 289
+  - lineage:
       - startswith: interface ethernet 1/31 mlag-channel-group
-      order: 290
-    - lineage:
+    order: 290
+  - lineage:
       - startswith: interface ethernet 1/32 mlag-channel-group
-      order: 291
-    - lineage:
+    order: 291
+  - lineage:
       - startswith: interface mlag-port-channel 1 switchport mode hybrid
-      order: 360
-    - lineage:
+    order: 360
+  - lineage:
       - startswith: interface mlag-port-channel 2 switchport mode hybrid
-      order: 361
-    - lineage:
+    order: 361
+  - lineage:
       - startswith: interface mlag-port-channel 3 switchport mode hybrid
-      order: 362
-    - lineage:
+    order: 362
+  - lineage:
       - startswith: interface mlag-port-channel 4 switchport mode hybrid
-      order: 363
-    - lineage:
+    order: 363
+  - lineage:
       - startswith: interface mlag-port-channel 5 switchport mode hybrid
-      order: 364
-    - lineage:
+    order: 364
+  - lineage:
       - startswith: interface mlag-port-channel 6 switchport mode hybrid
-      order: 365
-    - lineage:
+    order: 365
+  - lineage:
       - startswith: interface mlag-port-channel 7 switchport mode hybrid
-      order: 366
-    - lineage:
+    order: 366
+  - lineage:
       - startswith: interface mlag-port-channel 8 switchport mode hybrid
-      order: 367
-    - lineage:
+    order: 367
+  - lineage:
       - startswith: interface mlag-port-channel 9 switchport mode hybrid
-      order: 368
-    - lineage:
+    order: 368
+  - lineage:
       - startswith: interface mlag-port-channel 10 switchport mode hybrid
-      order: 369
-    - lineage:
+    order: 369
+  - lineage:
       - startswith: interface mlag-port-channel 11 switchport mode hybrid
-      order: 370
-    - lineage:
+    order: 370
+  - lineage:
       - startswith: interface mlag-port-channel 12 switchport mode hybrid
-      order: 371
-    - lineage:
+    order: 371
+  - lineage:
       - startswith: interface mlag-port-channel 13 switchport mode hybrid
-      order: 372
-    - lineage:
+    order: 372
+  - lineage:
       - startswith: interface mlag-port-channel 14 switchport mode hybrid
-      order: 373
-    - lineage:
+    order: 373
+  - lineage:
       - startswith: interface mlag-port-channel 15 switchport mode hybrid
-      order: 374
-    - lineage:
+    order: 374
+  - lineage:
       - startswith: interface mlag-port-channel 16 switchport mode hybrid
-      order: 375
-    - lineage:
+    order: 375
+  - lineage:
       - startswith: interface mlag-port-channel 17 switchport mode hybrid
-      order: 376
-    - lineage:
+    order: 376
+  - lineage:
       - startswith: interface mlag-port-channel 18 switchport mode hybrid
-      order: 377
-    - lineage:
+    order: 377
+  - lineage:
       - startswith: interface mlag-port-channel 19 switchport mode hybrid
-      order: 378
-    - lineage:
+    order: 378
+  - lineage:
       - startswith: interface mlag-port-channel 20 switchport mode hybrid
-      order: 379
-    - lineage:
+    order: 379
+  - lineage:
       - startswith: interface mlag-port-channel 114 switchport mode hybrid
-      order: 380
-    - lineage:
+    order: 380
+  - lineage:
       - startswith: interface mlag-port-channel 115 switchport mode hybrid
-      order: 381
-    - lineage:
+    order: 381
+  - lineage:
       - startswith: interface mlag-port-channel 151 switchport mode hybrid
-      order: 382
-    - lineage:
+    order: 382
+  - lineage:
       - startswith: interface mlag-port-channel 152 switchport mode hybrid
-      order: 383
-    - lineage:
+    order: 383
+  - lineage:
       - startswith: interface mlag-port-channel 153 switchport mode hybrid
-      order: 384
-    - lineage:
+    order: 384
+  - lineage:
       - startswith: interface mlag-port-channel 154 switchport mode hybrid
-      order: 385
-    - lineage:
+    order: 385
+  - lineage:
       - startswith: interface mlag-port-channel 201 switchport mode hybrid
-      order: 386
-    - lineage:
+    order: 386
+  - lineage:
       - startswith: interface mlag-port-channel 202 switchport mode hybrid
-      order: 387
-    - lineage:
+    order: 387
+  - lineage:
       - startswith: interface mlag-port-channel 203 switchport mode hybrid
-      order: 388
-    - lineage:
+    order: 388
+  - lineage:
       - startswith: interface ethernet 1/1 description
-      order: 400
-    - lineage:
+    order: 400
+  - lineage:
       - startswith: interface ethernet 1/2 description
-      order: 401
-    - lineage:
+    order: 401
+  - lineage:
       - startswith: interface ethernet 1/3 description
-      order: 402
-    - lineage:
+    order: 402
+  - lineage:
       - startswith: interface ethernet 1/4 description
-      order: 403
-    - lineage:
+    order: 403
+  - lineage:
       - startswith: interface ethernet 1/5 description
-      order: 404
-    - lineage:
+    order: 404
+  - lineage:
       - startswith: interface ethernet 1/6 description
-      order: 405
-    - lineage:
+    order: 405
+  - lineage:
       - startswith: interface ethernet 1/7 description
-      order: 406
-    - lineage:
+    order: 406
+  - lineage:
       - startswith: interface ethernet 1/8 description
-      order: 407
-    - lineage:
+    order: 407
+  - lineage:
       - startswith: interface ethernet 1/9 description
-      order: 408
-    - lineage:
+    order: 408
+  - lineage:
       - startswith: interface ethernet 1/10 description
-      order: 409
-    - lineage:
+    order: 409
+  - lineage:
       - startswith: interface ethernet 1/11 description
-      order: 410
-    - lineage:
+    order: 410
+  - lineage:
       - startswith: interface ethernet 1/12 description
-      order: 411
-    - lineage:
+    order: 411
+  - lineage:
       - startswith: interface ethernet 1/13 description
-      order: 412
-    - lineage:
+    order: 412
+  - lineage:
       - startswith: interface ethernet 1/14 description
-      order: 413
-    - lineage:
+    order: 413
+  - lineage:
       - startswith: interface ethernet 1/15 description
-      order: 414
-    - lineage:
+    order: 414
+  - lineage:
       - startswith: interface ethernet 1/16 description
-      order: 415
-    - lineage:
+    order: 415
+  - lineage:
       - startswith: interface ethernet 1/17 description
-      order: 416
-    - lineage:
+    order: 416
+  - lineage:
       - startswith: interface ethernet 1/18 description
-      order: 417
-    - lineage:
+    order: 417
+  - lineage:
       - startswith: interface ethernet 1/19 description
-      order: 418
-    - lineage:
+    order: 418
+  - lineage:
       - startswith: interface ethernet 1/20 description
-      order: 419
-    - lineage:
+    order: 419
+  - lineage:
       - startswith: interface ethernet 1/21 description
-      order: 420
-    - lineage:
+    order: 420
+  - lineage:
       - startswith: interface ethernet 1/22 description
-      order: 421
-    - lineage:
+    order: 421
+  - lineage:
       - startswith: interface ethernet 1/23 description
-      order: 422
-    - lineage:
+    order: 422
+  - lineage:
       - startswith: interface ethernet 1/24 description
-      order: 423
-    - lineage:
+    order: 423
+  - lineage:
       - startswith: interface ethernet 1/25 description
-      order: 424
-    - lineage:
+    order: 424
+  - lineage:
       - startswith: interface ethernet 1/26 description
-      order: 425
-    - lineage:
+    order: 425
+  - lineage:
       - startswith: interface ethernet 1/27 description
-      order: 426
-    - lineage:
+    order: 426
+  - lineage:
       - startswith: interface ethernet 1/28 description
-      order: 427
-    - lineage:
+    order: 427
+  - lineage:
       - startswith: interface ethernet 1/29 description
-      order: 428
-    - lineage:
+    order: 428
+  - lineage:
       - startswith: interface ethernet 1/30 description
-      order: 429
-    - lineage:
+    order: 429
+  - lineage:
       - startswith: interface ethernet 1/31 description
-      order: 430
-    - lineage:
+    order: 430
+  - lineage:
       - startswith: interface ethernet 1/32 description
-      order: 431
-    - lineage:
+    order: 431
+  - lineage:
       - startswith: interface mlag-port-channel 1 description
-      order: 460
-    - lineage:
+    order: 460
+  - lineage:
       - startswith: interface mlag-port-channel 2 description
-      order: 461
-    - lineage:
+    order: 461
+  - lineage:
       - startswith: interface mlag-port-channel 3 description
-      order: 462
-    - lineage:
+    order: 462
+  - lineage:
       - startswith: interface mlag-port-channel 4 description
-      order: 463
-    - lineage:
+    order: 463
+  - lineage:
       - startswith: interface mlag-port-channel 5 description
-      order: 464
-    - lineage:
+    order: 464
+  - lineage:
       - startswith: interface mlag-port-channel 6 description
-      order: 465
-    - lineage:
+    order: 465
+  - lineage:
       - startswith: interface mlag-port-channel 7 description
-      order: 466
-    - lineage:
+    order: 466
+  - lineage:
       - startswith: interface mlag-port-channel 8 description
-      order: 467
-    - lineage:
+    order: 467
+  - lineage:
       - startswith: interface mlag-port-channel 9 description
-      order: 468
-    - lineage:
+    order: 468
+  - lineage:
       - startswith: interface mlag-port-channel 10 description
-      order: 469
-    - lineage:
+    order: 469
+  - lineage:
       - startswith: interface mlag-port-channel 11 description
-      order: 470
-    - lineage:
+    order: 470
+  - lineage:
       - startswith: interface mlag-port-channel 12 description
-      order: 471
-    - lineage:
+    order: 471
+  - lineage:
       - startswith: interface mlag-port-channel 13 description
-      order: 472
-    - lineage:
+    order: 472
+  - lineage:
       - startswith: interface mlag-port-channel 14 description
-      order: 473
-    - lineage:
+    order: 473
+  - lineage:
       - startswith: interface mlag-port-channel 15 description
-      order: 474
-    - lineage:
+    order: 474
+  - lineage:
       - startswith: interface mlag-port-channel 16 description
-      order: 475
-    - lineage:
+    order: 475
+  - lineage:
       - startswith: interface mlag-port-channel 17 description
-      order: 476
-    - lineage:
+    order: 476
+  - lineage:
       - startswith: interface mlag-port-channel 18 description
-      order: 477
-    - lineage:
+    order: 477
+  - lineage:
       - startswith: interface mlag-port-channel 19 description
-      order: 478
-    - lineage:
+    order: 478
+  - lineage:
       - startswith: interface mlag-port-channel 20 description
-      order: 479
-    - lineage:
+    order: 479
+  - lineage:
       - startswith: interface mlag-port-channel 114 description
-      order: 480
-    - lineage:
+    order: 480
+  - lineage:
       - startswith: interface mlag-port-channel 115 description
-      order: 481
-    - lineage:
+    order: 481
+  - lineage:
       - startswith: interface mlag-port-channel 151 description
-      order: 482
-    - lineage:
+    order: 482
+  - lineage:
       - startswith: interface mlag-port-channel 152 description
-      order: 483
-    - lineage:
+    order: 483
+  - lineage:
       - startswith: interface mlag-port-channel 153 description
-      order: 484
-    - lineage:
+    order: 484
+  - lineage:
       - startswith: interface mlag-port-channel 201 description
-      order: 485
-    - lineage:
+    order: 485
+  - lineage:
       - startswith: interface mlag-port-channel 202 description
-      order: 486
-    - lineage:
+    order: 486
+  - lineage:
       - equals: interface mlag-port-channel 1 no shutdown
-      order: 500
-    - lineage:
+    order: 500
+  - lineage:
       - startswith: interface mlag-port-channel 2 no shutdown
-      order: 501
-    - lineage:
+    order: 501
+  - lineage:
       - startswith: interface mlag-port-channel 3 no shutdown
-      order: 502
-    - lineage:
+    order: 502
+  - lineage:
       - startswith: interface mlag-port-channel 4 no shutdown
-      order: 503
-    - lineage:
+    order: 503
+  - lineage:
       - startswith: interface mlag-port-channel 5 no shutdown
-      order: 504
-    - lineage:
+    order: 504
+  - lineage:
       - startswith: interface mlag-port-channel 6 no shutdown
-      order: 505
-    - lineage:
+    order: 505
+  - lineage:
       - startswith: interface mlag-port-channel 7 no shutdown
-      order: 506
-    - lineage:
+    order: 506
+  - lineage:
       - startswith: interface mlag-port-channel 8 no shutdown
-      order: 507
-    - lineage:
+    order: 507
+  - lineage:
       - startswith: interface mlag-port-channel 9 no shutdown
-      order: 508
-    - lineage:
+    order: 508
+  - lineage:
       - startswith: interface mlag-port-channel 10 no shutdown
-      order: 509
-    - lineage:
+    order: 509
+  - lineage:
       - startswith: interface mlag-port-channel 11 no shutdown
-      order: 510
-    - lineage:
+    order: 510
+  - lineage:
       - startswith: interface mlag-port-channel 12 no shutdown
-      order: 511
-    - lineage:
+    order: 511
+  - lineage:
       - startswith: interface mlag-port-channel 13 no shutdown
-      order: 512
-    - lineage:
+    order: 512
+  - lineage:
       - startswith: interface mlag-port-channel 14 no shutdown
-      order: 513
-    - lineage:
+    order: 513
+  - lineage:
       - startswith: interface mlag-port-channel 15 no shutdown
-      order: 514
-    - lineage:
+    order: 514
+  - lineage:
       - startswith: interface mlag-port-channel 16 no shutdown
-      order: 515
-    - lineage:
+    order: 515
+  - lineage:
       - startswith: interface mlag-port-channel 17 no shutdown
-      order: 516
-    - lineage:
+    order: 516
+  - lineage:
       - startswith: interface mlag-port-channel 18 no shutdown
-      order: 517
-    - lineage:
+    order: 517
+  - lineage:
       - startswith: interface mlag-port-channel 19 no shutdown
-      order: 518
-    - lineage:
+    order: 518
+  - lineage:
       - startswith: interface mlag-port-channel 20 no shutdown
-      order: 519
-    - lineage:
+    order: 519
+  - lineage:
       - startswith: interface mlag-port-channel 21 no shutdown
-      order: 520
-    - lineage:
+    order: 520
+  - lineage:
       - startswith: interface mlag-port-channel 22 no shutdown
-      order: 521
-    - lineage:
+    order: 521
+  - lineage:
       - startswith: interface mlag-port-channel 23 no shutdown
-      order: 522
-    - lineage:
+    order: 522
+  - lineage:
       - startswith: interface mlag-port-channel 24 no shutdown
-      order: 523
-    - lineage:
+    order: 523
+  - lineage:
       - startswith: interface mlag-port-channel 25 no shutdown
-      order: 524
-    - lineage:
+    order: 524
+  - lineage:
       - startswith: interface mlag-port-channel 26 no shutdown
-      order: 525
-    - lineage:
+    order: 525
+  - lineage:
       - startswith: interface mlag-port-channel 27 no shutdown
-      order: 526
-    - lineage:
+    order: 526
+  - lineage:
       - startswith: interface mlag-port-channel 28 no shutdown
-      order: 527
-    - lineage:
+    order: 527
+  - lineage:
       - startswith: interface mlag-port-channel 114 no shutdown
-      order: 528
-    - lineage:
+    order: 528
+  - lineage:
       - startswith: interface mlag-port-channel 115 no shutdown
-      order: 529
-    - lineage:
+    order: 529
+  - lineage:
       - startswith: interface mlag-port-channel 151 no shutdown
-      order: 530
-    - lineage:
+    order: 530
+  - lineage:
       - startswith: interface mlag-port-channel 152 no shutdown
-      order: 531
-    - lineage:
+    order: 531
+  - lineage:
       - startswith: interface mlag-port-channel 153 no shutdown
-      order: 532
-    - lineage:
+    order: 532
+  - lineage:
       - startswith: interface mlag-port-channel 201 no shutdown
-      order: 533
-    - lineage:
+    order: 533
+  - lineage:
       - startswith: interface mlag-port-channel 1 lacp-individual
-      order: 550
-    - lineage:
+    order: 550
+  - lineage:
       - startswith: interface mlag-port-channel 2 lacp-individual
-      order: 551
-    - lineage:
+    order: 551
+  - lineage:
       - startswith: interface mlag-port-channel 3 lacp-individual
-      order: 552
-    - lineage:
+    order: 552
+  - lineage:
       - startswith: interface mlag-port-channel 4 lacp-individual
-      order: 553
-    - lineage:
+    order: 553
+  - lineage:
       - startswith: interface mlag-port-channel 5 lacp-individual
-      order: 554
-    - lineage:
+    order: 554
+  - lineage:
       - startswith: interface mlag-port-channel 6 lacp-individual
-      order: 555
-    - lineage:
+    order: 555
+  - lineage:
       - startswith: interface mlag-port-channel 7 lacp-individual
-      order: 556
-    - lineage:
+    order: 556
+  - lineage:
       - startswith: interface mlag-port-channel 8 lacp-individual
-      order: 557
-    - lineage:
+    order: 557
+  - lineage:
       - startswith: interface mlag-port-channel 9 lacp-individual
-      order: 558
-    - lineage:
+    order: 558
+  - lineage:
       - startswith: interface mlag-port-channel 10 lacp-individual
-      order: 559
-    - lineage:
+    order: 559
+  - lineage:
       - startswith: interface mlag-port-channel 11 lacp-individual
-      order: 560
-    - lineage:
+    order: 560
+  - lineage:
       - startswith: interface mlag-port-channel 12 lacp-individual
-      order: 561
-    - lineage:
+    order: 561
+  - lineage:
       - startswith: interface mlag-port-channel 13 lacp-individual
-      order: 562
-    - lineage:
+    order: 562
+  - lineage:
       - startswith: interface mlag-port-channel 14 lacp-individual
-      order: 563
-    - lineage:
+    order: 563
+  - lineage:
       - startswith: interface mlag-port-channel 15 lacp-individual
-      order: 564
-    - lineage:
+    order: 564
+  - lineage:
       - startswith: interface mlag-port-channel 16 lacp-individual
-      order: 565
-    - lineage:
+    order: 565
+  - lineage:
       - startswith: interface mlag-port-channel 17 lacp-individual
-      order: 566
-    - lineage:
+    order: 566
+  - lineage:
       - startswith: interface mlag-port-channel 18 lacp-individual
-      order: 567
-    - lineage:
+    order: 567
+  - lineage:
       - startswith: interface mlag-port-channel 19 lacp-individual
-      order: 568
-    - lineage:
+    order: 568
+  - lineage:
       - startswith: interface mlag-port-channel 20 lacp-individual
-      order: 569
-    - lineage:
+    order: 569
+  - lineage:
       - startswith: interface mlag-port-channel 21 lacp-individual
-      order: 570
-    - lineage:
+    order: 570
+  - lineage:
       - startswith: interface mlag-port-channel 22 lacp-individual
-      order: 571
-    - lineage:
+    order: 571
+  - lineage:
       - startswith: interface mlag-port-channel 23 lacp-individual
-      order: 572
-    - lineage:
+    order: 572
+  - lineage:
       - startswith: interface mlag-port-channel 24 lacp-individual
-      order: 573
-    - lineage:
+    order: 573
+  - lineage:
       - startswith: interface mlag-port-channel 25 lacp-individual
-      order: 574
-    - lineage:
+    order: 574
+  - lineage:
       - startswith: interface mlag-port-channel 26 lacp-individual
-      order: 575
-    - lineage:
+    order: 575
+  - lineage:
       - startswith: interface mlag-port-channel 27 lacp-individual
-      order: 576
-    - lineage:
+    order: 576
+  - lineage:
       - startswith: interface mlag-port-channel 28 lacp-individual
-      order: 577
-    - lineage:
+    order: 577
+  - lineage:
       - startswith: interface mlag-port-channel 114 lacp-individual
-      order: 578
-    - lineage:
+    order: 578
+  - lineage:
       - startswith: interface mlag-port-channel 115 lacp-individual
-      order: 579
-    - lineage:
+    order: 579
+  - lineage:
       - startswith: interface mlag-port-channel 151 lacp-individual
-      order: 580
-    - lineage:
+    order: 580
+  - lineage:
       - startswith: interface mlag-port-channel 152 lacp-individual
-      order: 581
-    - lineage:
+    order: 581
+  - lineage:
       - startswith: vlan
-      order: 600
-    - lineage:
+    order: 600
+  - lineage:
       - contains: switchport hybrid allowed-vlan
-      order: 602
-    - lineage:
+    order: 602
+  - lineage:
       - contains: vrf
-      order: 603
-    - lineage:
+    order: 603
+  - lineage:
       - contains: interface loopback
-      order: 604
-    - lineage:
+    order: 604
+  - lineage:
       - contains: interface vlan
-      order: 606
-    - lineage:
+    order: 606
+  - lineage:
       - contains: no switchport
-      order: 607
-    - lineage:
+    order: 607
+  - lineage:
       - startswith: ip load-sharing
-      order: 609
-    - lineage:
+    order: 609
+  - lineage:
       - contains: ip route
-      order: 610
-    - lineage:
+    order: 610
+  - lineage:
       - contains: spanning-tree
-      order: 611
-    - lineage:
+    order: 611
+  - lineage:
       - contains: access-list
-      order: 615
-    - lineage:
+    order: 615
+  - lineage:
       - contains: access-group
-      order: 620
-    - lineage:
+    order: 620
+  - lineage:
       - contains: ospf
-      order: 625
-    - lineage:
+    order: 625
+  - lineage:
       - contains: dhcp relay
-      order: 630
-    - lineage:
+    order: 630
+  - lineage:
       - contains: magp
-      order: 635
-    - lineage:
+    order: 635
+  - lineage:
       - startswith: mlag-vip
-      order: 640
-    - lineage:
+    order: 640
+  - lineage:
       - startswith: no mlag shutdown
-      order: 645
-    - lineage:
+    order: 645
+  - lineage:
       - startswith: mlag system-mac
-      order: 650
-    - lineage:
+    order: 650
+  - lineage:
       - contains: ipl
-      order: 655
-    - lineage:
+    order: 655
+  - lineage:
       - contains: mgmt0
-      order: 660
-    - lineage:
+    order: 660
+  - lineage:
       - contains: prefix-list
-      order: 661
-    - lineage:
+    order: 661
+  - lineage:
       - contains: route-map
-      order: 662
-    - lineage:
+    order: 662
+  - lineage:
       - contains: router bgp
-      order: 663
-    - lineage:
+    order: 663
+  - lineage:
       - contains: ntp
-      order: 665
+    order: 665
 
+# adds +1 indent to lines following start_expression and removes the +1 indent for lines following end_expression
+indent_adjust: []
 
-    # adds +1 indent to lines following start_expression and removes the +1 indent for lines following end_expression
-    indent_adjust: []
-    
-    parent_allows_duplicate_child: []
-    
-    sectional_exiting:
-    # This rule is used in the hierarchical_configuration unit test for .add_section_exiting()
-    - lineage:
+parent_allows_duplicate_child: []
+
+sectional_exiting:
+  # This rule is used in the hierarchical_configuration unit test for .add_section_exiting()
+  - lineage:
       - startswith: router bgp
       - startswith: template peer-policy
-      exit_text: exit-peer-policy
-    - lineage:
+    exit_text: exit-peer-policy
+  - lineage:
       - startswith: router bgp
       - startswith: template peer-session
-      exit_text: exit-peer-session
-    - lineage:
+    exit_text: exit-peer-session
+  - lineage:
       - startswith: router bgp
       - startswith: address-family
-      exit_text: exit-address-family
-    
-    # substitions against the full multi-line config text
-    full_text_sub: []
-    #- search: 'banner\s(exec|motd)\s(\S)\n(.*\n){1,}(\2)'
-    #  replace: ''
-    #- search: 'banner\s(exec|motd)\s(\S.).+\n(.*\n){1,}.*(\2)'
-    #  replace: ''
-    #- search: 'banner\s(exec|motd)\s(\S.)\n(.*\n){1,}(\2)'
-    #  replace: ''
-    
-    # substitions against each line of the config text
-    per_line_sub:
-    - search: ^Building configuration.*
-      replace: ''
-    - search: ^Current configuration.*
-      replace: ''
-    - search: ^! Last configuration change.*
-      replace: ''
-    - search: ^! NVRAM config last updated.*
-      replace: ''
-    - search: ^ntp clock-period .*
-      replace: ''
-    - search: ^version.*
-      replace: ''
-    - search: ^ logging event link-status$
-      replace: ''
-    - search: ^ logging event subif-link-status$
-      replace: ''
-    - search: ^\s*ipv6 unreachables disable$
-      replace: ''
-    - search: ^end$
-      replace: ''
-    - search: '^\s*[#!].*'
-      replace: ''
-    - search: ^ no ip address
-      replace: ''
-    - search: ^ exit-peer-policy
-      replace: ''
-    - search: ^ exit-peer-session
-      replace: ''
-    - search: ^ exit-address-family
-      replace: ''
-    - search: ^crypto key generate rsa general-keys.*$
-      replace: ''
-    - search: /^ +/gm, ''
-      replace: ''
-    
-    idempotent_commands_blacklist: []
-    
-    # These commands do not require negation, they simply overwrite themselves
-    # Example Syntax
-    # - lineage:
-    #   - startswith: interface
-    #   - startswith: description
-    idempotent_commands:
-    - lineage:
+    exit_text: exit-address-family
+
+# substitions against the full multi-line config text
+full_text_sub: []
+#- search: 'banner\s(exec|motd)\s(\S)\n(.*\n){1,}(\2)'
+#  replace: ''
+#- search: 'banner\s(exec|motd)\s(\S.).+\n(.*\n){1,}.*(\2)'
+#  replace: ''
+#- search: 'banner\s(exec|motd)\s(\S.)\n(.*\n){1,}(\2)'
+#  replace: ''
+
+# substitions against each line of the config text
+per_line_sub:
+  - search: ^Building configuration.*
+    replace: ""
+  - search: ^Current configuration.*
+    replace: ""
+  - search: ^! Last configuration change.*
+    replace: ""
+  - search: ^! NVRAM config last updated.*
+    replace: ""
+  - search: ^ntp clock-period .*
+    replace: ""
+  - search: ^version.*
+    replace: ""
+  - search: ^ logging event link-status$
+    replace: ""
+  - search: ^ logging event subif-link-status$
+    replace: ""
+  - search: ^\s*ipv6 unreachables disable$
+    replace: ""
+  - search: ^end$
+    replace: ""
+  - search: '^\s*[#!].*'
+    replace: ""
+  - search: ^ no ip address
+    replace: ""
+  - search: ^ exit-peer-policy
+    replace: ""
+  - search: ^ exit-peer-session
+    replace: ""
+  - search: ^ exit-address-family
+    replace: ""
+  - search: ^crypto key generate rsa general-keys.*$
+    replace: ""
+  - search: /^ +/gm, ''
+    replace: ""
+  - search: ^username admin password.*
+    replace: ""
+  - search: ^username monitor password.*
+    replace: ""
+  - search: ^snmp-server user testuser v3.*
+    replace: ""
+
+idempotent_commands_blacklist: []
+
+# These commands do not require negation, they simply overwrite themselves
+# Example Syntax
+# - lineage:
+#   - startswith: interface
+#   - startswith: description
+idempotent_commands:
+  - lineage:
       - startswith: vlan
       - startswith: name
-    - lineage:
+  - lineage:
       - contains: description
-    - lineage:
-        - startswith: banner
-    - lineage:
-        - startswith: vlan 7 name
-    - lineage:
-        - startswith: interface vlan 7
-    - lineage:
-        - startswith: ip prefix-li
-    - lineage:
-        - startswith: route-map
-    
-    # Default when expression: list of expressions
-    negation_default_when: []
-    
-    # Negate substitutions: expression -> negate with
-    # Example Syntax:
-    # - lineage:
-    #   - startswith: route-map
-    #   - startswith: description
-    #   use: no description
-    negation_negate_with: []
+  - lineage:
+      - startswith: banner
+  - lineage:
+      - startswith: vlan 7 name
+  - lineage:
+      - startswith: interface vlan 7
+  - lineage:
+      - startswith: ip prefix-li
+  - lineage:
+      - startswith: route-map
+
+# Default when expression: list of expressions
+negation_default_when: []
+
+# Negate substitutions: expression -> negate with
+# Example Syntax:
+# - lineage:
+#   - startswith: route-map
+#   - startswith: description
+#   use: no description
+negation_negate_with:
+  - lineage:
+      - startswith: web vrf mgmt enable
+    use: web vrf default enable force
+  - lineage:
+      - startswith: ntp vrf mgmt enable
+    use: ntp vrf default enable force
