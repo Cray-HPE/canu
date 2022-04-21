@@ -31,15 +31,20 @@ pipeline {
     }
 
     environment {
+        NAME = "cray-canu"
+        DESCRIPTION = "CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze."
         RPM_NAME = "canu"
         SPEC_FILE = "canu.spec"
         IS_STABLE = getBuildIsStable()
         BUILD_METADATA = getRpmRevision(isStable: env.IS_STABLE)
         PUBLISH_SP2 = "sle-15sp2"
         PUBLISH_SP3 = "sle-15sp3"
+        VERSION = getDockerBuildVersion(isStable: env.IS_STABLE)
+        DOCKER_ARGS = getDockerBuildArgs(name: env.NAME, description: env.DESCRIPTION)
     }
 
     stages {
+
         stage("Prepare") {
             steps {
                 script {
@@ -86,7 +91,7 @@ pipeline {
                 }
             }
         }
-                stage("Build SP3") {
+        stage("Build SP3") {
             agent {
                 docker {
                     image "arti.dev.cray.com/dstbuildenv-docker-master-local/cray-sle15sp3_build_environment:latest"
@@ -105,6 +110,25 @@ pipeline {
                 script {
                     publishCsmRpms(component: env.RPM_NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: env.PUBLISH_SP3, arch: "x86_64", isStable: env.IS_STABLE)
                     publishCsmRpms(component: env.RPM_NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: env.PUBLISH_SP3, arch: "src", isStable: env.IS_STABLE)
+                }
+            }
+        }
+        stage("Build") {
+            parallel {
+                stage('Image') {
+                    steps {
+                        script {
+                            sh "printenv"
+                            sh "make -f Makefile_image image"
+                        }
+                    }
+                }
+            }
+        }
+        stage('Publish ') {
+            steps {
+                script {
+                    publishCsmDockerImage(image: env.NAME, tag: env.VERSION, isStable: env.IS_STABLE)
                 }
             }
         }

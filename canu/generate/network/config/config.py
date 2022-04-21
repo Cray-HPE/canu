@@ -143,6 +143,11 @@ csm_options = canu_config["csm_versions"]
     help="Custom switch configuration",
     type=click.Path(),
 )
+@click.option(
+    "--preserve",
+    help="Path to current running configs.",
+    type=click.Path(),
+)
 @click.pass_context
 def config(
     ctx,
@@ -156,6 +161,7 @@ def config(
     auth_token,
     sls_address,
     folder,
+    preserve,
     custom_config,
 ):
     """Generate the config of all switches (Aruba, Dell, or Mellanox) on the network using the SHCD.
@@ -212,6 +218,7 @@ def config(
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         folder: Folder to store config files
+        preserve: Folder where switch running configs exist.  This folder should be populated from the "canu backup network" command.
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
     """
     # SHCD Parsing
@@ -351,6 +358,7 @@ def config(
         "storage",
         "uan",
         "worker",
+        "edge",
     }
     config_devices = set()
     all_unknown = []
@@ -358,7 +366,17 @@ def config(
         switch_name = node.common_name()
         node_shasta_name = get_shasta_name(switch_name, factory.lookup_mapper())
 
-        if node_shasta_name in ["sw-cdu", "sw-leaf-bmc", "sw-leaf", "sw-spine"]:
+        if (
+            node_shasta_name
+            in [
+                "sw-cdu",
+                "sw-leaf-bmc",
+                "sw-leaf",
+                "sw-spine",
+            ]
+            or node_shasta_name == "sw-edge"
+            and float(csm) >= 1.2
+        ):
 
             switch_config, devices, unknown = generate_switch_config(
                 csm,
@@ -369,6 +387,7 @@ def config(
                 sls_variables,
                 template_folder,
                 vendor_folder,
+                preserve,
                 custom_config,
             )
             all_unknown.extend(unknown)
