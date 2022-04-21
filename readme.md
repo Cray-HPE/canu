@@ -1,4 +1,4 @@
-# 🛶 CANU v1.5.4-develop
+# 🛶 CANU v1.5.5-develop
 
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
