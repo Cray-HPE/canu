@@ -148,6 +148,12 @@ csm_options = canu_config["csm_versions"]
     help="Path to current running configs.",
     type=click.Path(),
 )
+@click.option(
+    "--reorder",
+    is_flag=True,
+    help="reorder config to heir config order",
+    required=False,
+)
 @click.pass_context
 def config(
     ctx,
@@ -163,6 +169,7 @@ def config(
     folder,
     preserve,
     custom_config,
+    reorder,
 ):
     """Generate the config of all switches (Aruba, Dell, or Mellanox) on the network using the SHCD.
 
@@ -389,6 +396,7 @@ def config(
                 vendor_folder,
                 preserve,
                 custom_config,
+                reorder,
             )
             all_unknown.extend(unknown)
             config_devices.update(devices)
