@@ -196,6 +196,12 @@ dash = "-" * 60
     help="Path to current running configs.",
     type=click.Path(),
 )
+@click.option(
+    "--reorder",
+    is_flag=True,
+    help="reorder config to heir config order",
+    required=False,
+)
 @click.pass_context
 def config(
     ctx,
@@ -212,6 +218,7 @@ def config(
     out,
     preserve,
     custom_config,
+    reorder,
 ):
     """Generate switch config using the SHCD.
 
@@ -404,6 +411,7 @@ def config(
         vendor_folder,
         preserve,
         custom_config,
+        reorder,
     )
 
     click.echo("\n")
@@ -524,6 +532,7 @@ def generate_switch_config(
     vendor_folder,
     preserve,
     custom_config,
+    reorder,
 ):
     """Generate switch config.
 
@@ -951,6 +960,28 @@ def generate_switch_config(
         preserve_lag_config = add_preserve_config(switch_config)
         error_check_preserve_config(preserve_lag_config)
         return (preserve_lag_config, devices, unknown)
+
+    if reorder:
+        switch_os = "aoscx"
+        options = yaml.load(open(hier_options(switch_os)))
+        host = Host(switch_name, switch_os, options)
+        switch_config_hier = HConfig(host=host)
+        switch_config_hier.load_from_string(switch_config)
+        switch_config_hier.set_order_weight()
+        # add ! to the end of the aruba banner.
+        banner = switch_config_hier.get_child("contains", "banner")
+        banner.add_child("!")
+        config = ""
+        for line in switch_config_hier.all_children_sorted():
+            # add two spaces to indented config to match aruba formatting.
+            if (
+                line.cisco_style_text().startswith("  ")
+                and "!" not in line.cisco_style_text()
+            ):
+                config += "\n" + "  " + line.cisco_style_text()
+            else:
+                config += "\n" + line.cisco_style_text().lstrip()
+        switch_config = config
 
     return switch_config, devices, unknown
 
