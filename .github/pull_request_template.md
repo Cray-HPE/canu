@@ -9,7 +9,7 @@ PR checklist (you may replace this section):
 - [ ] If adding a new file, I have updated pyinstaller.py
 - [ ] I have updated the appropriate Changelog entries in readme.md
 - [ ] I have incremented the version in the readme.md
-- [ ] I have incremented the version in `canu/.version`
+- [ ] I have incremented the version in `canu/.version` and `.version`
 
 ### Issues and Related PRs
 

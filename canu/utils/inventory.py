@@ -54,6 +54,7 @@ def inventory(username, password, network, sls_json=None):
                         "platform": "",
                         "username": username,
                         "password": password,
+                        "data": {"type": ""},
                     },
                 },
             )
@@ -74,6 +75,14 @@ def inventory(username, password, network, sls_json=None):
                         inventory["hosts"][host]["platform"] = "mellanox"
                     else:
                         inventory["hosts"][host]["platform"] = "generic"
+                if "sw-leaf-bmc" in host:
+                    inventory["hosts"][host]["data"]["type"] = "leaf-bmc"
+                elif "sw-leaf" in host:
+                    inventory["hosts"][host]["data"]["type"] = "leaf"
+                elif "sw-spine" in host:
+                    inventory["hosts"][host]["data"]["type"] = "spine"
+                elif "sw-cdu" in host:
+                    inventory["hosts"][host]["data"]["type"] = "cdu"
     inventory = {
         "plugin": "DictInventory",
         "options": {

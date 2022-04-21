@@ -1,5 +1,6 @@
 {#- mtn_hmn_vlan #}
 {%- for cabinet in variables.HMN_MTN_VLANS %}
+
 vlan {{ cabinet.VlanID }}
     name {{ cabinet.Name }}
     apply access-list ip nmn-hmn in
