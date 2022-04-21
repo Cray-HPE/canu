@@ -109,19 +109,6 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 13\n"
             + "interface mlag-port-channel 151\n"
             + "interface mlag-port-channel 201\n"
-            + "interface ethernet 1/1 mtu 9216 force\n"
-            + "interface ethernet 1/2 mtu 9216 force\n"
-            + "interface ethernet 1/3 mtu 9216 force\n"
-            + "interface ethernet 1/4 mtu 9216 force\n"
-            + "interface ethernet 1/5 mtu 9216 force\n"
-            + "interface ethernet 1/6 mtu 9216 force\n"
-            + "interface ethernet 1/7 mtu 9216 force\n"
-            + "interface ethernet 1/8 mtu 9216 force\n"
-            + "interface ethernet 1/9 mtu 9216 force\n"
-            + "interface ethernet 1/13 mtu 9216 force\n"
-            + "interface ethernet 1/26 mtu 9216 force\n"
-            + "interface ethernet 1/29 mtu 9216 force\n"
-            + "interface ethernet 1/30 mtu 9216 force\n"
             + "interface ethernet 1/31 speed 40G force\n"
             + "interface ethernet 1/32 speed 40G force\n"
             + "interface ethernet 1/1 speed 40G force\n"
@@ -137,18 +124,6 @@ def test_switch_config_spine_primary():
             + "interface ethernet 1/26 speed 10G force\n"
             + "interface ethernet 1/29 speed 40G force\n"
             + "interface ethernet 1/30 speed 40G force\n"
-            + "interface mlag-port-channel 1 mtu 9216 force\n"
-            + "interface mlag-port-channel 2 mtu 9216 force\n"
-            + "interface mlag-port-channel 3 mtu 9216 force\n"
-            + "interface mlag-port-channel 4 mtu 9216 force\n"
-            + "interface mlag-port-channel 5 mtu 9216 force\n"
-            + "interface mlag-port-channel 6 mtu 9216 force\n"
-            + "interface mlag-port-channel 7 mtu 9216 force\n"
-            + "interface mlag-port-channel 8 mtu 9216 force\n"
-            + "interface mlag-port-channel 9 mtu 9216 force\n"
-            + "interface mlag-port-channel 13 mtu 9216 force\n"
-            + "interface mlag-port-channel 151 mtu 9216 force\n"
-            + "interface mlag-port-channel 201 mtu 9216 force\n"
             + "interface ethernet 1/1 mlag-channel-group 1 mode active\n"
             + "interface ethernet 1/2 mlag-channel-group 2 mode active\n"
             + "interface ethernet 1/3 mlag-channel-group 3 mode active\n"
@@ -203,30 +178,17 @@ def test_switch_config_spine_primary():
             + 'interface mlag-port-channel 201 description "sw-spine-001:29==>sw-cdu-001:27"\n'
             + 'interface mlag-port-channel 201 description "sw-spine-001:30==>sw-cdu-002:27"\n'
         ) in str(result.output)
+        print(result.output)
         assert (
-            "interface port-channel 100\n"
-            + "interface ethernet 1/31 channel-group 100 mode active\n"
-            + "interface ethernet 1/32 channel-group 100 mode active\n"
-            + 'interface port-channel 100 description "mlag-isl"\n'
-            + "port-channel load-balance ethernet source-destination-ip ingress-port\n"
-            + "interface port-channel 100 dcb priority-flow-control mode on force\n"
+            "interface port-channel 256\n"
+            + "interface ethernet 1/31 channel-group 256 mode active\n"
+            + "interface ethernet 1/32 channel-group 256 mode active\n"
+            + 'interface port-channel 256 description "mlag-isl"\n'
+            + "interface port-channel 256 dcb priority-flow-control mode on force\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "interface mlag-port-channel 1 no shutdown\n"
-            + "interface ethernet 1/10 shutdown\n"
-            + "interface ethernet 1/11 shutdown\n"
-            + "interface ethernet 1/12 shutdown\n"
-            + "interface ethernet 1/14 shutdown\n"
-            + "interface ethernet 1/15 shutdown\n"
-            + "interface ethernet 1/16 shutdown\n"
-            + "interface ethernet 1/17 shutdown\n"
-            + "interface ethernet 1/18 shutdown\n"
-            + "interface ethernet 1/19 shutdown\n"
-            + "interface ethernet 1/21 shutdown\n"
-            + "interface ethernet 1/22 shutdown\n"
-            + "interface ethernet 1/23 shutdown\n"
-            + "interface ethernet 1/24 shutdown\n"
-            + "interface ethernet 1/25 shutdown\n"
             + "interface mlag-port-channel 2 no shutdown\n"
             + "interface mlag-port-channel 3 no shutdown\n"
             + "interface mlag-port-channel 4 no shutdown\n"
@@ -239,6 +201,7 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 151 no shutdown\n"
             + "interface mlag-port-channel 201 no shutdown\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "interface mlag-port-channel 1 lacp-individual enable force\n"
             + "interface mlag-port-channel 2 lacp-individual enable force\n"
@@ -250,18 +213,20 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 8 lacp-individual enable force\n"
             + "interface mlag-port-channel 9 lacp-individual enable force\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "vlan 2\n"
             + "vlan 4\n"
             + "vlan 6\n"
-            + "vlan 7\n"
             + "vlan 4000\n"
             + 'vlan 2 name "RVR_NMN"\n'
             + 'vlan 4 name "RVR_HMN"\n'
             + 'vlan 6 name "CMN"\n'
-            + 'vlan 7 name "CAN"\n'
             + 'vlan 4000 name "MLAG"\n'
+            + "vlan 7\n"
+            + 'vlan 7 name "CAN"\n'
         ) in str(result.output)
+        print(result.output)
         assert (
             "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 2\n"
             + "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 4\n"
@@ -309,27 +274,35 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 201 switchport hybrid allowed-vlan add 4\n"
             + "interface mlag-port-channel 201 switchport hybrid allowed-vlan add 6\n"
         ) in str(result.output)
+        print(result.output)
         assert (
-            "web vrf default enable force\n"
+            "web vrf default enable\n"
             + "vrf definition Customer\n"
             + "vrf definition Customer rd 7:7\n"
             + "ip routing vrf Customer\n"
             + "ip routing vrf default\n"
             + "ip name-server vrf vrf-default 10.92.100.225\n"
+            + "no ldap vrf mgmt enable\n"
+            + "no radius-server vrf mgmt enable\n"
+            + "no snmp-server vrf mgmt enable\n"
+            + "no tacacs-server vrf mgmt enable\n"
+            + "vrf definition mgmt\n"
             + "interface loopback 0\n"
             + "interface loopback 0 ip address 10.2.0.2/32 primary\n"
+            + "interface vlan 7 vrf forwarding Customer\n"
+            + "interface vlan 7 ip address 192.168.11.2/24 primary\n"
+            + "no interface vlan 7 ip icmp redirect\n"
+            + "interface vlan 7 mtu 9184\n"
             + "interface vlan 1\n"
             + "interface vlan 2\n"
             + "interface vlan 4\n"
             + "interface vlan 6 vrf forwarding Customer\n"
-            + "interface vlan 7 vrf forwarding Customer\n"
             + "interface vlan 10\n"
             + "interface vlan 4000\n"
             + "interface vlan 1 ip address 192.168.1.2/16 primary\n"
             + "interface vlan 2 ip address 192.168.3.2/17 primary\n"
             + "interface vlan 4 ip address 192.168.0.2/17 primary\n"
             + "interface vlan 6 ip address 192.168.12.2/24 primary\n"
-            + "interface vlan 7 ip address 192.168.11.2/24 primary\n"
             + "interface vlan 4000 ip address 192.168.255.253/30 primary\n"
             + "no interface vlan 1 ip icmp redirect\n"
             + "interface vlan 1 mtu 9184\n"
@@ -339,10 +312,8 @@ def test_switch_config_spine_primary():
             + "interface vlan 4 mtu 9184\n"
             + "no interface vlan 6 ip icmp redirect\n"
             + "interface vlan 6 mtu 9184\n"
-            + "no interface vlan 7 ip icmp redirect\n"
-            + "interface vlan 7 mtu 9184\n"
-            + "interface vlan 4000 mtu 9216\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "ip load-sharing source-ip-port\n"
             + "ip load-sharing type consistent\n"
@@ -356,6 +327,7 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 201 spanning-tree port type network\n"
             + "interface mlag-port-channel 201 spanning-tree guard root\n"
         ) in str(result.output)
+        print(result.output)
         print(result.output)
         assert (
             "ipv4 access-list nmn-hmn\n"
@@ -374,11 +346,12 @@ def test_switch_config_spine_primary():
             + "ipv4 access-list cmn-can seq-number 10 deny ip 192.168.12.0 mask 255.255.255.0 192.168.11.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 20 deny ip 192.168.11.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 30 permit ip any any\n"
+            + "interface vlan 7 ipv4 port access-group cmn-can\n"
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 6 ipv4 port access-group cmn-can\n"
-            + "interface vlan 7 ipv4 port access-group cmn-can\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "protocol ospf\n"
             + "router ospf 1 vrf default\n"
@@ -396,6 +369,7 @@ def test_switch_config_spine_primary():
             + "interface vlan 4 ip ospf passive-interface\n"
             + "router ospf 1 vrf default redistribute bgp\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "ip dhcp relay instance 2 vrf default\n"
             + "ip dhcp relay instance 4 vrf default\n"
@@ -405,36 +379,43 @@ def test_switch_config_spine_primary():
             + "interface vlan 2 ip dhcp relay instance 2 downstream\n"
             + "interface vlan 4 ip dhcp relay instance 4 downstream\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "protocol magp\n"
             + "interface vlan 1 magp 1\n"
             + "interface vlan 2 magp 2\n"
             + "interface vlan 4 magp 3\n"
             + "interface vlan 6 magp 4\n"
-            + "interface vlan 7 magp 5\n"
             + "interface vlan 1 magp 1 ip virtual-router address 192.168.1.1\n"
             + "interface vlan 2 magp 2 ip virtual-router address 192.168.3.1\n"
             + "interface vlan 4 magp 3 ip virtual-router address 192.168.0.1\n"
             + "interface vlan 6 magp 4 ip virtual-router address 192.168.12.1\n"
-            + "interface vlan 7 magp 5 ip virtual-router address 192.168.11.1\n"
             + "interface vlan 1 magp 1 ip virtual-router mac-address 00:00:5E:00:01:01\n"
             + "interface vlan 2 magp 2 ip virtual-router mac-address 00:00:5E:00:01:02\n"
             + "interface vlan 4 magp 3 ip virtual-router mac-address 00:00:5E:00:01:03\n"
             + "interface vlan 6 magp 4 ip virtual-router mac-address 00:00:5E:00:01:04\n"
+            + "interface vlan 7 magp 5\n"
+            + "interface vlan 7 magp 5 ip virtual-router address 192.168.11.1\n"
             + "interface vlan 7 magp 5 ip virtual-router mac-address 00:00:5E:00:01:05\n"
             + "mlag-vip mlag-domain ip 192.168.255.242 /29 force\n"
             + "no mlag shutdown\n"
             + "mlag system-mac 00:00:5E:00:01:01\n"
-            + "interface port-channel 100 ipl 1\n"
+            + "interface port-channel 256 ipl 1\n"
             + "interface vlan 4000 ipl 1 peer-address 192.168.255.254\n"
             + "no interface mgmt0 dhcp\n"
             + "interface mgmt0 ip address 192.168.255.241 /29\n"
             + "ip prefix-list pl-cmn\n"
+            + "ip prefix-list pl-cmn bulk-mode\n"
             + "ip prefix-list pl-cmn seq 10 permit 192.168.12.0 /24 ge 24\n"
+            + "ip prefix-list pl-cmn commit\n"
             + "ip prefix-list pl-hmn\n"
+            + "ip prefix-list pl-hmn bulk-mode\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0 /24 ge 24\n"
+            + "ip prefix-list pl-hmn commit\n"
             + "ip prefix-list pl-nmn\n"
+            + "ip prefix-list pl-nmn bulk-mode\n"
             + "ip prefix-list pl-nmn seq 30 permit 10.92.100.0 /24 ge 24\n"
+            + "ip prefix-list pl-nmn commit\n"
             + "route-map ncn-w001 permit 10 match ip address pl-cmn\n"
             + "route-map ncn-w001 permit 10 set ip next-hop 192.168.12.4\n"
             + "route-map ncn-w001 permit 20 match ip address pl-hmn\n"
@@ -496,6 +477,7 @@ def test_switch_config_spine_primary():
             + "no ntp server 192.168.4.6 trusted-enable\n"
             + "ntp server 192.168.4.6 version 4\n"
         ) in str(result.output)
+        print(result.output)
 
 
 def test_switch_config_spine_primary_custom():
@@ -558,18 +540,6 @@ def test_switch_config_spine_primary_custom():
             + "interface mlag-port-channel 13\n"
             + "interface mlag-port-channel 151\n"
             + "interface mlag-port-channel 201\n"
-            + "interface ethernet 1/2 mtu 9216 force\n"
-            + "interface ethernet 1/3 mtu 9216 force\n"
-            + "interface ethernet 1/4 mtu 9216 force\n"
-            + "interface ethernet 1/5 mtu 9216 force\n"
-            + "interface ethernet 1/6 mtu 9216 force\n"
-            + "interface ethernet 1/7 mtu 9216 force\n"
-            + "interface ethernet 1/8 mtu 9216 force\n"
-            + "interface ethernet 1/9 mtu 9216 force\n"
-            + "interface ethernet 1/13 mtu 9216 force\n"
-            + "interface ethernet 1/26 mtu 9216 force\n"
-            + "interface ethernet 1/29 mtu 9216 force\n"
-            + "interface ethernet 1/30 mtu 9216 force\n"
             + "interface ethernet 1/31 speed 40G force\n"
             + "interface ethernet 1/32 speed 40G force\n"
             + "interface ethernet 1/2 speed 40G force\n"
@@ -586,18 +556,6 @@ def test_switch_config_spine_primary_custom():
             + "interface ethernet 1/30 speed 40G force\n"
             + "interface ethernet 1/1 speed 10G force\n"
             + "interface ethernet 1/16 speed 10G force\n"
-            + "interface mlag-port-channel 1 mtu 9216 force\n"
-            + "interface mlag-port-channel 2 mtu 9216 force\n"
-            + "interface mlag-port-channel 3 mtu 9216 force\n"
-            + "interface mlag-port-channel 4 mtu 9216 force\n"
-            + "interface mlag-port-channel 5 mtu 9216 force\n"
-            + "interface mlag-port-channel 6 mtu 9216 force\n"
-            + "interface mlag-port-channel 7 mtu 9216 force\n"
-            + "interface mlag-port-channel 8 mtu 9216 force\n"
-            + "interface mlag-port-channel 9 mtu 9216 force\n"
-            + "interface mlag-port-channel 13 mtu 9216 force\n"
-            + "interface mlag-port-channel 151 mtu 9216 force\n"
-            + "interface mlag-port-channel 201 mtu 9216 force\n"
             + "interface ethernet 1/2 mlag-channel-group 2 mode active\n"
             + "interface ethernet 1/3 mlag-channel-group 3 mode active\n"
             + "interface ethernet 1/4 mlag-channel-group 4 mode active\n"
@@ -652,14 +610,15 @@ def test_switch_config_spine_primary_custom():
             + 'interface mlag-port-channel 201 description "sw-spine-001:29==>sw-cdu-001:27"\n'
             + 'interface mlag-port-channel 201 description "sw-spine-001:30==>sw-cdu-002:27"\n'
         ) in str(result.output)
+        print(result.output)
         assert (
-            "interface port-channel 100\n"
-            + "interface ethernet 1/31 channel-group 100 mode active\n"
-            + "interface ethernet 1/32 channel-group 100 mode active\n"
-            + 'interface port-channel 100 description "mlag-isl"\n'
-            + "port-channel load-balance ethernet source-destination-ip ingress-port\n"
-            + "interface port-channel 100 dcb priority-flow-control mode on force\n"
+            "interface port-channel 256\n"
+            + "interface ethernet 1/31 channel-group 256 mode active\n"
+            + "interface ethernet 1/32 channel-group 256 mode active\n"
+            + 'interface port-channel 256 description "mlag-isl"\n'
+            + "interface port-channel 256 dcb priority-flow-control mode on force\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "interface ethernet 1/1 ip address 10.102.255.14/30 primary\n"
             + "interface ethernet 1/1 dcb priority-flow-control mode on force\n"
@@ -677,6 +636,7 @@ def test_switch_config_spine_primary_custom():
             + "interface mlag-port-channel 151 no shutdown\n"
             + "interface mlag-port-channel 201 no shutdown\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "interface mlag-port-channel 1 lacp-individual enable force\n"
             + "interface mlag-port-channel 2 lacp-individual enable force\n"
@@ -692,14 +652,16 @@ def test_switch_config_spine_primary_custom():
             "vlan 2\n"
             + "vlan 4\n"
             + "vlan 6\n"
-            + "vlan 7\n"
             + "vlan 4000\n"
             + 'vlan 2 name "RVR_NMN"\n'
             + 'vlan 4 name "RVR_HMN"\n'
             + 'vlan 6 name "CMN"\n'
-            + 'vlan 7 name "CAN"\n'
             + 'vlan 4000 name "MLAG"\n'
+            + "vlan 7\n"
+            + 'vlan 7 name "CAN"\n'
         ) in str(result.output)
+        print(result.output)
+
         assert (
             "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 2\n"
             + "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 4\n"
@@ -747,27 +709,35 @@ def test_switch_config_spine_primary_custom():
             + "interface mlag-port-channel 201 switchport hybrid allowed-vlan add 4\n"
             + "interface mlag-port-channel 201 switchport hybrid allowed-vlan add 6\n"
         ) in str(result.output)
+        print(result.output)
         assert (
-            "web vrf default enable force\n"
+            "web vrf default enable\n"
             + "vrf definition Customer\n"
             + "vrf definition Customer rd 7:7\n"
             + "ip routing vrf Customer\n"
             + "ip routing vrf default\n"
             + "ip name-server vrf vrf-default 10.92.100.225\n"
+            + "no ldap vrf mgmt enable\n"
+            + "no radius-server vrf mgmt enable\n"
+            + "no snmp-server vrf mgmt enable\n"
+            + "no tacacs-server vrf mgmt enable\n"
+            + "vrf definition mgmt\n"
             + "interface loopback 0\n"
             + "interface loopback 0 ip address 10.2.0.2/32 primary\n"
+            + "interface vlan 7 vrf forwarding Customer\n"
+            + "interface vlan 7 ip address 192.168.11.2/24 primary\n"
+            + "no interface vlan 7 ip icmp redirect\n"
+            + "interface vlan 7 mtu 9184\n"
             + "interface vlan 1\n"
             + "interface vlan 2\n"
             + "interface vlan 4\n"
             + "interface vlan 6 vrf forwarding Customer\n"
-            + "interface vlan 7 vrf forwarding Customer\n"
             + "interface vlan 10\n"
             + "interface vlan 4000\n"
             + "interface vlan 1 ip address 192.168.1.2/16 primary\n"
             + "interface vlan 2 ip address 192.168.3.2/17 primary\n"
             + "interface vlan 4 ip address 192.168.0.2/17 primary\n"
             + "interface vlan 6 ip address 192.168.12.2/24 primary\n"
-            + "interface vlan 7 ip address 192.168.11.2/24 primary\n"
             + "interface vlan 4000 ip address 192.168.255.253/30 primary\n"
             + "no interface vlan 1 ip icmp redirect\n"
             + "interface vlan 1 mtu 9184\n"
@@ -777,10 +747,8 @@ def test_switch_config_spine_primary_custom():
             + "interface vlan 4 mtu 9184\n"
             + "no interface vlan 6 ip icmp redirect\n"
             + "interface vlan 6 mtu 9184\n"
-            + "no interface vlan 7 ip icmp redirect\n"
-            + "interface vlan 7 mtu 9184\n"
-            + "interface vlan 4000 mtu 9216\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "interface ethernet 1/1 no switchport force\n"
             + "interface ethernet 1/16 no switchport force\n"
@@ -815,11 +783,12 @@ def test_switch_config_spine_primary_custom():
             + "ipv4 access-list cmn-can seq-number 10 deny ip 192.168.12.0 mask 255.255.255.0 192.168.11.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 20 deny ip 192.168.11.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 30 permit ip any any\n"
+            + "interface vlan 7 ipv4 port access-group cmn-can\n"
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 6 ipv4 port access-group cmn-can\n"
-            + "interface vlan 7 ipv4 port access-group cmn-can\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "protocol ospf\n"
             + "router ospf 1 vrf default\n"
@@ -837,6 +806,7 @@ def test_switch_config_spine_primary_custom():
             + "interface vlan 4 ip ospf passive-interface\n"
             + "router ospf 1 vrf default redistribute bgp\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "ip dhcp relay instance 2 vrf default\n"
             + "ip dhcp relay instance 4 vrf default\n"
@@ -846,36 +816,43 @@ def test_switch_config_spine_primary_custom():
             + "interface vlan 2 ip dhcp relay instance 2 downstream\n"
             + "interface vlan 4 ip dhcp relay instance 4 downstream\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "protocol magp\n"
             + "interface vlan 1 magp 1\n"
             + "interface vlan 2 magp 2\n"
             + "interface vlan 4 magp 3\n"
             + "interface vlan 6 magp 4\n"
-            + "interface vlan 7 magp 5\n"
             + "interface vlan 1 magp 1 ip virtual-router address 192.168.1.1\n"
             + "interface vlan 2 magp 2 ip virtual-router address 192.168.3.1\n"
             + "interface vlan 4 magp 3 ip virtual-router address 192.168.0.1\n"
             + "interface vlan 6 magp 4 ip virtual-router address 192.168.12.1\n"
-            + "interface vlan 7 magp 5 ip virtual-router address 192.168.11.1\n"
             + "interface vlan 1 magp 1 ip virtual-router mac-address 00:00:5E:00:01:01\n"
             + "interface vlan 2 magp 2 ip virtual-router mac-address 00:00:5E:00:01:02\n"
             + "interface vlan 4 magp 3 ip virtual-router mac-address 00:00:5E:00:01:03\n"
             + "interface vlan 6 magp 4 ip virtual-router mac-address 00:00:5E:00:01:04\n"
+            + "interface vlan 7 magp 5\n"
+            + "interface vlan 7 magp 5 ip virtual-router address 192.168.11.1\n"
             + "interface vlan 7 magp 5 ip virtual-router mac-address 00:00:5E:00:01:05\n"
             + "mlag-vip mlag-domain ip 192.168.255.242 /29 force\n"
             + "no mlag shutdown\n"
             + "mlag system-mac 00:00:5E:00:01:01\n"
-            + "interface port-channel 100 ipl 1\n"
+            + "interface port-channel 256 ipl 1\n"
             + "interface vlan 4000 ipl 1 peer-address 192.168.255.254\n"
             + "no interface mgmt0 dhcp\n"
             + "interface mgmt0 ip address 192.168.255.241 /29\n"
             + "ip prefix-list pl-cmn\n"
+            + "ip prefix-list pl-cmn bulk-mode\n"
             + "ip prefix-list pl-cmn seq 10 permit 192.168.12.0 /24 ge 24\n"
+            + "ip prefix-list pl-cmn commit\n"
             + "ip prefix-list pl-hmn\n"
+            + "ip prefix-list pl-hmn bulk-mode\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0 /24 ge 24\n"
+            + "ip prefix-list pl-hmn commit\n"
             + "ip prefix-list pl-nmn\n"
+            + "ip prefix-list pl-nmn bulk-mode\n"
             + "ip prefix-list pl-nmn seq 30 permit 10.92.100.0 /24 ge 24\n"
+            + "ip prefix-list pl-nmn commit\n"
             + "route-map ncn-w001 permit 10 match ip address pl-cmn\n"
             + "route-map ncn-w001 permit 10 set ip next-hop 192.168.12.4\n"
             + "route-map ncn-w001 permit 20 match ip address pl-hmn\n"
@@ -937,6 +914,7 @@ def test_switch_config_spine_primary_custom():
             + "no ntp server 192.168.4.6 trusted-enable\n"
             + "ntp server 192.168.4.6 version 4\n"
         ) in str(result.output)
+        print(result.output)
 
 
 def test_switch_config_spine_secondary():
@@ -989,19 +967,6 @@ def test_switch_config_spine_secondary():
             + "interface mlag-port-channel 13\n"
             + "interface mlag-port-channel 151\n"
             + "interface mlag-port-channel 201\n"
-            + "interface ethernet 1/1 mtu 9216 force\n"
-            + "interface ethernet 1/2 mtu 9216 force\n"
-            + "interface ethernet 1/3 mtu 9216 force\n"
-            + "interface ethernet 1/4 mtu 9216 force\n"
-            + "interface ethernet 1/5 mtu 9216 force\n"
-            + "interface ethernet 1/6 mtu 9216 force\n"
-            + "interface ethernet 1/7 mtu 9216 force\n"
-            + "interface ethernet 1/8 mtu 9216 force\n"
-            + "interface ethernet 1/9 mtu 9216 force\n"
-            + "interface ethernet 1/13 mtu 9216 force\n"
-            + "interface ethernet 1/26 mtu 9216 force\n"
-            + "interface ethernet 1/29 mtu 9216 force\n"
-            + "interface ethernet 1/30 mtu 9216 force\n"
             + "interface ethernet 1/31 speed 40G force\n"
             + "interface ethernet 1/32 speed 40G force\n"
             + "interface ethernet 1/1 speed 40G force\n"
@@ -1017,18 +982,6 @@ def test_switch_config_spine_secondary():
             + "interface ethernet 1/26 speed 10G force\n"
             + "interface ethernet 1/29 speed 40G force\n"
             + "interface ethernet 1/30 speed 40G force\n"
-            + "interface mlag-port-channel 1 mtu 9216 force\n"
-            + "interface mlag-port-channel 2 mtu 9216 force\n"
-            + "interface mlag-port-channel 3 mtu 9216 force\n"
-            + "interface mlag-port-channel 4 mtu 9216 force\n"
-            + "interface mlag-port-channel 5 mtu 9216 force\n"
-            + "interface mlag-port-channel 6 mtu 9216 force\n"
-            + "interface mlag-port-channel 7 mtu 9216 force\n"
-            + "interface mlag-port-channel 8 mtu 9216 force\n"
-            + "interface mlag-port-channel 9 mtu 9216 force\n"
-            + "interface mlag-port-channel 13 mtu 9216 force\n"
-            + "interface mlag-port-channel 151 mtu 9216 force\n"
-            + "interface mlag-port-channel 201 mtu 9216 force\n"
             + "interface ethernet 1/1 mlag-channel-group 1 mode active\n"
             + "interface ethernet 1/2 mlag-channel-group 2 mode active\n"
             + "interface ethernet 1/3 mlag-channel-group 3 mode active\n"
@@ -1083,30 +1036,17 @@ def test_switch_config_spine_secondary():
             + 'interface mlag-port-channel 201 description "sw-spine-002:29==>sw-cdu-001:28"\n'
             + 'interface mlag-port-channel 201 description "sw-spine-002:30==>sw-cdu-002:28"\n'
         ) in str(result.output)
+        print(result.output)
+
         assert (
-            "interface port-channel 100\n"
-            + "interface ethernet 1/31 channel-group 100 mode active\n"
-            + "interface ethernet 1/32 channel-group 100 mode active\n"
-            + 'interface port-channel 100 description "mlag-isl"\n'
-            + "port-channel load-balance ethernet source-destination-ip ingress-port\n"
-            + "interface port-channel 100 dcb priority-flow-control mode on force\n"
+            "interface port-channel 256\n"
+            + "interface ethernet 1/31 channel-group 256 mode active\n"
+            + "interface ethernet 1/32 channel-group 256 mode active\n"
+            + 'interface port-channel 256 description "mlag-isl"\n'
+            + "interface port-channel 256 dcb priority-flow-control mode on force\n"
         ) in str(result.output)
         assert (
             "interface mlag-port-channel 1 no shutdown\n"
-            + "interface ethernet 1/10 shutdown\n"
-            + "interface ethernet 1/11 shutdown\n"
-            + "interface ethernet 1/12 shutdown\n"
-            + "interface ethernet 1/14 shutdown\n"
-            + "interface ethernet 1/15 shutdown\n"
-            + "interface ethernet 1/16 shutdown\n"
-            + "interface ethernet 1/17 shutdown\n"
-            + "interface ethernet 1/18 shutdown\n"
-            + "interface ethernet 1/19 shutdown\n"
-            + "interface ethernet 1/21 shutdown\n"
-            + "interface ethernet 1/22 shutdown\n"
-            + "interface ethernet 1/23 shutdown\n"
-            + "interface ethernet 1/24 shutdown\n"
-            + "interface ethernet 1/25 shutdown\n"
             + "interface mlag-port-channel 2 no shutdown\n"
             + "interface mlag-port-channel 3 no shutdown\n"
             + "interface mlag-port-channel 4 no shutdown\n"
@@ -1123,13 +1063,13 @@ def test_switch_config_spine_secondary():
             "vlan 2\n"
             + "vlan 4\n"
             + "vlan 6\n"
-            + "vlan 7\n"
             + "vlan 4000\n"
             + 'vlan 2 name "RVR_NMN"\n'
             + 'vlan 4 name "RVR_HMN"\n'
             + 'vlan 6 name "CMN"\n'
-            + 'vlan 7 name "CAN"\n'
             + 'vlan 4000 name "MLAG"\n'
+            + "vlan 7\n"
+            + 'vlan 7 name "CAN"\n'
         ) in str(result.output)
         print(result.output)
         assert (
@@ -1180,26 +1120,33 @@ def test_switch_config_spine_secondary():
             + "interface mlag-port-channel 201 switchport hybrid allowed-vlan add 6\n"
         ) in str(result.output)
         assert (
-            "web vrf default enable force\n"
+            "web vrf default enable\n"
             + "vrf definition Customer\n"
             + "vrf definition Customer rd 7:7\n"
             + "ip routing vrf Customer\n"
             + "ip routing vrf default\n"
             + "ip name-server vrf vrf-default 10.92.100.225\n"
+            + "no ldap vrf mgmt enable\n"
+            + "no radius-server vrf mgmt enable\n"
+            + "no snmp-server vrf mgmt enable\n"
+            + "no tacacs-server vrf mgmt enable\n"
+            + "vrf definition mgmt\n"
             + "interface loopback 0\n"
             + "interface loopback 0 ip address 10.2.0.3/32 primary\n"
+            + "interface vlan 7 vrf forwarding Customer\n"
+            + "interface vlan 7 ip address 192.168.11.3/24 primary\n"
+            + "no interface vlan 7 ip icmp redirect\n"
+            + "interface vlan 7 mtu 9184\n"
             + "interface vlan 1\n"
             + "interface vlan 2\n"
             + "interface vlan 4\n"
             + "interface vlan 6 vrf forwarding Customer\n"
-            + "interface vlan 7 vrf forwarding Customer\n"
             + "interface vlan 10\n"
             + "interface vlan 4000\n"
             + "interface vlan 1 ip address 192.168.1.3/16 primary\n"
             + "interface vlan 2 ip address 192.168.3.3/17 primary\n"
             + "interface vlan 4 ip address 192.168.0.3/17 primary\n"
             + "interface vlan 6 ip address 192.168.12.3/24 primary\n"
-            + "interface vlan 7 ip address 192.168.11.3/24 primary\n"
             + "interface vlan 4000 ip address 192.168.255.254/30 primary\n"
             + "no interface vlan 1 ip icmp redirect\n"
             + "interface vlan 1 mtu 9184\n"
@@ -1209,9 +1156,6 @@ def test_switch_config_spine_secondary():
             + "interface vlan 4 mtu 9184\n"
             + "no interface vlan 6 ip icmp redirect\n"
             + "interface vlan 6 mtu 9184\n"
-            + "no interface vlan 7 ip icmp redirect\n"
-            + "interface vlan 7 mtu 9184\n"
-            + "interface vlan 4000 mtu 9216\n"
         ) in str(result.output)
         assert (
             "ip load-sharing source-ip-port\n"
@@ -1243,10 +1187,10 @@ def test_switch_config_spine_secondary():
             + "ipv4 access-list cmn-can seq-number 10 deny ip 192.168.12.0 mask 255.255.255.0 192.168.11.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 20 deny ip 192.168.11.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 30 permit ip any any\n"
+            + "interface vlan 7 ipv4 port access-group cmn-can\n"
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 6 ipv4 port access-group cmn-can\n"
-            + "interface vlan 7 ipv4 port access-group cmn-can\n"
         ) in str(result.output)
         assert (
             "protocol ospf\n"
@@ -1280,30 +1224,36 @@ def test_switch_config_spine_secondary():
             + "interface vlan 2 magp 2\n"
             + "interface vlan 4 magp 3\n"
             + "interface vlan 6 magp 4\n"
-            + "interface vlan 7 magp 5\n"
             + "interface vlan 1 magp 1 ip virtual-router address 192.168.1.1\n"
             + "interface vlan 2 magp 2 ip virtual-router address 192.168.3.1\n"
             + "interface vlan 4 magp 3 ip virtual-router address 192.168.0.1\n"
             + "interface vlan 6 magp 4 ip virtual-router address 192.168.12.1\n"
-            + "interface vlan 7 magp 5 ip virtual-router address 192.168.11.1\n"
             + "interface vlan 1 magp 1 ip virtual-router mac-address 00:00:5E:00:01:01\n"
             + "interface vlan 2 magp 2 ip virtual-router mac-address 00:00:5E:00:01:02\n"
             + "interface vlan 4 magp 3 ip virtual-router mac-address 00:00:5E:00:01:03\n"
             + "interface vlan 6 magp 4 ip virtual-router mac-address 00:00:5E:00:01:04\n"
+            + "interface vlan 7 magp 5\n"
+            + "interface vlan 7 magp 5 ip virtual-router address 192.168.11.1\n"
             + "interface vlan 7 magp 5 ip virtual-router mac-address 00:00:5E:00:01:05\n"
             + "mlag-vip mlag-domain ip 192.168.255.242 /29 force\n"
             + "no mlag shutdown\n"
             + "mlag system-mac 00:00:5E:00:01:01\n"
-            + "interface port-channel 100 ipl 1\n"
+            + "interface port-channel 256 ipl 1\n"
             + "interface vlan 4000 ipl 1 peer-address 192.168.255.253\n"
             + "no interface mgmt0 dhcp\n"
             + "interface mgmt0 ip address 192.168.255.243 /29\n"
             + "ip prefix-list pl-cmn\n"
+            + "ip prefix-list pl-cmn bulk-mode\n"
             + "ip prefix-list pl-cmn seq 10 permit 192.168.12.0 /24 ge 24\n"
+            + "ip prefix-list pl-cmn commit\n"
             + "ip prefix-list pl-hmn\n"
+            + "ip prefix-list pl-hmn bulk-mode\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0 /24 ge 24\n"
+            + "ip prefix-list pl-hmn commit\n"
             + "ip prefix-list pl-nmn\n"
+            + "ip prefix-list pl-nmn bulk-mode\n"
             + "ip prefix-list pl-nmn seq 30 permit 10.92.100.0 /24 ge 24\n"
+            + "ip prefix-list pl-nmn commit\n"
             + "route-map ncn-w001 permit 10 match ip address pl-cmn\n"
             + "route-map ncn-w001 permit 10 set ip next-hop 192.168.12.4\n"
             + "route-map ncn-w001 permit 20 match ip address pl-hmn\n"
@@ -1444,7 +1394,7 @@ def test_switch_config_leaf_bmc():
             + "  ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
         assert (
-            "interface port-channel100\n"
+            "interface port-channel101\n"
             + "  description sw-leaf-bmc-001:51==>sw-spine-001:26\n"
             + "  no shutdown\n"
             + "  switchport mode trunk\n"
@@ -1464,7 +1414,7 @@ def test_switch_config_leaf_bmc():
             + "  ipv6 address autoconfig\n"
             + "interface ethernet1/1/51\n"
             + "  no shutdown\n"
-            + "  channel-group 100 mode active\n"
+            + "  channel-group 101 mode active\n"
             + "  no switchport\n"
             + "  mtu 9216\n"
             + "  speed 10000\n"
@@ -1472,7 +1422,7 @@ def test_switch_config_leaf_bmc():
             + "  flowcontrol transmit off\n"
             + "interface ethernet1/1/52\n"
             + "  no shutdown\n"
-            + "  channel-group 100 mode active\n"
+            + "  channel-group 101 mode active\n"
             + "  no switchport\n"
             + "  mtu 9216\n"
             + "  speed 10000\n"
@@ -1686,8 +1636,9 @@ def test_switch_config_leaf_bmc_custom():
             + "  ip access-group cmn-can out\n"
             + "  ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
+        print(result.output)
         assert (
-            "interface port-channel100\n"
+            "interface port-channel101\n"
             + "  description sw-leaf-bmc-001:51==>sw-spine-001:26\n"
             + "  no shutdown\n"
             + "  switchport mode trunk\n"
@@ -1695,6 +1646,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  switchport trunk allowed vlan 2,4,6\n"
             + "  mtu 9216\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "interface loopback0\n"
             + "  no shutdown\n"
@@ -1707,7 +1659,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  ipv6 address autoconfig\n"
             + "interface ethernet1/1/51\n"
             + "  no shutdown\n"
-            + "  channel-group 100 mode active\n"
+            + "  channel-group 101 mode active\n"
             + "  no switchport\n"
             + "  mtu 9216\n"
             + "  speed 10000\n"
@@ -1715,7 +1667,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  flowcontrol transmit off\n"
             + "interface ethernet1/1/52\n"
             + "  no shutdown\n"
-            + "  channel-group 100 mode active\n"
+            + "  channel-group 101 mode active\n"
             + "  no switchport\n"
             + "  mtu 9216\n"
             + "  speed 10000\n"
@@ -2018,6 +1970,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  spanning-tree port type edge\n"
         ) in str(result.output)
         print(result.output)
+        print(result.output)
         assert (
             "ip access-list nmn-hmn\n"
             + "  seq 10 deny ip 192.168.3.0/17 192.168.0.0/17\n"
@@ -2034,6 +1987,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
             + "  seq 30 permit ip any any\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "router ospf 1\n"
             + "  router-id 10.2.0.12\n"
@@ -2047,6 +2001,7 @@ def test_switch_config_leaf_bmc_custom():
             + "ntp server 192.168.4.5\n"
             + "ntp server 192.168.4.6\n"
         ) in str(result.output)
+        print(result.output)
 
 
 def test_switch_config_cdu_primary():
@@ -2089,6 +2044,7 @@ def test_switch_config_cdu_primary():
             + "hostname sw-cdu-001\n"
             + "rest api restconf\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "interface vlan3000\n"
             + "  mode L3\n"
@@ -2115,6 +2071,7 @@ def test_switch_config_cdu_primary():
             + "    virtual-address 192.168.100.1\n"
             + "    priority 110\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "interface vlan1\n"
             + "  description MTL\n"
@@ -2150,6 +2107,7 @@ def test_switch_config_cdu_primary():
             + "  ip access-group cmn-can out\n"
             + "  ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "interface port-channel2\n"
             + "  description sw-cdu-001:2==>cmm-x3002-000:1\n"
@@ -2188,15 +2146,16 @@ def test_switch_config_cdu_primary():
             + "  vlt-port-channel 5\n"
             + "  spanning-tree guard root\n"
         ) in str(result.output)
+        print(result.output)
         assert (
-            "interface port-channel100\n"
+            "interface port-channel255\n"
             + "  description sw-cdu-001:27==>sw-spine-001:29\n"
             + "  no shutdown\n"
             + "  switchport mode trunk\n"
             + "  switchport access vlan 1\n"
             + "  switchport trunk allowed vlan 2,4,6\n"
             + "  mtu 9216\n"
-            + "  vlt-port-channel 100\n"
+            + "  vlt-port-channel 255\n"
             + "interface loopback0\n"
             + "  no shutdown\n"
             + "  mtu 9216\n"
@@ -2250,7 +2209,7 @@ def test_switch_config_cdu_primary():
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/27\n"
             + "  no shutdown\n"
-            + "  channel-group 100 mode active\n"
+            + "  channel-group 255 mode active\n"
             + "  no switchport\n"
             + "  speed 40000\n"
             + "  mtu 9216\n"
@@ -2258,7 +2217,7 @@ def test_switch_config_cdu_primary():
             + "  flowcontrol transmit off\n"
             + "interface ethernet1/1/28\n"
             + "  no shutdown\n"
-            + "  channel-group 100 mode active\n"
+            + "  channel-group 255 mode active\n"
             + "  no switchport\n"
             + "  speed 40000\n"
             + "  mtu 9216\n"
@@ -2443,6 +2402,7 @@ def test_switch_config_cdu_primary():
             + "  flowcontrol receive off\n"
             + "  flowcontrol transmit off\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "ip access-list nmn-hmn\n"
             + "  seq 10 deny ip 192.168.3.0/17 192.168.0.0/17\n"
@@ -2459,6 +2419,7 @@ def test_switch_config_cdu_primary():
             + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
             + "  seq 30 permit ip any any\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "router ospf 1\n"
             + "  router-id 10.2.0.16\n"
@@ -2478,6 +2439,7 @@ def test_switch_config_cdu_primary():
             + "ntp server 192.168.4.5\n"
             + "ntp server 192.168.4.6\n"
         ) in str(result.output)
+        print(result.output)
 
 
 def test_switch_config_cdu_secondary():
@@ -2519,6 +2481,7 @@ def test_switch_config_cdu_secondary():
             + "hostname sw-cdu-002\n"
             + "rest api restconf\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "interface vlan3000\n"
             + "  mode L3\n"
@@ -2545,6 +2508,7 @@ def test_switch_config_cdu_secondary():
             + "    virtual-address 192.168.100.1\n"
             + "    priority 90\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "interface vlan1\n"
             + "  description MTL\n"
@@ -2580,6 +2544,7 @@ def test_switch_config_cdu_secondary():
             + "  ip access-group cmn-can out\n"
             + "  ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "interface port-channel2\n"
             + "  description sw-cdu-002:2==>cmm-x3002-000:2\n"
@@ -2619,15 +2584,16 @@ def test_switch_config_cdu_secondary():
             + "  spanning-tree guard root\n"
         ) in str(result.output)
         print(result.output)
+        print(result.output)
         assert (
-            "interface port-channel100\n"
+            "interface port-channel255\n"
             + "  description sw-cdu-002:27==>sw-spine-001:30\n"
             + "  no shutdown\n"
             + "  switchport mode trunk\n"
             + "  switchport access vlan 1\n"
             + "  switchport trunk allowed vlan 2,4,6\n"
             + "  mtu 9216\n"
-            + "  vlt-port-channel 100\n"
+            + "  vlt-port-channel 255\n"
             + "interface loopback0\n"
             + "  no shutdown\n"
             + "  mtu 9216\n"
@@ -2672,7 +2638,7 @@ def test_switch_config_cdu_secondary():
             + "  flowcontrol transmit on\n"
             + "interface ethernet1/1/27\n"
             + "  no shutdown\n"
-            + "  channel-group 100 mode active\n"
+            + "  channel-group 255 mode active\n"
             + "  no switchport\n"
             + "  speed 40000\n"
             + "  mtu 9216\n"
@@ -2680,7 +2646,7 @@ def test_switch_config_cdu_secondary():
             + "  flowcontrol transmit off\n"
             + "interface ethernet1/1/28\n"
             + "  no shutdown\n"
-            + "  channel-group 100 mode active\n"
+            + "  channel-group 255 mode active\n"
             + "  no switchport\n"
             + "  speed 40000\n"
             + "  mtu 9216\n"
@@ -2869,6 +2835,7 @@ def test_switch_config_cdu_secondary():
             + "  flowcontrol receive off\n"
             + "  flowcontrol transmit off\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "ip access-list nmn-hmn\n"
             + "  seq 10 deny ip 192.168.3.0/17 192.168.0.0/17\n"
@@ -2885,6 +2852,7 @@ def test_switch_config_cdu_secondary():
             + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
             + "  seq 30 permit ip any any\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "router ospf 1\n"
             + "  router-id 10.2.0.17\n"
@@ -2904,6 +2872,7 @@ def test_switch_config_cdu_secondary():
             + "ntp server 192.168.4.5\n"
             + "ntp server 192.168.4.6\n"
         ) in str(result.output)
+        print(result.output)
 
 
 sls_input = {
@@ -2934,6 +2903,38 @@ sls_input = {
                         "Name": "bootstrap_dhcp",
                         "VlanID": 7,
                         "Gateway": "192.168.11.1",
+                    },
+                ],
+            },
+        },
+        "CHN": {
+            "Name": "CHN",
+            "ExtraProperties": {
+                "CIDR": "192.168.200.0/24",
+                "MyASN": 65530,
+                "PeerASN": 65533,
+                "Subnets": [
+                    {
+                        "Name": "bootstrap_dhcp",
+                        "CIDR": "192.168.200.0/24",
+                        "IPReservations": [
+                            {"Name": "chn-switch-1", "IPAddress": "192.168.200.2"},
+                            {"Name": "chn-switch-2", "IPAddress": "192.168.200.3"},
+                        ],
+                        "VlanID": 5,
+                        "Gateway": "192.168.200.1",
+                    },
+                    {
+                        "FullName": "CHN Bootstrap DHCP Subnet",
+                        "CIDR": "192.168.200.0/24",
+                        "IPReservations": [
+                            {"Name": "ncn-w001", "IPAddress": "192.168.200.4"},
+                            {"Name": "ncn-w002", "IPAddress": "192.168.200.5"},
+                            {"Name": "ncn-w003", "IPAddress": "192.168.200.6"},
+                        ],
+                        "Name": "bootstrap_dhcp",
+                        "VlanID": 5,
+                        "Gateway": "192.168.200.1",
                     },
                 ],
             },
