@@ -38,6 +38,7 @@ router bgp {{ variables.SWITCH_ASN }}
             {%- endfor %}
             {%- for name, ip in variables.CMN_IPs.items() if "ncn-w" in name %}
             neighbor {{ ip }} activate
+            neighbor {{ ip }} route-map cmn in
             {%- endfor %}
         exit-address-family
 {#- end bgp #}

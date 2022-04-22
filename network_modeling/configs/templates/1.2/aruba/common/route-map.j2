@@ -24,4 +24,6 @@ route-map {{ name }} permit seq {{ sequence.value }}
      set ip next-hop {{ nmn_ip }}
      {%- endfor %}
 {%- endfor %}
+route-map cmn permit seq 10
+     match ip address prefix-list pl-cmn
 {#- end route-map #}
