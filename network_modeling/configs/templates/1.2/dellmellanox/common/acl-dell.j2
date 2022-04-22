@@ -25,10 +25,17 @@ ip access-list nmn-hmn
  seq {% set sequence = sequence+10 %}{{ sequence }} deny ip {{ variables.HMN_MTN_NETWORK_IP }}/{{ variables.HMN_MTN_PREFIX_LEN }} {{ variables.NMN_MTN_NETWORK_IP }}/{{ variables.NMN_MTN_PREFIX_LEN }}
 {%- endif %}
  seq {% set sequence = sequence+10 %}{{ sequence }} permit ip any any
-{%- if variables.CMN and variables.CAN %}
 ip access-list cmn-can
+{%- if variables.CMN and variables.CAN %}
  seq {% set sequence = 10 %}{{ sequence }} deny ip {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_PREFIX_LEN }} {{ variables.CAN_NETWORK_IP }}/{{ variables.CAN_PREFIX_LEN }}
  seq {% set sequence = sequence+10 %}{{ sequence }} deny ip {{ variables.CAN_NETWORK_IP }}/{{ variables.CAN_PREFIX_LEN }} {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_PREFIX_LEN }}
+{%- endif %}
+{%- if not variables.CAN %}
+{% set sequence = 0 %}
+{%- endif %}
+{%- if variables.CMN and variables.CHN %}
+ seq {% set sequence = sequence+10 %}{{ sequence }} deny ip {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_PREFIX_LEN }} {{ variables.CHN_NETWORK_IP }}/{{ variables.CHN_PREFIX_LEN }}
+ seq {% set sequence = sequence+10 %}{{ sequence }} deny ip {{ variables.CHN_NETWORK_IP }}/{{ variables.CHN_PREFIX_LEN }} {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_PREFIX_LEN }}
  seq {% set sequence = sequence+10 %}{{ sequence }} permit ip any any
 {%- endif %}
 {#- end acl #}
