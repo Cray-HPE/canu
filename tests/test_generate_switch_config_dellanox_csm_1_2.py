@@ -345,7 +345,9 @@ def test_switch_config_spine_primary():
             + "ipv4 access-list cmn-can bind-point rif\n"
             + "ipv4 access-list cmn-can seq-number 10 deny ip 192.168.12.0 mask 255.255.255.0 192.168.11.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 20 deny ip 192.168.11.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
-            + "ipv4 access-list cmn-can seq-number 30 permit ip any any\n"
+            + "ipv4 access-list cmn-can seq-number 30 deny ip 192.168.12.0 mask 255.255.255.0 192.168.200.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 40 deny ip 192.168.200.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 50 permit ip any any\n"
             + "interface vlan 7 ipv4 port access-group cmn-can\n"
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
@@ -782,7 +784,9 @@ def test_switch_config_spine_primary_custom():
             + "ipv4 access-list cmn-can bind-point rif\n"
             + "ipv4 access-list cmn-can seq-number 10 deny ip 192.168.12.0 mask 255.255.255.0 192.168.11.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 20 deny ip 192.168.11.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
-            + "ipv4 access-list cmn-can seq-number 30 permit ip any any\n"
+            + "ipv4 access-list cmn-can seq-number 30 deny ip 192.168.12.0 mask 255.255.255.0 192.168.200.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 40 deny ip 192.168.200.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 50 permit ip any any\n"
             + "interface vlan 7 ipv4 port access-group cmn-can\n"
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
@@ -1186,7 +1190,9 @@ def test_switch_config_spine_secondary():
             + "ipv4 access-list cmn-can bind-point rif\n"
             + "ipv4 access-list cmn-can seq-number 10 deny ip 192.168.12.0 mask 255.255.255.0 192.168.11.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 20 deny ip 192.168.11.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
-            + "ipv4 access-list cmn-can seq-number 30 permit ip any any\n"
+            + "ipv4 access-list cmn-can seq-number 30 deny ip 192.168.12.0 mask 255.255.255.0 192.168.200.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 40 deny ip 192.168.200.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 50 permit ip any any\n"
             + "interface vlan 7 ipv4 port access-group cmn-can\n"
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
@@ -1534,7 +1540,9 @@ def test_switch_config_leaf_bmc():
             + "ip access-list cmn-can\n"
             + "  seq 10 deny ip 192.168.12.0/24 192.168.11.0/24\n"
             + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
-            + "  seq 30 permit ip any any\n"
+            + "  seq 30 deny ip 192.168.12.0/24 192.168.200.0/24\n"
+            + "  seq 40 deny ip 192.168.200.0/24 192.168.12.0/24\n"
+            + "  seq 50 permit ip any any\n"
         ) in str(result.output)
         assert (
             "router ospf 1\n"
@@ -1985,7 +1993,9 @@ def test_switch_config_leaf_bmc_custom():
             + "ip access-list cmn-can\n"
             + "  seq 10 deny ip 192.168.12.0/24 192.168.11.0/24\n"
             + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
-            + "  seq 30 permit ip any any\n"
+            + "  seq 30 deny ip 192.168.12.0/24 192.168.200.0/24\n"
+            + "  seq 40 deny ip 192.168.200.0/24 192.168.12.0/24\n"
+            + "  seq 50 permit ip any any\n"
         ) in str(result.output)
         print(result.output)
         assert (
@@ -2417,7 +2427,9 @@ def test_switch_config_cdu_primary():
             + "ip access-list cmn-can\n"
             + "  seq 10 deny ip 192.168.12.0/24 192.168.11.0/24\n"
             + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
-            + "  seq 30 permit ip any any\n"
+            + "  seq 30 deny ip 192.168.12.0/24 192.168.200.0/24\n"
+            + "  seq 40 deny ip 192.168.200.0/24 192.168.12.0/24\n"
+            + "  seq 50 permit ip any any\n"
         ) in str(result.output)
         print(result.output)
         assert (
@@ -2850,7 +2862,9 @@ def test_switch_config_cdu_secondary():
             + "ip access-list cmn-can\n"
             + "  seq 10 deny ip 192.168.12.0/24 192.168.11.0/24\n"
             + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
-            + "  seq 30 permit ip any any\n"
+            + "  seq 30 deny ip 192.168.12.0/24 192.168.200.0/24\n"
+            + "  seq 40 deny ip 192.168.200.0/24 192.168.12.0/24\n"
+            + "  seq 50 permit ip any any\n"
         ) in str(result.output)
         print(result.output)
         assert (
