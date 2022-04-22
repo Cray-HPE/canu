@@ -1,4 +1,4 @@
-# 🛶 CANU v1.5.6-develop
+# 🛶 CANU v1.5.7-develop
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1153,10 +1153,18 @@ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.5.7-develop]
+
+- Add ACL to block CHN <> traffic for CSM 1.2
+- Add Route-Map to CMN BGP peers to restrict routes to only CMN IPs
+
 ## [1.5.6-develop]
+
 - More verbose instructions for generating switch configs
 
 ## [1.5.5-develop]
+
 - Add the ability to generate BGP config for Arista edge switches.
 
 ## [1.5.4-develop]
