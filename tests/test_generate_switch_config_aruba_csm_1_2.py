@@ -413,6 +413,8 @@ def test_switch_config_spine_primary():
             + "route-map ncn-w003 permit seq 60\n"
             + "     match ip address prefix-list pl-nmn\n"
             + "     set ip next-hop 192.168.4.6\n"
+            + "route-map cmn permit seq 10\n"
+            + "     match ip address prefix-list pl-cmn\n"
         ) in str(result.output)
         print(result.output)
         assert (
@@ -461,8 +463,11 @@ def test_switch_config_spine_primary():
             + "        address-family ipv4 unicast\n"
             + "            neighbor 192.168.12.3 activate\n"
             + "            neighbor 192.168.12.4 activate\n"
+            + "            neighbor 192.168.12.4 route-map cmn in\n"
             + "            neighbor 192.168.12.5 activate\n"
+            + "            neighbor 192.168.12.5 route-map cmn in\n"
             + "            neighbor 192.168.12.6 activate\n"
+            + "            neighbor 192.168.12.6 route-map cmn in\n"
             + "        exit-address-family\n"
             + "https-server vrf Customer\n"
             + "https-server vrf default\n"
@@ -876,8 +881,11 @@ def test_switch_config_spine_primary_custom():
             + "      address-family ipv4 unicast\n"
             + "        neighbor 192.168.12.3 activate\n"
             + "        neighbor 192.168.12.4 activate\n"
+            + "        neighbor 192.168.12.4 route-map cmn in\n"
             + "        neighbor 192.168.12.5 activate\n"
+            + "        neighbor 192.168.12.5 route-map cmn in\n"
             + "        neighbor 192.168.12.6 activate\n"
+            + "        neighbor 192.168.12.6 route-map cmn in\n"
             + "      exit-address-family\n"
             + "https-server vrf Customer\n"
             + "https-server vrf default\n"
@@ -1288,8 +1296,11 @@ def test_switch_config_spine_secondary_custom():
             + "      address-family ipv4 unicast\n"
             + "        neighbor 192.168.12.2 activate\n"
             + "        neighbor 192.168.12.4 activate\n"
+            + "        neighbor 192.168.12.4 route-map cmn in\n"
             + "        neighbor 192.168.12.5 activate\n"
+            + "        neighbor 192.168.12.5 route-map cmn in\n"
             + "        neighbor 192.168.12.6 activate\n"
+            + "        neighbor 192.168.12.6 route-map cmn in\n"
             + "      exit-address-family\n"
             + "https-server vrf Customer\n"
             + "https-server vrf default\n"
@@ -1644,6 +1655,8 @@ def test_switch_config_spine_secondary():
             + "route-map ncn-w003 permit seq 60\n"
             + "     match ip address prefix-list pl-nmn\n"
             + "     set ip next-hop 192.168.4.6\n"
+            + "route-map cmn permit seq 10\n"
+            + "     match ip address prefix-list pl-cmn\n"
         ) in str(result.output)
 
         print(result.output)
@@ -1693,8 +1706,11 @@ def test_switch_config_spine_secondary():
             + "        address-family ipv4 unicast\n"
             + "            neighbor 192.168.12.2 activate\n"
             + "            neighbor 192.168.12.4 activate\n"
+            + "            neighbor 192.168.12.4 route-map cmn in\n"
             + "            neighbor 192.168.12.5 activate\n"
+            + "            neighbor 192.168.12.5 route-map cmn in\n"
             + "            neighbor 192.168.12.6 activate\n"
+            + "            neighbor 192.168.12.6 route-map cmn in\n"
             + "        exit-address-family\n"
             + "https-server vrf Customer\n"
             + "https-server vrf default\n"
@@ -4561,6 +4577,8 @@ def test_switch_config_tds_spine_primary():
             + "route-map ncn-w003 permit seq 60\n"
             + "     match ip address prefix-list pl-nmn\n"
             + "     set ip next-hop 192.168.4.6\n"
+            + "route-map cmn permit seq 10\n"
+            + "     match ip address prefix-list pl-cmn\n"
         ) in str(result.output)
 
         print(result.output)
@@ -4610,8 +4628,11 @@ def test_switch_config_tds_spine_primary():
             + "        address-family ipv4 unicast\n"
             + "            neighbor 192.168.12.3 activate\n"
             + "            neighbor 192.168.12.4 activate\n"
+            + "            neighbor 192.168.12.4 route-map cmn in\n"
             + "            neighbor 192.168.12.5 activate\n"
+            + "            neighbor 192.168.12.5 route-map cmn in\n"
             + "            neighbor 192.168.12.6 activate\n"
+            + "            neighbor 192.168.12.6 route-map cmn in\n"
             + "        exit-address-family\n"
             + "https-server vrf Customer\n"
             + "https-server vrf default\n"
@@ -5169,6 +5190,8 @@ def test_switch_config_tds_spine_secondary():
             + "route-map ncn-w003 permit seq 60\n"
             + "     match ip address prefix-list pl-nmn\n"
             + "     set ip next-hop 192.168.4.6\n"
+            + "route-map cmn permit seq 10\n"
+            + "     match ip address prefix-list pl-cmn\n"
         ) in str(result.output)
 
         print(result.output)
@@ -5218,8 +5241,11 @@ def test_switch_config_tds_spine_secondary():
             + "        address-family ipv4 unicast\n"
             + "            neighbor 192.168.12.2 activate\n"
             + "            neighbor 192.168.12.4 activate\n"
+            + "            neighbor 192.168.12.4 route-map cmn in\n"
             + "            neighbor 192.168.12.5 activate\n"
+            + "            neighbor 192.168.12.5 route-map cmn in\n"
             + "            neighbor 192.168.12.6 activate\n"
+            + "            neighbor 192.168.12.6 route-map cmn in\n"
             + "        exit-address-family\n"
             + "https-server vrf Customer\n"
             + "https-server vrf default\n"

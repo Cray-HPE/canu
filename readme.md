@@ -1157,6 +1157,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 ## [1.5.7-develop]
 
 - Add ACL to block CHN <> traffic for CSM 1.2
+- Add Route-Map to CMN BGP peers to restrict routes to only CMN IPs
 
 ## [1.5.6-develop]
 
