@@ -59,12 +59,21 @@ access-list ip nmn-hmn
 {% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }} {{ variables.HMNLB_NETWORK_IP }}/{{ variables.HMNLB_NETMASK }}
 {%- endif %}
 {% set sequence = sequence+10 %}    {{ sequence }} permit any any any
-{%- if variables.CMN and variables.CAN %}
 access-list ip cmn-can
+{%- if variables.CMN and variables.CAN %}
 {% set sequence = 10 %}    {{ sequence }} deny any {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} {{ variables.CAN_NETWORK_IP }}/{{ variables.CAN_NETMASK }}
 {%- endif %}
-{%- if variables.HMN and variables.NMN %}
+{%- if variables.CMN and variables.CAN %}
 {% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.CAN_NETWORK_IP }}/{{ variables.CAN_NETMASK }} {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }}
+{%- endif %}
+{%- if variables.CMN and variables.CHN %}
+{% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} {{ variables.CHN_NETWORK_IP }}/{{ variables.CHN_NETMASK }}
+{%- endif %}
+{%- if not variables.CAN %}
+{% set sequence = 0 %}
+{%- endif %}
+{%- if variables.CMN and variables.CHN %}
+{% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.CHN_NETWORK_IP }}/{{ variables.CHN_NETMASK }} {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }}
 {%- endif %}
 {% set sequence = sequence+10 %}    {{ sequence }} permit any any any
 apply access-list ip mgmt control-plane vrf default

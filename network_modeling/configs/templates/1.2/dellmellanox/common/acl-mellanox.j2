@@ -26,11 +26,18 @@ ipv4 access-list nmn-hmn seq-number {% set sequence = sequence+10 %}{{ sequence 
 ipv4 access-list nmn-hmn seq-number {% set sequence = sequence+10 %}{{ sequence }} deny ip {{ variables.HMN_MTN_NETWORK_IP }} mask {{ variables.HMN_MTN_NETMASK }} {{ variables.NMN_MTN_NETWORK_IP }} mask {{ variables.NMN_MTN_NETMASK }}
 {%- endif %}
 ipv4 access-list nmn-hmn seq-number {% set sequence = sequence+10 %}{{ sequence }} permit ip any any
-{%- if variables.CMN and variables.CAN %}
 ipv4 access-list cmn-can
 ipv4 access-list cmn-can bind-point rif
+{%- if variables.CMN and variables.CAN %}
 ipv4 access-list cmn-can seq-number {% set sequence = 10 %}{{ sequence }} deny ip {{ variables.CMN_NETWORK_IP }} mask {{ variables.CMN_NETMASK }} {{ variables.CAN_NETWORK_IP }} mask {{ variables.CAN_NETMASK }}
 ipv4 access-list cmn-can seq-number {% set sequence = sequence+10 %}{{ sequence }} deny ip {{ variables.CAN_NETWORK_IP }} mask {{ variables.CAN_NETMASK }} {{ variables.CMN_NETWORK_IP }} mask {{ variables.CMN_NETMASK }}
+{%- endif %}
+{%- if not variables.CAN %}
+{% set sequence = 0 %}
+{%- endif %}
+{%- if variables.CMN and variables.CHN %}
+ipv4 access-list cmn-can seq-number {% set sequence = sequence+10 %}{{ sequence }} deny ip {{ variables.CMN_NETWORK_IP }} mask {{ variables.CMN_NETMASK }} {{ variables.CHN_NETWORK_IP }} mask {{ variables.CHN_NETMASK }}
+ipv4 access-list cmn-can seq-number {% set sequence = sequence+10 %}{{ sequence }} deny ip {{ variables.CHN_NETWORK_IP }} mask {{ variables.CHN_NETMASK }} {{ variables.CMN_NETWORK_IP }} mask {{ variables.CMN_NETMASK }}
 ipv4 access-list cmn-can seq-number {% set sequence = sequence+10 %}{{ sequence }} permit ip any any
 {%- endif %}
 {#- end acl #}
