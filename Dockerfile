@@ -20,22 +20,15 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 
-from artifactory.algol60.net/csm-docker/stable/docker.io/python:slim-bullseye
+from artifactory.algol60.net/csm-docker/stable/docker.io/python:slim-bullseye as base
 
-# create canu user
-RUN useradd -ms /bin/bash canu
-
-# update command prompt
-RUN echo 'export PS1="canu \w : "' >> /etc/bash.bashrc
-
-# make files dir
-RUN mkdir /files
-
-# prep image layer for faster builds
-COPY requirements.txt /app/canu/
+from base AS build
 
 RUN apt-get -yq update && apt-get -yq install gcc openssl jq vim libffi-dev musl-dev \
     python3 python3-dev python3-pip
+
+# prep image layer for faster builds
+COPY requirements.txt /app/canu/
 
 RUN pip3 install --upgrade pip && pip3 install -r /app/canu/requirements.txt
 
@@ -44,6 +37,23 @@ COPY . /app/canu
 
 # install canu
 RUN pip3 install --editable /app/canu/
+
+FROM base
+
+# create canu user
+RUN useradd -ms /bin/bash canu
+
+# update command prompt
+RUN echo 'export PS1="canu \w : "' >> /etc/bash.bashrc
+
+RUN apt-get -yq update && apt-get -yq install openssl jq vim python3
+
+# make files dir
+RUN mkdir /files
+
+COPY --from=build /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
+COPY --from=build /app/canu /app/canu
+COPY --from=build /usr/local/bin/canu /usr/local/bin/canu
 
 # set file perms for canu
 RUN chown -R canu /app/canu /files
