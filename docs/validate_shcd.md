@@ -31,7 +31,7 @@ canu validate shcd [OPTIONS]
 
 * **Options**
 
-    Full | TDS | V1
+    Full | TDS | V1 | mug
 
 
 
