@@ -258,6 +258,17 @@ network_hardware:
       - count: 1
         speed: 1
         slot: bmc
+  - name: "River NCN Node - Generic 2 port stub Intel"
+    vendor: "Intel"
+    type: "server"
+    model: "river_ncn_node_2_port_intel"
+    ports:
+      - count: 2
+        speed: 10
+        slot: "onboard"
+      - count: 1
+        speed: 1
+        slot: "bmc"
   - name: "cec"
     vendor: "cray"
     type: "none"

@@ -61,7 +61,7 @@ log = logging.getLogger("validate_shcd")
 @click.option(
     "--architecture",
     "-a",
-    type=click.Choice(["Full", "TDS", "V1"], case_sensitive=False),
+    type=click.Choice(["Full", "TDS", "V1", "mug"], case_sensitive=False),
     help="CSM architecture",
     required=True,
     prompt="Architecture type",

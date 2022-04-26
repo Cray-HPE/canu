@@ -22,6 +22,7 @@
 network_v1: include('v1_architecture_profile', required=False)
 network_v2: include('v2_architecture_profile')
 network_v2_tds: include('v2_architecture_profile')
+mug: include('mug_architecture_profile')
 ---
 v1_architecture_profile:
   name: str(min=1)
@@ -32,6 +33,13 @@ v1_architecture_profile:
   lookup_mapper: list(include('lookup_map'))
 
 v2_architecture_profile:
+  name: str(min=1)
+  description: str(min=1, max=256)
+  version: int(min=1)
+  components: list(include('component'))
+  lookup_mapper: list(include('lookup_map'))
+
+mug_architecture_profile:
   name: str(min=1)
   description: str(min=1, max=256)
   version: int(min=1)
@@ -62,4 +70,3 @@ lookup_map:
   shasta_name: str(min=1, exclude=' ')
   architecture_type: str(min=1, exclude=' ')
   regex: bool(required=False)
-  

@@ -96,7 +96,7 @@ csm_options = canu_config["csm_versions"]
 @click.option(
     "--architecture",
     "-a",
-    type=click.Choice(["Full", "TDS", "V1"], case_sensitive=False),
+    type=click.Choice(["Full", "TDS", "V1", "mug"], case_sensitive=False),
     help="CSM architecture",
 )
 @optgroup.group(
@@ -257,6 +257,10 @@ def config(
         architecture = "network_v1"
         template_folder = "full"
         vendor_folder = "dellmellanox"
+    elif architecture.lower() == "mug":
+        architecture = "mug"
+        template_folder = "tds"
+        vendor_folder = "mug"
 
     # Create Node factory
     factory = NetworkNodeFactory(architecture_version=architecture)

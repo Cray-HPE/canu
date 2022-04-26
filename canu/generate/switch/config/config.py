@@ -135,7 +135,7 @@ dash = "-" * 60
 @click.option(
     "--architecture",
     "-a",
-    type=click.Choice(["Full", "TDS", "V1"], case_sensitive=False),
+    type=click.Choice(["Full", "TDS", "V1", "mug"], case_sensitive=False),
     help="CSM architecture",
     required=True,
     prompt="Architecture type",
@@ -306,6 +306,10 @@ def config(
         architecture = "network_v1"
         template_folder = "full"
         vendor_folder = "dellmellanox"
+    elif architecture.lower() == "mug":
+        architecture = "mug"
+        template_folder = "tds"
+        vendor_folder = "aruba"
 
     # Create Node factory
     factory = NetworkNodeFactory(architecture_version=architecture)

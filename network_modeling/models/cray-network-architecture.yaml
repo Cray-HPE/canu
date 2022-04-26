@@ -347,7 +347,7 @@ network_v2_tds:
         - "slurm"
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port"
-    - lookup_name: 
+    - lookup_name:
         - "lm"
         - "lmem"
       shasta_name: "lm"
@@ -356,7 +356,7 @@ network_v2_tds:
         - "lnet"
       shasta_name: "lnet"
       architecture_type: "river_ncn_node_4_port"
-    - lookup_name: 
+    - lookup_name:
         - "gw"
         - "gateway"
       shasta_name: "gateway"
@@ -564,3 +564,102 @@ network_v1:
     - lookup_name: ["SubRack", "subrack"]
       shasta_name: "SubRack"
       architecture_type: "subrack"
+mug:
+  name: "Mug Dev System"
+  description: "Aruba + Dell Hardware"
+  version: 2
+  components:
+    - name: "spine"
+      model: "8320_JL581A"
+      connections:
+        - name: "spine"
+          speed: 40
+          number: 2
+          comment: "isl"
+        - name: "spine"
+          speed: 10
+          number: 1
+          comment: "keepalive"
+    - name: "river_bmc_leaf"
+      model: "S3048-ON"
+      connections:
+        - name: "spine"
+          speed: 10
+    - name: "slingshot_hsn_switch"
+      model: "slingshot_hsn_switch"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
+    - name: "river_ncn_node_2_port_intel"
+      model: "river_ncn_node_2_port_intel"
+      connections:
+        - name: "spine"
+          speed: 10
+        - name: "river_bmc_leaf"
+          speed: 1
+    - name: "river_compute_node"
+      model: "river_compute_node"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
+          comment: "onboard nmn"
+        - name: "river_bmc_leaf"
+          speed: 1
+          comment: "bmc"
+    - name: "pdu"
+      model: "pdu"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
+    - name: "subrack"
+      model: "subrack"
+      connections:
+        - name: "river_compute_node"
+          speed: 1
+        - name: "river_bmc_leaf"
+          speed: 1
+  lookup_mapper:
+    - lookup_name:
+        - "mn"
+      shasta_name: "ncn-m"
+      architecture_type: "river_ncn_node_2_port_intel"
+    - lookup_name:
+        - "wn"
+      shasta_name: "ncn-w"
+      architecture_type: "river_ncn_node_2_port_intel"
+    - lookup_name:
+        - "sn"
+      shasta_name: "ncn-s"
+      architecture_type: "river_ncn_node_2_port_intel"
+    - lookup_name:
+        - "sw-hsn"
+      shasta_name: "sw-hsn"
+      architecture_type: "slingshot_hsn_switch"
+    - lookup_name:
+        - "sw-smn"
+      shasta_name: "sw-leaf-bmc"
+      architecture_type: "river_bmc_leaf"
+    - lookup_name:
+        - "sw-25g"
+      shasta_name: "sw-spine"
+      architecture_type: "spine"
+    - lookup_name:
+        - "sw-100g"
+      shasta_name: "sw-edge"
+      architecture_type: "customer_edge_router"
+    - lookup_name: ["cn", "nid"]
+      shasta_name: "cn"
+      architecture_type: "river_compute_node"
+    - lookup_name:
+        - '^x\d+p\d+$'
+        - '^x\d+pdu\d+$'
+        - '^pdu\d+$'
+      shasta_name: "pdu"
+      architecture_type: "pdu"
+      regex: true
+    - lookup_name: ["SubRack", "subrack"]
+      shasta_name: "SubRack"
+      architecture_type: "subrack"
+    - lookup_name: ["uan", "slurm"]
+      shasta_name: "uan"
+      architecture_type: "river_ncn_node_2_port_intel"
