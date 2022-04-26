@@ -80,6 +80,10 @@ added_files = [
         "canu/generate/switch/config/ttp_templates/*.txt",
         "canu/generate/switch/config/ttp_templates",
     ),
+    (
+        "network_modeling/configs/templates/1.2/mug/tds/*.j2",
+        "network_modeling/configs/templates/1.2/mug/tds",
+    ),
 ]
 a = Analysis(
     ["canu/cli.py"],
