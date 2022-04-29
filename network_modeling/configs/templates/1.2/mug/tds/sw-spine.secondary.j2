@@ -48,9 +48,9 @@ interface mgmt
     shutdown
     ip dhcp
 
-{% include '1.2/aruba/common/ncn-m.lag.j2' %}
+{% include '1.2/mug/tds/ncn-m.lag.j2' %}
 {% include '1.2/aruba/common/ncn-w.lag.j2' %}
-{% include '1.2/aruba/common/ncn-s.lag.j2' %}
+{% include '1.2/mug/tds/ncn-s.lag.j2' %}
 {% include '1.2/aruba/common/uan.j2' %}
 {% include '1.2/aruba/tds/spine-to-leaf-bmc.lag.j2' %}
 {% include '1.2/aruba/common/spine-to-cdu.lag.j2' %}
