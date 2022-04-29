@@ -1156,7 +1156,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## [1.5.8-develop]
 
-- Add Mug architecture
+- Add Mug architecture & templates
 
 ## [1.5.7-develop]
 
