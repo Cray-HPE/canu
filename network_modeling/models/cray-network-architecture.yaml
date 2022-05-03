@@ -175,7 +175,7 @@ network_v2:
       shasta_name: "uan"
       architecture_type: "river_ncn_node_4_port"
     - lookup_name: ["lm", "lmem"]
-      shasta_name: "lm"
+      shasta_name: "lmem"
       architecture_type: "river_ncn_node_4_port"
     - lookup_name: ["lnet"]
       shasta_name: "lnet"
@@ -356,7 +356,7 @@ network_v2_tds:
     - lookup_name: 
         - "lm"
         - "lmem"
-      shasta_name: "lm"
+      shasta_name: "lmem"
       architecture_type: "river_ncn_node_4_port"
     - lookup_name:
         - "lnet"
