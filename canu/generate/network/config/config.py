@@ -227,6 +227,7 @@ def config(
         folder: Folder to store config files
         preserve: Folder where switch running configs exist.  This folder should be populated from the "canu backup network" command.
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
+        reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
     """
     # SHCD Parsing
     if shcd:
