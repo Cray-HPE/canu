@@ -114,6 +114,7 @@ class NetworkNodeFactory:
         hardware_data=default_hardware_spec_file,
         architecture_schema=default_architecture_schema_file,
         architecture_data=default_architecture_spec_file,
+        architecture_override=None,
     ):
         """
         Construct the necessary attributes for the network factory object.
@@ -132,9 +133,29 @@ class NetworkNodeFactory:
         # Load yaml data as JSON
         with open(hardware_data) as file:
             self.__hardware_data = yaml.load(file)
-            self.__hardware_data = self.__hardware_data["network_hardware"]  # TODO ?
+            self.__hardware_data = self.__hardware_data["network_hardware"]
         with open(architecture_data) as file:
             self.__architecture_data = yaml.load(file)
+
+        # Merge architecture overrides.  Add if not there, replace if exists.
+        # NOTE:  This is not schema checked at the moment.
+        if architecture_override is not None:
+            try:
+                with open(architecture_override) as file:
+                    override = yaml.load(file)
+            except FileNotFoundError:
+                click.secho(
+                    f"Architecture override file {architecture_override} not found.",
+                    fg="bright_red",
+                )
+                sys.exit(1)
+            for section in ["lookup_mapper"]:
+                arch_data = self.__architecture_data[architecture_version][section]
+                for o in override[section]:
+                    for i in range(len(arch_data)):
+                        if arch_data[i]["shasta_name"] != o["shasta_name"]:
+                            continue
+                        arch_data[i] = o
 
         # Perform any cleanup required
         self.__cleanup_hardware_port_speeds()

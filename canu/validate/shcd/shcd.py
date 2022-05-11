@@ -81,6 +81,11 @@ log = logging.getLogger("validate_shcd")
     help="The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.",
 )
 @click.option(
+    "--custom-config",
+    help="YAML file containing architecture type mappings and custom switch configuration",
+    type=click.Path(),
+)
+@click.option(
     "--out",
     help="Output results to a file",
     type=click.File("w"),
@@ -95,7 +100,7 @@ log = logging.getLogger("validate_shcd")
     default="ERROR",
 )
 @click.pass_context
-def shcd(ctx, architecture, shcd, tabs, corners, out, json_, log_):
+def shcd(ctx, architecture, shcd, tabs, corners, custom_config, out, json_, log_):
     """Validate a SHCD file.
 
     CANU can be used to validate that an SHCD (SHasta Cabling Diagram) passes basic validation checks.
@@ -116,6 +121,7 @@ def shcd(ctx, architecture, shcd, tabs, corners, out, json_, log_):
         shcd: SHCD file
         tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
         corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
+        custom_config: YAML file containing custom architecture mappings and switch configs.
         out: Filename for the JSON Topology if requested.
         json_: Bool indicating json output
         log_: Level of logging.
@@ -136,7 +142,7 @@ def shcd(ctx, architecture, shcd, tabs, corners, out, json_, log_):
         return
 
     # Create Node factory
-    factory = NetworkNodeFactory(architecture_version=architecture)
+    factory = NetworkNodeFactory(architecture_version=architecture, architecture_override=custom_config)
 
     node_list, warnings = node_model_from_shcd(
         factory=factory,
