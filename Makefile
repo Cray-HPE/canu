@@ -19,9 +19,9 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-name = canu
+name ?= ${GIT_REPO_NAME}
 
-version := $(shell cat canu/.version)
+version := $(shell cat $(name)/.version)
 
 build_image := cdrx/pyinstaller-linux:python3
 
