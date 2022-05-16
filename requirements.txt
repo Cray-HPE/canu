@@ -60,7 +60,7 @@ html2text==2020.1.16
 icdiff==2.0.4
 idna==3.2
 imagesize==1.2.0
-ipython==7.8.0
+ipython==7.16.3
 iniconfig==1.1.1
 isort==5.9.3
 Jinja2==3.0.2
