@@ -1156,7 +1156,9 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## [1.5.8-develop]
 
-- Added shellcheck GitHub action 
+- Added shellcheck GitHub action
+- Bump ipython to 7.16.3 to remediate CVE
+- Clean up Jenkins build
 
 ## [1.5.7-develop]
 
