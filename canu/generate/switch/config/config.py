@@ -545,6 +545,25 @@ def generate_switch_config(
     """
     node_shasta_name = get_shasta_name(switch_name, factory.lookup_mapper())
 
+    templates = {
+        "sw-spine": {
+            "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-spine.primary.j2",
+            "secondary": f"{csm}/{vendor_folder}/{template_folder}/sw-spine.secondary.j2",
+        },
+        "sw-cdu": {
+            "primary": f"{csm}/{vendor_folder}/common/sw-cdu.primary.j2",
+            "secondary": f"{csm}/{vendor_folder}/common/sw-cdu.secondary.j2",
+        },
+        "sw-leaf": {
+            "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf.primary.j2",
+            "secondary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf.secondary.j2",
+        },
+        "sw-leaf-bmc": {
+            "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf-bmc.j2",
+            "secondary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf-bmc.j2",
+        },
+    }
+
     if node_shasta_name is None:
         return Exception(
             click.secho(
@@ -552,7 +571,17 @@ def generate_switch_config(
                 fg="red",
             ),
         )
-    elif node_shasta_name not in ["sw-cdu", "sw-leaf-bmc", "sw-leaf", "sw-spine"]:
+    elif node_shasta_name == "sw-edge" and float(csm) >= 1.2:
+        templates["sw-edge"] = {
+            "primary": f"{csm}/arista/sw-edge.primary.j2",
+            "secondary": f"{csm}/arista/sw-edge.secondary.j2",
+        }
+    elif node_shasta_name not in [
+        "sw-cdu",
+        "sw-leaf-bmc",
+        "sw-leaf",
+        "sw-spine",
+    ]:
         return Exception(
             click.secho(
                 f"{switch_name} is not a switch. Only switch config can be generated.",
@@ -595,24 +624,6 @@ def generate_switch_config(
 
     is_primary, primary, secondary = switch_is_primary(switch_name)
 
-    templates = {
-        "sw-spine": {
-            "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-spine.primary.j2",
-            "secondary": f"{csm}/{vendor_folder}/{template_folder}/sw-spine.secondary.j2",
-        },
-        "sw-cdu": {
-            "primary": f"{csm}/{vendor_folder}/common/sw-cdu.primary.j2",
-            "secondary": f"{csm}/{vendor_folder}/common/sw-cdu.secondary.j2",
-        },
-        "sw-leaf": {
-            "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf.primary.j2",
-            "secondary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf.secondary.j2",
-        },
-        "sw-leaf-bmc": {
-            "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf-bmc.j2",
-            "secondary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf-bmc.j2",
-        },
-    }
     template_name = templates[node_shasta_name][
         "primary" if is_primary else "secondary"
     ]
@@ -633,6 +644,7 @@ def generate_switch_config(
     if sls_variables["CMN_VLAN"] and float(csm) >= 1.2:
         spine_leaf_vlan.append(sls_variables["CMN_VLAN"])
         leaf_bmc_vlan.append(sls_variables["CMN_VLAN"])
+
     elif sls_variables["CMN_VLAN"] and float(csm) < 1.2:
         click.secho(
             "\nCMN network found in SLS, the CSM version required to use this network has to be 1.2 or greater. "
@@ -662,6 +674,12 @@ def generate_switch_config(
         "CAN_NETMASK": sls_variables["CAN_NETMASK"],
         "CAN_NETWORK_IP": sls_variables["CAN_NETWORK_IP"],
         "CAN_PREFIX_LEN": sls_variables["CAN_PREFIX_LEN"],
+        "CHN": sls_variables["CHN"],
+        "CHN_VLAN": sls_variables["CHN_VLAN"],
+        "CHN_NETMASK": sls_variables["CHN_NETMASK"],
+        "CHN_NETWORK_IP": sls_variables["CHN_NETWORK_IP"],
+        "CHN_PREFIX_LEN": sls_variables["CHN_PREFIX_LEN"],
+        "CHN_ASN": sls_variables["CHN_ASN"],
         "CMN": sls_variables["CMN"],
         "CMN_VLAN": sls_variables["CMN_VLAN"],
         "CMN_NETMASK": sls_variables["CMN_NETMASK"],
@@ -707,6 +725,9 @@ def generate_switch_config(
         "CAN_IP_GATEWAY": sls_variables["CAN_IP_GATEWAY"],
         "CAN_IP_PRIMARY": sls_variables["CAN_IP_PRIMARY"],
         "CAN_IP_SECONDARY": sls_variables["CAN_IP_SECONDARY"],
+        "CHN_IP_GATEWAY": sls_variables["CHN_IP_GATEWAY"],
+        "CHN_IP_PRIMARY": sls_variables["CHN_IP_PRIMARY"],
+        "CHN_IP_SECONDARY": sls_variables["CHN_IP_SECONDARY"],
         "CMN_IP_GATEWAY": sls_variables["CMN_IP_GATEWAY"],
         "CMN_IP_PRIMARY": sls_variables["CMN_IP_PRIMARY"],
         "CMN_IP_SECONDARY": sls_variables["CMN_IP_SECONDARY"],
@@ -716,6 +737,7 @@ def generate_switch_config(
         "SPINE_LEAF_VLANS": spine_leaf_vlan,
         "NATIVE_VLAN": native_vlan,
         "CAN_IPs": sls_variables["CAN_IPs"],
+        "CHN_IPs": sls_variables["CHN_IPs"],
         "CMN_IPs": sls_variables["CMN_IPs"],
         "NMN_IPs": sls_variables["NMN_IPs"],
         "HMN_IPs": sls_variables["HMN_IPs"],
@@ -734,20 +756,40 @@ def generate_switch_config(
     unused_ports = switch_unused_ports(network_node_list)
     variables["UNUSED_PORTS"] = unused_ports[switch_name]
 
-    if switch_name not in sls_variables["HMN_IPs"].keys():
+    if (
+        switch_name not in sls_variables["HMN_IPs"].keys()
+        and "sw-edge" not in switch_name
+    ):
         click.secho(f"Cannot find {switch_name} in CSI / SLS nodes.", fg="red")
         sys.exit(1)
 
-    cmm_switch_ip = sls_variables.get("CMN_IPs")
-    if cmm_switch_ip:
-        variables["CMN_IP"] = sls_variables["CMN_IPs"][switch_name]
-    variables["HMN_IP"] = sls_variables["HMN_IPs"][switch_name]
-    variables["MTL_IP"] = sls_variables["MTL_IPs"][switch_name]
-    variables["NMN_IP"] = sls_variables["NMN_IPs"][switch_name]
+    # hack to rename edge switch to chn switch, this is a temporary fix until SLS/CSI is updated
+    if "sw-edge" in switch_name:
 
-    last_octet = variables["HMN_IP"].split(".")[3]
-    variables["LOOPBACK_IP"] = "10.2.0." + last_octet
-    variables["IPV6_IP"] = "2001:db8:beef:99::" + last_octet + "/128"
+        if switch_name == "sw-edge-001":
+            switch_name = "chn-switch-1"
+        if switch_name == "sw-edge-002":
+            switch_name = "chn-switch-2"
+        if sls_variables.get("CHN_IPs", {}).get(switch_name):
+            variables["CHN_IP"] = sls_variables["CHN_IPs"][switch_name]
+            last_octet = variables["CHN_IP"].split(".")[3]
+            variables["LOOPBACK_IP"] = "10.2.1." + last_octet
+            variables["EDGE_BGP_IP_PRIMARY"] = "10.2.3.2"
+            variables["EDGE_BGP_IP_SECONDARY"] = "10.2.3.3"
+        else:
+            click.secho(
+                f"\n{switch_name} found in SHCD but not in SLS"
+                + "\nMake sure the CHN edge switches are used as inputs when running CSI.",
+                fg="red",
+            )
+            sys.exit(1)
+    else:
+        variables["CMN_IP"] = sls_variables.get("CMN_IPs", {}).get(switch_name)
+        variables["HMN_IP"] = sls_variables.get("HMN_IPs", {}).get(switch_name)
+        variables["MTL_IP"] = sls_variables.get("MTL_IPs", {}).get(switch_name)
+        variables["NMN_IP"] = sls_variables.get("NMN_IPs", {}).get(switch_name)
+        last_octet = variables["HMN_IP"].split(".")[3]
+        variables["LOOPBACK_IP"] = "10.2.0." + last_octet
 
     if node_shasta_name in ["sw-spine", "sw-leaf", "sw-cdu"]:
         # Get connections to switch pair
@@ -855,7 +897,7 @@ def generate_switch_config(
             )
             sys.exit(1)
 
-    if architecture == "network_v1":
+    if architecture == "network_v1" and node_shasta_name != "sw-edge":
         switch_config_v1 = ""
         if "sw-cdu" in switch_name or "sw-leaf-bmc" in switch_name:
             switch_os = "dellOS10"
@@ -1217,6 +1259,9 @@ def get_switch_nodes(
             elif switch_name.startswith("sw-spine"):
                 is_primary, primary, secondary = switch_is_primary(switch_name)
                 lag_number = 256
+            elif switch_name.startswith("sw-edge"):
+                is_primary, primary, secondary = switch_is_primary(switch_name)
+                lag_number = 250
             new_node = {
                 "subtype": "spine",
                 "slot": None,
@@ -1327,7 +1372,15 @@ def get_switch_nodes(
                 new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name == "sw-edge":
-            pass
+            new_node = {
+                "subtype": "edge",
+                "slot": None,
+                "config": {
+                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "PORT": f"{source_port}",
+                },
+            }
+            nodes.append(new_node)
         else:  # pragma: no cover
             print("*********************************")
             print("Cannot determine destination connection")
@@ -1428,6 +1481,12 @@ def parse_sls_for_config(input_json):
         "CAN_NETMASK": None,
         "CAN_PREFIX_LEN": None,
         "CAN_NETWORK_IP": None,
+        "CHN": None,
+        "CHN_VLAN": None,
+        "CHN_NETMASK": None,
+        "CHN_PREFIX_LEN": None,
+        "CHN_NETWORK_IP": None,
+        "CHN_ASN": None,
         "CMN": None,
         "CMN_VLAN": None,
         "CMN_NETMASK": None,
@@ -1470,6 +1529,7 @@ def parse_sls_for_config(input_json):
         "NMNLB_TFTP": None,
         "NMNLB_DNS": None,
         "CAN_IP_GATEWAY": None,
+        "CHN_IP_GATEWAY": None,
         "CMN_IP_GATEWAY": None,
         "HMN_IP_GATEWAY": None,
         "MTL_IP_GATEWAY": None,
@@ -1479,9 +1539,12 @@ def parse_sls_for_config(input_json):
         "ncn_w003": None,
         "CAN_IP_PRIMARY": None,
         "CAN_IP_SECONDARY": None,
+        "CHN_IP_PRIMARY": None,
+        "CHN_IP_SECONDARY": None,
         "CMN_IP_PRIMARY": None,
         "CMN_IP_SECONDARY": None,
         "CAN_IPs": defaultdict(),
+        "CHN_IPs": defaultdict(),
         "CMN_IPs": defaultdict(),
         "HMN_IPs": defaultdict(),
         "MTL_IPs": defaultdict(),
@@ -1516,6 +1579,34 @@ def parse_sls_for_config(input_json):
                     for ip in subnets["IPReservations"]:
                         if "ncn-w" in ip["Name"]:
                             sls_variables["CAN_IPs"][ip["Name"]] = ip["IPAddress"]
+
+        if name == "CHN":
+            sls_variables["CHN"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
+            )
+            sls_variables["CHN_NETMASK"] = sls_variables["CHN"].netmask
+            sls_variables["CHN_PREFIX_LEN"] = sls_variables["CHN"].prefixlen
+            sls_variables["CHN_NETWORK_IP"] = sls_variables["CHN"].ip
+            sls_variables["CHN_ASN"] = sls_network.get("ExtraProperties", {}).get(
+                "MyASN",
+                {},
+            )
+            for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
+                if subnets["Name"] == "bootstrap_dhcp":
+                    sls_variables["CHN_IP_GATEWAY"] = subnets["Gateway"]
+                    sls_variables["CHN_VLAN"] = subnets["VlanID"]
+                    for ip in subnets["IPReservations"]:
+                        if ip["Name"] == "chn-switch-1":
+                            sls_variables["CHN_IP_PRIMARY"] = ip["IPAddress"]
+                        elif ip["Name"] == "chn-switch-2":
+                            sls_variables["CHN_IP_SECONDARY"] = ip["IPAddress"]
+                if subnets["Name"] == "bootstrap_dhcp":
+                    for ip in subnets["IPReservations"]:
+                        sls_variables["CHN_IPs"][ip["Name"]] = ip["IPAddress"]
+
         elif name == "CMN":
             sls_variables["CMN"] = netaddr.IPNetwork(
                 sls_network.get("ExtraProperties", {}).get(

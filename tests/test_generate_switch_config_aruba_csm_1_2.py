@@ -153,7 +153,9 @@ def test_switch_config_spine_primary():
             + "access-list ip cmn-can\n"
             + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
             + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
-            + "    30 permit any any any\n"
+            + "    30 deny any 192.168.12.0/255.255.255.0 192.168.200.0/255.255.255.0\n"
+            + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    50 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "\n"
@@ -411,6 +413,8 @@ def test_switch_config_spine_primary():
             + "route-map ncn-w003 permit seq 60\n"
             + "     match ip address prefix-list pl-nmn\n"
             + "     set ip next-hop 192.168.4.6\n"
+            + "route-map cmn permit seq 10\n"
+            + "     match ip address prefix-list pl-cmn\n"
         ) in str(result.output)
         print(result.output)
         assert (
@@ -459,8 +463,11 @@ def test_switch_config_spine_primary():
             + "        address-family ipv4 unicast\n"
             + "            neighbor 192.168.12.3 activate\n"
             + "            neighbor 192.168.12.4 activate\n"
+            + "            neighbor 192.168.12.4 route-map cmn in\n"
             + "            neighbor 192.168.12.5 activate\n"
+            + "            neighbor 192.168.12.5 route-map cmn in\n"
             + "            neighbor 192.168.12.6 activate\n"
+            + "            neighbor 192.168.12.6 route-map cmn in\n"
             + "        exit-address-family\n"
             + "https-server vrf Customer\n"
             + "https-server vrf default\n"
@@ -573,7 +580,9 @@ def test_switch_config_spine_primary_custom():
             + "access-list ip cmn-can\n"
             + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
             + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
-            + "    30 permit any any any\n"
+            + "    30 deny any 192.168.12.0/255.255.255.0 192.168.200.0/255.255.255.0\n"
+            + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    50 permit any any any\n"
             + "vlan 1\n"
             + "vlan 2\n"
             + "    name NMN\n"
@@ -872,8 +881,11 @@ def test_switch_config_spine_primary_custom():
             + "      address-family ipv4 unicast\n"
             + "        neighbor 192.168.12.3 activate\n"
             + "        neighbor 192.168.12.4 activate\n"
+            + "        neighbor 192.168.12.4 route-map cmn in\n"
             + "        neighbor 192.168.12.5 activate\n"
+            + "        neighbor 192.168.12.5 route-map cmn in\n"
             + "        neighbor 192.168.12.6 activate\n"
+            + "        neighbor 192.168.12.6 route-map cmn in\n"
             + "      exit-address-family\n"
             + "https-server vrf Customer\n"
             + "https-server vrf default\n"
@@ -982,7 +994,9 @@ def test_switch_config_spine_secondary_custom():
             + "access-list ip cmn-can\n"
             + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
             + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
-            + "    30 permit any any any\n"
+            + "    30 deny any 192.168.12.0/255.255.255.0 192.168.200.0/255.255.255.0\n"
+            + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    50 permit any any any\n"
             + "vlan 1\n"
             + "vlan 2\n"
             + "    name NMN\n"
@@ -1282,8 +1296,11 @@ def test_switch_config_spine_secondary_custom():
             + "      address-family ipv4 unicast\n"
             + "        neighbor 192.168.12.2 activate\n"
             + "        neighbor 192.168.12.4 activate\n"
+            + "        neighbor 192.168.12.4 route-map cmn in\n"
             + "        neighbor 192.168.12.5 activate\n"
+            + "        neighbor 192.168.12.5 route-map cmn in\n"
             + "        neighbor 192.168.12.6 activate\n"
+            + "        neighbor 192.168.12.6 route-map cmn in\n"
             + "      exit-address-family\n"
             + "https-server vrf Customer\n"
             + "https-server vrf default\n"
@@ -1380,7 +1397,9 @@ def test_switch_config_spine_secondary():
             + "access-list ip cmn-can\n"
             + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
             + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
-            + "    30 permit any any any\n"
+            + "    30 deny any 192.168.12.0/255.255.255.0 192.168.200.0/255.255.255.0\n"
+            + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    50 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "\n"
@@ -1636,6 +1655,8 @@ def test_switch_config_spine_secondary():
             + "route-map ncn-w003 permit seq 60\n"
             + "     match ip address prefix-list pl-nmn\n"
             + "     set ip next-hop 192.168.4.6\n"
+            + "route-map cmn permit seq 10\n"
+            + "     match ip address prefix-list pl-cmn\n"
         ) in str(result.output)
 
         print(result.output)
@@ -1685,8 +1706,11 @@ def test_switch_config_spine_secondary():
             + "        address-family ipv4 unicast\n"
             + "            neighbor 192.168.12.2 activate\n"
             + "            neighbor 192.168.12.4 activate\n"
+            + "            neighbor 192.168.12.4 route-map cmn in\n"
             + "            neighbor 192.168.12.5 activate\n"
+            + "            neighbor 192.168.12.5 route-map cmn in\n"
             + "            neighbor 192.168.12.6 activate\n"
+            + "            neighbor 192.168.12.6 route-map cmn in\n"
             + "        exit-address-family\n"
             + "https-server vrf Customer\n"
             + "https-server vrf default\n"
@@ -1782,7 +1806,9 @@ def test_switch_config_leaf_primary():
             + "access-list ip cmn-can\n"
             + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
             + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
-            + "    30 permit any any any\n"
+            + "    30 deny any 192.168.12.0/255.255.255.0 192.168.200.0/255.255.255.0\n"
+            + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    50 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "\n"
@@ -2205,7 +2231,9 @@ def test_switch_config_leaf_secondary():
             + "access-list ip cmn-can\n"
             + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
             + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
-            + "    30 permit any any any\n"
+            + "    30 deny any 192.168.12.0/255.255.255.0 192.168.200.0/255.255.255.0\n"
+            + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    50 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "\n"
@@ -2622,7 +2650,9 @@ def test_switch_config_cdu_primary():
             + "access-list ip cmn-can\n"
             + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
             + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
-            + "    30 permit any any any\n"
+            + "    30 deny any 192.168.12.0/255.255.255.0 192.168.200.0/255.255.255.0\n"
+            + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    50 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "\n"
@@ -2918,7 +2948,9 @@ def test_switch_config_cdu_secondary():
             + "access-list ip cmn-can\n"
             + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
             + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
-            + "    30 permit any any any\n"
+            + "    30 deny any 192.168.12.0/255.255.255.0 192.168.200.0/255.255.255.0\n"
+            + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    50 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "\n"
@@ -3200,7 +3232,9 @@ def test_switch_config_leaf_bmc():
             + "access-list ip cmn-can\n"
             + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
             + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
-            + "    30 permit any any any\n"
+            + "    30 deny any 192.168.12.0/255.255.255.0 192.168.200.0/255.255.255.0\n"
+            + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    50 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "\n"
@@ -4081,7 +4115,9 @@ def test_switch_config_tds_spine_primary():
             + "access-list ip cmn-can\n"
             + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
             + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
-            + "    30 permit any any any\n"
+            + "    30 deny any 192.168.12.0/255.255.255.0 192.168.200.0/255.255.255.0\n"
+            + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    50 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "\n"
@@ -4541,6 +4577,8 @@ def test_switch_config_tds_spine_primary():
             + "route-map ncn-w003 permit seq 60\n"
             + "     match ip address prefix-list pl-nmn\n"
             + "     set ip next-hop 192.168.4.6\n"
+            + "route-map cmn permit seq 10\n"
+            + "     match ip address prefix-list pl-cmn\n"
         ) in str(result.output)
 
         print(result.output)
@@ -4590,8 +4628,11 @@ def test_switch_config_tds_spine_primary():
             + "        address-family ipv4 unicast\n"
             + "            neighbor 192.168.12.3 activate\n"
             + "            neighbor 192.168.12.4 activate\n"
+            + "            neighbor 192.168.12.4 route-map cmn in\n"
             + "            neighbor 192.168.12.5 activate\n"
+            + "            neighbor 192.168.12.5 route-map cmn in\n"
             + "            neighbor 192.168.12.6 activate\n"
+            + "            neighbor 192.168.12.6 route-map cmn in\n"
             + "        exit-address-family\n"
             + "https-server vrf Customer\n"
             + "https-server vrf default\n"
@@ -4688,7 +4729,9 @@ def test_switch_config_tds_spine_secondary():
             + "access-list ip cmn-can\n"
             + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
             + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
-            + "    30 permit any any any\n"
+            + "    30 deny any 192.168.12.0/255.255.255.0 192.168.200.0/255.255.255.0\n"
+            + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    50 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "\n"
@@ -5147,6 +5190,8 @@ def test_switch_config_tds_spine_secondary():
             + "route-map ncn-w003 permit seq 60\n"
             + "     match ip address prefix-list pl-nmn\n"
             + "     set ip next-hop 192.168.4.6\n"
+            + "route-map cmn permit seq 10\n"
+            + "     match ip address prefix-list pl-cmn\n"
         ) in str(result.output)
 
         print(result.output)
@@ -5196,8 +5241,11 @@ def test_switch_config_tds_spine_secondary():
             + "        address-family ipv4 unicast\n"
             + "            neighbor 192.168.12.2 activate\n"
             + "            neighbor 192.168.12.4 activate\n"
+            + "            neighbor 192.168.12.4 route-map cmn in\n"
             + "            neighbor 192.168.12.5 activate\n"
+            + "            neighbor 192.168.12.5 route-map cmn in\n"
             + "            neighbor 192.168.12.6 activate\n"
+            + "            neighbor 192.168.12.6 route-map cmn in\n"
             + "        exit-address-family\n"
             + "https-server vrf Customer\n"
             + "https-server vrf default\n"
@@ -5293,7 +5341,9 @@ def test_switch_config_tds_leaf_bmc():
             + "access-list ip cmn-can\n"
             + "    10 deny any 192.168.12.0/255.255.255.0 192.168.11.0/255.255.255.0\n"
             + "    20 deny any 192.168.11.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
-            + "    30 permit any any any\n"
+            + "    30 deny any 192.168.12.0/255.255.255.0 192.168.200.0/255.255.255.0\n"
+            + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
+            + "    50 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
             + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "\n"
@@ -5525,6 +5575,38 @@ sls_input = {
                         "Name": "bootstrap_dhcp",
                         "VlanID": 7,
                         "Gateway": "192.168.11.1",
+                    },
+                ],
+            },
+        },
+        "CHN": {
+            "Name": "CHN",
+            "ExtraProperties": {
+                "CIDR": "192.168.200.0/24",
+                "MyASN": 65530,
+                "PeerASN": 65533,
+                "Subnets": [
+                    {
+                        "Name": "bootstrap_dhcp",
+                        "CIDR": "192.168.200.0/24",
+                        "IPReservations": [
+                            {"Name": "chn-switch-1", "IPAddress": "192.168.200.2"},
+                            {"Name": "chn-switch-2", "IPAddress": "192.168.200.3"},
+                        ],
+                        "VlanID": 5,
+                        "Gateway": "192.168.200.1",
+                    },
+                    {
+                        "FullName": "CHN Bootstrap DHCP Subnet",
+                        "CIDR": "192.168.200.0/24",
+                        "IPReservations": [
+                            {"Name": "ncn-w001", "IPAddress": "192.168.200.4"},
+                            {"Name": "ncn-w002", "IPAddress": "192.168.200.5"},
+                            {"Name": "ncn-w003", "IPAddress": "192.168.200.6"},
+                        ],
+                        "Name": "bootstrap_dhcp",
+                        "VlanID": 5,
+                        "Gateway": "192.168.200.1",
                     },
                 ],
             },

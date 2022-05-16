@@ -1,4 +1,5 @@
 {#- route-map #}
+route-map cmn permit 10 match ip address pl-cmn
 {%- for name, ip in variables.NMN_IPs.items() if "ncn-w" in name %}
 {% set sequence = namespace(value=10) %}
 route-map {{ name }} permit {{ sequence.value }} match ip address pl-cmn

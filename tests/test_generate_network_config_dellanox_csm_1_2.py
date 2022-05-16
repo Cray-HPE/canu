@@ -84,6 +84,8 @@ def test_network_config():
         assert "sw-cdu-001 Config Generated" in str(result.output)
         assert "sw-cdu-002 Config Generated" in str(result.output)
         assert "sw-leaf-bmc-001 Config Generated" in str(result.output)
+        assert "sw-edge-001 Config Generated" in str(result.output)
+        assert "sw-edge-002 Config Generated" in str(result.output)
 
 
 def test_network_config_custom():
@@ -170,6 +172,8 @@ def test_network_config_folder_prompt():
         assert "sw-cdu-001 Config Generated" in str(result.output)
         assert "sw-cdu-002 Config Generated" in str(result.output)
         assert "sw-leaf-bmc-001 Config Generated" in str(result.output)
+        assert "sw-edge-001 Config Generated" in str(result.output)
+        assert "sw-edge-002 Config Generated" in str(result.output)
 
 
 def test_network_config_csi_file_missing():
@@ -308,6 +312,8 @@ def test_network_config_missing_tabs():
         assert "sw-cdu-001 Config Generated" in str(result.output)
         assert "sw-cdu-002 Config Generated" in str(result.output)
         assert "sw-leaf-bmc-001 Config Generated" in str(result.output)
+        assert "sw-edge-001 Config Generated" in str(result.output)
+        assert "sw-edge-002 Config Generated" in str(result.output)
 
 
 def test_network_config_bad_tab():
@@ -381,6 +387,8 @@ def test_network_config_corner_prompt():
         assert "sw-cdu-001 Config Generated" in str(result.output)
         assert "sw-cdu-002 Config Generated" in str(result.output)
         assert "sw-leaf-bmc-001 Config Generated" in str(result.output)
+        assert "sw-edge-001 Config Generated" in str(result.output)
+        assert "sw-edge-002 Config Generated" in str(result.output)
 
 
 def test_network_config_not_enough_corners():
@@ -458,6 +466,8 @@ def test_network_config_sls():
         assert "sw-cdu-001 Config Generated" in str(result.output)
         assert "sw-cdu-002 Config Generated" in str(result.output)
         assert "sw-leaf-bmc-001 Config Generated" in str(result.output)
+        assert "sw-edge-001 Config Generated" in str(result.output)
+        assert "sw-edge-002 Config Generated" in str(result.output)
 
 
 @responses.activate

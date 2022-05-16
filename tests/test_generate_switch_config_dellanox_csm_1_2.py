@@ -345,7 +345,9 @@ def test_switch_config_spine_primary():
             + "ipv4 access-list cmn-can bind-point rif\n"
             + "ipv4 access-list cmn-can seq-number 10 deny ip 192.168.12.0 mask 255.255.255.0 192.168.11.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 20 deny ip 192.168.11.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
-            + "ipv4 access-list cmn-can seq-number 30 permit ip any any\n"
+            + "ipv4 access-list cmn-can seq-number 30 deny ip 192.168.12.0 mask 255.255.255.0 192.168.200.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 40 deny ip 192.168.200.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 50 permit ip any any\n"
             + "interface vlan 7 ipv4 port access-group cmn-can\n"
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
@@ -416,6 +418,7 @@ def test_switch_config_spine_primary():
             + "ip prefix-list pl-nmn bulk-mode\n"
             + "ip prefix-list pl-nmn seq 30 permit 10.92.100.0 /24 ge 24\n"
             + "ip prefix-list pl-nmn commit\n"
+            + "route-map cmn permit 10 match ip address pl-cmn\n"
             + "route-map ncn-w001 permit 10 match ip address pl-cmn\n"
             + "route-map ncn-w001 permit 10 set ip next-hop 192.168.12.4\n"
             + "route-map ncn-w001 permit 20 match ip address pl-hmn\n"
@@ -459,8 +462,11 @@ def test_switch_config_spine_primary():
             + "router bgp 65533 vrf default neighbor 192.168.4.5 timers 1 3\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.6 timers 1 3\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.4 transport connection-mode passive\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.4 route-map cmn\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.5 transport connection-mode passive\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.5 route-map cmn\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.6 transport connection-mode passive\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.6 route-map cmn\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.4 transport connection-mode passive\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.5 transport connection-mode passive\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.6 transport connection-mode passive\n"
@@ -782,7 +788,9 @@ def test_switch_config_spine_primary_custom():
             + "ipv4 access-list cmn-can bind-point rif\n"
             + "ipv4 access-list cmn-can seq-number 10 deny ip 192.168.12.0 mask 255.255.255.0 192.168.11.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 20 deny ip 192.168.11.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
-            + "ipv4 access-list cmn-can seq-number 30 permit ip any any\n"
+            + "ipv4 access-list cmn-can seq-number 30 deny ip 192.168.12.0 mask 255.255.255.0 192.168.200.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 40 deny ip 192.168.200.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 50 permit ip any any\n"
             + "interface vlan 7 ipv4 port access-group cmn-can\n"
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
@@ -853,6 +861,7 @@ def test_switch_config_spine_primary_custom():
             + "ip prefix-list pl-nmn bulk-mode\n"
             + "ip prefix-list pl-nmn seq 30 permit 10.92.100.0 /24 ge 24\n"
             + "ip prefix-list pl-nmn commit\n"
+            + "route-map cmn permit 10 match ip address pl-cmn\n"
             + "route-map ncn-w001 permit 10 match ip address pl-cmn\n"
             + "route-map ncn-w001 permit 10 set ip next-hop 192.168.12.4\n"
             + "route-map ncn-w001 permit 20 match ip address pl-hmn\n"
@@ -896,8 +905,11 @@ def test_switch_config_spine_primary_custom():
             + "router bgp 65533 vrf default neighbor 192.168.4.5 timers 1 3\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.6 timers 1 3\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.4 transport connection-mode passive\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.4 route-map cmn\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.5 transport connection-mode passive\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.5 route-map cmn\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.6 transport connection-mode passive\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.6 route-map cmn\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.4 transport connection-mode passive\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.5 transport connection-mode passive\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.6 transport connection-mode passive\n"
@@ -1186,7 +1198,9 @@ def test_switch_config_spine_secondary():
             + "ipv4 access-list cmn-can bind-point rif\n"
             + "ipv4 access-list cmn-can seq-number 10 deny ip 192.168.12.0 mask 255.255.255.0 192.168.11.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 20 deny ip 192.168.11.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
-            + "ipv4 access-list cmn-can seq-number 30 permit ip any any\n"
+            + "ipv4 access-list cmn-can seq-number 30 deny ip 192.168.12.0 mask 255.255.255.0 192.168.200.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 40 deny ip 192.168.200.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 50 permit ip any any\n"
             + "interface vlan 7 ipv4 port access-group cmn-can\n"
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
@@ -1254,6 +1268,7 @@ def test_switch_config_spine_secondary():
             + "ip prefix-list pl-nmn bulk-mode\n"
             + "ip prefix-list pl-nmn seq 30 permit 10.92.100.0 /24 ge 24\n"
             + "ip prefix-list pl-nmn commit\n"
+            + "route-map cmn permit 10 match ip address pl-cmn\n"
             + "route-map ncn-w001 permit 10 match ip address pl-cmn\n"
             + "route-map ncn-w001 permit 10 set ip next-hop 192.168.12.4\n"
             + "route-map ncn-w001 permit 20 match ip address pl-hmn\n"
@@ -1297,8 +1312,11 @@ def test_switch_config_spine_secondary():
             + "router bgp 65533 vrf default neighbor 192.168.4.5 timers 1 3\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.6 timers 1 3\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.4 transport connection-mode passive\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.4 route-map cmn\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.5 transport connection-mode passive\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.5 route-map cmn\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.6 transport connection-mode passive\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.6 route-map cmn\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.4 transport connection-mode passive\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.5 transport connection-mode passive\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.6 transport connection-mode passive\n"
@@ -1534,7 +1552,9 @@ def test_switch_config_leaf_bmc():
             + "ip access-list cmn-can\n"
             + "  seq 10 deny ip 192.168.12.0/24 192.168.11.0/24\n"
             + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
-            + "  seq 30 permit ip any any\n"
+            + "  seq 30 deny ip 192.168.12.0/24 192.168.200.0/24\n"
+            + "  seq 40 deny ip 192.168.200.0/24 192.168.12.0/24\n"
+            + "  seq 50 permit ip any any\n"
         ) in str(result.output)
         assert (
             "router ospf 1\n"
@@ -1985,7 +2005,9 @@ def test_switch_config_leaf_bmc_custom():
             + "ip access-list cmn-can\n"
             + "  seq 10 deny ip 192.168.12.0/24 192.168.11.0/24\n"
             + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
-            + "  seq 30 permit ip any any\n"
+            + "  seq 30 deny ip 192.168.12.0/24 192.168.200.0/24\n"
+            + "  seq 40 deny ip 192.168.200.0/24 192.168.12.0/24\n"
+            + "  seq 50 permit ip any any\n"
         ) in str(result.output)
         print(result.output)
         assert (
@@ -2417,7 +2439,9 @@ def test_switch_config_cdu_primary():
             + "ip access-list cmn-can\n"
             + "  seq 10 deny ip 192.168.12.0/24 192.168.11.0/24\n"
             + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
-            + "  seq 30 permit ip any any\n"
+            + "  seq 30 deny ip 192.168.12.0/24 192.168.200.0/24\n"
+            + "  seq 40 deny ip 192.168.200.0/24 192.168.12.0/24\n"
+            + "  seq 50 permit ip any any\n"
         ) in str(result.output)
         print(result.output)
         assert (
@@ -2850,7 +2874,9 @@ def test_switch_config_cdu_secondary():
             + "ip access-list cmn-can\n"
             + "  seq 10 deny ip 192.168.12.0/24 192.168.11.0/24\n"
             + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
-            + "  seq 30 permit ip any any\n"
+            + "  seq 30 deny ip 192.168.12.0/24 192.168.200.0/24\n"
+            + "  seq 40 deny ip 192.168.200.0/24 192.168.12.0/24\n"
+            + "  seq 50 permit ip any any\n"
         ) in str(result.output)
         print(result.output)
         assert (
@@ -2903,6 +2929,38 @@ sls_input = {
                         "Name": "bootstrap_dhcp",
                         "VlanID": 7,
                         "Gateway": "192.168.11.1",
+                    },
+                ],
+            },
+        },
+        "CHN": {
+            "Name": "CHN",
+            "ExtraProperties": {
+                "CIDR": "192.168.200.0/24",
+                "MyASN": 65530,
+                "PeerASN": 65533,
+                "Subnets": [
+                    {
+                        "Name": "bootstrap_dhcp",
+                        "CIDR": "192.168.200.0/24",
+                        "IPReservations": [
+                            {"Name": "chn-switch-1", "IPAddress": "192.168.200.2"},
+                            {"Name": "chn-switch-2", "IPAddress": "192.168.200.3"},
+                        ],
+                        "VlanID": 5,
+                        "Gateway": "192.168.200.1",
+                    },
+                    {
+                        "FullName": "CHN Bootstrap DHCP Subnet",
+                        "CIDR": "192.168.200.0/24",
+                        "IPReservations": [
+                            {"Name": "ncn-w001", "IPAddress": "192.168.200.4"},
+                            {"Name": "ncn-w002", "IPAddress": "192.168.200.5"},
+                            {"Name": "ncn-w003", "IPAddress": "192.168.200.6"},
+                        ],
+                        "Name": "bootstrap_dhcp",
+                        "VlanID": 5,
+                        "Gateway": "192.168.200.1",
                     },
                 ],
             },
