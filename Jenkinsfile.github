@@ -45,7 +45,7 @@ pipeline {
         stage("Prepare: RPM") {
             steps {
                 script {
-                    runLibraryScript("addRpmMetaData.sh", env.GIT_REPO_NAME)
+                    runLibraryScript("addRpmMetaData.sh", "${env.GIT_REPO_NAME}.spec")
                     sh "make prepare"
                 }
             }
