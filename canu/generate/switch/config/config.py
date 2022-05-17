@@ -197,6 +197,12 @@ dash = "-" * 60
     help="Path to current running configs.",
     type=click.Path(),
 )
+@click.option(
+    "--reorder",
+    is_flag=True,
+    help="reorder config to heir config order",
+    required=False,
+)
 @click.pass_context
 def config(
     ctx,
@@ -213,6 +219,7 @@ def config(
     out,
     preserve,
     custom_config,
+    reorder,
 ):
     """Generate switch config using the SHCD.
 
@@ -271,6 +278,7 @@ def config(
         out: Name of the output file
         preserve: Folder where switch running configs exist.
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
+        reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
     """
     # SHCD Parsing
     if shcd:
@@ -405,6 +413,7 @@ def config(
         vendor_folder,
         preserve,
         custom_config,
+        reorder,
     )
 
     click.echo("\n")
@@ -525,6 +534,7 @@ def generate_switch_config(
     vendor_folder,
     preserve,
     custom_config,
+    reorder,
 ):
     """Generate switch config.
 
@@ -539,6 +549,7 @@ def generate_switch_config(
         vendor_folder: Vendor folder contaning the template_folder
         preserve: Folder where switch running configs exist.  This folder should be populated from the "canu backup network"
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
+        reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
 
 
     Returns:
@@ -973,6 +984,28 @@ def generate_switch_config(
         error_check_preserve_config(preserve_lag_config)
         return (preserve_lag_config, devices, unknown)
 
+    if reorder:
+        switch_os = "aoscx"
+        options = yaml.load(open(hier_options(switch_os)))
+        host = Host(switch_name, switch_os, options)
+        switch_config_hier = HConfig(host=host)
+        switch_config_hier.load_from_string(switch_config)
+        switch_config_hier.set_order_weight()
+        # add ! to the end of the aruba banner.
+        banner = switch_config_hier.get_child("contains", "banner")
+        banner.add_child("!")
+        config = ""
+        for line in switch_config_hier.all_children_sorted():
+            # add two spaces to indented config to match aruba formatting.
+            if (
+                line.cisco_style_text().startswith("  ")
+                and "!" not in line.cisco_style_text()
+            ):
+                config += "\n" + "  " + line.cisco_style_text()
+            else:
+                config += "\n" + line.cisco_style_text().lstrip()
+        switch_config = config
+
     return switch_config, devices, unknown
 
 
@@ -1083,7 +1116,12 @@ def get_switch_nodes(
                 "slot": destination_slot,
                 "destination_port": destination_port,
                 "config": {
-                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
+                    "DESCRIPTION": get_description(
+                        switch_name,
+                        destination_node_name,
+                        destination_slot,
+                        destination_port,
+                    ),
                     "PORT": f"{source_port}",
                     "LAG_NUMBER": primary_port,
                 },
@@ -1110,7 +1148,12 @@ def get_switch_nodes(
                 "slot": destination_slot,
                 "destination_port": destination_port,
                 "config": {
-                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
+                    "DESCRIPTION": get_description(
+                        switch_name,
+                        destination_node_name,
+                        destination_slot,
+                        destination_port,
+                    ),
                     "PORT": f"{source_port}",
                     "LAG_NUMBER": primary_port_ncn_s,
                     "LAG_NUMBER_V1": primary_port,
@@ -1131,7 +1174,12 @@ def get_switch_nodes(
                 "slot": destination_slot,
                 "destination_port": destination_port,
                 "config": {
-                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
+                    "DESCRIPTION": get_description(
+                        switch_name,
+                        destination_node_name,
+                        destination_slot,
+                        destination_port,
+                    ),
                     "PORT": f"{source_port}",
                     "LAG_NUMBER": primary_port,
                 },
@@ -1155,7 +1203,12 @@ def get_switch_nodes(
                 "subtype": "cec",
                 "slot": None,
                 "config": {
-                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "DESCRIPTION": get_description(
+                        switch_name,
+                        destination_node_name,
+                        None,
+                        destination_port,
+                    ),
                     "INTERFACE_NUMBER": f"{source_port}",
                     "NATIVE_VLAN": hmn_mtn_vlan,
                 },
@@ -1175,7 +1228,12 @@ def get_switch_nodes(
                 "subtype": "cmm",
                 "slot": None,
                 "config": {
-                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "DESCRIPTION": get_description(
+                        switch_name,
+                        destination_node_name,
+                        None,
+                        destination_port,
+                    ),
                     "PORT": f"{source_port}",
                     "LAG_NUMBER": primary_port,
                     "NATIVE_VLAN": nmn_mtn_vlan,
@@ -1185,7 +1243,7 @@ def get_switch_nodes(
             if preserve:
                 new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
-        elif shasta_name in {"viz", "uan", "login"}:
+        elif shasta_name in {"uan", "login", "viz", "lmem"}:
             primary_port_uan = get_primary_port(
                 nodes_by_name,
                 switch_name,
@@ -1197,7 +1255,12 @@ def get_switch_nodes(
                 "slot": destination_slot,
                 "destination_port": destination_port,
                 "config": {
-                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_slot}:{destination_port}",
+                    "DESCRIPTION": get_description(
+                        switch_name,
+                        destination_node_name,
+                        destination_slot,
+                        destination_port,
+                    ),
                     "PORT": f"{source_port}",
                     "LAG_NUMBER": primary_port_uan,
                     "LAG_NUMBER_V1": primary_port,
@@ -1212,13 +1275,35 @@ def get_switch_nodes(
             elif preserve:
                 new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
+        elif shasta_name in {"gateway", "ssn", "dvs"}:
+            new_node = {
+                "subtype": "river_ncn_node_4_port_1g_ocp",
+                "slot": destination_slot,
+                "destination_port": destination_port,
+                "config": {
+                    "DESCRIPTION": get_description(
+                        switch_name,
+                        destination_node_name,
+                        destination_slot,
+                        destination_port,
+                    ),
+                    "PORT": f"{source_port}",
+                    "INTERFACE_NUMBER": f"{source_port}",
+                },
+            }
+            nodes.append(new_node)
         elif shasta_name == "cn":
             new_node = {
                 "subtype": "compute",
                 "slot": destination_slot,
                 "destination_port": destination_port,
                 "config": {
-                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "DESCRIPTION": get_description(
+                        switch_name,
+                        destination_node_name,
+                        destination_slot,
+                        destination_port,
+                    ),
                     "PORT": f"{source_port}",
                     "INTERFACE_NUMBER": f"{source_port}",
                 },
@@ -1230,7 +1315,12 @@ def get_switch_nodes(
                 "slot": destination_slot,
                 "destination_port": destination_port,
                 "config": {
-                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "DESCRIPTION": get_description(
+                        switch_name,
+                        destination_node_name,
+                        destination_slot,
+                        destination_port,
+                    ),
                     "PORT": f"{source_port}",
                     "INTERFACE_NUMBER": f"{source_port}",
                 },
@@ -1242,7 +1332,12 @@ def get_switch_nodes(
                 "slot": destination_slot,
                 "destination_port": destination_port,
                 "config": {
-                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "DESCRIPTION": get_description(
+                        switch_name,
+                        destination_node_name,
+                        destination_slot,
+                        destination_port,
+                    ),
                     "PORT": f"{source_port}",
                     "INTERFACE_NUMBER": f"{source_port}",
                 },
@@ -1254,7 +1349,12 @@ def get_switch_nodes(
                 "slot": destination_slot,
                 "destination_port": destination_port,
                 "config": {
-                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "DESCRIPTION": get_description(
+                        switch_name,
+                        destination_node_name,
+                        destination_slot,
+                        destination_port,
+                    ),
                     "PORT": f"{source_port}",
                     "INTERFACE_NUMBER": f"{source_port}",
                 },
@@ -1288,7 +1388,12 @@ def get_switch_nodes(
                 "slot": None,
                 "primary": is_primary,
                 "config": {
-                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "DESCRIPTION": get_description(
+                        switch_name,
+                        destination_node_name,
+                        None,
+                        destination_port,
+                    ),
                     "LAG_NUMBER": lag_number,
                     "PORT": f"{source_port}",
                 },
@@ -1317,7 +1422,12 @@ def get_switch_nodes(
                 "slot": None,
                 "primary": is_primary,
                 "config": {
-                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "DESCRIPTION": get_description(
+                        switch_name,
+                        destination_node_name,
+                        None,
+                        destination_port,
+                    ),
                     "LAG_NUMBER": lag_number,
                     "PORT": f"{source_port}",
                 },
@@ -1350,7 +1460,12 @@ def get_switch_nodes(
                 "slot": None,
                 "primary": is_primary,
                 "config": {
-                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "DESCRIPTION": get_description(
+                        switch_name,
+                        destination_node_name,
+                        None,
+                        destination_port,
+                    ),
                     "LAG_NUMBER": lag_number,
                     "PORT": f"{source_port}",
                 },
@@ -1378,7 +1493,12 @@ def get_switch_nodes(
                 "subtype": "leaf-bmc",
                 "slot": None,
                 "config": {
-                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "DESCRIPTION": get_description(
+                        switch_name,
+                        destination_node_name,
+                        None,
+                        destination_port,
+                    ),
                     "LAG_NUMBER": lag_number,
                     "PORT": f"{source_port}",
                 },
@@ -1397,7 +1517,12 @@ def get_switch_nodes(
                 "subtype": "edge",
                 "slot": None,
                 "config": {
-                    "DESCRIPTION": f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}",
+                    "DESCRIPTION": get_description(
+                        switch_name,
+                        destination_node_name,
+                        None,
+                        destination_port,
+                    ),
                     "PORT": f"{source_port}",
                 },
             }
@@ -1410,7 +1535,12 @@ def get_switch_nodes(
             print("Destination: ", destination_node_name)
             print("shasta_name", shasta_name)
             print("*********************************")
-            unknown_description = f"{switch_name}:{source_port}==>{destination_node_name}:{destination_port}"
+            unknown_description = get_description(
+                switch_name,
+                destination_node_name,
+                destination_slot,
+                destination_port,
+            )
             new_node = {
                 "subtype": "unknown",
                 "slot": None,
@@ -1874,3 +2004,27 @@ def get_primary_port(
             # Since ncn-s can have multiple connections to a device, returns the correct one
             elif destination_port and y["destination_port"] == destination_port:
                 return y["port"]
+
+
+def get_description(
+    source_node_name,
+    destination_node_name,
+    destination_slot,
+    destination_port,
+):
+    """Return the port description for a node.
+
+    Args:
+        source_node_name: source device name
+        destination_node_name: destination device name
+        destination_slot: device slot name
+        destination_port: device port number
+
+    Returns:
+        description: string for port/interface description
+    """
+    description = f"{destination_node_name}:{destination_slot}:{destination_port}<=={source_node_name}"
+    if destination_slot is None:
+        description = f"{destination_node_name}:{destination_port}<=={source_node_name}"
+
+    return description
