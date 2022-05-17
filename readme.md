@@ -85,22 +85,25 @@ In order to run CANU, both python3 and pip3 need to be installed.
 
 ## Installation
 
-- To run CANU inside a container:
+- To run a CANU development environment inside a container:
 
   - Prerequisites:
-    - docker
-    - docker-compose
+    - bash
+    - podman or docker
 
   ```bash
-    sh canu_docker.sh up
+    ./canu-devel
   ```
 
-  - CANU source files can be found inside the container at /app/canu
-  - shared folder between local disk is call `files` and is mounted in the container at `/files`
-  - When you are finished with the container and `exit` the container:
+  - Type `exit` or `Ctrl+D` to exit the container.
+  - The container image will be reused unless manually removed or the script is run with `./canu-devel rebuild`.
+  - The script will prompt for your private key used for Public GitHub Cray-HPE/canu.
+    - The key is mounted read-only inside the container at `/home/canu/key`.
+    - The key may also be an environment variable `export SSHKEYFILE=/path/to/your/CANU/key`.
 
   ```bash
-    sh canu_docker.sh down
+    export SSHKEYFILE=/path/to/your/CANU/private/key
+    ./canu-devel
   ```
 
 - To run CANU in a Python Virtualenv:
