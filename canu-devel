@@ -52,7 +52,7 @@ echo "#   Read-Only GitHub ssh key located at /home/canu/key"
 echo '#   Type "exit" or "Ctrl+D" to exit the container'
 ${PLATFORM} run -it --rm \
     -v "${SSHKEYFILE}":/home/canu/key:ro \
-    -v $(pwd)/:/files:rw \
+    -v "$(pwd)"/:/files:rw \
     --name ${IMAGE} \
     --hostname ${IMAGE} \
     ${IMAGE} \
