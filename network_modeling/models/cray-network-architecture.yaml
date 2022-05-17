@@ -179,7 +179,7 @@ network_v2:
       architecture_type: "river_ncn_node_4_port"
     - lookup_name: ["lnet"]
       shasta_name: "lnet"
-      architecture_type: "river_ncn_node_4_port"
+      architecture_type: "river_ncn_node_4_port_1g_ocp"
     - lookup_name: ["Ln", "ln", "login"]
       shasta_name: "login"
       architecture_type: "river_ncn_node_4_port"
@@ -361,7 +361,7 @@ network_v2_tds:
     - lookup_name:
         - "lnet"
       shasta_name: "lnet"
-      architecture_type: "river_ncn_node_4_port"
+      architecture_type: "river_ncn_node_4_port_1g_ocp"
     - lookup_name: 
         - "gw"
         - "gn"
@@ -379,7 +379,7 @@ network_v2_tds:
     - lookup_name:
         - "lnet"
       shasta_name: "lnet"
-      architecture_type: "river_ncn_node_4_port"
+      architecture_type: "river_ncn_node_4_port_1g_ocp"
     - lookup_name:
         - "cdu"
       shasta_name: "sw-cdu"
