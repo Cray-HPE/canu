@@ -33,6 +33,8 @@ interface mgmt
     shutdown
     ip dhcp
 
+
+{% include '1.0/aruba/common/uan_1g.j2' %}
 {% include '1.0/aruba/common/compute.j2' %}
 {% include '1.0/aruba/common/bmc.j2' %}
 {% include '1.0/aruba/full/leaf-bmc-to-leaf.lag.j2' %}
