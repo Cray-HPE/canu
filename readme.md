@@ -1156,6 +1156,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## [1.5.9-develop]
 
+- Change Rosetta/Columbia switch naming to be sw-hsn-<rack>-<###> (as with PDU and CMM/CEC).
 - Change switch port/interface descriptions to `dst:slot:port==>src` to avoid truncation.
 - Change gateway nodes to 4 port 1G OCP card definitions.
 - Add dvs and ssn nodes as 4 port 1G OCP card definitions.
