@@ -1,0 +1,13 @@
+{#- compute #}
+{%- for node in cabling.nodes if node.subtype == "river_ncn_node_4_port_1g_ocp" and node.slot == "ocp" %}
+interface 1/1/{{ node.config.PORT }}
+    no shutdown
+    mtu 9198
+    description {{ node.config.DESCRIPTION }}
+    no routing
+    vlan access {{ variables.NMN_VLAN }}
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+
+{%- endfor %}
+{#- end compute #}
