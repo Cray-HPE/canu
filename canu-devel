@@ -17,11 +17,13 @@ if [[ ! -f ${SSHKEYFILE} ]]; then
     exit 1
 fi
 
+set -x
 #
 # Find a container platform (podman, docker, etc...)
 #
 for platform in podman docker;do
-    which ${platform} >/dev/null 2>&1 
+    which ${platform} >/dev/null 2>&1
+    # shellcheck disable=SC2181
     if [[ $? == 0 ]];then
         PLATFORM=$(which ${platform})
         break
