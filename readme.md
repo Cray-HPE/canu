@@ -1162,6 +1162,12 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Change large memory node common name from `lm` to `lmem`.
 - Beta release of `--reorder` for switch/network config generation where custom-config is not used.
 
+## [1.5.8-develop]
+
+- Added shellcheck GitHub action
+- Bump ipython to 7.16.3 to remediate CVE
+- Clean up Jenkins build
+
 ## [1.5.7-develop]
 
 - Add ACL to block CHN <> traffic for CSM 1.2
