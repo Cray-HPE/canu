@@ -36,6 +36,7 @@ from hier_config import HConfig, Host
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 import natsort
 import netaddr
+from netutils.mac import is_valid_mac
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import requests
 from ruamel.yaml import YAML
@@ -627,7 +628,27 @@ def generate_switch_config(
     template_name = templates[node_shasta_name][
         "primary" if is_primary else "secondary"
     ]
+
+    def vsx_mac(switch_name):
+        is_primary, primary, secondary = switch_is_primary(switch_name)
+        primary_number = re.search(r"\d+", primary).group()
+        hex_number = format(int(primary_number), "02x")
+        if "sw-spine" in switch_name:
+            vsx_mac = "02:00:00:00:" + hex_number + ":00"
+        elif "sw-leaf" in switch_name:
+            vsx_mac = "02:01:00:00:" + hex_number + ":00"
+        elif "sw-cdu" in switch_name:
+            vsx_mac = "02:02:00:00:" + hex_number + ":00"
+        if is_valid_mac(vsx_mac):
+            return vsx_mac
+        else:
+            click.secho(f"system-mac for VSX {switch_name} is not valid", fg="red")
+            sys.exit(1)
+
+    jinja_func = {"vsx_mac": vsx_mac}
     template = env.get_template(template_name)
+    template.globals.update(jinja_func)
+
     native_vlan = 1
 
     leaf_bmc_vlan = [
