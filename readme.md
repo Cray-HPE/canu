@@ -1157,6 +1157,8 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 ## [1.5.10-develop]
 
 - Fix canu paddle-file.json schema
+- Fixed Mellanox Customer ACL.
+- Add VLAN 7 to Dellanox UAN for 1.0
 
 ## [1.5.9-develop]
 
