@@ -1158,6 +1158,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 ## [1.5.10]
 
 - Create unique VSX system macs for each VSX cluster.
+- Fixed Mellanox Customer ACL.
 
 ## [1.5.9-develop]
 
