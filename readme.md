@@ -1159,6 +1159,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 - Create unique VSX system macs for each VSX cluster.
 - Fixed Mellanox Customer ACL.
+- Add VLAN 7 to Dellanox UAN for 1.0
 
 ## [1.5.9-develop]
 
