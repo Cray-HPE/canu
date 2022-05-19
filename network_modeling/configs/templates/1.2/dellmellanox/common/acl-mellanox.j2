@@ -38,6 +38,6 @@ ipv4 access-list cmn-can seq-number {% set sequence = sequence+10 %}{{ sequence 
 {%- if variables.CMN and variables.CHN %}
 ipv4 access-list cmn-can seq-number {% set sequence = sequence+10 %}{{ sequence }} deny ip {{ variables.CMN_NETWORK_IP }} mask {{ variables.CMN_NETMASK }} {{ variables.CHN_NETWORK_IP }} mask {{ variables.CHN_NETMASK }}
 ipv4 access-list cmn-can seq-number {% set sequence = sequence+10 %}{{ sequence }} deny ip {{ variables.CHN_NETWORK_IP }} mask {{ variables.CHN_NETMASK }} {{ variables.CMN_NETWORK_IP }} mask {{ variables.CMN_NETMASK }}
-ipv4 access-list cmn-can seq-number {% set sequence = sequence+10 %}{{ sequence }} permit ip any any
 {%- endif %}
+ipv4 access-list cmn-can seq-number {% set sequence = sequence+10 %}{{ sequence }} permit ip any any
 {#- end acl #}
