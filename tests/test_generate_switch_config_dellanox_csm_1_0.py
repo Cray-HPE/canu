@@ -2837,8 +2837,8 @@ def test_switch_config_cdu_secondary():
             + "  switchport access vlan 1\n"
             + "  flowcontrol receive on\n"
         ) in str(result.output)
-        print(result.output)    
-        assert ( 
+        print(result.output)
+        assert (
             "interface ethernet1/1/25\n"
             + "  no shutdown\n"
             + "  no switchport\n"
