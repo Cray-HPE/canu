@@ -1154,6 +1154,10 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
+## [1.5.10-develop]
+
+- Fix canu paddle-file.json schema
+
 ## [1.5.9-develop]
 
 - Change Rosetta/Columbia switch naming to be sw-hsn-<rack>-<###> (as with PDU and CMM/CEC).
