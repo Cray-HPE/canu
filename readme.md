@@ -1156,7 +1156,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## [1.5.13-develop]
 
-- Fix Dell4148 template to inclure correct port count 
+- Fix Dell4148 template to include correct port count 
 
 ## [1.5.10-develop]
 
