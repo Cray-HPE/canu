@@ -1972,7 +1972,18 @@ def test_switch_config_cdu_primary():
             + "  shutdown\n"
             + "  switchport access vlan 1\n"
             + "  flowcontrol receive on\n"
-            + "interface ethernet1/1/25\n"
+            + "interface ethernet1/1/53\n"
+            + "  shutdown\n"
+            + "  switchport access vlan 1\n"
+            + "  flowcontrol receive on\n"
+            + "interface ethernet1/1/54\n"
+            + "  shutdown\n"
+            + "  switchport access vlan 1\n"
+            + "  flowcontrol receive on\n"
+        ) in str(result.output)
+        print(result.output)
+        assert (
+            "interface ethernet1/1/25\n"
             + "  no shutdown\n"
             + "  no switchport\n"
             + "  flowcontrol receive off\n"
@@ -2393,7 +2404,18 @@ def test_switch_config_cdu_primary_preserve():
             + "  shutdown\n"
             + "  switchport access vlan 1\n"
             + "  flowcontrol receive on\n"
-            + "interface ethernet1/1/25\n"
+            + "interface ethernet1/1/53\n"
+            + "  shutdown\n"
+            + "  switchport access vlan 1\n"
+            + "  flowcontrol receive on\n"
+            + "interface ethernet1/1/54\n"
+            + "  shutdown\n"
+            + "  switchport access vlan 1\n"
+            + "  flowcontrol receive on\n"
+        ) in str(result.output)
+        print(result.output)
+        assert (
+            "interface ethernet1/1/25\n"
             + "  no shutdown\n"
             + "  no switchport\n"
             + "  flowcontrol receive off\n"
@@ -2806,7 +2828,18 @@ def test_switch_config_cdu_secondary():
             + "  shutdown\n"
             + "  switchport access vlan 1\n"
             + "  flowcontrol receive on\n"
-            + "interface ethernet1/1/25\n"
+            + "interface ethernet1/1/53\n"
+            + "  shutdown\n"
+            + "  switchport access vlan 1\n"
+            + "  flowcontrol receive on\n"
+            + "interface ethernet1/1/54\n"
+            + "  shutdown\n"
+            + "  switchport access vlan 1\n"
+            + "  flowcontrol receive on\n"
+        ) in str(result.output)
+        print(result.output)    
+        assert ( 
+            "interface ethernet1/1/25\n"
             + "  no shutdown\n"
             + "  no switchport\n"
             + "  flowcontrol receive off\n"
