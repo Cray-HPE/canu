@@ -1,4 +1,4 @@
-# 🛶 CANU v1.5.10-develop
+# 🛶 CANU v1.5.11-develop
 
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
@@ -1155,7 +1155,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [1.5.10]
+## [1.5.11]
 
 - Create unique VSX system macs for each VSX cluster.
 - Fixed Mellanox Customer ACL.
