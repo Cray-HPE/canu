@@ -20,6 +20,7 @@
 
 @Library('csm-shared-library') _
 
+def pythonVer = '3.10'
 pipeline {
     agent {
         label "metal-gcp-builder"
@@ -27,6 +28,8 @@ pipeline {
 
     options {
         buildDiscarder(logRotator(numToKeepStr: "10"))
+        timeout(time: 20, unit: 'MINUTES')
+        disableConcurrentBuilds()
         timestamps()
     }
 
@@ -36,7 +39,7 @@ pipeline {
         GIT_REPO_NAME = getRepoName()
         BUILD_METADATA = getRpmRevision(isStable: env.IS_STABLE)
         OS = "sle-15sp3"
-        VERSION = getDockerBuildVersion(isStable: env.IS_STABLE)
+        IMAGE_VERSION = getDockerBuildVersion(isStable: env.IS_STABLE)
         DOCKER_ARGS = getDockerBuildArgs(name: "cray-${getRepoName()}", description: env.DESCRIPTION)
     }
 
@@ -45,7 +48,7 @@ pipeline {
         stage("Prepare: RPM") {
             agent {
                 docker {
-                    image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:3.10"
+                    image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${pythonVer}"
                     reuseNode true
                     // Support docker in docker for clamav scan
                     args "-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --group-add 999"
@@ -55,14 +58,6 @@ pipeline {
                 script {
                     runLibraryScript("addRpmMetaData.sh", "${env.GIT_REPO_NAME}.spec")
                     sh "make prepare"
-                }
-            }
-        }
-
-        stage("Test: UnitTests") {
-            steps {
-                script {
-                    sh "make test"
                 }
             }
         }
@@ -79,7 +74,7 @@ pipeline {
         stage("Build: RPMs") {
             agent {
                 docker {
-                    image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:3.10"
+                    image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${pythonVer}"
                     reuseNode true
                     // Support docker in docker for clamav scan
                     args "-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --group-add 999"
@@ -102,8 +97,7 @@ pipeline {
         stage('Build: Image') {
             steps {
                 script {
-                    sh "printenv"
-                    sh "make -f Makefile_image image"
+                    sh "make image"
                 }
             }
         }
@@ -111,7 +105,7 @@ pipeline {
         stage('Publish: Image') {
             steps {
                 script {
-                    publishCsmDockerImage(image: "cray-${env.GIT_REPO_NAME}", tag: env.VERSION, isStable: env.IS_STABLE)
+                    publishCsmDockerImage(image: "cray-${env.GIT_REPO_NAME}", tag: env.IMAGE_VERSION, isStable: env.IS_STABLE)
                 }
             }
         }
