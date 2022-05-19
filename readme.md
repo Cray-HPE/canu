@@ -1155,11 +1155,15 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [1.5.11]
+## [1.5.11-develop]
 
 - Create unique VSX system macs for each VSX cluster.
 - Fixed Mellanox Customer ACL.
 - Add VLAN 7 to Dellanox UAN for 1.0
+
+## [1.5.10-develop]
+
+- Fix canu paddle-file.json schema
 
 ## [1.5.9-develop]
 
