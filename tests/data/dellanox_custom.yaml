@@ -19,7 +19,7 @@ sw-spine-002:  |
     ip route vrf default 0.0.0.0/0 10.102.255.33
 sw-leaf-bmc-001:  |
     interface ethernet1/1/12
-      description sw-leaf-bmc-001:12==>cn003:2
+      description cn003:2<==sw-leaf-bmc-001
       no shutdown
       switchport access vlan 2
       mtu 9216
