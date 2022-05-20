@@ -1,4 +1,4 @@
-# 🛶 CANU v1.5.7
+# 🛶 CANU v1.5.11
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1153,6 +1153,31 @@ nox -s tests -- tests/test_report_switch_firmware.py
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.5.11]
+
+- Create unique VSX system macs for each VSX cluster.
+- Fixed Mellanox Customer ACL.
+- Add VLAN 7 to Dellanox UAN for 1.0
+
+## [1.5.10]
+
+- Fix canu paddle-file.json schema
+
+## [1.5.9]
+
+- Change Rosetta/Columbia switch naming to be sw-hsn-<rack>-<###> (as with PDU and CMM/CEC).
+- Change switch port/interface descriptions to `dst:slot:port==>src` to avoid truncation.
+- Change gateway nodes to 4 port 1G OCP card definitions.
+- Add dvs and ssn nodes as 4 port 1G OCP card definitions.
+- Change large memory node common name from `lm` to `lmem`.
+- Beta release of `--reorder` for switch/network config generation where custom-config is not used.
+
+## [1.5.8]
+
+- Added shellcheck GitHub action
+- Bump ipython to 7.16.3 to remediate CVE
+- Clean up Jenkins build
 
 ## [1.5.7]
 
