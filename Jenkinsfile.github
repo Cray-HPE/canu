@@ -20,6 +20,7 @@
 
 @Library('csm-shared-library') _
 
+def pythonVer = '3.10'
 pipeline {
     agent {
         label "metal-gcp-builder"
@@ -27,52 +28,53 @@ pipeline {
 
     options {
         buildDiscarder(logRotator(numToKeepStr: "10"))
+        timeout(time: 20, unit: 'MINUTES')
+        disableConcurrentBuilds()
         timestamps()
     }
 
     environment {
-        NAME = "cray-canu"
         DESCRIPTION = "CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze."
-        RPM_NAME = "canu"
-        SPEC_FILE = "canu.spec"
         IS_STABLE = getBuildIsStable()
+        GIT_REPO_NAME = getRepoName()
         BUILD_METADATA = getRpmRevision(isStable: env.IS_STABLE)
-        PUBLISH_SP2 = "sle-15sp2"
-        PUBLISH_SP3 = "sle-15sp3"
-        VERSION = getDockerBuildVersion(isStable: env.IS_STABLE)
-        DOCKER_ARGS = getDockerBuildArgs(name: env.NAME, description: env.DESCRIPTION)
+        OS = "sle-15sp3"
+        IMAGE_VERSION = getDockerBuildVersion(isStable: env.IS_STABLE)
+        DOCKER_ARGS = getDockerBuildArgs(name: "cray-${getRepoName()}", description: env.DESCRIPTION)
     }
 
     stages {
 
-        stage("Prepare") {
+        stage("Prepare: RPM") {
+            agent {
+                docker {
+                    image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${pythonVer}"
+                    reuseNode true
+                    // Support docker in docker for clamav scan
+                    args "-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --group-add 999"
+                }
+            }
             steps {
                 script {
-                    runLibraryScript("addRpmMetaData.sh", env.SPEC_FILE)
+                    runLibraryScript("addRpmMetaData.sh", "${env.GIT_REPO_NAME}.spec")
                     sh "make prepare"
                 }
             }
         }
 
-        stage("Test") {
-            steps {
-                script {
-                    sh "make test"
-                }
-            }
-        }
-
-        stage("Build Binary") {
+        stage("Build: Binary") {
             steps {
                 script {
                     sh "make binary"
                 }
             }
         }
-        stage("Build SP2") {
+
+
+        stage("Build: RPMs") {
             agent {
                 docker {
-                    image "arti.dev.cray.com/dstbuildenv-docker-master-local/cray-sle15sp2_build_environment:latest"
+                    image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${pythonVer}"
                     reuseNode true
                     // Support docker in docker for clamav scan
                     args "-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --group-add 999"
@@ -83,60 +85,34 @@ pipeline {
             }
         }
 
-        stage('Publish SP2') {
+        stage('Publish: RPMs') {
             steps {
                 script {
-                    publishCsmRpms(component: env.RPM_NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: env.PUBLISH_SP2, arch: "x86_64", isStable: env.IS_STABLE)
-                    publishCsmRpms(component: env.RPM_NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: env.PUBLISH_SP2, arch: "src", isStable: env.IS_STABLE)
+                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: env.OS, arch: "x86_64", isStable: env.IS_STABLE)
+                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: env.OS, arch: "src", isStable: env.IS_STABLE)
                 }
-            }
-        }
-        stage("Build SP3") {
-            agent {
-                docker {
-                    image "arti.dev.cray.com/dstbuildenv-docker-master-local/cray-sle15sp3_build_environment:latest"
-                    reuseNode true
-                    // Support docker in docker for clamav scan
-                    args "-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --group-add 999"
-                }
-            }
-            steps {
-                sh "make rpm"
             }
         }
 
-        stage('Publish SP3') {
+        stage('Build: Image') {
             steps {
                 script {
-                    publishCsmRpms(component: env.RPM_NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: env.PUBLISH_SP3, arch: "x86_64", isStable: env.IS_STABLE)
-                    publishCsmRpms(component: env.RPM_NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: env.PUBLISH_SP3, arch: "src", isStable: env.IS_STABLE)
+                    sh "make image"
                 }
             }
         }
-        stage("Build") {
-            parallel {
-                stage('Image') {
-                    steps {
-                        script {
-                            sh "printenv"
-                            sh "make -f Makefile_image image"
-                        }
-                    }
-                }
-            }
-        }
-        stage('Publish ') {
+
+        stage('Publish: Image') {
             steps {
                 script {
-                    publishCsmDockerImage(image: env.NAME, tag: env.VERSION, isStable: env.IS_STABLE)
+                    publishCsmDockerImage(image: "cray-${env.GIT_REPO_NAME}", tag: env.IMAGE_VERSION, isStable: env.IS_STABLE)
                 }
             }
         }
     }
     post {
         cleanup {
-            // Own files so jenkins can clean them up later
-            sh "sudo chown -R jenkins ${env.WORKSPACE}"
+            postChownFiles()
         }
     }
 }

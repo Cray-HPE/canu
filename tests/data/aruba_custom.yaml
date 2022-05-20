@@ -12,7 +12,7 @@ sw-spine-001:  |
     interface 1/1/20
         no shutdown
         mtu 9198
-        description sw-spine-001:16==>ion-node
+        description ion-node<==sw-spine-001
         no routing
         vlan access 7
         spanning-tree bpdu-guard
@@ -27,7 +27,7 @@ sw-spine-002:  |
     interface 1/1/20
         no shutdown
         mtu 9198
-        description sw-spine-002:16==>ion-node
+        description ion-node<==sw-spine-002
         no routing
         vlan access 7
         spanning-tree bpdu-guard

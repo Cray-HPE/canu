@@ -19,10 +19,9 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-name = canu
+name ?= ${GIT_REPO_NAME}
 
-version := $(shell cat canu/.version)
-
+version ?= $(shell cat .version)
 build_image := cdrx/pyinstaller-linux:python3
 
 # Default release if not set
@@ -33,6 +32,7 @@ source_name := ${name}-${version}
 
 build_dir := $(PWD)/dist/rpmbuild
 source_path := ${build_dir}/SOURCES/${source_name}.tar.bz2
+IMAGE_VERSION ?= ${IMAGE_VERSION}
 
 all : prepare binary test rpm
 rpm: rpm_package_source rpm_build_source rpm_build
@@ -47,6 +47,12 @@ binary:
 
 test:
 		docker run --rm -v $(PWD):/src $(build_image) nox
+
+image:
+	docker build --no-cache --pull ${DOCKER_ARGS} --tag 'cray-${name}:${IMAGE_VERSION}' .
+
+snyk:
+	$(MAKE) -s image | xargs --verbose -n 1 snyk container test
 
 rpm_package_source:
 		tar --transform 'flags=r;s,^,/$(source_name)/,' --exclude .git --exclude .nox --exclude dist/rpmbuild -cvjf $(source_path) .
