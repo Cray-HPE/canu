@@ -20,7 +20,7 @@
 
 @Library('csm-shared-library') _
 
-def pythonVer = '3.10'
+def pythonVersion = '3.10'
 pipeline {
     agent {
         label "metal-gcp-builder"
@@ -48,7 +48,7 @@ pipeline {
         stage("Prepare: RPM") {
             agent {
                 docker {
-                    image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${pythonVer}"
+                    image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${pythonVersion}"
                     reuseNode true
                     // Support docker in docker for clamav scan
                     args "-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --group-add 999"
@@ -74,7 +74,7 @@ pipeline {
         stage("Build: RPMs") {
             agent {
                 docker {
-                    image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${pythonVer}"
+                    image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${pythonVersion}"
                     reuseNode true
                     // Support docker in docker for clamav scan
                     args "-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --group-add 999"
