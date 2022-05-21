@@ -62,16 +62,7 @@ pipeline {
             }
         }
 
-        stage("Build: Binary") {
-            steps {
-                script {
-                    sh "make binary"
-                }
-            }
-        }
-
-
-        stage("Build: RPMs") {
+        stage("Build: RPM") {
             agent {
                 docker {
                     image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${pythonVersion}"

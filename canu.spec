@@ -1,3 +1,6 @@
+%global __python /usr/local/bin/python3.10
+%define __pyinstaller /usr/local/bin/pyinstaller
+
 Name: canu
 BuildArch: x86_64
 License: MIT License
@@ -15,13 +18,24 @@ CSM Automatic Network Utility
 %setup -q
 
 %build
+%{__python} -m pip install -U pyinstaller
+
+# Build the wheel.
+%{__python} -m pip install -q build
+%{__python} -m build
 
 %install
+mv pyinstaller.py pyinstaller.spec
+%{__pyinstaller} pyinstaller.spec
+
 mkdir -p %{buildroot}%{_bindir}
 install -m 755 dist/linux/canu %{buildroot}%{_bindir}/canu
 
+%pre
+useradd -ms /bin/bash canu
+
 %files
-%{_bindir}/canu
+%attr(755, canu, canu) %{_bindir}/canu
 %license LICENSE
 
 %changelog
