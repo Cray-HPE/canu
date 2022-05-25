@@ -13,7 +13,7 @@ route-map {{ name }} permit seq {{ sequence.value }}
      {%- for CMN_name, CMN_ip in variables.CMN_IPs.items() if name == CMN_name %}
      set ip next-hop {{ CMN_ip }}
      {%- endfor %}
-route-map {{ name }} permit seq {{ sequence.value }}
+{% set sequence.value = sequence.value + 10 %}route-map {{ name }} permit seq {{ sequence.value }}
      match ip address prefix-list pl-can
      {%- for CAN_name, CAN_ip in variables.CAN_IPs.items() if name == CAN_name %}
      set ip next-hop {{ CAN_ip }}

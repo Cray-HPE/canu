@@ -338,8 +338,9 @@ def test_switch_config_spine_primary():
         print(result.output)
         assert (
             "ip prefix-list pl-cmn seq 10 permit 192.168.12.0/24 ge 24\n"
-            + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24\n"
-            + "ip prefix-list pl-nmn seq 30 permit 10.92.100.0/24 ge 24\n"
+            + "ip prefix-list pl-can seq 20 permit 192.168.11.0/24 ge 24\n"
+            + "ip prefix-list pl-hmn seq 30 permit 10.94.100.0/24 ge 24\n"
+            + "ip prefix-list pl-nmn seq 40 permit 10.92.100.0/24 ge 24\n"
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
@@ -362,9 +363,12 @@ def test_switch_config_spine_primary():
             + "     match ip address prefix-list pl-cmn\n"
             + "     set ip next-hop 192.168.12.4\n"
             + "route-map ncn-w001 permit seq 50\n"
+            + "     match ip address prefix-list pl-can\n"
+            + "     set ip next-hop 192.168.11.4\n"
+            + "route-map ncn-w001 permit seq 60\n"
             + "     match ip address prefix-list pl-hmn\n"
             + "     set ip next-hop 192.168.0.4\n"
-            + "route-map ncn-w001 permit seq 60\n"
+            + "route-map ncn-w001 permit seq 70\n"
             + "     match ip address prefix-list pl-nmn\n"
             + "     set ip next-hop 192.168.4.4\n"
             + "\n"
@@ -385,9 +389,12 @@ def test_switch_config_spine_primary():
             + "     match ip address prefix-list pl-cmn\n"
             + "     set ip next-hop 192.168.12.5\n"
             + "route-map ncn-w002 permit seq 50\n"
+            + "     match ip address prefix-list pl-can\n"
+            + "     set ip next-hop 192.168.11.5\n"
+            + "route-map ncn-w002 permit seq 60\n"
             + "     match ip address prefix-list pl-hmn\n"
             + "     set ip next-hop 192.168.0.5\n"
-            + "route-map ncn-w002 permit seq 60\n"
+            + "route-map ncn-w002 permit seq 70\n"
             + "     match ip address prefix-list pl-nmn\n"
             + "     set ip next-hop 192.168.4.5\n"
             + "\n"
@@ -408,13 +415,18 @@ def test_switch_config_spine_primary():
             + "     match ip address prefix-list pl-cmn\n"
             + "     set ip next-hop 192.168.12.6\n"
             + "route-map ncn-w003 permit seq 50\n"
+            + "     match ip address prefix-list pl-can\n"
+            + "     set ip next-hop 192.168.11.6\n"
+            + "route-map ncn-w003 permit seq 60\n"
             + "     match ip address prefix-list pl-hmn\n"
             + "     set ip next-hop 192.168.0.6\n"
-            + "route-map ncn-w003 permit seq 60\n"
+            + "route-map ncn-w003 permit seq 70\n"
             + "     match ip address prefix-list pl-nmn\n"
             + "     set ip next-hop 192.168.4.6\n"
             + "route-map cmn permit seq 10\n"
             + "     match ip address prefix-list pl-cmn\n"
+            + "route-map can permit seq 10\n"
+            + "     match ip address prefix-list pl-can\n"
         ) in str(result.output)
         print(result.output)
         assert (
@@ -832,6 +844,7 @@ def test_switch_config_spine_primary_custom():
         assert (
             "ip dns server-address 10.92.100.225\n"
             + "ip prefix-list pl-cmn seq 10 permit 192.168.12.0/24 ge 24\n"
+            + "ip prefix-list pl-can seq 20 permit 192.168.11.0/24 ge 24\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24\n"
             + "ip prefix-list pl-nmn seq 30 permit 10.92.100.0/24 ge 24\n"
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
@@ -1247,6 +1260,7 @@ def test_switch_config_spine_secondary_custom():
         assert (
             "ip dns server-address 10.92.100.225\n"
             + "ip prefix-list pl-cmn seq 10 permit 192.168.12.0/24 ge 24\n"
+            + "ip prefix-list pl-can seq 20 permit 192.168.11.0/24 ge 24\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24\n"
             + "ip prefix-list pl-nmn seq 30 permit 10.92.100.0/24 ge 24\n"
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
@@ -1581,8 +1595,9 @@ def test_switch_config_spine_secondary():
         print(result.output)
         assert (
             "ip prefix-list pl-cmn seq 10 permit 192.168.12.0/24 ge 24\n"
-            + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24\n"
-            + "ip prefix-list pl-nmn seq 30 permit 10.92.100.0/24 ge 24\n"
+            + "ip prefix-list pl-can seq 20 permit 192.168.11.0/24 ge 24\n"
+            + "ip prefix-list pl-hmn seq 30 permit 10.94.100.0/24 ge 24\n"
+            + "ip prefix-list pl-nmn seq 40 permit 10.92.100.0/24 ge 24\n"
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
@@ -1657,6 +1672,8 @@ def test_switch_config_spine_secondary():
             + "     set ip next-hop 192.168.4.6\n"
             + "route-map cmn permit seq 10\n"
             + "     match ip address prefix-list pl-cmn\n"
+            + "route-map can permit seq 10\n"
+            + "     match ip address prefix-list pl-can\n"
         ) in str(result.output)
 
         print(result.output)
@@ -4503,8 +4520,9 @@ def test_switch_config_tds_spine_primary():
         print(result.output)
         assert (
             "ip prefix-list pl-cmn seq 10 permit 192.168.12.0/24 ge 24\n"
-            + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24\n"
-            + "ip prefix-list pl-nmn seq 30 permit 10.92.100.0/24 ge 24\n"
+            + "ip prefix-list pl-can seq 20 permit 192.168.11.0/24 ge 24\n"
+            + "ip prefix-list pl-hmn seq 30 permit 10.94.100.0/24 ge 24\n"
+            + "ip prefix-list pl-nmn seq 40 permit 10.92.100.0/24 ge 24\n"
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
@@ -4579,6 +4597,8 @@ def test_switch_config_tds_spine_primary():
             + "     set ip next-hop 192.168.4.6\n"
             + "route-map cmn permit seq 10\n"
             + "     match ip address prefix-list pl-cmn\n"
+            + "route-map can permit seq 10\n"
+            + "     match ip address prefix-list pl-can\n"
         ) in str(result.output)
 
         print(result.output)
@@ -5116,8 +5136,9 @@ def test_switch_config_tds_spine_secondary():
         print(result.output)
         assert (
             "ip prefix-list pl-cmn seq 10 permit 192.168.12.0/24 ge 24\n"
-            + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24\n"
-            + "ip prefix-list pl-nmn seq 30 permit 10.92.100.0/24 ge 24\n"
+            + "ip prefix-list pl-can seq 20 permit 192.168.11.0/24 ge 24\n"
+            + "ip prefix-list pl-hmn seq 30 permit 10.94.100.0/24 ge 24\n"
+            + "ip prefix-list pl-nmn seq 40 permit 10.92.100.0/24 ge 24\n"
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
@@ -5192,6 +5213,8 @@ def test_switch_config_tds_spine_secondary():
             + "     set ip next-hop 192.168.4.6\n"
             + "route-map cmn permit seq 10\n"
             + "     match ip address prefix-list pl-cmn\n"
+            + "route-map can permit seq 10\n"
+            + "     match ip address prefix-list pl-can\n"
         ) in str(result.output)
 
         print(result.output)
