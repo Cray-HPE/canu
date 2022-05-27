@@ -1,5 +1,6 @@
 # 🛶 CANU v1.5.12-develop
 
+[![Continuous Integration](https://github.com/Cray-HPE/canu/actions/workflows/unittests.yml/badge.svg)](https://github.com/Cray-HPE/canu/actions/workflows/unittests.yml)
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
