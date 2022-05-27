@@ -8,16 +8,6 @@ route-map {{ name }} permit seq {{ sequence.value }}{% set sequence.value = sequ
      match ip next-hop {{ tftp_ip }}
      set local-preference {{ localpref.value }}{% set localpref.value = localpref.value + 100%}
     {%- endfor %}
-route-map {{ name }} permit seq {{ sequence.value }}
-     match ip address prefix-list pl-cmn
-     {%- for CMN_name, CMN_ip in variables.CMN_IPs.items() if name == CMN_name %}
-     set ip next-hop {{ CMN_ip }}
-     {%- endfor %}
-{% set sequence.value = sequence.value + 10 %}route-map {{ name }} permit seq {{ sequence.value }}
-     match ip address prefix-list pl-can
-     {%- for CAN_name, CAN_ip in variables.CAN_IPs.items() if name == CAN_name %}
-     set ip next-hop {{ CAN_ip }}
-     {%- endfor %}
 {% set sequence.value = sequence.value + 10 %}route-map {{ name }} permit seq {{ sequence.value }}
      match ip address prefix-list pl-hmn
      {%- for hmn_name, hmn_ip in variables.HMN_IPs.items() if name == hmn_name %}
@@ -28,9 +18,20 @@ route-map {{ name }} permit seq {{ sequence.value }}
      {%- for nmn_name, nmn_ip in variables.NMN_IPs.items() if name == nmn_name %}
      set ip next-hop {{ nmn_ip }}
      {%- endfor %}
-{%- endfor %}
-route-map cmn permit seq 10
-     match ip address prefix-list pl-cmn
-route-map can permit seq 10
+
+
+{%- if variables.CAN %}
+{% set sequence = namespace(value=10) %}
+route-map {{ name }}-Customer permit seq {{ sequence.value }}
      match ip address prefix-list pl-can
+     {%- for CAN_name, CAN_ip in variables.CAN_IPs.items() if name == CAN_name %}
+     set ip next-hop {{ CAN_ip }}
+     {%- endfor %}
+{%- endif %}
+{%- if not variables.CAN %}
+{% set sequence = namespace(value=10) %}
+{%- endif %}
+{% set sequence.value = sequence.value + 10 %}route-map {{ name }}-Customer permit seq {{ sequence.value }}
+     match ip address prefix-list pl-cmn
+{%- endfor %}
 {#- end route-map #}
