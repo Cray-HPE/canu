@@ -1148,7 +1148,7 @@ def test_switch_config_spine_secondary_custom():
             + "    set ip next-hop 192.168.11.6\n"
             + "route-map ncn-w003-Customer permit seq 20\n"
             + "    match ip address prefix-list pl-cmn\n"
-        ) 
+        )
         assert output in str(result.output)
 
         print(result.output)
@@ -5238,7 +5238,7 @@ def test_switch_config_tds_spine_secondary():
             + "     set ip next-hop 192.168.11.6\n"
             + "route-map ncn-w003-Customer permit seq 20\n"
             + "     match ip address prefix-list pl-cmn\n"
-            ) in str(result.output)
+        ) in str(result.output)
 
         print(result.output)
         assert (
