@@ -1,6 +1,7 @@
 # 🛶 CANU v1.6.0-develop
 
 
+
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
 CANU can be used to:
@@ -1182,6 +1183,10 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 - Add `canu report network version` feature.
 - Fix Errors in the output of `canu test`
+
+## [1.5.12-develop]
+
+- Add netutils pyinstaller hook file.
 
 ## [1.5.11-develop]
 
