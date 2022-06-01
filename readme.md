@@ -1,6 +1,5 @@
 # 🛶 CANU 1.5.14~develop
 
-
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
 CANU can be used to:
@@ -1158,6 +1157,10 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 ## [1.5.14-develop]
 
 - Add route-map and prefixes to allow connection to UAI's from CAN network.
+
+## [1.5.13-develop]
+
+- Fix Dell4148 template to include correct port count 
 
 ## [1.5.12-develop]
 
