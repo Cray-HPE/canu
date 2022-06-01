@@ -19,19 +19,13 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-NAME ?= cray-${GIT_REPO_NAME}
-VERSION ?= $(shell .version)
+"""netutils hook file."""
+from PyInstaller.utils.hooks import (
+    collect_data_files,
+    collect_submodules,
+    copy_metadata,
+)
 
+datas = collect_data_files("netutils", True) + copy_metadata("netutils")
 
-IMAGE ?= artifactory.algol60.net/csm-docker/stable/${NAME}
-
-all : image
-
-image:
-	docker build --no-cache --pull ${DOCKER_ARGS} --tag '${NAME}:${VERSION}' .
-
-
-snyk:
-	$(MAKE) -s image | xargs --verbose -n 1 snyk container test
-
-
+hiddenimports = collect_submodules("netutils")

@@ -1158,6 +1158,16 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 - Fix Dell4148 template to include correct port count 
 
+## [1.5.12-develop]
+
+- Add netutils pyinstaller hook file.
+
+## [1.5.11-develop]
+
+- Create unique VSX system macs for each VSX cluster.
+- Fixed Mellanox Customer ACL.
+- Add VLAN 7 to Dellanox UAN for 1.0
+
 ## [1.5.10-develop]
 
 - Fix canu paddle-file.json schema
