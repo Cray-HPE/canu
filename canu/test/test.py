@@ -34,14 +34,13 @@ from nornir.core.filter import F
 from nornir_salt import (
     netmiko_send_commands,
     TabulateFormatter,
-    tcp_ping,
     TestsProcessor,
 )
 from nornir_salt.plugins.functions import ResultSerializer
 import yaml
 
+from canu.utils.host_alive import host_alive
 from canu.utils.inventory import inventory
-
 
 # Get project root directory
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
@@ -101,7 +100,18 @@ def test(
     log_,
     json_,
 ):
-    """Canu test commands."""
+    """Run tests against the network.
+
+    Args:
+        ctx: CANU context settings
+        username: Switch username
+        password: Switch password
+        sls_file: JSON file containing SLS data
+        sls_address: The address of SLS
+        network: The network that is used to connect to the switches.
+        log_: enable logging
+        json_: output test results in JSON format
+    """
     if not password:
         password = click.prompt(
             "Enter the switch password",
@@ -123,7 +133,6 @@ def test(
         inventory=switch_inventory,
         logging={"enabled": log_, "to_console": True, "level": "DEBUG"},
     )
-
     # get the switch vendor name from the inventory
     # this is used to determine which tests to run
     platform = nr.filter(F(platform="aruba_os"))
@@ -143,47 +152,49 @@ def test(
     with open(test_file) as f:
         test_suite = yaml.safe_load(f.read())
 
-    # check if switch is reachable before running tests
-    ping_check = nr.run(task=tcp_ping)
-    result_dictionary = ResultSerializer(ping_check)
-    unreachable_hosts = []
+    online_hosts, unreachable_hosts = host_alive(nr)
 
-    for hostname, result in result_dictionary.items():
-        if result["tcp_ping"][22] is False:
+    if unreachable_hosts:
+        for switch in unreachable_hosts:
             click.secho(
-                f"{hostname} is not reachable via SSH, skipping tests.",
+                f"WARNING: Could not reach {switch} via SSH, skipping tests",
                 fg="red",
             )
-            unreachable_hosts.append(hostname)
-
-    online_hosts = nr.filter(~F(name__in=unreachable_hosts))
-
-    tests = online_hosts.with_processors([TestsProcessor(test_suite)])
-
     switch_commands = {"spine": [], "leaf-bmc": [], "leaf": [], "cdu": []}
+    switch_test_suite = {"spine": [], "leaf-bmc": [], "leaf": [], "cdu": []}
 
     dict_results = {}
     pretty_results = []
 
-    # get the commands to run for each switch type'
+    # get the commands and the test suite for each switch type.
+    for switch in switch_commands.keys():
+        for test_command in test_suite:
+            devices = test_command.get("device")
+            if switch in devices:
+                switch_test_suite[switch].append(test_command)
+            if switch in devices and isinstance(test_command["task"], str):
+                switch_commands[switch].append(test_command["task"])
+            elif switch in devices and isinstance(test_command["task"], list):
+                switch_commands.extend(test_command["task"])
+
+    # run the tests for each switch type
     with click_spinner.spinner():
         for switch in switch_commands.keys():
             print(
-                "  Connecting",
+                f"  Running tests on {switch} switches...",
                 end="\r",
             )
-            switch_nr = tests.filter(type=switch)
+            # filter out each switch type
+            switch_nr = online_hosts.filter(type=switch)
+            # get the tests for each switch type
+            test_nr = switch_nr.with_processors(
+                [TestsProcessor(switch_test_suite[switch])],
+            )
 
-            for item in test_suite:
-                device = item.get("device")
-
-                for switch_type in device:
-
-                    if switch_type == switch and isinstance(item["task"], str):
-                        switch_commands[switch].append(item["task"])
-            results = switch_nr.run(
+            commands = switch_commands[switch]
+            results = test_nr.run(
                 task=netmiko_send_commands,
-                commands=switch_commands[switch],
+                commands=commands,
             )
 
             dict_results.update(
@@ -192,6 +203,7 @@ def test(
 
             pretty_results += ResultSerializer(results, add_details=True, to_dict=False)
 
+    # print the results
     if json_:
         click.secho(json.dumps(dict_results, indent=4))
     else:

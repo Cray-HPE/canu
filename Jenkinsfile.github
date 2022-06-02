@@ -20,7 +20,7 @@
 
 @Library('csm-shared-library') _
 
-def pythonVer = '3.10'
+def pythonVersion = '3.10'
 pipeline {
     agent {
         label "metal-gcp-builder"
@@ -38,7 +38,6 @@ pipeline {
         IS_STABLE = getBuildIsStable()
         GIT_REPO_NAME = getRepoName()
         BUILD_METADATA = getRpmRevision(isStable: env.IS_STABLE)
-        OS = "sle-15sp3"
         IMAGE_VERSION = getDockerBuildVersion(isStable: env.IS_STABLE)
         DOCKER_ARGS = getDockerBuildArgs(name: "cray-${getRepoName()}", description: env.DESCRIPTION)
     }
@@ -48,7 +47,7 @@ pipeline {
         stage("Prepare: RPM") {
             agent {
                 docker {
-                    image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${pythonVer}"
+                    image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${pythonVersion}"
                     reuseNode true
                     // Support docker in docker for clamav scan
                     args "-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --group-add 999"
@@ -74,7 +73,7 @@ pipeline {
         stage("Build: RPMs") {
             agent {
                 docker {
-                    image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${pythonVer}"
+                    image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${pythonVersion}"
                     reuseNode true
                     // Support docker in docker for clamav scan
                     args "-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --group-add 999"
@@ -88,8 +87,10 @@ pipeline {
         stage('Publish: RPMs') {
             steps {
                 script {
-                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: env.OS, arch: "x86_64", isStable: env.IS_STABLE)
-                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: env.OS, arch: "src", isStable: env.IS_STABLE)
+                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: "sle-15sp2", arch: "x86_64", isStable: env.IS_STABLE)
+                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: "sle-15sp2", arch: "x86_64", isStable: env.IS_STABLE)
+                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: "sle-15sp3", arch: "src", isStable: env.IS_STABLE)
+                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: "sle-15sp3", arch: "src", isStable: env.IS_STABLE)
                 }
             }
         }
