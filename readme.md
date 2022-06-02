@@ -1179,7 +1179,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## [1.6.1]
 
-- Disable load balacing configuration for Dell CDU/Leaf.
+- Disable load balancing configuration for Dell CDU/Leaf.
 
 ## [1.6.0]
 
@@ -1423,7 +1423,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Adjusted the STP timeout to 4 seconds from the default of 15.
 - Changed setup.py file glob to follow previously updated Jinja2 template locations.
 - Command line option --csi-folder has changed to --sls-file. Any SLS JSON file can be used.
-- Installation via pip now supports noner modes. Pyinstaller binary and RPM now work as advertised.
+- Installation via pip now supports non-developer modes. Pyinstaller binary and RPM now work as advertised.
 - The directory of canu_cache.yaml is now dynamically configured in the user's home directory (preferred), or the system temporary directory depending on filesystem permissions.
 - Added `canu cache location` print the folder where your cache is located
 - Added `canu cache print` to print a colored version of your cache to the screen
