@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.0-develop
+# 🛶 CANU v1.6.1-develop
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1176,6 +1176,10 @@ To run a specific test file:
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.6.1-develop]
+
+- Disable load balacing configuration for Dell CDU/Leaf.
 
 ## [1.6.0]
 
