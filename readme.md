@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.1-develop
+# 🛶 CANU v1.6.1
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1177,7 +1177,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [1.6.1-develop]
+## [1.6.1]
 
 - Disable load balacing configuration for Dell CDU/Leaf.
 
@@ -1186,29 +1186,29 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Add `canu report network version` feature.
 - Fix Errors in the output of `canu test`
 
-## [1.5.14-develop]
+## [1.5.14]
 
 - Add route-map and prefixes to allow connection to UAI's from CAN network.
 
-## [1.5.13-develop]
+## [1.5.13]
 
 - Fix Dell4148 template to include correct port count 
 
-## [1.5.12-develop]
+## [1.5.12]
 
 - Add netutils pyinstaller hook file.
 
-## [1.5.11-develop]
+## [1.5.11]
 
 - Create unique VSX system macs for each VSX cluster.
 - Fixed Mellanox Customer ACL.
 - Add VLAN 7 to Dellanox UAN for 1.0
 
-## [1.5.10-develop]
+## [1.5.10]
 
 - Fix canu paddle-file.json schema
 
-## [1.5.9-develop]
+## [1.5.9]
 
 - Change Rosetta/Columbia switch naming to be sw-hsn-<rack>-<###> (as with PDU and CMM/CEC).
 - Change switch port/interface descriptions to `dst:slot:port==>src` to avoid truncation.
@@ -1217,22 +1217,22 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Change large memory node common name from `lm` to `lmem`.
 - Beta release of `--reorder` for switch/network config generation where custom-config is not used.
 
-## [1.5.8-develop]
+## [1.5.8]
 
 - Added shellcheck GitHub action
 - Bump ipython to 7.16.3 to remediate CVE
 - Clean up Jenkins build
 
-## [1.5.7-develop]
+## [1.5.7]
 
 - Add ACL to block CHN <> traffic for CSM 1.2
 - Add Route-Map to CMN BGP peers to restrict routes to only CMN IPs
 
-## [1.5.6-develop]
+## [1.5.6]
 
 - More verbose instructions for generating switch configs
 
-## [1.5.5-develop]
+## [1.5.5]
 
 - Add the ability to generate BGP config for Arista edge switches.
 
@@ -1423,7 +1423,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Adjusted the STP timeout to 4 seconds from the default of 15.
 - Changed setup.py file glob to follow previously updated Jinja2 template locations.
 - Command line option --csi-folder has changed to --sls-file. Any SLS JSON file can be used.
-- Installation via pip now supports non-developer modes. Pyinstaller binary and RPM now work as advertised.
+- Installation via pip now supports noner modes. Pyinstaller binary and RPM now work as advertised.
 - The directory of canu_cache.yaml is now dynamically configured in the user's home directory (preferred), or the system temporary directory depending on filesystem permissions.
 - Added `canu cache location` print the folder where your cache is located
 - Added `canu cache print` to print a colored version of your cache to the screen
