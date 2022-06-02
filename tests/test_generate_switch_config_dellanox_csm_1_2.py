@@ -1578,6 +1578,16 @@ def test_switch_config_leaf_bmc():
             + "  seq 50 permit ip any any\n"
         ) in str(result.output)
         assert (
+            "load-balancing ingress-port enable\n"
+            + "no load-balancing mac-selection destination-mac\n"
+            + "no load-balancing mac-selection ethertype\n"
+            + "no load-balancing mac-selection source-mac\n"
+            + "no load-balancing mac-selection vlan-id\n"
+            + "no load-balancing tcp-udp-selection l4-destination-port\n"
+            + "no load-balancing tcp-udp-selection l4-source-port\n"
+        ) in str(result.output)
+        print(result.output)
+        assert (
             "router ospf 1\n"
             + "  router-id 10.2.0.12\n"
             + "router ospf 2 vrf Customer\n"
@@ -2477,6 +2487,16 @@ def test_switch_config_cdu_primary():
         ) in str(result.output)
         print(result.output)
         assert (
+            "load-balancing ingress-port enable\n"
+            + "no load-balancing mac-selection destination-mac\n"
+            + "no load-balancing mac-selection ethertype\n"
+            + "no load-balancing mac-selection source-mac\n"
+            + "no load-balancing mac-selection vlan-id\n"
+            + "no load-balancing tcp-udp-selection l4-destination-port\n"
+            + "no load-balancing tcp-udp-selection l4-source-port\n"
+        ) in str(result.output)
+        print(result.output)
+        assert (
             "router ospf 1\n"
             + "  router-id 10.2.0.16\n"
             + "router ospf 2 vrf Customer\n"
@@ -2917,6 +2937,16 @@ def test_switch_config_cdu_secondary():
             + "  seq 30 deny ip 192.168.12.0/24 192.168.200.0/24\n"
             + "  seq 40 deny ip 192.168.200.0/24 192.168.12.0/24\n"
             + "  seq 50 permit ip any any\n"
+        ) in str(result.output)
+        print(result.output)
+        assert (
+            "load-balancing ingress-port enable\n"
+            + "no load-balancing mac-selection destination-mac\n"
+            + "no load-balancing mac-selection ethertype\n"
+            + "no load-balancing mac-selection source-mac\n"
+            + "no load-balancing mac-selection vlan-id\n"
+            + "no load-balancing tcp-udp-selection l4-destination-port\n"
+            + "no load-balancing tcp-udp-selection l4-source-port\n"
         ) in str(result.output)
         print(result.output)
         assert (
