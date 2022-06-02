@@ -19,25 +19,4 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-"""CANU commands report on the switch network."""
-import click
-from click_help_colors import HelpColorsGroup
-
-from canu.report.network.cabling import cabling
-from canu.report.network.firmware import firmware
-from canu.report.network.version import version
-
-
-@click.group(
-    cls=HelpColorsGroup,
-    help_headers_color="yellow",
-    help_options_color="blue",
-)
-@click.pass_context
-def network(ctx):
-    """Commands that report on the entire network."""
-
-
-network.add_command(cabling.cabling)
-network.add_command(firmware.firmware)
-network.add_command(version.version)
+"""CANU report network version commands."""

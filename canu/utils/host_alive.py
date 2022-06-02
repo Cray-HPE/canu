@@ -19,25 +19,28 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-"""CANU commands report on the switch network."""
-import click
-from click_help_colors import HelpColorsGroup
 
-from canu.report.network.cabling import cabling
-from canu.report.network.firmware import firmware
-from canu.report.network.version import version
+"""Retrieve hosts that are reachable via SSH."""
+from nornir.core.filter import F
+from nornir_salt import tcp_ping
+from nornir_salt.plugins.functions import ResultSerializer
 
 
-@click.group(
-    cls=HelpColorsGroup,
-    help_headers_color="yellow",
-    help_options_color="blue",
-)
-@click.pass_context
-def network(ctx):
-    """Commands that report on the entire network."""
+def host_alive(nornir_object):
+    """Return Nornir inventory with alive hosts.
 
+    Args:
+        nornir_object: Nornir object
 
-network.add_command(cabling.cabling)
-network.add_command(firmware.firmware)
-network.add_command(version.version)
+    Returns:
+        Nornir object with online hosts, and a list of unreachable hosts.
+    """
+    ping_check = nornir_object.run(task=tcp_ping)
+    result_dictionary = ResultSerializer(ping_check)
+    unreachable_hosts = []
+
+    for hostname, result in result_dictionary.items():
+        if result["tcp_ping"][22] is False:
+            unreachable_hosts.append(hostname)
+    online_hosts = nornir_object.filter(~F(name__in=unreachable_hosts))
+    return (online_hosts, unreachable_hosts)

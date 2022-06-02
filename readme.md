@@ -1,4 +1,4 @@
-# 🛶 CANU v1.5.12
+# 🛶 CANU v1.6.1
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1090,35 +1090,58 @@ You can either use an SLS file or pull the SLS file from the API-Gateway using a
 
 Examples
 
-```bash
-  canu send command --sls-file ./sls_input_file.json --network cmn --command "show banner exec" --name sw-spine-001
-  -netmiko_send_command************************************************************
-  * sw-spine-001 ** changed : False **********************************************
-  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-  ###############################################################################
-  # CSM version:  1.2
-  # CANU version: 1.3.2
-  ###############################################################################
+  ```bash
+    canu send command --sls-file ./sls_input_file.json --network cmn --command "show banner exec" --name sw-spine-001
+    -netmiko_send_command************************************************************
+    * sw-spine-001 ** changed : False **********************************************
+    vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+    ###############################################################################
+    # CSM version:  1.2
+    # CANU version: 1.3.2
+    ###############################################################################
 
-  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-```
+    ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ```
 
-```bash
-  canu send command --command 'show version | include "Version      :"'
-  \netmiko_send_command************************************************************
-  * sw-leaf-bmc-001 ** changed : False *******************************************
-  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-  Version      : FL.10.09.0010                                                 
-  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  * sw-spine-001 ** changed : False **********************************************
-  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-  Version      : GL.10.09.0010                                                 
-  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  * sw-spine-002 ** changed : False **********************************************
-  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-  Version      : GL.10.09.0010                                                 
-  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-```
+  ```bash
+    canu send command --command 'show version | include "Version      :"'
+    \netmiko_send_command************************************************************
+    * sw-leaf-bmc-001 ** changed : False *******************************************
+    vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+    Version      : FL.10.09.0010                                                 
+    ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    * sw-spine-001 ** changed : False **********************************************
+    vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+    Version      : GL.10.09.0010                                                 
+    ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    * sw-spine-002 ** changed : False **********************************************
+    vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+    Version      : GL.10.09.0010                                                 
+    ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ```
+
+### Report Network Version
+
+Canu reports the version of configuration on the switch.  It reads the exec baner of all the switches and outputs to the screen.
+
+Options
+
+- `--sls-file`
+- `--network [HMN|CMN]` This gives the user the ability to connect to the switches over the CMN.  This allows the use of this tool from outside the Mgmt Network.  The default network used is the HMN.
+- `--password` prompts if password is not entered
+- `--username` defaults to admin
+
+Example
+
+  ```console
+  canu report network version --sls-file ../sls_input_file.json --network cmn
+  Password: 
+  SWITCH            CANU VERSION      CSM VERSION
+  sw-spine-001      1.5.12            1.2  
+  sw-spine-002      1.5.12            1.2  
+  sw-leaf-bmc-001   1.5.12            1.2
+  ```
+
 
 ## Uninstallation
 
@@ -1128,31 +1151,48 @@ Examples
 
 To run the full set of tests, linting, coverage map, and docs building run:
 
-```bash
-nox
-```
+  ```bash
+  nox
+  ```
 
 To just run tests:
 
-```bash
-nox -s tests
-```
+  ```bash
+  nox -s tests
+  ```
 
 To just run linting:
 
-```bash
-nox -s lint
-```
+  ```bash
+  nox -s lint
+  ```
 
 To run a specific test file:
 
-```bash
-nox -s tests -- tests/test_report_switch_firmware.py
-```
+  ```bash
+  nox -s tests -- tests/test_report_switch_firmware.py
+  ```
 
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.6.1]
+
+- Disable load balancing configuration for Dell CDU/Leaf.
+
+## [1.6.0]
+
+- Add `canu report network version` feature.
+- Fix Errors in the output of `canu test`
+
+## [1.5.14]
+
+- Add route-map and prefixes to allow connection to UAI's from CAN network.
+
+## [1.5.13]
+
+- Fix Dell4148 template to include correct port count 
 
 ## [1.5.12]
 
