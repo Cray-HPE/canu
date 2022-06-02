@@ -11,6 +11,7 @@ ntp server {{ variables.NCN_W002 }}
 ntp server {{ variables.NCN_W003 }}
 
 {%- include '1.0/dellmellanox/common/acl-dell.j2' %}
+{%- include '1.0/dellmellanox/common/load-balancing.j2' %}
 
 interface vlan{{ variables.NATIVE_VLAN }}
  description MTL

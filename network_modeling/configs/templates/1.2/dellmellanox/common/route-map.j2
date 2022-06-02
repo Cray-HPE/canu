@@ -1,18 +1,27 @@
 {#- route-map #}
 route-map cmn permit 10 match ip address pl-cmn
 {%- for name, ip in variables.NMN_IPs.items() if "ncn-w" in name %}
+
 {% set sequence = namespace(value=10) %}
-route-map {{ name }} permit {{ sequence.value }} match ip address pl-cmn
-{%- for cmn_name, cmn_ip in variables.CMN_IPs.items() if name == cmn_name %}
-route-map {{ name }} permit {{ sequence.value }} set ip next-hop {{ cmn_ip }}
-{%- endfor %}
-{% set sequence.value = sequence.value + 10 %}route-map {{ name }} permit {{ sequence.value }} match ip address pl-hmn
-{%- for hmn_name, hmn_ip in variables.HMN_IPs.items() if name == hmn_name %}
+route-map {{ name }}-Customer permit {{ sequence.value }} match ip address pl-cmn
+
+{%- if variables.CAN %}
+{% set sequence.value = sequence.value + 10 %}
+route-map {{ name }}-Customer permit {{ sequence.value }} match ip address pl-can
+    {%- for can_name, can_ip in variables.CAN_IPs.items() if name == can_name %}
+route-map {{ name }}-Customer permit {{ sequence.value }} set ip next-hop {{ can_ip }}
+    {%- endfor %}
+{%- endif %}
+
+{% set sequence = namespace(value=10) %}
+route-map {{ name }} permit {{ sequence.value }} match ip address pl-hmn
+    {%- for hmn_name, hmn_ip in variables.HMN_IPs.items() if name == hmn_name %}
 route-map {{ name }} permit {{ sequence.value }} set ip next-hop {{ hmn_ip }}
-{%- endfor %}
+    {%- endfor %}
 {% set sequence.value = sequence.value + 10 %}route-map {{ name }} permit {{ sequence.value }} match ip address pl-nmn
-{%- for nmn_name, nmn_ip in variables.NMN_IPs.items() if name == nmn_name %}
+    {%- for nmn_name, nmn_ip in variables.NMN_IPs.items() if name == nmn_name %}
 route-map {{ name }} permit {{ sequence.value }} set ip next-hop {{ nmn_ip }}
-{%- endfor %}
+    {%- endfor %}
+
 {%- endfor %}
 {#- end route-map #}
