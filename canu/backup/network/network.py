@@ -22,6 +22,7 @@
 """CANU backup network config."""
 import os
 from pathlib import Path
+import logging
 import sys
 
 import click
@@ -107,6 +108,9 @@ def network(
             type=str,
             hide_input=True,
         )
+
+    # set to ERROR otherwise nornir plugin logs debug messages to the screen.
+    logging.basicConfig(level="ERROR")
     switch_inventory = inventory(username, password, network, sls_file)
     nr = InitNornir(
         runner={
@@ -136,9 +140,6 @@ def network(
     online_hosts = nr.filter(~F(name__in=unreachable_hosts))
 
     # Filter nornir inventory since mellanox requires a different show run command.
-    not_mellanox_switches = online_hosts.filter(~F(platform__in="mellanox"))
-    mellanox_switches = online_hosts.filter(platform="mellanox")
-
     # Save the netmiko config.
     def save_config_to_file(hostname, config):
         if not unsanitized:
@@ -150,21 +151,28 @@ def network(
 
     # Use netmiko to SSH to switches and retrieve config.
     def get_netmiko_backups():
-
-        mellanox_backup = mellanox_switches.run(
+        backup_results = {}
+        mellanox_backup = online_hosts.filter(platform="mellanox").run(
             task=netmiko_send_command,
             enable=True,
             command_string="show running-config expanded",
         )
-
-        backup_results = not_mellanox_switches.run(
+        backup_results.update(mellanox_backup)
+        aruba_backup = online_hosts.filter(platform="aruba_os").run(
             task=netmiko_send_command,
             enable=True,
-            command_string="show run",
+            command_string="show running-config",
         )
+        backup_results.update(aruba_backup)
+        dell_backup = online_hosts.filter(platform="dell_os10").run(
+            task=netmiko_send_command,
+            enable=True,
+            command_string="show running-configuration",
+        )
+        backup_results.update(dell_backup)
+        
         click.secho("\nRunning Configs Saved\n---------------------", fg="green")
 
-        backup_results.update(mellanox_backup)
         for hostname in backup_results:
             exist = os.path.exists(folder)
             if not exist:
