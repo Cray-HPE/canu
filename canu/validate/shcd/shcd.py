@@ -1054,7 +1054,7 @@ def node_list_warnings(node_list, warnings, out="-"):
         if warnings["shcd_slot_data"]:
             click.secho(
                 "\nSHCD slot definitions used are either deprecated, missing or incorrect."
-                + '\n(The cells below should only be one of the following ["bmc", "ocp", "pcie-slot1, "mgmt", None])',
+                + '\n(The cells below can be blank but should one of the following ["bmc", "ocp", "pcie-slot1, "mgmt", "onboard"])',
                 fg="red",
                 file=out,
             )
