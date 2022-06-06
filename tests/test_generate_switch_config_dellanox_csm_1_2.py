@@ -149,34 +149,34 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 13 switchport mode hybrid\n"
             + "interface mlag-port-channel 151 switchport mode hybrid\n"
             + "interface mlag-port-channel 201 switchport mode hybrid\n"
-            + 'interface ethernet 1/1 description "sw-spine-001:1==>ncn-m001:pcie-slot1:1"\n'
-            + 'interface ethernet 1/2 description "sw-spine-001:2==>ncn-m002:pcie-slot1:1"\n'
-            + 'interface ethernet 1/3 description "sw-spine-001:3==>ncn-m003:pcie-slot1:1"\n'
-            + 'interface ethernet 1/4 description "sw-spine-001:4==>ncn-w001:pcie-slot1:1"\n'
-            + 'interface ethernet 1/5 description "sw-spine-001:5==>ncn-w002:pcie-slot1:1"\n'
-            + 'interface ethernet 1/6 description "sw-spine-001:6==>ncn-w003:pcie-slot1:1"\n'
-            + 'interface ethernet 1/7 description "sw-spine-001:7==>ncn-s001:pcie-slot1:1"\n'
-            + 'interface ethernet 1/8 description "sw-spine-001:8==>ncn-s002:pcie-slot1:1"\n'
-            + 'interface ethernet 1/9 description "sw-spine-001:9==>ncn-s003:pcie-slot1:1"\n'
-            + 'interface ethernet 1/13 description "sw-spine-001:13==>uan001:pcie-slot1:1"\n'
-            + 'interface ethernet 1/26 description "sw-spine-001:26==>sw-leaf-bmc-001:51"\n'
-            + 'interface ethernet 1/29 description "sw-spine-001:29==>sw-cdu-001:27"\n'
-            + 'interface ethernet 1/30 description "sw-spine-001:30==>sw-cdu-002:27"\n'
+            + 'interface ethernet 1/1 description "ncn-m001:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface ethernet 1/2 description "ncn-m002:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface ethernet 1/3 description "ncn-m003:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface ethernet 1/4 description "ncn-w001:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface ethernet 1/5 description "ncn-w002:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface ethernet 1/6 description "ncn-w003:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface ethernet 1/7 description "ncn-s001:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface ethernet 1/8 description "ncn-s002:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface ethernet 1/9 description "ncn-s003:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface ethernet 1/13 description "uan001:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface ethernet 1/26 description "sw-leaf-bmc-001:51<==sw-spine-001"\n'
+            + 'interface ethernet 1/29 description "sw-cdu-001:27<==sw-spine-001"\n'
+            + 'interface ethernet 1/30 description "sw-cdu-002:27<==sw-spine-001"\n'
             + 'interface ethernet 1/31 description "mlag-isl"\n'
             + 'interface ethernet 1/32 description "mlag-isl"\n'
-            + 'interface mlag-port-channel 1 description "sw-spine-001:1==>ncn-m001:pcie-slot1:1"\n'
-            + 'interface mlag-port-channel 2 description "sw-spine-001:2==>ncn-m002:pcie-slot1:1"\n'
-            + 'interface mlag-port-channel 3 description "sw-spine-001:3==>ncn-m003:pcie-slot1:1"\n'
-            + 'interface mlag-port-channel 4 description "sw-spine-001:4==>ncn-w001:pcie-slot1:1"\n'
-            + 'interface mlag-port-channel 5 description "sw-spine-001:5==>ncn-w002:pcie-slot1:1"\n'
-            + 'interface mlag-port-channel 6 description "sw-spine-001:6==>ncn-w003:pcie-slot1:1"\n'
-            + 'interface mlag-port-channel 7 description "sw-spine-001:7==>ncn-s001:pcie-slot1:1"\n'
-            + 'interface mlag-port-channel 8 description "sw-spine-001:8==>ncn-s002:pcie-slot1:1"\n'
-            + 'interface mlag-port-channel 9 description "sw-spine-001:9==>ncn-s003:pcie-slot1:1"\n'
-            + 'interface mlag-port-channel 13 description "sw-spine-001:13==>uan001:pcie-slot1:1"\n'
-            + 'interface mlag-port-channel 151 description "sw-spine-001:26==>sw-leaf-bmc-001:51"\n'
-            + 'interface mlag-port-channel 201 description "sw-spine-001:29==>sw-cdu-001:27"\n'
-            + 'interface mlag-port-channel 201 description "sw-spine-001:30==>sw-cdu-002:27"\n'
+            + 'interface mlag-port-channel 1 description "ncn-m001:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 2 description "ncn-m002:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 3 description "ncn-m003:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 4 description "ncn-w001:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 5 description "ncn-w002:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 6 description "ncn-w003:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 7 description "ncn-s001:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 8 description "ncn-s002:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 9 description "ncn-s003:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 13 description "uan001:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 151 description "sw-leaf-bmc-001:51<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 201 description "sw-cdu-001:27<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 201 description "sw-cdu-002:27<==sw-spine-001"\n'
         ) in str(result.output)
         print(result.output)
         assert (
@@ -345,7 +345,9 @@ def test_switch_config_spine_primary():
             + "ipv4 access-list cmn-can bind-point rif\n"
             + "ipv4 access-list cmn-can seq-number 10 deny ip 192.168.12.0 mask 255.255.255.0 192.168.11.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 20 deny ip 192.168.11.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
-            + "ipv4 access-list cmn-can seq-number 30 permit ip any any\n"
+            + "ipv4 access-list cmn-can seq-number 30 deny ip 192.168.12.0 mask 255.255.255.0 192.168.200.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 40 deny ip 192.168.200.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 50 permit ip any any\n"
             + "interface vlan 7 ipv4 port access-group cmn-can\n"
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
@@ -408,6 +410,10 @@ def test_switch_config_spine_primary():
             + "ip prefix-list pl-cmn bulk-mode\n"
             + "ip prefix-list pl-cmn seq 10 permit 192.168.12.0 /24 ge 24\n"
             + "ip prefix-list pl-cmn commit\n"
+            + "ip prefix-list pl-can\n"
+            + "ip prefix-list pl-can bulk-mode\n"
+            + "ip prefix-list pl-can seq 10 permit 192.168.11.0 /24 ge 24\n"
+            + "ip prefix-list pl-can commit\n"
             + "ip prefix-list pl-hmn\n"
             + "ip prefix-list pl-hmn bulk-mode\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0 /24 ge 24\n"
@@ -416,24 +422,27 @@ def test_switch_config_spine_primary():
             + "ip prefix-list pl-nmn bulk-mode\n"
             + "ip prefix-list pl-nmn seq 30 permit 10.92.100.0 /24 ge 24\n"
             + "ip prefix-list pl-nmn commit\n"
-            + "route-map ncn-w001 permit 10 match ip address pl-cmn\n"
-            + "route-map ncn-w001 permit 10 set ip next-hop 192.168.12.4\n"
-            + "route-map ncn-w001 permit 20 match ip address pl-hmn\n"
-            + "route-map ncn-w001 permit 20 set ip next-hop 192.168.0.4\n"
-            + "route-map ncn-w001 permit 30 match ip address pl-nmn\n"
-            + "route-map ncn-w001 permit 30 set ip next-hop 192.168.4.4\n"
-            + "route-map ncn-w002 permit 10 match ip address pl-cmn\n"
-            + "route-map ncn-w002 permit 10 set ip next-hop 192.168.12.5\n"
-            + "route-map ncn-w002 permit 20 match ip address pl-hmn\n"
-            + "route-map ncn-w002 permit 20 set ip next-hop 192.168.0.5\n"
-            + "route-map ncn-w002 permit 30 match ip address pl-nmn\n"
-            + "route-map ncn-w002 permit 30 set ip next-hop 192.168.4.5\n"
-            + "route-map ncn-w003 permit 10 match ip address pl-cmn\n"
-            + "route-map ncn-w003 permit 10 set ip next-hop 192.168.12.6\n"
-            + "route-map ncn-w003 permit 20 match ip address pl-hmn\n"
-            + "route-map ncn-w003 permit 20 set ip next-hop 192.168.0.6\n"
-            + "route-map ncn-w003 permit 30 match ip address pl-nmn\n"
-            + "route-map ncn-w003 permit 30 set ip next-hop 192.168.4.6\n"
+            + "route-map ncn-w001-Customer permit 10 match ip address pl-cmn\n"
+            + "route-map ncn-w001-Customer permit 20 match ip address pl-can\n"
+            + "route-map ncn-w001-Customer permit 20 set ip next-hop 192.168.11.4\n"
+            + "route-map ncn-w001 permit 10 match ip address pl-hmn\n"
+            + "route-map ncn-w001 permit 10 set ip next-hop 192.168.0.4\n"
+            + "route-map ncn-w001 permit 20 match ip address pl-nmn\n"
+            + "route-map ncn-w001 permit 20 set ip next-hop 192.168.4.4\n"
+            + "route-map ncn-w002-Customer permit 10 match ip address pl-cmn\n"
+            + "route-map ncn-w002-Customer permit 20 match ip address pl-can\n"
+            + "route-map ncn-w002-Customer permit 20 set ip next-hop 192.168.11.5\n"
+            + "route-map ncn-w002 permit 10 match ip address pl-hmn\n"
+            + "route-map ncn-w002 permit 10 set ip next-hop 192.168.0.5\n"
+            + "route-map ncn-w002 permit 20 match ip address pl-nmn\n"
+            + "route-map ncn-w002 permit 20 set ip next-hop 192.168.4.5\n"
+            + "route-map ncn-w003-Customer permit 10 match ip address pl-cmn\n"
+            + "route-map ncn-w003-Customer permit 20 match ip address pl-can\n"
+            + "route-map ncn-w003-Customer permit 20 set ip next-hop 192.168.11.6\n"
+            + "route-map ncn-w003 permit 10 match ip address pl-hmn\n"
+            + "route-map ncn-w003 permit 10 set ip next-hop 192.168.0.6\n"
+            + "route-map ncn-w003 permit 20 match ip address pl-nmn\n"
+            + "route-map ncn-w003 permit 20 set ip next-hop 192.168.4.6\n"
             + "router bgp 65533 vrf Customer\n"
             + "router bgp 65533 vrf default\n"
             + "router bgp 65533 vrf Customer router-id 10.2.0.2 force\n"
@@ -459,8 +468,11 @@ def test_switch_config_spine_primary():
             + "router bgp 65533 vrf default neighbor 192.168.4.5 timers 1 3\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.6 timers 1 3\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.4 transport connection-mode passive\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.4 route-map ncn-w001-Customer\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.5 transport connection-mode passive\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.5 route-map ncn-w002-Customer\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.6 transport connection-mode passive\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.6 route-map ncn-w003-Customer\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.4 transport connection-mode passive\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.5 transport connection-mode passive\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.6 transport connection-mode passive\n"
@@ -476,6 +488,7 @@ def test_switch_config_spine_primary():
             + "ntp server 192.168.4.6 keyID 0\n"
             + "no ntp server 192.168.4.6 trusted-enable\n"
             + "ntp server 192.168.4.6 version 4\n"
+            + "ntp vrf default enable\n"
         ) in str(result.output)
         print(result.output)
 
@@ -581,34 +594,34 @@ def test_switch_config_spine_primary_custom():
             + "interface mlag-port-channel 151 switchport mode hybrid\n"
             + "interface mlag-port-channel 201 switchport mode hybrid\n"
             + 'interface ethernet 1/1 description "sw-spine02-1/16"\n'
-            + 'interface ethernet 1/2 description "sw-spine-001:2==>ncn-m002:pcie-slot1:1"\n'
-            + 'interface ethernet 1/3 description "sw-spine-001:3==>ncn-m003:pcie-slot1:1"\n'
-            + 'interface ethernet 1/4 description "sw-spine-001:4==>ncn-w001:pcie-slot1:1"\n'
-            + 'interface ethernet 1/5 description "sw-spine-001:5==>ncn-w002:pcie-slot1:1"\n'
-            + 'interface ethernet 1/6 description "sw-spine-001:6==>ncn-w003:pcie-slot1:1"\n'
-            + 'interface ethernet 1/7 description "sw-spine-001:7==>ncn-s001:pcie-slot1:1"\n'
-            + 'interface ethernet 1/8 description "sw-spine-001:8==>ncn-s002:pcie-slot1:1"\n'
-            + 'interface ethernet 1/9 description "sw-spine-001:9==>ncn-s003:pcie-slot1:1"\n'
-            + 'interface ethernet 1/13 description "sw-spine-001:13==>uan001:pcie-slot1:1"\n'
+            + 'interface ethernet 1/2 description "ncn-m002:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface ethernet 1/3 description "ncn-m003:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface ethernet 1/4 description "ncn-w001:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface ethernet 1/5 description "ncn-w002:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface ethernet 1/6 description "ncn-w003:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface ethernet 1/7 description "ncn-s001:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface ethernet 1/8 description "ncn-s002:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface ethernet 1/9 description "ncn-s003:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface ethernet 1/13 description "uan001:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface ethernet 1/16 description "sw-spine02-1/16"\n'
-            + 'interface ethernet 1/26 description "sw-spine-001:26==>sw-leaf-bmc-001:51"\n'
-            + 'interface ethernet 1/29 description "sw-spine-001:29==>sw-cdu-001:27"\n'
-            + 'interface ethernet 1/30 description "sw-spine-001:30==>sw-cdu-002:27"\n'
+            + 'interface ethernet 1/26 description "sw-leaf-bmc-001:51<==sw-spine-001"\n'
+            + 'interface ethernet 1/29 description "sw-cdu-001:27<==sw-spine-001"\n'
+            + 'interface ethernet 1/30 description "sw-cdu-002:27<==sw-spine-001"\n'
             + 'interface ethernet 1/31 description "mlag-isl"\n'
             + 'interface ethernet 1/32 description "mlag-isl"\n'
-            + 'interface mlag-port-channel 1 description "sw-spine-001:1==>ncn-m001:pcie-slot1:1"\n'
-            + 'interface mlag-port-channel 2 description "sw-spine-001:2==>ncn-m002:pcie-slot1:1"\n'
-            + 'interface mlag-port-channel 3 description "sw-spine-001:3==>ncn-m003:pcie-slot1:1"\n'
-            + 'interface mlag-port-channel 4 description "sw-spine-001:4==>ncn-w001:pcie-slot1:1"\n'
-            + 'interface mlag-port-channel 5 description "sw-spine-001:5==>ncn-w002:pcie-slot1:1"\n'
-            + 'interface mlag-port-channel 6 description "sw-spine-001:6==>ncn-w003:pcie-slot1:1"\n'
-            + 'interface mlag-port-channel 7 description "sw-spine-001:7==>ncn-s001:pcie-slot1:1"\n'
-            + 'interface mlag-port-channel 8 description "sw-spine-001:8==>ncn-s002:pcie-slot1:1"\n'
-            + 'interface mlag-port-channel 9 description "sw-spine-001:9==>ncn-s003:pcie-slot1:1"\n'
-            + 'interface mlag-port-channel 13 description "sw-spine-001:13==>uan001:pcie-slot1:1"\n'
-            + 'interface mlag-port-channel 151 description "sw-spine-001:26==>sw-leaf-bmc-001:51"\n'
-            + 'interface mlag-port-channel 201 description "sw-spine-001:29==>sw-cdu-001:27"\n'
-            + 'interface mlag-port-channel 201 description "sw-spine-001:30==>sw-cdu-002:27"\n'
+            + 'interface mlag-port-channel 1 description "ncn-m001:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 2 description "ncn-m002:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 3 description "ncn-m003:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 4 description "ncn-w001:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 5 description "ncn-w002:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 6 description "ncn-w003:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 7 description "ncn-s001:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 8 description "ncn-s002:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 9 description "ncn-s003:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 13 description "uan001:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 151 description "sw-leaf-bmc-001:51<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 201 description "sw-cdu-001:27<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 201 description "sw-cdu-002:27<==sw-spine-001"\n'
         ) in str(result.output)
         print(result.output)
         assert (
@@ -782,7 +795,9 @@ def test_switch_config_spine_primary_custom():
             + "ipv4 access-list cmn-can bind-point rif\n"
             + "ipv4 access-list cmn-can seq-number 10 deny ip 192.168.12.0 mask 255.255.255.0 192.168.11.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 20 deny ip 192.168.11.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
-            + "ipv4 access-list cmn-can seq-number 30 permit ip any any\n"
+            + "ipv4 access-list cmn-can seq-number 30 deny ip 192.168.12.0 mask 255.255.255.0 192.168.200.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 40 deny ip 192.168.200.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 50 permit ip any any\n"
             + "interface vlan 7 ipv4 port access-group cmn-can\n"
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
@@ -845,6 +860,10 @@ def test_switch_config_spine_primary_custom():
             + "ip prefix-list pl-cmn bulk-mode\n"
             + "ip prefix-list pl-cmn seq 10 permit 192.168.12.0 /24 ge 24\n"
             + "ip prefix-list pl-cmn commit\n"
+            + "ip prefix-list pl-can\n"
+            + "ip prefix-list pl-can bulk-mode\n"
+            + "ip prefix-list pl-can seq 10 permit 192.168.11.0 /24 ge 24\n"
+            + "ip prefix-list pl-can commit\n"
             + "ip prefix-list pl-hmn\n"
             + "ip prefix-list pl-hmn bulk-mode\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0 /24 ge 24\n"
@@ -853,24 +872,27 @@ def test_switch_config_spine_primary_custom():
             + "ip prefix-list pl-nmn bulk-mode\n"
             + "ip prefix-list pl-nmn seq 30 permit 10.92.100.0 /24 ge 24\n"
             + "ip prefix-list pl-nmn commit\n"
-            + "route-map ncn-w001 permit 10 match ip address pl-cmn\n"
-            + "route-map ncn-w001 permit 10 set ip next-hop 192.168.12.4\n"
-            + "route-map ncn-w001 permit 20 match ip address pl-hmn\n"
-            + "route-map ncn-w001 permit 20 set ip next-hop 192.168.0.4\n"
-            + "route-map ncn-w001 permit 30 match ip address pl-nmn\n"
-            + "route-map ncn-w001 permit 30 set ip next-hop 192.168.4.4\n"
-            + "route-map ncn-w002 permit 10 match ip address pl-cmn\n"
-            + "route-map ncn-w002 permit 10 set ip next-hop 192.168.12.5\n"
-            + "route-map ncn-w002 permit 20 match ip address pl-hmn\n"
-            + "route-map ncn-w002 permit 20 set ip next-hop 192.168.0.5\n"
-            + "route-map ncn-w002 permit 30 match ip address pl-nmn\n"
-            + "route-map ncn-w002 permit 30 set ip next-hop 192.168.4.5\n"
-            + "route-map ncn-w003 permit 10 match ip address pl-cmn\n"
-            + "route-map ncn-w003 permit 10 set ip next-hop 192.168.12.6\n"
-            + "route-map ncn-w003 permit 20 match ip address pl-hmn\n"
-            + "route-map ncn-w003 permit 20 set ip next-hop 192.168.0.6\n"
-            + "route-map ncn-w003 permit 30 match ip address pl-nmn\n"
-            + "route-map ncn-w003 permit 30 set ip next-hop 192.168.4.6\n"
+            + "route-map ncn-w001-Customer permit 10 match ip address pl-cmn\n"
+            + "route-map ncn-w001-Customer permit 20 match ip address pl-can\n"
+            + "route-map ncn-w001-Customer permit 20 set ip next-hop 192.168.11.4\n"
+            + "route-map ncn-w001 permit 10 match ip address pl-hmn\n"
+            + "route-map ncn-w001 permit 10 set ip next-hop 192.168.0.4\n"
+            + "route-map ncn-w001 permit 20 match ip address pl-nmn\n"
+            + "route-map ncn-w001 permit 20 set ip next-hop 192.168.4.4\n"
+            + "route-map ncn-w002-Customer permit 10 match ip address pl-cmn\n"
+            + "route-map ncn-w002-Customer permit 20 match ip address pl-can\n"
+            + "route-map ncn-w002-Customer permit 20 set ip next-hop 192.168.11.5\n"
+            + "route-map ncn-w002 permit 10 match ip address pl-hmn\n"
+            + "route-map ncn-w002 permit 10 set ip next-hop 192.168.0.5\n"
+            + "route-map ncn-w002 permit 20 match ip address pl-nmn\n"
+            + "route-map ncn-w002 permit 20 set ip next-hop 192.168.4.5\n"
+            + "route-map ncn-w003-Customer permit 10 match ip address pl-cmn\n"
+            + "route-map ncn-w003-Customer permit 20 match ip address pl-can\n"
+            + "route-map ncn-w003-Customer permit 20 set ip next-hop 192.168.11.6\n"
+            + "route-map ncn-w003 permit 10 match ip address pl-hmn\n"
+            + "route-map ncn-w003 permit 10 set ip next-hop 192.168.0.6\n"
+            + "route-map ncn-w003 permit 20 match ip address pl-nmn\n"
+            + "route-map ncn-w003 permit 20 set ip next-hop 192.168.4.6\n"
             + "router bgp 65533 vrf Customer\n"
             + "router bgp 65533 vrf default\n"
             + "router bgp 65533 vrf Customer router-id 10.2.0.2 force\n"
@@ -896,8 +918,11 @@ def test_switch_config_spine_primary_custom():
             + "router bgp 65533 vrf default neighbor 192.168.4.5 timers 1 3\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.6 timers 1 3\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.4 transport connection-mode passive\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.4 route-map ncn-w001-Customer\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.5 transport connection-mode passive\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.5 route-map ncn-w002-Customer\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.6 transport connection-mode passive\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.6 route-map ncn-w003-Customer\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.4 transport connection-mode passive\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.5 transport connection-mode passive\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.6 transport connection-mode passive\n"
@@ -913,6 +938,7 @@ def test_switch_config_spine_primary_custom():
             + "ntp server 192.168.4.6 keyID 0\n"
             + "no ntp server 192.168.4.6 trusted-enable\n"
             + "ntp server 192.168.4.6 version 4\n"
+            + "ntp vrf default enable\n"
         ) in str(result.output)
         print(result.output)
 
@@ -1007,34 +1033,34 @@ def test_switch_config_spine_secondary():
             + "interface mlag-port-channel 13 switchport mode hybrid\n"
             + "interface mlag-port-channel 151 switchport mode hybrid\n"
             + "interface mlag-port-channel 201 switchport mode hybrid\n"
-            + 'interface ethernet 1/1 description "sw-spine-002:1==>ncn-m001:pcie-slot1:2"\n'
-            + 'interface ethernet 1/2 description "sw-spine-002:2==>ncn-m002:pcie-slot1:2"\n'
-            + 'interface ethernet 1/3 description "sw-spine-002:3==>ncn-m003:pcie-slot1:2"\n'
-            + 'interface ethernet 1/4 description "sw-spine-002:4==>ncn-w001:pcie-slot1:2"\n'
-            + 'interface ethernet 1/5 description "sw-spine-002:5==>ncn-w002:pcie-slot1:2"\n'
-            + 'interface ethernet 1/6 description "sw-spine-002:6==>ncn-w003:pcie-slot1:2"\n'
-            + 'interface ethernet 1/7 description "sw-spine-002:7==>ncn-s001:pcie-slot1:2"\n'
-            + 'interface ethernet 1/8 description "sw-spine-002:8==>ncn-s002:pcie-slot1:2"\n'
-            + 'interface ethernet 1/9 description "sw-spine-002:9==>ncn-s003:pcie-slot1:2"\n'
-            + 'interface ethernet 1/13 description "sw-spine-002:13==>uan001:pcie-slot1:2"\n'
-            + 'interface ethernet 1/26 description "sw-spine-002:26==>sw-leaf-bmc-001:52"\n'
-            + 'interface ethernet 1/29 description "sw-spine-002:29==>sw-cdu-001:28"\n'
-            + 'interface ethernet 1/30 description "sw-spine-002:30==>sw-cdu-002:28"\n'
+            + 'interface ethernet 1/1 description "ncn-m001:pcie-slot1:2<==sw-spine-002"\n'
+            + 'interface ethernet 1/2 description "ncn-m002:pcie-slot1:2<==sw-spine-002"\n'
+            + 'interface ethernet 1/3 description "ncn-m003:pcie-slot1:2<==sw-spine-002"\n'
+            + 'interface ethernet 1/4 description "ncn-w001:pcie-slot1:2<==sw-spine-002"\n'
+            + 'interface ethernet 1/5 description "ncn-w002:pcie-slot1:2<==sw-spine-002"\n'
+            + 'interface ethernet 1/6 description "ncn-w003:pcie-slot1:2<==sw-spine-002"\n'
+            + 'interface ethernet 1/7 description "ncn-s001:pcie-slot1:2<==sw-spine-002"\n'
+            + 'interface ethernet 1/8 description "ncn-s002:pcie-slot1:2<==sw-spine-002"\n'
+            + 'interface ethernet 1/9 description "ncn-s003:pcie-slot1:2<==sw-spine-002"\n'
+            + 'interface ethernet 1/13 description "uan001:pcie-slot1:2<==sw-spine-002"\n'
+            + 'interface ethernet 1/26 description "sw-leaf-bmc-001:52<==sw-spine-002"\n'
+            + 'interface ethernet 1/29 description "sw-cdu-001:28<==sw-spine-002"\n'
+            + 'interface ethernet 1/30 description "sw-cdu-002:28<==sw-spine-002"\n'
             + 'interface ethernet 1/31 description "mlag-isl"\n'
             + 'interface ethernet 1/32 description "mlag-isl"\n'
-            + 'interface mlag-port-channel 1 description "sw-spine-002:1==>ncn-m001:pcie-slot1:2"\n'
-            + 'interface mlag-port-channel 2 description "sw-spine-002:2==>ncn-m002:pcie-slot1:2"\n'
-            + 'interface mlag-port-channel 3 description "sw-spine-002:3==>ncn-m003:pcie-slot1:2"\n'
-            + 'interface mlag-port-channel 4 description "sw-spine-002:4==>ncn-w001:pcie-slot1:2"\n'
-            + 'interface mlag-port-channel 5 description "sw-spine-002:5==>ncn-w002:pcie-slot1:2"\n'
-            + 'interface mlag-port-channel 6 description "sw-spine-002:6==>ncn-w003:pcie-slot1:2"\n'
-            + 'interface mlag-port-channel 7 description "sw-spine-002:7==>ncn-s001:pcie-slot1:2"\n'
-            + 'interface mlag-port-channel 8 description "sw-spine-002:8==>ncn-s002:pcie-slot1:2"\n'
-            + 'interface mlag-port-channel 9 description "sw-spine-002:9==>ncn-s003:pcie-slot1:2"\n'
-            + 'interface mlag-port-channel 13 description "sw-spine-002:13==>uan001:pcie-slot1:2"\n'
-            + 'interface mlag-port-channel 151 description "sw-spine-002:26==>sw-leaf-bmc-001:52"\n'
-            + 'interface mlag-port-channel 201 description "sw-spine-002:29==>sw-cdu-001:28"\n'
-            + 'interface mlag-port-channel 201 description "sw-spine-002:30==>sw-cdu-002:28"\n'
+            + 'interface mlag-port-channel 1 description "ncn-m001:pcie-slot1:2<==sw-spine-002"\n'
+            + 'interface mlag-port-channel 2 description "ncn-m002:pcie-slot1:2<==sw-spine-002"\n'
+            + 'interface mlag-port-channel 3 description "ncn-m003:pcie-slot1:2<==sw-spine-002"\n'
+            + 'interface mlag-port-channel 4 description "ncn-w001:pcie-slot1:2<==sw-spine-002"\n'
+            + 'interface mlag-port-channel 5 description "ncn-w002:pcie-slot1:2<==sw-spine-002"\n'
+            + 'interface mlag-port-channel 6 description "ncn-w003:pcie-slot1:2<==sw-spine-002"\n'
+            + 'interface mlag-port-channel 7 description "ncn-s001:pcie-slot1:2<==sw-spine-002"\n'
+            + 'interface mlag-port-channel 8 description "ncn-s002:pcie-slot1:2<==sw-spine-002"\n'
+            + 'interface mlag-port-channel 9 description "ncn-s003:pcie-slot1:2<==sw-spine-002"\n'
+            + 'interface mlag-port-channel 13 description "uan001:pcie-slot1:2<==sw-spine-002"\n'
+            + 'interface mlag-port-channel 151 description "sw-leaf-bmc-001:52<==sw-spine-002"\n'
+            + 'interface mlag-port-channel 201 description "sw-cdu-001:28<==sw-spine-002"\n'
+            + 'interface mlag-port-channel 201 description "sw-cdu-002:28<==sw-spine-002"\n'
         ) in str(result.output)
         print(result.output)
 
@@ -1186,7 +1212,9 @@ def test_switch_config_spine_secondary():
             + "ipv4 access-list cmn-can bind-point rif\n"
             + "ipv4 access-list cmn-can seq-number 10 deny ip 192.168.12.0 mask 255.255.255.0 192.168.11.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 20 deny ip 192.168.11.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
-            + "ipv4 access-list cmn-can seq-number 30 permit ip any any\n"
+            + "ipv4 access-list cmn-can seq-number 30 deny ip 192.168.12.0 mask 255.255.255.0 192.168.200.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 40 deny ip 192.168.200.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
+            + "ipv4 access-list cmn-can seq-number 50 permit ip any any\n"
             + "interface vlan 7 ipv4 port access-group cmn-can\n"
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
@@ -1246,6 +1274,10 @@ def test_switch_config_spine_secondary():
             + "ip prefix-list pl-cmn bulk-mode\n"
             + "ip prefix-list pl-cmn seq 10 permit 192.168.12.0 /24 ge 24\n"
             + "ip prefix-list pl-cmn commit\n"
+            + "ip prefix-list pl-can\n"
+            + "ip prefix-list pl-can bulk-mode\n"
+            + "ip prefix-list pl-can seq 10 permit 192.168.11.0 /24 ge 24\n"
+            + "ip prefix-list pl-can commit\n"
             + "ip prefix-list pl-hmn\n"
             + "ip prefix-list pl-hmn bulk-mode\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0 /24 ge 24\n"
@@ -1254,24 +1286,27 @@ def test_switch_config_spine_secondary():
             + "ip prefix-list pl-nmn bulk-mode\n"
             + "ip prefix-list pl-nmn seq 30 permit 10.92.100.0 /24 ge 24\n"
             + "ip prefix-list pl-nmn commit\n"
-            + "route-map ncn-w001 permit 10 match ip address pl-cmn\n"
-            + "route-map ncn-w001 permit 10 set ip next-hop 192.168.12.4\n"
-            + "route-map ncn-w001 permit 20 match ip address pl-hmn\n"
-            + "route-map ncn-w001 permit 20 set ip next-hop 192.168.0.4\n"
-            + "route-map ncn-w001 permit 30 match ip address pl-nmn\n"
-            + "route-map ncn-w001 permit 30 set ip next-hop 192.168.4.4\n"
-            + "route-map ncn-w002 permit 10 match ip address pl-cmn\n"
-            + "route-map ncn-w002 permit 10 set ip next-hop 192.168.12.5\n"
-            + "route-map ncn-w002 permit 20 match ip address pl-hmn\n"
-            + "route-map ncn-w002 permit 20 set ip next-hop 192.168.0.5\n"
-            + "route-map ncn-w002 permit 30 match ip address pl-nmn\n"
-            + "route-map ncn-w002 permit 30 set ip next-hop 192.168.4.5\n"
-            + "route-map ncn-w003 permit 10 match ip address pl-cmn\n"
-            + "route-map ncn-w003 permit 10 set ip next-hop 192.168.12.6\n"
-            + "route-map ncn-w003 permit 20 match ip address pl-hmn\n"
-            + "route-map ncn-w003 permit 20 set ip next-hop 192.168.0.6\n"
-            + "route-map ncn-w003 permit 30 match ip address pl-nmn\n"
-            + "route-map ncn-w003 permit 30 set ip next-hop 192.168.4.6\n"
+            + "route-map ncn-w001-Customer permit 10 match ip address pl-cmn\n"
+            + "route-map ncn-w001-Customer permit 20 match ip address pl-can\n"
+            + "route-map ncn-w001-Customer permit 20 set ip next-hop 192.168.11.4\n"
+            + "route-map ncn-w001 permit 10 match ip address pl-hmn\n"
+            + "route-map ncn-w001 permit 10 set ip next-hop 192.168.0.4\n"
+            + "route-map ncn-w001 permit 20 match ip address pl-nmn\n"
+            + "route-map ncn-w001 permit 20 set ip next-hop 192.168.4.4\n"
+            + "route-map ncn-w002-Customer permit 10 match ip address pl-cmn\n"
+            + "route-map ncn-w002-Customer permit 20 match ip address pl-can\n"
+            + "route-map ncn-w002-Customer permit 20 set ip next-hop 192.168.11.5\n"
+            + "route-map ncn-w002 permit 10 match ip address pl-hmn\n"
+            + "route-map ncn-w002 permit 10 set ip next-hop 192.168.0.5\n"
+            + "route-map ncn-w002 permit 20 match ip address pl-nmn\n"
+            + "route-map ncn-w002 permit 20 set ip next-hop 192.168.4.5\n"
+            + "route-map ncn-w003-Customer permit 10 match ip address pl-cmn\n"
+            + "route-map ncn-w003-Customer permit 20 match ip address pl-can\n"
+            + "route-map ncn-w003-Customer permit 20 set ip next-hop 192.168.11.6\n"
+            + "route-map ncn-w003 permit 10 match ip address pl-hmn\n"
+            + "route-map ncn-w003 permit 10 set ip next-hop 192.168.0.6\n"
+            + "route-map ncn-w003 permit 20 match ip address pl-nmn\n"
+            + "route-map ncn-w003 permit 20 set ip next-hop 192.168.4.6\n"
             + "router bgp 65533 vrf Customer\n"
             + "router bgp 65533 vrf default\n"
             + "router bgp 65533 vrf Customer router-id 10.2.0.3 force\n"
@@ -1297,8 +1332,11 @@ def test_switch_config_spine_secondary():
             + "router bgp 65533 vrf default neighbor 192.168.4.5 timers 1 3\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.6 timers 1 3\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.4 transport connection-mode passive\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.4 route-map ncn-w001-Customer\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.5 transport connection-mode passive\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.5 route-map ncn-w002-Customer\n"
             + "router bgp 65533 vrf Customer neighbor 192.168.12.6 transport connection-mode passive\n"
+            + "router bgp 65533 vrf Customer neighbor 192.168.12.6 route-map ncn-w003-Customer\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.4 transport connection-mode passive\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.5 transport connection-mode passive\n"
             + "router bgp 65533 vrf default neighbor 192.168.4.6 transport connection-mode passive\n"
@@ -1314,6 +1352,7 @@ def test_switch_config_spine_secondary():
             + "ntp server 192.168.4.6 keyID 0\n"
             + "no ntp server 192.168.4.6 trusted-enable\n"
             + "ntp server 192.168.4.6 version 4\n"
+            + "ntp vrf default enable\n"
         ) in str(result.output)
 
 
@@ -1395,7 +1434,7 @@ def test_switch_config_leaf_bmc():
         ) in str(result.output)
         assert (
             "interface port-channel101\n"
-            + "  description sw-leaf-bmc-001:51==>sw-spine-001:26\n"
+            + "  description sw-spine-001:26<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport mode trunk\n"
             + "  switchport access vlan 1\n"
@@ -1429,7 +1468,7 @@ def test_switch_config_leaf_bmc():
             + "  flowcontrol receive off\n"
             + "  flowcontrol transmit off\n"
             + "interface ethernet1/1/1\n"
-            + "  description sw-leaf-bmc-001:1==>ncn-m001:bmc:1\n"
+            + "  description ncn-m001:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1438,7 +1477,7 @@ def test_switch_config_leaf_bmc():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/2\n"
-            + "  description sw-leaf-bmc-001:2==>ncn-m002:bmc:1\n"
+            + "  description ncn-m002:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1447,7 +1486,7 @@ def test_switch_config_leaf_bmc():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/3\n"
-            + "  description sw-leaf-bmc-001:3==>ncn-m003:bmc:1\n"
+            + "  description ncn-m003:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1456,7 +1495,7 @@ def test_switch_config_leaf_bmc():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/4\n"
-            + "  description sw-leaf-bmc-001:4==>ncn-w001:bmc:1\n"
+            + "  description ncn-w001:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1465,7 +1504,7 @@ def test_switch_config_leaf_bmc():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/5\n"
-            + "  description sw-leaf-bmc-001:5==>ncn-w002:bmc:1\n"
+            + "  description ncn-w002:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1474,7 +1513,7 @@ def test_switch_config_leaf_bmc():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/6\n"
-            + "  description sw-leaf-bmc-001:6==>ncn-w003:bmc:1\n"
+            + "  description ncn-w003:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1483,7 +1522,7 @@ def test_switch_config_leaf_bmc():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/7\n"
-            + "  description sw-leaf-bmc-001:7==>ncn-s001:bmc:1\n"
+            + "  description ncn-s001:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1492,7 +1531,7 @@ def test_switch_config_leaf_bmc():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/8\n"
-            + "  description sw-leaf-bmc-001:8==>ncn-s002:bmc:1\n"
+            + "  description ncn-s002:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1501,7 +1540,7 @@ def test_switch_config_leaf_bmc():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/9\n"
-            + "  description sw-leaf-bmc-001:9==>ncn-s003:bmc:1\n"
+            + "  description ncn-s003:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1510,7 +1549,7 @@ def test_switch_config_leaf_bmc():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/10\n"
-            + "  description sw-leaf-bmc-001:10==>uan001:bmc:1\n"
+            + "  description uan001:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1534,8 +1573,20 @@ def test_switch_config_leaf_bmc():
             + "ip access-list cmn-can\n"
             + "  seq 10 deny ip 192.168.12.0/24 192.168.11.0/24\n"
             + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
-            + "  seq 30 permit ip any any\n"
+            + "  seq 30 deny ip 192.168.12.0/24 192.168.200.0/24\n"
+            + "  seq 40 deny ip 192.168.200.0/24 192.168.12.0/24\n"
+            + "  seq 50 permit ip any any\n"
         ) in str(result.output)
+        assert (
+            "load-balancing ingress-port enable\n"
+            + "no load-balancing mac-selection destination-mac\n"
+            + "no load-balancing mac-selection ethertype\n"
+            + "no load-balancing mac-selection source-mac\n"
+            + "no load-balancing mac-selection vlan-id\n"
+            + "no load-balancing tcp-udp-selection l4-destination-port\n"
+            + "no load-balancing tcp-udp-selection l4-source-port\n"
+        ) in str(result.output)
+        print(result.output)
         assert (
             "router ospf 1\n"
             + "  router-id 10.2.0.12\n"
@@ -1589,7 +1640,7 @@ def test_switch_config_leaf_bmc_custom():
         print(result.output)
         assert (
             "# interface ethernet1/1/12\n"
-            + "#   description sw-leaf-bmc-001:12==>cn003:2\n"
+            + "#   description cn003:2<==sw-leaf-bmc-001\n"
             + "#   switchport access vlan 2\n"
             + "# interface vlan6\n"
             + "#   ip address 10.102.4.100/25\n"
@@ -1639,7 +1690,7 @@ def test_switch_config_leaf_bmc_custom():
         print(result.output)
         assert (
             "interface port-channel101\n"
-            + "  description sw-leaf-bmc-001:51==>sw-spine-001:26\n"
+            + "  description sw-spine-001:26<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport mode trunk\n"
             + "  switchport access vlan 1\n"
@@ -1674,7 +1725,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  flowcontrol receive off\n"
             + "  flowcontrol transmit off\n"
             + "interface ethernet1/1/1\n"
-            + "  description sw-leaf-bmc-001:1==>ncn-m001:bmc:1\n"
+            + "  description ncn-m001:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1683,7 +1734,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/2\n"
-            + "  description sw-leaf-bmc-001:2==>ncn-m002:bmc:1\n"
+            + "  description ncn-m002:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1692,7 +1743,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/3\n"
-            + "  description sw-leaf-bmc-001:3==>ncn-m003:bmc:1\n"
+            + "  description ncn-m003:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1701,7 +1752,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/4\n"
-            + "  description sw-leaf-bmc-001:4==>ncn-w001:bmc:1\n"
+            + "  description ncn-w001:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1710,7 +1761,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/5\n"
-            + "  description sw-leaf-bmc-001:5==>ncn-w002:bmc:1\n"
+            + "  description ncn-w002:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1719,7 +1770,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/6\n"
-            + "  description sw-leaf-bmc-001:6==>ncn-w003:bmc:1\n"
+            + "  description ncn-w003:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1728,7 +1779,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/7\n"
-            + "  description sw-leaf-bmc-001:7==>ncn-s001:bmc:1\n"
+            + "  description ncn-s001:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1737,7 +1788,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/8\n"
-            + "  description sw-leaf-bmc-001:8==>ncn-s002:bmc:1\n"
+            + "  description ncn-s002:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1746,7 +1797,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/9\n"
-            + "  description sw-leaf-bmc-001:9==>ncn-s003:bmc:1\n"
+            + "  description ncn-s003:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1755,7 +1806,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/10\n"
-            + "  description sw-leaf-bmc-001:10==>uan001:bmc:1\n"
+            + "  description uan001:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1764,7 +1815,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/11\n"
-            + "  description sw-leaf-bmc-001:11==>cn001:1\n"
+            + "  description cn001:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1773,7 +1824,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/13\n"
-            + "  description sw-leaf-bmc-001:13==>cn003:1\n"
+            + "  description cn003:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1782,7 +1833,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/14\n"
-            + "  description sw-leaf-bmc-001:14==>cn004:1\n"
+            + "  description cn004:bmc:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 4\n"
             + "  mtu 9216\n"
@@ -1791,7 +1842,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/24\n"
-            + "  description sw-leaf-bmc-001:24==>cn001:1\n"
+            + "  description cn001:onboard:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 2\n"
             + "  mtu 9216\n"
@@ -1800,7 +1851,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/25\n"
-            + "  description sw-leaf-bmc-001:25==>cn002:1\n"
+            + "  description cn002:onboard:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 2\n"
             + "  mtu 9216\n"
@@ -1809,7 +1860,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/26\n"
-            + "  description sw-leaf-bmc-001:26==>cn003:1\n"
+            + "  description cn003:onboard:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 2\n"
             + "  mtu 9216\n"
@@ -1818,7 +1869,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/27\n"
-            + "  description sw-leaf-bmc-001:27==>cn004:1\n"
+            + "  description cn004:onboard:1<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 2\n"
             + "  mtu 9216\n"
@@ -1960,7 +2011,7 @@ def test_switch_config_leaf_bmc_custom():
 
         assert (
             "interface ethernet1/1/12\n"
-            + "  description sw-leaf-bmc-001:12==>cn003:2\n"
+            + "  description cn003:2<==sw-leaf-bmc-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 2\n"
             + "  mtu 9216\n"
@@ -1985,7 +2036,9 @@ def test_switch_config_leaf_bmc_custom():
             + "ip access-list cmn-can\n"
             + "  seq 10 deny ip 192.168.12.0/24 192.168.11.0/24\n"
             + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
-            + "  seq 30 permit ip any any\n"
+            + "  seq 30 deny ip 192.168.12.0/24 192.168.200.0/24\n"
+            + "  seq 40 deny ip 192.168.200.0/24 192.168.12.0/24\n"
+            + "  seq 50 permit ip any any\n"
         ) in str(result.output)
         print(result.output)
         assert (
@@ -2110,7 +2163,7 @@ def test_switch_config_cdu_primary():
         print(result.output)
         assert (
             "interface port-channel2\n"
-            + "  description sw-cdu-001:2==>cmm-x3002-000:1\n"
+            + "  description cmm-x3002-000:1<==sw-cdu-001\n"
             + "  no shutdown\n"
             + "  switchport mode trunk\n"
             + "  switchport access vlan 2000\n"
@@ -2119,7 +2172,7 @@ def test_switch_config_cdu_primary():
             + "  vlt-port-channel 2\n"
             + "  spanning-tree guard root\n"
             + "interface port-channel3\n"
-            + "  description sw-cdu-001:3==>cmm-x3002-001:1\n"
+            + "  description cmm-x3002-001:1<==sw-cdu-001\n"
             + "  no shutdown\n"
             + "  switchport mode trunk\n"
             + "  switchport access vlan 2000\n"
@@ -2128,7 +2181,7 @@ def test_switch_config_cdu_primary():
             + "  vlt-port-channel 3\n"
             + "  spanning-tree guard root\n"
             + "interface port-channel4\n"
-            + "  description sw-cdu-001:4==>cmm-x3002-002:1\n"
+            + "  description cmm-x3002-002:1<==sw-cdu-001\n"
             + "  no shutdown\n"
             + "  switchport mode trunk\n"
             + "  switchport access vlan 2000\n"
@@ -2137,7 +2190,7 @@ def test_switch_config_cdu_primary():
             + "  vlt-port-channel 4\n"
             + "  spanning-tree guard root\n"
             + "interface port-channel5\n"
-            + "  description sw-cdu-001:5==>cmm-x3002-003:1\n"
+            + "  description cmm-x3002-003:1<==sw-cdu-001\n"
             + "  no shutdown\n"
             + "  switchport mode trunk\n"
             + "  switchport access vlan 2000\n"
@@ -2149,7 +2202,7 @@ def test_switch_config_cdu_primary():
         print(result.output)
         assert (
             "interface port-channel255\n"
-            + "  description sw-cdu-001:27==>sw-spine-001:29\n"
+            + "  description sw-spine-001:29<==sw-cdu-001\n"
             + "  no shutdown\n"
             + "  switchport mode trunk\n"
             + "  switchport access vlan 1\n"
@@ -2167,7 +2220,7 @@ def test_switch_config_cdu_primary():
             + "  ip address 192.168.255.242/29\n"
             + "  ipv6 address autoconfig\n"
             + "interface ethernet1/1/2\n"
-            + "  description sw-cdu-001:2==>cmm-x3002-000:1\n"
+            + "  description cmm-x3002-000:1<==sw-cdu-001\n"
             + "  no shutdown\n"
             + "  channel-group 2\n"
             + "  no switchport\n"
@@ -2175,7 +2228,7 @@ def test_switch_config_cdu_primary():
             + "  flowcontrol receive on\n"
             + "  flowcontrol transmit on\n"
             + "interface ethernet1/1/3\n"
-            + "  description sw-cdu-001:3==>cmm-x3002-001:1\n"
+            + "  description cmm-x3002-001:1<==sw-cdu-001\n"
             + "  no shutdown\n"
             + "  channel-group 3\n"
             + "  no switchport\n"
@@ -2183,7 +2236,7 @@ def test_switch_config_cdu_primary():
             + "  flowcontrol receive on\n"
             + "  flowcontrol transmit on\n"
             + "interface ethernet1/1/4\n"
-            + "  description sw-cdu-001:4==>cmm-x3002-002:1\n"
+            + "  description cmm-x3002-002:1<==sw-cdu-001\n"
             + "  no shutdown\n"
             + "  channel-group 4\n"
             + "  no switchport\n"
@@ -2191,7 +2244,7 @@ def test_switch_config_cdu_primary():
             + "  flowcontrol receive on\n"
             + "  flowcontrol transmit on\n"
             + "interface ethernet1/1/5\n"
-            + "  description sw-cdu-001:5==>cmm-x3002-003:1\n"
+            + "  description cmm-x3002-003:1<==sw-cdu-001\n"
             + "  no shutdown\n"
             + "  channel-group 5\n"
             + "  no switchport\n"
@@ -2199,7 +2252,7 @@ def test_switch_config_cdu_primary():
             + "  flowcontrol receive on\n"
             + "  flowcontrol transmit on\n"
             + "interface ethernet1/1/1\n"
-            + "  description sw-cdu-001:1==>cec-x3002-000:1\n"
+            + "  description cec-x3002-000:1<==sw-cdu-001\n"
             + "  no shutdown\n"
             + "  switchport access vlan 3000\n"
             + "  mtu 9216\n"
@@ -2391,7 +2444,18 @@ def test_switch_config_cdu_primary():
             + "  shutdown\n"
             + "  switchport access vlan 1\n"
             + "  flowcontrol receive on\n"
-            + "interface ethernet1/1/25\n"
+            + "interface ethernet1/1/53\n"
+            + "  shutdown\n"
+            + "  switchport access vlan 1\n"
+            + "  flowcontrol receive on\n"
+            + "interface ethernet1/1/54\n"
+            + "  shutdown\n"
+            + "  switchport access vlan 1\n"
+            + "  flowcontrol receive on\n"
+        ) in str(result.output)
+        print(result.output)
+        assert (
+            "interface ethernet1/1/25\n"
             + "  no shutdown\n"
             + "  no switchport\n"
             + "  flowcontrol receive off\n"
@@ -2417,7 +2481,19 @@ def test_switch_config_cdu_primary():
             + "ip access-list cmn-can\n"
             + "  seq 10 deny ip 192.168.12.0/24 192.168.11.0/24\n"
             + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
-            + "  seq 30 permit ip any any\n"
+            + "  seq 30 deny ip 192.168.12.0/24 192.168.200.0/24\n"
+            + "  seq 40 deny ip 192.168.200.0/24 192.168.12.0/24\n"
+            + "  seq 50 permit ip any any\n"
+        ) in str(result.output)
+        print(result.output)
+        assert (
+            "load-balancing ingress-port enable\n"
+            + "no load-balancing mac-selection destination-mac\n"
+            + "no load-balancing mac-selection ethertype\n"
+            + "no load-balancing mac-selection source-mac\n"
+            + "no load-balancing mac-selection vlan-id\n"
+            + "no load-balancing tcp-udp-selection l4-destination-port\n"
+            + "no load-balancing tcp-udp-selection l4-source-port\n"
         ) in str(result.output)
         print(result.output)
         assert (
@@ -2547,7 +2623,7 @@ def test_switch_config_cdu_secondary():
         print(result.output)
         assert (
             "interface port-channel2\n"
-            + "  description sw-cdu-002:2==>cmm-x3002-000:2\n"
+            + "  description cmm-x3002-000:2<==sw-cdu-002\n"
             + "  no shutdown\n"
             + "  switchport mode trunk\n"
             + "  switchport access vlan 2000\n"
@@ -2556,7 +2632,7 @@ def test_switch_config_cdu_secondary():
             + "  vlt-port-channel 2\n"
             + "  spanning-tree guard root\n"
             + "interface port-channel3\n"
-            + "  description sw-cdu-002:3==>cmm-x3002-001:2\n"
+            + "  description cmm-x3002-001:2<==sw-cdu-002\n"
             + "  no shutdown\n"
             + "  switchport mode trunk\n"
             + "  switchport access vlan 2000\n"
@@ -2565,7 +2641,7 @@ def test_switch_config_cdu_secondary():
             + "  vlt-port-channel 3\n"
             + "  spanning-tree guard root\n"
             + "interface port-channel4\n"
-            + "  description sw-cdu-002:4==>cmm-x3002-002:2\n"
+            + "  description cmm-x3002-002:2<==sw-cdu-002\n"
             + "  no shutdown\n"
             + "  switchport mode trunk\n"
             + "  switchport access vlan 2000\n"
@@ -2574,7 +2650,7 @@ def test_switch_config_cdu_secondary():
             + "  vlt-port-channel 4\n"
             + "  spanning-tree guard root\n"
             + "interface port-channel5\n"
-            + "  description sw-cdu-002:5==>cmm-x3002-003:2\n"
+            + "  description cmm-x3002-003:2<==sw-cdu-002\n"
             + "  no shutdown\n"
             + "  switchport mode trunk\n"
             + "  switchport access vlan 2000\n"
@@ -2587,7 +2663,7 @@ def test_switch_config_cdu_secondary():
         print(result.output)
         assert (
             "interface port-channel255\n"
-            + "  description sw-cdu-002:27==>sw-spine-001:30\n"
+            + "  description sw-spine-001:30<==sw-cdu-002\n"
             + "  no shutdown\n"
             + "  switchport mode trunk\n"
             + "  switchport access vlan 1\n"
@@ -2605,7 +2681,7 @@ def test_switch_config_cdu_secondary():
             + "  ip address 192.168.255.243/29\n"
             + "  ipv6 address autoconfig\n"
             + "interface ethernet1/1/2\n"
-            + "  description sw-cdu-002:2==>cmm-x3002-000:2\n"
+            + "  description cmm-x3002-000:2<==sw-cdu-002\n"
             + "  no shutdown\n"
             + "  channel-group 2\n"
             + "  no switchport\n"
@@ -2613,7 +2689,7 @@ def test_switch_config_cdu_secondary():
             + "  flowcontrol receive on\n"
             + "  flowcontrol transmit on\n"
             + "interface ethernet1/1/3\n"
-            + "  description sw-cdu-002:3==>cmm-x3002-001:2\n"
+            + "  description cmm-x3002-001:2<==sw-cdu-002\n"
             + "  no shutdown\n"
             + "  channel-group 3\n"
             + "  no switchport\n"
@@ -2621,7 +2697,7 @@ def test_switch_config_cdu_secondary():
             + "  flowcontrol receive on\n"
             + "  flowcontrol transmit on\n"
             + "interface ethernet1/1/4\n"
-            + "  description sw-cdu-002:4==>cmm-x3002-002:2\n"
+            + "  description cmm-x3002-002:2<==sw-cdu-002\n"
             + "  no shutdown\n"
             + "  channel-group 4\n"
             + "  no switchport\n"
@@ -2629,7 +2705,7 @@ def test_switch_config_cdu_secondary():
             + "  flowcontrol receive on\n"
             + "  flowcontrol transmit on\n"
             + "interface ethernet1/1/5\n"
-            + "  description sw-cdu-002:5==>cmm-x3002-003:2\n"
+            + "  description cmm-x3002-003:2<==sw-cdu-002\n"
             + "  no shutdown\n"
             + "  channel-group 5\n"
             + "  no switchport\n"
@@ -2824,6 +2900,14 @@ def test_switch_config_cdu_secondary():
             + "  shutdown\n"
             + "  switchport access vlan 1\n"
             + "  flowcontrol receive on\n"
+            + "interface ethernet1/1/53\n"
+            + "  shutdown\n"
+            + "  switchport access vlan 1\n"
+            + "  flowcontrol receive on\n"
+            + "interface ethernet1/1/54\n"
+            + "  shutdown\n"
+            + "  switchport access vlan 1\n"
+            + "  flowcontrol receive on\n"
             + "interface ethernet1/1/25\n"
             + "  no shutdown\n"
             + "  no switchport\n"
@@ -2850,7 +2934,19 @@ def test_switch_config_cdu_secondary():
             + "ip access-list cmn-can\n"
             + "  seq 10 deny ip 192.168.12.0/24 192.168.11.0/24\n"
             + "  seq 20 deny ip 192.168.11.0/24 192.168.12.0/24\n"
-            + "  seq 30 permit ip any any\n"
+            + "  seq 30 deny ip 192.168.12.0/24 192.168.200.0/24\n"
+            + "  seq 40 deny ip 192.168.200.0/24 192.168.12.0/24\n"
+            + "  seq 50 permit ip any any\n"
+        ) in str(result.output)
+        print(result.output)
+        assert (
+            "load-balancing ingress-port enable\n"
+            + "no load-balancing mac-selection destination-mac\n"
+            + "no load-balancing mac-selection ethertype\n"
+            + "no load-balancing mac-selection source-mac\n"
+            + "no load-balancing mac-selection vlan-id\n"
+            + "no load-balancing tcp-udp-selection l4-destination-port\n"
+            + "no load-balancing tcp-udp-selection l4-source-port\n"
         ) in str(result.output)
         print(result.output)
         assert (
@@ -2903,6 +2999,38 @@ sls_input = {
                         "Name": "bootstrap_dhcp",
                         "VlanID": 7,
                         "Gateway": "192.168.11.1",
+                    },
+                ],
+            },
+        },
+        "CHN": {
+            "Name": "CHN",
+            "ExtraProperties": {
+                "CIDR": "192.168.200.0/24",
+                "MyASN": 65530,
+                "PeerASN": 65533,
+                "Subnets": [
+                    {
+                        "Name": "bootstrap_dhcp",
+                        "CIDR": "192.168.200.0/24",
+                        "IPReservations": [
+                            {"Name": "chn-switch-1", "IPAddress": "192.168.200.2"},
+                            {"Name": "chn-switch-2", "IPAddress": "192.168.200.3"},
+                        ],
+                        "VlanID": 5,
+                        "Gateway": "192.168.200.1",
+                    },
+                    {
+                        "FullName": "CHN Bootstrap DHCP Subnet",
+                        "CIDR": "192.168.200.0/24",
+                        "IPReservations": [
+                            {"Name": "ncn-w001", "IPAddress": "192.168.200.4"},
+                            {"Name": "ncn-w002", "IPAddress": "192.168.200.5"},
+                            {"Name": "ncn-w003", "IPAddress": "192.168.200.6"},
+                        ],
+                        "Name": "bootstrap_dhcp",
+                        "VlanID": 5,
+                        "Gateway": "192.168.200.1",
                     },
                 ],
             },

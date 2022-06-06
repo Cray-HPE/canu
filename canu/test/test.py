@@ -24,18 +24,23 @@ import json
 import logging
 from os import path
 from pathlib import Path
-import pprint
 import sys
 
 import click
 from click_help_colors import HelpColorsCommand
 import click_spinner
 from nornir import InitNornir
-from nornir_salt import netmiko_send_commands, TabulateFormatter, TestsProcessor
+from nornir.core.filter import F
+from nornir_salt import (
+    netmiko_send_commands,
+    TabulateFormatter,
+    TestsProcessor,
+)
 from nornir_salt.plugins.functions import ResultSerializer
 import yaml
 
-from canu.utils.sls import pull_sls_hardware, pull_sls_networks
+from canu.utils.host_alive import host_alive
+from canu.utils.inventory import inventory
 
 # Get project root directory
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
@@ -95,72 +100,29 @@ def test(
     log_,
     json_,
 ):
-    """Canu test commands."""
-    # Parse SLS input file.
-    if sls_file:
-        try:
-            input_json = json.load(sls_file)
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            click.secho(
-                f"The file {sls_file.name} is not valid JSON.",
-                fg="red",
-            )
-            return
+    """Run tests against the network.
 
-        sls_variables = pull_sls_networks(input_json)
-        sls_hardware = pull_sls_hardware(input_json)
-    else:
-        sls_variables = pull_sls_networks()
-        sls_hardware = pull_sls_hardware()
+    Args:
+        ctx: CANU context settings
+        username: Switch username
+        password: Switch password
+        sls_file: JSON file containing SLS data
+        sls_address: The address of SLS
+        network: The network that is used to connect to the switches.
+        log_: enable logging
+        json_: output test results in JSON format
+    """
     if not password:
         password = click.prompt(
             "Enter the switch password",
             type=str,
             hide_input=True,
         )
+
     # set to ERROR otherwise nornir plugin logs debug messages to the screen.
     logging.basicConfig(level="ERROR")
-    inventory = {"groups": "shasta", "hosts": {}}
-    if sls_variables[network + "_IPs"] == {}:
-        click.secho(
-            f"The file {sls_file.name} is missing CMN Network.",
-            fg="red",
-        )
-        sys.exit(1)
-    for k in sls_variables[network + "_IPs"]:
 
-        if "sw" in k:
-            inventory["hosts"].update(
-                {
-                    k: {
-                        "hostname": str(sls_variables[network + "_IPs"][k]),
-                        "platform": "",
-                        "username": username,
-                        "password": password,
-                    },
-                },
-            )
-    # pull in the platform type from sls hardware data
-    vendor = None
-    for x in sls_hardware:
-        if (
-            x["Type"] == "comptype_hl_switch"
-            or x["Type"] == "comptype_mgmt_switch"
-            or x["Type"] == "comptype_cdu_mgmt_switch"
-        ):
-            for host in inventory["hosts"]:
-                if host == x["ExtraProperties"]["Aliases"][0]:
-                    if x["ExtraProperties"]["Brand"] == "Aruba":
-                        inventory["hosts"][host]["platform"] = "aruba_os"
-                        vendor = "aruba"
-                    elif x["ExtraProperties"]["Brand"] == "Dell":
-                        inventory["hosts"][host]["platform"] = "dell_os10"
-                    elif x["ExtraProperties"]["Brand"] == "Mellanox":
-                        inventory["hosts"][host]["platform"] = "mellanox"
-                        vendor = "dellanox"
-                    else:
-                        inventory["hosts"][host]["platform"] = "generic"
-
+    switch_inventory = inventory(username, password, network, sls_file)
     nr = InitNornir(
         runner={
             "plugin": "threaded",
@@ -168,16 +130,17 @@ def test(
                 "num_workers": 10,
             },
         },
-        inventory={
-            "plugin": "DictInventory",
-            "options": {
-                "hosts": inventory["hosts"],
-                "groups": {},
-                "defaults": {},
-            },
-        },
+        inventory=switch_inventory,
         logging={"enabled": log_, "to_console": True, "level": "DEBUG"},
     )
+    # get the switch vendor name from the inventory
+    # this is used to determine which tests to run
+    platform = nr.filter(F(platform="aruba_os"))
+    if platform.inventory.hosts.keys():
+        vendor = "aruba"
+    else:
+        vendor = "dellanox"
+
     test_file = path.join(
         project_root,
         "canu",
@@ -188,86 +151,65 @@ def test(
 
     with open(test_file) as f:
         test_suite = yaml.safe_load(f.read())
-    # add tests processor
 
-    tests = nr.with_processors([TestsProcessor(test_suite)])
+    online_hosts, unreachable_hosts = host_alive(nr)
 
-    spine_nr = tests.filter(filter_func=lambda h: "sw-spine" in h.name)
-    leaf_nr = tests.filter(
-        filter_func=lambda h: "sw-leaf" in h.name and "bmc" not in h.name,
-    )
-    leaf_bmc_nr = tests.filter(filter_func=lambda h: "sw-leaf-bmc" in h.name)
-    cdu_nr = tests.filter(filter_func=lambda h: "sw-cdu" in h.name)
+    if unreachable_hosts:
+        for switch in unreachable_hosts:
+            click.secho(
+                f"WARNING: Could not reach {switch} via SSH, skipping tests",
+                fg="red",
+            )
+    switch_commands = {"spine": [], "leaf-bmc": [], "leaf": [], "cdu": []}
+    switch_test_suite = {"spine": [], "leaf-bmc": [], "leaf": [], "cdu": []}
 
-    # collect commands for devices
-    spine_commands = []
-    leaf_commands = []
-    leaf_bmc_commands = []
-    cdu_commands = []
-    for item in test_suite:
-        device = item.get("device")
-        if "spine" in device and isinstance(item["task"], str):
-            spine_commands.append(item["task"])
-        elif isinstance(item["task"], list):
-            spine_commands.extend(item["task"])
-        if "leaf" in device and isinstance(item["task"], str):
-            leaf_commands.append(item["task"])
-        elif isinstance(item["task"], list):
-            leaf_commands.extend(item["task"])
-        if "leaf-bmc" in device and isinstance(item["task"], str):
-            leaf_bmc_commands.append(item["task"])
-        elif isinstance(item["task"], list):
-            leaf_bmc_commands.extend(item["task"])
-        if "cdu" in device and isinstance(item["task"], str):
-            cdu_commands.append(item["task"])
-        elif isinstance(item["task"], list):
-            cdu_commands.extend(item["task"])
+    dict_results = {}
+    pretty_results = []
 
-    # collect output from devices using netmiko_send_commands task plugin
+    # get the commands and the test suite for each switch type.
+    for switch in switch_commands.keys():
+        for test_command in test_suite:
+            devices = test_command.get("device")
+            if switch in devices:
+                switch_test_suite[switch].append(test_command)
+            if switch in devices and isinstance(test_command["task"], str):
+                switch_commands[switch].append(test_command["task"])
+            elif switch in devices and isinstance(test_command["task"], list):
+                switch_commands.extend(test_command["task"])
+
+    # run the tests for each switch type
     with click_spinner.spinner():
-        print(
-            "  Connecting...",
-            end="\r",
-        )
-        spine_results = spine_nr.run(
-            task=netmiko_send_commands,
-            commands=spine_commands,
-        )
-        leaf_results = leaf_nr.run(task=netmiko_send_commands, commands=leaf_commands)
-        leaf_bmc_results = leaf_bmc_nr.run(
-            task=netmiko_send_commands,
-            commands=leaf_bmc_commands,
-        )
-        cdu_results = cdu_nr.run(task=netmiko_send_commands, commands=cdu_commands)
-    print(
-        "                                                             ",
-        end="\r",
-    )
-    # print out the results
-    if json_:
-        dict_results = ResultSerializer(spine_results, add_details=False, to_dict=True)
-        dict_results.update(
-            ResultSerializer(leaf_results, add_details=False, to_dict=True),
-        )
-        dict_results.update(
-            ResultSerializer(spine_results, add_details=False, to_dict=True),
-        )
-        dict_results.update(
-            ResultSerializer(leaf_bmc_results, add_details=False, to_dict=True),
-        )
-        dict_results.update(
-            ResultSerializer(cdu_results, add_details=False, to_dict=True),
-        )
+        for switch in switch_commands.keys():
+            print(
+                f"  Running tests on {switch} switches...",
+                end="\r",
+            )
+            # filter out each switch type
+            switch_nr = online_hosts.filter(type=switch)
+            # get the tests for each switch type
+            test_nr = switch_nr.with_processors(
+                [TestsProcessor(switch_test_suite[switch])],
+            )
 
-        pprint.pprint(dict_results)
+            commands = switch_commands[switch]
+            results = test_nr.run(
+                task=netmiko_send_commands,
+                commands=commands,
+            )
+
+            dict_results.update(
+                ResultSerializer(results, add_details=False, to_dict=True),
+            )
+
+            pretty_results += ResultSerializer(results, add_details=True, to_dict=False)
+
+    # print the results
+    if json_:
+        click.secho(json.dumps(dict_results, indent=4))
     else:
-        spine = ResultSerializer(spine_results, add_details=True, to_dict=False)
-        leaf = ResultSerializer(leaf_results, add_details=True, to_dict=False)
-        leaf_bmc = ResultSerializer(leaf_bmc_results, add_details=True, to_dict=False)
-        cdu = ResultSerializer(cdu_results, add_details=True, to_dict=False)
         print(
             TabulateFormatter(
-                leaf + spine + leaf_bmc + cdu,
+                pretty_results,
                 tabulate="brief",
             ),
         )

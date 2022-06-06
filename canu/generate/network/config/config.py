@@ -148,6 +148,12 @@ csm_options = canu_config["csm_versions"]
     help="Path to current running configs.",
     type=click.Path(),
 )
+@click.option(
+    "--reorder",
+    is_flag=True,
+    help="reorder config to heir config order",
+    required=False,
+)
 @click.pass_context
 def config(
     ctx,
@@ -163,6 +169,7 @@ def config(
     folder,
     preserve,
     custom_config,
+    reorder,
 ):
     """Generate the config of all switches (Aruba, Dell, or Mellanox) on the network using the SHCD.
 
@@ -220,6 +227,7 @@ def config(
         folder: Folder to store config files
         preserve: Folder where switch running configs exist.  This folder should be populated from the "canu backup network" command.
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
+        reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
     """
     # SHCD Parsing
     if shcd:
@@ -358,6 +366,7 @@ def config(
         "storage",
         "uan",
         "worker",
+        "edge",
     }
     config_devices = set()
     all_unknown = []
@@ -365,7 +374,17 @@ def config(
         switch_name = node.common_name()
         node_shasta_name = get_shasta_name(switch_name, factory.lookup_mapper())
 
-        if node_shasta_name in ["sw-cdu", "sw-leaf-bmc", "sw-leaf", "sw-spine"]:
+        if (
+            node_shasta_name
+            in [
+                "sw-cdu",
+                "sw-leaf-bmc",
+                "sw-leaf",
+                "sw-spine",
+            ]
+            or node_shasta_name == "sw-edge"
+            and float(csm) >= 1.2
+        ):
 
             switch_config, devices, unknown = generate_switch_config(
                 csm,
@@ -378,6 +397,7 @@ def config(
                 vendor_folder,
                 preserve,
                 custom_config,
+                reorder,
             )
             all_unknown.extend(unknown)
             config_devices.update(devices)

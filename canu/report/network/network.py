@@ -25,6 +25,7 @@ from click_help_colors import HelpColorsGroup
 
 from canu.report.network.cabling import cabling
 from canu.report.network.firmware import firmware
+from canu.report.network.version import version
 
 
 @click.group(
@@ -39,3 +40,4 @@ def network(ctx):
 
 network.add_command(cabling.cabling)
 network.add_command(firmware.firmware)
+network.add_command(version.version)

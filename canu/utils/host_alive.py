@@ -20,35 +20,27 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 
-from artifactory.algol60.net/csm-docker/stable/docker.io/python:slim-bullseye
+"""Retrieve hosts that are reachable via SSH."""
+from nornir.core.filter import F
+from nornir_salt import tcp_ping
+from nornir_salt.plugins.functions import ResultSerializer
 
-# create canu user
-RUN useradd -ms /bin/bash canu
 
-# update command prompt
-RUN echo 'export PS1="canu \w : "' >> /etc/bash.bashrc
+def host_alive(nornir_object):
+    """Return Nornir inventory with alive hosts.
 
-# make files dir
-RUN mkdir /files
+    Args:
+        nornir_object: Nornir object
 
-# prep image layer for faster builds
-COPY requirements.txt /app/canu/
+    Returns:
+        Nornir object with online hosts, and a list of unreachable hosts.
+    """
+    ping_check = nornir_object.run(task=tcp_ping)
+    result_dictionary = ResultSerializer(ping_check)
+    unreachable_hosts = []
 
-RUN apt-get -yq update && apt-get -yq install gcc openssl jq vim libffi-dev musl-dev \
-    python3 python3-dev python3-pip
-
-RUN pip3 install --upgrade pip && pip3 install -r /app/canu/requirements.txt
-
-# copy canu files
-COPY . /app/canu
-
-# install canu
-RUN pip3 install --editable /app/canu/
-
-# set file perms for canu
-RUN chown -R canu /app/canu /files
-
-# set none root user: canu
-USER canu
-
-WORKDIR /files
+    for hostname, result in result_dictionary.items():
+        if result["tcp_ping"][22] is False:
+            unreachable_hosts.append(hostname)
+    online_hosts = nornir_object.filter(~F(name__in=unreachable_hosts))
+    return (online_hosts, unreachable_hosts)

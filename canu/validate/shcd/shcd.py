@@ -171,7 +171,7 @@ def shcd_to_sheets(shcd, tabs, corners):
     sheets = []
 
     if not tabs:
-        wb = load_workbook(shcd, read_only=True)
+        wb = load_workbook(shcd, read_only=True, data_only=True)
         click.secho("What tabs would you like to check in the SHCD?")
         tab_options = wb.sheetnames
         for x in tab_options:
@@ -247,7 +247,9 @@ def get_node_common_name(name, rack_number, rack_elevation, mapper):
             if re.match("^{}".format(lookup_name.strip()), name):
                 # One naming convention for switches, another for else.
                 tmp_name = None
-                if node[1].find("sw-") != -1:
+                if node[1].find("sw-hsn") != -1:
+                    tmp_name = node[1] + "-" + rack_number + "-"
+                elif node[1].find("sw-") != -1:
                     tmp_name = node[1] + "-"
                 elif node[1].find("cmm") != -1:
                     tmp_name = node[1] + "-" + rack_number + "-"
@@ -461,7 +463,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
     node_name_list = []
     warnings = defaultdict(list)
 
-    wb = load_workbook(spreadsheet, read_only=True)
+    wb = load_workbook(spreadsheet, read_only=True, data_only=True)
 
     for tab in sheets:
 
@@ -1052,7 +1054,7 @@ def node_list_warnings(node_list, warnings, out="-"):
         if warnings["shcd_slot_data"]:
             click.secho(
                 "\nSHCD slot definitions used are either deprecated, missing or incorrect."
-                + '\n(The cells below should only be one of the following ["bmc", "ocp", "pcie-slot1, "mgmt", None])',
+                + '\n(The cells below can be blank but should one of the following ["bmc", "ocp", "pcie-slot1, "mgmt", "onboard"])',
                 fg="red",
                 file=out,
             )

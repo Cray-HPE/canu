@@ -1,4 +1,4 @@
-# 🛶 CANU v1.5.5-develop
+# 🛶 CANU v1.6.4-develop
 
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
@@ -1091,18 +1091,57 @@ You can either use an SLS file or pull the SLS file from the API-Gateway using a
 
 Examples
 
-```bash
-  canu send command --sls-file ./sls_input_file.json --network cmn --command "show banner exec" --name sw-spine-001
-  -netmiko_send_command************************************************************
-  * sw-spine-001 ** changed : False **********************************************
-  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-  ###############################################################################
-  # CSM version:  1.2
-  # CANU version: 1.3.2
-  ###############################################################################
+  ```bash
+    canu send command --sls-file ./sls_input_file.json --network cmn --command "show banner exec" --name sw-spine-001
+    -netmiko_send_command************************************************************
+    * sw-spine-001 ** changed : False **********************************************
+    vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+    ###############################################################################
+    # CSM version:  1.2
+    # CANU version: 1.3.2
+    ###############################################################################
 
-  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-```
+    ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ```
+
+  ```bash
+    canu send command --command 'show version | include "Version      :"'
+    \netmiko_send_command************************************************************
+    * sw-leaf-bmc-001 ** changed : False *******************************************
+    vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+    Version      : FL.10.09.0010                                                 
+    ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    * sw-spine-001 ** changed : False **********************************************
+    vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+    Version      : GL.10.09.0010                                                 
+    ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    * sw-spine-002 ** changed : False **********************************************
+    vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+    Version      : GL.10.09.0010                                                 
+    ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ```
+
+### Report Network Version
+
+Canu reports the version of configuration on the switch.  It reads the exec baner of all the switches and outputs to the screen.
+
+Options
+
+- `--sls-file`
+- `--network [HMN|CMN]` This gives the user the ability to connect to the switches over the CMN.  This allows the use of this tool from outside the Mgmt Network.  The default network used is the HMN.
+- `--password` prompts if password is not entered
+- `--username` defaults to admin
+
+Example
+
+  ```console
+  canu report network version --sls-file ../sls_input_file.json --network cmn
+  Password: 
+  SWITCH            CANU VERSION      CSM VERSION
+  sw-spine-001      1.5.12            1.2  
+  sw-spine-002      1.5.12            1.2  
+  sw-leaf-bmc-001   1.5.12            1.2
+  ```
 
 ```bash
   canu send command --command 'show version | include "Version      :"'
@@ -1129,35 +1168,115 @@ Examples
 
 To run the full set of tests, linting, coverage map, and docs building run:
 
-```bash
-nox
-```
+  ```bash
+  nox
+  ```
 
 To just run tests:
 
-```bash
-nox -s tests
-```
+  ```bash
+  nox -s tests
+  ```
 
 To just run linting:
 
-```bash
-nox -s lint
-```
+  ```bash
+  nox -s lint
+  ```
 
 To run a specific test file:
 
-```bash
-nox -s tests -- tests/test_report_switch_firmware.py
-```
+  ```bash
+  nox -s tests -- tests/test_report_switch_firmware.py
+  ```
 
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
-## [1.5.5-develop]
+
+## [1.6.4-develop]
 - Documentation updates to docs/network_configuration_and_upgrade
 
+## [1.6.3-develop]
+
+- Use full `show run` commands to retrieve running config from `canu network backup`
+- UAN CAN ports are now shutdown if CHN is enabled.
+- Mellanox UAN CAN ports now only allow the CAN vlan.
+- Added CMC subrack port configuration.
+
+## [1.6.2-develop]
+
+- Correct the 'slot warning' to specify more accurate options
+
+## [1.6.1-develop]
+
+- Disable load balacing configuration for Dell CDU/Leaf.
+
+## [1.6.0]
+
+- Add `canu report network version` feature.
+- Fix Errors in the output of `canu test`
+
+## [1.5.14-develop]
+
+- Add route-map and prefixes to allow connection to UAI's from CAN network.
+
+## [1.5.13-develop]
+
+- Fix Dell4148 template to include correct port count 
+
+## [1.5.12-develop]
+
+- Add netutils pyinstaller hook file.
+
+## [1.5.11-develop]
+
+- Create unique VSX system macs for each VSX cluster.
+- Fixed Mellanox Customer ACL.
+- Add VLAN 7 to Dellanox UAN for 1.0
+
+## [1.5.10-develop]
+
+- Fix canu paddle-file.json schema
+
+## [1.5.9-develop]
+
+- Change Rosetta/Columbia switch naming to be sw-hsn-<rack>-<###> (as with PDU and CMM/CEC).
+- Change switch port/interface descriptions to `dst:slot:port==>src` to avoid truncation.
+- Change gateway nodes to 4 port 1G OCP card definitions.
+- Add dvs and ssn nodes as 4 port 1G OCP card definitions.
+- Change large memory node common name from `lm` to `lmem`.
+- Beta release of `--reorder` for switch/network config generation where custom-config is not used.
+
+## [1.5.8-develop]
+
+- Added shellcheck GitHub action
+- Bump ipython to 7.16.3 to remediate CVE
+- Clean up Jenkins build
+
+## [1.5.7-develop]
+
+- Add ACL to block CHN <> traffic for CSM 1.2
+- Add Route-Map to CMN BGP peers to restrict routes to only CMN IPs
+
+## [1.5.6-develop]
+
+- More verbose instructions for generating switch configs
+
+## [1.5.5-develop]
+
+- Add the ability to generate BGP config for Arista edge switches.
+
+## [1.5.4-develop]
+
+- `canu backup network` and `canu test` now checks for connectivity before running commands against the switch.
+- Refactored canu `test.py`.
+- Fixed mellanox backup config.  It requires `show running-config expanded` vs `show run`
+- Add test for out of sync LAG on aruba.
+- Fixed mellanox ping test.
+
 ## [1.5.3-develop]
+
 - Update base packages required by Canu to function and fix known CVE from paramiko
 
 ## [1.5.2-develop]
