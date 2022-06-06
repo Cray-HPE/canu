@@ -34,6 +34,4 @@ route-map {{ name }}-Customer permit seq {{ sequence.value }}
 {% set sequence.value = sequence.value + 10 %}route-map {{ name }}-Customer permit seq {{ sequence.value }}
      match ip address prefix-list pl-cmn
 {%- endfor %}
-route-map cmn permit seq 10
-     match ip address prefix-list pl-cmn
 {#- end route-map #}
