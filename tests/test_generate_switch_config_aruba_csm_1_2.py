@@ -2142,7 +2142,7 @@ def test_switch_config_leaf_primary_to_uan():
         )
         assert result.exit_code == 0
         assert "hostname sw-leaf-003\n"
-
+        print(result.output)
         uan = (
             "interface 1/1/7\n"
             + "    no shutdown\n"
@@ -2154,14 +2154,14 @@ def test_switch_config_leaf_primary_to_uan():
             + "    spanning-tree port-type admin-edge\n"
             + "\n"
             + "interface lag 8 multi-chassis\n"
-            + "    no shutdown\n"
             + "    description uan001:ocp:2<==sw-leaf-003\n"
             + "    no routing\n"
-            + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 7\n"
             + "    lacp mode active\n"
             + "    lacp fallback\n"
             + "    spanning-tree port-type admin-edge\n"
+            + "    no shutdown\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 7\n"
             + "\n"
             + "interface 1/1/8\n"
             + "    no shutdown\n"
@@ -2170,7 +2170,7 @@ def test_switch_config_leaf_primary_to_uan():
             + "    lag 8\n"
         )
         assert uan in str(result.output)
-
+        print(result.output)
 
 def test_switch_config_leaf_secondary():
     """Test that the `canu generate switch config` command runs and returns valid secondary leaf config."""
@@ -2574,14 +2574,14 @@ def test_switch_config_leaf_secondary_to_uan():
             + "    spanning-tree port-type admin-edge\n"
             + "\n"
             + "interface lag 8 multi-chassis\n"
-            + "    no shutdown\n"
             + "    description uan001:pcie-slot1:2<==sw-leaf-004\n"
             + "    no routing\n"
-            + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 7\n"
             + "    lacp mode active\n"
             + "    lacp fallback\n"
             + "    spanning-tree port-type admin-edge\n"
+            + "    no shutdown\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 7\n"
             + "\n"
             + "interface 1/1/8\n"
             + "    no shutdown\n"
@@ -2590,6 +2590,7 @@ def test_switch_config_leaf_secondary_to_uan():
             + "    lag 8\n"
         )
         assert uan in str(result.output)
+        print(result.output)
 
 
 def test_switch_config_cdu_primary():
@@ -4395,14 +4396,14 @@ def test_switch_config_tds_spine_primary():
             + "    spanning-tree port-type admin-edge\n"
             + "\n"
             + "interface lag 14 multi-chassis\n"
-            + "    no shutdown\n"
             + "    description uan001:ocp:2<==sw-spine-001\n"
             + "    no routing\n"
-            + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 7\n"
             + "    lacp mode active\n"
             + "    lacp fallback\n"
             + "    spanning-tree port-type admin-edge\n"
+            + "    no shutdown\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 7\n"
             + "\n"
             + "interface 1/1/14\n"
             + "    no shutdown\n"
@@ -4411,6 +4412,7 @@ def test_switch_config_tds_spine_primary():
             + "    lag 14\n"
         )
         assert uan in str(result.output)
+        print(result.output)
 
         sw_spine_to_leaf_bmc = (
             "interface lag 151 multi-chassis\n"
@@ -5016,14 +5018,14 @@ def test_switch_config_tds_spine_secondary():
             + "    spanning-tree port-type admin-edge\n"
             + "\n"
             + "interface lag 14 multi-chassis\n"
-            + "    no shutdown\n"
             + "    description uan001:pcie-slot1:2<==sw-spine-002\n"
             + "    no routing\n"
-            + "    vlan trunk native 1\n"
-            + "    vlan trunk allowed 7\n"
             + "    lacp mode active\n"
             + "    lacp fallback\n"
             + "    spanning-tree port-type admin-edge\n"
+            + "    no shutdown\n"
+            + "    vlan trunk native 1\n"
+            + "    vlan trunk allowed 7\n"
             + "\n"
             + "interface 1/1/14\n"
             + "    no shutdown\n"
@@ -5032,6 +5034,8 @@ def test_switch_config_tds_spine_secondary():
             + "    lag 14\n"
         )
         assert uan in str(result.output)
+        print(result.output)
+        
         sw_spine_to_leaf_bmc = (
             "interface lag 151 multi-chassis\n"
             + "    no shutdown\n"
