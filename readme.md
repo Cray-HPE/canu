@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # 🛶 CANU v1.6.3-develop
+=======
+# 🛶 CANU v1.6.2-develop
+>>>>>>> bce1c4b60818131282f3c4945ae6af5186996a4e
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1183,6 +1187,10 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - UAN CAN ports are now shutdown if CHN is enabled.
 - Mellanox UAN CAN ports now only allow the CAN vlan.
 - Added CMC subrack port configuration.
+
+## [1.6.2-develop]
+
+- Correct the 'slot warning' to specify more accurate options
 
 ## [1.6.1-develop]
 
