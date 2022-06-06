@@ -2172,6 +2172,7 @@ def test_switch_config_leaf_primary_to_uan():
         assert uan in str(result.output)
         print(result.output)
 
+
 def test_switch_config_leaf_secondary():
     """Test that the `canu generate switch config` command runs and returns valid secondary leaf config."""
     leaf_secondary = "sw-leaf-002"
@@ -5034,8 +5035,7 @@ def test_switch_config_tds_spine_secondary():
             + "    lag 14\n"
         )
         assert uan in str(result.output)
-        print(result.output)
-        
+
         sw_spine_to_leaf_bmc = (
             "interface lag 151 multi-chassis\n"
             + "    no shutdown\n"

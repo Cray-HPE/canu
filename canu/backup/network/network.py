@@ -20,9 +20,9 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU backup network config."""
+import logging
 import os
 from pathlib import Path
-import logging
 import sys
 
 import click
@@ -170,7 +170,7 @@ def network(
             command_string="show running-configuration",
         )
         backup_results.update(dell_backup)
-        
+
         click.secho("\nRunning Configs Saved\n---------------------", fg="green")
 
         for hostname in backup_results:
