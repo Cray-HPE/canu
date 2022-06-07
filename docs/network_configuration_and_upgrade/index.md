@@ -1,8 +1,8 @@
-# Canu network configuration and upgrade quick guide 
+# Canu network configuration and upgrade quick guide
 
 ## Introduction
 
-The intent for the this documentation is to help install and upgraae Aruba, Dell, and Mellanox configurations using Canu.
+The intent for this documentation is to help install and upgrade Aruba, Dell, and Mellanox configurations using Canu.
 
 This document is intended for network administrators and support personnel.
 __________________________________
