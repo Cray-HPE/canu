@@ -17,14 +17,18 @@ interface 1/1/{{ node.config.PORT }}
 {%- if node.destination_port == 2%}
 
 interface lag {{ node.config.LAG_NUMBER }} multi-chassis
-    no shutdown
     description {{ node.config.DESCRIPTION }}
     no routing
-    vlan trunk native {{ variables.NATIVE_VLAN }}
-    vlan trunk allowed {{ variables.CAN_VLAN }}
     lacp mode active
     lacp fallback
     spanning-tree port-type admin-edge
+{%- if variables.CAN %}
+    no shutdown
+    vlan trunk native {{ variables.NATIVE_VLAN }}
+    vlan trunk allowed {{ variables.CAN_VLAN }}
+{%- else %}
+    vlan access 1
+{%- endif %}
 
 interface 1/1/{{ node.config.PORT }}
     no shutdown
