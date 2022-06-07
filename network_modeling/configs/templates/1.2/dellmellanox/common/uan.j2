@@ -4,14 +4,12 @@
 interface mlag-port-channel {{ node.config.LAG_NUMBER_V1 }}
 interface mlag-port-channel {{ node.config.LAG_NUMBER_V1 }} switchport mode hybrid
 interface mlag-port-channel {{ node.config.LAG_NUMBER_V1 }} description "{{ node.config.DESCRIPTION }}"
+{%- if variables.CAN %}
 interface mlag-port-channel {{ node.config.LAG_NUMBER_V1 }} no shutdown
-
+interface mlag-port-channel {{ node.config.LAG_NUMBER_V1 }} switchport hybrid allowed-vlan add {{ variables.CAN_VLAN }}
+{%- endif %}
 interface ethernet 1/{{ node.config.PORT }} speed 40G force
 interface ethernet 1/{{ node.config.PORT }} mlag-channel-group {{ node.config.LAG_NUMBER_V1 }} mode active
 interface ethernet 1/{{ node.config.PORT }} description "{{ node.config.DESCRIPTION }}"
-
-interface mlag-port-channel {{ node.config.LAG_NUMBER_V1 }} switchport hybrid allowed-vlan add {{ variables.NMN_VLAN }}
-interface mlag-port-channel {{ node.config.LAG_NUMBER_V1 }} switchport hybrid allowed-vlan add {{ variables.HMN_VLAN }}
-interface mlag-port-channel {{ node.config.LAG_NUMBER_V1 }} switchport hybrid allowed-vlan add {{ variables.CMN_VLAN }}
 {%- endfor %}
 {#- end-uan #}
