@@ -1201,6 +1201,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Added CMC subrack port configuration.
 
 ## [1.6.3-develop]
+
 - Documentation updates to docs/network_configuration_and_upgrade
 
 ## [1.6.2-develop]
