@@ -1,14 +1,22 @@
-# Generate Switch Configs
+# Generate CSM switch configs
 
-Generating configuration files can be done for singular switch or for the full system.
+Generating configuration files can be done for singular switch or for the full system. For example; in a case where you suspect a configuration issue on single switch you can generate just that one file for easier debugging purposes.
 
-For example, if there is a suspected configuration issue on single switch, a configuration file can be generated for just that switch to make it easier to debug problems.
+* Generating configuration file for single switch:
 
-## Generate Configuration Files
+```text
+canu generate switch config --csm 1.2 -a full --ccj hela-ccj.json  --sls-file sls_file.json --name sw-spine-001 --folder generated
+```
 
-Ensure the correct architecture (`-a` parameter) is selected for the setup in use.
+* Generating configuration files for the entire system:
+
+```text
+canu generate network config --csm 1.2 -a full --ccj hela-ccj.json  --sls-file sls_file.json  --folder generated
+```
 
 The following are the different architectures that can be specified:
+
+Again, make sure that you select the correct (-a) architecture specific to your setup:
 
 * ***Tds*** – Aruba-based Test and Development System. These are small systems characterized by Kubernetes NCNs cabling directly to the spine.
 * ***Full*** – Aruba-based Leaf-Spine systems, usually customer production systems.
