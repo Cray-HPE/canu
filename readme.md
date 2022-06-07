@@ -1,4 +1,5 @@
-# 🛶 CANU v1.6.2-develop
+# 🛶 CANU v1.6.4-develop
+
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1142,6 +1143,22 @@ Example
   sw-leaf-bmc-001   1.5.12            1.2
   ```
 
+```bash
+  canu send command --command 'show version | include "Version      :"'
+  \netmiko_send_command************************************************************
+  * sw-leaf-bmc-001 ** changed : False *******************************************
+  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+  Version      : FL.10.09.0010
+  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  * sw-spine-001 ** changed : False **********************************************
+  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+  Version      : GL.10.09.0010
+  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  * sw-spine-002 ** changed : False **********************************************
+  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+  Version      : GL.10.09.0010
+  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+```
 
 ## Uninstallation
 
@@ -1176,6 +1193,16 @@ To run a specific test file:
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.6.4-develop]
+- Documentation updates to docs/network_configuration_and_upgrade
+
+## [1.6.3-develop]
+
+- Use full `show run` commands to retrieve running config from `canu network backup`
+- UAN CAN ports are now shutdown if CHN is enabled.
+- Mellanox UAN CAN ports now only allow the CAN vlan.
+- Added CMC subrack port configuration.
 
 ## [1.6.2-develop]
 
