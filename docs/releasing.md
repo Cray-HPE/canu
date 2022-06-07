@@ -21,8 +21,9 @@
 20. Make sure the canu binary RPM exists in artifactory:  URL.... and should probably test it physically.
 
 To release CANU into CSM:
-* https://github.com/Cray-HPE/csm/blob/main/rpm/cray/csm/sle-15sp2/index.yaml#L49
+* https://github.com/Cray-HPE/csm/blob/main/rpm/cray/csm/sle-15sp3/index.yaml#L26
 * https://github.com/Cray-HPE/csm-rpms/blob/main/packages/cray-pre-install-toolkit/base.packages#L3
-* https://github.com/Cray-HPE/csm-rpms/blob/main/packages/node-image-non-compute-common/base.packages#L3
+* https://github.com/Cray-HPE/csm-rpms/blob/main/packages/node-image-non-compute-common/base.packages#L6
+* https://github.com/Cray-HPE/csm/blob/main/docker/index.yaml#L33
 
 
