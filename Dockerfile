@@ -20,7 +20,7 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 
-from artifactory.algol60.net/csm-docker/stable/docker.io/python:slim-bullseye
+from python:slim-bullseye
 
 # create canu user
 RUN useradd -ms /bin/bash canu
