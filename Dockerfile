@@ -20,7 +20,7 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 
-from debian:bullseye-slim
+from debian:bookworm-slim
 
 # create canu user
 RUN useradd -ms /bin/bash canu
