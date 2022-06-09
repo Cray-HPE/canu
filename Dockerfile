@@ -20,7 +20,7 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 
-from python:slim-bullseye
+from debian:bullseye-slim
 
 # create canu user
 RUN useradd -ms /bin/bash canu
@@ -34,7 +34,7 @@ RUN mkdir /files
 # prep image layer for faster builds
 COPY requirements.txt /app/canu/
 
-RUN apt-get -yq update && apt-get -yq install gcc openssl jq vim libffi-dev musl-dev \
+RUN apt-get -yq update && apt-get -yq upgrade && apt-get -yq install gcc openssl jq vim libffi-dev musl-dev \
     python3 python3-dev python3-pip
 
 RUN pip3 install --upgrade pip && pip3 install -r /app/canu/requirements.txt
