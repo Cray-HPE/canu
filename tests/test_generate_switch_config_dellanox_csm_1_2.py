@@ -265,6 +265,7 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 9 switchport hybrid allowed-vlan add 6\n"
             + "interface mlag-port-channel 9 switchport hybrid allowed-vlan add 7\n"
             + "interface mlag-port-channel 13 switchport hybrid allowed-vlan add 7\n"
+            + "interface mlag-port-channel 13 switchport hybrid allowed-vlan add 6\n"
             + "interface mlag-port-channel 151 switchport hybrid allowed-vlan add 6\n"
             + "interface mlag-port-channel 151 switchport hybrid allowed-vlan add 2\n"
             + "interface mlag-port-channel 151 switchport hybrid allowed-vlan add 4\n"
@@ -346,10 +347,8 @@ def test_switch_config_spine_primary():
             + "ipv4 access-list cmn-can seq-number 30 deny ip 192.168.12.0 mask 255.255.255.0 192.168.200.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 40 deny ip 192.168.200.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 50 permit ip any any\n"
-            + "interface vlan 7 ipv4 port access-group cmn-can\n"
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
-            + "interface vlan 6 ipv4 port access-group cmn-can\n"
         ) in str(result.output)
         print(result.output)
         assert (
@@ -711,6 +710,7 @@ def test_switch_config_spine_primary_custom():
             + "interface mlag-port-channel 9 switchport hybrid allowed-vlan add 6\n"
             + "interface mlag-port-channel 9 switchport hybrid allowed-vlan add 7\n"
             + "interface mlag-port-channel 13 switchport hybrid allowed-vlan add 7\n"
+            + "interface mlag-port-channel 13 switchport hybrid allowed-vlan add 6\n"
             + "interface mlag-port-channel 151 switchport hybrid allowed-vlan add 6\n"
             + "interface mlag-port-channel 151 switchport hybrid allowed-vlan add 2\n"
             + "interface mlag-port-channel 151 switchport hybrid allowed-vlan add 4\n"
@@ -794,10 +794,8 @@ def test_switch_config_spine_primary_custom():
             + "ipv4 access-list cmn-can seq-number 30 deny ip 192.168.12.0 mask 255.255.255.0 192.168.200.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 40 deny ip 192.168.200.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 50 permit ip any any\n"
-            + "interface vlan 7 ipv4 port access-group cmn-can\n"
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
-            + "interface vlan 6 ipv4 port access-group cmn-can\n"
         ) in str(result.output)
         print(result.output)
         assert (
@@ -1132,6 +1130,7 @@ def test_switch_config_spine_secondary():
             + "interface mlag-port-channel 9 switchport hybrid allowed-vlan add 6\n"
             + "interface mlag-port-channel 9 switchport hybrid allowed-vlan add 7\n"
             + "interface mlag-port-channel 13 switchport hybrid allowed-vlan add 7\n"
+            + "interface mlag-port-channel 13 switchport hybrid allowed-vlan add 6\n"
             + "interface mlag-port-channel 151 switchport hybrid allowed-vlan add 6\n"
             + "interface mlag-port-channel 151 switchport hybrid allowed-vlan add 2\n"
             + "interface mlag-port-channel 151 switchport hybrid allowed-vlan add 4\n"
@@ -1209,10 +1208,8 @@ def test_switch_config_spine_secondary():
             + "ipv4 access-list cmn-can seq-number 30 deny ip 192.168.12.0 mask 255.255.255.0 192.168.200.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 40 deny ip 192.168.200.0 mask 255.255.255.0 192.168.12.0 mask 255.255.255.0\n"
             + "ipv4 access-list cmn-can seq-number 50 permit ip any any\n"
-            + "interface vlan 7 ipv4 port access-group cmn-can\n"
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
-            + "interface vlan 6 ipv4 port access-group cmn-can\n"
         ) in str(result.output)
         assert (
             "protocol ospf\n"
@@ -1422,8 +1419,6 @@ def test_switch_config_leaf_bmc():
             + "  ip vrf forwarding Customer\n"
             + "  mtu 9216\n"
             + "  ip address 192.168.12.4/24\n"
-            + "  ip access-group cmn-can in\n"
-            + "  ip access-group cmn-can out\n"
             + "  ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
         assert (
@@ -1677,8 +1672,6 @@ def test_switch_config_leaf_bmc_custom():
             + "  ip vrf forwarding Customer\n"
             + "  mtu 9216\n"
             + "  ip address 10.102.4.100/25\n"
-            + "  ip access-group cmn-can in\n"
-            + "  ip access-group cmn-can out\n"
             + "  ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
         print(result.output)
@@ -2150,8 +2143,6 @@ def test_switch_config_cdu_primary():
             + "  ip vrf forwarding Customer\n"
             + "  mtu 9216\n"
             + "  ip address 192.168.12.5/24\n"
-            + "  ip access-group cmn-can in\n"
-            + "  ip access-group cmn-can out\n"
             + "  ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
         print(result.output)
@@ -2610,8 +2601,6 @@ def test_switch_config_cdu_secondary():
             + "  ip vrf forwarding Customer\n"
             + "  mtu 9216\n"
             + "  ip address 192.168.12.6/24\n"
-            + "  ip access-group cmn-can in\n"
-            + "  ip access-group cmn-can out\n"
             + "  ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
         print(result.output)
