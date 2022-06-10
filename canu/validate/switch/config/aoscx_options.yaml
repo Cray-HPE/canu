@@ -133,8 +133,6 @@ full_text_sub: []
 per_line_sub:
   - search: ^Building configuration.*
     replace: ""
-  - search: ^snmpv3.*
-    replace: ""
   - search: ^ type jl663a.*
     replace: ""
   - search: ^user admin.*
