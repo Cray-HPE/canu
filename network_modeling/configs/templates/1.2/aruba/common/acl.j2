@@ -46,18 +46,6 @@ access-list ip nmn-hmn
 {%- if variables.HMN_MTN and variables.NMN_MTN %}
 {% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.HMN_MTN_NETWORK_IP }}/{{ variables.HMN_MTN_NETMASK }} {{ variables.NMN_MTN_NETWORK_IP }}/{{ variables.NMN_MTN_NETMASK }}
 {%- endif %}
-{%- if variables.NMNLB and variables.HMN %}
-{% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.NMNLB_NETWORK_IP }}/{{ variables.NMNLB_NETMASK }} {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }}
-{%- endif %}
-{%- if variables.HMNLB and variables.NMN %}
-{% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.HMNLB_NETWORK_IP }}/{{ variables.HMNLB_NETMASK }} {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }}
-{%- endif %}
-{%- if variables.HMN and variables.NMNLB %}
-{% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} {{ variables.NMNLB_NETWORK_IP }}/{{ variables.NMNLB_NETMASK }}
-{%- endif %}
-{%- if variables.NMN and variables.HMNLB %}
-{% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }} {{ variables.HMNLB_NETWORK_IP }}/{{ variables.HMNLB_NETMASK }}
-{%- endif %}
 {% set sequence = sequence+10 %}    {{ sequence }} permit any any any
 access-list ip cmn-can
 {%- if variables.CMN and variables.CAN %}
