@@ -24,7 +24,6 @@ interface vlan {{ variables.CAN_VLAN }} vrf forwarding Customer
 interface vlan {{ variables.CAN_VLAN }} ip address {{ variables.CAN_IP_PRIMARY }}/{{variables.CAN_PREFIX_LEN}} primary
 no interface vlan {{ variables.CAN_VLAN }} ip icmp redirect
 interface vlan {{ variables.CAN_VLAN }} mtu 9184
-interface vlan {{ variables.CAN_VLAN }} ipv4 port access-group cmn-can
 {%- endif %}
 
 no ntp server {{ variables.NCN_W001 }} disable
@@ -76,7 +75,6 @@ interface vlan {{ variables.CMN_VLAN }} mtu 9184
 interface vlan {{ variables.NMN_VLAN }} ipv4 port access-group nmn-hmn
 interface vlan {{ variables.HMN_VLAN }} ipv4 port access-group nmn-hmn
 {%- if variables.CAN != None %}
-interface vlan {{ variables.CMN_VLAN }} ipv4 port access-group cmn-can
 {%- endif %}
 ip load-sharing source-ip-port
 ip load-sharing type consistent
