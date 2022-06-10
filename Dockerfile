@@ -35,10 +35,11 @@ RUN mkdir /files
 COPY requirements.txt /app/canu/
 
 RUN apt-get -yq update && apt-get -yq install gcc openssl jq vim libffi-dev musl-dev \
-    python3 python3-dev python3-pip
+    python3-pip python3.9
 
 RUN pip3 install --upgrade pip && pip3 install -r /app/canu/requirements.txt
 
+RUN alias python='/usr/bin/python3.9'
 # copy canu files
 COPY . /app/canu
 
@@ -49,6 +50,6 @@ RUN pip3 install --editable /app/canu/
 RUN chown -R canu /app/canu /files
 
 # set none root user: canu
-USER canu
+USER root
 
 WORKDIR /files

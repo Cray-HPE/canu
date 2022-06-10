@@ -22,13 +22,9 @@ interface lag {{ node.config.LAG_NUMBER }} multi-chassis
     lacp mode active
     lacp fallback
     spanning-tree port-type admin-edge
-{%- if variables.CAN %}
     no shutdown
     vlan trunk native {{ variables.NATIVE_VLAN }}
-    vlan trunk allowed {{ variables.CAN_VLAN }}
-{%- else %}
-    vlan access 1
-{%- endif %}
+    vlan trunk allowed {{ variables.CAN_VLAN }},{{ variables.CMN_VLAN }}
 
 interface 1/1/{{ node.config.PORT }}
     no shutdown
