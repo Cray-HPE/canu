@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright [2022] Hewlett Packard Enterprise Development LP
+# (C) Copyright [2021] Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -23,6 +23,8 @@
 import click
 from click_help_colors import HelpColorsGroup
 
+from canu.config.bi_can import bi_can
+
 
 @click.group(
     cls=HelpColorsGroup,
@@ -32,3 +34,6 @@ from click_help_colors import HelpColorsGroup
 @click.pass_context
 def config(ctx):
     """Commands that configure switches on the network."""
+
+
+config.add_command(bi_can.bi_can)
