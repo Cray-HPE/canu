@@ -1242,7 +1242,7 @@ def get_switch_nodes(
             if preserve:
                 new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
-        elif shasta_name in {"uan", "login", "viz", "lmem"}:
+        elif shasta_name in {"uan", "login", "viz", "lmem", "gpu"}:
             primary_port_uan = get_primary_port(
                 nodes_by_name,
                 switch_name,

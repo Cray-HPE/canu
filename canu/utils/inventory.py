@@ -27,7 +27,7 @@ import click
 from canu.utils.sls import pull_sls_hardware, pull_sls_networks
 
 
-def inventory(username, password, network, sls_json=None):
+def inventory(username, password, network, sls_json=None, sls_inventory=None):
     """Build Nornir inventory from sls_input."""
     inventory = {"groups": "shasta", "hosts": {}}
     if sls_json:
@@ -68,7 +68,7 @@ def inventory(username, password, network, sls_json=None):
             for host in inventory["hosts"]:
                 if host == x["ExtraProperties"]["Aliases"][0]:
                     if x["ExtraProperties"]["Brand"] == "Aruba":
-                        inventory["hosts"][host]["platform"] = "aruba_os"
+                        inventory["hosts"][host]["platform"] = "aruba_aoscx"
                     elif x["ExtraProperties"]["Brand"] == "Dell":
                         inventory["hosts"][host]["platform"] = "dell_os10"
                     elif x["ExtraProperties"]["Brand"] == "Mellanox":
@@ -91,5 +91,7 @@ def inventory(username, password, network, sls_json=None):
             "defaults": {},
         },
     }
-
-    return inventory
+    if sls_inventory:
+        return inventory, sls_variables
+    else:
+        return inventory

@@ -19,11 +19,12 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-"""Retrieve SLS token."""
+"""Retrieve SLS token & inventory."""
 import base64
 from collections import defaultdict
 import json
 import sys
+import netaddr
 
 from kubernetes import client, config
 import requests
@@ -159,23 +160,65 @@ def pull_sls_networks(sls_file=None):
 
         sls_networks = sls_cache
 
+    networks_list = []
+
     sls_variables = {
         "SWITCH_ASN": None,
         "CAN": None,
         "CAN_VLAN": None,
+        "CAN_NETMASK": None,
+        "CAN_PREFIX_LEN": None,
+        "CAN_NETWORK_IP": None,
+        "CHN": None,
+        "CHN_VLAN": None,
+        "CHN_NETMASK": None,
+        "CHN_PREFIX_LEN": None,
+        "CHN_NETWORK_IP": None,
+        "CHN_ASN": None,
         "CMN": None,
         "CMN_VLAN": None,
+        "CMN_NETMASK": None,
+        "CMN_PREFIX_LEN": None,
+        "CMN_NETWORK_IP": None,
+        "CMN_ASN": None,
         "HMN": None,
         "HMN_VLAN": None,
+        "HMN_NETMASK": None,
+        "HMN_NETWORK_IP": None,
+        "HMN_PREFIX_LEN": None,
         "MTL": None,
-        "MTL_VLAN": None,
+        "MTL_NETMASK": None,
+        "MTL_NETWORK_IP": None,
+        "MTL_PREFIX_LEN": None,
         "NMN": None,
         "NMN_VLAN": None,
+        "NMN_NETMASK": None,
+        "NMN_NETWORK_IP": None,
+        "NMN_PREFIX_LEN": None,
+        "NMN_ASN": None,
         "HMN_MTN": None,
+        "HMN_MTN_NETMASK": None,
+        "HMN_MTN_NETWORK_IP": None,
+        "HMN_MTN_PREFIX_LEN": None,
         "NMN_MTN": None,
+        "NMN_MTN_NETMASK": None,
+        "NMN_MTN_NETWORK_IP": None,
+        "NMN_MTN_PREFIX_LEN": None,
+        "HMNLB": None,
+        "HMNLB_NETMASK": None,
+        "HMNLB_NETWORK_IP": None,
+        "HMNLB_PREFIX_LEN": None,
+        "HMNLB_TFTP": None,
+        "HMNLB_DNS": None,
+        "NMNLB": None,
+        "NMNLB_NETMASK": None,
+        "NMNLB_NETWORK_IP": None,
+        "NMNLB_PREFIX_LEN": None,
+        "NMNLB_TFTP": None,
+        "NMNLB_DNS": None,
         "CAN_IP_GATEWAY": None,
+        "CHN_IP_GATEWAY": None,
         "CMN_IP_GATEWAY": None,
-        "HSN_IP_GATEWAY": None,
         "HMN_IP_GATEWAY": None,
         "MTL_IP_GATEWAY": None,
         "NMN_IP_GATEWAY": None,
@@ -184,9 +227,12 @@ def pull_sls_networks(sls_file=None):
         "ncn_w003": None,
         "CAN_IP_PRIMARY": None,
         "CAN_IP_SECONDARY": None,
+        "CHN_IP_PRIMARY": None,
+        "CHN_IP_SECONDARY": None,
         "CMN_IP_PRIMARY": None,
         "CMN_IP_SECONDARY": None,
         "CAN_IPs": defaultdict(),
+        "CHN_IPs": defaultdict(),
         "CMN_IPs": defaultdict(),
         "HMN_IPs": defaultdict(),
         "MTL_IPs": defaultdict(),
@@ -198,50 +244,105 @@ def pull_sls_networks(sls_file=None):
         name = sls_network.get("Name", "")
 
         if name == "CAN":
-            sls_variables["CAN"] = sls_network.get("ExtraProperties", {}).get(
-                "CIDR",
-                "",
+            sls_variables["CAN"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
             )
+            sls_variables["CAN_NETMASK"] = sls_variables["CAN"].netmask
+            sls_variables["CAN_PREFIX_LEN"] = sls_variables["CAN"].prefixlen
+            sls_variables["CAN_NETWORK_IP"] = sls_variables["CAN"].ip
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
-                sls_variables["CAN_VLAN"] = subnets.get("VlanID", "")
                 if subnets["Name"] == "bootstrap_dhcp":
                     sls_variables["CAN_IP_GATEWAY"] = subnets["Gateway"]
+                    sls_variables["CAN_VLAN"] = subnets["VlanID"]
                     for ip in subnets["IPReservations"]:
                         if ip["Name"] == "can-switch-1":
                             sls_variables["CAN_IP_PRIMARY"] = ip["IPAddress"]
                         elif ip["Name"] == "can-switch-2":
                             sls_variables["CAN_IP_SECONDARY"] = ip["IPAddress"]
+                if subnets["Name"] == "bootstrap_dhcp":
+                    for ip in subnets["IPReservations"]:
+                        if "ncn-w" in ip["Name"]:
+                            sls_variables["CAN_IPs"][ip["Name"]] = ip["IPAddress"]
 
-        if name == "CMN":
-            sls_variables["CMN"] = sls_network.get("ExtraProperties", {}).get(
-                "CIDR",
-                "",
+
+        if name == "CHN":
+            sls_variables["CHN"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
+            )
+            sls_variables["CHN_NETMASK"] = sls_variables["CHN"].netmask
+            sls_variables["CHN_PREFIX_LEN"] = sls_variables["CHN"].prefixlen
+            sls_variables["CHN_NETWORK_IP"] = sls_variables["CHN"].ip
+            sls_variables["CHN_ASN"] = sls_network.get("ExtraProperties", {}).get(
+                "MyASN",
+                {},
             )
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
-                sls_variables["CMN_VLAN"] = subnets.get("VlanID", "")
+                if subnets["Name"] == "bootstrap_dhcp":
+                    sls_variables["CHN_IP_GATEWAY"] = subnets["Gateway"]
+                    sls_variables["CHN_VLAN"] = subnets["VlanID"]
+                    for ip in subnets["IPReservations"]:
+                        if ip["Name"] == "chn-switch-1":
+                            sls_variables["CHN_IP_PRIMARY"] = ip["IPAddress"]
+                        elif ip["Name"] == "chn-switch-2":
+                            sls_variables["CHN_IP_SECONDARY"] = ip["IPAddress"]
+                if subnets["Name"] == "bootstrap_dhcp":
+                    for ip in subnets["IPReservations"]:
+                        sls_variables["CHN_IPs"][ip["Name"]] = ip["IPAddress"]
+
+
+        elif name == "CMN":
+            sls_variables["CMN"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
+            )
+            sls_variables["CMN_NETMASK"] = sls_variables["CMN"].netmask
+            sls_variables["CMN_PREFIX_LEN"] = sls_variables["CMN"].prefixlen
+            sls_variables["CMN_NETWORK_IP"] = sls_variables["CMN"].ip
+            sls_variables["CMN_ASN"] = sls_network.get("ExtraProperties", {}).get(
+                "MyASN",
+                {},
+            )
+            for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 if subnets["Name"] == "bootstrap_dhcp":
                     sls_variables["CMN_IP_GATEWAY"] = subnets["Gateway"]
-                    for ip in subnets["IPReservations"]:
-                        if ip["Name"] == "cmn-switch-1":
-                            sls_variables["CMN_IP_PRIMARY"] = ip["IPAddress"]
-                        elif ip["Name"] == "cmn-switch-2":
-                            sls_variables["CMN_IP_SECONDARY"] = ip["IPAddress"]
+                    sls_variables["CMN_VLAN"] = subnets["VlanID"]
                 if subnets["Name"] == "network_hardware":
                     for ip in subnets["IPReservations"]:
                         if "sw" in ip["Name"]:
                             sls_variables["CMN_IPs"][ip["Name"]] = ip["IPAddress"]
+                if subnets["Name"] == "bootstrap_dhcp":
+                    for ip in subnets["IPReservations"]:
+                        if "ncn-w" in ip["Name"]:
+                            sls_variables["CMN_IPs"][ip["Name"]] = ip["IPAddress"]
 
         elif name == "HMN":
-            sls_variables["HMN"] = sls_network.get("ExtraProperties", {}).get(
-                "CIDR",
-                "",
+            sls_variables["HMN"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
             )
+            sls_variables["HMN_NETMASK"] = sls_variables["HMN"].netmask
+            sls_variables["HMN_PREFIX_LEN"] = sls_variables["HMN"].prefixlen
+            sls_variables["HMN_NETWORK_IP"] = sls_variables["HMN"].ip
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
-                sls_variables["HMN_VLAN"] = subnets.get("VlanID", "")
                 if subnets["Name"] == "network_hardware":
                     sls_variables["HMN_IP_GATEWAY"] = subnets["Gateway"]
+                    sls_variables["HMN_VLAN"] = subnets["VlanID"]
                     for ip in subnets["IPReservations"]:
                         sls_variables["HMN_IPs"][ip["Name"]] = ip["IPAddress"]
+                if subnets["Name"] == "bootstrap_dhcp":
+                    for ip in subnets["IPReservations"]:
+                        if "ncn-w" in ip["Name"]:
+                            sls_variables["HMN_IPs"][ip["Name"]] = ip["IPAddress"]
 
         elif name == "HSN":
             sls_variables["HSN"] = sls_network.get("ExtraProperties", {}).get(
@@ -253,28 +354,43 @@ def pull_sls_networks(sls_file=None):
                     sls_variables["HSN_IP_GATEWAY"] = subnets["Gateway"]
 
         elif name == "MTL":
-            sls_variables["MTL"] = sls_network.get("ExtraProperties", {}).get(
-                "CIDR",
-                "",
+            sls_variables["MTL"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
             )
+            sls_variables["MTL_NETMASK"] = sls_variables["MTL"].netmask
+            sls_variables["MTL_PREFIX_LEN"] = sls_variables["MTL"].prefixlen
+            sls_variables["MTL_NETWORK_IP"] = sls_variables["MTL"].ip
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
-                sls_variables["MTL_VLAN"] = subnets.get("VlanID", "")
                 if subnets["Name"] == "network_hardware":
                     sls_variables["MTL_IP_GATEWAY"] = subnets["Gateway"]
                     for ip in subnets["IPReservations"]:
                         sls_variables["MTL_IPs"][ip["Name"]] = ip["IPAddress"]
 
         elif name == "NMN":
-            sls_variables["NMN"] = sls_network.get("ExtraProperties", {}).get(
-                "CIDR",
-                "",
+            sls_variables["NMN"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
             )
+            sls_variables["NMN_NETMASK"] = sls_variables["NMN"].netmask
+            sls_variables["NMN_PREFIX_LEN"] = sls_variables["NMN"].prefixlen
+            sls_variables["NMN_NETWORK_IP"] = sls_variables["NMN"].ip
             sls_variables["SWITCH_ASN"] = sls_network.get("ExtraProperties", {}).get(
                 "PeerASN",
                 {},
             )
+            sls_variables["NMN_ASN"] = sls_network.get("ExtraProperties", {}).get(
+                "MyASN",
+                {},
+            )
+            sls_variables["NMN_NETMASK"] = sls_variables["NMN"].netmask
+            sls_variables["NMN_PREFIX_LEN"] = sls_variables["NMN"].prefixlen
+            sls_variables["NMN_NETWORK_IP"] = sls_variables["NMN"].ip
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
-                sls_variables["NMN_VLAN"] = subnets.get("VlanID", "")
                 if subnets["Name"] == "bootstrap_dhcp":
                     for ip in subnets["IPReservations"]:
                         if ip["Name"] == "ncn-w001":
@@ -283,28 +399,91 @@ def pull_sls_networks(sls_file=None):
                             sls_variables["ncn_w002"] = ip["IPAddress"]
                         elif ip["Name"] == "ncn-w003":
                             sls_variables["ncn_w003"] = ip["IPAddress"]
+                if subnets["Name"] == "bootstrap_dhcp":
+                    for ip in subnets["IPReservations"]:
+                        if "ncn-w" in ip["Name"]:
+                            sls_variables["NMN_IPs"][ip["Name"]] = ip["IPAddress"]
                 elif subnets["Name"] == "network_hardware":
                     sls_variables["NMN_IP_GATEWAY"] = subnets["Gateway"]
+                    sls_variables["NMN_VLAN"] = subnets["VlanID"]
                     for ip in subnets["IPReservations"]:
                         sls_variables["NMN_IPs"][ip["Name"]] = ip["IPAddress"]
 
         elif name == "NMN_MTN":
-            sls_variables["NMN_MTN"] = sls_network.get("ExtraProperties", {}).get(
-                "CIDR",
-                "",
+            sls_variables["NMN_MTN"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
             )
-            sls_variables["NMN_MTN_CABINETS"] = [
-                list(sls_network.get("ExtraProperties", {}).get("Subnets", {})),
-            ]
-        elif name == "HMN_MTN":
-            sls_variables["HMN_MTN"] = sls_network.get("ExtraProperties", {}).get(
-                "CIDR",
-                "",
+            sls_variables["NMN_MTN_NETMASK"] = sls_variables["NMN_MTN"].netmask
+            sls_variables["NMN_MTN_PREFIX_LEN"] = sls_variables["NMN_MTN"].prefixlen
+            sls_variables["NMN_MTN_NETWORK_IP"] = sls_variables["NMN_MTN"].ip
+            sls_variables["NMN_MTN_CABINETS"] = list(
+                sls_network.get("ExtraProperties", {}).get("Subnets", {}),
             )
-            sls_variables["HMN_MTN_CABINETS"] = [
-                list(sls_network.get("ExtraProperties", {}).get("Subnets", {})),
-            ]
 
+        elif name == "HMN_MTN":
+            sls_variables["HMN_MTN"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
+            )
+            sls_variables["HMN_MTN_NETMASK"] = sls_variables["HMN_MTN"].netmask
+            sls_variables["HMN_MTN_PREFIX_LEN"] = sls_variables["HMN_MTN"].prefixlen
+            sls_variables["HMN_MTN_NETWORK_IP"] = sls_variables["HMN_MTN"].ip
+            sls_variables["HMN_MTN_CABINETS"] = list(
+                sls_network.get("ExtraProperties", {}).get("Subnets", {}),
+            )
+
+        elif name == "HMNLB":
+            sls_variables["HMNLB"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
+            )
+            for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
+                if subnets["Name"] == "hmn_metallb_address_pool":
+                    for ip in subnets["IPReservations"]:
+                        if ip["Name"] == "cray-tftp":
+                            sls_variables["HMNLB_TFTP"] = ip["IPAddress"]
+                        elif ip["Name"] == "unbound":
+                            sls_variables["HMNLB_DNS"] = ip["IPAddress"]
+            sls_variables["HMNLB_NETMASK"] = sls_variables["HMNLB"].netmask
+            sls_variables["HMNLB_PREFIX_LEN"] = sls_variables["HMNLB"].prefixlen
+            sls_variables["HMNLB_NETWORK_IP"] = sls_variables["HMNLB"].ip
+            sls_variables["HMNLB_CABINETS"] = list(
+                sls_network.get("ExtraProperties", {}).get("Subnets", {}),
+            )
+
+        elif name == "NMNLB":
+            sls_variables["NMNLB"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
+            )
+            for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
+                if subnets["Name"] == "nmn_metallb_address_pool":
+                    for ip in subnets["IPReservations"]:
+                        if ip["Name"] == "cray-tftp":
+                            sls_variables["NMNLB_TFTP"] = ip["IPAddress"]
+                        elif ip["Name"] == "unbound":
+                            sls_variables["NMNLB_DNS"] = ip["IPAddress"]
+            sls_variables["NMNLB_NETMASK"] = sls_variables["NMNLB"].netmask
+            sls_variables["NMNLB_PREFIX_LEN"] = sls_variables["NMNLB"].prefixlen
+            sls_variables["NMNLB_NETWORK_IP"] = sls_variables["NMNLB"].ip
+            sls_variables["NMNLB_CABINETS"] = list(
+                sls_network.get("ExtraProperties", {}).get("Subnets", {}),
+            )
+        for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
+
+            vlan = subnets.get("VlanID", "")
+            networks_list.append([name, vlan])
+
+    networks_list = {tuple(x) for x in networks_list}
     return sls_variables
 
 
