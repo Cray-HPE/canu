@@ -1,0 +1,72 @@
+vrf Customer
+hostname {{ host }}
+
+vlan 1
+    name MTL
+interface vlan 1
+    description MTL
+    ip mtu 9198
+    ip address {{ vlan_ip(variables, host, network = "MTL_IPs") }}/{{ variables.MTL_PREFIX_LEN }}
+{% if hostname in ["sw-spine-001", "sw-spine-002"] %}
+    active-gateway ip mac 12:00:00:00:6b:00
+    active-gateway ip {{ variables.MTL_IP_GATEWAY }}
+{% endif %}
+    ip ospf 1 area 0.0.0.0
+
+vlan {{ variables.NMN_VLAN }}
+    name NMN
+interface vlan {{ variables.NMN_VLAN }}
+    description NMN
+    ip mtu 9198
+    ip address {{ vlan_ip(variables, host, network = "NMN_IPs") }}/{{ variables.NMN_PREFIX_LEN }}
+{% if hostname in ["sw-spine-001", "sw-spine-002"] %}
+    active-gateway ip mac 12:00:00:00:6b:00
+    active-gateway ip {{ variables.NMN_IP_GATEWAY }}
+    ip helper-address 10.92.100.222
+{% endif %}
+    ip ospf 1 area 0.0.0.0
+
+vlan {{ variables.HMN_VLAN }}
+    name NMN
+interface vlan {{ variables.HMN_VLAN }}
+    description HMN
+    ip mtu 9198
+    ip address {{ vlan_ip(variables, host, network = "HMN_IPs") }}/{{ variables.HMN_PREFIX_LEN }}
+{% if hostname in ["sw-spine-001", "sw-spine-002"] %}
+    active-gateway ip mac 12:00:00:00:6b:00
+    active-gateway ip {{ variables.HMN_IP_GATEWAY }}
+    ip helper-address 10.94.100.222
+{% endif %}
+    ip ospf 1 area 0.0.0.0
+
+vlan {{ variables.CMN_VLAN }}
+    name CMN
+interface vlan {{ variables.CMN_VLAN }}
+    vrf attach Customer
+    description CMN
+    ip mtu 9198
+    ip address {{ vlan_ip(variables, host, network = "CMN_IPs") }}/{{ variables.CMN_PREFIX_LEN }}
+{% if hostname in ["sw-spine-001", "sw-spine-002"] %}
+    active-gateway ip mac 12:00:00:00:6b:00
+    active-gateway ip {{ variables.CMN_IP_GATEWAY }}
+{% endif %}
+    ip ospf 2 area 0.0.0.0
+
+{% if variables.CAN and hostname in ["sw-spine-001", "sw-spine-002"] %}
+vlan {{ variables.CAN_VLAN }}
+    name CAN
+interface vlan {{ variables.CAN_VLAN }}
+    vrf attach Customer
+    description CAN
+    ip mtu 9198
+{% if hostname == "sw-spine-001" %}
+    ip address {{ variables.CAN_IP_PRIMARY }}/{{ variables.CAN_PREFIX_LEN }}
+{% else %}
+    ip address {{ variables.CAN_IP_SECONDARY }}/{{ variables.CAN_PREFIX_LEN }}
+{% endif %}
+    active-gateway ip mac 12:00:00:00:6b:00
+    active-gateway ip {{ variables.CAN_IP_GATEWAY }}
+    ip ospf 2 area 0.0.0.0
+{% endif %}
+
+

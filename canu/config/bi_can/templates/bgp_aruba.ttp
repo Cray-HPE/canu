@@ -1,0 +1,55 @@
+<macro>
+def is_passive(data):
+    if "passive" in data:
+        return data, {"passive": True}
+    else:
+       return data, {"passive": False}
+</macro>
+<macro>
+def is_active(data):
+    if "activate" in data:
+        return data, {"activate": True}
+    else:
+       return data, {"activate": False}
+</macro>
+
+<group name="bgp_cfg.vrfs.default">
+router bgp {{ asn }}
+    bgp router-id {{ bgp_rid }}
+    maximum-paths {{ max_paths }}
+    timers bgp {{ keepalive_timer }} {{ hold_timer }}
+    distance bgp {{ ebgp_distance }} {{ ibgp_distance }}
+    <group name="peers.{{ neighbor }}**">
+    neighbor {{ neighbor | _start_ }} remote-as {{ remote_asn }}
+    neighbor {{ neighbor }} {{ passive | macro("is_passive") }}
+    </group>
+        <group name="peers.{{ neighbor }}**">
+        neighbor {{ neighbor }} {{ activate | exclude("passive") | macro("is_active") }}
+        </group>
+        <group name="peers.{{ neighbor }}**.route-map">
+        neighbor {{ neighbor }} route-map {{ route-map-in }} in
+        </group>
+        <group name="peers.{{ neighbor }}**.route-map**">
+        neighbor {{ neighbor }} route-map {{ route-map-out }} out
+        </group>
+</group>
+<group name="vrfs.{{ vrf }}">
+    vrf {{ vrf }}
+        bgp router-id {{ bgp_rid }}
+        maximum-paths {{ max_paths }}
+        timers bgp {{ keepalive_timer }} {{ hold_timer }}
+        distance bgp {{ ebgp_distance }} {{ ibgp_distance }}
+        <group name="peers.{{ neighbor }}**">
+        neighbor {{ neighbor | _start_ }} remote-as {{ remote_asn }}
+        neighbor {{ neighbor }} {{ passive | macro("is_passive") }}
+        </group>
+            <group name="peers.{{ neighbor }}**">
+            neighbor {{ neighbor }} {{ activate | macro("is_active") }}
+            </group>
+            <group name="peers.{{ neighbor }}**">
+            neighbor {{ neighbor }} route-map {{ route-map-in }} in
+            </group>
+            <group name="peers.{{ neighbor }}**">
+            neighbor {{ neighbor }} route-map {{ route-map-out }} out
+            </group>
+</group>

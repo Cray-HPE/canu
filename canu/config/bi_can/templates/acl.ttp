@@ -1,0 +1,7 @@
+<group name = "acl.{{ acl }}">
+access-list ip {{ acl }}
+	<group name = "{{ sequence }}" >
+    {{ sequence | DIGIT | _start_ }} {{ action }} {{ protocol }} {{ source }} {{ destination }} eq {{ port }}
+    {{ sequence | DIGIT | _start_ }} {{ action }} {{ protocol }} {{ source }} {{ destination }}
+</group>
+</group>

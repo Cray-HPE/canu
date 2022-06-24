@@ -1,0 +1,61 @@
+{#- bgp #}
+{% if hostname in ["sw-spine-001", "sw-spine-002"] %}
+
+{% include 'acl.j2' %}
+
+vrf Customer
+{% include 'prefix-list.j2' %}
+!
+!
+{% include 'route-map.j2' %}
+router bgp {{ variables.SWITCH_ASN }}
+    maximum-paths 8
+    timers bgp 1 3
+    distance bgp 20 70
+{% if hostname == "sw-spine-001" %}
+    neighbor {{ vlan_ip(variables, "sw-spine-002", network = "NMN_IPs") }} remote-as {{ variables.SWITCH_ASN }}
+{% elif hostname == "sw-spine-002" %}
+    neighbor {{ vlan_ip(variables, "sw-spine-001", network = "NMN_IPs") }} remote-as {{ variables.SWITCH_ASN }}
+{% endif %}
+{% for name, ip in variables.NMN_IPs.items() if "ncn-w" in name %}
+    neighbor {{ ip }} remote-as {{ variables.NMN_ASN }}
+    neighbor {{ ip }} passive
+{% endfor %}
+    address-family ipv4 unicast
+{% if hostname == "sw-spine-001" %}
+        neighbor {{ vlan_ip(variables, "sw-spine-002", network = "NMN_IPs") }} activate
+{% elif hostname == "sw-spine-002" %}
+        neighbor {{ vlan_ip(variables, "sw-spine-001", network = "NMN_IPs") }} activate
+{% endif %}
+{% for name, ip in variables.NMN_IPs.items() if "ncn-w" in name %}
+        neighbor {{ ip }} activate
+        neighbor {{ ip }} route-map {{ name }} in
+{% endfor %}
+    exit-address-family
+!
+    vrf Customer
+        maximum-paths 8
+        timers bgp 1 3
+        distance bgp 20 70
+{% if hostname == "sw-spine-001" %}
+        neighbor {{ vlan_ip(variables, "sw-spine-002", network = "CMN_IPs") }} remote-as {{ variables.SWITCH_ASN }}
+{% elif hostname == "sw-spine-002" %}
+        neighbor {{ vlan_ip(variables, "sw-spine-001", network = "CMN_IPs") }} remote-as {{ variables.SWITCH_ASN }}
+{% endif %}
+{% for name, ip in variables.CMN_IPs.items() if "ncn-w" in name %}
+        neighbor {{ ip }} remote-as {{ variables.CMN_ASN }}
+        neighbor {{ ip }} passive
+{% endfor %}
+        address-family ipv4 unicast
+{% if hostname == "sw-spine-001" %}
+            neighbor {{ vlan_ip(variables, "sw-spine-002", network = "CMN_IPs") }} activate
+{% elif hostname == "sw-spine-002" %}
+            neighbor {{ vlan_ip(variables, "sw-spine-001", network = "CMN_IPs") }} activate
+{% endif %}
+{% for name, ip in variables.CMN_IPs.items() if "ncn-w" in name %}
+            neighbor {{ ip }} activate
+            neighbor {{ ip }} route-map {{ name }}-Customer in
+{% endfor %}
+        exit-address-family
+{% endif %}
+{#- end bgp #}
