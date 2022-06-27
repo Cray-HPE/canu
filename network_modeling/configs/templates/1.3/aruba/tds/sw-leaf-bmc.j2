@@ -36,6 +36,38 @@ spanning-tree config-revision 1
 interface mgmt
     shutdown
     ip dhcp
+qos queue-profile Aruba
+    vsx-sync
+    !
+    map queue 0 local-priority 0
+    name queue 0 Best-effort
+    map queue 1 local-priority 1
+    name queue 1 Background
+    map queue 2 local-priority 2
+    name queue 2 Excellent-effort
+    map queue 3 local-priority 3
+    name queue 3 Critical-applications
+    map queue 4 local-priority 4
+    name queue 4 Video
+    map queue 5 local-priority 5
+    name queue 5 Voice
+    map queue 6 local-priority 6
+    name queue 6 Inter-network-control
+    map queue 7 local-priority 7
+    name queue 7 Network-control
+qos schedule-profile Aruba
+    vsx-sync
+    !
+    strict queue 0 
+    strict queue 1 
+    strict queue 2 
+    strict queue 3 
+    strict queue 4 
+    strict queue 5 
+    strict queue 6 
+    strict queue 7 
+apply qos queue-profile Aruba schedule-profile Aruba
+qos trust dscp
 
 {% include '1.2/aruba/common/compute.j2' %}
 {% include '1.2/aruba/common/bmc.j2' %}
@@ -44,35 +76,64 @@ interface mgmt
 
 interface loopback 0
     ip address {{ variables.LOOPBACK_IP }}/32
+    ipv6 address  {{ variables.LOOPBACK_IPv6 }}/128
     ip ospf 1 area 0.0.0.0
+    ipv6 ospfv3 1 area 0.0.0.0
+interface loopback 1
+    ipv6 address  {{ variables.LOOPBACK_IPv6 }}/128
+    ipv6 ospfv3 2 area 0.0.0.0
 interface vlan 1
     ip mtu 9198
     ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}}
+    ipv6 address {{ variables.MTL_IPv6 }}/{{variables.MTL_PREFIX_LEN_IPv6}}
     ip ospf 1 area 0.0.0.0
     ip ospf passive
+    ipv6 ospfv3 1 area 0.0.0.0
+    ipv6 ospfv3 passive
+    ip igmp enable
+    ipv6 mld enable
 interface vlan {{ variables.NMN_VLAN }}
     description NMN
     ip mtu 9198
     ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}}
+    ipv6 address {{ variables.NMN_IPv6 }}/{{variables.NMN_PREFIX_LEN_IPv6}}
     ip ospf 1 area 0.0.0.0
+    ipv6 ospfv3 1 area 0.0.0.0
+    ip igmp enable
+    ipv6 mld enable
 interface vlan {{ variables.HMN_VLAN }}
     description HMN
     ip mtu 9198
     ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
+    ipv6 address {{ variables.HMN_IPv6 }}/{{variables.HMN_PREFIX_LEN_IPv6}}
     ip ospf 1 area 0.0.0.0
     ip ospf passive
+    ipv6 ospfv3 1 area 0.0.0.0
+    ipv6 ospfv3 passive
+    ip igmp enable
+    ipv6 mld enable
 interface vlan {{ variables.CMN_VLAN }}
     vrf attach Customer
     description CMN
     ip mtu 9198
     ip address {{ variables.CMN_IP }}/{{variables.CMN_PREFIX_LEN}}
+    ipv6 address {{ variables.CMN_IPv6 }}/{{variables.CMN_PREFIX_LEN_IPv6}}
     ip ospf 2 area 0.0.0.0
+    ipv6 ospfv3 2 area 0.0.0.0
+    ip igmp enable
+    ipv6 mld enable
 snmp-server vrf default
 ip dns server-address {{ variables.NMNLB_DNS }}
 router ospf 2 vrf Customer
     router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
+router ospfv3 2 vrf Customer
+    router-id {{ variables.LOOPBACK_IP }}
+    area 0.0.0.0
 router ospf 1
+    router-id {{ variables.LOOPBACK_IP }}
+    area 0.0.0.0
+router ospfv3 1
     router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
 https-server vrf Customer
