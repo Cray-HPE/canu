@@ -1,0 +1,34 @@
+{#- qos #}
+qos queue-profile Aruba
+    vsx-sync
+    !
+    map queue 0 local-priority 0
+    name queue 0 Best-effort
+    map queue 1 local-priority 1
+    name queue 1 Background
+    map queue 2 local-priority 2
+    name queue 2 Excellent-effort
+    map queue 3 local-priority 3
+    name queue 3 Critical-applications
+    map queue 4 local-priority 4
+    name queue 4 Video
+    map queue 5 local-priority 5
+    name queue 5 Voice
+    map queue 6 local-priority 6
+    name queue 6 Inter-network-control
+    map queue 7 local-priority 7
+    name queue 7 Network-control
+qos schedule-profile Aruba
+    vsx-sync
+    !
+    strict queue 0 
+    strict queue 1 
+    strict queue 2 
+    strict queue 3 
+    strict queue 4 
+    strict queue 5 
+    strict queue 6 
+    strict queue 7 
+apply qos queue-profile Aruba schedule-profile Aruba
+qos trust dscp
+{#- end qos #}
