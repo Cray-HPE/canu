@@ -26,6 +26,7 @@ from os import environ, path
 import sys
 
 import click
+import pkg_resources
 from click_help_colors import HelpColorsCommand, HelpColorsGroup
 import requests
 from ruamel.yaml import YAML
@@ -52,12 +53,9 @@ if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cov
 else:
     parent_directory = path.abspath(path.dirname(path.dirname(__file__)))
 
+canu_version = pkg_resources.get_distribution('canu').version
+
 canu_config_file = path.join(parent_directory, "canu", "canu.yaml")
-canu_version_file = path.join(parent_directory, "canu", ".version")
-
-with open(canu_version_file, "r") as version_file:
-    version = version_file.read().replace("\n", "")
-
 with open(canu_config_file, "r") as canu_f:
     canu_config = yaml.load(canu_f)
 
