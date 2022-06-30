@@ -22,30 +22,20 @@
 
 FROM artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:3.10
 
-# create canu user
-RUN     useradd -ms /bin/bash canu
-
 # update command prompt
-RUN     echo 'export PS1="canu \w : "' >> /etc/bash.bashrc
+RUN echo 'export PS1="canu \w : "' >> /etc/bash.bashrc
 
 # make files dir
-RUN     mkdir /files
+RUN mkdir /files
 
-# prep image layer for faster builds
-COPY    requirements.txt /app/canu/
+COPY dist/rpmbuild/RPMS/x86_64/ /files
 
-RUN     pip3 install -r /app/canu/requirements.txt
-
-# copy canu files
-COPY    . /app/canu
-
-# install canu
-RUN     pip3 install --editable /app/canu/
+RUN ls -l /files && zypper in -y /files/canu*.rpm
 
 # set file perms for canu
-RUN     chown -R canu /app/canu /files
+RUN chown -R canu /files
 
 # set none root user: canu
-USER    canu
+USER canu
 
 WORKDIR /files
