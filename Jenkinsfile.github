@@ -20,7 +20,9 @@
 
 @Library('csm-shared-library') _
 
+def isStable = env.TAG_NAME != null ? true : false
 def pythonVersion = '3.10'
+
 pipeline {
     agent {
         label "metal-gcp-builder"
@@ -34,23 +36,19 @@ pipeline {
     }
 
     environment {
-        DESCRIPTION = "CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze."
-        IS_STABLE = getBuildIsStable()
         GIT_REPO_NAME = getRepoName()
-        BUILD_METADATA = getRpmRevision(isStable: env.IS_STABLE)
-        IMAGE_VERSION = getDockerBuildVersion(isStable: env.IS_STABLE)
-        DOCKER_ARGS = getDockerBuildArgs(name: "cray-${getRepoName()}", description: env.DESCRIPTION)
+        IMAGE_VERSION = sh(returnStdout: true, script: "git describe --tags | tr -s '-' '_' | tr -d '^v'").trim()
+        VERSION = sh(returnStdout: true, script: "git describe --tags | tr -s '-' '~' | tr -d '^v'").trim()
     }
 
     stages {
 
-        stage("Prepare: RPM") {
+        stage('Prepare: RPMs') {
             agent {
                 docker {
+                    label 'docker'
                     image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${pythonVersion}"
                     reuseNode true
-                    // Support docker in docker for clamav scan
-                    args "-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --group-add 999"
                 }
             }
             steps {
@@ -61,22 +59,12 @@ pipeline {
             }
         }
 
-        stage("Build: Binary") {
-            steps {
-                script {
-                    sh "make binary"
-                }
-            }
-        }
-
-
-        stage("Build: RPMs") {
+        stage('Build: RPMs') {
             agent {
                 docker {
+                    label 'docker'
                     image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${pythonVersion}"
                     reuseNode true
-                    // Support docker in docker for clamav scan
-                    args "-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --group-add 999"
                 }
             }
             steps {
@@ -87,10 +75,10 @@ pipeline {
         stage('Publish: RPMs') {
             steps {
                 script {
-                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: "sle-15sp2", arch: "x86_64", isStable: env.IS_STABLE)
-                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: "sle-15sp3", arch: "x86_64", isStable: env.IS_STABLE)
-                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: "sle-15sp2", arch: "src", isStable: env.IS_STABLE)
-                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: "sle-15sp3", arch: "src", isStable: env.IS_STABLE)
+                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: "sle-15sp2", arch: "x86_64", isStable: isStable)
+                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: "sle-15sp3", arch: "x86_64", isStable: isStable)
+                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: "sle-15sp2", arch: "src", isStable: isStable)
+                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: "sle-15sp3", arch: "src", isStable: isStable)
                 }
             }
         }

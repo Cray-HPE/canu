@@ -2,6 +2,7 @@
 canu_cache.yaml
 files/*
 nornir.log
+pyinstaller.spec
 
 # Build artifacts
 *.py[cod]
