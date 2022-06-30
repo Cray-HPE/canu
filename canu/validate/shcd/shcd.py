@@ -36,6 +36,7 @@ from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from network_modeling.NetworkPort import NetworkPort
 from network_modeling.NodeLocation import NodeLocation
 from openpyxl import load_workbook
+import pkg_resources
 
 
 # Get project root directory
@@ -45,10 +46,7 @@ else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent.parent
 
-canu_version_file = path.join(project_root, "canu", ".version")
-
-with open(canu_version_file, "r") as version_file:
-    version = version_file.read().replace("\n", "")
+version = pkg_resources.get_distribution('canu').version
 
 log = logging.getLogger("validate_shcd")
 

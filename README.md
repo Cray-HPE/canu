@@ -20,24 +20,24 @@ CANU can be used to:
 To checkout a fresh system using CSI:
 
 1. Make a new directory to save switch IP addresses: `mkdir ips_folder`, `cd ips_folder`
-2. Parse CSI files and save switch IP addresses: `canu init --sls-file sls_input_file.json --out ips.txt`
-3. Check network firmware: `canu report network firmware --csm 1.2 --ips-file ips.txt`
-4. Check network cabling: `canu report network cabling --ips-file ips.txt`
-5. Validate BGP status: `canu validate network bgp --ips-file ips.txt --verbose`
-6. Validate cabling: `canu validate network cabling --ips-file ips.txt`
+1. Parse CSI files and save switch IP addresses: `canu init --sls-file sls_input_file.json --out ips.txt`
+1. Check network firmware: `canu report network firmware --csm 1.2 --ips-file ips.txt`
+1. Check network cabling: `canu report network cabling --ips-file ips.txt`
+1. Validate BGP status: `canu validate network bgp --ips-file ips.txt --verbose`
+1. Validate cabling: `canu validate network cabling --ips-file ips.txt`
 
 If you have the system's **SHCD**, there are even more commands that can be run
 
-7. Validate the SHCD: `canu validate shcd --shcd SHCD.xlsx`
-8. Validate the SHCD against network cabling: `canu validate shcd-cabling --shcd SHCD.xlsx --ips-file ips.txt`
-9. Generate switch config for the network: `canu generate network config --shcd SHCD.xlsx --sls-file sls_input_file.json --folder configs`
-10. Convert the SHCD to CCJ: `canu validate shcd --shcd SHCD.xlsx --json --out paddle.json`
+1. Validate the SHCD: `canu validate shcd --shcd SHCD.xlsx`
+1. Validate the SHCD against network cabling: `canu validate shcd-cabling --shcd SHCD.xlsx --ips-file ips.txt`
+1. Generate switch config for the network: `canu generate network config --shcd SHCD.xlsx --sls-file sls_input_file.json --folder configs`
+1. Convert the SHCD to CCJ: `canu validate shcd --shcd SHCD.xlsx --json --out paddle.json`
 
 If you have the system's **CCJ**
 
-11. Validate the Paddle / CCJ: `canu validate paddle --ccj paddle.json`
-12. Validate the CCJ against network cabling: `canu validate paddle-cabling --ccj paddle.json --ips-file ips.txt`
-13. Generate switch config for the network: `canu generate network config --ccj paddle.json --sls-file sls_input_file.json --folder configs`
+1. Validate the Paddle / CCJ: `canu validate paddle --ccj paddle.json`
+1. Validate the CCJ against network cabling: `canu validate paddle-cabling --ccj paddle.json --ips-file ips.txt`
+1. Generate switch config for the network: `canu generate network config --ccj paddle.json --sls-file sls_input_file.json --folder configs`
 
 # Paddle / CCJ
 
@@ -53,29 +53,29 @@ The SHCD can easily be converted into CCJ by using `canu validate shcd --shcd SH
 
 # Table of Contents
 
-**[Installation](#installation)**<br>
-**[CANU Initialization](#initialization)**<br>
-**[Report Switch Firmware](#report-switch-firmware)**<br>
-**[Report Network Firmware](#report-network-firmware)**<br>
-**[Report Switch Cabling](#report-switch-cabling)**<br>
-**[Report Network Cabling](#report-network-cabling)**<br>
-**[Validate SHCD](#validate-shcd)**<br>
-**[Validate Paddle](#validate-paddle)**<br>
-**[Validate Network Cabling](#validate-network-cabling)**<br>
-**[Validate SHCD and Cabling](#validate-shcd-and-cabling)**<br>
-**[Validate Paddle and Cabling](#validate-paddle-and-cabling)**<br>
-**[Validate Network BGP](#validate-network-bgp)**<br>
-**[Generate Switch Config](#generate-switch-config)**<br>
-**[Generate Network Config](#generate-network-config)**<br>
-**[Validate Switch Config](#validate-switch-config)**<br>
-**[Validate Network Config](#validate-network-config)**<br>
-**[Backup Network](#backup-network)**<br>
-**[Send Command](#send-)**<br>
-**[Cache](#cache)**<br>
-**[Uninstallation](#uninstallation)**<br>
-**[Road Map](#road-map)**<br>
-**[Testing](#testing)**<br>
-**[Changelog](#changelog)**<br>
+**[Installation](#installation)**
+**[CANU Initialization](#initialization)**
+**[Report Switch Firmware](#report-switch-firmware)**
+**[Report Network Firmware](#report-network-firmware)**
+**[Report Switch Cabling](#report-switch-cabling)**
+**[Report Network Cabling](#report-network-cabling)**
+**[Validate SHCD](#validate-shcd)**
+**[Validate Paddle](#validate-paddle)**
+**[Validate Network Cabling](#validate-network-cabling)**
+**[Validate SHCD and Cabling](#validate-shcd-and-cabling)**
+**[Validate Paddle and Cabling](#validate-paddle-and-cabling)**
+**[Validate Network BGP](#validate-network-bgp)**
+**[Generate Switch Config](#generate-switch-config)**
+**[Generate Network Config](#generate-network-config)**
+**[Validate Switch Config](#validate-switch-config)**
+**[Validate Network Config](#validate-network-config)**
+**[Backup Network](#backup-network)**
+**[Send Command](#send-command)**
+**[Cache](#cache)**
+**[Uninstallation](#uninstallation)**
+**[Road Map](#road-map)**
+**[Testing](#testing)**
+**[Changelog](#changelog)**
 
 # Installation and Usage
 
@@ -91,47 +91,68 @@ In order to run CANU, both python3 and pip3 need to be installed.
     - docker
     - docker-compose
 
-  ```bash
+    ```bash
     sh canu_docker.sh up
-  ```
+    ```
 
   - CANU source files can be found inside the container at /app/canu
   - shared folder between local disk is call `files` and is mounted in the container at `/files`
   - When you are finished with the container and `exit` the container:
 
-  ```bash
+    ```bash
     sh canu_docker.sh down
-  ```
+    ```
 
 - To run CANU in a Python Virtualenv:
 
-  - Prerequisites
+  - Prerequisites:
     - python3
     - pip3
     - Python Virtualenv
 
   ```bash
-    python3 -m venv .venv
-    source ./.venv/bin/activate
-    pip3 install .
+  python3 -m venv .venv
+  source ./.venv/bin/activate
+  python3 -m pip install .
+  python3 -m pip install .[network_modeling]
   ```
 
   - When you are done working in the Python Virtualenv.
     Use the following command to exit out of the Python Virtualenv:
 
-  ```bash
-  deactivate
-  ```
+    ```bash
+    deactivate
+    ```
 
 - To install the development build of CANU type:
 
   ```bash
-  pip3 install --editable .
+  python3 -m pip install --editable .
   ```
 
 - To install SLES RPM versions
 
 [SLES RPM](docs/rpm_install.md)
+
+### Versioning
+
+- (stable) Production/stable copies will report an `X.Y.Z` version:
+
+  ```bash
+  canu, version 1.6.20
+  ```
+  
+- (unstable) Feature/bugfix branches will report an `X.Y.Z.postA` version:
+
+  ```bash
+  canu, version 1.6.20.post1
+  ```
+
+- (unstable/dev) Development builds with uncommitted changes present report an `X.Y.Z.postA.dev1` version:
+
+  ```bash
+  canu, version 1.6.20.post1.dev1
+  ```
 
 ## Usage
 
@@ -157,7 +178,12 @@ The CSI _sls_input_file.json_ file is generally stored in one of two places depe
 To get the switch IP addresses from CSI output, run the command:
 
 ```bash
-$ canu init --sls-file SLS_FILE --out output.txt
+canu init --sls-file SLS_FILE --out output.txt
+```
+
+Potential output:
+
+```text
 8 IP addresses saved to output.txt
 ```
 
@@ -168,7 +194,12 @@ $ canu init --sls-file SLS_FILE --out output.txt
 To get the switch IP addresses from the Shasta SLS API, run the command:
 
 ```bash
-$ canu init --auth-token ~./config/cray/tokens/ --sls-address 1.2.3.4 --out output.txt
+canu init --auth-token ~./config/cray/tokens/ --sls-address 1.2.3.4 --out output.txt
+```
+
+Potential output:
+
+```text
 8 IP addresses saved to output.txt
 ```
 
@@ -204,8 +235,12 @@ The CSM version is required to determine the firmware to validate against, you c
 An example of checking the firmware of multiple switches: `canu report network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
 ```bash
-$ canu report network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2,192.168.1.3,192.168.1.4 --username USERNAME --password PASSWORD
+canu report network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2,192.168.1.3,192.168.1.4 --username USERNAME --password PASSWORD
+```
 
+Potential output:
+
+```text
 ------------------------------------------------------------------
     STATUS  IP              HOSTNAME            FIRMWARE
 ------------------------------------------------------------------
@@ -242,8 +277,12 @@ To output the results of the switch firmware or network firmware commands to a f
 To get the JSON output from a single switch, or from multiple switches, make sure to use the `--json` flag. An example json output is below.
 
 ```bash
-$ canu network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --json
+canu network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --json
+```
+           
+Potential output:
 
+```json
 {
     "192.168.1.1": {
         "status": "Pass",
@@ -270,8 +309,6 @@ $ canu network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2 --username USERN
         },
     },
 }
-
-
 ```
 
 ### Report Switch Cabling
@@ -280,8 +317,12 @@ $ canu network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2 --username USERN
 CANU can also use LLDP to check the cabling status of a switch. To check the cabling of a single switch run: `canu report switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD`
 
 ```bash
-$ canu report switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD
+canu report switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD
+```
 
+Potential output:
+
+```text
 Switch: test-switch-spine01 (192.168.1.1)
 Aruba 8325
 ------------------------------------------------------------------------------------------------------------------------------------------
@@ -313,13 +354,17 @@ There are two different `--view` options, **switch** and **equipment**.
 
 1. The `--view switch` option displays a table for every switch IP address passed in showing connections. This is the same view as shown in the above example of checking single switch cabling.
 
-2. The `--view equipment` option displays a table for each mac address connection. This means that servers and switches will both display incoming and outgoing connections.
+1. The `--view equipment` option displays a table for each mac address connection. This means that servers and switches will both display incoming and outgoing connections.
 
 An example of checking the cabling of multiple switches and displaying with the equipment view: `canu network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --view equipment`
 
 ```bash
-$ canu report network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --view equipment
+canu report network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --view equipment
+```
 
+Potential output:
+
+```text
 sw-spine01 Aruba JL635A  GL.10.06.0010
 aa:aa:aa:aa:aa:aa
 ----------------------------------------------------------------------------------------------------
@@ -359,8 +404,12 @@ CANU can be used to validate that an SHCD (SHasta Cabling Diagram) passes basic 
 To check an SHCD run: `canu validate shcd -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN,HMN --corners I14,S25,I16,S22,J20,T39`
 
 ```bash
-$ canu validate shcd -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN,HMN --corners I14,S25,I16,S22,J20,T39
+canu validate shcd -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN,HMN --corners I14,S25,I16,S22,J20,T39
+```
 
+Potential output:
+
+```text
 SHCD Node Connections
 ------------------------------------------------------------
 0: sw-spine-001 connects to 6 nodes: [1, 2, 3, 4, 5, 6]
@@ -391,8 +440,12 @@ CANU can be used to validate that a CCJ (CSM Cabling JSON) passes basic validati
 To validate a paddle CCJ run: `canu validate paddle --ccj paddle.json`
 
 ```bash
-$ canu validate paddle --ccj paddle.json
+canu validate paddle --ccj paddle.json
+```
 
+Potential output:
+
+```text
 CCJ Node Connections
 ------------------------------------------------------------
 0: sw-spine-001 connects to 6 nodes: [1, 2, 3, 4, 5, 6]
@@ -402,7 +455,6 @@ CCJ Node Connections
 4: ncn-s001 connects to 2 nodes: [0, 1]
 5: ncn-w001 connects to 2 nodes: [0, 1]
 6: ncn-m001 connects to 2 nodes: [0, 1]
-
 ```
 
 ### Validate Network Cabling
@@ -417,8 +469,12 @@ CANU can be used to validate that network cabling passes basic validation checks
 To validate the cabling run: `canu validate network cabling -a tds --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
 ```bash
-$ canu validate network cabling -a tds --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
+canu validate network cabling -a tds --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
+```
 
+Potential output:
+
+```text
 Cabling Node Connections
 ------------------------------------------------------------
 0: sw-spine-001 connects to 10 nodes: [1, 2, 3, 4]
@@ -464,8 +520,12 @@ CANU can be used to validate an SHCD against the current network cabling.
 To validate an SHCD against the cabling run: `canu validate shcd-cabling --csm 1.2 -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN --corners I14,S49,I16,S22 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
 ```bash
-$ canu validate shcd-cabling --csm 1.2 -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN --corners I14,S49,I16,S22 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
+canu validate shcd-cabling --csm 1.2 -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN --corners I14,S49,I16,S22 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
+```
 
+Potential output:
+
+```text
 ====================================================================================================
 SHCD vs Cabling
 ====================================================================================================
@@ -567,8 +627,12 @@ CANU can be used to validate aCCJ paddle against the current network cabling.
 To validate an SHCD against the cabling run: `canu validate paddle-cabling --csm 1.2 --ccj paddle.json --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
 ```bash
-$ canu validate paddle-cabling --csm 1.2 --ccj paddle.json --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
+canu validate paddle-cabling --csm 1.2 --ccj paddle.json --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
+```
 
+Potential output:
+
+```text
 ====================================================================================================
 CCJ vs Cabling
 ====================================================================================================
@@ -660,8 +724,12 @@ If you want to see the individual status of all the neighbors of a switch, use t
 To validate BGP run: `canu validate network bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
 ```bash
-$ canu validate network bgp --username USERNAME --password PASSWORD
+canu validate network bgp --username USERNAME --password PASSWORD
+```
 
+Potential output:
+
+```text
 BGP Neighbors Established
 --------------------------------------------------
 PASS - IP: 192.168.1.1 Hostname: sw-spine01
@@ -712,8 +780,12 @@ To generate config for a specific switch, a hostname must also be passed in usin
 To generate switch config run: `canu generate switch config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --sls-file SLS_FILE --name SWITCH_HOSTNAME --out FILENAME`
 
 ```bash
-$ canu generate switch config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --name sw-spine-001
+canu generate switch config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --name sw-spine-001
+```
 
+Potential output:
+
+```text
 hostname sw-spine-001
 user admin group administrators password plaintext
 bfd
@@ -721,7 +793,6 @@ no ip icmp redirect
 vrf CAN
 vrf keepalive
 ...
-
 ```
 
 #### Generate Switch Configs Including Custom Configurations
@@ -735,7 +806,7 @@ custom config file examples
 
 Aruba
 
-```
+```yaml
 sw-spine-001:  |
     ip route 0.0.0.0/0 10.103.15.185
     interface 1/1/36
@@ -768,7 +839,7 @@ sw-leaf-bmc-001:  |
 
 Mellanox/Dell
 
-```
+```yaml
 sw-spine-001:  |
     interface ethernet 1/1 speed 10G force
     interface ethernet 1/1 description "sw-spine02-1/16"
@@ -807,8 +878,8 @@ sw-leaf-bmc-001:  |
 To generate switch configuration with custom config injection.
 
 ```bash
-$ canu generate switch config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --name sw-spine-001 --custom-config CUSTOM_CONFIG_FILE.yaml
-
+canu generate switch config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --name sw-spine-001 --custom-config CUSTOM_CONFIG_FILE.yaml
+```
 
 #### Generate Switch Config while preserving LAG #s
 
@@ -838,8 +909,12 @@ To generate switch config from a CCJ paddle run: `canu generate network config -
 To generate switch config from SHCD run: `canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --sls-file SLS_FILE --folder FOLDERNAME`
 
 ```bash
-$ canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config
+canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config
+```
 
+Potential output:
+
+```text
 sw-spine-001 Config Generated
 sw-spine-002 Config Generated
 sw-leaf-001 Config Generated
@@ -877,7 +952,7 @@ It requires a folder with the config/s backed up.
 The recommended way to back these configs up is with **[Backup Network](#backup-network)**
 
 ```bash
-$ canu generate network config --csm 1.0 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config --preserve FOLDER_WITH_SWITCH_CONFIGS
+canu generate network config --csm 1.0 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config --preserve FOLDER_WITH_SWITCH_CONFIGS
 ```
 
 ### Validate Switch Config
@@ -898,8 +973,12 @@ After running the `validate switch config` command, you will be shown a line by 
 To validate switch config run: `canu validate switch config --ip 192.168.1.1 --username USERNAME --password PASSWORD --generated SWITCH_CONFIG.cfg`
 
 ```bash
-$ canu validate switch config --ip 192.168.1.1 --generated sw-spine-001.cfg
+canu validate switch config --ip 192.168.1.1 --generated sw-spine-001.cfg
+```
 
+Potential output:
+
+```text
 hostname sw-spine-001
 - ntp server 192.168.1.10
 ?                       ^
@@ -925,7 +1004,6 @@ Interface:                       2  |  Interface:                       1
 Interface Lag:                   1  |  Interface Lag:                   2
 Spanning Tree:                   2  |  Spanning Tree:                   3
 Router:                          1  |
-
 ```
 
 ![](docs/images/canu_validate_switch_config.png)
@@ -946,8 +1024,12 @@ A directory of generated config files will also need to be passed in using `--ge
 To validate switch config run: `canu validate network config --ips-file ips.txt --username USERNAME --password PASSWORD --generated /CONFIG/FOLDER`
 
 ```bash
-$ canu validate network config --csm 1.2 --ips-file ips.txt --generated /CONFIG/FOLDER
+canu validate network config --csm 1.2 --ips-file ips.txt --generated /CONFIG/FOLDER
+```
 
+Potential output:
+
+```text
 Switch: sw-leaf-001 (192.168.1.1)
 Differences
 -------------------------------------------------------------------------
@@ -1020,7 +1102,7 @@ More information on tests and how to write them can be found at <https://nornir.
 
 Example test
 
-```
+```yaml
 - name: Software version test
   task: show version
   test: contains
@@ -1058,19 +1140,24 @@ Options
 Example
 
 ```bash
-  $ canu backup network --sls-file ./sls_input_file.json --network CMN --folder ./ --unsanitized
-  Running Configs Saved
-  ---------------------
-  sw-spine-001.cfg
-  sw-spine-002.cfg
-  sw-leaf-001.cfg
-  sw-leaf-002.cfg
-  sw-leaf-003.cfg
-  sw-leaf-004.cfg
-  sw-leaf-bmc-001.cfg
-  sw-leaf-bmc-002.cfg
-  sw-cdu-001.cfg
-  sw-cdu-002.cfg
+canu backup network --sls-file ./sls_input_file.json --network CMN --folder ./ --unsanitized
+```
+
+Potential output:
+
+```text
+Running Configs Saved
+---------------------
+sw-spine-001.cfg
+sw-spine-002.cfg
+sw-leaf-001.cfg
+sw-leaf-002.cfg
+sw-leaf-003.cfg
+sw-leaf-004.cfg
+sw-leaf-bmc-001.cfg
+sw-leaf-bmc-002.cfg
+sw-cdu-001.cfg
+sw-cdu-002.cfg
 ```
 
 ### Send Command
@@ -1091,33 +1178,33 @@ You can either use an SLS file or pull the SLS file from the API-Gateway using a
 Examples
 
   ```bash
-    canu send command --sls-file ./sls_input_file.json --network cmn --command "show banner exec" --name sw-spine-001
-    -netmiko_send_command************************************************************
-    * sw-spine-001 ** changed : False **********************************************
-    vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-    ###############################################################################
-    # CSM version:  1.2
-    # CANU version: 1.3.2
-    ###############################################################################
+  canu send command --sls-file ./sls_input_file.json --network cmn --command "show banner exec" --name sw-spine-001
+  -netmiko_send_command************************************************************
+  * sw-spine-001 ** changed : False **********************************************
+  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+  ###############################################################################
+  # CSM version:  1.2
+  # CANU version: 1.3.2
+  ###############################################################################
 
-    ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   ```
 
   ```bash
-    canu send command --command 'show version | include "Version      :"'
-    \netmiko_send_command************************************************************
-    * sw-leaf-bmc-001 ** changed : False *******************************************
-    vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-    Version      : FL.10.09.0010                                                 
-    ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    * sw-spine-001 ** changed : False **********************************************
-    vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-    Version      : GL.10.09.0010                                                 
-    ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    * sw-spine-002 ** changed : False **********************************************
-    vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-    Version      : GL.10.09.0010                                                 
-    ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  canu send command --command 'show version | include "Version      :"'
+  \netmiko_send_command************************************************************
+  * sw-leaf-bmc-001 ** changed : False *******************************************
+  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+  Version      : FL.10.09.0010                                                 
+  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  * sw-spine-001 ** changed : False **********************************************
+  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+  Version      : GL.10.09.0010                                                 
+  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  * sw-spine-002 ** changed : False **********************************************
+  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+  Version      : GL.10.09.0010                                                 
+  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   ```
 
 ### Report Network Version
@@ -1143,20 +1230,20 @@ Example
   ```
 
 ```bash
-  canu send command --command 'show version | include "Version      :"'
-  \netmiko_send_command************************************************************
-  * sw-leaf-bmc-001 ** changed : False *******************************************
-  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-  Version      : FL.10.09.0010
-  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  * sw-spine-001 ** changed : False **********************************************
-  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-  Version      : GL.10.09.0010
-  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  * sw-spine-002 ** changed : False **********************************************
-  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-  Version      : GL.10.09.0010
-  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+canu send command --command 'show version | include "Version      :"'
+\netmiko_send_command************************************************************
+* sw-leaf-bmc-001 ** changed : False *******************************************
+vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+Version      : FL.10.09.0010
+^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* sw-spine-001 ** changed : False **********************************************
+vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+Version      : GL.10.09.0010
+^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* sw-spine-002 ** changed : False **********************************************
+vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+Version      : GL.10.09.0010
+^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ```
 
 ## Uninstallation
@@ -1166,6 +1253,10 @@ Example
 # Testing
 
 To run the full set of tests, linting, coverage map, and docs building run:
+
+  ```bash
+  python3 -m pip install .[ci]
+  ```
 
   ```bash
   nox

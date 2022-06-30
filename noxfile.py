@@ -46,8 +46,9 @@ def tests(session):
     """Default unit test session."""
     # Install all test dependencies, then install this package in-place.
     path = "tests"
-    session.install("-r", "requirements-test.txt")
-    session.install("-e", ".")
+    session.install(".[test]")
+    session.install(".[network_modeling]")
+    session.install(".")
 
     if session.posargs:
         path = session.posargs[0]
@@ -71,23 +72,8 @@ def tests(session):
 def lint(session):
     """Run flake8 linter and plugins."""
     args = session.posargs or locations
-    session.install(
-        "flake8==3.9.2",
-        "flake8-black",
-        "flake8-bugbear",
-        "flake8-commas",
-        "flake8-comprehensions",
-        "flake8-debugger",
-        "flake8-docstrings",
-        "flake8-eradicate",
-        "flake8-import-order",
-        "flake8_quotes",
-        "flake8-string-format",
-        "pep8-naming",
-        "darglint",
-        # "wemake-python-styleguide",
-        "toml",
-    )
+    session.install(".[lint]")
+    session.install(".")
     session.run("flake8", *args)
 
 
@@ -110,7 +96,9 @@ def black(session):
 @nox.session(python="3")
 def cover(session):
     """Run the final coverage report."""
-    session.install("coverage", "pytest-cov")
+    session.install(".[test]")
+    session.install(".[network_modeling]")
+    session.install(".")
     session.run(
         "coverage",
         "report",
@@ -128,9 +116,8 @@ def cover(session):
 @nox.session(python="3")
 def docs(session) -> None:
     """Build the documentation."""
-    session.install("-r", "requirements.txt")
-    session.install("-r", "requirements-test.txt")
-    session.install("sphinx", "sphinx_click", "myst-parser", "sphinx-markdown-builder")
+    session.install(".[docs]")
+    session.install(".[network_modeling]")
     session.run(
         "sphinx-build",
         "-M",
