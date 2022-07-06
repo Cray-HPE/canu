@@ -50,6 +50,7 @@ interface mgmt
 {% include '1.3/aruba/common/vsx_isl.secondary.j2' %}
 
 interface loopback 0
+    description default VRF loopback
     ip address {{ variables.LOOPBACK_IP }}/32
     ipv6 address  {{ variables.LOOPBACK_IPv6 }}/128
     ip ospf 1 area 0.0.0.0
@@ -57,7 +58,14 @@ interface loopback 0
     ip pim-sparse enable
     ipv6 pim6-sparse enable
 interface loopback 1
-    ip address 10.2.0.2/32
+    description Customer VRF loopback
+    ip address {{ variables.LOOPBACK_IP }}/32
+    ipv6 address  {{ variables.LOOPBACK_IPv6 }}/128
+    ip ospf 2 area 0.0.0.0
+    ipv6 ospfv3 2 area 0.0.0.0
+interface loopback 2
+    description router MSDP peering
+    ip address {{ variables.LOOPBACK_IP }}/32
     ip ospf 1 area 0.0.0.0
     ip pim-sparse enable
 interface vlan {{ variables.NATIVE_VLAN }}
@@ -65,7 +73,9 @@ interface vlan {{ variables.NATIVE_VLAN }}
     ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.MTL_IP_GATEWAY }}
+    {#- Needs variable defined in https://jira-pro.its.hpecorp.net:8443/browse/CASMNET-1665
     ipv6 address {{ variables.MTL_IPv6 }}/{{variables.MTL_PREFIX_LEN_IPv6}}
+    #}
     active-gateway ipv6 mac 12:01:00:00:01:06
     active-gateway ipv6 fe80::1
     ipv6 address autoconfig
@@ -80,7 +90,9 @@ interface vlan {{ variables.NMN_VLAN }}
     ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.NMN_IP_GATEWAY }}
+    {#- Needs variable defined in https://jira-pro.its.hpecorp.net:8443/browse/CASMNET-1665
     ipv6 address {{ variables.NMN_IPv6 }}/{{variables.NMN_PREFIX_LEN_IPv6}}
+    #}
     active-gateway ipv6 mac 12:01:00:00:01:06
     active-gateway ipv6 fe80::1
     ipv6 nd ra other-config-flag
@@ -98,7 +110,9 @@ interface vlan {{ variables.HMN_VLAN }}
     ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.HMN_IP_GATEWAY }}
+    {#- Needs variable defined in https://jira-pro.its.hpecorp.net:8443/browse/CASMNET-1665
     ipv6 address {{ variables.HMN_IPv6 }}/{{variables.HMN_PREFIX_LEN_IPv6}}
+    #}
     active-gateway ipv6 mac 12:01:00:00:01:06
     active-gateway ipv6 fe80::1
     ipv6 nd ra other-config-flag
@@ -120,7 +134,9 @@ interface vlan {{ variables.CMN_VLAN }}
     ip address {{ variables.CMN_IP }}/{{ variables.CMN_PREFIX_LEN }}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.CMN_IP_GATEWAY }}
+    {#- Needs variable defined in https://jira-pro.its.hpecorp.net:8443/browse/CASMNET-1665
     ipv6 address {{ variables.CMN_IPv6 }}/{{variables.CMN_PREFIX_LEN_IPv6}}
+    #}
     active-gateway ipv6 mac 12:01:00:00:01:06
     active-gateway ipv6 fe80::1
     ipv6 nd ra other-config-flag
@@ -141,7 +157,9 @@ interface vlan {{ variables.CAN_VLAN }}
     ip address {{ variables.CAN_IP_SECONDARY }}/{{ variables.CAN_PREFIX_LEN }}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.CAN_IP_GATEWAY }}
+    {#- Needs variable defined in https://jira-pro.its.hpecorp.net:8443/browse/CASMNET-1665
     ipv6 address {{ variables.CAN_IPv6 }}/{{variables.CAN_PREFIX_LEN_IPv6}}
+    #}
     active-gateway ipv6 mac 12:01:00:00:01:06
     active-gateway ipv6 fe80::1
     ipv6 nd ra other-config-flag
@@ -189,7 +207,7 @@ https-server vrf default
 https-server vrf mgmt
 router msdp
     enable
-    ip msdp peer 10.2.0.2
+    ip msdp peer ip address {{ variables.LOOPBACK_IP_1 }}/32
         connect-source loopback0
         enable
         mesh-group 1

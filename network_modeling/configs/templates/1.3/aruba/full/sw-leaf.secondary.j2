@@ -64,7 +64,9 @@ interface loopback 1
 interface vlan {{ variables.NATIVE_VLAN }}
     ip mtu 9198
     ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}}
+    {#- Needs variable defined in https://jira-pro.its.hpecorp.net:8443/browse/CASMNET-1665
     ipv6 address {{ variables.MTL_IPv6 }}/{{variables.MTL_PREFIX_LEN_IPv6}}
+    #}
     ip ospf 1 area 0.0.0.0
     ip ospf passive
     ipv6 ospfv3 1 area 0.0.0.0
@@ -75,7 +77,9 @@ interface vlan {{ variables.NMN_VLAN }}
     description NMN
     ip mtu 9198
     ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}}
+    {#- Needs variable defined in https://jira-pro.its.hpecorp.net:8443/browse/CASMNET-1665
     ipv6 address {{ variables.NMN_IPv6 }}/{{variables.NMN_PREFIX_LEN_IPv6}}
+    #}
     ip ospf 1 area 0.0.0.0
     ipv6 ospfv3 1 area 0.0.0.0
     ip igmp enable
@@ -84,7 +88,9 @@ interface vlan {{ variables.HMN_VLAN }}
     description HMN
     ip mtu 9198
     ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
+    {#- Needs variable defined in https://jira-pro.its.hpecorp.net:8443/browse/CASMNET-1665
     ipv6 address {{ variables.HMN_IPv6 }}/{{variables.HMN_PREFIX_LEN_IPv6}}
+    #}
     ip ospf 1 area 0.0.0.0
     ip ospf passive
     ipv6 ospfv3 1 area 0.0.0.0
@@ -96,7 +102,9 @@ interface vlan {{ variables.CMN_VLAN }}
     description CMN
     ip mtu 9198
     ip address {{ variables.CMN_IP }}/{{variables.CMN_PREFIX_LEN}}
+    {#- Needs variable defined in https://jira-pro.its.hpecorp.net:8443/browse/CASMNET-1665
     ipv6 address {{ variables.CMN_IPv6 }}/{{variables.CMN_PREFIX_LEN_IPv6}}
+    #}
     ip ospf 2 area 0.0.0.0
     ipv6 ospfv3 2 area 0.0.0.0
     ip igmp enable
