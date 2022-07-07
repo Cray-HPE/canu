@@ -43,13 +43,19 @@ interface mgmt
 {% include '1.3/aruba/tds/leaf-bmc-to-spine.lag.j2' %}
 {% include '1.3/aruba/common/leaf_bmc_unused_port.j2' %}
 
-interface loopback 0
-    ip address {{ variables.LOOPBACK_IP }}/32
-    ipv6 address  {{ variables.LOOPBACK_IPv6 }}/128
+interface loopback 0 {% set loopback_number = 0 %} 
+    description default VRF loopback
+    ip address {{ loopback_ipv4(variables.HOSTNAME, loopback_number) }}/32
+    ipv6 address {{ loopback_ipv6(variables.HOSTNAME) }}/128
     ip ospf 1 area 0.0.0.0
     ipv6 ospfv3 1 area 0.0.0.0
-interface loopback 1
-    ipv6 address  {{ variables.LOOPBACK_IPv6 }}/128
+    ip pim-sparse enable
+    ipv6 pim6-sparse enable
+interface loopback 1 {% set loopback_number = 1 %} 
+    description Customer VRF loopback
+    ip address {{ loopback_ipv4(variables.HOSTNAME, loopback_number) }}/32
+    ipv6 address {{ loopback_ipv6(variables.HOSTNAME) }}/128
+    ip ospf 2 area 0.0.0.0
     ipv6 ospfv3 2 area 0.0.0.0
 interface vlan 1
     ip mtu 9198

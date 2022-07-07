@@ -656,21 +656,23 @@ def generate_switch_config(
         else:
             click.secho(f"system-mac for VSX {switch_name} is not valid", fg="red")
             sys.exit(1)
-        
-    def loopback_ipv6(switch_name):
+
+    def loopback_ipv6(switch_name, loopback_number):
         is_primary, primary, secondary = switch_is_primary(switch_name)
         primary_number = re.search(r"\d+", primary).group()
-        hex_number = format(int(primary_number), "02x")
+        num = re.findall(r'\d+', switch_name)
+        ipv6_last_octet = num[0]
+        ipv6_last_octet = ipv6_last_octet.lstrip(("0"))
         if "sw-spine" in switch_name:
-            ipv6 = "2001:db8:beef:99::" + hex_number
+            ipv6 = f"2001:db8:beef:9{loopback_number}::" + ipv6_last_octet
         elif "sw-leaf" in switch_name:
-            ipv6 = "2001:db8:beef:98::" + hex_number
+            ipv6 = f"2001:db8:beef:9{loopback_number}::" + ipv6_last_octet
         elif "sw-cdu" in switch_name:
-            ipv6 = "2001:db8:beef:97::" + hex_number
+            ipv6 = f"2001:db8:beef:9{loopback_number}::" + ipv6_last_octet
         if is_ip(ipv6):
             return ipv6
         else:
-            click.secho(f"system-mac for VSX {switch_name} is not valid", fg="red")
+            click.secho(f"IP address for loopback interface in {switch_name} is not valid", fg="red")
             sys.exit(1)
             
     def loopback_ipv4(switch_name, loopback_number):
@@ -689,7 +691,7 @@ def generate_switch_config(
         if is_ip(ipv4):
             return ipv4
         else:
-            click.secho(f"system-mac for VSX {switch_name} is not valid", fg="red")
+            click.secho(f"IP address for loopback interface in {switch_name} is not valid", fg="red")
             sys.exit(1)
             
 
