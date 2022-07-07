@@ -13,6 +13,21 @@ def is_active(data):
        return data, {"activate": False}
 </macro>
 
+<group name = "prefix_list.{{ name }}.{{ seq }}">
+ip prefix-list {{ name | _start_ }} seq {{ seq }} {{ operation }} {{ ip }} ge {{ ge_prefix }} le {{ le_prefix }}
+ip prefix-list {{ name | _start_ }} seq {{ seq }} {{ operation }} {{ ip }} ge {{ ge_prefix }}
+ip prefix-list {{ name | _start_ }} seq {{ seq }} {{ operation }} {{ ip }} le {{ le_prefix }}
+</group>
+
+
+<group name="route_map.{{ name }}.{{ seq }}">
+route-map {{ name | _start_ }} permit seq {{ seq }}
+     match ip address prefix-list {{ prefix_list }}
+     set ip next-hop {{ set_next_hop }}
+     match ip next-hop {{ match_next_hop }}
+     set local-preference {{ local_pref }}
+</group>
+
 <group name="bgp_cfg.vrfs.default">
 router bgp {{ asn }}
     bgp router-id {{ bgp_rid }}
@@ -33,7 +48,7 @@ router bgp {{ asn }}
         neighbor {{ neighbor }} route-map {{ route-map-out }} out
         </group>
 </group>
-<group name="vrfs.{{ vrf }}">
+<group name="bgp_cfg.vrfs.{{ vrf }}">
     vrf {{ vrf }}
         bgp router-id {{ bgp_rid }}
         maximum-paths {{ max_paths }}

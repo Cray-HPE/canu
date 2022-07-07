@@ -93,6 +93,9 @@ def inventory(username, password, network, sls_json=None, sls_inventory=None):
         },
     }
 
+    def aruba_aoscx_autoconfirm(conn):
+        conn.channel.send_input("auto-confirm")
+
     nornir_inventory["options"]["groups"] = {"aruba": {"platform": "aruba_aoscx", "connection_options": { "scrapli": {"extras": {"auth_strict_key": False}}}}, "dell": {"platform": "dellos10"}, "mellanox": {"platform": "mellanox"}}
 
     if sls_inventory:
