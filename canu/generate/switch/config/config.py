@@ -37,6 +37,7 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 import natsort
 import netaddr
 from netutils.mac import is_valid_mac
+from netutils.ip import is_ip
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import requests
 from ruamel.yaml import YAML
@@ -655,8 +656,44 @@ def generate_switch_config(
         else:
             click.secho(f"system-mac for VSX {switch_name} is not valid", fg="red")
             sys.exit(1)
+        
+    def loopback_ipv6(switch_name):
+        is_primary, primary, secondary = switch_is_primary(switch_name)
+        primary_number = re.search(r"\d+", primary).group()
+        hex_number = format(int(primary_number), "02x")
+        if "sw-spine" in switch_name:
+            ipv6 = "2001:db8:beef:99::" + hex_number
+        elif "sw-leaf" in switch_name:
+            ipv6 = "2001:db8:beef:98::" + hex_number
+        elif "sw-cdu" in switch_name:
+            ipv6 = "2001:db8:beef:97::" + hex_number
+        if is_ip(ipv6):
+            return ipv6
+        else:
+            click.secho(f"system-mac for VSX {switch_name} is not valid", fg="red")
+            sys.exit(1)
+            
+    def loopback_ipv4(switch_name, loopback_number):
+        is_primary, primary, secondary = switch_is_primary(switch_name)
+        primary_number = re.search(r"\d+", primary).group()
+        num = re.findall(r'\d+', switch_name)
+        ipv4_last_octet = num[0]
+        ipv4_last_octet = ipv4_last_octet.lstrip(("0"))
+        if "sw-spine" in switch_name:
+            ipv4 = f"10.2.{loopback_number}." + ipv4_last_octet
+        elif "sw-leaf" in switch_name:
+            ipv4 = f"10.3.{loopback_number}." + ipv4_last_octet
+        elif "sw-cdu" in switch_name:
+            ipv4 = f"10.4.{loopback_number}." + ipv4_last_octet
+        print(ipv4)
+        if is_ip(ipv4):
+            return ipv4
+        else:
+            click.secho(f"system-mac for VSX {switch_name} is not valid", fg="red")
+            sys.exit(1)
+            
 
-    jinja_func = {"vsx_mac": vsx_mac}
+    jinja_func = {"vsx_mac": vsx_mac, "loopback_ipv6": loopback_ipv6, "loopback_ipv4": loopback_ipv4}
     template = env.get_template(template_name)
     template.globals.update(jinja_func)
 

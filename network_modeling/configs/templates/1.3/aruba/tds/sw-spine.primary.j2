@@ -53,23 +53,23 @@ interface mgmt
 {% include '1.3/aruba/common/spine-to-cdu.lag.j2' %}
 {% include '1.3/aruba/common/vsx_isl.primary.j2' %}
 
-interface loopback 0
+interface loopback 0 {% set loopback_number = 0 %} 
     description default VRF loopback
-    ip address {{ variables.LOOPBACK_IP }}/32
-    ipv6 address  {{ variables.LOOPBACK_IPv6 }}/128
+    ip address {{ loopback_ipv4(variables.HOSTNAME, loopback_number) }}/32
+    ipv6 address {{ loopback_ipv6(variables.HOSTNAME) }}/128
     ip ospf 1 area 0.0.0.0
     ipv6 ospfv3 1 area 0.0.0.0
     ip pim-sparse enable
     ipv6 pim6-sparse enable
-interface loopback 1
+interface loopback 1 {% set loopback_number = 1 %} 
     description Customer VRF loopback
-    ip address {{ variables.LOOPBACK_IP }}/32
-    ipv6 address  {{ variables.LOOPBACK_IPv6 }}/128
+    ip address {{ loopback_ipv4(variables.HOSTNAME, loopback_number) }}/32
+    ipv6 address {{ loopback_ipv6(variables.HOSTNAME) }}/128
     ip ospf 2 area 0.0.0.0
     ipv6 ospfv3 2 area 0.0.0.0
-interface loopback 2
+interface loopback 2 {% set loopback_number = 2 %} 
     description router MSDP peering
-    ip address {{ variables.LOOPBACK_IP }}/32
+    ip address {{ loopback_ipv4(variables.HOSTNAME, loopback_number) }}/32
     ip ospf 1 area 0.0.0.0
     ip pim-sparse enable
 interface vlan 1
@@ -213,7 +213,7 @@ https-server vrf default
 https-server vrf mgmt
 router msdp
     enable
-    ip msdp peer 10.2.0.3
+    ip msdp peer {{ loopback_ipv4("sw-spine-002", "2") }}
         connect-source loopback2
         enable
         mesh-group 1
