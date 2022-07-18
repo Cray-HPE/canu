@@ -30,6 +30,7 @@ import re
 import sys
 
 import click
+import pkg_resources
 from click_help_colors import HelpColorsCommand
 from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from hier_config import HConfig, Host
@@ -68,7 +69,6 @@ else:
 # Schema and Data files
 canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
-canu_version_file = path.join(project_root, "canu", ".version")
 
 # ttp preserve templates
 # pulls the interface and lag from switch configs.
@@ -112,10 +112,7 @@ with open(canu_config_file, "r") as file:
 
 csm_options = canu_config["csm_versions"]
 
-# Get CANU version from .version
-with open(canu_version_file, "r") as file:
-    canu_version = file.readline()
-canu_version = canu_version.strip()
+canu_version = pkg_resources.get_distribution('canu').version
 
 dash = "-" * 60
 

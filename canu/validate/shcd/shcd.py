@@ -30,6 +30,7 @@ import re
 import sys
 
 import click
+import pkg_resources
 from click_help_colors import HelpColorsCommand
 import natsort
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
@@ -45,10 +46,7 @@ else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent.parent
 
-canu_version_file = path.join(project_root, "canu", ".version")
-
-with open(canu_version_file, "r") as version_file:
-    version = version_file.read().replace("\n", "")
+version = pkg_resources.get_distribution('canu').version
 
 log = logging.getLogger("validate_shcd")
 
