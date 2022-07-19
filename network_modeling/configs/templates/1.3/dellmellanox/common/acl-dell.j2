@@ -29,6 +29,7 @@ ip access-list cmn-can
 {%- if variables.CMN and variables.CAN %}
  seq {% set sequence = 10 %}{{ sequence }} deny ip {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_PREFIX_LEN }} {{ variables.CAN_NETWORK_IP }}/{{ variables.CAN_PREFIX_LEN }}
  seq {% set sequence = sequence+10 %}{{ sequence }} deny ip {{ variables.CAN_NETWORK_IP }}/{{ variables.CAN_PREFIX_LEN }} {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_PREFIX_LEN }}
+ seq {% set sequence = sequence+10 %}{{ sequence }} permit ip any any
 {%- endif %}
 {%- if not variables.CAN %}
 {% set sequence = 0 %}
@@ -38,4 +39,7 @@ ip access-list cmn-can
  seq {% set sequence = sequence+10 %}{{ sequence }} deny ip {{ variables.CHN_NETWORK_IP }}/{{ variables.CHN_PREFIX_LEN }} {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_PREFIX_LEN }}
  seq {% set sequence = sequence+10 %}{{ sequence }} permit ip any any
 {%- endif %}
+ip access-list ssh
+ seq 10 permit ip {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_PREFIX_LEN }} any
+ seq 20 deny ip any any
 {#- end acl #}
