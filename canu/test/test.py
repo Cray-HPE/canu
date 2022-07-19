@@ -33,6 +33,7 @@ from nornir import InitNornir
 from nornir.core.filter import F
 from nornir_salt import (
     netmiko_send_commands,
+    scrapli_send_commands,
     TabulateFormatter,
     TestsProcessor,
 )
@@ -49,8 +50,22 @@ else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent
 
+# Get CSM versions from canu.yaml
+canu_config_file = path.join(project_root, "canu", "canu.yaml")
+with open(canu_config_file, "r") as file:
+    canu_config = yaml.load(file)
+
+csm_options = canu_config["csm_versions"]
 
 @click.option("--username", default="admin", show_default=True, help="Switch username")
+@click.option(
+    "--csm",
+    type=click.Choice(csm_options),
+    help="CSM version",
+    prompt="CSM version",
+    required=True,
+    show_choices=True,
+)
 @click.option(
     "--password",
     hide_input=True,
@@ -90,9 +105,11 @@ else:
 )
 @click.option("--sls-address", default="api-gw-service-nmn.local", show_default=True)
 @click.pass_context
+
 def test(
     ctx,
     username,
+    csm,
     password,
     sls_file,
     sls_address,
@@ -105,6 +122,7 @@ def test(
     Args:
         ctx: CANU context settings
         username: Switch username
+        csm: CSM version
         password: Switch password
         sls_file: JSON file containing SLS data
         sls_address: The address of SLS
@@ -122,7 +140,8 @@ def test(
     # set to ERROR otherwise nornir plugin logs debug messages to the screen.
     logging.basicConfig(level="ERROR")
 
-    switch_inventory = inventory(username, password, network, sls_file)
+    switch_inventory, sls_variables = inventory(username, password, network, sls_file, sls_inventory=True)
+
     nr = InitNornir(
         runner={
             "plugin": "threaded",
@@ -135,7 +154,7 @@ def test(
     )
     # get the switch vendor name from the inventory
     # this is used to determine which tests to run
-    platform = nr.filter(F(platform="aruba_os"))
+    platform = nr.filter(F(platform="aruba_aoscx"))
     if platform.inventory.hosts.keys():
         vendor = "aruba"
     else:
@@ -165,11 +184,16 @@ def test(
 
     dict_results = {}
     pretty_results = []
-
     # get the commands and the test suite for each switch type.
     for switch in switch_commands.keys():
         for test_command in test_suite:
             devices = test_command.get("device")
+            csm_test = test_command.get("csm")
+            csm = float(csm)
+
+            if csm_test is not None:
+                if csm_test != csm:
+                    continue
             if switch in devices:
                 switch_test_suite[switch].append(test_command)
             if switch in devices and isinstance(test_command["task"], str):
@@ -192,10 +216,16 @@ def test(
             )
 
             commands = switch_commands[switch]
-            results = test_nr.run(
-                task=netmiko_send_commands,
-                commands=commands,
-            )
+            if vendor == "aruba":
+                results = test_nr.run(
+                    task=scrapli_send_commands,
+                    commands=commands,
+                )
+            else:
+                results = test_nr.run(
+                    task=netmiko_send_commands,
+                    commands=commands,
+                )
 
             dict_results.update(
                 ResultSerializer(results, add_details=False, to_dict=True),

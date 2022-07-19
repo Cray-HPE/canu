@@ -69,9 +69,9 @@ def inventory(username, password, network, sls_json=None, sls_inventory=None):
                     if x["ExtraProperties"]["Brand"] == "Aruba":
                         inventory["hosts"][host]["groups"] = ["aruba"]
                     elif x["ExtraProperties"]["Brand"] == "Dell":
-                        inventory["hosts"][host]["groups"] = "dell"
+                        inventory["hosts"][host]["groups"] = ["dell"]
                     elif x["ExtraProperties"]["Brand"] == "Mellanox":
-                        inventory["hosts"][host]["groups"] = "mellanox"
+                        inventory["hosts"][host]["groups"] = ["mellanox"]
                     else:
                         inventory["hosts"][host]["platform"] = "generic"
                 if "sw-leaf-bmc" in host:
@@ -96,7 +96,7 @@ def inventory(username, password, network, sls_json=None, sls_inventory=None):
     def aruba_aoscx_autoconfirm(conn):
         conn.channel.send_input("auto-confirm")
 
-    nornir_inventory["options"]["groups"] = {"aruba": {"platform": "aruba_aoscx", "connection_options": { "scrapli": {"extras": {"auth_strict_key": False}}}}, "dell": {"platform": "dellos10"}, "mellanox": {"platform": "mellanox"}}
+    nornir_inventory["options"]["groups"] = {"aruba": {"platform": "aruba_aoscx", "connection_options": { "scrapli": {"extras": {"auth_strict_key": False}}}}, "dell": {"platform": "dell_os10"}, "mellanox": {"platform": "mellanox"}}
 
     if sls_inventory:
         return nornir_inventory, sls_variables
