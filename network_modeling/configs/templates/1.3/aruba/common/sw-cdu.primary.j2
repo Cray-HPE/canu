@@ -1,7 +1,7 @@
 {#- sw-cdu.primary #}
-{%- include '1.2/aruba/common/unknown.j2' %}
+{%- include '1.3/aruba/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
-{%- include '1.2/aruba/common/banner-motd.j2' %}
+{%- include '1.3/aruba/common/banner-motd.j2' %}
 no ip icmp redirect
 vrf keepalive
 vrf Customer
@@ -16,7 +16,7 @@ ssh server vrf Customer
 ssh server vrf default
 ssh server vrf keepalive
 ssh server vrf mgmt
-{%- include '1.2/aruba/common/acl.j2' %}
+{%- include '1.3/aruba/common/acl.j2' %}
 
 vlan {{ variables.NATIVE_VLAN }}
 vlan {{ variables.NMN_VLAN }}
@@ -29,6 +29,8 @@ vlan {{ variables.HMN_VLAN }}
     apply access-list ip nmn-hmn out
 vlan {{ variables.CMN_VLAN }}
     name CMN
+    apply access-list ip cmn-can in
+    apply access-list ip cmn-can out
 spanning-tree
 {#- forward delay added to help with pxe boots. CASMNET-1099 + CASMTRIAGE-2793 #}
 spanning-tree forward-delay 4
@@ -38,12 +40,12 @@ interface mgmt
     shutdown
     ip dhcp
 
-{%- include '1.2/aruba/common/mtn_hmn_vlan.j2' %}
-{%- include '1.2/aruba/common/mtn_nmn_vlan.j2' %}
-{% include '1.2/aruba/common/cmm.j2' %}
-{% include '1.2/aruba/common/cec.j2' %}
-{% include '1.2/aruba/common/cdu-to-spine.lag.j2' %}
-{% include '1.2/aruba/common/vsx_isl.primary.j2' %}
+{%- include '1.3/aruba/common/mtn_hmn_vlan.j2' %}
+{%- include '1.3/aruba/common/mtn_nmn_vlan.j2' %}
+{% include '1.3/aruba/common/cmm.j2' %}
+{% include '1.3/aruba/common/cec.j2' %}
+{% include '1.3/aruba/common/cdu-to-spine.lag.j2' %}
+{% include '1.3/aruba/common/vsx_isl.primary.j2' %}
 
 interface loopback 0
     ip address {{ variables.LOOPBACK_IP }}/32
