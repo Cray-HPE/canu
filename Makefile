@@ -21,16 +21,14 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 NAME ?= ${GIT_REPO_NAME}
 
-ifeq ($(VERSION),)
-VERSION := $(shell git describe --tags | tr -s '-' '~' | tr -d '^v')
-endif
+IMAGE_VERSION ?= ${IMAGE_VERSION}
+VERSION ?= ${VERSION}
 
 SPEC_FILE := ${NAME}.spec
 SOURCE_NAME := ${NAME}-${VERSION}
 
 BUILD_DIR := $(PWD)/dist/rpmbuild
 SOURCE_PATH := ${BUILD_DIR}/SOURCES/${SOURCE_NAME}.tar.bz2
-IMAGE_VERSION ?= ${IMAGE_VERSION}
 
 all : prepare binary test rpm
 rpm: rpm_package_source rpm_build_source rpm_build
