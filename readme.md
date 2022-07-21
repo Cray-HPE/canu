@@ -1193,6 +1193,9 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
+## [1.6.10-develop]
+
+- Ensure location rack and elevation strings are lower case.
 ## [1.6.7-develop]
 
 - Fix 1.3 template links.
