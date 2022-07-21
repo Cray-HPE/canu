@@ -53,7 +53,7 @@ else:
 # Get CSM versions from canu.yaml
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
 with open(canu_config_file, "r") as file:
-    canu_config = yaml.load(file)
+    canu_config = yaml.safe_load(file)
 
 csm_options = canu_config["csm_versions"]
 
