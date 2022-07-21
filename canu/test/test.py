@@ -57,6 +57,7 @@ with open(canu_config_file, "r") as file:
 
 csm_options = canu_config["csm_versions"]
 
+
 @click.option("--username", default="admin", show_default=True, help="Switch username")
 @click.option(
     "--csm",
@@ -105,7 +106,6 @@ csm_options = canu_config["csm_versions"]
 )
 @click.option("--sls-address", default="api-gw-service-nmn.local", show_default=True)
 @click.pass_context
-
 def test(
     ctx,
     username,
@@ -140,7 +140,13 @@ def test(
     # set to ERROR otherwise nornir plugin logs debug messages to the screen.
     logging.basicConfig(level="ERROR")
 
-    switch_inventory, sls_variables = inventory(username, password, network, sls_file, sls_inventory=True)
+    switch_inventory, sls_variables = inventory(
+        username,
+        password,
+        network,
+        sls_file,
+        sls_inventory=True,
+    )
 
     nr = InitNornir(
         runner={

@@ -181,10 +181,7 @@ network_v2:
       architecture_type: "river_ncn_node_4_port"
     - lookup_name: ["lm", "lmem"]
       shasta_name: "lmem"
-      architecture_type: "river_ncn_node_4_port_1g_ocp"
-    - lookup_name: ["gpu"]
-      shasta_name: "gpu"
-      architecture_type: "river_ncn_node_4_port_1g_ocp"
+      architecture_type: "river_ncn_node_4_port"
     - lookup_name: ["lnet"]
       shasta_name: "lnet"
       architecture_type: "river_ncn_node_4_port_1g_ocp"
@@ -193,6 +190,9 @@ network_v2:
       architecture_type: "river_ncn_node_4_port"
     - lookup_name: ["gw", "gn", "gateway"]
       shasta_name: "gateway"
+      architecture_type: "river_ncn_node_4_port_1g_ocp"
+    - lookup_name: ["gpu"]
+      shasta_name: "gpu"
       architecture_type: "river_ncn_node_4_port_1g_ocp"
     - lookup_name: ["dvs"]
       shasta_name: "dvs"

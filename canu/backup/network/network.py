@@ -32,9 +32,9 @@ from netutils.config.clean import sanitize_config
 from nornir import InitNornir
 from nornir.core.filter import F
 from nornir_netmiko import netmiko_send_command
-from nornir_scrapli.tasks import send_command
 from nornir_salt.plugins.functions import ResultSerializer
 from nornir_salt.plugins.tasks import tcp_ping
+from nornir_scrapli.tasks import send_command
 
 from canu.utils.inventory import inventory
 

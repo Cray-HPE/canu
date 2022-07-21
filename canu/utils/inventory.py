@@ -82,7 +82,6 @@ def inventory(username, password, network, sls_json=None, sls_inventory=None):
                     inventory["hosts"][host]["data"]["type"] = "spine"
                 elif "sw-cdu" in host:
                     inventory["hosts"][host]["data"]["type"] = "cdu"
-        
 
     nornir_inventory = {
         "plugin": "DictInventory",
@@ -96,7 +95,14 @@ def inventory(username, password, network, sls_json=None, sls_inventory=None):
     def aruba_aoscx_autoconfirm(conn):
         conn.channel.send_input("auto-confirm")
 
-    nornir_inventory["options"]["groups"] = {"aruba": {"platform": "aruba_aoscx", "connection_options": { "scrapli": {"extras": {"auth_strict_key": False}}}}, "dell": {"platform": "dell_os10"}, "mellanox": {"platform": "mellanox"}}
+    nornir_inventory["options"]["groups"] = {
+        "aruba": {
+            "platform": "aruba_aoscx",
+            "connection_options": {"scrapli": {"extras": {"auth_strict_key": False}}},
+        },
+        "dell": {"platform": "dell_os10"},
+        "mellanox": {"platform": "mellanox"},
+    }
 
     if sls_inventory:
         return nornir_inventory, sls_variables
