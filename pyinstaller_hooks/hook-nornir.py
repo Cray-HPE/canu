@@ -29,10 +29,16 @@ datas = (
     copy_metadata("nornir")
     + copy_metadata("nornir_salt")
     + copy_metadata("nornir_netmiko")
+    + copy_metadata("nornir_scrapli")
+    + copy_metadata("scrapli")
+    + copy_metadata("scrapli_community")
 )
 
 hiddenimports = (
     collect_submodules("nornir")
     + collect_submodules("nornir_salt")
     + collect_submodules("nornir_netmiko")
+    + collect_submodules("nornir_scrapli")
+    + collect_submodules("scrapli")
+    + collect_submodules("scrapli_community")
 )

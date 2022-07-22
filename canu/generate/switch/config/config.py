@@ -656,7 +656,7 @@ def generate_switch_config(
             click.secho(f"system-mac for VSX {switch_name} is not valid", fg="red")
             sys.exit(1)
 
-    jinja_func = {"vsx_mac": vsx_mac}
+    jinja_func = {"vsx_mac": vsx_mac, "groupby_vlan_range": groupby_vlan_range}
     template = env.get_template(template_name)
     template.globals.update(jinja_func)
 
@@ -1274,7 +1274,7 @@ def get_switch_nodes(
             elif preserve:
                 new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
-        elif shasta_name in {"gateway", "ssn", "dvs"}:
+        elif shasta_name in {"gateway", "ssn", "dvs", "gpu"}:
             new_node = {
                 "subtype": "river_ncn_node_4_port_1g_ocp",
                 "slot": destination_slot,
@@ -1328,6 +1328,23 @@ def get_switch_nodes(
         elif shasta_name == "pdu":
             new_node = {
                 "subtype": "pdu",
+                "slot": destination_slot,
+                "destination_port": destination_port,
+                "config": {
+                    "DESCRIPTION": get_description(
+                        switch_name,
+                        destination_node_name,
+                        destination_slot,
+                        destination_port,
+                    ),
+                    "PORT": f"{source_port}",
+                    "INTERFACE_NUMBER": f"{source_port}",
+                },
+            }
+            nodes.append(new_node)
+        elif shasta_name == "kvm":
+            new_node = {
+                "subtype": "kvm",
                 "slot": destination_slot,
                 "destination_port": destination_port,
                 "config": {
