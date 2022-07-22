@@ -39,6 +39,7 @@ interface mgmt
     shutdown
     ip dhcp
 
+{% include '1.3/aruba/common/four_port_ocp.j2' %}
 {% include '1.3/aruba/common/compute.j2' %}
 {% include '1.3/aruba/common/bmc.j2' %}
 {% include '1.3/aruba/full/leaf-bmc-to-leaf.lag.j2' %}
