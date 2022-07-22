@@ -1,0 +1,16 @@
+{#- bmc #}
+{%- for node in cabling.nodes if node.slot == "bmc"  or node.subtype == "sw-hsn" or node.subtype == "pdu" %}
+interface ethernet1/1/{{node.config.PORT}}
+  description {{ node.config.DESCRIPTION }}
+  no shutdown
+  switchport access vlan {{ variables.HMN_VLAN }}
+  mtu 9216
+  flowcontrol receive off
+  flowcontrol transmit off
+  spanning-tree bpduguard enable
+  spanning-tree port type edge
+
+{%- endfor %}
+{#- end bmc #}
+
+

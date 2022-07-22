@@ -27,6 +27,7 @@
   err_msg: Software version is wrong
   device:
     - leaf-bmc
+    - cdu
 - name: OSPF check
   task: show ip ospf neighbor
   test: ncontains
@@ -34,6 +35,7 @@
   err_msg: ospf neighbor down
   device:
     - leaf-bmc
+    - cdu
 - name: OSPF check vrf customer
   task: show ip ospf vrf Customer neighbor
   test: ncontains
@@ -41,6 +43,7 @@
   err_msg: ospf neighbor down in Customer VRF
   device:
     - leaf-bmc
+    - cdu
 - name: STP check for root bridge
   task: show spanning-tree brief
   test: ncontains
@@ -55,6 +58,7 @@
   err_msg: Interfaces errors above 999
   device:
     - leaf-bmc
+    - cdu
 # - name: running-config different from startup-config
 #   task: show diff running-configuration startup-configuration
 #   test: "!contains_re"
@@ -130,3 +134,25 @@
   err_msg: ospf neighbor down
   device:
     - spine
+- name: Internet connection check
+  task: ping vrf Customer 8.8.8.8 -c 1
+  test: contains
+  pattern: bytes from
+  err_msg: External network (internet) does not respond.
+  device:
+    - leaf
+    - leaf-bmc
+    - cdu
+    - spine
+  csm: 1.2
+- name: Internet connection check
+  task: ping 8.8.8.8 -c 1
+  test: contains
+  pattern: bytes from
+  err_msg: External network (internet) does not respond.
+  device:
+    - leaf
+    - leaf-bmc
+    - cdu
+    - spine
+  csm: 1.0

@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.5
+# 🛶 CANU v1.6.9
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1176,6 +1176,33 @@ To run a specific test file:
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.6.9]
+
+- Ensure location rack and elevation strings are lower case.
+
+## [1.6.8]
+
+- Add 4 port OCP to templates.
+- Add GPU node to model.
+- Use Scrapli instead of Netmiko to SSH to Aruba switches when using Nornir.
+- Add additional tests to the aruba test suite.
+- Add dell CDUs to test suite.
+- Add CSM version flag to `canu test`
+
+## [1.6.7]
+
+- Fix 1.3 template links.
+- Fix VLAN ordering of CMM ports.
+- Add Customer ACLs back to 1.3 templates.
+- Add SSH ACLs to dellanox.
+- Fix Dell CMN-CAN ACL.
+- Remove CMN from UAN 1.3 template.
+- Add KVM to HPE model.
+
+## [1.6.6]
+
+- Create initial CSM 1.3 configuration framework.
 
 ## [1.6.5]
 
