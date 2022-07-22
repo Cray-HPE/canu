@@ -581,10 +581,10 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 tmp_port = row[required_header[4]]
                 src_rack = None
                 if row[required_header[1]].value:
-                    src_rack = row[required_header[1]].value.strip()
+                    src_rack = row[required_header[1]].value.strip().lower()
                 src_elevation = None
                 if row[required_header[2]].value:
-                    src_elevation = row[required_header[2]].value.strip()
+                    src_elevation = row[required_header[2]].value.strip().lower()
                 src_location = NodeLocation(src_rack, src_elevation)
             except AttributeError:
                 log.fatal("")
