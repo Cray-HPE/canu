@@ -191,6 +191,9 @@ network_v2:
     - lookup_name: ["gw", "gn", "gateway"]
       shasta_name: "gateway"
       architecture_type: "river_ncn_node_4_port_1g_ocp"
+    - lookup_name: ["gpu"]
+      shasta_name: "gpu"
+      architecture_type: "river_ncn_node_4_port_1g_ocp"
     - lookup_name: ["dvs"]
       shasta_name: "dvs"
       architecture_type: "river_ncn_node_4_port_1g_ocp"

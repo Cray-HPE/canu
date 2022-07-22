@@ -28,6 +28,7 @@ import click_spinner
 from nornir import InitNornir
 from nornir.core.filter import F
 from nornir_salt import netmiko_send_commands
+from nornir_scrapli.tasks import send_command
 from ttp import ttp
 
 from canu.utils.host_alive import host_alive
@@ -122,7 +123,7 @@ def version(ctx, username, password, sls_file, sls_address, network, log_):
     )
 
     version = {}
-    aruba_hosts = online_hosts.filter(F(platform="aruba_os"))
+    aruba_hosts = online_hosts.filter(F(platform="aruba_aoscx"))
     mellanox_hosts = online_hosts.filter(F(platform="mellanox"))
     dell_hosts = online_hosts.filter(F(platform="dell_os10"))
 
@@ -133,8 +134,8 @@ def version(ctx, username, password, sls_file, sls_address, network, log_):
             end="\r",
         )
         aruba_banner_check = aruba_hosts.run(
-            task=netmiko_send_commands,
-            commands="show banner exec",
+            task=send_command,
+            command="show banner exec",
         )
         mellanox_banner_check = mellanox_hosts.run(
             task=netmiko_send_commands,
@@ -147,7 +148,7 @@ def version(ctx, username, password, sls_file, sls_address, network, log_):
 
     for switches in aruba_banner_check.keys():
         parser = ttp(
-            data=str(aruba_banner_check[switches][1]),
+            data=str(aruba_banner_check[switches][0]),
             template=banner_ttp_aruba,
         )
         parser.parse()

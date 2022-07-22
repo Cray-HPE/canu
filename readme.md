@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.7-develop
+# 🛶 CANU v1.6.8-develop
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1192,6 +1192,15 @@ To run a specific test file:
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.6.8-develop]
+
+- Add 4 port OCP to templates.
+- Add GPU node to model.
+- Use Scrapli instead of Netmiko to SSH to Aruba switches when using Nornir.
+- Add additional tests to the aruba test suite.
+- Add dell CDUs to test suite.
+- Add CSM version flag to `canu test`
 
 ## [1.6.7-develop]
 
