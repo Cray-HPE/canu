@@ -27,9 +27,9 @@ import click
 from canu.utils.sls import pull_sls_hardware, pull_sls_networks
 
 
-def inventory(username, password, network, sls_json=None):
+def inventory(username, password, network, sls_json=None, sls_inventory=None):
     """Build Nornir inventory from sls_input."""
-    inventory = {"groups": "shasta", "hosts": {}}
+    inventory = {"groups": {}, "hosts": {}}
     if sls_json:
         try:
             input_json = json.load(sls_json)
@@ -51,7 +51,6 @@ def inventory(username, password, network, sls_json=None):
                 {
                     k: {
                         "hostname": str(sls_variables[network + "_IPs"][k]),
-                        "platform": "",
                         "username": username,
                         "password": password,
                         "data": {"type": ""},
@@ -68,11 +67,11 @@ def inventory(username, password, network, sls_json=None):
             for host in inventory["hosts"]:
                 if host == x["ExtraProperties"]["Aliases"][0]:
                     if x["ExtraProperties"]["Brand"] == "Aruba":
-                        inventory["hosts"][host]["platform"] = "aruba_os"
+                        inventory["hosts"][host]["groups"] = ["aruba"]
                     elif x["ExtraProperties"]["Brand"] == "Dell":
-                        inventory["hosts"][host]["platform"] = "dell_os10"
+                        inventory["hosts"][host]["groups"] = ["dell"]
                     elif x["ExtraProperties"]["Brand"] == "Mellanox":
-                        inventory["hosts"][host]["platform"] = "mellanox"
+                        inventory["hosts"][host]["groups"] = ["mellanox"]
                     else:
                         inventory["hosts"][host]["platform"] = "generic"
                 if "sw-leaf-bmc" in host:
@@ -83,13 +82,29 @@ def inventory(username, password, network, sls_json=None):
                     inventory["hosts"][host]["data"]["type"] = "spine"
                 elif "sw-cdu" in host:
                     inventory["hosts"][host]["data"]["type"] = "cdu"
-    inventory = {
+
+    nornir_inventory = {
         "plugin": "DictInventory",
         "options": {
             "hosts": inventory["hosts"],
-            "groups": {},
+            "groups": inventory["groups"],
             "defaults": {},
         },
     }
 
-    return inventory
+    def aruba_aoscx_autoconfirm(conn):
+        conn.channel.send_input("auto-confirm")
+
+    nornir_inventory["options"]["groups"] = {
+        "aruba": {
+            "platform": "aruba_aoscx",
+            "connection_options": {"scrapli": {"extras": {"auth_strict_key": False}}},
+        },
+        "dell": {"platform": "dell_os10"},
+        "mellanox": {"platform": "mellanox"},
+    }
+
+    if sls_inventory:
+        return nornir_inventory, sls_variables
+    else:
+        return nornir_inventory

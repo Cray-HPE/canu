@@ -34,6 +34,7 @@ from nornir.core.filter import F
 from nornir_netmiko import netmiko_send_command
 from nornir_salt.plugins.functions import ResultSerializer
 from nornir_salt.plugins.tasks import tcp_ping
+from nornir_scrapli.tasks import send_command
 
 from canu.utils.inventory import inventory
 
@@ -158,10 +159,9 @@ def network(
             command_string="show running-config expanded",
         )
         backup_results.update(mellanox_backup)
-        aruba_backup = online_hosts.filter(platform="aruba_os").run(
-            task=netmiko_send_command,
-            enable=True,
-            command_string="show running-config",
+        aruba_backup = online_hosts.filter(platform="aruba_aoscx").run(
+            task=send_command,
+            command="show running-config",
         )
         backup_results.update(aruba_backup)
         dell_backup = online_hosts.filter(platform="dell_os10").run(
