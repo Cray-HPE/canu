@@ -1,4 +1,3 @@
-#!/bin/bash
 # MIT License
 #
 # (C) Copyright [2022] Hewlett Packard Enterprise Development LP
@@ -21,38 +20,35 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 
-# check for folder call files
-# used to mount data between local and container
-if [[ ! -d "files" ]]
-then
-    mkdir files
-fi
+from artifactory.algol60.net/csm-docker/stable/docker.io/python:slim-bullseye
 
-# get local path
-path=$(pwd)
+# create canu user
+RUN useradd -ms /bin/bash canu
 
-case $1 in
+# update command prompt
+RUN echo 'export PS1="canu \w : "' >> /etc/bash.bashrc
 
-    up)
-        docker-compose up -d --build
-        echo ""
-        echo "The folder ${path}/files"
-        echo "is mounted on the container at /files"
-        echo ""
-        echo "Type exit to disconnect from container before trying to shutdown the container"
-        echo ""
-        docker exec -it canu /bin/bash
-    ;;
+# make files dir
+RUN mkdir /files
 
-    down)
-        docker-compose down
-    ;;
+# prep image layer for faster builds
+COPY requirements.txt /app/canu/
 
-    *)
-        echo ""
-        echo "canu_docker.sh usuage is:"
-        echo "canu_docker.sh up - for starting container"
-        echo "canu_docker.sh down - for stopping container"
-        echo ""
-    ;;
-esac
+RUN apt-get -yq update && apt-get -yq install gcc openssl jq vim libffi-dev musl-dev \
+    python3 python3-dev python3-pip git
+
+RUN pip3 install --upgrade pip && pip3 install -r /app/canu/requirements.txt
+
+# copy canu files
+COPY . /app/canu
+
+# install canu
+RUN pip3 install --editable /app/canu/
+
+# set file perms for canu
+RUN chown -R canu /app/canu /files
+
+# set none root user: canu
+USER canu
+
+WORKDIR /files
