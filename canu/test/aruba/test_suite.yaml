@@ -42,6 +42,52 @@
     - leaf
     - leaf-bmc
     - spine
+- name: interface speed mismatch check
+  task: show int br
+  test: ncontains_lines
+  pattern:
+    - "mismatch"
+  err_msg: interface speed mismatch detected
+  device:
+    - cdu
+    - leaf
+    - leaf-bmc
+    - spine
+- name: VSX status check
+  task: show vsx status
+  test: ncontains_lines
+  pattern:
+    - "peer_unreachable"
+    - "VSX is not configured"
+    - "Init"
+    - "inter_switch_link_down"
+    - "Out-Of-Sync"
+  err_msg: VSX health degraded
+  device:
+    - leaf
+    - cdu
+    - spine
+- name: VSX ISL check
+  task: show lacp interfaces | include lag256
+  test: ncontains_lines
+  pattern:
+    - "down"
+  err_msg: VSX ISL port down
+  device:
+    - leaf
+    - cdu
+    - spine
+- name: VSX keepalive check
+  task: show vsx status keepalive
+  test: ncontains_lines
+  pattern:
+    - "Keepalive-Init"
+    - "Keepalive-Failed"
+  err_msg: VSX keepalive down
+  device:
+    - leaf
+    - cdu
+    - spine
 - name: Interface error check
   task: "show interface error-statistics | exclude vlan"
   test: "!contains_re"
@@ -155,7 +201,7 @@
     - leaf-bmc
     - cdu
 - name: Is internal DNS server alive (ping)
-  task: ping 10.92.100.225
+  task: ping 10.92.100.225 repetitions 2
   test: contains
   pattern: bytes from
   err_msg: Internal DNS does not respond to ping
@@ -165,7 +211,7 @@
     - cdu
     - spine
 - name: Does internal DNS resolve ncn-m001-nmn
-  task: ping ncn-m001-nmn
+  task: ping ncn-m001-nmn repetitions 2
   test: contains
   pattern: bytes from
   err_msg: Internal DNS cannot resolve ncn-m001-nmn, is ncn-m001 alive?
@@ -174,23 +220,25 @@
     - leaf-bmc
     - cdu
     - spine
-- name: Internet connection check CSM 1.0
-  task: ping 8.8.8.8 source vlan7
+- name: Internet connection check
+  task: ping 8.8.8.8 source vlan7 repetitions 2
   test: contains
   pattern: bytes from
-  err_msg: External network (internet) does not respond. Ignore if running CSM 1.2.
+  err_msg: External network (internet) does not respond.
   device:
     - leaf
     - leaf-bmc
     - cdu
     - spine
-- name: Internet connection check CSM 1.2
-  task: ping 8.8.8.8 source vlan7 vrf Customer
+  csm: 1.0
+- name: Internet connection check
+  task: ping 8.8.8.8 source vlan7 vrf Customer repetitions 2
   test: contains
   pattern: bytes from
-  err_msg: External network (internet) does not respond. Ignore if running CSM 1.0.
+  err_msg: External network (internet) does not respond.
   device:
     - leaf
     - leaf-bmc
     - cdu
     - spine
+  csm: 1.2

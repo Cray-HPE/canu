@@ -1196,6 +1196,16 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 ## [1.6.9-develop]
 
 - Ensure location rack and elevation strings are lower case.
+
+## [1.6.8-develop]
+
+- Add 4 port OCP to templates.
+- Add GPU node to model.
+- Use Scrapli instead of Netmiko to SSH to Aruba switches when using Nornir.
+- Add additional tests to the aruba test suite.
+- Add dell CDUs to test suite.
+- Add CSM version flag to `canu test`
+
 ## [1.6.7-develop]
 
 - Fix 1.3 template links.
