@@ -258,6 +258,10 @@ def get_node_common_name(name, rack_number, rack_elevation, mapper):
                     tmp_name = node[1] + "-" + rack_number + "-"
                 elif node[1].find("pdu") != -1:
                     tmp_name = node[1] + "-" + rack_number + "-"
+                elif node[1].find("kvm") != -1:
+                    tmp_name = node[1] + "-"
+                elif node[1].find("SubRack") != -1:
+                    tmp_name = node[1] + "-"
                 else:
                     tmp_name = node[1]
 
