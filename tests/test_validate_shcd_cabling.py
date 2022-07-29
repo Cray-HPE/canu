@@ -1471,7 +1471,7 @@ def test_validate_shcd_cabling_bad_architectural_definition(
             ],
         )
         assert result.exit_code == 1
-        assert "No architectural definition found to allow connection between" in str(
+        assert "The plan-of-record architectural definition does not allow connections" in str(
             result.output,
         )
         remove_switch_from_cache(ip)
