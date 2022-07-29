@@ -199,10 +199,10 @@ class NetworkNode:
 
         if match_count == 0:
             raise Exception(
-                f"{__name__} No architectural definition found to allow connection "
+                f"{__name__} The plan-of-record architectural definition does not allow connections "
                 f"between {self.common_name()} ({self.arch_type()}) "
                 f"and {node.common_name()} ({node.arch_type()}). "
-                "\nCheck that the correct architectural was selected.",
+                f"\nCheck that the correct architecture was selected or remove the connection.",
             )
 
         # Allow east-west connections (MLAG connections require this)
