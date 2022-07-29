@@ -159,10 +159,7 @@ class NetworkNodeFactory:
             yamale.validate(schema, data)
         except Exception as err:
             raise Exception(
-                click.secho(
-                    f"Error validating {data_file} with {schema_file}: {err}",
-                    fg="red",
-                ),
+                f"{__name__}: Error validating {data_file} with {schema_file}: {err}",
             ) from err
 
     # For convenience to users the yamale schema allows port speeds as int or list.
@@ -184,10 +181,7 @@ class NetworkNodeFactory:
                 break
         if not found:
             raise Exception(
-                click.secho(
-                    f"Error finding version {architecture_version} in the architecture definition",
-                    fg="red",
-                ),
+                f"{__name__}: Error finding version {architecture_version} in the architecture definition",
             )
         log.debug(f"Using architecture version: {architecture_version}")
 
@@ -217,10 +211,7 @@ class NetworkNodeFactory:
                     "    Models in the architectural definition must be represented in the hardware definition",
                 )
                 raise Exception(
-                    click.secho(
-                        f"Architecture model {arch_component['model']} for {arch_name} not found in hardware data",
-                        fg="red",
-                    ),
+                    f"{__name__}: Architecture model {arch_component['model']} for {arch_name} not found in hardware data",
                 )
 
     # Port speeds listed in the architectural definition must actually exist on the hardware.
@@ -249,10 +240,7 @@ class NetworkNodeFactory:
 
                 if not found:
                     raise Exception(
-                        click.secho(
-                            f"Validation of {arch_model} architecture against hardware failed for speeds",
-                            fg="red",
-                        ),
+                        f"{__name__}: Validation of {arch_model} architecture against hardware failed for speeds",
                     )
                 log.debug(
                     f"Validated {arch_model} architecture against hardware for speeds",
@@ -286,10 +274,7 @@ class NetworkNodeFactory:
                     break
             if not found:
                 raise Exception(
-                    click.secho(
-                        f"Device {lookup_type} in lookup_mapper not found in architecture components",
-                        fg="red",
-                    ),
+                    f"{__name__}: Device {lookup_type} in lookup_mapper not found in architecture components",
                 )
             log.debug(
                 f"Validated lookup_mapper device {lookup_type} in architecture definition",
@@ -322,10 +307,7 @@ class NetworkNodeFactory:
                         node_architecture = component
         if node_architecture is None:
             raise Exception(
-                click.secho(
-                    f"Error finding node architecture definition {node_type} in version {version_name}",
-                    fg="red",
-                ),
+                f"{__name__}: Error finding node architecture definition {node_type} in version {version_name}",
             )
 
         # The architectural "model" is the "primary key" for hardware
@@ -339,10 +321,7 @@ class NetworkNodeFactory:
                 node_hardware = v
         if node_hardware is None:
             raise Exception(
-                click.secho(
-                    f"Error finding node hardware definition {node_hardware} in hardware",
-                    fg="red",
-                ),
+                f"{__name__}: Error finding node hardware definition {node_hardware} in hardware",
             )
 
         # Create a Network Node object based on the above definitions
@@ -377,10 +356,7 @@ class NetworkNodeFactory:
                 node_architecture = component
         if node_architecture is None:
             raise Exception(
-                click.secho(
-                    f"Error finding node architecture definition {node_type} in version {self.__architecture_version}",
-                    fg="red",
-                ),
+                f"{__name__}: Error finding node architecture definition {node_type} in version {self.__architecture_version}",
             )
 
         # Find the hardware definition based on model
@@ -390,10 +366,7 @@ class NetworkNodeFactory:
                 node_hardware = hardware_definition
         if node_hardware is None:
             raise Exception(
-                click.secho(
-                    f"Error finding node hardware definition {node_hardware} in hardware",
-                    fg="red",
-                ),
+                f"{__name__}: Error finding node hardware definition {node_hardware} in hardware",
             )
 
         # Create a Network Node object based on the above definitions

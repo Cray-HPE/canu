@@ -132,7 +132,8 @@ def shcd(ctx, architecture, shcd, tabs, corners, out, json_, log_):
     # SHCD Parsing
     try:
         sheets = shcd_to_sheets(shcd, tabs, corners)
-    except Exception:
+    except Exception as err:
+        click.secho(err, fg="red")
         return
 
     # Create Node factory
@@ -477,7 +478,6 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
         log.info("")
 
         if sheet not in wb.sheetnames:
-            log.fatal("")
             click.secho(f"Tab {sheet} not found in {spreadsheet.name}\n", fg="red")
             click.secho(f"Available tabs: {wb.sheetnames}", fg="red")
             sys.exit(1)
@@ -485,8 +485,8 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
         ws = wb[sheet]
         try:
             block = ws[range_start:range_end]
-        except ValueError:
-            log.error("")
+        except ValueError as err:
+            log.fatal(err)
             click.secho(f"Bad range of cells entered for tab {sheet}.", fg="red")
             click.secho(f"{range_start}:{range_end}\n", fg="red")
             click.secho(
@@ -586,8 +586,8 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 if row[required_header[2]].value:
                     src_elevation = row[required_header[2]].value.strip().lower()
                 src_location = NodeLocation(src_rack, src_elevation)
-            except AttributeError:
-                log.fatal("")
+            except AttributeError as err:
+                log.fatal(err)
                 click.secho(
                     f"Bad cell data or range of cells entered for sheet {sheet} in row {current_row} for source data.",
                     fg="red",
@@ -625,8 +625,8 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     log.info(f"Creating new node {node_name} of type {node_type}")
                     try:
                         src_node = factory.generate_node(node_type)
-                    except Exception as e:
-                        print(e)
+                    except Exception as err:
+                        log.fatal(err)
                         sys.exit(1)
 
                     src_node.common_name(node_name)
@@ -760,8 +760,8 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 if row[required_header[7]].value:
                     dst_elevation = row[required_header[7]].value.strip()
                 dst_location = NodeLocation(dst_rack, dst_elevation)
-            except AttributeError:
-                log.fatal("")
+            except AttributeError as err:
+                log.fatal(err)
                 click.secho(
                     f"Bad cell data or range of cells entered for sheet {sheet} in row {current_row} for destination data.",
                     fg="red",
@@ -817,14 +817,12 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                         dst_node_port,
                     )
                 except Exception as err:
-                    log.fatal(err)
-                    log.fatal(
-                        click.secho(
-                            f"Failed to connect {src_node.common_name()} "
-                            + f"to {dst_node.common_name()} bi-directionally "
-                            + f"while working on sheet {sheet}, row {current_row}.",
-                            fg="red",
-                        ),
+                    click.secho(err, fg="red")
+                    click.secho(
+                        f"Failed to connect {src_node.common_name()} "
+                        + f"to {dst_node.common_name()} bi-directionally "
+                        + f"while working on sheet {sheet}, row {current_row}.",
+                        fg="red",
                     )
                     sys.exit(1)
 
@@ -863,8 +861,8 @@ def create_dst_node(
             log.info(f"Creating new node {node_name} of type {node_type}")
             try:
                 dst_node = factory.generate_node(node_type)
-            except Exception as e:
-                print(e)
+            except Exception as err:
+                click.secho(err, fg="red")
                 sys.exit(1)
 
             dst_node.common_name(node_name)
