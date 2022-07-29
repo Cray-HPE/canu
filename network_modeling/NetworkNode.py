@@ -299,15 +299,15 @@ class NetworkNode:
         """Connect one device to another."""
         # Defensively check input node type.
         if not isinstance(dst_node, NetworkNode):
-            raise Exception(
+            raise TypeError(
                 f"{__name__}: Node needs to be type NetworkNode",
             )
         if src_port is not None and not isinstance(src_port, NetworkPort):
-            raise Exception(
+            raise TypeError(
                 f"{__name__}: Source Port needs to be type NetworkPort or None",
             )
         if dst_port is not None and not isinstance(dst_port, NetworkPort):
-            raise Exception(
+            raise TypeError(
                 f"{__name__}: Source Port needs to be type NetworkPort or None",
             )
 
@@ -427,11 +427,11 @@ class NetworkNode:
         """Connect an edge connection to a physical port."""
         # Defensively check input node type.
         if not isinstance(port, NetworkPort):
-            raise Exception(
+            raise TypeError(
                 f"{__name__}: Port needs to be type NetworkPort",
             )
         if not isinstance(destination_node, NetworkNode):
-            raise Exception(
+            raise TypeError(
                 f"{__name__}: Node needs to be type NetworkNode",
             )
         pass
@@ -440,7 +440,7 @@ class NetworkNode:
         """Disconnect one device from another."""
         # Defensively check input node type.
         if not isinstance(node, NetworkNode):
-            raise Exception(
+            raise TypeError(
                 "Node needs to be type NetworkNode",
             )
 
