@@ -716,13 +716,11 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     )
                 except Exception as err:
                     log.fatal(err)
-                    log.fatal(
-                        click.secho(
-                            f"Failed to connect {src_node.common_name()} "
-                            + f"to parent {parent_node.common_name()} bi-directionally "
-                            + f"while working on sheet {sheet}, row {current_row}.",
-                            fg="red",
-                        ),
+                    click.secho(
+                        f"Failed to connect {src_node.common_name()} "
+                        + f"to parent {parent_node.common_name()} bi-directionally "
+                        + f"while working on sheet {sheet}, row {current_row}.",
+                        fg="red",
                     )
                     sys.exit(1)
                 # If the tmp_port is None, make one connection:
@@ -919,14 +917,11 @@ def connect_src_dst(
             f"Connected {src_node.common_name()} to {dst_node.common_name()} bi-directionally",
         )
     else:
-        log.error(
-            click.secho(
-                f"Failed to connect {src_node.common_name()}"
-                + f" to {dst_node.common_name()} bi-directionally",
-                fg="red",
-            ),
+        raise Exception(
+            f"Failed to connect {src_node.common_name()} to {dst_node.common_name()} bi-directionally. "
+            "Check that input data is correct, that plan-of-record hardware is used on the system, and that "
+            "the correct architecture model was specified.",
         )
-        raise Exception
 
 
 def node_list_warnings(node_list, warnings, out="-"):

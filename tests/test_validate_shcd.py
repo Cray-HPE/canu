@@ -372,8 +372,11 @@ def test_validate_shcd_bad_architectural_definition():
             ],
         )
         assert result.exit_code == 1
-        assert "The plan-of-record architectural definition does not allow connections" in str(
-            result.output,
+        assert (
+            "The plan-of-record architectural definition does not allow connections"
+            in str(
+                result.output,
+            )
         )
 
 
