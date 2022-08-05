@@ -160,6 +160,13 @@
   err_msg: IP-Helper is missing
   device:
     - spine
+- name: KEA connection check
+  task: ping 10.92.100.222 source vlan2 repetitions 2
+  test: contains
+  pattern: bytes from
+  err_msg: KEA (10.92.100.222) does not respond.
+  device:
+    - spine
 - name: vlan 4 ip-helper test
   task: show run interface vlan 4
   test: contains
