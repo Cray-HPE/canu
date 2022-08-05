@@ -140,6 +140,9 @@
   pattern: bytes from
   err_msg: KEA (10.92.100.222) does not respond.
   device:
+    - leaf
+    - leaf-bmc
+    - cdu
     - spine
 - name: Internet connection check
   task: ping vrf Customer 8.8.8.8 -c 1

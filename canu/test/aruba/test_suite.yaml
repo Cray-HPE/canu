@@ -166,6 +166,9 @@
   pattern: bytes from
   err_msg: KEA (10.92.100.222) does not respond.
   device:
+    - leaf
+    - leaf-bmc
+    - cdu
     - spine
 - name: vlan 4 ip-helper test
   task: show run interface vlan 4
