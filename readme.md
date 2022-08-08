@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.10-develop
+# 🛶 CANU v1.6.13-develop
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1192,6 +1192,13 @@ To run a specific test file:
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.6.13-develop]
+
+- Fix CSM 1.2 UAN template when CHN is used - do not produce None VLAN.
+- Bump docs generated from code.
+- Change exception-handling in `canu validate shcd` and from `network_modeling`.
+- Provide better next steps from errors reported while validating SHCDs.
 
 ## [1.6.10-develop]
 
