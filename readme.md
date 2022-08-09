@@ -1197,6 +1197,10 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 - canu test add ping test for KEA
 
+## [1.6.11-develop]
+
+- Update to release process
+
 ## [1.6.10-develop]
 
 - Enabling 1.3 configuration templates.

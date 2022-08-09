@@ -26,4 +26,5 @@ To release CANU into CSM:
 * https://github.com/Cray-HPE/csm-rpms/blob/main/packages/node-image-non-compute-common/base.packages#L6
 * https://github.com/Cray-HPE/csm/blob/main/docker/index.yaml#L33
 
+21. Once new canu RPM is created. Navigate to: 'https://github.com/Cray-HPE/canu/releases' edit release and upload the new RPM can also be downloaded from Github.
 
