@@ -69,7 +69,7 @@ canu generate network config [OPTIONS]
 
 
 ### -a(, --architecture( <architecture>)
-**Required** CSM architecture
+CSM architecture
 
 
 * **Options**
@@ -78,8 +78,12 @@ canu generate network config [OPTIONS]
 
 
 
+### --ccj( <ccj>)
+Paddle CCJ file
+
+
 ### --shcd( <shcd>)
-**Required** SHCD file
+SHCD file
 
 
 ### --tabs( <tabs>)

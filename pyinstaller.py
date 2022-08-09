@@ -74,6 +74,30 @@ added_files = [
         "network_modeling/configs/templates/1.2/dellmellanox/full/*.j2",
         "network_modeling/configs/templates/1.2/dellmellanox/full",
     ),
+    (
+            "network_modeling/configs/templates/1.3/arista/*.j2",
+        "network_modeling/configs/templates/1.3/arista",
+    ),
+    (
+        "network_modeling/configs/templates/1.3/aruba/common/*.j2",
+        "network_modeling/configs/templates/1.3/aruba/common",
+    ),
+    (
+        "network_modeling/configs/templates/1.3/aruba/full/*.j2",
+        "network_modeling/configs/templates/1.3/aruba/full",
+    ),
+    (
+        "network_modeling/configs/templates/1.3/aruba/tds/*.j2",
+        "network_modeling/configs/templates/1.3/aruba/tds",
+    ),
+    (
+        "network_modeling/configs/templates/1.3/dellmellanox/common/*.j2",
+        "network_modeling/configs/templates/1.3/dellmellanox/common",
+    ),
+    (
+        "network_modeling/configs/templates/1.3/dellmellanox/full/*.j2",
+        "network_modeling/configs/templates/1.3/dellmellanox/full",
+    ),
     ("canu/test/aruba/test_suite.yaml", "canu/test/aruba"),
     ("canu/test/dellanox/test_suite.yaml", "canu/test/dellanox"),
     (
