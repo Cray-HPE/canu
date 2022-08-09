@@ -132,7 +132,8 @@ def shcd(ctx, architecture, shcd, tabs, corners, out, json_, log_):
     # SHCD Parsing
     try:
         sheets = shcd_to_sheets(shcd, tabs, corners)
-    except Exception:
+    except Exception as err:
+        click.secho(err, fg="red")
         return
 
     # Create Node factory
@@ -184,7 +185,6 @@ def shcd_to_sheets(shcd, tabs, corners):
 
     if corners:
         if len(tabs.split(",")) * 2 != len(corners.split(",")):
-            log.error("")
             click.secho("Not enough corners.\n", fg="red")
             click.secho(
                 f"Make sure each tab: {tabs.split(',')} has 2 corners.\n",
@@ -240,6 +240,9 @@ def get_node_common_name(name, rack_number, rack_elevation, mapper):
 
     Returns:
         common_name: A string of the hostname
+
+    Raises:
+        ValueError: When name cannot be appropriately found
     """
     common_name = None
     for node in mapper:
@@ -257,6 +260,10 @@ def get_node_common_name(name, rack_number, rack_elevation, mapper):
                     tmp_name = node[1] + "-" + rack_number + "-"
                 elif node[1].find("pdu") != -1:
                     tmp_name = node[1] + "-" + rack_number + "-"
+                elif node[1].find("kvm") != -1:
+                    tmp_name = node[1] + "-"
+                elif node[1].find("SubRack") != -1:
+                    tmp_name = node[1] + "-"
                 else:
                     tmp_name = node[1]
 
@@ -268,11 +275,29 @@ def get_node_common_name(name, rack_number, rack_elevation, mapper):
                     # cdu2sw1 --> sw-cdu-005
                     # cdu2sw2 --> sw-cdu-006
                     digits = re.findall(r"\d+", name)
-                    tmp_id = int(digits[0]) * 2 + int(digits[1])
+                    try:
+                        tmp_id = int(digits[0]) * 2 + int(digits[1])
+                    except IndexError as err:
+                        click.secho(
+                            f"Naming of CDU switch {name} is non-standard and cannot be parsed properly.",
+                            fg="red",
+                        )
+                        raise ValueError(
+                            f"Valid name standards for CDU switches are {node[0]} or {node[1]}.",
+                        ) from err
                     common_name = f"{tmp_name}{tmp_id:0>3}"
                 elif tmp_name.startswith("pdu"):
                     digits = re.findall(r"\d+", name)
-                    digit = digits[-1]
+                    try:
+                        digit = digits[-1]
+                    except IndexError as err:
+                        click.secho(
+                            f"Naming of PDU {name} is non-standard and cannot be parsed properly.",
+                            fg="red",
+                        )
+                        raise ValueError(
+                            f"Valid name standards for PDUs are {node[0]} or {node[1]}.",
+                        ) from err
                     # Original names of:
                     #    pdu1 in x3113, or
                     #    x3113pdu1 in x3113, or
@@ -410,15 +435,17 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False, node_type=
         if port.upper() == "CMC" or port.upper() == "RCM":
             port = "1"
         if re.search(r"\D", port) is not None:
-            log.fatal(
+            click.secho(
                 "Port numbers must be integers. "
                 + f'Please correct in the SHCD for cell {sheet}:{location} with value "{port}"',
+                fg="red",
             )
             sys.exit(1)
         if int(port) < 1:
-            log.fatal(
+            click.secho(
                 "Ports numbers must be greater than 1. Port numbering must begin at 1. "
                 + f'Please correct in the SHCD for cell {sheet}:{location} with value "{port}"',
+                fg="red",
             )
             sys.exit(1)
         if is_src_port:
@@ -437,9 +464,10 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False, node_type=
         if node_type == "subrack":
             return None
         else:
-            log.fatal(
+            click.secho(
                 "A port number must be specified. "
                 + f"Please correct the SHCD for {sheet}:{cell.coordinate} with an empty value",
+                fg="red",
             )
             sys.exit(1)
 
@@ -477,7 +505,6 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
         log.info("")
 
         if sheet not in wb.sheetnames:
-            log.fatal("")
             click.secho(f"Tab {sheet} not found in {spreadsheet.name}\n", fg="red")
             click.secho(f"Available tabs: {wb.sheetnames}", fg="red")
             sys.exit(1)
@@ -485,8 +512,8 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
         ws = wb[sheet]
         try:
             block = ws[range_start:range_end]
-        except ValueError:
-            log.error("")
+        except ValueError as err:
+            log.fatal(err)
             click.secho(f"Bad range of cells entered for tab {sheet}.", fg="red")
             click.secho(f"{range_start}:{range_end}\n", fg="red")
             click.secho(
@@ -507,10 +534,10 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             "Location",
             "Port",
         ]
+        original_header = required_header.copy()
 
         header = block[0]
         if len(header) == 0 or len(header) < len(required_header):
-            log.fatal("")
             click.secho(
                 f"Bad range of cells entered for tab {sheet}:{range_start}:{range_end}.",
                 fg="red",
@@ -518,7 +545,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             click.secho(
                 "Not enough columns exist.\n"
                 "Columns must exist in the following order, but may have other columns in between:\n"
-                f"{required_header}\n"
+                f"{original_header}\n"
                 "Ensure that the upper left corner (Labeled 'Source'), and the lower right corner of the table is entered.",
                 fg="red",
             )
@@ -555,16 +582,14 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 found = None
                 continue
             else:
-                log.error("")
                 click.secho(
                     f"On tab {sheet}, header column {required_header[required_index]} not found.",
                     fg="red",
                 )
-                log.fatal("")
                 click.secho(
                     f"On tab {sheet}, the header is formatted incorrectly.\n"
                     "Columns must exist in the following order, but may have other columns in between:\n"
-                    f"{required_header}",
+                    f"{original_header}",
                     fg="red",
                 )
                 sys.exit(1)
@@ -586,8 +611,8 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 if row[required_header[2]].value:
                     src_elevation = row[required_header[2]].value.strip().lower()
                 src_location = NodeLocation(src_rack, src_elevation)
-            except AttributeError:
-                log.fatal("")
+            except AttributeError as err:
+                click.secho(err, fg="red")
                 click.secho(
                     f"Bad cell data or range of cells entered for sheet {sheet} in row {current_row} for source data.",
                     fg="red",
@@ -605,12 +630,21 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 is_src_slot=True,
             )
 
-            node_name = get_node_common_name(
-                src_name,
-                src_rack,
-                src_elevation,
-                factory.lookup_mapper(),
-            )
+            try:
+                node_name = get_node_common_name(
+                    src_name,
+                    src_rack,
+                    src_elevation,
+                    factory.lookup_mapper(),
+                )
+            except ValueError as err:
+                click.secho(err, fg="red")
+                click.secho(
+                    f"A parsing error occured in sheet {sheet} in row {current_row} for Source name.",
+                    fg="red",
+                )
+                sys.exit(1)
+
             log.debug(f"Source Name Lookup:  {node_name}")
             log.debug(f"Source rack {src_rack} in location {src_elevation}")
             node_type = get_node_type(src_name, factory.lookup_mapper())
@@ -625,8 +659,8 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     log.info(f"Creating new node {node_name} of type {node_type}")
                     try:
                         src_node = factory.generate_node(node_type)
-                    except Exception as e:
-                        print(e)
+                    except Exception as err:
+                        log.fatal(err)
                         sys.exit(1)
 
                     src_node.common_name(node_name)
@@ -673,12 +707,20 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 parent_slot = "cmc"
                 parent_rack = None
                 parent_elevation = None
-                node_name_parent = get_node_common_name(
-                    parent,
-                    parent_rack,
-                    parent_elevation,
-                    factory.lookup_mapper(),
-                )
+                try:
+                    node_name_parent = get_node_common_name(
+                        parent,
+                        parent_rack,
+                        parent_elevation,
+                        factory.lookup_mapper(),
+                    )
+                except ValueError as err:
+                    click.secho(err, fg="red")
+                    click.secho(
+                        f"A parsing error occured in sheet {sheet} in row {current_row} for Parent field.",
+                        fg="red",
+                    )
+                    sys.exit(1)
 
                 node_type_parent = get_node_type(parent, factory.lookup_mapper())
 
@@ -712,13 +754,11 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     )
                 except Exception as err:
                     log.fatal(err)
-                    log.fatal(
-                        click.secho(
-                            f"Failed to connect {src_node.common_name()} "
-                            + f"to parent {parent_node.common_name()} bi-directionally "
-                            + f"while working on sheet {sheet}, row {current_row}.",
-                            fg="red",
-                        ),
+                    click.secho(
+                        f"Failed to connect {src_node.common_name()} "
+                        + f"to parent {parent_node.common_name()} bi-directionally "
+                        + f"while working on sheet {sheet}, row {current_row}.",
+                        fg="red",
                     )
                     sys.exit(1)
                 # If the tmp_port is None, make one connection:
@@ -760,8 +800,8 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 if row[required_header[7]].value:
                     dst_elevation = row[required_header[7]].value.strip()
                 dst_location = NodeLocation(dst_rack, dst_elevation)
-            except AttributeError:
-                log.fatal("")
+            except AttributeError as err:
+                log.fatal(err)
                 click.secho(
                     f"Bad cell data or range of cells entered for sheet {sheet} in row {current_row} for destination data.",
                     fg="red",
@@ -773,12 +813,20 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 sys.exit(1)
 
             log.debug(f"Destination Data:  {dst_name} {dst_slot} {dst_port}")
-            node_name = get_node_common_name(
-                dst_name,
-                dst_rack,
-                dst_elevation,
-                factory.lookup_mapper(),
-            )
+            try:
+                node_name = get_node_common_name(
+                    dst_name,
+                    dst_rack,
+                    dst_elevation,
+                    factory.lookup_mapper(),
+                )
+            except ValueError as err:
+                click.secho(err, fg="red")
+                click.secho(
+                    f"A parsing error occured in sheet {sheet} in row {current_row} for Destination name.",
+                    fg="red",
+                )
+                sys.exit(1)
             log.debug(f"Destination Name Lookup:  {node_name}")
             node_type = get_node_type(dst_name, factory.lookup_mapper())
             log.debug(f"Destination Node Type Lookup:  {node_type}")
@@ -817,14 +865,12 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                         dst_node_port,
                     )
                 except Exception as err:
-                    log.fatal(err)
-                    log.fatal(
-                        click.secho(
-                            f"Failed to connect {src_node.common_name()} "
-                            + f"to {dst_node.common_name()} bi-directionally "
-                            + f"while working on sheet {sheet}, row {current_row}.",
-                            fg="red",
-                        ),
+                    click.secho(err, fg="red")
+                    click.secho(
+                        f"Failed to connect {src_node.common_name()} "
+                        + f"to {dst_node.common_name()} bi-directionally "
+                        + f"while working on sheet {sheet}, row {current_row}.",
+                        fg="red",
                     )
                     sys.exit(1)
 
@@ -863,8 +909,8 @@ def create_dst_node(
             log.info(f"Creating new node {node_name} of type {node_type}")
             try:
                 dst_node = factory.generate_node(node_type)
-            except Exception as e:
-                print(e)
+            except Exception as err:
+                click.secho(err, fg="red")
                 sys.exit(1)
 
             dst_node.common_name(node_name)
@@ -917,14 +963,11 @@ def connect_src_dst(
             f"Connected {src_node.common_name()} to {dst_node.common_name()} bi-directionally",
         )
     else:
-        log.error(
-            click.secho(
-                f"Failed to connect {src_node.common_name()}"
-                + f" to {dst_node.common_name()} bi-directionally",
-                fg="red",
-            ),
+        raise Exception(
+            f"Failed to connect {src_node.common_name()} to {dst_node.common_name()} bi-directionally. "
+            "Check that input data is correct, that plan-of-record hardware is used on the system, and that "
+            "the correct architecture model was specified.",
         )
-        raise Exception
 
 
 def node_list_warnings(node_list, warnings, out="-"):

@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.9
+# 🛶 CANU v1.6.13
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1177,11 +1177,30 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [1.6.9]
+## [1.6.13-develop]
+
+- Fix CSM 1.2 UAN template when CHN is used - do not produce None VLAN.
+- Bump docs generated from code.
+- Change exception-handling in `canu validate shcd` and from `network_modeling`.
+- Provide better next steps from errors reported while validating SHCDs.
+
+## [1.6.12-develop]
+
+- canu test add ping test for KEA
+
+## [1.6.11-develop]
+
+- Update to release process
+
+## [1.6.10-develop]
+
+- Enabling 1.3 configuration templates.
+
+## [1.6.9-develop]
 
 - Ensure location rack and elevation strings are lower case.
 
-## [1.6.8]
+## [1.6.8-develop]
 
 - Add 4 port OCP to templates.
 - Add GPU node to model.
@@ -1190,7 +1209,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Add dell CDUs to test suite.
 - Add CSM version flag to `canu test`
 
-## [1.6.7]
+## [1.6.7-develop]
 
 - Fix 1.3 template links.
 - Fix VLAN ordering of CMM ports.
@@ -1200,17 +1219,17 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Remove CMN from UAN 1.3 template.
 - Add KVM to HPE model.
 
-## [1.6.6]
+## [1.6.6-develop]
 
 - Create initial CSM 1.3 configuration framework.
 
-## [1.6.5]
+## [1.6.5-develop]
 
 - Remove Metallb IP ranges from ACLs.
 - Remove CAN-CMN ACLs from VLAN interfaces.
 - Add CMN VLAN to UAN template for Mellanox & Aruba.
 
-## [1.6.4]
+## [1.6.4-develop]
 
 - Use full `show run` commands to retrieve running config from `canu network backup`
 - UAN CAN ports are now shutdown if CHN is enabled.

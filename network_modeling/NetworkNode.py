@@ -23,8 +23,6 @@
 import copy
 import logging
 
-import click
-
 from .NetworkPort import NetworkPort
 from .NodeLocation import NodeLocation
 
@@ -146,33 +144,26 @@ class NetworkNode:
                 )
             port_block = port_block[0]
         else:
+            free_slots = ""
+            for s in self.__ports_block_metadata:
+                free_slots += f'{s["slot"]}:{s["count"]} '
             raise Exception(
-                click.secho(
-                    f"{__name__}: No available ports found for slot {slot} and speed {speed} "
-                    f"in node {self.__common_name}",
-                    fg="red",
-                ),
+                f"{__name__}: No available ports found for slot {slot} and speed {speed} "
+                f"in node {self.__common_name}.  Available slot:ports - {free_slots}",
             )
-
         return port_block
 
     def __decrement_available_ports(self, port_block=None, count=1):
         """Subtract used port(s) from the count of the given block."""
         if port_block is None:
             raise Exception(
-                click.secho(
-                    f"{__name__}: Port block to decrement is a required argument.",
-                    fg="red",
-                ),
+                f"{__name__}: Port block to decrement is a required argument.",
             )
 
         if port_block["count"] - count < 0:
             raise Exception(
-                click.secho(
-                    f"{__name__}: Port count in block {port_block} cannot be decremented as requested."
-                    f"Decrement of {count} uses more ports than are available.",
-                    fg="red",
-                ),
+                f"{__name__}: Port count in block {port_block} cannot be decremented as requested."
+                f"Decrement of {count} uses more ports than are available.",
             )
 
         port_block["count"] -= count
@@ -208,13 +199,10 @@ class NetworkNode:
 
         if match_count == 0:
             raise Exception(
-                click.secho(
-                    f"{__name__} No architectural definition found to allow connection "
-                    f"between {self.common_name()} ({self.arch_type()}) "
-                    f"and {node.common_name()} ({node.arch_type()}). "
-                    "\nCheck that the correct architectural was selected.",
-                    fg="red",
-                ),
+                f"{__name__} The plan-of-record architectural definition does not allow connections "
+                f"between {self.common_name()} ({self.arch_type()}) "
+                f"and {node.common_name()} ({node.arch_type()}). "
+                f"\nCheck that the correct architecture was selected or remove the connection.",
             )
 
         # Allow east-west connections (MLAG connections require this)
@@ -233,24 +221,18 @@ class NetworkNode:
 
         if south_node is None or north_node is None:
             raise Exception(
-                click.secho(
-                    f"{__name__} Cannot determine architectural direction between "
-                    f"{self.common_name()} ({self.arch_type()}) "
-                    f"and {node.common_name()} ({node.arch_type()}).  "
-                    "Check architectural definition.",
-                    fg="red",
-                ),
+                f"{__name__} Cannot determine architectural direction between "
+                f"{self.common_name()} ({self.arch_type()}) "
+                f"and {node.common_name()} ({node.arch_type()}).  "
+                "Check architectural definition.",
             )
 
         if connection_speed is None:
             raise Exception(
-                click.secho(
-                    f"{__name__} Connection not architecturally allowed between "
-                    f"{self.common_name()} ({self.arch_type()}) "
-                    f"and {node.common_name()} ({node.arch_type()}) at any speed. "
-                    "Check architectural definition.",
-                    fg="red",
-                ),
+                f"{__name__} Connection not architecturally allowed between "
+                f"{self.common_name()} ({self.arch_type()}) "
+                f"and {node.common_name()} ({node.arch_type()}) at any speed. "
+                "Check architectural definition.",
             )
 
         log.debug(
@@ -296,11 +278,8 @@ class NetworkNode:
 
         if available is None:
             raise Exception(
-                click.secho(
-                    f"{__name__}: Available port at speed {speed} not found for {self.common_name()} "
-                    f'of type {self.__architecture["name"]} and model {self.__architecture["model"]}',
-                    fg="red",
-                ),
+                f"{__name__}: Available port at speed {speed} not found for {self.common_name()} "
+                f'of type {self.__architecture["name"]} and model {self.__architecture["model"]}',
             )
         if next_free_port:
             return int(available["total"]) - int(available["count"]) + 1
@@ -320,20 +299,16 @@ class NetworkNode:
         """Connect one device to another."""
         # Defensively check input node type.
         if not isinstance(dst_node, NetworkNode):
-            raise Exception(click.secho("Node needs to be type NetworkNode", fg="red"))
+            raise TypeError(
+                f"{__name__}: Node needs to be type NetworkNode",
+            )
         if src_port is not None and not isinstance(src_port, NetworkPort):
-            raise Exception(
-                click.secho(
-                    "Source Port needs to be type NetworkPort or None",
-                    fg="red",
-                ),
+            raise TypeError(
+                f"{__name__}: Source Port needs to be type NetworkPort or None",
             )
         if dst_port is not None and not isinstance(dst_port, NetworkPort):
-            raise Exception(
-                click.secho(
-                    "Source Port needs to be type NetworkPort or None",
-                    fg="red",
-                ),
+            raise TypeError(
+                f"{__name__}: Source Port needs to be type NetworkPort or None",
             )
 
         # First create the connection on the destination (to local).
@@ -398,12 +373,8 @@ class NetworkNode:
 
             if index > len(self.__ports) - 1 or index < 0:
                 raise Exception(
-                    click.secho(
-                        f"{__name__} Index {index} out of range {len(self.__ports)-1} "
-                        f"for {self.__id}:{self.__common_name} with requested port {src_port.port()}. "
-                        "This is usually a mismatch between port input data and available ports.",
-                        fg="red",
-                    ),
+                    f"{__name__} Port {src_port.port()} was requested from {self.__id}:{self.__common_name} "
+                    f"but only {len(self.__ports)-1} Ports are available on the Node.",
                 )
 
             if self.__ports[index] is not None:
@@ -419,12 +390,9 @@ class NetworkNode:
                     return True  # no-op because already connected
                 else:
                     raise Exception(
-                        click.secho(
-                            f"{__name__} Port {src_port.port()} in slot {src_port.slot()} "
-                            f"already in use for {self.common_name()} connected to a different "
-                            f"node {existing_port.destination_node_id()}.  Cannot repurpose previously used ports.",
-                            fg="red",
-                        ),
+                        f"{__name__} Port {src_port.port()} in slot {src_port.slot()} "
+                        f"already in use for {self.common_name()} connected to a different "
+                        f"node {existing_port.destination_node_id()}.  Cannot repurpose previously used ports.",
                     )
 
             src_port.destination_node_id(dst_node.id())
@@ -458,16 +426,22 @@ class NetworkNode:
         """Connect an edge connection to a physical port."""
         # Defensively check input node type.
         if not isinstance(port, NetworkPort):
-            raise Exception(click.secho("Port needs to be type NetworkPort", fg="red"))
+            raise TypeError(
+                f"{__name__}: Port needs to be type NetworkPort",
+            )
         if not isinstance(destination_node, NetworkNode):
-            raise Exception(click.secho("Node needs to be type NetworkNode", fg="red"))
+            raise TypeError(
+                f"{__name__}: Node needs to be type NetworkNode",
+            )
         pass
 
     def disconnect(self, node):
         """Disconnect one device from another."""
         # Defensively check input node type.
         if not isinstance(node, NetworkNode):
-            raise Exception(click.secho("Node needs to be type NetworkNode", fg="red"))
+            raise TypeError(
+                "Node needs to be type NetworkNode",
+            )
 
         # TODO:  this for real
         return False
