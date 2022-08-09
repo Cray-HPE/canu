@@ -24,7 +24,11 @@ interface lag {{ node.config.LAG_NUMBER }} multi-chassis
     spanning-tree port-type admin-edge
     no shutdown
     vlan trunk native {{ variables.NATIVE_VLAN }}
+{%- if not variables.CHN_VLAN %}
     vlan trunk allowed {{ variables.CAN_VLAN }},{{ variables.CMN_VLAN }}
+{%- else %}
+    vlan trunk allowed {{ variables.CMN_VLAN }}
+{%- endif %}
 
 interface 1/1/{{ node.config.PORT }}
     no shutdown

@@ -6,7 +6,9 @@ interface mlag-port-channel {{ node.config.LAG_NUMBER_V1 }} switchport mode hybr
 interface mlag-port-channel {{ node.config.LAG_NUMBER_V1 }} description "{{ node.config.DESCRIPTION }}"
 {%- if variables.CAN %}
 interface mlag-port-channel {{ node.config.LAG_NUMBER_V1 }} no shutdown
+{% if not variables.CHN_VLAN %}
 interface mlag-port-channel {{ node.config.LAG_NUMBER_V1 }} switchport hybrid allowed-vlan add {{ variables.CAN_VLAN }}
+{% endif %}
 interface mlag-port-channel {{ node.config.LAG_NUMBER_V1 }} switchport hybrid allowed-vlan add {{ variables.CMN_VLAN }}
 {%- endif %}
 interface ethernet 1/{{ node.config.PORT }} speed 40G force
