@@ -1200,6 +1200,14 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Change exception-handling in `canu validate shcd` and from `network_modeling`.
 - Provide better next steps from errors reported while validating SHCDs.
 
+## [1.6.12-develop]
+
+- canu test add ping test for KEA
+
+## [1.6.11-develop]
+
+- Update to release process
+
 ## [1.6.10-develop]
 
 - Enabling 1.3 configuration templates.
