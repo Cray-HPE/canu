@@ -276,6 +276,12 @@ def config(
                 bg="red",
             )
             return
+        except FileNotFoundError:
+            click.secho(
+                f"The file {running} cannot be found",
+                fg="red",
+            )
+            return
 
         hostname = ""
         for running_line in running_config_hier.all_children():
