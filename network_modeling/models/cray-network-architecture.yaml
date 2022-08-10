@@ -136,6 +136,10 @@ network_v2:
       connections:
         - name: "spine"
           speed: 100
+        - name: "customer_edge_router"
+          number: 2
+          speed: 100
+          comment: "ISL"
     - name: "cec"
       model: "cec"
       connections:
@@ -182,6 +186,9 @@ network_v2:
     - lookup_name: ["lm", "lmem"]
       shasta_name: "lmem"
       architecture_type: "river_ncn_node_4_port"
+    - lookup_name: ["dm"]
+      shasta_name: "datamover"
+      architecture_type: "river_ncn_node_4_port_1g_ocp"
     - lookup_name: ["lnet"]
       shasta_name: "lnet"
       architecture_type: "river_ncn_node_4_port_1g_ocp"
@@ -310,6 +317,10 @@ network_v2_tds:
       connections:
         - name: "spine"
           speed: 100
+        - name: "customer_edge_router"
+          number: 2
+          speed: 100
+          comment: "ISL"
     - name: "river_compute_node"
       model: "river_compute_node"
       connections:
@@ -391,6 +402,10 @@ network_v2_tds:
     - lookup_name:
         - "ssn"
       shasta_name: "ssn"
+      architecture_type: "river_ncn_node_4_port_1g_ocp"
+    - lookup_name:
+        - "dm"
+      shasta_name: "datamover"
       architecture_type: "river_ncn_node_4_port_1g_ocp"
     - lookup_name:
         - "lnet"
