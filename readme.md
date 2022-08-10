@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.16-develop
+# 🛶 CANU v1.6.17-develop
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1192,6 +1192,14 @@ To run a specific test file:
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.6.17-develop]
+
+- Add Arista ISL to the Model
+- Update MTN VLAN descriptions on CDU switches
+- Update Arista configs to match slingshot docs
+- Add datamover to canu model
+- Add LNET, datamover to config generation
 
 ## [1.6.16-develop]
 

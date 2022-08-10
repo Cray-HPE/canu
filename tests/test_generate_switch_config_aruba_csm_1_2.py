@@ -2791,11 +2791,12 @@ def test_switch_config_cdu_primary():
 
         mtn_hmn_vlan = (
             "vlan 3000\n"
-            + "    name cabinet_3002\n"
+            + "    name cabinet_3002_hmn\n"
             + "    apply access-list ip nmn-hmn in\n"
             + "    apply access-list ip nmn-hmn out\n"
             + "\n"
             + "interface vlan 3000\n"
+            + "    description cabinet_3002_hmn\n"
             + "    ip mtu 9198\n"
             + "    ip address 192.168.104.2/22\n"
             + "    active-gateway ip mac 12:00:00:00:73:00\n"
@@ -2808,11 +2809,12 @@ def test_switch_config_cdu_primary():
 
         mtn_nmn_vlan = (
             "vlan 2000\n"
-            + "    name cabinet_3002\n"
+            + "    name cabinet_3002_nmn\n"
             + "    apply access-list ip nmn-hmn in\n"
             + "    apply access-list ip nmn-hmn out\n"
             + "\n"
             + "interface vlan 2000\n"
+            + "    description cabinet_3002_nmn\n"
             + "    ip mtu 9198\n"
             + "    ip address 192.168.100.2/22\n"
             + "    active-gateway ip mac 12:00:00:00:73:00\n"
@@ -3071,11 +3073,12 @@ def test_switch_config_cdu_secondary():
 
         mtn_hmn_vlan = (
             "vlan 3000\n"
-            + "    name cabinet_3002\n"
+            + "    name cabinet_3002_hmn\n"
             + "    apply access-list ip nmn-hmn in\n"
             + "    apply access-list ip nmn-hmn out\n"
             + "\n"
             + "interface vlan 3000\n"
+            + "    description cabinet_3002_hmn\n"
             + "    ip mtu 9198\n"
             + "    ip address 192.168.104.3/22\n"
             + "    active-gateway ip mac 12:00:00:00:73:00\n"
@@ -3083,22 +3086,25 @@ def test_switch_config_cdu_secondary():
             + "    ipv6 address autoconfig\n"
             + "    ip helper-address 10.94.100.222\n"
             + "    ip ospf 1 area 0.0.0.0\n"
+            + "    ip ospf passive\n"
         )
         assert mtn_hmn_vlan in str(result.output)
 
         mtn_nmn_vlan = (
             "vlan 2000\n"
-            + "    name cabinet_3002\n"
+            + "    name cabinet_3002_nmn\n"
             + "    apply access-list ip nmn-hmn in\n"
             + "    apply access-list ip nmn-hmn out\n"
             + "\n"
             + "interface vlan 2000\n"
+            + "    description cabinet_3002_nmn\n"
             + "    ip mtu 9198\n"
             + "    ip address 192.168.100.3/22\n"
             + "    active-gateway ip mac 12:00:00:00:73:00\n"
             + "    active-gateway ip 192.168.100.1\n"
             + "    ip helper-address 10.92.100.222\n"
             + "    ip ospf 1 area 0.0.0.0\n"
+            + "    ip ospf passive\n"
         )
         assert mtn_nmn_vlan in str(result.output)
 
