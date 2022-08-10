@@ -1,19 +1,35 @@
 {#- edge_router #}
 
+transceiver qsfp default-mode 4x10G
+!
+hostname sw-edge-002
+!
+spanning-tree mode rstp
+no spanning-tree vlan-id 4094
+
 interface loopback 0
     ip address {{ variables.LOOPBACK_IP }}/32
+
+interface Management1
+   ip address 172.30.52.120/20
    
-vlan 4091
- name mlag-ibgp
- trunk group mlag-peer
+vlan 4094
+   trunk group MLAG-Peer
 !
-int vlan 4091
- ip address {{ variables.EDGE_BGP_IP_SECONDARY }}/31
- mtu 9214
+int Port-Channel1000
+ des [MLAG Peer-Link]
+ switchport mode trunk
+ switchport trunk group MLAG-Peer
 !
- no spanning-tree vlan-id 4091
+interface Vlan4094
+   description [MLAG Link]
+   no autostate
+   ip address 10.255.255.1/31
+!
 
 interface Vlan{{ variables.CHN_VLAN }}
+   description CHN
+   mtu 9214
    ip address {{ variables.CHN_IP }}/{{variables.CHN_PREFIX_LEN}}
    ip virtual-router address {{ variables.CHN_IP_GATEWAY }}
 ip routing
@@ -22,6 +38,13 @@ ip prefix-list HSN seq 10 permit {{ variables.CHN }} ge {{ variables.CHN_PREFIX_
 !
 route-map HSN permit 5
    match ip address prefix-list HSN
+   
+mlag configuration
+   domain-id edge
+   local-interface Vlan4094
+   peer-address 10.255.255.0
+   peer-address heartbeat 172.30.52.119
+   peer-link Port-Channel1000
 
 router bgp {{ variables.SWITCH_ASN }}
    distance bgp 20 200 200
@@ -34,5 +57,10 @@ router bgp {{ variables.SWITCH_ASN }}
    neighbor {{ ip }} passive
    neighbor {{ ip }} route-map HSN in
    {%- endfor %}
+
+router ospf 1
+   router-id {{ variables.LOOPBACK_IP }}
+   max-lsa 12000
+   default-information originate
 
 {#- end edge_router #}

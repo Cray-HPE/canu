@@ -1275,7 +1275,7 @@ def get_switch_nodes(
             elif preserve:
                 new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
-        elif shasta_name in {"gateway", "ssn", "dvs", "gpu"}:
+        elif shasta_name in {"gateway", "ssn", "dvs", "gpu", "lnet", "datamover"}:
             new_node = {
                 "subtype": "river_ncn_node_4_port_1g_ocp",
                 "slot": destination_slot,
