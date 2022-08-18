@@ -240,7 +240,8 @@
     - leaf-bmc
     - cdu
     - spine
-  csm: 1.0
+  csm:
+    - 1.0
 - name: Internet connection check
   task: ping 8.8.8.8 source vlan7 vrf Customer repetitions 2
   test: contains
@@ -251,4 +252,6 @@
     - leaf-bmc
     - cdu
     - spine
-  csm: 1.2
+  csm:
+    - 1.2
+    - 1.3
