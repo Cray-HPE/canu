@@ -104,6 +104,13 @@ csm_options = canu_config["csm_versions"]
     help="JSON output.",
     required=False,
 )
+@click.option(
+    "--ping",
+    "ping",
+    is_flag=True,
+    help="Ping test from all mgmt switches to all NCNs.",
+    required=False,
+)
 @click.option("--sls-address", default="api-gw-service-nmn.local", show_default=True)
 @click.pass_context
 #@pysnooper.snoop()
@@ -117,6 +124,7 @@ def test(
     network,
     log_,
     json_,
+    ping,
 ):
     """Run tests against the network.
 
@@ -130,6 +138,7 @@ def test(
         network: The network that is used to connect to the switches.
         log_: enable logging
         json_: output test results in JSON format
+        ping:
     """
     if not password:
         password = click.prompt(
@@ -140,7 +149,6 @@ def test(
 
     # set to ERROR otherwise nornir plugin logs debug messages to the screen.
     logging.basicConfig(level="ERROR")
-    click.secho("Loading SLS JSON file.", fg="bright_white")
     try:
         sls_json = json.load(sls_file)
     except (json.JSONDecodeError, UnicodeDecodeError):
@@ -177,17 +185,6 @@ def test(
     else:
         vendor = "dellanox"
 
-    test_file = path.join(
-        project_root,
-        "canu",
-        "test",
-        vendor,
-        "test_suite.yaml",
-    )
-
-    with open(test_file) as f:
-        test_suite = yaml.safe_load(f.read())
-
     online_hosts, unreachable_hosts = host_alive(nr)
 
     if unreachable_hosts:
@@ -197,114 +194,132 @@ def test(
                 fg="red",
             )
 
-    networks = NetworkManager(sls_json["Networks"])
+    if ping:
+        networks = NetworkManager(sls_json["Networks"])
 
-    def get_ncn_switch_address(network):
-        network_dict = {}
-        for net in network:
-            for subnet in networks.get(net).subnets().values():
-                for reservation in subnet.reservations().values():
-                    if "ncn" in reservation.name() or "sw" in reservation.name():
-                        network_dict[reservation.name() + f"-{net}".lower()] = str(reservation.ipv4_address())
-        return network_dict
+        def get_ncn_switch_address(network):
+            network_dict = {}
+            for net in network:
+                for subnet in networks.get(net).subnets().values():
+                    for reservation in subnet.reservations().values():
+                        if "ncn" in reservation.name() or "sw" in reservation.name():
+                            network_dict[reservation.name() + f"-{net}".lower()] = str(reservation.ipv4_address())
+            return network_dict
 
-    aruba_ping = {'device': ['leaf', 'leaf-bmc', 'cdu', 'spine'],
-            'err_msg': '',
-            'name': '',
-            'pattern': 'bytes from',
-            'task': '',
-            'test': 'contains'}
+        ping = {'device': ['leaf', 'leaf-bmc', 'cdu', 'spine'],
+                'err_msg': '',
+                'name': '',
+                'pattern': 'bytes from',
+                'task': '',
+                'test': 'contains'}
 
-    ncn_switch_address = get_ncn_switch_address(["HMN", "CMN", "NMN"])
+        ncn_switch_address = get_ncn_switch_address(["HMN", "CMN", "NMN"])
 
-    ping_test = []
+        ping_test = []
 
-    for k,v in ncn_switch_address.items():
-        aruba_ping["err_msg"] = f"{k} is not reachable"
-        aruba_ping["name"] = f"ping {k} {v}"
-        if "cmn" in k:
-            aruba_ping["task"] = f"ping {v} vrf Customer repetitions 1"
-        else:
-            aruba_ping["task"] = f"ping {v} repetitions 1"
+        for k,v in ncn_switch_address.items():
+            ping["err_msg"] = f"{k} is not reachable"
+            ping["name"] = f"ping {k} {v}"
+            if "cmn" in k and vendor == "aruba":
+                ping["task"] = f"ping {v} vrf Customer repetitions 1"
+            elif vendor == "aruba":
+                ping["task"] = f"ping {v} repetitions 1"
+            if "cmn" in k and vendor == "dellanox":
+                ping["task"] = f"ping vrf Customer {v} -c 1"
+            elif vendor == "dellanox":
+                ping["task"] = f"ping {v} -c 1"
+            ping_test.append(ping.copy())
 
-        ping_test.append(aruba_ping.copy())
-
-
-    nr_with_tests = online_hosts.with_processors(
-        [
-            TestsProcessor(ping_test)
-        ]
-    )
-
-    commands = []
-    for item in ping_test:
-        if isinstance(item["task"], str):
-            commands.append(item["task"])
-        elif isinstance(item["task"], list):    
-            commands.extend(item["task"])
-
-    # collect output from devices using netmiko_send_commands task plugin
-    results = nr_with_tests.run(
-        task=scrapli_send_commands,
-        commands=commands
-    )
-
-    # prettify results transforming them in a text table using TabulateFormatter
-    table = TabulateFormatter(results, tabulate="brief")
-
-    # print results
-    print(table)
-
-    switch_commands = {"spine": [], "leaf-bmc": [], "leaf": [], "cdu": []}
-    switch_test_suite = {"spine": [], "leaf-bmc": [], "leaf": [], "cdu": []}
-
-    dict_results = {}
-    pretty_results = []
-    # get the commands and the test suite for each switch type.
-    for switch in switch_commands.keys():
-        for test_command in test_suite:
-            devices = test_command.get("device")
-            csm_test_version = test_command.get("csm")
-            csm = float(csm)
-            if csm_test_version is not None:
-                if csm not in csm_test_version:
-                    continue
-            if switch in devices:
-                switch_test_suite[switch].append(test_command)
-            if switch in devices and isinstance(test_command["task"], str):
-                switch_commands[switch].append(test_command["task"])
-            elif switch in devices and isinstance(test_command["task"], list):
-                switch_commands.extend(test_command["task"])
-
-    for switch in switch_commands.keys():
-        if not json_:
-            click.secho(f"Running tests on {switch} switches...", fg="green")
-        # filter out each switch type
-        switch_nr = online_hosts.filter(type=switch)
-        # get the tests for each switch type
-        test_nr = switch_nr.with_processors(
-            [TestsProcessor(switch_test_suite[switch])],
+        nr_with_tests = online_hosts.with_processors(
+            [
+                TestsProcessor(ping_test)
+            ]
         )
 
-        commands = switch_commands[switch]
+        commands = []
+        for item in ping_test:
+            if isinstance(item["task"], str):
+                commands.append(item["task"])
+            elif isinstance(item["task"], list):    
+                commands.extend(item["task"])
+
+        # collect output from devices using netmiko_send_commands task plugin
         if vendor == "aruba":
-            results = test_nr.run(
+            results = nr_with_tests.run(
                 task=scrapli_send_commands,
-                commands=commands,
+                commands=commands
             )
         else:
-            results = test_nr.run(
+            results = nr_with_tests.run(
                 task=netmiko_send_commands,
                 commands=commands,
             )
+        # prettify results transforming them in a text table using TabulateFormatter
+        pretty_results = ResultSerializer(results, add_details=True, to_dict=False)
+        dict_results = ResultSerializer(results, add_details=False, to_dict=True)
+        # print results
+    else:
 
-        dict_results.update(
-            ResultSerializer(results, add_details=False, to_dict=True),
+        test_file = path.join(
+            project_root,
+            "canu",
+            "test",
+            vendor,
+            "test_suite.yaml",
         )
 
-        pretty_results += ResultSerializer(results, add_details=True, to_dict=False)
+        with open(test_file) as f:
+            test_suite = yaml.safe_load(f.read())
+        switch_commands = {"spine": [], "leaf-bmc": [], "leaf": [], "cdu": []}
+        switch_test_suite = {"spine": [], "leaf-bmc": [], "leaf": [], "cdu": []}
 
-    # print the results
+        dict_results = {}
+        pretty_results = []
+        # get the commands and the test suite for each switch type.
+        for switch in switch_commands.keys():
+            for test_command in test_suite:
+                devices = test_command.get("device")
+                csm_test_version = test_command.get("csm")
+                csm = float(csm)
+                if csm_test_version is not None:
+                    if csm not in csm_test_version:
+                        continue
+                if switch in devices:
+                    switch_test_suite[switch].append(test_command)
+                if switch in devices and isinstance(test_command["task"], str):
+                    switch_commands[switch].append(test_command["task"])
+                elif switch in devices and isinstance(test_command["task"], list):
+                    switch_commands.extend(test_command["task"])
+
+        for switch in switch_commands.keys():
+            if not json_:
+                click.secho(f"Running tests on {switch} switches...", fg="green")
+            # filter out each switch type
+            switch_nr = online_hosts.filter(type=switch)
+            # get the tests for each switch type
+            test_nr = switch_nr.with_processors(
+                [TestsProcessor(switch_test_suite[switch])],
+            )
+
+            commands = switch_commands[switch]
+            if vendor == "aruba":
+                results = test_nr.run(
+                    task=scrapli_send_commands,
+                    commands=commands,
+                )
+            else:
+                results = test_nr.run(
+                    task=netmiko_send_commands,
+                    commands=commands,
+                )
+
+            dict_results.update(
+                ResultSerializer(results, add_details=False, to_dict=True),
+            )
+
+            pretty_results += ResultSerializer(results, add_details=True, to_dict=False)
+
+        # print the results
     if json_:
         click.secho(json.dumps(dict_results, indent=4))
     else:

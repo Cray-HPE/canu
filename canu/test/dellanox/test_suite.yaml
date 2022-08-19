@@ -135,7 +135,7 @@
   device:
     - spine
 - name: KEA connection check
-  task: ping 10.92.100.222 -c 1 
+  task: ping 10.92.100.222 -c 1
   test: contains
   pattern: bytes from
   err_msg: KEA (10.92.100.222) does not respond.
@@ -154,7 +154,8 @@
     - leaf-bmc
     - cdu
     - spine
-  csm: 1.2
+  csm:
+    - 1.2
 - name: Internet connection check
   task: ping 8.8.8.8 -c 1
   test: contains
@@ -165,4 +166,5 @@
     - leaf-bmc
     - cdu
     - spine
-  csm: 1.0
+  csm:
+    - 1.0
