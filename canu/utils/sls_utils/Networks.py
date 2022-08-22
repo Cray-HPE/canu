@@ -302,10 +302,6 @@ class Subnet(Network):
         )
 
         sls_subnet.ipv4_gateway(ipaddress.IPv4Address(sls_data.get("Gateway")))
-        if sls_subnet.ipv4_gateway() not in sls_subnet.ipv4_network():
-            print(
-                f"WARNING: Gateway not in Subnet for {sls_subnet.name()} (possibly supernetting).",
-            )
 
         sls_subnet.full_name(sls_data.get("FullName"))
         sls_subnet.vlan(sls_data.get("VlanID"))

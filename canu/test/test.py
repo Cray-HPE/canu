@@ -138,7 +138,7 @@ def test(
         network: The network that is used to connect to the switches.
         log_: enable logging
         json_: output test results in JSON format
-        ping:
+        ping: run the ping test suite
     """
     if not password:
         password = click.prompt(
@@ -185,6 +185,30 @@ def test(
     else:
         vendor = "dellanox"
 
+    def get_ncn_switch_address(network):
+        network_dict = {}
+        for net in network:
+            for subnet in networks.get(net).subnets().values():
+                for reservation in subnet.reservations().values():
+                    if "ncn" in reservation.name() or "sw" in reservation.name():
+                        network_dict[reservation.name() + f"-{net}".lower()] = str(reservation.ipv4_address())
+        return network_dict
+
+    def send_ssh_commands(vendor, commands, nornir_object):
+
+        if vendor == "aruba":
+            results = nornir_object.run(
+                task=scrapli_send_commands,
+                commands=commands
+            )
+        else:
+            results = nornir_object.run(
+                task=netmiko_send_commands,
+                commands=commands,
+                enable = True,
+            )
+        return(results)
+
     online_hosts, unreachable_hosts = host_alive(nr)
 
     if unreachable_hosts:
@@ -197,15 +221,6 @@ def test(
     if ping:
         networks = NetworkManager(sls_json["Networks"])
 
-        def get_ncn_switch_address(network):
-            network_dict = {}
-            for net in network:
-                for subnet in networks.get(net).subnets().values():
-                    for reservation in subnet.reservations().values():
-                        if "ncn" in reservation.name() or "sw" in reservation.name():
-                            network_dict[reservation.name() + f"-{net}".lower()] = str(reservation.ipv4_address())
-            return network_dict
-
         ping = {'device': ['leaf', 'leaf-bmc', 'cdu', 'spine'],
                 'err_msg': '',
                 'name': '',
@@ -217,6 +232,7 @@ def test(
 
         ping_test = []
 
+        #construct pings tests for switches.
         for k,v in ncn_switch_address.items():
             ping["err_msg"] = f"{k} is not reachable"
             ping["name"] = f"ping {k} {v}"
@@ -243,21 +259,9 @@ def test(
             elif isinstance(item["task"], list):    
                 commands.extend(item["task"])
 
-        # collect output from devices using netmiko_send_commands task plugin
-        if vendor == "aruba":
-            results = nr_with_tests.run(
-                task=scrapli_send_commands,
-                commands=commands
-            )
-        else:
-            results = nr_with_tests.run(
-                task=netmiko_send_commands,
-                commands=commands,
-            )
-        # prettify results transforming them in a text table using TabulateFormatter
+        results = send_ssh_commands(vendor, commands, nr_with_tests)
         pretty_results = ResultSerializer(results, add_details=True, to_dict=False)
         dict_results = ResultSerializer(results, add_details=False, to_dict=True)
-        # print results
     else:
 
         test_file = path.join(
@@ -302,17 +306,8 @@ def test(
             )
 
             commands = switch_commands[switch]
-            if vendor == "aruba":
-                results = test_nr.run(
-                    task=scrapli_send_commands,
-                    commands=commands,
-                )
-            else:
-                results = test_nr.run(
-                    task=netmiko_send_commands,
-                    commands=commands,
-                )
 
+            results = send_ssh_commands(vendor, commands, test_nr)
             dict_results.update(
                 ResultSerializer(results, add_details=False, to_dict=True),
             )

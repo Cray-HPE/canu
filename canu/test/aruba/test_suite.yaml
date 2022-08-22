@@ -161,7 +161,7 @@
 #   device:
 #     - spine
 - name: KEA connection check
-  task: ping 10.92.100.222 source vlan2 repetitions 2
+  task: ping 10.92.100.222 source vlan2 repetitions 1
   test: contains
   pattern: bytes from
   err_msg: KEA (10.92.100.222) does not respond.
@@ -191,7 +191,7 @@
     - Idle
     - Active
     - connect
-  err_msg: BGP has Neighbors in active or idle
+  err_msg: BGP has Neighbors not established.
   device:
     - spine
 - name: STP check for root bridge spine
@@ -211,7 +211,7 @@
     - leaf-bmc
     - cdu
 - name: Is internal DNS server alive (ping)
-  task: ping 10.92.100.225 repetitions 2
+  task: ping 10.92.100.225 repetitions 1
   test: contains
   pattern: bytes from
   err_msg: Internal DNS does not respond to ping
@@ -221,7 +221,7 @@
     - cdu
     - spine
 - name: Does internal DNS resolve ncn-m001-nmn
-  task: ping ncn-m001-nmn repetitions 2
+  task: ping ncn-m001-nmn repetitions 1
   test: contains
   pattern: bytes from
   err_msg: Internal DNS cannot resolve ncn-m001-nmn, is ncn-m001 alive?
@@ -231,7 +231,7 @@
     - cdu
     - spine
 - name: Internet connection check
-  task: ping 8.8.8.8 source vlan7 repetitions 2
+  task: ping 8.8.8.8 source vlan7 repetitions 1
   test: contains
   pattern: bytes from
   err_msg: External network (internet) does not respond.
@@ -243,7 +243,7 @@
   csm:
     - 1.0
 - name: Internet connection check
-  task: ping 8.8.8.8 source vlan7 vrf Customer repetitions 2
+  task: ping 8.8.8.8 source vlan7 vrf Customer repetitions 1
   test: contains
   pattern: bytes from
   err_msg: External network (internet) does not respond.
