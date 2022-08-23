@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.13-develop
+# 🛶 CANU v1.6.15-develop
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1192,6 +1192,16 @@ To run a specific test file:
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.6.15-develop]
+
+- Fix switch firmware version for 1.2 and 1.3
+- Fix JSON output with canu test
+- Add canu test --ping
+- Add additional tests for dellanox
+- Remove CPU and memory, and ip helper test from aruba
+- Add the ability to have multiple CSM versions for tests
+- Add sls_utils
 
 ## [1.6.13-develop]
 
