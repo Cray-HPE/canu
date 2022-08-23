@@ -15,6 +15,9 @@ If a switch that is not a spine switch is tested, it will show in the results ta
 
 * Or read the IP addresses from a file, one IP address per line, using ‘–ips-file FILENAME’ flag.
 
+
+* The default ‘asn’ is set to 65533 if it needs to be changed, use the ‘–asn NEW_ASN_NUMBER’ flag.
+
 If you want to see the individual status of all the neighbors of a switch, use the ‘–verbose’ flag.
 
 
@@ -25,6 +28,14 @@ canu validate network bgp [OPTIONS]
 ```
 
 ### Options
+
+
+### --ips( <ips>)
+Comma separated list of IPv4 addresses of switches
+
+
+### --ips-file( <ips_file>)
+File with one IPv4 address per line
 
 
 ### --username( <username>)
@@ -41,19 +52,23 @@ Switch username
 Switch password
 
 
-### --network( <network>)
-The network that BGP neighbors are checked.
+### --asn( <asn>)
+ASN
 
 
 * **Default**
 
-    ALL
+    65533
 
+
+
+### -a(, --architecture( <architecture>)
+**Required** CSM architecture
 
 
 * **Options**
 
-    ALL | NMN | CMN
+    Full | TDS | V1
 
 
 
