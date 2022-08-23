@@ -341,10 +341,10 @@ def temp_is_subnet_of(a, b):
             b.network_address <= a.network_address
             and b.broadcast_address >= a.broadcast_address  # noqa W503
         )
-    except AttributeError:  # noqa
+    except AttributeError as err:  # noqa
         raise TypeError(
             f"Unable to test subnet containment " f"between {a} and {b}",
-        )  # noqa
+        ) from err
 
 
 def prefixlength_from_hosts(num_hosts):

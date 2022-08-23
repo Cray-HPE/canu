@@ -31,7 +31,7 @@ from canu.utils.sls_utils.Networks import Network, Subnet
 class NetworkManager(UserDict):
     """Provide a means to search and set SLS Network info."""
 
-    def __init__(self, network_dict=[]):
+    def __init__(self, network_dict=None):
         """Create a Network Manager.
 
         Args:
@@ -40,6 +40,8 @@ class NetworkManager(UserDict):
         Raises:
             TypeError: When subnet_dict is not a dictionary
         """
+        if network_dict is None:
+            network_dict = []
         if not isinstance(network_dict, dict):
             raise TypeError(
                 "SLSNetworkManager requires an SLS Networks dictionary for initialization.",
@@ -117,7 +119,7 @@ class NetworkManager(UserDict):
 class SubnetManager(UserDict):
     """A SubnetManager is a convenience wrapper around Subnets."""
 
-    def __init__(self, subnet_dict=[]):
+    def __init__(self, subnet_dict=None):
         """Create a Subnet Manager.
 
         Args:
@@ -126,6 +128,8 @@ class SubnetManager(UserDict):
         Raises:
             TypeError: When subnet_dict is not a dictionary
         """
+        if subnet_dict is None:
+            subnet_dict = []
         if not isinstance(subnet_dict, dict):
             raise TypeError("SubnetManager requires dictionary for initialization.")
 

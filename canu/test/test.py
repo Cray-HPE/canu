@@ -25,9 +25,9 @@ import logging
 from os import path
 from pathlib import Path
 import sys
+
 import click
 from click_help_colors import HelpColorsCommand
-import click_spinner
 from nornir import InitNornir
 from nornir.core.filter import F
 from nornir_salt import (
@@ -113,7 +113,7 @@ csm_options = canu_config["csm_versions"]
 )
 @click.option("--sls-address", default="api-gw-service-nmn.local", show_default=True)
 @click.pass_context
-#@pysnooper.snoop()
+# @pysnooper.snoop()
 def test(
     ctx,
     username,
@@ -158,7 +158,6 @@ def test(
         )
         sys.exit(1)
 
-
     switch_inventory, sls_variables = inventory(
         username,
         password,
@@ -166,7 +165,7 @@ def test(
         sls_json,
         sls_inventory=True,
     )
-    
+
     nr = InitNornir(
         runner={
             "plugin": "threaded",
@@ -191,23 +190,22 @@ def test(
             for subnet in networks.get(net).subnets().values():
                 for reservation in subnet.reservations().values():
                     if "ncn" in reservation.name() or "sw" in reservation.name():
-                        network_dict[reservation.name() + f"-{net}".lower()] = str(reservation.ipv4_address())
+                        network_dict[reservation.name() + f"-{net}".lower()] = str(
+                            reservation.ipv4_address(),
+                        )
         return network_dict
 
     def send_ssh_commands(vendor, commands, nornir_object):
 
         if vendor == "aruba":
-            results = nornir_object.run(
-                task=scrapli_send_commands,
-                commands=commands
-            )
+            results = nornir_object.run(task=scrapli_send_commands, commands=commands)
         else:
             results = nornir_object.run(
                 task=netmiko_send_commands,
                 commands=commands,
-                enable = True,
+                enable=True,
             )
-        return(results)
+        return results
 
     online_hosts, unreachable_hosts = host_alive(nr)
 
@@ -221,19 +219,20 @@ def test(
     if ping:
         networks = NetworkManager(sls_json["Networks"])
 
-        ping = {'device': ['leaf', 'leaf-bmc', 'cdu', 'spine'],
-                'err_msg': '',
-                'name': '',
-                'pattern': 'bytes from',
-                'task': '',
-                'test': 'contains'}
+        ping = {
+            "device": ["leaf", "leaf-bmc", "cdu", "spine"],
+            "err_msg": "",
+            "name": "",
+            "pattern": "bytes from",
+            "test": "contains",
+        }
 
         ncn_switch_address = get_ncn_switch_address(["HMN", "CMN", "NMN"])
 
         ping_test = []
 
-        #construct pings tests for switches.
-        for k,v in ncn_switch_address.items():
+        # construct pings tests for switches
+        for k, v in ncn_switch_address.items():
             ping["err_msg"] = f"{k} is not reachable"
             ping["name"] = f"ping {k} {v}"
             if "cmn" in k and vendor == "aruba":
@@ -246,17 +245,13 @@ def test(
                 ping["task"] = f"ping {v} -c 1"
             ping_test.append(ping.copy())
 
-        nr_with_tests = online_hosts.with_processors(
-            [
-                TestsProcessor(ping_test)
-            ]
-        )
+        nr_with_tests = online_hosts.with_processors([TestsProcessor(ping_test)])
 
         commands = []
         for item in ping_test:
             if isinstance(item["task"], str):
                 commands.append(item["task"])
-            elif isinstance(item["task"], list):    
+            elif isinstance(item["task"], list):
                 commands.extend(item["task"])
 
         results = send_ssh_commands(vendor, commands, nr_with_tests)

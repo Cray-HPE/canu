@@ -20,10 +20,6 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Create Nornir Inventory from SLS."""
-import json
-
-import click
-
 from canu.utils.sls import pull_sls_hardware, pull_sls_networks
 
 
