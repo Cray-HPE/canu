@@ -136,6 +136,8 @@ network_v2:
       connections:
         - name: "spine"
           speed: 100
+        - name: "customer_edge_router"
+          speed: 100
     - name: "cec"
       model: "cec"
       connections:
@@ -309,6 +311,8 @@ network_v2_tds:
       model: "customer_edge_router"
       connections:
         - name: "spine"
+          speed: 100
+        - name: "customer_edge_router"
           speed: 100
     - name: "river_compute_node"
       model: "river_compute_node"
