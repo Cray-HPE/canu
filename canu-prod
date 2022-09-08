@@ -1,21 +1,7 @@
 #!/usr/bin/env bash
-echo "######################################################################"
-echo "# Creating CANU development environment in a container"
-echo "######################################################################"
 
-IMAGE="canu-devel"
+IMAGE="canu-prod"
 REBUILD=${1:-"same"}
-
-#
-# Try to get an ssh key for CANU github
-#
-if [[ ${SSHKEYFILE:-"unset"} == "unset" ]];then
-    read -er -p "Public GitHub Cray-HPE ssh key (full path): " SSHKEYFILE
-fi
-if [[ ! -f ${SSHKEYFILE} ]]; then
-    echo "ERROR:  Key file ${SSHKEYFILE} does not exist."
-    exit 1
-fi
 
 #
 # Find a container platform (podman, docker, etc...)
@@ -46,7 +32,7 @@ fi
 #
 if [[ -z $(${PLATFORM} image ls -q ${IMAGE}) || ${REBUILD} == "rebuild" ]];then
     echo "# Building CANU image ${IMAGE}. This may take time to download and create."
-    ${PLATFORM} build -t ${IMAGE} -f Dockerfile.devel .
+    ${PLATFORM} build -t ${IMAGE} -f Dockerfile.prod .
 fi
 
 
