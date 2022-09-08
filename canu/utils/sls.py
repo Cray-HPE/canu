@@ -88,9 +88,8 @@ def pull_sls_networks(sls_file=None):
         # Get the admin client secret from Kubernetes
         #
         secret = None
-        cenv = os.getenv('CRAYENV')
-        csm = 'csm'
-        if cenv != csm:
+        cenv = os.getenv('CRAYENV',"notk8s")
+        if cenv is not None and cenv != "k8s":
             try:
                 config.load_kube_config()
                 v1 = client.CoreV1Api()
@@ -114,7 +113,10 @@ def pull_sls_networks(sls_file=None):
         # Get an auth token by using the secret
         #
         token = None
-        if cenv != csm:
+        sls_cache = None
+        sls_url = "http://cray-sls.services.svc.cluster.local/v1/networks"
+        if cenv is not None and cenv != "k8s":
+            sls_url = "https://api-gw-service-nmn.local/apis/sls/v1/networks"
             try:
                 token_url = "https://api-gw-service-nmn.local/keycloak/realms/shasta/protocol/openid-connect/token"
                 token_data = {
@@ -144,10 +146,6 @@ def pull_sls_networks(sls_file=None):
         # Get existing SLS data for comparison (used as a cache)
         #
         sls_cache = None
-        if cenv == csm:
-            sls_url = "http://cray-sls.services.svc.cluster.local/v1/networks"
-        else:
-            sls_url = "https://api-gw-service-nmn.local/apis/sls/v1/networks"
         auth_headers = {"Authorization": "Bearer {}".format(token)}
         try:
             sls_cache = remote_request(
@@ -375,8 +373,7 @@ def pull_sls_hardware(sls_file=None):
         #
         secret = None
         cenv = os.getenv('CRAYENV')
-        csm = 'csm'
-        if cenv != csm:
+        if cenv is not None and cenv != "k8s":
             try:
                 config.load_kube_config()
                 v1 = client.CoreV1Api()
@@ -400,7 +397,10 @@ def pull_sls_hardware(sls_file=None):
         # Get an auth token by using the secret
         #
         token = None
-        if cenv != csm:
+        sls_cache = None
+        sls_url = "http://cray-sls.services.svc.cluster.local/v1/hardware"
+        if cenv is not None and cenv != "k8s":
+            sls_url = "https://api-gw-service-nmn.local/apis/sls/v1/hardware"
             try:
                 token_url = "https://api-gw-service-nmn.local/keycloak/realms/shasta/protocol/openid-connect/token"
                 token_data = {
@@ -429,11 +429,6 @@ def pull_sls_hardware(sls_file=None):
         #
         # Get existing SLS data for comparison (used as a cache)
         #
-        sls_cache = None
-        if cenv == csm:
-            sls_url = "http://cray-sls.services.svc.cluster.local/v1/hardware"
-        else:
-            sls_url = "https://api-gw-service-nmn.local/apis/sls/v1/hardware"
         auth_headers = {"Authorization": "Bearer {}".format(token)}
         try:
             sls_cache = remote_request(
