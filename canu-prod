@@ -18,8 +18,7 @@ if [[ -z ${PLATFORM} ]];then
    exit 1
 fi
 
-if [[ $(basename ${PLATFORM}) == "podman" ]];then
-    PLATFORM="${PLATFORM}"
+if [[ $(basename "${PLATFORM}") == "podman" ]];then
     MOUNTOPTS="Z,U"
     if [[ $(id -u) -ne 0 ]];then
         RUNOPTS="--user 0"
