@@ -46,11 +46,10 @@ fi
 #
 if [[ -z $(${PLATFORM} image ls -q ${IMAGE}) || ${REBUILD} == "rebuild" ]];then
     echo "# Building CANU image ${IMAGE}. This may take time to download and create."
-    ${PLATFORM} build -t "${IMAGE}" -f Dockerfile.prod .
+    ${PLATFORM} build -t "${IMAGE}" -f Dockerfile.devel .
 fi
 
 
-set -x
 #
 # Start CANU container
 #
