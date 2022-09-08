@@ -7,8 +7,7 @@ REBUILD=${1:-"same"}
 # Find a container platform (podman, docker, etc...)
 #
 for platform in podman docker;do
-    which ${platform} >/dev/null 2>&1 
-    if [[ $? == 0 ]];then
+    if which ${platform} >/dev/null 2>&1;then
         PLATFORM=$(which ${platform})
         break
     fi
@@ -21,8 +20,10 @@ fi
 
 if [[ $(basename ${PLATFORM}) == "podman" ]];then
     PLATFORM="${PLATFORM}"
-    #RUNOPTS="--user 0"
     MOUNTOPTS="Z,U"
+    if [[ $(id -u) -ne 0 ]];then
+        RUNOPTS="--user 0"
+    fi
 else
     MOUNTOPTS="rw"
 fi
@@ -37,18 +38,15 @@ fi
 
 
 
-set -x
 #
 # Start CANU container
 #
-echo "# Launching CANU container"
-echo "#   CANU version $(cat ./canu/.version)"
-echo "#   Read-Only GitHub ssh key located at /home/canu/key"
-echo '#   Type "exit" or "Ctrl+D" to exit the container'
 ${PLATFORM} run ${RUNOPTS} -it --rm \
-    -v "${SSHKEYFILE}":/home/canu/key:ro \
     -v $(pwd)/:/files:${MOUNTOPTS} \
     --name ${IMAGE} \
     --hostname ${IMAGE} \
     ${IMAGE} \
-    /bin/bash
+    canu "${@}"
+
+    # "canu ${@}"
+#    /bin/bash
