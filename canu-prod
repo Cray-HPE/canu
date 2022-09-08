@@ -37,8 +37,9 @@ fi
 #
 # Start CANU container
 #
+# shellcheck disable=SC2086
 ${PLATFORM} run ${RUNOPTS} -it --rm \
-    -v $(pwd)/:/files:"${MOUNTOPTS}" \
+    -v "$(pwd)"/:/files:"${MOUNTOPTS}" \
     --name "${IMAGE}" \
     --hostname "${IMAGE}" \
     "${IMAGE}" \
