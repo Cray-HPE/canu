@@ -17,12 +17,12 @@ if [[ ! -f ${SSHKEYFILE} ]]; then
     exit 1
 fi
 
+
 #
 # Find a container platform (podman, docker, etc...)
 #
 for platform in podman docker;do
-    which ${platform} >/dev/null 2>&1 
-    if [[ $? == 0 ]];then
+    if which ${platform} >/dev/null 2>&1;then
         PLATFORM=$(which ${platform})
         break
     fi
@@ -33,22 +33,21 @@ if [[ -z ${PLATFORM} ]];then
    exit 1
 fi
 
-if [[ $(basename ${PLATFORM}) == "podman" ]];then
-    PLATFORM="${PLATFORM}"
-    #RUNOPTS="--user 0"
+if [[ $(basename "${PLATFORM}") == "podman" ]];then
     MOUNTOPTS="Z,U"
+    [[ $(id -u) -ne 0 ]] && RUNOPTS="--user 0"
 else
     MOUNTOPTS="rw"
 fi
+
 
 #
 # Build an image if required
 #
 if [[ -z $(${PLATFORM} image ls -q ${IMAGE}) || ${REBUILD} == "rebuild" ]];then
     echo "# Building CANU image ${IMAGE}. This may take time to download and create."
-    ${PLATFORM} build -t ${IMAGE} -f Dockerfile.devel .
+    ${PLATFORM} build -t "${IMAGE}" -f Dockerfile.prod .
 fi
-
 
 
 set -x
@@ -59,10 +58,11 @@ echo "# Launching CANU container"
 echo "#   CANU version $(cat ./canu/.version)"
 echo "#   Read-Only GitHub ssh key located at /home/canu/key"
 echo '#   Type "exit" or "Ctrl+D" to exit the container'
+# shellcheck disable=SC2086
 ${PLATFORM} run ${RUNOPTS} -it --rm \
     -v "${SSHKEYFILE}":/home/canu/key:ro \
-    -v $(pwd)/:/files:${MOUNTOPTS} \
-    --name ${IMAGE} \
-    --hostname ${IMAGE} \
-    ${IMAGE} \
+    -v "$(pwd)"/:/files:"${MOUNTOPTS}" \
+    --name "${IMAGE}" \
+    --hostname "${IMAGE}" \
+    "${IMAGE}" \
     /bin/bash

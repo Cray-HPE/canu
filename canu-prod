@@ -3,6 +3,7 @@
 IMAGE="canu-prod"
 REBUILD=${1:-"same"}
 
+
 #
 # Find a container platform (podman, docker, etc...)
 #
@@ -25,6 +26,7 @@ else
     MOUNTOPTS="rw"
 fi
 
+
 #
 # Build an image if required
 #
@@ -44,6 +46,3 @@ ${PLATFORM} run ${RUNOPTS} -it --rm \
     --hostname "${IMAGE}" \
     "${IMAGE}" \
     canu "${@}"
-
-    # "canu ${@}"
-#    /bin/bash
