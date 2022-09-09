@@ -89,7 +89,7 @@ def pull_sls_networks(sls_file=None):
         #
         secret = None
         cenv = os.getenv('CRAYENV',"notk8s")
-        if cenv is not None and cenv != "k8s":
+        if cenv != "k8s":
             try:
                 config.load_kube_config()
                 v1 = client.CoreV1Api()
@@ -115,7 +115,7 @@ def pull_sls_networks(sls_file=None):
         token = None
         sls_cache = None
         sls_url = "http://cray-sls.services.svc.cluster.local/v1/networks"
-        if cenv is not None and cenv != "k8s":
+        if cenv != "k8s":
             sls_url = "https://api-gw-service-nmn.local/apis/sls/v1/networks"
             try:
                 token_url = "https://api-gw-service-nmn.local/keycloak/realms/shasta/protocol/openid-connect/token"
@@ -372,8 +372,8 @@ def pull_sls_hardware(sls_file=None):
         # Get the admin client secret from Kubernetes
         #
         secret = None
-        cenv = os.getenv('CRAYENV')
-        if cenv is not None and cenv != "k8s":
+        cenv = os.getenv('CRAYENV',"notk8s")
+        if cenv != "k8s":
             try:
                 config.load_kube_config()
                 v1 = client.CoreV1Api()
@@ -399,7 +399,7 @@ def pull_sls_hardware(sls_file=None):
         token = None
         sls_cache = None
         sls_url = "http://cray-sls.services.svc.cluster.local/v1/hardware"
-        if cenv is not None and cenv != "k8s":
+        if cenv != "k8s":
             sls_url = "https://api-gw-service-nmn.local/apis/sls/v1/hardware"
             try:
                 token_url = "https://api-gw-service-nmn.local/keycloak/realms/shasta/protocol/openid-connect/token"
