@@ -23,8 +23,8 @@
 import base64
 from collections import defaultdict
 import json
-import sys
 import os
+import sys
 
 from kubernetes import client, config
 import requests
@@ -88,7 +88,7 @@ def pull_sls_networks(sls_file=None):
         # Get the admin client secret from Kubernetes
         #
         secret = None
-        cenv = os.getenv('CRAYENV',"notk8s")
+        cenv = os.getenv("CRAYENV", "notk8s")
         if cenv != "k8s":
             try:
                 config.load_kube_config()
@@ -120,16 +120,16 @@ def pull_sls_networks(sls_file=None):
             try:
                 token_url = "https://api-gw-service-nmn.local/keycloak/realms/shasta/protocol/openid-connect/token"
                 token_data = {
-                     "grant_type": "client_credentials",
-                     "client_id": "admin-client",
-                     "client_secret": secret,
+                    "grant_type": "client_credentials",
+                    "client_id": "admin-client",
+                    "client_secret": secret,
                 }
                 token_request = remote_request(
-                     "POST",
-                     token_url,
-                     data=token_data,
-                     debug=debug,
-                 )
+                    "POST",
+                    token_url,
+                    data=token_data,
+                    debug=debug,
+                )
                 token = token_request["access_token"]
                 on_debug(
                     debug=debug,
@@ -372,7 +372,7 @@ def pull_sls_hardware(sls_file=None):
         # Get the admin client secret from Kubernetes
         #
         secret = None
-        cenv = os.getenv('CRAYENV',"notk8s")
+        cenv = os.getenv("CRAYENV", "notk8s")
         if cenv != "k8s":
             try:
                 config.load_kube_config()
