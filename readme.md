@@ -1203,6 +1203,10 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Add the ability to have multiple CSM versions for tests
 - Add sls_utils
 
+## [1.6.14-develop]
+
+- Support  SLS query in CANU container  that works both in and out of Kubernetes
+
 ## [1.6.13-develop]
 
 - Fix CSM 1.2 UAN template when CHN is used - do not produce None VLAN.

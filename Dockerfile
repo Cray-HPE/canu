@@ -43,8 +43,7 @@ COPY    . /app/canu
 RUN     pip3 install --editable /app/canu/
 
 # set file perms for canu
-RUN     chown -R canu /app/canu /files
-
+RUN     chown -R canu /app/canu /files /home
 # set none root user: canu
 USER    canu
 
