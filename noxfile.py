@@ -35,7 +35,7 @@ else:
     project_root = Path(__file__).resolve().parent
 
 
-COVERAGE_FAIL = 90
+COVERAGE_FAIL = 85
 ERROR_ON_GENERATE = True
 locations = "canu", "tests", "noxfile.py", "network_modeling", "docs/templates/conf.py"
 nox.options.sessions = "tests", "lint", "cover", "docs"
