@@ -126,42 +126,42 @@
     - leaf
     - leaf-bmc
     - spine
-- name: CPU Utilization over 70%
-  task: show system resource-utilization | include "CPU usage"
-  test: "!contains_re"
-  pattern: "[7-9][0-9]+"
-  err_msg: CPU Utilization is over 70%
-  device:
-    - cdu
-    - leaf
-    - leaf-bmc
-    - spine
-- name: Memory Utilization over 70%
-  task: show system resource-utilization | include "Memory usage"
-  test: "!contains_re"
-  pattern: "[7-9][0-9]+"
-  err_msg: Memory usage is over 70%
-  device:
-    - cdu
-    - leaf
-    - leaf-bmc
-    - spine
-- name: vlan 1 ip-helper test
-  task: show run interface vlan 1
-  test: contains
-  pattern: 10.92.100.222
-  err_msg: IP-Helper is missing
-  device:
-    - spine
-- name: vlan 2 ip-helper test
-  task: show run interface vlan 2
-  test: contains
-  pattern: 10.92.100.222
-  err_msg: IP-Helper is missing
-  device:
-    - spine
+# - name: CPU Utilization over 70%
+#   task: show system resource-utilization | include "CPU usage"
+#   test: "!contains_re"
+#   pattern: "[7-9][0-9]+"
+#   err_msg: CPU Utilization is over 70%
+#   device:
+#     - cdu
+#     - leaf
+#     - leaf-bmc
+#     - spine
+# - name: Memory Utilization over 70%
+#   task: show system resource-utilization | include "Memory usage"
+#   test: "!contains_re"
+#   pattern: "[7-9][0-9]+"
+#   err_msg: Memory usage is over 70%
+#   device:
+#     - cdu
+#     - leaf
+#     - leaf-bmc
+#     - spine
+# - name: vlan 1 ip-helper test
+#   task: show run interface vlan 1
+#   test: contains
+#   pattern: 10.92.100.222
+#   err_msg: IP-Helper is missing
+#   device:
+#     - spine
+# - name: vlan 2 ip-helper test
+#   task: show run interface vlan 2
+#   test: contains
+#   pattern: 10.92.100.222
+#   err_msg: IP-Helper is missing
+#   device:
+#     - spine
 - name: KEA connection check
-  task: ping 10.92.100.222 source vlan2 repetitions 2
+  task: ping 10.92.100.222 source vlan2 repetitions 1
   test: contains
   pattern: bytes from
   err_msg: KEA (10.92.100.222) does not respond.
@@ -170,13 +170,13 @@
     - leaf-bmc
     - cdu
     - spine
-- name: vlan 4 ip-helper test
-  task: show run interface vlan 4
-  test: contains
-  pattern: 10.94.100.222
-  err_msg: IP-Helper is missing
-  device:
-    - spine
+# - name: vlan 4 ip-helper test
+#   task: show run interface vlan 4
+#   test: contains
+#   pattern: 10.94.100.222
+#   err_msg: IP-Helper is missing
+#   device:
+#     - spine
 - name: tftp route
   task: show ip route 10.92.100.60
   test: contains
@@ -191,7 +191,7 @@
     - Idle
     - Active
     - connect
-  err_msg: BGP has Neighbors in active or idle
+  err_msg: BGP has Neighbors not established.
   device:
     - spine
 - name: STP check for root bridge spine
@@ -211,7 +211,7 @@
     - leaf-bmc
     - cdu
 - name: Is internal DNS server alive (ping)
-  task: ping 10.92.100.225 repetitions 2
+  task: ping 10.92.100.225 repetitions 1
   test: contains
   pattern: bytes from
   err_msg: Internal DNS does not respond to ping
@@ -221,7 +221,7 @@
     - cdu
     - spine
 - name: Does internal DNS resolve ncn-m001-nmn
-  task: ping ncn-m001-nmn repetitions 2
+  task: ping ncn-m001-nmn repetitions 1
   test: contains
   pattern: bytes from
   err_msg: Internal DNS cannot resolve ncn-m001-nmn, is ncn-m001 alive?
@@ -231,7 +231,7 @@
     - cdu
     - spine
 - name: Internet connection check
-  task: ping 8.8.8.8 source vlan7 repetitions 2
+  task: ping 8.8.8.8 source vlan7 repetitions 1
   test: contains
   pattern: bytes from
   err_msg: External network (internet) does not respond.
@@ -240,9 +240,10 @@
     - leaf-bmc
     - cdu
     - spine
-  csm: 1.0
+  csm:
+    - 1.0
 - name: Internet connection check
-  task: ping 8.8.8.8 source vlan7 vrf Customer repetitions 2
+  task: ping 8.8.8.8 source vlan7 vrf Customer repetitions 1
   test: contains
   pattern: bytes from
   err_msg: External network (internet) does not respond.
@@ -251,4 +252,6 @@
     - leaf-bmc
     - cdu
     - spine
-  csm: 1.2
+  csm:
+    - 1.2
+    - 1.3
