@@ -1197,6 +1197,16 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 - Fix a bug where destination port reuse was incorrectly allowed for `validate shcd` and `validate paddle`
 
+## [1.6.15-develop]
+
+- Fix switch firmware version for 1.2 and 1.3
+- Fix JSON output with canu test
+- Add canu test --ping
+- Add additional tests for dellanox
+- Remove CPU and memory, and ip helper test from aruba
+- Add the ability to have multiple CSM versions for tests
+- Add sls_utils
+
 ## [1.6.14-develop]
 
 - Support  SLS query in CANU container  that works both in and out of Kubernetes
