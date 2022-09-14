@@ -320,6 +320,7 @@ class NetworkNode:
                 src_port=dst_port,
                 dst_port=src_port,
                 bidirectional=False,
+                strict=True,
             ):
                 log.error(
                     "Connection of local to remote failed - "
