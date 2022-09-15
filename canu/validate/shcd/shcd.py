@@ -881,7 +881,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                         )
             if overlap_err_message is not None:
                 click.secho(
-                    f"ERROR: Conflicting nodes were assigned to the same Source geo-location the {sheet} tab on row {current_row}."
+                    f"ERROR: Conflicting nodes were assigned to the same Destination geo-location the {sheet} tab on row {current_row}."
                     f" {overlap_err_message}"
                     " Ensure rack placement is correct in all cabling rack layout tabs.",
                     fg="red",
