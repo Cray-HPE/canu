@@ -655,6 +655,35 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             src_index = None
             parent = None
             if node_type is not None and node_name is not None:
+
+                overlap_err_message = None
+                for x in node_list:
+                    xr = x.location().rack()
+                    xe = x.location().elevation()
+                    xn = x.common_name()
+                    if node_name == xn:
+                        if src_rack != xr or src_elevation != xe:
+                            overlap_err_message = (
+                                "Node rack and elevation locations cannot be redefined within the SHCD. "
+                                f"Node {src_name} ({node_name}) is currently located at {xr}{xe} and an attempt "
+                                f"was made to relocate it to {src_rack}{src_elevation}."
+                            )
+                    else:
+                        if src_rack == xr and src_elevation == xe:
+                            overlap_err_message = (
+                                "Two Nodes cannot share the same rack location."
+                                f" Node {xn} is currently located at {xr}{xe} and an attempt was made to"
+                                f" place {src_name} ({node_name}) in the same location."
+                            )
+                if overlap_err_message is not None:
+                    click.secho(
+                        f"ERROR: Conflicting nodes were assigned to the same Source geo-location the {sheet} tab on row {current_row}."
+                        f" {overlap_err_message}"
+                        " Ensure rack placement is correct in all cabling rack layout tabs.",
+                        fg="red",
+                    )
+                    sys.exit(1)
+
                 if node_name not in node_name_list:
                     log.info(f"Creating new node {node_name} of type {node_type}")
                     try:
@@ -830,6 +859,34 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             log.debug(f"Destination Name Lookup:  {node_name}")
             node_type = get_node_type(dst_name, factory.lookup_mapper())
             log.debug(f"Destination Node Type Lookup:  {node_type}")
+
+            overlap_err_message = None
+            for x in node_list:
+                xr = x.location().rack()
+                xe = x.location().elevation()
+                xn = x.common_name()
+                if node_name == xn:
+                    if dst_rack != xr or dst_elevation != xe:
+                        overlap_err_message = (
+                            "Node rack and elevation locations cannot be redefined within the SHCD. "
+                            f"Node {dst_name} ({node_name}) is currently located at {xr}{xe} and an attempt "
+                            f"was made to relocate it to {dst_rack}{dst_elevation}."
+                        )
+                else:
+                    if dst_rack == xr and dst_elevation == xe:
+                        overlap_err_message = (
+                            "Two Nodes cannot share the same rack location."
+                            f" Node {xn} is currently located at {xr}{xe} and an attempt was made to"
+                            f" place {dst_name} ({node_name}) in the same location."
+                        )
+            if overlap_err_message is not None:
+                click.secho(
+                    f"ERROR: Conflicting nodes were assigned to the same Source geo-location the {sheet} tab on row {current_row}."
+                    f" {overlap_err_message}"
+                    " Ensure rack placement is correct in all cabling rack layout tabs.",
+                    fg="red",
+                )
+                sys.exit(1)
 
             # Create dst_node if it does not exist
             try:
