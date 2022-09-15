@@ -598,16 +598,16 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
         block = block[1:]
         for row in block:
             # Cable source
+            src_rack = None
+            src_elevation = None
             try:
                 current_row = row[required_header[0]].row
                 log.debug(f"---- Working in sheet {sheet} on row {current_row} ----")
                 src_name = row[required_header[0]].value.strip()
                 tmp_slot = row[required_header[3]]
                 tmp_port = row[required_header[4]]
-                src_rack = None
                 if row[required_header[1]].value:
                     src_rack = row[required_header[1]].value.strip().lower()
-                src_elevation = None
                 if row[required_header[2]].value:
                     src_elevation = row[required_header[2]].value.strip().lower()
                 src_location = NodeLocation(src_rack, src_elevation)
@@ -656,11 +656,18 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             parent = None
             if node_type is not None and node_name is not None:
 
+                # Check for Source location overlaps or repositioning
                 overlap_err_message = None
                 for x in node_list:
                     xr = x.location().rack()
                     xe = x.location().elevation()
                     xn = x.common_name()
+                    if node_type == "cec" or node_type == "cmm":
+                        log.debug(
+                            f"Skipping Source locations checks for Mountain Hardware for tab {sheet} on row {current_row}."
+                            " Mountain hardware locations can overlap for cec and cmm in the SHCD."
+                        )
+                        break
                     if node_name == xn:
                         if src_rack != xr or src_elevation != xe:
                             overlap_err_message = (
@@ -677,7 +684,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                             )
                 if overlap_err_message is not None:
                     click.secho(
-                        f"ERROR: Conflicting nodes were assigned to the same Source geo-location the {sheet} tab on row {current_row}."
+                        f"ERROR: Conflicting nodes were assigned to the same Source geo-location in the {sheet} tab on row {current_row}."
                         f" {overlap_err_message}"
                         " Ensure rack placement is correct in all cabling rack layout tabs.",
                         fg="red",
@@ -814,18 +821,18 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             src_node_port = NetworkPort(number=src_port, slot=src_slot)
 
             # Cable destination
+            dst_slot = None  # dst is always a switch
+            dst_rack = None
+            dst_elevation = None
             try:
                 dst_name = row[required_header[5]].value.strip()
-                dst_slot = None  # dst is always a switch
                 dst_port = validate_shcd_port_data(
                     row[required_header[8]],
                     sheet,
                     warnings,
                 )
-                dst_rack = None
                 if row[required_header[6]].value:
                     dst_rack = row[required_header[6]].value.strip()
-                dst_elevation = None
                 if row[required_header[7]].value:
                     dst_elevation = row[required_header[7]].value.strip()
                 dst_location = NodeLocation(dst_rack, dst_elevation)
@@ -857,14 +864,22 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 )
                 sys.exit(1)
             log.debug(f"Destination Name Lookup:  {node_name}")
+            log.debug(f"Destination rack {dst_rack} in location {dst_elevation}")
             node_type = get_node_type(dst_name, factory.lookup_mapper())
             log.debug(f"Destination Node Type Lookup:  {node_type}")
 
+            # Check for Destination location overlaps or repositioning
             overlap_err_message = None
             for x in node_list:
                 xr = x.location().rack()
                 xe = x.location().elevation()
                 xn = x.common_name()
+                if node_type == "cec" or node_type == "cmm":
+                    log.debug(
+                        f"Skipping Destination locations checks for Mountain Hardware for tab {sheet} on row {current_row}."
+                        " Mountain hardware locations can overlap for cec and cmm in the SHCD."
+                    )
+                    break
                 if node_name == xn:
                     if dst_rack != xr or dst_elevation != xe:
                         overlap_err_message = (
@@ -881,7 +896,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                         )
             if overlap_err_message is not None:
                 click.secho(
-                    f"ERROR: Conflicting nodes were assigned to the same Destination geo-location the {sheet} tab on row {current_row}."
+                    f"ERROR: Conflicting nodes were assigned to the same Destination geo-location in the {sheet} tab on row {current_row}."
                     f" {overlap_err_message}"
                     " Ensure rack placement is correct in all cabling rack layout tabs.",
                     fg="red",
