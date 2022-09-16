@@ -775,6 +775,7 @@ def generate_switch_config(
         "HMN_IPs": sls_variables["HMN_IPs"],
         "SWITCH_ASN": sls_variables["SWITCH_ASN"],
     }
+
     cabling = {}
     cabling["nodes"], unknown = get_switch_nodes(
         architecture,
@@ -1854,9 +1855,6 @@ def parse_sls_for_config(input_json):
                 "MyASN",
                 {},
             )
-            sls_variables["NMN_NETMASK"] = sls_variables["NMN"].netmask
-            sls_variables["NMN_PREFIX_LEN"] = sls_variables["NMN"].prefixlen
-            sls_variables["NMN_NETWORK_IP"] = sls_variables["NMN"].ip
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
                 if subnets["Name"] == "bootstrap_dhcp":
                     for ip in subnets["IPReservations"]:
