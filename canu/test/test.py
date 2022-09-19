@@ -150,15 +150,17 @@ def test(
 
     # set to ERROR otherwise nornir plugin logs debug messages to the screen.
     logging.basicConfig(level="ERROR")
-    try:
-        sls_json = json.load(sls_file)
-    except (json.JSONDecodeError, UnicodeDecodeError):
-        click.secho(
-            f"The file {sls_file.name} is not valid JSON.",
-            fg="red",
-        )
-        sys.exit(1)
-
+    if sls_file:
+        try:
+            sls_json = json.load(sls_file)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            click.secho(
+                f"The file {sls_file.name} is not valid JSON.",
+                fg="red",
+            )
+            sys.exit(1)
+    else:
+        sls_json = sls_file
     switch_inventory, sls_variables = inventory(
         username,
         password,
