@@ -28,6 +28,7 @@ import sys
 
 import click
 from click_help_colors import HelpColorsCommand
+from jinja2 import Environment
 from nornir import InitNornir
 from nornir.core.filter import F
 from nornir_salt import (
@@ -275,6 +276,7 @@ def test(
         dict_results = {}
         pretty_results = []
         # get the commands and the test suite for each switch type.
+        environment = Environment()
         for switch in switch_commands.keys():
             for test_command in test_suite:
                 devices = test_command.get("device")
@@ -286,7 +288,12 @@ def test(
                 if switch in devices:
                     switch_test_suite[switch].append(test_command)
                 if switch in devices and isinstance(test_command["task"], str):
+
+                    template = environment.from_string(test_command["task"])
+                    command = template.render(variables=sls_variables)
+                    test_command["task"] = command
                     switch_commands[switch].append(test_command["task"])
+
                 elif switch in devices and isinstance(test_command["task"], list):
                     switch_commands.extend(test_command["task"])
 
