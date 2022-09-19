@@ -9,6 +9,7 @@ router bgp {{ variables.SWITCH_ASN }} vrf default distance 20 70 20
 router bgp {{ variables.SWITCH_ASN }} vrf Customer maximum-paths ibgp 32
 router bgp {{ variables.SWITCH_ASN }} vrf Customer maximum-paths 32
 router bgp {{ variables.SWITCH_ASN }} vrf default maximum-paths ibgp 32
+router bgp {{ variables.SWITCH_ASN }} vrf default maximum-paths 32
 {%- for cmn_name, cmn_ip in variables.CMN_IPs.items() if "ncn-w" in cmn_name %}
 router bgp {{ variables.SWITCH_ASN }} vrf Customer neighbor {{ cmn_ip }} remote-as {{ variables.CMN_ASN }}
 {%- endfor %}
