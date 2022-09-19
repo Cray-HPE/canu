@@ -75,7 +75,7 @@ added_files = [
         "network_modeling/configs/templates/1.2/dellmellanox/full",
     ),
     (
-            "network_modeling/configs/templates/1.3/arista/*.j2",
+        "network_modeling/configs/templates/1.3/arista/*.j2",
         "network_modeling/configs/templates/1.3/arista",
     ),
     (
@@ -104,6 +104,7 @@ added_files = [
         "canu/generate/switch/config/ttp_templates/*.txt",
         "canu/generate/switch/config/ttp_templates",
     ),
+    ("canu/utils/sls_utils/schemas/*.json"),
 ]
 a = Analysis(
     ["canu/cli.py"],
