@@ -104,7 +104,7 @@ added_files = [
         "canu/generate/switch/config/ttp_templates/*.txt",
         "canu/generate/switch/config/ttp_templates",
     ),
-    ("canu/utils/sls_utils/schemas/*.json"),
+    ("canu/utils/sls_utils/schemas/*.json", "canu/utils/sls_utils/schemas"),
 ]
 a = Analysis(
     ["canu/cli.py"],
