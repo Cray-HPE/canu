@@ -161,7 +161,7 @@
 #   device:
 #     - spine
 - name: KEA connection check
-  task: ping 10.92.100.222 source vlan2 repetitions 1
+  task: ping 10.92.100.222 source vlan{{ variables.NMN_VLAN }} repetitions 1
   test: contains
   pattern: bytes from
   err_msg: KEA (10.92.100.222) does not respond.
@@ -231,7 +231,7 @@
     - cdu
     - spine
 - name: Internet connection check
-  task: ping 8.8.8.8 source vlan7 repetitions 1
+  task: ping 8.8.8.8 source vlan{{ variables.CAN_VLAN }} repetitions 1
   test: contains
   pattern: bytes from
   err_msg: External network (internet) does not respond.
@@ -243,7 +243,7 @@
   csm:
     - 1.0
 - name: Internet connection check
-  task: ping 8.8.8.8 source vlan7 vrf Customer repetitions 1
+  task: ping 8.8.8.8 source vlan{{ variables.CMN_VLAN }} vrf Customer repetitions 1
   test: contains
   pattern: bytes from
   err_msg: External network (internet) does not respond.
