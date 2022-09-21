@@ -173,7 +173,7 @@ def test(
         runner={
             "plugin": "threaded",
             "options": {
-                "num_workers": 10,
+                "num_workers": 25,
             },
         },
         inventory=switch_inventory,
