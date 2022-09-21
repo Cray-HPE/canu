@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.18-develop
+# 🛶 CANU v1.6.19-develop
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1193,6 +1193,9 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
+## [1.6.19-develop]
+
+- Remove Control Plane ACL for CSM 1.3
 ## [1.6.18-develop]
 
 - Add BGP multipath to mellanox default VRF.

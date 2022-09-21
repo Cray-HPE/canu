@@ -64,7 +64,7 @@ canu generate switch config [OPTIONS]
 
 * **Options**
 
-    1.0 | 1.2
+    1.0 | 1.2 | 1.3
 
 
 
@@ -118,8 +118,16 @@ Token for SLS authentication
 Output results to a file
 
 
-### --override( <override>)
-Switch configuration override
+### --custom-config( <custom_config>)
+Create and maintain custom switch configurations beyond generated plan-of-record
+
+
+### --preserve( <preserve>)
+Path to current running configs.
+
+
+### --reorder()
+reorder config to heir config order
 
 ### Environment variables
 
