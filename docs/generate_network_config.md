@@ -64,7 +64,7 @@ canu generate network config [OPTIONS]
 
 * **Options**
 
-    1.0 | 1.2
+    1.0 | 1.2 | 1.3
 
 
 
@@ -114,8 +114,16 @@ Token for SLS authentication
 **Required** Folder to store config files
 
 
-### --override( <override>)
-Switch configuration override
+### --custom-config( <custom_config>)
+Custom switch configuration
+
+
+### --preserve( <preserve>)
+Path to current running configs.
+
+
+### --reorder()
+reorder config to heir config order
 
 ### Environment variables
 
