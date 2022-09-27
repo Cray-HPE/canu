@@ -1196,6 +1196,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 ## [1.6.19]
 
 - Remove Control Plane ACL for CSM 1.3
+
 ## [1.6.18]
 
 - Add BGP multipath to mellanox default VRF.
