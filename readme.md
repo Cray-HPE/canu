@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.19-develop
+# 🛶 CANU v1.6.19
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1193,14 +1193,14 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [1.6.19-develop]
+## [1.6.19]
 
 - Remove Control Plane ACL for CSM 1.3
-## [1.6.18-develop]
+## [1.6.18]
 
 - Add BGP multipath to mellanox default VRF.
 
-## [1.6.17-develop]
+## [1.6.17]
 
 - Add Arista ISL to the Model
 - Update MTN VLAN descriptions on CDU switches
@@ -1208,11 +1208,11 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Add datamover to canu model
 - Add LNET, datamover to config generation
 
-## [1.6.16-develop]
+## [1.6.16]
 
 - Fix a bug where destination port reuse was incorrectly allowed for `validate shcd` and `validate paddle`
 
-## [1.6.15-develop]
+## [1.6.15]
 
 - Fix switch firmware version for 1.2 and 1.3
 - Fix JSON output with canu test
@@ -1222,34 +1222,34 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Add the ability to have multiple CSM versions for tests
 - Add sls_utils
 
-## [1.6.14-develop]
+## [1.6.14]
 
 - Support  SLS query in CANU container  that works both in and out of Kubernetes
 
-## [1.6.13-develop]
+## [1.6.13]
 
 - Fix CSM 1.2 UAN template when CHN is used - do not produce None VLAN.
 - Bump docs generated from code.
 - Change exception-handling in `canu validate shcd` and from `network_modeling`.
 - Provide better next steps from errors reported while validating SHCDs.
 
-## [1.6.12-develop]
+## [1.6.12]
 
 - canu test add ping test for KEA
 
-## [1.6.11-develop]
+## [1.6.11]
 
 - Update to release process
 
-## [1.6.10-develop]
+## [1.6.10]
 
 - Enabling 1.3 configuration templates.
 
-## [1.6.9-develop]
+## [1.6.9]
 
 - Ensure location rack and elevation strings are lower case.
 
-## [1.6.8-develop]
+## [1.6.8]
 
 - Add 4 port OCP to templates.
 - Add GPU node to model.
@@ -1258,7 +1258,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Add dell CDUs to test suite.
 - Add CSM version flag to `canu test`
 
-## [1.6.7-develop]
+## [1.6.7]
 
 - Fix 1.3 template links.
 - Fix VLAN ordering of CMM ports.
@@ -1268,32 +1268,32 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Remove CMN from UAN 1.3 template.
 - Add KVM to HPE model.
 
-## [1.6.6-develop]
+## [1.6.6]
 
 - Create initial CSM 1.3 configuration framework.
 
-## [1.6.5-develop]
+## [1.6.5]
 
 - Remove Metallb IP ranges from ACLs.
 - Remove CAN-CMN ACLs from VLAN interfaces.
 - Add CMN VLAN to UAN template for Mellanox & Aruba.
 
-## [1.6.4-develop]
+## [1.6.4]
 
 - Use full `show run` commands to retrieve running config from `canu network backup`
 - UAN CAN ports are now shutdown if CHN is enabled.
 - Mellanox UAN CAN ports now only allow the CAN vlan.
 - Added CMC subrack port configuration.
 
-## [1.6.3-develop]
+## [1.6.3]
 
 - Documentation updates to docs/network_configuration_and_upgrade
 
-## [1.6.2-develop]
+## [1.6.2]
 
 - Correct the 'slot warning' to specify more accurate options
 
-## [1.6.1-develop]
+## [1.6.1]
 
 - Disable load balacing configuration for Dell CDU/Leaf.
 
@@ -1302,29 +1302,29 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Add `canu report network version` feature.
 - Fix Errors in the output of `canu test`
 
-## [1.5.14-develop]
+## [1.5.14]
 
 - Add route-map and prefixes to allow connection to UAI's from CAN network.
 
-## [1.5.13-develop]
+## [1.5.13]
 
 - Fix Dell4148 template to include correct port count 
 
-## [1.5.12-develop]
+## [1.5.12]
 
 - Add netutils pyinstaller hook file.
 
-## [1.5.11-develop]
+## [1.5.11]
 
 - Create unique VSX system macs for each VSX cluster.
 - Fixed Mellanox Customer ACL.
 - Add VLAN 7 to Dellanox UAN for 1.0
 
-## [1.5.10-develop]
+## [1.5.10]
 
 - Fix canu paddle-file.json schema
 
-## [1.5.9-develop]
+## [1.5.9]
 
 - Change Rosetta/Columbia switch naming to be sw-hsn-<rack>-<###> (as with PDU and CMM/CEC).
 - Change switch port/interface descriptions to `dst:slot:port==>src` to avoid truncation.
@@ -1333,26 +1333,26 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Change large memory node common name from `lm` to `lmem`.
 - Beta release of `--reorder` for switch/network config generation where custom-config is not used.
 
-## [1.5.8-develop]
+## [1.5.8]
 
 - Added shellcheck GitHub action
 - Bump ipython to 7.16.3 to remediate CVE
 - Clean up Jenkins build
 
-## [1.5.7-develop]
+## [1.5.7]
 
 - Add ACL to block CHN <> traffic for CSM 1.2
 - Add Route-Map to CMN BGP peers to restrict routes to only CMN IPs
 
-## [1.5.6-develop]
+## [1.5.6]
 
 - More verbose instructions for generating switch configs
 
-## [1.5.5-develop]
+## [1.5.5]
 
 - Add the ability to generate BGP config for Arista edge switches.
 
-## [1.5.4-develop]
+## [1.5.4]
 
 - `canu backup network` and `canu test` now checks for connectivity before running commands against the switch.
 - Refactored canu `test.py`.
@@ -1360,11 +1360,11 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Add test for out of sync LAG on aruba.
 - Fixed mellanox ping test.
 
-## [1.5.3-develop]
+## [1.5.3]
 
 - Update base packages required by Canu to function and fix known CVE from paramiko
 
-## [1.5.2-develop]
+## [1.5.2]
 
 - Fixed aruba and dell 1.2 templates so CAN config is only generated when it's detected in SLS.
 - Fix `canu generate --custom` and `canu generate --preserve` usage with RPM, this requried a new pyinstaller hook file.
@@ -1373,75 +1373,75 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Fix a couple `canu validate` issues
 - Bump ttp version
 
-## [1.5.1-develop]
+## [1.5.1]
 
 - Add DNS test to canu/test. remove folder "network configuration and upgrade"
 
-## [1.5.0-develop]
+## [1.5.0]
 
 - Add `canu send command` feature.
 
-## [1.4.1-develop]
+## [1.4.1]
 
 - Added new guide for network install
 
-## [1.4.0-develop]
+## [1.4.0]
 
 - Add the ability to preserve LAG #s when generating switch configs.
 - Fix hard coded LAG numbers in templates.
 - Fix hard coded VLAN IDs in templates.
 - Remove unused Dellanox TDS templates.
 
-## [1.3.5-develop]
+## [1.3.5]
 
 - Fix BGP output of canu validate
 - Ignore `user admin` and `snmpv3` config during canu validate
 
-## [1.3.4-develop]
+## [1.3.4]
 
 - fixed PDU and sw-hsn ports being generated for sw-leaf-bmc switches
 
-## [1.3.3-develop]
+## [1.3.3]
 
 - Define warnings variable as defaultdict(list) to handle invalid key errors
 
-## [1.3.2-develop]
+## [1.3.2]
 
 - Fix aruba banner output during canu validate
 
-## [1.3.1-develop]
+## [1.3.1]
 
 - shutdown unused ports by default on aruba 6300+dell+mellanox
 
-## [1.3.0-develop]
+## [1.3.0]
 
 - Removed the override feature
 - Add feature to inject custom configs into generated switch configs
 
-## [1.2.10-develop]
+## [1.2.10]
 
 - Change Aruba banner from motd to exec
 
-## [1.2.9-develop]
+## [1.2.9]
 
 - Reordered the configuration output so that vlans are defined before being applied to ports.
 
-## [1.2.8-develop]
+## [1.2.8]
 
 - Fix Leaf-bmc naming corner case: leaf-bmc-bmc to leaf-bmc
 - Fix OSPF CAN vlan for 1.2 in full/tds
 
-## [1.2.7-develop]
+## [1.2.7]
 
 - Fixed bug to allow canu to exit gracefully with sys.exit(1)
 
-## [1.2.6-develop]
+## [1.2.6]
 
 - Add network test cases
 - Add network test cases for DNS and site connectivity
 - Fixed missing DNS from Aruba switches
 
-## [1.2.5-develop]
+## [1.2.5]
 
 - Add NMN network for 1.0 to ssh allowed into switches because of BGP DOCS in 1.0 allowing it.
 - Remove router ospfv3 from 1.0/1.2
@@ -1450,7 +1450,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Change Aruba banner to match running config.
 - Fix Canu test --network
 
-## [1.2.4-develop]
+## [1.2.4]
 
 - Add OSPF to vlan 1.
 - Add 'ip ospf passive' to vlan 1,4.
@@ -1458,50 +1458,50 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Fix missing OSPF configuration from VLAN 7 in /network_modeling/configs/templates/dellmellanox/1.2/*.
 - Fix descriptions for MTL
 
-## [1.2.3-develop]
+## [1.2.3]
 
 - Config backup create /running.
 
-## [1.2.2-develop]
+## [1.2.2]
 
 - Add SHCD filename to paddle/ccj JSON to obtain originating SHCD version.
 
-## [1.2.1-develop]
+## [1.2.1]
 
 - Remove `canu config bgp`, there is no need for this as it's configured during `canu generated switch/network config`
 - Move Aruba CMN ospf instance from 1 to 2.
 - `canu validate` output enahncements & bug fixes.
 - Template fixes/enhancements.
 
-## [1.2.0-develop]
+## [1.2.0]
 
 - Add `canu backup network`
 
-## [1.1.11-develop]
+## [1.1.11]
 
 - `canu validate BGP` now has an option to choose what network to run against.
 - Remove `'lacp-individual` from mellanox spine02.
 - Generate unique MAC address for each Mellanox magp virtual router.
 
-## [1.1.10-develop]
+## [1.1.10]
 
 - Update canu validate to user heir config diff and cleaner output.
 - Add --remediate option for canu validate
 - bump heir config version
 
-## [1.1.9-develop]
+## [1.1.9]
 
 - Fix Mellanox web interface command
 - Remove hard coded BGP ASN #
 - Add CMN to CAN ACL
 - Level set CSM 1.0 templates with CSM 1.2 minus CMN, VRF, etc..
 
-## [1.1.8-develop]
+## [1.1.8]
 
 - Add banner motd to all switch configs with CSM and CANU versions.
 - Add documentation to install from RPM (for SLES).
 
-## [1.1.7-develop]
+## [1.1.7]
 
 - Remove CMN ip helper on mellanox.
 - Remove broken tests.
@@ -1510,7 +1510,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Mellanox loopback command fix.
 - Mellanox NTP command fix.
 
-## [1.1.5-develop]
+## [1.1.5]
 
 - Add ACLs to VLAN interfaces.
 - Add maximum paths to mellanox BGP template for customer VRF.
@@ -1519,21 +1519,21 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Add large memory UAN node definitions: `lm-<###> maps to lm-<###>`
 - Add gateway: `gateway<#>, gw<#> map to gateway-<###>`
 
-## [1.1.4-develop]
+## [1.1.4]
 
 - fix sls url
 
-## [1.1.3-develop]
+## [1.1.3]
 
 - validate BGP now reads IPs from the SLS API
 - Added a feature to run tests against a live network. (Aruba only)
 
-## [1.1.2-develop]
+## [1.1.2]
 
 - Enabled webui for mellanox.
 - Added speed commands to dell/mellanox templates.
 
-## [1.1.1-develop] 2022-12-07
+## [1.1.1] 2022-12-07
 
 - Updated pull_request_template.md
 - Adjusted the STP timeout to 4 seconds from the default of 15.
