@@ -1193,6 +1193,10 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
+## [1.6.20-develop]
+
+- Change UAN port config to be a trunk port on mellanox (prevously hybrid port).
+
 ## [1.6.19-develop]
 
 - Remove Control Plane ACL for CSM 1.3
