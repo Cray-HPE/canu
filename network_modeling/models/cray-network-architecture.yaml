@@ -396,6 +396,10 @@ network_v2_tds:
       shasta_name: "gateway"
       architecture_type: "river_ncn_node_4_port_1g_ocp"
     - lookup_name:
+        - "gpu"
+      shasta_name: "gpu"
+      architecture_type: "river_ncn_node_4_port_1g_ocp"
+    - lookup_name:
         - "dvs"
       shasta_name: "dvs"
       architecture_type: "river_ncn_node_4_port_1g_ocp"
@@ -406,10 +410,6 @@ network_v2_tds:
     - lookup_name:
         - "dm"
       shasta_name: "datamover"
-      architecture_type: "river_ncn_node_4_port_1g_ocp"
-    - lookup_name:
-        - "lnet"
-      shasta_name: "lnet"
       architecture_type: "river_ncn_node_4_port_1g_ocp"
     - lookup_name:
         - "cdu"
