@@ -382,9 +382,9 @@ class NetworkNode:
                 existing_port = self.__ports[index]
                 if existing_port.destination_node_id() == dst_node.id():
                     log.warning(
-                        f"Node {self.__id}: port {src_port.port()} in slot {src_port.slot()} "
-                        f"already connected to Node {dst_node.id()}: port {dst_port.port()} "
-                        f"in slot {dst_port.slot()}",
+                        f"Node {self.__id} ({self.__common_name}): port {src_port.port()} in slot {src_port.slot()} "
+                        f"already connected to Node {dst_node.id()} ({dst_node.common_name()}): port {dst_port.port()} "
+                        f"in slot {dst_port.slot()} {src_port.destination_port()} {src_port.destination_slot()}",
                     )
                     if strict:
                         return False
