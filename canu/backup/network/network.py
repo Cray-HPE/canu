@@ -21,6 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU backup network config."""
 import logging
+import json
 import os
 from pathlib import Path
 import sys
@@ -112,7 +113,18 @@ def network(
 
     # set to ERROR otherwise nornir plugin logs debug messages to the screen.
     logging.basicConfig(level="ERROR")
-    switch_inventory = inventory(username, password, network, sls_file)
+    if sls_file:
+        try:
+            input_json = json.load(sls_file)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            click.secho(
+                f"The file {sls_file.name} is not valid JSON.",
+                fg="red",
+            )
+            sys.exit(1)
+    else:
+        input_json = None
+    switch_inventory = inventory(username, password, network, input_json)
     nr = InitNornir(
         runner={
             "plugin": "threaded",
