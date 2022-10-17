@@ -21,12 +21,23 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """Create Nornir Inventory from SLS."""
 from canu.utils.sls import pull_sls_hardware, pull_sls_networks
+import json
+import click
+import sys
 
 
-def inventory(username, password, network, sls_json=None, sls_inventory=None):
+def inventory(username, password, network, sls_file=None, sls_inventory=None):
     """Build Nornir inventory from sls_input."""
     inventory = {"groups": {}, "hosts": {}}
-    if sls_json:
+    if sls_file:
+        try:
+            sls_json = json.load(sls_file)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            click.secho(
+                f"The file {sls_file.name} is not valid JSON.",
+                fg="red",
+            )
+            sys.exit(1)
         sls_variables = pull_sls_networks(sls_json)
         sls_hardware = pull_sls_hardware(sls_json)
     else:
