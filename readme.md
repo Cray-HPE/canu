@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-# 🛶 CANU v1.6.19-develop
-=======
-# 🛶 CANU v1.6.20
->>>>>>> dbc13da51ab60dbdb6bcd4766c6569c4aec21730
+# 🛶 CANU v1.6.21
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1196,6 +1192,10 @@ To run a specific test file:
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.6.21]
+
+- Fix sls_utils so that it works correctly when using a SLS.json file.
 
 ## [1.6.20]
 
