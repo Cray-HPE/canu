@@ -113,18 +113,7 @@ def network(
 
     # set to ERROR otherwise nornir plugin logs debug messages to the screen.
     logging.basicConfig(level="ERROR")
-    if sls_file:
-        try:
-            input_json = json.load(sls_file)
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            click.secho(
-                f"The file {sls_file.name} is not valid JSON.",
-                fg="red",
-            )
-            sys.exit(1)
-    else:
-        input_json = None
-    switch_inventory = inventory(username, password, network, input_json)
+    switch_inventory = inventory(username, password, network, sls_file)
     nr = InitNornir(
         runner={
             "plugin": "threaded",
