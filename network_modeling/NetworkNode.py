@@ -293,7 +293,7 @@ class NetworkNode:
         dst_node,
         src_port=None,
         dst_port=None,
-        strict=False,
+        strict=True,
         bidirectional=True,
     ):
         """Connect one device to another."""
@@ -320,7 +320,7 @@ class NetworkNode:
                 src_port=dst_port,
                 dst_port=src_port,
                 bidirectional=False,
-                strict=True,
+                strict=strict,
             ):
                 log.error(
                     "Connection of local to remote failed - "

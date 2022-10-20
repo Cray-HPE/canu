@@ -67,7 +67,7 @@ with open(canu_config_file, "r") as canu_f:
 
 csm_options = canu_config["csm_versions"]
 
-log = logging.getLogger("validate_shcd")
+log = logging.getLogger("validate_shcd_cabling")
 
 
 @click.command(
@@ -184,7 +184,7 @@ def shcd_cabling(
         macs: Print NCN MAC addresses
         username: Switch username
         password: Switch password
-        log_: Level of logging.
+        log_: Level of logging
         out: Name of the output file
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
@@ -201,6 +201,15 @@ def shcd_cabling(
         sheets = shcd_to_sheets(shcd, tabs, corners)
     except Exception:
         return
+
+    # Create SHCD Node factory and model
+    log.debug("Creating model from SHCD data")
+    shcd_factory = NetworkNodeFactory(architecture_version=architecture)
+    shcd_node_list, shcd_warnings = node_model_from_shcd(
+        factory=shcd_factory,
+        spreadsheet=shcd,
+        sheets=sheets,
+    )
 
     # IP Address / LLDP Parsing
     if ips_file:
@@ -246,22 +255,13 @@ def shcd_cabling(
 
                     errors.append([str(ip), error_message])
 
-    # Create SHCD Node factory
-    shcd_factory = NetworkNodeFactory(architecture_version=architecture)
-
-    shcd_node_list, shcd_warnings = node_model_from_shcd(
-        factory=shcd_factory,
-        spreadsheet=shcd,
-        sheets=sheets,
-    )
-
-    # Create Cabling Node factory
-    cabling_factory = NetworkNodeFactory(architecture_version=architecture)
-
     # Open the updated cache to model nodes
     with open(canu_cache_file, "r+") as file:
         canu_cache = yaml.load(file)
 
+    # Create Cabling Node factory and model
+    log.debug("Creating model from switch LLDP data")
+    cabling_factory = NetworkNodeFactory(architecture_version=architecture)
     cabling_node_list, cabling_warnings = node_model_from_canu(
         cabling_factory,
         canu_cache,
