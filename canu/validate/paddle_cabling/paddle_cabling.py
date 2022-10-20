@@ -22,6 +22,7 @@
 """CANU commands that validate the shcd against the current network cabling."""
 import ipaddress
 import json
+import logging
 from os import path
 from pathlib import Path
 import sys
@@ -64,6 +65,8 @@ with open(canu_config_file, "r") as canu_f:
     canu_config = yaml.load(canu_f)
 
 csm_options = canu_config["csm_versions"]
+
+log = logging.getLogger("validate_paddle_cabling")
 
 
 @click.command(
@@ -108,6 +111,13 @@ csm_options = canu_config["csm_versions"]
     help="Switch password",
 )
 @click.option(
+    "--log",
+    "log_",
+    help="Level of logging.",
+    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
+    default="ERROR",
+)
+@click.option(
     "--out",
     help="Output results to a file",
     type=click.File("w"),
@@ -122,6 +132,7 @@ def paddle_cabling(
     ips_file,
     username,
     password,
+    log_,
     out,
 ):
     """Validate a CCJ file against the current network cabling.
@@ -145,8 +156,11 @@ def paddle_cabling(
         ips_file: File with one IPv4 address per line
         username: Switch username
         password: Switch password
+        log_: Level of logging
         out: Name of the output file
     """
+    logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
+
     ccj_json = json.load(ccj)
     architecture = ccj_json.get("architecture")
 
@@ -156,6 +170,11 @@ def paddle_cabling(
             fg="red",
         )
         return
+
+    # Create Paddle Node factory and model
+    log.debug("Creating model from CCJ data")
+    paddle_factory = NetworkNodeFactory(architecture_version=architecture)
+    paddle_node_list, paddle_warnings = node_model_from_paddle(paddle_factory, ccj_json)
 
     # IP Address / LLDP Parsing
     if ips_file:
@@ -201,17 +220,13 @@ def paddle_cabling(
 
                     errors.append([str(ip), error_message])
 
-    # Create Paddle Node factory
-    paddle_factory = NetworkNodeFactory(architecture_version=architecture)
-    paddle_node_list, paddle_warnings = node_model_from_paddle(paddle_factory, ccj_json)
-
-    # Create Cabling Node factory
-    cabling_factory = NetworkNodeFactory(architecture_version=architecture)
-
     # Open the updated cache to model nodes
     with open(canu_cache_file, "r+") as file:
         canu_cache = yaml.load(file)
 
+    # Create Cabling Node factory and model
+    log.debug("Creating model from switch LLDP data")
+    cabling_factory = NetworkNodeFactory(architecture_version=architecture)
     cabling_node_list, cabling_warnings = node_model_from_canu(
         cabling_factory,
         canu_cache,
