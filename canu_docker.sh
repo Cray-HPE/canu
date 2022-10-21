@@ -20,27 +20,30 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-
-# check for folder call files
-# used to mount data between local and container
-if [[ ! -d "files" ]]
-then
-    mkdir files
-fi
+#
+set -euo pipefail
 
 # get local path
+script_name=$(basename "$0")
 path=$(pwd)
 
 case $1 in
 
     up)
+        # check for folder call files
+        # used to mount data between local and container
+        if [[ ! -d "files" ]]
+        then
+            mkdir files
+        fi
+
         docker-compose up -d --build
-        echo ""
-        echo "The folder ${path}/files"
+        echo
+        echo "The folder [${path}/files]"
         echo "is mounted on the container at /files"
-        echo ""
+        echo
         echo "Type exit to disconnect from container before trying to shutdown the container"
-        echo ""
+        echo
         docker exec -it canu /bin/bash
     ;;
 
@@ -49,10 +52,11 @@ case $1 in
     ;;
 
     *)
-        echo ""
-        echo "canu_docker.sh usuage is:"
-        echo "canu_docker.sh up - for starting container"
-        echo "canu_docker.sh down - for stopping container"
-        echo ""
+        echo
+        echo "${script_name} usage is:"
+        echo
+        printf '%14s %-8s - %s\n' "${script_name}" 'up' 'for starting container'
+        printf '%14s %-8s - %s\n' "${script_name}" 'down' 'for stopping container'
+        echo
     ;;
 esac

@@ -1,0 +1,22 @@
+name: Python
+
+on: [push]
+
+jobs:
+  nox:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 # Also fetch git-tags
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.10'
+    - name: nox
+      env:
+        GIT_REPO_NAME: "${GITHUB_REPOSITORY#*/}"
+      run: |
+        pip install .[ci]
+        nox -e lint

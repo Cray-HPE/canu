@@ -1,13 +1,15 @@
-name: Python package
+name: Python
 
 on: [push]
 
 jobs:
   nox:
-    name: Coverage, Docs, Lint, and Unit Tests
+    name: Tests and Coverage
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 # Also fetch git-tags
     - name: Set up Python
       uses: actions/setup-python@v3
       with:
@@ -16,4 +18,6 @@ jobs:
       env:
         GIT_REPO_NAME: "${GITHUB_REPOSITORY#*/}"
       run: |
-        make test
+        pip install .[ci]
+        nox -e tests
+        nox -e cover

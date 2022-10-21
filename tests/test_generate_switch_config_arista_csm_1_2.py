@@ -25,6 +25,7 @@ from os import path
 from pathlib import Path
 
 from click import testing
+import pkg_resources
 
 from canu.cli import cli
 from .test_generate_switch_config_aruba_csm_1_2 import sls_input
@@ -50,9 +51,7 @@ architecture_tds = "TDS"
 tabs_tds = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners_tds = "J14,T30,J14,T53,J14,T32,J14,T27"
 
-canu_version_file = path.join(test_file_directory.resolve().parent, "canu", ".version")
-with open(canu_version_file, "r") as file:
-    canu_version = file.readline()
+canu_version = pkg_resources.get_distribution('canu').version
 
 runner = testing.CliRunner()
 

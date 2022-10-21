@@ -25,6 +25,7 @@ from os import path
 from pathlib import Path
 
 from click import testing
+import pkg_resources
 
 from canu.cli import cli
 
@@ -43,10 +44,7 @@ sls_address = "api-gw-service-nmn.local"
 switch_backups = "switch_backups/dellanox"
 switch_backups_folder = path.join(test_file_directory, "data", switch_backups)
 
-canu_version_file = path.join(test_file_directory.resolve().parent, "canu", ".version")
-with open(canu_version_file, "r") as file:
-    canu_version = file.readline()
-canu_version = canu_version.strip()
+canu_version = pkg_resources.get_distribution('canu').version
 banner_motd = (
     'banner motd "\n'
     "###############################################################################\n"
