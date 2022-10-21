@@ -154,7 +154,7 @@ setup(
         'emoji==1.6.0',
         'hier-config==1.6.1',
         'ipython==7.16.3',
-        'jinja2==3.0.2',
+        'jinja2==3.1.2',
         'jsonschema==3.2.0',
         'kubernetes==20.13.0',
         'mac-vendor-lookup==0.1.11',
