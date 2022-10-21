@@ -116,7 +116,7 @@ with open(canu_config_file, "r") as file:
 
 csm_options = canu_config["csm_versions"]
 
-canu_version = pkg_resources.get_distribution('canu').version
+canu_version = pkg_resources.get_distribution("canu").version
 
 dash = "-" * 60
 
@@ -204,6 +204,13 @@ dash = "-" * 60
     help="reorder config to heir config order",
     required=False,
 )
+@click.option(
+    "--bgp-control-plane",
+    type=click.Choice(["CMN", "CHN"], case_sensitive=False),
+    help="Network used for BGP control plane",
+    required=False,
+    default="CHN",
+)
 @click.pass_context
 def config(
     ctx,
@@ -221,6 +228,7 @@ def config(
     preserve,
     custom_config,
     reorder,
+    bgp_control_plane,
 ):
     """Generate switch config using the SHCD.
 
@@ -280,6 +288,7 @@ def config(
         preserve: Folder where switch running configs exist.
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
         reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
+        bgp_control_plane: Network used for BGP control plane
     """
     # SHCD Parsing
     if shcd:
@@ -415,6 +424,7 @@ def config(
         preserve,
         custom_config,
         reorder,
+        bgp_control_plane,
     )
 
     click.echo("\n")
@@ -536,6 +546,7 @@ def generate_switch_config(
     preserve,
     custom_config,
     reorder,
+    bgp_control_plane,
 ):
     """Generate switch config.
 
@@ -551,6 +562,7 @@ def generate_switch_config(
         preserve: Folder where switch running configs exist.  This folder should be populated from the "canu backup network"
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
         reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
+        bgp_control_plane: Network used for BGP control plane
 
 
     Returns:
@@ -775,6 +787,7 @@ def generate_switch_config(
         "NMN_IPs": sls_variables["NMN_IPs"],
         "HMN_IPs": sls_variables["HMN_IPs"],
         "SWITCH_ASN": sls_variables["SWITCH_ASN"],
+        "BGP_CONTROL_PLANE": bgp_control_plane,
     }
 
     cabling = {}
