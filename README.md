@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.20
+# 🛶 CANU v1.6.21
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1283,6 +1283,12 @@ To run a specific test file:
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.6.21]
+
+- Update Arista BGP templates
+- Add feature flag for CHN BGP control plane
+- Fix ordering of switch configuration when using custom switch configs or `--reorder`
 
 ## [1.6.20]
 
