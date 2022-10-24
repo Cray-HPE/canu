@@ -156,7 +156,7 @@ setup(
         'ipython==7.16.3',
         'jinja2==3.1.2',
         'jsonschema==3.2.0',
-        'kubernetes==20.13.0',
+        'kubernetes==24.2.0',
         'mac-vendor-lookup==0.1.11',
         'natsort==7.1.1',
         'netaddr==0.8.0',
