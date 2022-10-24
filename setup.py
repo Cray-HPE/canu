@@ -168,7 +168,7 @@ setup(
         'nornir-utils==0.2.0',
         'nornir==3.2.0',
         'openpyxl==3.0.10',
-        'pyyaml==5.4.1',
+        'pyyaml==6.0',
         'requests==2.26.0',
         'responses==0.14.0',
         'ruamel.yaml<=0.16.13',
