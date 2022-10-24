@@ -210,7 +210,7 @@ def test(
             )
 
     if ping:
-        networks = NetworkManager(sls_json["Networks"])
+        networks = NetworkManager(sls_file["Networks"])
 
         ping = {
             "device": ["leaf", "leaf-bmc", "cdu", "spine"],
