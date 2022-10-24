@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.21
+# 🛶 CANU v1.6.22
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1284,6 +1284,10 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
+## [1.6.22]
+
+- Remove Control Plane ACL for CSM 1.2 previousl missed.
+
 ## [1.6.21]
 
 - Update Arista BGP templates
@@ -1296,7 +1300,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## [1.6.19]
 
-- Remove Control Plane ACL for CSM 1.3
+- Remove Control Plane ACL for CSM 1.3.
 
 ## [1.6.18]
 
