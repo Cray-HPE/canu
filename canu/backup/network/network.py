@@ -21,7 +21,6 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU backup network config."""
 import logging
-import json
 import os
 from pathlib import Path
 import sys

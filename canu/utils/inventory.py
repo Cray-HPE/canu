@@ -20,10 +20,12 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Create Nornir Inventory from SLS."""
-from canu.utils.sls import pull_sls_hardware, pull_sls_networks
 import json
-import click
 import sys
+
+import click
+
+from canu.utils.sls import pull_sls_hardware, pull_sls_networks
 
 
 def inventory(username, password, network, sls_file=None, sls_inventory=None):
