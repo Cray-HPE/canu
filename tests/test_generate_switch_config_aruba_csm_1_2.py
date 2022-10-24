@@ -720,7 +720,6 @@ def test_switch_config_spine_primary_custom():
         assert (
             "no ip icmp redirect\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
-            + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "system interface-group 3 speed 10g\n"
             + "interface loopback 0\n"
             + "    ip address 10.2.0.2/32\n"
@@ -1133,7 +1132,6 @@ def test_switch_config_spine_secondary_custom():
         assert (
             "no ip icmp redirect\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
-            + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "system interface-group 3 speed 10g\n"
             + "interface loopback 0\n"
             + "    ip address 10.2.0.3/32\n"
