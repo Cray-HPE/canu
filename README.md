@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.22
+# 🛶 CANU v1.6.23
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1283,6 +1283,10 @@ To run a specific test file:
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.6.23]
+
+- Shutdown UAN CAN port when CHN is enabled.
 
 ## [1.6.22]
 
