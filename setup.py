@@ -164,7 +164,7 @@ setup(
         'netutils==1.0.0',
         'nornir-netmiko==0.1.2',
         'nornir-salt==0.9.0',
-        'nornir-scrapli==2022.1.30',
+        'nornir-scrapli==2022.7.30',
         'nornir-utils==0.2.0',
         'nornir==3.2.0',
         'openpyxl==3.0.10',
