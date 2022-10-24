@@ -154,6 +154,13 @@ csm_options = canu_config["csm_versions"]
     help="reorder config to heir config order",
     required=False,
 )
+@click.option(
+    "--bgp-control-plane",
+    type=click.Choice(["CMN", "CHN"], case_sensitive=False),
+    help="Network used for BGP control plane",
+    required=False,
+    default="CHN",
+)
 @click.pass_context
 def config(
     ctx,
@@ -170,6 +177,7 @@ def config(
     preserve,
     custom_config,
     reorder,
+    bgp_control_plane,
 ):
     """Generate the config of all switches (Aruba, Dell, or Mellanox) on the network using the SHCD.
 
@@ -228,6 +236,7 @@ def config(
         preserve: Folder where switch running configs exist.  This folder should be populated from the "canu backup network" command.
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
         reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
+        bgp_control_plane: Network used for BGP control plane
     """
     # SHCD Parsing
     if shcd:
@@ -398,6 +407,7 @@ def config(
                 preserve,
                 custom_config,
                 reorder,
+                bgp_control_plane,
             )
             all_unknown.extend(unknown)
             config_devices.update(devices)
