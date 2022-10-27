@@ -382,7 +382,8 @@ class NetworkNode:
                 existing_port = self.__ports[index]
                 if existing_port.destination_node_id() == dst_node.id():
                     msg = (
-                        f"Port already in use.  Node {self.__id} ({self.__common_name}): port {src_port.port()} in slot {src_port.slot()} "
+                        f"Port already in use.  Node {self.__id} ({self.__common_name}): "
+                        f"port {src_port.port()} in slot {src_port.slot()} "
                         f"is already connected to Node {dst_node.id()} ({dst_node.common_name()}): "
                         f"port {existing_port.destination_port()} in slot {existing_port.destination_slot()}."
                     )

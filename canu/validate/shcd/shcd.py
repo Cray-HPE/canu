@@ -966,7 +966,7 @@ def connect_src_dst(
             "More information is often found by re-running with --log DEBUG enabled. "
             "Often the source of the error is that ports are being used twice on the device, "
             "that the correct network architecture model was specified, or plan-of-record hardware "
-            "is not being used."
+            "is not being used.",
         )
 
 
