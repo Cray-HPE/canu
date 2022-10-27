@@ -963,9 +963,10 @@ def connect_src_dst(
     else:
         raise Exception(
             f"Failed to connect {src_node.common_name()} to {dst_node.common_name()} bi-directionally. "
-            "Check that input data is correct, that plan-of-record hardware is used on the system, that "
-            "the correct architecture model was specified and that ports are not being re-used on devices. "
-            "More information is often found by re-running with --log DEBUG enabled.",
+            "More information is often found by re-running with --log DEBUG enabled. "
+            "Often the source of the error is that ports are being used twice on the device, "
+            "that the correct network architecture model was specified, or plan-of-record hardware "
+            "is not being used."
         )
 
 
