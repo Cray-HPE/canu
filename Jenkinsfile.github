@@ -36,7 +36,7 @@ pipeline {
     }
 
     environment {
-        GIT_REPO_NAME = getRepoName()
+        NAME = getRepoName()
         IMAGE_VERSION = sh(returnStdout: true, script: "git describe --tags | tr -s '-' '_' | tr -d '^v'").trim()
         VERSION = sh(returnStdout: true, script: "git describe --tags | tr -s '-' '~' | tr -d '^v'").trim()
     }
