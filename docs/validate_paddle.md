@@ -7,7 +7,7 @@ Validate a CCJ file.
 Pass in a CCJ file to validate that it works architecturally. The validation will ensure that spine switches,
 leaf switches, edge switches, and nodes all are connected properly.
 
-```
+```shell
 canu validate paddle [OPTIONS]
 ```
 
@@ -25,7 +25,7 @@ Output results to a file
 
 To validate a paddle CCJ run: `canu validate paddle --ccj paddle.json`
 
-```
+```bash
 $ canu validate paddle --ccj paddle.json
 
 CCJ Node Connections

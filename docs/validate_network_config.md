@@ -26,7 +26,7 @@ There will be a summary table for each switch highlighting the most important di
 
 ---
 
-```
+```shell
 canu validate network config [OPTIONS]
 ```
 
@@ -84,7 +84,7 @@ Output results to a file
 
 To validate switch config run: `canu validate network config --ips-file ips.txt --username USERNAME --password PASSWORD --generated /CONFIG/FOLDER`
 
-```
+```bash
 $ canu validate network config --csm 1.2 --ips-file ips.txt --generated /CONFIG/FOLDER
 
 Switch: sw-leaf-001 (192.168.1.1)
