@@ -38,7 +38,7 @@ Ports highlighted in ‘blue’ contain the string “ncn” in the hostname.
 
 Ports are highlighted in ‘green’ when the port name is set with the interface name.
 
-```
+```shell
 canu report network cabling [OPTIONS]
 ```
 
@@ -92,7 +92,7 @@ View of the cabling results.
 
 To check the cabling of multiple switches run: `canu report network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`. Or to load IP addresses from a file run: `canu report network cabling --ips-file ip_file.txt --username USERNAME --password PASSWORD`
 
-```
+```bash
 $ canu report network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
 
 Switch: sw-test01 (192.168.1.1)
@@ -118,7 +118,7 @@ PORT        NEIGHBOR       NEIGHBOR PORT      PORT DESCRIPTION                  
 
 An example of checking the cabling of multiple switches and displaying with the equipment view: `canu report network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --view equipment`
 
-```
+```bash
 $ canu report network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --view equipment
 
 sw-test01 Test switch description

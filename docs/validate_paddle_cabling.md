@@ -12,7 +12,7 @@ is properly connected architecturally.
 The validation will ensure that spine switches, leaf switches,
 edge switches, and nodes all are connected properly.
 
-```
+```shell
 canu validate paddle-cabling [OPTIONS]
 ```
 
@@ -64,7 +64,7 @@ Output results to a file
 
 To validate a CCJ Paddle against the cabling run: `canu validate paddle-cabling --csm 1.2 --ccj paddle.json --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
-```
+```bash
 $ canu validate paddle-cabling --csm 1.2 --ccj paddle.json --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
 
 ====================================================================================================
