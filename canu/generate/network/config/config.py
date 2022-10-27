@@ -62,7 +62,7 @@ else:
 canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
-log = logging.getLogger(("generate_network_config"))
+log = logging.getLogger("generate_network_config")
 
 # Import templates
 network_templates_folder = path.join(
