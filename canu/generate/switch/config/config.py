@@ -23,6 +23,7 @@
 from collections import defaultdict
 from itertools import groupby
 import json
+import logging
 import os
 from os import environ, path
 from pathlib import Path
@@ -118,6 +119,8 @@ csm_options = canu_config["csm_versions"]
 
 canu_version = pkg_resources.get_distribution("canu").version
 
+log = logging.getLogger("generate_switch_config")
+
 dash = "-" * 60
 
 
@@ -211,6 +214,13 @@ dash = "-" * 60
     required=False,
     default="CHN",
 )
+@click.option(
+    "--log",
+    "log_",
+    help="Level of logging.",
+    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
+    default="ERROR",
+)
 @click.pass_context
 def config(
     ctx,
@@ -229,6 +239,7 @@ def config(
     custom_config,
     reorder,
     bgp_control_plane,
+    log_,
 ):
     """Generate switch config using the SHCD.
 
@@ -289,7 +300,10 @@ def config(
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
         reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
         bgp_control_plane: Network used for BGP control plane
+        log_: Level of Logging
     """
+    logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
+
     # SHCD Parsing
     if shcd:
         try:
@@ -1559,13 +1573,13 @@ def get_switch_nodes(
             }
             nodes.append(new_node)
         else:  # pragma: no cover
-            print("*********************************")
-            print("Cannot determine destination connection")
-            print("Source: ", switch_name)
-            print("Port: ", port)
-            print("Destination: ", destination_node_name)
-            print("shasta_name", shasta_name)
-            print("*********************************")
+            log.debug(
+                "Cannot determine destination connection.  Logging as an unknown configuration.",
+            )
+            log.debug(f"    Source: {switch_name}")
+            log.debug(f"    Port: {port}")
+            log.debug(f"    Destination: {destination_node_name}")
+            log.debug(f"    shasta_name: {shasta_name}")
             unknown_description = get_description(
                 switch_name,
                 destination_node_name,

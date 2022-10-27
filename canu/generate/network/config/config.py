@@ -21,6 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that generate the config of the entire Shasta network."""
 import json
+import logging
 from os import environ, makedirs, path
 from pathlib import Path
 import sys
@@ -60,6 +61,8 @@ else:
 # Schema and Data files
 canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
+
+log = logging.getLogger(("generate_network_config"))
 
 # Import templates
 network_templates_folder = path.join(
@@ -161,6 +164,13 @@ csm_options = canu_config["csm_versions"]
     required=False,
     default="CHN",
 )
+@click.option(
+    "--log",
+    "log_",
+    help="Level of logging.",
+    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
+    default="ERROR",
+)
 @click.pass_context
 def config(
     ctx,
@@ -178,6 +188,7 @@ def config(
     custom_config,
     reorder,
     bgp_control_plane,
+    log_,
 ):
     """Generate the config of all switches (Aruba, Dell, or Mellanox) on the network using the SHCD.
 
@@ -237,7 +248,10 @@ def config(
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
         reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
         bgp_control_plane: Network used for BGP control plane
+        log_: Level of logging.
     """
+    logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
+
     # SHCD Parsing
     if shcd:
         try:
@@ -423,31 +437,31 @@ def config(
     missing_devices = all_devices.difference(config_devices)
     dash = "-" * 60
     if len(missing_devices) > 0:
-        click.secho("\nWarning", fg="red")
-
-        click.secho(
-            "\nThe following devices typically exist, but were not found in the current configuration.",
-            fg="red",
+        log.warning(
+            "The following devices often exist in Plan-of-Record system configurations, but",
         )
-        click.secho(
-            "If the network is supposed to have these devices, check the SHCD to ensure all tabs were included.",
-            fg="red",
+        log.warning(
+            "were not found on the current system.  This warning is simply a last minute",
         )
-        click.secho(
-            "If the network does not contain these devices, disregard this warning.",
+        log.warning(
+            "reminder to completely check the currrent system configuration for the following nodes:",
         )
-        click.secho(dash)
         for x in missing_devices:
-            click.secho(x, fg="bright_white")
+            log.warning(f"    {x}")
 
     if len(all_unknown) > 0:
-        click.secho("\nWarning", fg="red")
-
         click.secho(
-            "\nThe following devices were discovered in the input data, but the CANU model cannot determine "
-            + "the type and generate a configuration.\nApplying this configuration without considering these "
-            + "devices will likely result in loss of contact with these devices."
-            + "\nEnsure valid input, submit a bug to CANU and manually add these devices to the configuration.",
+            (
+                "\n"
+                "Warning\n"
+                "CANU is unable to find a network configuration template for the following connections.\n"
+                "    Applying the generated configurations as-iswill likely result in loss of connectivity\n"
+                "    with these devices.  Two possibilities exist:\n"
+                "    1. The devices do not follow Plan-of-Record cabling specifications.\n"
+                "       In this case either bring the system to PoR or use the next possibility.\n"
+                "    2. The connections are meant to be configured using a missing --custom-config YAML.\n"
+                "       In this case add the missing configurations to a --custom-config YAML file.\n",
+            ),
             fg="red",
         )
         click.secho(dash)
