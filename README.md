@@ -19,63 +19,130 @@ CANU can be used to:
 
 To checkout a fresh system using CSI:
 
-1. Make a new directory to save switch IP addresses: `mkdir ips_folder`, `cd ips_folder`
-1. Parse CSI files and save switch IP addresses: `canu init --sls-file sls_input_file.json --out ips.txt`
-1. Check network firmware: `canu report network firmware --csm 1.2 --ips-file ips.txt`
-1. Check network cabling: `canu report network cabling --ips-file ips.txt`
-1. Validate BGP status: `canu validate network bgp --ips-file ips.txt --verbose`
-1. Validate cabling: `canu validate network cabling --ips-file ips.txt`
+1. Make a new directory to save switch IP addresses
+
+  ```bash
+  mkdir ips_folder
+  cd ips_folder
+  ```
+
+1. Parse CSI files and save switch IP addresses
+   
+    ```bash
+    canu init --sls-file sls_input_file.json --out ips.txt`
+    ```
+
+1. Check network firmware
+
+    ```bash
+    canu report network firmware --csm 1.2 --ips-file ips.txt
+    ```
+
+1. Check network cabling
+
+    ```bash
+    canu report network cabling --ips-file ips.txt
+    ```
+
+1. Validate BGP status
+
+    ```bash
+    canu validate network bgp --ips-file ips.txt --verbose
+    ```
+
+1. Validate cabling
+
+    ```bash
+    canu validate network cabling --ips-file ips.txt
+    ```
 
 If you have the system's **SHCD**, there are even more commands that can be run
 
-1. Validate the SHCD: `canu validate shcd --shcd SHCD.xlsx`
-1. Validate the SHCD against network cabling: `canu validate shcd-cabling --shcd SHCD.xlsx --ips-file ips.txt`
-1. Generate switch config for the network: `canu generate network config --shcd SHCD.xlsx --sls-file sls_input_file.json --folder configs`
-1. Convert the SHCD to CCJ: `canu validate shcd --shcd SHCD.xlsx --json --out paddle.json`
+1. Validate the SHCD
+
+    ```bash
+    canu validate shcd --shcd SHCD.xlsx
+    ```
+
+1. Validate the SHCD against network cabling
+
+    ```bash
+    canu validate shcd-cabling --shcd SHCD.xlsx --ips-file ips.txt
+    ```
+
+1. Generate switch config for the network
+
+    ```bash
+    canu generate network config --shcd SHCD.xlsx --sls-file sls_input_file.json --folder configs
+    ```
+
+1. Convert the SHCD to CCJ
+
+    ```bash
+    canu validate shcd --shcd SHCD.xlsx --json --out paddle.json
+    ```
+
 
 If you have the system's **CCJ**
 
-1. Validate the Paddle / CCJ: `canu validate paddle --ccj paddle.json`
-1. Validate the CCJ against network cabling: `canu validate paddle-cabling --ccj paddle.json --ips-file ips.txt`
-1. Generate switch config for the network: `canu generate network config --ccj paddle.json --sls-file sls_input_file.json --folder configs`
+1. Validate the Paddle / CCJ
+
+    ```bash
+    canu validate paddle --ccj paddle.json
+    ```
+
+1. Validate the CCJ against network cabling
+
+    ```bash
+    canu validate paddle-cabling --ccj paddle.json --ips-file ips.txt
+    ```
+1. Generate switch config for the network
+
+    ```bash
+    canu generate network config --ccj paddle.json --sls-file sls_input_file.json --folder configs
+    ```
 
 # Paddle / CCJ
 
 The **paddle** or **CCJ** (CSM Cabling JSON) is a JSON representation of the network. There are many benefits of using the CCJ:
 
-- The CCJ schema has been validated using _paddle-schema.json_
+- The CCJ schema has been validated using `paddle-schema.json`
 - The paddle has been architecturally validated to ensure all connections between devices are approved
 - All port connections between devices have been checked using the CANU model to ensure speed, slot choice, and port availability has been confirmed
-- The CCJ is machine readable and therefore easy to build additional tooling around
-- There are less flags that need to be used when reading the CCJ vs the SHCD
+- The CCJ is machine-readable and therefore easy to build additional tooling around
+- Less flags need to be used when reading the CCJ vs the SHCD
 
-The SHCD can easily be converted into CCJ by using `canu validate shcd --shcd SHCD.xlsx --json --out paddle.json`
+The SHCD can easily be converted into CCJ by using
+
+  ```bash
+  canu validate shcd --shcd SHCD.xlsx --json --out paddle.json
+  ```
 
 # Table of Contents
 
-**[Installation](#installation)**
-**[CANU Initialization](#initialization)**
-**[Report Switch Firmware](#report-switch-firmware)**
-**[Report Network Firmware](#report-network-firmware)**
-**[Report Switch Cabling](#report-switch-cabling)**
-**[Report Network Cabling](#report-network-cabling)**
-**[Validate SHCD](#validate-shcd)**
-**[Validate Paddle](#validate-paddle)**
-**[Validate Network Cabling](#validate-network-cabling)**
-**[Validate SHCD and Cabling](#validate-shcd-and-cabling)**
-**[Validate Paddle and Cabling](#validate-paddle-and-cabling)**
-**[Validate Network BGP](#validate-network-bgp)**
-**[Generate Switch Config](#generate-switch-config)**
-**[Generate Network Config](#generate-network-config)**
-**[Validate Switch Config](#validate-switch-config)**
-**[Validate Network Config](#validate-network-config)**
-**[Backup Network](#backup-network)**
-**[Send Command](#send-command)**
-**[Cache](#cache)**
-**[Uninstallation](#uninstallation)**
-**[Road Map](#road-map)**
-**[Testing](#testing)**
-**[Changelog](#changelog)**
+- **[Installation](#installation)**
+- **[CANU Initialization](#initialization)**
+- **[Report Switch Firmware](#report-switch-firmware)**
+- **[Report Network Firmware](#report-network-firmware)**
+- **[Report Switch Cabling](#report-switch-cabling)**
+- **[Report Network Cabling](#report-network-cabling)**
+- **[Validate SHCD](#validate-shcd)**
+- **[Validate Paddle](#validate-paddle)**
+- **[Validate Network Cabling](#validate-network-cabling)**
+- **[Validate SHCD and Cabling](#validate-shcd-and-cabling)**
+- **[Validate Paddle and Cabling](#validate-paddle-and-cabling)**
+- **[Validate Network BGP](#validate-network-bgp)**
+- **[Generate Switch Config](#generate-switch-config)**
+- **[Generate Network Config](#generate-network-config)**
+- **[Validate Switch Config](#validate-switch-config)**
+- **[Validate Network Config](#validate-network-config)**
+- **[Backup Network](#backup-network)**
+- **[Send Command](#send-command)**
+- **[Cache](#cache)**
+- **[Uninstallation](#uninstallation)**
+- **[Road Map](#road-map)**
+- **[Testing](#testing)**
+- **[Changelog](#changelog)**
 
 # Installation and Usage
 
@@ -110,12 +177,12 @@ In order to run CANU, both python3 and pip3 need to be installed.
     - pip3
     - Python Virtualenv
 
-  ```bash
-  python3 -m venv .venv
-  source ./.venv/bin/activate
-  python3 -m pip install .
-  python3 -m pip install .[network_modeling]
-  ```
+      ```bash
+      python3 -m venv .venv
+      source ./.venv/bin/activate
+      python3 -m pip install .
+      python3 -m pip install .[network_modeling]
+      ```
 
   - When you are done working in the Python Virtualenv.
     Use the following command to exit out of the Python Virtualenv:
@@ -168,10 +235,10 @@ To help make switch setup a breeze. CANU can automatically parse SLS JSON data -
 
 - In order to parse CSI output, use the `--sls-file FILE` flag to pass in the folder where an SLS JSON file is located.
 
-The CSI _sls_input_file.json_ file is generally stored in one of two places depending on how far the system is in the install process.
+The CSI `sls_input_file.json` file is generally stored in one of two places depending on how far the system is in the install process.
 
-- Early in the install process, when running off of the LiveCD the CSI _sls_input_file.json_ file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
-- Later in the install process, the CSI _sls_input_file.json_ file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
+- Early in the install process, when running off of the LiveCD the CSI `sls_input_file.json` file is normally found in the the directory `/var/www/ephemeral/prep/SYSTEMNAME/`
+- Later in the install process, the CSI `sls_input_file.json` file is generally in `/mnt/pitdata/prep/SYSTEMNAME/`
 - The SLS file can also be obtained from an NCN that's in the k8s cluster by running `cray sls dumpstate list  --format json`
 - The switch IPs will be read from the 'NMN' network, if a different network is desired, use the `--network` flag to choose a different one e.g. (CAN, MTL, NMN).
 
@@ -189,7 +256,7 @@ Potential output:
 
 #### SLS API Input
 
-- To parse the Shasta SLS API for IP addresses, ensure that you have a valid token. The token file can either be passed in with the `--auth-token TOKEN_FILE` flag, or it can be automatically read if the environmental variable **SLS_TOKEN** is set. The SLS address is default set to _api-gw-service-nmn.local_, if you are operating on a system with a different address, you can set it with the `--sls-address SLS_ADDRESS` flag.
+- To parse the Shasta SLS API for IP addresses, ensure that you have a valid token. The token file can either be passed in with the `--auth-token TOKEN_FILE` flag, or it can be automatically read if the environmental variable **`SLS_TOKEN`** is set. The SLS address is default set to `api-gw-service-nmn.local`, if you are operating on a system with a different address, you can set it with the `--sls-address SLS_ADDRESS` flag.
 
 To get the switch IP addresses from the Shasta SLS API, run the command:
 
@@ -209,9 +276,9 @@ The output file for the `canu init` command is set with the `--out FILENAME` fla
 
 ### Report Switch Firmware
 
-**[Details](docs/report_switch_firmware.md)**<br>
+#### [Details](docs/report_switch_firmware.md)
 
-CANU checks the switch firmware version against the standard in the _canu.yaml_ file found in the root directory.
+CANU checks the switch firmware version against the standard in the `canu.yaml` file found in the root directory.
 
 The CSM version is required to determine the firmware to validate against, you can pass it in with `--csm` like `--csm 1.2`.
 
@@ -226,7 +293,7 @@ $ canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --p
 
 ### Report Network Firmware
 
-**[Details](docs/report_network_firmware.md)**<br>
+#### [Details](docs/report_network_firmware.md)
 
 Multiple switches on a network (Aruba, Dell, or Mellanox) can be checked for their firmware versions. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
 
@@ -266,13 +333,13 @@ FL.10.05.0010 - 1 switches
 
 ![](docs/images/canu_report_network_firmware.png)
 
-When using the _network firmware_ commands, the table will show either: 🛶 Pass, ❌ Fail, or 🔺 Error. The switch will **pass** or **fail** based on if the switch firmware matches the _canu.yaml_
+When using the _network firmware_ commands, the table will show either: 🛶 Pass, ❌ Fail, or 🔺 Error. The switch will **pass** or **fail** based on if the switch firmware matches the `canu.yaml`.
 
 ### Output to a File
 
 To output the results of the switch firmware or network firmware commands to a file, append the `--out FILENAME` flag
 
-### JSON
+### Output to JSON
 
 To get the JSON output from a single switch, or from multiple switches, make sure to use the `--json` flag. An example json output is below.
 
@@ -313,7 +380,8 @@ Potential output:
 
 ### Report Switch Cabling
 
-**[Details](docs/report_switch_cabling.md)**<br>
+#### [Details](docs/report_switch_cabling.md)
+
 CANU can also use LLDP to check the cabling status of a switch. To check the cabling of a single switch run: `canu report switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD`
 
 ```bash
@@ -344,7 +412,7 @@ Entries in the table will be colored based on what they are. Neighbors that have
 
 ### Report Network Cabling
 
-**[Details](docs/report_network_cabling.md)**<br>
+#### [Details](docs/report_network_cabling.md)
 
 The cabling of multiple switches (Aruba, Dell, or Mellanox) on a network can be checked at the same time using LLDP. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
 
@@ -353,7 +421,6 @@ An example of checking the cabling of multiple switches: `canu report network ca
 There are two different `--view` options, **switch** and **equipment**.
 
 1. The `--view switch` option displays a table for every switch IP address passed in showing connections. This is the same view as shown in the above example of checking single switch cabling.
-
 1. The `--view equipment` option displays a table for each mac address connection. This means that servers and switches will both display incoming and outgoing connections.
 
 An example of checking the cabling of multiple switches and displaying with the equipment view: `canu network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --view equipment`
@@ -749,7 +816,7 @@ In order to generate switch config, a valid SHCD or CCJ must be passed in and sy
 
 #### CSI Input
 
-- In order to parse CSI output, use the `--sls-file FILE` flag to pass in the folder where the _sls_file.json_ file is located.
+- In order to parse CSI output, use the `--sls-file FILE` flag to pass in the folder where the `sls_file.json` file is located.
 
 The sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.
 
@@ -933,7 +1000,7 @@ This option allows extension and maintenance of switch configurations beyond pla
 
 WARNING: Extreme diligence should be used applying custom configurations which override plan-of-record generated configurations. Custom configurations will overwrite generated configurations! Override/overwrite is by design to support and document cases where site-interconnects demand "nonstandard" configurations or a bug must be worked around.
 
-The instructions are exactly the same as **[Generate Switch Config with Custom Config Injection](#generate-switch-config-withcustom-config-injection)**
+The instructions are exactly the same as **[Generate Switch Config with Custom Config Injection](#generate-network-config-with-custom-config-injection)**
 
 To generate network configuration with custom config injection run
 
@@ -1725,7 +1792,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Cache firmware API calls to canu_cache.yaml file.
 - Able to check cabling with LLDP on a switch using the `canu switch cabling` command.
 - Cache cabling information to canu_cache.yaml file.
-- For the `canu init` command the CSI input now comes from the _sls_input_file.json_ instead of the _NMN.yaml_ file.
+- For the `canu init` command the CSI input now comes from the `sls_input_file.json` instead of the `NMN.yaml` file.
 - Able to check cabling with LLDP on the whole network using the `canu network cabling` command.
 
 ## [0.0.2] - 2021-03-29
