@@ -16,7 +16,7 @@ Ports are highlighted in ‘green’ when the port name is set with the interfac
 
 ---
 
-```
+```shell
 canu report switch cabling [OPTIONS]
 ```
 
@@ -48,7 +48,7 @@ Output results to a file
 
 To check the cabling of a single switch run: `canu report switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD`
 
-```
+```bash
 $ canu report switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD
 
 Switch: test-switch-spine01 (192.168.1.1)

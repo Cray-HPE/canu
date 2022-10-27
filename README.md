@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.24
+# 🛶 CANU v1.6.25
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1283,6 +1283,13 @@ To run a specific test file:
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.6.25]
+
+- Fix the CANU model to allow "cable swapping" while using LLDP data.
+- Add gpu node definitiions to v2 TDS architecture.
+- Provide better guidance during SHCD validation if port re-use/change is attempted.
+- Update generated docs from template changes.
 
 ## [1.6.24]
 

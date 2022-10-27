@@ -16,7 +16,7 @@ If used, CSI-generated sls_input_file.json file is generally stored in one of tw
 
 The output file for the canu init command is set with the –out FILENAME flag.
 
-```
+```shell
 canu init [OPTIONS]
 ```
 
@@ -64,7 +64,7 @@ Switch network e.g. (CAN, MTL, NMN)
 
 To get the switch IP addresses from CSI output, run the command:
 
-```
+```bash
 $ canu init --sls-file SLS_FILE --out output.txt
 8 IP addresses saved to output.txt
 ```
@@ -78,7 +78,7 @@ $ canu init --sls-file SLS_FILE --out output.txt
 
 To get the switch IP addresses from the Shasta SLS API, run the command:
 
-```
+```bash
 $ canu init --auth-token ~./config/cray/tokens/ --sls-address 1.2.3.4 --out output.txt
 8 IP addresses saved to output.txt
 ```

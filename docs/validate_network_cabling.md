@@ -13,7 +13,7 @@ The validation will ensure that spine switches, leaf switches, edge switches, an
 
 ---
 
-```
+```shell
 canu validate network cabling [OPTIONS]
 ```
 
@@ -71,7 +71,7 @@ Output results to a file
 
 To validate the cabling run: `canu validate network cabling -a tds --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
-```
+```bash
 $ canu validate network cabling -a tds --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
 
 Cabling Node Connections

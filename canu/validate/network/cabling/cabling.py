@@ -46,7 +46,7 @@ yaml = YAML()
 
 canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 
-log = logging.getLogger("validate_shcd")
+log = logging.getLogger("validate_cabling")
 
 
 @click.command(
@@ -173,13 +173,13 @@ def cabling(ctx, architecture, ips, ips_file, username, password, log_, out):
 
                     errors.append([str(ip), error_message])
 
-    # Create Node factory
-    factory = NetworkNodeFactory(architecture_version=architecture)
-
     # Open the updated cache to model nodes
     with open(canu_cache_file, "r+") as file:
         canu_cache = yaml.load(file)
 
+    # Create Node factory and model from switch LLDP data
+    log.debug("Creating model from switch LLDP data")
+    factory = NetworkNodeFactory(architecture_version=architecture)
     node_list, warnings = node_model_from_canu(factory, canu_cache, ips)
 
     print_node_list(node_list, "Cabling", out)
@@ -475,6 +475,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                             dst_node,
                             src_port=src_node_port,
                             dst_port=dst_node_port,
+                            strict=False,
                         )
                     except Exception:
                         log.fatal(
