@@ -53,7 +53,7 @@ pipeline {
             }
             steps {
                 script {
-                    runLibraryScript("addRpmMetaData.sh", "${env.GIT_REPO_NAME}.spec")
+                    runLibraryScript("addRpmMetaData.sh", "${env.NAME}.spec")
                     sh "make prepare"
                 }
             }
@@ -75,10 +75,10 @@ pipeline {
         stage('Publish: RPMs') {
             steps {
                 script {
-                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: "sle-15sp2", arch: "x86_64", isStable: isStable)
-                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: "sle-15sp3", arch: "x86_64", isStable: isStable)
-                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: "sle-15sp2", arch: "src", isStable: isStable)
-                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: "sle-15sp3", arch: "src", isStable: isStable)
+                    publishCsmRpms(component: env.NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: "sle-15sp2", arch: "x86_64", isStable: isStable)
+                    publishCsmRpms(component: env.NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: "sle-15sp3", arch: "x86_64", isStable: isStable)
+                    publishCsmRpms(component: env.NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: "sle-15sp2", arch: "src", isStable: isStable)
+                    publishCsmRpms(component: env.NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: "sle-15sp3", arch: "src", isStable: isStable)
                 }
             }
         }
@@ -94,7 +94,7 @@ pipeline {
         stage('Publish: Image') {
             steps {
                 script {
-                    publishCsmDockerImage(image: "cray-${env.GIT_REPO_NAME}", tag: env.IMAGE_VERSION, isStable: env.IS_STABLE)
+                    publishCsmDockerImage(image: "cray-${env.NAME}", tag: env.IMAGE_VERSION, isStable: env.IS_STABLE)
                 }
             }
         }
