@@ -131,6 +131,7 @@ setup(
         ],
         'test': [
             'coverage',
+            'py>==1.11.0',
             'pytest<7.2.1',
             'pytest-cov',
             'pytest-sugar',
