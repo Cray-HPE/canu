@@ -46,7 +46,7 @@ else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent.parent
 
-version = pkg_resources.get_distribution('canu').version
+version = pkg_resources.get_distribution("canu").version
 
 log = logging.getLogger("validate_shcd")
 
