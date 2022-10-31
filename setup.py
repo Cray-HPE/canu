@@ -161,7 +161,7 @@ setup(
         'natsort==7.1.1',
         'netaddr==0.8.0',
         'netmiko==3.4.0',
-        'netutils==1.0.0',
+        'netutils==1.2.0',
         'nornir-netmiko==0.1.2',
         'nornir-salt==0.9.0',
         'nornir-scrapli==2022.7.30',
