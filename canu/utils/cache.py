@@ -67,7 +67,7 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent
 
 canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
-version = pkg_resources.get_distribution('canu').version
+version = pkg_resources.get_distribution("canu").version
 file_exists = path.isfile(canu_cache_file)
 
 # Open the Cache file, and generate it if it does not exist
