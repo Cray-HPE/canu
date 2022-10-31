@@ -171,7 +171,7 @@ setup(
         'pyyaml==6.0',
         'requests==2.26.0',
         'responses==0.14.0',
-        'ruamel.yaml<=0.16.13',
+        'ruamel.yaml<0.17.22',
         'tabulate==0.8.9',
         'tokenize-rt==3.2.0',
         'tomli==1.1.0',
