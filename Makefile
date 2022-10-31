@@ -20,7 +20,7 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 ifeq ($(NAME),)
-NAME := $(shell basename $(pwd))
+NAME := $(shell basename $(shell pwd))
 endif
 
 ifeq ($(IMAGE_VERSION),)
@@ -41,6 +41,7 @@ all : prepare binary test rpm
 rpm: rpm_package_source rpm_build_source rpm_build
 
 prepare:
+		@echo $(NAME)
 		rm -rf dist
 		mkdir -p $(BUILD_DIR)/SPECS $(BUILD_DIR)/SOURCES
 		cp $(SPEC_FILE) $(BUILD_DIR)/SPECS/

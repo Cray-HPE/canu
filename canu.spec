@@ -24,7 +24,7 @@
 %global __python /usr/local/bin/python3.10
 %define __pyinstaller /home/jenkins/.local/bin/pyinstaller
 
-Name: canu
+Name: %(echo $NAME)
 BuildArch: x86_64
 License: MIT License
 Summary: CSM Automatic Network Utility
