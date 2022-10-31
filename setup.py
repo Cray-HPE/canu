@@ -131,7 +131,8 @@ setup(
         ],
         'test': [
             'coverage',
-            'pytest<=7.1.3',
+            'py>==1.11.0',
+            'pytest',
             'pytest-cov',
             'pytest-sugar',
             'testfixtures',
