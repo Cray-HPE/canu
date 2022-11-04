@@ -95,7 +95,7 @@ pipeline {
         stage('Publish: Image') {
             steps {
                 script {
-                    publishCsmDockerImage(image: "cray-${env.NAME}", tag: env.IMAGE_VERSION, isStable: env.IS_STABLE)
+                    publishCsmDockerImage(image: "cray-${env.NAME}", tag: env.IMAGE_VERSION, isStable: isStable)
                 }
             }
         }
