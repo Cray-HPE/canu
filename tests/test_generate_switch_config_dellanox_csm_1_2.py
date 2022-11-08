@@ -44,7 +44,7 @@ switch_name = "sw-spine-001"
 cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
 
-canu_version = pkg_resources.get_distribution('canu').version
+canu_version = pkg_resources.get_distribution("canu").version
 banner_motd = (
     'banner motd "\n'
     "###############################################################################\n"

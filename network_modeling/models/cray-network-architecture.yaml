@@ -548,6 +548,11 @@ network_v1:
           speed: 1
         - name: "river_bmc_leaf"
           speed: 1
+    - name: "kvm"
+      model: "kvm"
+      connections:
+        - name: "river_bmc_leaf"
+          speed: 1
   lookup_mapper:
     - lookup_name:
         - "mn"
@@ -573,14 +578,18 @@ network_v1:
     - lookup_name:
         - "Ln"
         - "ln"
-      shasta_name: "ln"
+      shasta_name: "login"
       architecture_type: "river_ncn_node_4_port_gigabyte"
     - lookup_name:
         - "gn"
       shasta_name: "gn"
       architecture_type: "river_ncn_node_2_port_gigabyte"
     - lookup_name:
-        - "sw-cdu"
+        - "gpu"
+      shasta_name: "gpu"
+      architecture_type: "river_ncn_node_4_port_gigabyte"
+    - lookup_name:
+        - "cdu"
       shasta_name: "sw-cdu"
       architecture_type: "mountain_compute_leaf"
     - lookup_name:
@@ -617,3 +626,7 @@ network_v1:
     - lookup_name: ["SubRack", "subrack"]
       shasta_name: "SubRack"
       architecture_type: "subrack"
+    - lookup_name:
+        - "kvm"
+      shasta_name: "kvm"
+      architecture_type: "kvm"

@@ -54,7 +54,7 @@ if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cov
 else:
     parent_directory = path.abspath(path.dirname(path.dirname(__file__)))
 
-version = pkg_resources.get_distribution('canu').version
+version = pkg_resources.get_distribution("canu").version
 
 canu_config_file = path.join(parent_directory, "canu", "canu.yaml")
 with open(canu_config_file, "r") as canu_f:
