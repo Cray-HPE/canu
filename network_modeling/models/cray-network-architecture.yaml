@@ -578,13 +578,13 @@ network_v1:
     - lookup_name:
         - "Ln"
         - "ln"
-      shasta_name: "ln"
+      shasta_name: "login"
       architecture_type: "river_ncn_node_4_port_gigabyte"
     - lookup_name:
         - "gn"
       shasta_name: "gn"
       architecture_type: "river_ncn_node_2_port_gigabyte"
-    - lookup_name: 
+    - lookup_name:
         - "gpu"
       shasta_name: "gpu"
       architecture_type: "river_ncn_node_4_port_gigabyte"
