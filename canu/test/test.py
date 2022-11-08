@@ -31,13 +31,9 @@ from click_help_colors import HelpColorsCommand
 from jinja2 import Environment
 from nornir import InitNornir
 from nornir.core.filter import F
-from nornir_salt import (
-    netmiko_send_commands,
-    scrapli_send_commands,
-    TabulateFormatter,
-    TestsProcessor,
-)
-from nornir_salt.plugins.functions import ResultSerializer
+from nornir_salt.plugins.functions import ResultSerializer, TabulateFormatter
+from nornir_salt.plugins.processors import TestsProcessor
+from nornir_salt.plugins.tasks import netmiko_send_commands, scrapli_send_commands
 import yaml
 
 from canu.utils.host_alive import host_alive

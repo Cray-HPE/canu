@@ -22,8 +22,8 @@
 
 """Retrieve hosts that are reachable via SSH."""
 from nornir.core.filter import F
-from nornir_salt import tcp_ping
 from nornir_salt.plugins.functions import ResultSerializer
+from nornir_salt.plugins.tasks import tcp_ping
 
 
 def host_alive(nornir_object):
