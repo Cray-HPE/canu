@@ -27,7 +27,7 @@ from click_help_colors import HelpColorsCommand
 import click_spinner
 from nornir import InitNornir
 from nornir.core.filter import F
-from nornir_salt import netmiko_send_commands
+from nornir_salt.plugins.tasks import netmiko_send_commands
 from nornir_scrapli.tasks import send_command
 from ttp import ttp
 
