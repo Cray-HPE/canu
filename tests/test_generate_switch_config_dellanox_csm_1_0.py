@@ -44,7 +44,7 @@ sls_address = "api-gw-service-nmn.local"
 switch_backups = "switch_backups/dellanox"
 switch_backups_folder = path.join(test_file_directory, "data", switch_backups)
 
-canu_version = pkg_resources.get_distribution('canu').version
+canu_version = pkg_resources.get_distribution("canu").version
 banner_motd = (
     'banner motd "\n'
     "###############################################################################\n"
