@@ -1354,6 +1354,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 ## [1.6.26]
 
 - Fix login node shasta name for v1 architecture
+
 ## [1.6.26]
 
 - Added gpu and kvm node definitions to v1 arrchitecture.
