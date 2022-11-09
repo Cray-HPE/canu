@@ -162,7 +162,7 @@ setup(
         'nornir-salt==0.16.1',
         'nornir-scrapli==2022.7.30',
         'nornir-utils==0.2.0',
-        'nornir==3.2.0',
+        'nornir==3.3.0',
         'openpyxl==3.0.10',
         'pyyaml==6.0',
         'requests==2.26.0',
