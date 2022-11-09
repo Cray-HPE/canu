@@ -31,9 +31,9 @@ import re
 from setuptools import find_packages
 from setuptools import setup
 
-version_re = re.compile('^Version: (.+)$', re.M)
+version_re = re.compile("^Version: (.+)$", re.M)
 
-with open('LICENSE') as license_file:
+with open("LICENSE") as license_file:
     LICENSE = license_file.read()
 
 
@@ -42,48 +42,45 @@ def readme() -> str:
     Print the README file.
     :returns: Read README file.
     """
-    with open('README.md') as file:
+    with open("README.md") as file:
         return str(file.read())
 
 
 def get_version():
     d = dirname(__file__)
 
-    if isdir(join(d, '.git')):
+    if isdir(join(d, ".git")):
         # Get the version using "git describe".
-        cmd = 'git describe --tags --match [0-9]*'.split()
+        cmd = "git describe --tags --match [0-9]*".split()
         try:
             version = subprocess.check_output(cmd).decode().strip()
         except subprocess.CalledProcessError:
-            print('Unable to get version number from git tags')
+            print("Unable to get version number from git tags")
             exit(1)
 
         # PEP 386 compatibility
-        if '-' in version:
-            version = '.post'.join(version.split('-')[:2])
+        if "-" in version:
+            version = ".post".join(version.split("-")[:2])
 
         # Don't declare a version "dirty" merely because a time stamp has
         # changed. If it is dirty, append the branch name as a suffix to
         # indicate a development revision after the release.
-        with open(devnull, 'w') as fd_devnull:
-            subprocess.call(
-                ['git', 'status'],
-                stdout=fd_devnull, stderr=fd_devnull
-            )
+        with open(devnull, "w") as fd_devnull:
+            subprocess.call(["git", "status"], stdout=fd_devnull, stderr=fd_devnull)
 
-        cmd = 'git diff-index --name-only HEAD'.split()
+        cmd = "git diff-index --name-only HEAD".split()
         try:
             dirty = subprocess.check_output(cmd).decode().strip()
         except subprocess.CalledProcessError:
-            print('Unable to get git index status')
+            print("Unable to get git index status")
             exit(1)
 
-        if dirty != '':
-            version += '.dev1'
+        if dirty != "":
+            version += ".dev1"
 
     else:
         # Extract the version from the PKG-INFO file.
-        with open(join(d, 'PKG-INFO')) as f:
+        with open(join(d, "PKG-INFO")) as f:
             version = version_re.search(f.read()).group(1)
 
     return version
@@ -100,49 +97,47 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    exclude_package_data={
-        "canu": ["canu_cache.yaml"]
-    },
+    exclude_package_data={"canu": ["canu_cache.yaml"]},
     extras_require={
-        'ci': [
-            'nox',
+        "ci": [
+            "nox",
         ],
-        'docs': [
-            'myst-parser',
-            'sphinx',
-            'sphinx-markdown-builder',
-            'sphinx_click',
+        "docs": [
+            "myst-parser",
+            "sphinx",
+            "sphinx-markdown-builder",
+            "sphinx_click",
         ],
-        'lint': [
-            'darglint',
-            'flake8',
-            'flake8-black',
-            'flake8-bugbear',
-            'flake8-commas',
-            'flake8-comprehensions',
-            'flake8-debugger',
-            'flake8-docstrings',
-            'flake8-eradicate',
-            'flake8-import-order',
-            'flake8-quotes',
-            'flake8-string-format',
-            'pep8-naming',
-            'toml',
+        "lint": [
+            "darglint",
+            "flake8",
+            "flake8-black",
+            "flake8-bugbear",
+            "flake8-commas",
+            "flake8-comprehensions",
+            "flake8-debugger",
+            "flake8-docstrings",
+            "flake8-eradicate",
+            "flake8-import-order",
+            "flake8-quotes",
+            "flake8-string-format",
+            "pep8-naming",
+            "toml",
         ],
-        'test': [
-            'coverage',
-            'py>==1.11.0',
-            'pytest<7.2.1',
-            'pytest-cov',
-            'pytest-sugar',
-            'testfixtures',
+        "test": [
+            "coverage",
+            "py>==1.11.0",
+            "pytest<7.2.1",
+            "pytest-cov",
+            "pytest-sugar",
+            "testfixtures",
         ],
-        'network_modeling': [
-            'jsonschema<=4.4.0',
-            'matplotlib<=3.5.1',
-            'networkx<=2.6.3',
-            'yamale<=4.0.2',
-        ]
+        "network_modeling": [
+            "jsonschema<=4.4.0",
+            "matplotlib<=3.5.1",
+            "networkx<=2.6.3",
+            "yamale<=4.0.2",
+        ],
     },
     install_requires=[
         'aiohttp==3.8.0',
@@ -181,8 +176,6 @@ setup(
         'yamale<=4.0.2',
     ],
     entry_points={
-        'console_scripts': [
-            'canu=canu.cli:cli'
-        ],
+        "console_scripts": ["canu=canu.cli:cli"],
     },
 )
