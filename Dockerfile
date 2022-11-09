@@ -30,7 +30,7 @@ RUN     mkdir /files
 COPY    dist/rpmbuild/RPMS/x86_64/ /files
 
 RUN     ls -l /files && \
-        zypper -n in --allow-unsigned-rpm -y /files/canu*.rpm
+        zypper --no-gpg-checks -n in --allow-unsigned-rpm --auto-agree-with-licenses -y /files/canu*.rpm
 
 # set file perms for canu
 RUN      chown -R canu /files /home
