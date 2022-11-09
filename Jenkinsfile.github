@@ -55,6 +55,7 @@ pipeline {
                 script {
                     runLibraryScript("addRpmMetaData.sh", "${env.NAME}.spec")
                     sh "make prepare"
+                    sh "git update-index --assume-unchanged ${env.NAME}.spec"
                 }
             }
         }
@@ -94,7 +95,7 @@ pipeline {
         stage('Publish: Image') {
             steps {
                 script {
-                    publishCsmDockerImage(image: "cray-${env.NAME}", tag: env.IMAGE_VERSION, isStable: env.IS_STABLE)
+                    publishCsmDockerImage(image: "cray-${env.NAME}", tag: env.IMAGE_VERSION, isStable: isStable)
                 }
             }
         }
