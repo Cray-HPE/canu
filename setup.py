@@ -147,7 +147,7 @@ setup(
         'click-spinner==0.1.10',
         'click==8.0.3',
         'colorama==0.4.4',
-        'emoji==1.6.0',
+        'emoji==2.1.0',
         'hier-config==1.6.1',
         'ipython==7.16.3',
         'jinja2==3.1.2',
