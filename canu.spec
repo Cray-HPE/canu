@@ -40,17 +40,13 @@ Vendor: Cray HPE
 %setup -q
 
 %build
-# PIP and Setuptools updates.
 %{__python} -m pip install -U pyinstaller
 %{__python} -m pip install -q build
 %{__python} -m build
 %{__python} -m pip install dist/%{name}*.tar.gz
-git status
-git diff-index --name-only HEAD
 
 cp -pv pyinstaller.py pyinstaller.spec
-git status
-git diff-index --name-only HEAD
+
 %{__pyinstaller} --clean -y --dist ./dist/linux --workpath /tmp pyinstaller.spec
 rm pyinstaller.spec
 chown -R --reference=. ./dist/linux
