@@ -19,11 +19,7 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-
-FROM artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:3.10
-
-# create canu user
-RUN     useradd -ms /bin/bash canu
+FROM    artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:3.10
 
 # update command prompt
 RUN     echo 'export PS1="canu \w : "' >> /etc/bash.bashrc
@@ -31,20 +27,14 @@ RUN     echo 'export PS1="canu \w : "' >> /etc/bash.bashrc
 # make files dir
 RUN     mkdir /files
 
-# prep image layer for faster builds
-COPY    requirements.txt /app/canu/
+COPY    dist/rpmbuild/RPMS/x86_64/ /files
 
-RUN     pip3 install -r /app/canu/requirements.txt
-
-# copy canu files
-COPY    . /app/canu
-
-# install canu
-RUN     pip3 install --editable /app/canu/
+RUN     ls -l /files && \
+        zypper --no-gpg-checks -n in --allow-unsigned-rpm --auto-agree-with-licenses -y /files/canu*.rpm
 
 # set file perms for canu
-RUN     chown -R canu /app/canu /files /home
-# set none root user: canu
-USER    canu
+RUN      chown -R canu /files /home
+
+USER     canu
 
 WORKDIR /files

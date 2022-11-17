@@ -19,46 +19,44 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-name ?= ${GIT_REPO_NAME}
+ifeq ($(NAME),)
+NAME := $(shell basename $(shell pwd))
+endif
 
-version ?= $(shell cat .version)
-build_image := cdrx/pyinstaller-linux:python3
+ifeq ($(IMAGE_VERSION),)
+IMAGE_VERSION := $(shell git describe --tags | tr -s '-' '_' | tr -d '^v')
+endif
 
-# Default release if not set
-BUILD_METADATA ?= "1~development~$(shell git rev-parse --short HEAD)"
+ifeq ($(VERSION),)
+VERSION := $(shell git describe --tags | tr -s '-' '~' | tr -d '^v')
+endif
 
-spec_file := ${name}.spec
-source_name := ${name}-${version}
+SPEC_FILE := ${NAME}.spec
+SOURCE_NAME := ${NAME}-${VERSION}
 
-build_dir := $(PWD)/dist/rpmbuild
-source_path := ${build_dir}/SOURCES/${source_name}.tar.bz2
-IMAGE_VERSION ?= ${IMAGE_VERSION}
+BUILD_DIR := $(PWD)/dist/rpmbuild
+SOURCE_PATH := ${BUILD_DIR}/SOURCES/${SOURCE_NAME}.tar.bz2
 
 all : prepare binary test rpm
 rpm: rpm_package_source rpm_build_source rpm_build
 
 prepare:
+		@echo $(NAME)
 		rm -rf dist
-		mkdir -p $(build_dir)/SPECS $(build_dir)/SOURCES
-		cp $(spec_file) $(build_dir)/SPECS/
-
-binary:
-		docker run --rm -v $(PWD):/src $(build_image) ./pyinstaller.sh
-
-test:
-		docker run --rm -v $(PWD):/src $(build_image) nox
+		mkdir -p $(BUILD_DIR)/SPECS $(BUILD_DIR)/SOURCES
+		cp $(SPEC_FILE) $(BUILD_DIR)/SPECS/
 
 image:
-	docker build --no-cache --pull ${DOCKER_ARGS} --tag 'cray-${name}:${IMAGE_VERSION}' .
+		docker build --no-cache --pull --tag 'cray-${NAME}:${IMAGE_VERSION}' .
 
 snyk:
-	$(MAKE) -s image | xargs --verbose -n 1 snyk container test
+		$(MAKE) -s image | xargs --verbose -n 1 snyk container test
 
 rpm_package_source:
-		tar --transform 'flags=r;s,^,/$(source_name)/,' --exclude .git --exclude .nox --exclude dist/rpmbuild -cvjf $(source_path) .
+		tar --transform 'flags=r;s,^,/$(SOURCE_NAME)/,' --exclude .nox --exclude dist/rpmbuild -cvjf $(SOURCE_PATH) .
 
 rpm_build_source:
-		BUILD_METADATA=$(BUILD_METADATA) rpmbuild -ts $(source_path) --define "_topdir $(build_dir)"
+		rpmbuild -ts $(SOURCE_PATH) --define "_topdir $(BUILD_DIR)"
 
 rpm_build:
-		BUILD_METADATA=$(BUILD_METADATA) rpmbuild -ba $(spec_file) --define "_topdir $(build_dir)"
+		rpmbuild -ba $(SPEC_FILE) --define "_topdir $(BUILD_DIR)"

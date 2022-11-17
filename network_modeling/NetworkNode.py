@@ -293,7 +293,7 @@ class NetworkNode:
         dst_node,
         src_port=None,
         dst_port=None,
-        strict=False,
+        strict=True,
         bidirectional=True,
     ):
         """Connect one device to another."""
@@ -320,11 +320,11 @@ class NetworkNode:
                 src_port=dst_port,
                 dst_port=src_port,
                 bidirectional=False,
-                strict=True,
+                strict=strict,
             ):
                 log.error(
-                    "Connection of local to remote failed - "
-                    "usually no ports are available or port already used.",
+                    "Connection of local to remote failed. "
+                    "Usually no ports are available or the requested port has already been used.",
                 )
                 return False
 
@@ -381,13 +381,16 @@ class NetworkNode:
             if self.__ports[index] is not None:
                 existing_port = self.__ports[index]
                 if existing_port.destination_node_id() == dst_node.id():
-                    log.warning(
-                        f"Node {self.__id}: port {src_port.port()} in slot {src_port.slot()} "
-                        f"already connected to Node {dst_node.id()}: port {dst_port.port()} "
-                        f"in slot {dst_port.slot()}",
+                    msg = (
+                        f"Port already in use.  Node {self.__id} ({self.__common_name}): "
+                        f"port {src_port.port()} in slot {src_port.slot()} "
+                        f"is already connected to Node {dst_node.id()} ({dst_node.common_name()}): "
+                        f"port {existing_port.destination_port()} in slot {existing_port.destination_slot()}."
                     )
                     if strict:
+                        log.error(msg)
                         return False
+                    log.warning(msg)
                     return True  # no-op because already connected
                 else:
                     raise Exception(

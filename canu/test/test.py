@@ -31,13 +31,9 @@ from click_help_colors import HelpColorsCommand
 from jinja2 import Environment
 from nornir import InitNornir
 from nornir.core.filter import F
-from nornir_salt import (
-    netmiko_send_commands,
-    scrapli_send_commands,
-    TabulateFormatter,
-    TestsProcessor,
-)
-from nornir_salt.plugins.functions import ResultSerializer
+from nornir_salt.plugins.functions import ResultSerializer, TabulateFormatter
+from nornir_salt.plugins.processors import TestsProcessor
+from nornir_salt.plugins.tasks import netmiko_send_commands, scrapli_send_commands
 import yaml
 
 from canu.utils.host_alive import host_alive
@@ -150,22 +146,12 @@ def test(
 
     # set to ERROR otherwise nornir plugin logs debug messages to the screen.
     logging.basicConfig(level="ERROR")
-    if sls_file:
-        try:
-            sls_json = json.load(sls_file)
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            click.secho(
-                f"The file {sls_file.name} is not valid JSON.",
-                fg="red",
-            )
-            sys.exit(1)
-    else:
-        sls_json = sls_file
+
     switch_inventory, sls_variables = inventory(
         username,
         password,
         network,
-        sls_json,
+        sls_file,
         sls_inventory=True,
     )
 
@@ -220,7 +206,7 @@ def test(
             )
 
     if ping:
-        networks = NetworkManager(sls_json["Networks"])
+        networks = NetworkManager(sls_file["Networks"])
 
         ping = {
             "device": ["leaf", "leaf-bmc", "cdu", "spine"],

@@ -18,7 +18,7 @@ CANU can be used to validate that an SHCD (SHasta Cabling Diagram) passes basic 
 
 ---
 
-```
+```shell
 canu validate shcd [OPTIONS]
 ```
 
@@ -68,7 +68,7 @@ Level of logging.
 
 To check an SHCD run: `canu validate shcd -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN,HMN --corners I14,S25,I16,S22,J20,T39`
 
-```
+```bash
 $ canu validate shcd -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN,HMN --corners I14,S25,I16,S22,J20,T39
 
 SHCD Node Connections
