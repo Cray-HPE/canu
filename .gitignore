@@ -50,3 +50,6 @@ pylintrc
 pylintrc.test
 
 test_data/*
+
+# Shasta Cabling Diagrams
+*.xlsx
