@@ -26,7 +26,7 @@ After running the ‘validate switch config’ command, you will be shown a line
 
 ---
 
-```
+```shell
 canu validate switch config [OPTIONS]
 ```
 
@@ -80,7 +80,7 @@ Outputs commands to get from the running-config to generated config
 
 To validate switch config run: `canu validate switch config --ip 192.168.1.1 --username USERNAME --password PASSWORD --generated SWITCH_CONFIG.cfg`
 
-```
+```bash
 $ canu validate switch config --ip 192.168.1.1 --generated sw-spine-001.cfg
 
 hostname sw-spine-001

@@ -90,6 +90,9 @@ ordering:
       - startswith: ip
     order: 820
   - lineage:
+      - startswith: route-map
+    order: 830
+  - lineage:
       - startswith: router
     order: 850
   - lineage:

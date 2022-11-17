@@ -24,7 +24,7 @@ There are three different statuses found in the report.
 
 ---
 
-```
+```shell
 canu report network firmware [OPTIONS]
 ```
 
@@ -76,7 +76,7 @@ Output results to a file
 
 An example of checking the firmware of multiple switches: `canu report network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD` Or to load IP addresses from a file run: `canu report network firmware --csm 1.2 --ips-file ip_file.txt --username USERNAME --password PASSWORD`
 
-```
+```bash
 $ canu report network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2,192.168.1.3,192.168.1.4 --username USERNAME --password PASSWORD
 
 ------------------------------------------------------------------
@@ -111,7 +111,7 @@ FL.10.05.0010 - 1 switches
 
 To get the JSON output from multiple switches, make sure to use the `--json` flag. An example json output is below.
 
-```
+```bash
 $ canu report network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --json
 
 {

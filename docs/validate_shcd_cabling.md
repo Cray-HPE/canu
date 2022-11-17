@@ -12,7 +12,7 @@ If there is a difference in what is found connected to a devices port in SHCD an
 
 ---
 
-```
+```shell
 canu validate shcd-cabling [OPTIONS]
 ```
 
@@ -96,7 +96,7 @@ Print NCN MAC addresses
 
 To validate an SHCD against the cabling run: `canu validate shcd-cabling --csm 1.2 -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN --corners I14,S49,I16,S22 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
-```
+```bash
 $ canu validate shcd-cabling --csm 1.2 -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN --corners I14,S49,I16,S22 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
 
 ====================================================================================================

@@ -23,6 +23,7 @@
 from collections import defaultdict
 from itertools import groupby
 import json
+import logging
 import os
 from os import environ, path
 from pathlib import Path
@@ -31,13 +32,18 @@ import sys
 
 import click
 from click_help_colors import HelpColorsCommand
-from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
-from hier_config import HConfig, Host
-from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from click_option_group import optgroup
+from click_option_group import RequiredMutuallyExclusiveOptionGroup
+from hier_config import HConfig
+from hier_config import Host
+from jinja2 import Environment
+from jinja2 import FileSystemLoader
+from jinja2 import StrictUndefined
 import natsort
 import netaddr
 from netutils.mac import is_valid_mac
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
+import pkg_resources
 import requests
 from ruamel.yaml import YAML
 from ttp import ttp
@@ -68,7 +74,6 @@ else:
 # Schema and Data files
 canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
-canu_version_file = path.join(project_root, "canu", ".version")
 
 # ttp preserve templates
 # pulls the interface and lag from switch configs.
@@ -112,10 +117,9 @@ with open(canu_config_file, "r") as file:
 
 csm_options = canu_config["csm_versions"]
 
-# Get CANU version from .version
-with open(canu_version_file, "r") as file:
-    canu_version = file.readline()
-canu_version = canu_version.strip()
+canu_version = pkg_resources.get_distribution("canu").version
+
+log = logging.getLogger("generate_switch_config")
 
 dash = "-" * 60
 
@@ -203,6 +207,20 @@ dash = "-" * 60
     help="reorder config to heir config order",
     required=False,
 )
+@click.option(
+    "--bgp-control-plane",
+    type=click.Choice(["CMN", "CHN"], case_sensitive=False),
+    help="Network used for BGP control plane",
+    required=False,
+    default="CHN",
+)
+@click.option(
+    "--log",
+    "log_",
+    help="Level of logging.",
+    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
+    default="ERROR",
+)
 @click.pass_context
 def config(
     ctx,
@@ -220,6 +238,8 @@ def config(
     preserve,
     custom_config,
     reorder,
+    bgp_control_plane,
+    log_,
 ):
     """Generate switch config using the SHCD.
 
@@ -279,7 +299,11 @@ def config(
         preserve: Folder where switch running configs exist.
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
         reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
+        bgp_control_plane: Network used for BGP control plane
+        log_: Level of Logging
     """
+    logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
+
     # SHCD Parsing
     if shcd:
         try:
@@ -414,6 +438,7 @@ def config(
         preserve,
         custom_config,
         reorder,
+        bgp_control_plane,
     )
 
     click.echo("\n")
@@ -535,6 +560,7 @@ def generate_switch_config(
     preserve,
     custom_config,
     reorder,
+    bgp_control_plane,
 ):
     """Generate switch config.
 
@@ -550,6 +576,7 @@ def generate_switch_config(
         preserve: Folder where switch running configs exist.  This folder should be populated from the "canu backup network"
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
         reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
+        bgp_control_plane: Network used for BGP control plane
 
 
     Returns:
@@ -774,6 +801,7 @@ def generate_switch_config(
         "NMN_IPs": sls_variables["NMN_IPs"],
         "HMN_IPs": sls_variables["HMN_IPs"],
         "SWITCH_ASN": sls_variables["SWITCH_ASN"],
+        "BGP_CONTROL_PLANE": bgp_control_plane,
     }
 
     cabling = {}
@@ -1545,13 +1573,13 @@ def get_switch_nodes(
             }
             nodes.append(new_node)
         else:  # pragma: no cover
-            print("*********************************")
-            print("Cannot determine destination connection")
-            print("Source: ", switch_name)
-            print("Port: ", port)
-            print("Destination: ", destination_node_name)
-            print("shasta_name", shasta_name)
-            print("*********************************")
+            log.debug(
+                "Cannot determine destination connection.  Logging as an unknown configuration.",
+            )
+            log.debug(f"    Source: {switch_name}")
+            log.debug(f"    Port: {port}")
+            log.debug(f"    Destination: {destination_node_name}")
+            log.debug(f"    shasta_name: {shasta_name}")
             unknown_description = get_description(
                 switch_name,
                 destination_node_name,

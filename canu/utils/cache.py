@@ -29,6 +29,7 @@ import sys
 import tempfile
 
 import click
+import pkg_resources
 from ruamel.yaml import YAML
 
 yaml = YAML()
@@ -66,8 +67,7 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent
 
 canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
-canu_version_file = path.join(project_root, "canu", ".version")
-
+version = pkg_resources.get_distribution("canu").version
 file_exists = path.isfile(canu_cache_file)
 
 # Open the Cache file, and generate it if it does not exist
@@ -75,9 +75,6 @@ if file_exists:  # pragma: no cover
     with open(canu_cache_file, "r+") as canu_exist_f:
         canu_cache = yaml.load(canu_exist_f)
     if canu_cache is None:
-        with open(canu_version_file, "r") as version_file:
-            version = version_file.read().replace("\n", "")
-
         with open(canu_cache_file, "w+") as f:
             f.write(f"version: {version}\n")
             f.write("switches:\n")
@@ -85,8 +82,6 @@ if file_exists:  # pragma: no cover
         with open(canu_cache_file, "r+") as canu_f:
             canu_cache = yaml.load(canu_f)
 else:  # pragma: no cover
-    with open(canu_version_file, "r") as version_f:
-        version = version_f.read().replace("\n", "")
 
     with open(canu_cache_file, "w+") as new_cache_f:
         new_cache_f.write(f"version: {version}\n")

@@ -20,7 +20,7 @@ If you want to see the individual status of all the neighbors of a switch, use t
 
 ---
 
-```
+```shell
 canu validate network bgp [OPTIONS]
 ```
 
@@ -66,7 +66,7 @@ Verbose mode
 
 To validate BGP run: `canu validate network bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
-```
+```bash
 $ canu validate network bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
 
 BGP Neighbors Established
@@ -80,7 +80,7 @@ PASS - IP: 192.168.1.2 Hostname: sw-spine02
 
 To get verbose BGP neighbor details: `canu validate network bgp --ips 192.168.1.1,192.168.1.3,192.168.1.2 --username USERNAME --password PASSWORD --verbose`
 
-```
+```bash
 $ canu validate network bgp --ips 192.168.1.1,192.168.1.3,192.168.1.2 --username USERNAME --password PASSWORD --verbose
 
 --------------------------------------------------

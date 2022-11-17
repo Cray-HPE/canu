@@ -51,7 +51,7 @@ Use the ‘–folder FOLDERNAME’ flag to output all the switch configs to a fo
 
 ---
 
-```
+```shell
 canu generate switch config [OPTIONS]
 ```
 
@@ -129,6 +129,16 @@ Path to current running configs.
 ### --reorder()
 reorder config to heir config order
 
+
+### --bgp-control-plane( <bgp_control_plane>)
+Network used for BGP control plane
+
+
+* **Options**
+
+    CMN | CHN
+
+
 ### Environment variables
 
 
@@ -141,7 +151,7 @@ reorder config to heir config order
 
 To generate switch config run: `canu generate switch config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --auth_token TOKEN_FILE --name SWITCH_HOSTNAME --out FILENAME`
 
-```
+```bash
 $ canu generate switch config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --auth_token TOKEN_FILE --name sw-spine-001
 
 hostname sw-spine-001
@@ -158,7 +168,7 @@ vrf keepalive
 
 To generate switch config run: `canu generate switch config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --sls-file /CSI/OUTPUT/FOLDER/ADDRESS --name SWITCH_HOSTNAME --out FILENAME`
 
-```
+```bash
 $ canu generate switch config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file /CSI/OUTPUT/FOLDER/ADDRESS --name sw-leaf-bmc-001
 
 hostname sw-leaf-bmc-001

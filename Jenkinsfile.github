@@ -1,27 +1,37 @@
-// (C) Copyright [2022] Hewlett Packard Enterprise Development LP
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the "Software"),
-// to deal in the Software without restriction, including without limitation
-// the rights to use, copy, modify, merge, publish, distribute, sublicense,
-// and/or sell copies of the Software, and to permit persons to whom the
-// Software is furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-// THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-// OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-// ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-// OTHER DEALINGS IN THE SOFTWARE.
+/*
+ *
+ *  MIT License
+ *
+ *  (C) Copyright 2021-2022 Hewlett Packard Enterprise Development LP
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a
+ *  copy of this software and associated documentation files (the "Software"),
+ *  to deal in the Software without restriction, including without limitation
+ *  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ *  and/or sell copies of the Software, and to permit persons to whom the
+ *  Software is furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included
+ *  in all copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ *  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ *  OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ *  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ *  OTHER DEALINGS IN THE SOFTWARE.
+ *
+ */
 
 @Library('csm-shared-library') _
 
+def isStable = env.TAG_NAME != null ? true : false
+def pythonImage = 'artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python'
 def pythonVersion = '3.10'
+
 pipeline {
+
     agent {
         label "metal-gcp-builder"
     }
@@ -34,49 +44,34 @@ pipeline {
     }
 
     environment {
-        DESCRIPTION = "CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze."
-        IS_STABLE = getBuildIsStable()
-        GIT_REPO_NAME = getRepoName()
-        BUILD_METADATA = getRpmRevision(isStable: env.IS_STABLE)
-        IMAGE_VERSION = getDockerBuildVersion(isStable: env.IS_STABLE)
-        DOCKER_ARGS = getDockerBuildArgs(name: "cray-${getRepoName()}", description: env.DESCRIPTION)
+        NAME = getRepoName()
+        IMAGE_VERSION = sh(returnStdout: true, script: "git describe --tags | tr -s '-' '_' | tr -d '^v'").trim()
+        VERSION = sh(returnStdout: true, script: "git describe --tags | tr -s '-' '~' | tr -d '^v'").trim()
     }
 
     stages {
 
-        stage("Prepare: RPM") {
+        stage('Prepare: RPMs') {
             agent {
                 docker {
-                    image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${pythonVersion}"
+                    label 'docker'
+                    image "${pythonImage}:${pythonVersion}"
                     reuseNode true
-                    // Support docker in docker for clamav scan
-                    args "-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --group-add 999"
                 }
             }
             steps {
-                script {
-                    runLibraryScript("addRpmMetaData.sh", "${env.GIT_REPO_NAME}.spec")
-                    sh "make prepare"
-                }
+                runLibraryScript("addRpmMetaData.sh", "${env.NAME}.spec")
+                sh "make prepare"
+                sh "git update-index --assume-unchanged ${env.NAME}.spec"
             }
         }
 
-        stage("Build: Binary") {
-            steps {
-                script {
-                    sh "make binary"
-                }
-            }
-        }
-
-
-        stage("Build: RPMs") {
+        stage('Build: RPMs') {
             agent {
                 docker {
-                    image "artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${pythonVersion}"
+                    label 'docker'
+                    image "${pythonImage}:${pythonVersion}"
                     reuseNode true
-                    // Support docker in docker for clamav scan
-                    args "-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --group-add 999"
                 }
             }
             steps {
@@ -87,10 +82,10 @@ pipeline {
         stage('Publish: RPMs') {
             steps {
                 script {
-                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: "sle-15sp2", arch: "x86_64", isStable: env.IS_STABLE)
-                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: "sle-15sp3", arch: "x86_64", isStable: env.IS_STABLE)
-                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: "sle-15sp2", arch: "src", isStable: env.IS_STABLE)
-                    publishCsmRpms(component: env.GIT_REPO_NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: "sle-15sp3", arch: "src", isStable: env.IS_STABLE)
+                    publishCsmRpms(component: env.NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: "sle-15sp2", arch: "x86_64", isStable: isStable)
+                    publishCsmRpms(component: env.NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: "sle-15sp3", arch: "x86_64", isStable: isStable)
+                    publishCsmRpms(component: env.NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: "sle-15sp2", arch: "src", isStable: isStable)
+                    publishCsmRpms(component: env.NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: "sle-15sp3", arch: "src", isStable: isStable)
                 }
             }
         }
@@ -106,7 +101,7 @@ pipeline {
         stage('Publish: Image') {
             steps {
                 script {
-                    publishCsmDockerImage(image: "cray-${env.GIT_REPO_NAME}", tag: env.IMAGE_VERSION, isStable: env.IS_STABLE)
+                    publishCsmDockerImage(image: "cray-${env.NAME}", tag: env.IMAGE_VERSION, isStable: isStable)
                 }
             }
         }

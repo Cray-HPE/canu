@@ -36,6 +36,7 @@ from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from network_modeling.NetworkPort import NetworkPort
 from network_modeling.NodeLocation import NodeLocation
 from openpyxl import load_workbook
+import pkg_resources
 
 
 # Get project root directory
@@ -45,10 +46,7 @@ else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent.parent
 
-canu_version_file = path.join(project_root, "canu", ".version")
-
-with open(canu_version_file, "r") as version_file:
-    version = version_file.read().replace("\n", "")
+version = pkg_resources.get_distribution("canu").version
 
 log = logging.getLogger("validate_shcd")
 
@@ -965,8 +963,10 @@ def connect_src_dst(
     else:
         raise Exception(
             f"Failed to connect {src_node.common_name()} to {dst_node.common_name()} bi-directionally. "
-            "Check that input data is correct, that plan-of-record hardware is used on the system, and that "
-            "the correct architecture model was specified.",
+            "More information is often found by re-running with --log DEBUG enabled. "
+            "Often the source of the error is that ports are being used twice on the device, "
+            "that the correct network architecture model was specified, or plan-of-record hardware "
+            "is not being used.",
         )
 
 

@@ -25,6 +25,7 @@ from os import path
 from pathlib import Path
 
 from click import testing
+import pkg_resources
 import requests
 import responses
 
@@ -51,10 +52,7 @@ architecture_tds = "TDS"
 tabs_tds = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners_tds = "J14,T30,J14,T53,J14,T32,J14,T27"
 
-canu_version_file = path.join(test_file_directory.resolve().parent, "canu", ".version")
-with open(canu_version_file, "r") as file:
-    canu_version = file.readline()
-canu_version = canu_version.strip()
+canu_version = pkg_resources.get_distribution("canu").version
 banner_motd = (
     "banner exec !\n"
     "###############################################################################\n"
@@ -153,7 +151,6 @@ def test_switch_config_spine_primary():
             + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
             + "    50 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
-            + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -639,9 +636,14 @@ def test_switch_config_spine_primary_custom():
         assert sw_spine_to_leaf in str(result.output)
 
         output = (
-            "no ip icmp redirect\n"
-            + "apply access-list ip mgmt control-plane vrf default\n"
-            + "apply access-list ip mgmt control-plane vrf Customer\n"
+            "ip dns server-address 10.92.100.225\n"
+            + "ip prefix-list pl-cmn seq 10 permit 192.168.12.0/24 ge 24\n"
+            + "ip prefix-list pl-can seq 20 permit 192.168.11.0/24 ge 24\n"
+            + "ip prefix-list pl-hmn seq 30 permit 10.94.100.0/24 ge 24\n"
+            + "ip prefix-list pl-nmn seq 40 permit 10.92.100.0/24 ge 24\n"
+            + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
+            + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
+            + "ip route 0.0.0.0/0 10.103.15.185\n"
             + "route-map ncn-w001 permit seq 10\n"
             + "    match ip address prefix-list tftp\n"
             + "    match ip next-hop 192.168.4.4\n"
@@ -716,7 +718,9 @@ def test_switch_config_spine_primary_custom():
 
         print(result.output)
         assert (
-            "system interface-group 3 speed 10g\n"
+            "no ip icmp redirect\n"
+            + "apply access-list ip mgmt control-plane vrf default\n"
+            + "system interface-group 3 speed 10g\n"
             + "interface loopback 0\n"
             + "    ip address 10.2.0.2/32\n"
             + "    ip ospf 1 area 0.0.0.0\n"
@@ -828,15 +832,7 @@ def test_switch_config_spine_primary_custom():
 
         print(result.output)
         assert (
-            "ip dns server-address 10.92.100.225\n"
-            + "ip prefix-list pl-cmn seq 10 permit 192.168.12.0/24 ge 24\n"
-            + "ip prefix-list pl-can seq 20 permit 192.168.11.0/24 ge 24\n"
-            + "ip prefix-list pl-hmn seq 30 permit 10.94.100.0/24 ge 24\n"
-            + "ip prefix-list pl-nmn seq 40 permit 10.92.100.0/24 ge 24\n"
-            + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
-            + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
-            + "ip route 0.0.0.0/0 10.103.15.185\n"
-            + "router ospf 2 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.2\n"
             + "    default-information originate\n"
             + "    area 0.0.0.0\n"
@@ -1052,9 +1048,14 @@ def test_switch_config_spine_secondary_custom():
         assert sw_spine_to_leaf in str(result.output)
 
         output = (
-            "no ip icmp redirect\n"
-            + "apply access-list ip mgmt control-plane vrf default\n"
-            + "apply access-list ip mgmt control-plane vrf Customer\n"
+            "ip dns server-address 10.92.100.225\n"
+            + "ip prefix-list pl-cmn seq 10 permit 192.168.12.0/24 ge 24\n"
+            + "ip prefix-list pl-can seq 20 permit 192.168.11.0/24 ge 24\n"
+            + "ip prefix-list pl-hmn seq 30 permit 10.94.100.0/24 ge 24\n"
+            + "ip prefix-list pl-nmn seq 40 permit 10.92.100.0/24 ge 24\n"
+            + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
+            + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
+            + "ip route 0.0.0.0/0 10.103.15.189\n"
             + "route-map ncn-w001 permit seq 10\n"
             + "    match ip address prefix-list tftp\n"
             + "    match ip next-hop 192.168.4.4\n"
@@ -1129,7 +1130,9 @@ def test_switch_config_spine_secondary_custom():
 
         print(result.output)
         assert (
-            "system interface-group 3 speed 10g\n"
+            "no ip icmp redirect\n"
+            + "apply access-list ip mgmt control-plane vrf default\n"
+            + "system interface-group 3 speed 10g\n"
             + "interface loopback 0\n"
             + "    ip address 10.2.0.3/32\n"
             + "    ip ospf 1 area 0.0.0.0\n"
@@ -1242,15 +1245,7 @@ def test_switch_config_spine_secondary_custom():
 
         print(result.output)
         assert (
-            "ip dns server-address 10.92.100.225\n"
-            + "ip prefix-list pl-cmn seq 10 permit 192.168.12.0/24 ge 24\n"
-            + "ip prefix-list pl-can seq 20 permit 192.168.11.0/24 ge 24\n"
-            + "ip prefix-list pl-hmn seq 30 permit 10.94.100.0/24 ge 24\n"
-            + "ip prefix-list pl-nmn seq 40 permit 10.92.100.0/24 ge 24\n"
-            + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
-            + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
-            + "ip route 0.0.0.0/0 10.103.15.189\n"
-            + "router ospf 2 vrf Customer\n"
+            "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.3\n"
             + "    default-information originate\n"
             + "    area 0.0.0.0\n"
@@ -1395,7 +1390,6 @@ def test_switch_config_spine_secondary():
             + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
             + "    50 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
-            + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -1804,7 +1798,6 @@ def test_switch_config_leaf_primary():
             + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
             + "    50 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
-            + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -2222,7 +2215,6 @@ def test_switch_config_leaf_secondary():
             + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
             + "    50 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
-            + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -2634,7 +2626,6 @@ def test_switch_config_cdu_primary():
             + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
             + "    50 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
-            + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -2928,7 +2919,6 @@ def test_switch_config_cdu_secondary():
             + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
             + "    50 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
-            + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -3210,7 +3200,6 @@ def test_switch_config_leaf_bmc():
             + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
             + "    50 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
-            + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -4087,7 +4076,6 @@ def test_switch_config_tds_spine_primary():
             + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
             + "    50 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
-            + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -4702,7 +4690,6 @@ def test_switch_config_tds_spine_secondary():
             + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
             + "    50 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
-            + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "\n"
             + "vlan 1\n"
             + "vlan 2\n"
@@ -5315,7 +5302,6 @@ def test_switch_config_tds_leaf_bmc():
             + "    40 deny any 192.168.200.0/255.255.255.0 192.168.12.0/255.255.255.0\n"
             + "    50 permit any any any\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
-            + "apply access-list ip mgmt control-plane vrf Customer\n"
             + "\n"
             + "vlan 1\n"
             + "vlan 2\n"

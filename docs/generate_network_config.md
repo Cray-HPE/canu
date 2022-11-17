@@ -51,7 +51,7 @@ Use the ‘–folder FOLDERNAME’ flag to output all the switch configs to a fo
 
 ---
 
-```
+```shell
 canu generate network config [OPTIONS]
 ```
 
@@ -125,6 +125,16 @@ Path to current running configs.
 ### --reorder()
 reorder config to heir config order
 
+
+### --bgp-control-plane( <bgp_control_plane>)
+Network used for BGP control plane
+
+
+* **Options**
+
+    CMN | CHN
+
+
 ### Environment variables
 
 
@@ -137,7 +147,7 @@ reorder config to heir config order
 
 To generate network config run: `canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --auth_token TOKEN_FILE --folder SWITCH_CONFIG`
 
-```
+```bash
 $ canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --auth_token TOKEN_FILE --folder SWITCH_CONFIG
 
 sw-spine-001 Config Generated
@@ -156,7 +166,7 @@ sw-leaf-bmc-001 Config Generated
 
 To generate network config run: `canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --sls-file SLS_FILE --folder SWITCH_CONFIG`
 
-```
+```bash
 $ canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder SWITCH_CONFIG
 
 sw-spine-001 Config Generated
