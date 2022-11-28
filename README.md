@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.27
+# 🛶 CANU v1.6.28
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1350,6 +1350,10 @@ To run a specific test file:
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.6.27]
+
+- Modify nmn-hmn ACL to block traffic between the NMNLB and HMNLB networks.
 
 ## [1.6.26]
 
