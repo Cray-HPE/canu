@@ -19,7 +19,9 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-FROM    artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:3.10
+ARG     PY_VERSION
+ARG     SLE_VERSION
+FROM    artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${PY_VERSION}-SLES${SLE_VERSION}
 
 # update command prompt
 RUN     echo 'export PS1="canu \w : "' >> /etc/bash.bashrc
