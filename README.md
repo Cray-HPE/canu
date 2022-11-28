@@ -1351,11 +1351,11 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [1.6.27]
+## [1.6.28]
 
 - Modify nmn-hmn ACL to block traffic between the NMNLB and HMNLB networks.
 
-## [1.6.26]
+## [1.6.27]
 
 - Fix login node shasta name for v1 architecture
 
