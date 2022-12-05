@@ -29,5 +29,5 @@
 
 [1]: https://github.com/Cray-HPE/csm-rpms/blob/main/packages/cray-pre-install-toolkit
 [2]: https://github.com/Cray-HPE/csm-rpms/blob/main/packages/node-images-pre-install-toolkit
-[3]: https://github.com/Cray-HPE/csm/blob/main/rpm/cray/csm/sle-15sp3/index.yaml
+[3]: https://github.com/Cray-HPE/csm/blob/main/rpm/cray/csm/sle-15sp4/index.yaml
 [4]: https://github.com/Cray-HPE/csm/blob/main/docker/index.yaml

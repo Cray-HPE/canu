@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.27
+# 🛶 CANU v1.6.28
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -27,7 +27,7 @@ To checkout a fresh system using CSI:
   ```
 
 1. Parse CSI files and save switch IP addresses
-   
+
     ```bash
     canu init --sls-file sls_input_file.json --out ips.txt`
     ```
@@ -208,7 +208,7 @@ In order to run CANU, both python3 and pip3 need to be installed.
   ```bash
   canu, version 1.6.20
   ```
-  
+
 - (unstable) Feature/bugfix branches will report an `X.Y.Z.postA` version:
 
   ```bash
@@ -1351,7 +1351,13 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [1.6.26]
+## [1.6.29] (in-progress)
+
+## [1.6.28]
+
+- Update RPM publishing for SP4, use Python 3.10.8
+
+## [1.6.27]
 
 - Fix login node shasta name for v1 architecture
 
