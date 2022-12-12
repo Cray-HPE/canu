@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.28
+# 🛶 CANU v1.6.29
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -27,7 +27,7 @@ To checkout a fresh system using CSI:
   ```
 
 1. Parse CSI files and save switch IP addresses
-   
+
     ```bash
     canu init --sls-file sls_input_file.json --out ips.txt`
     ```
@@ -208,7 +208,7 @@ In order to run CANU, both python3 and pip3 need to be installed.
   ```bash
   canu, version 1.6.20
   ```
-  
+
 - (unstable) Feature/bugfix branches will report an `X.Y.Z.postA` version:
 
   ```bash
@@ -346,7 +346,7 @@ To get the JSON output from a single switch, or from multiple switches, make sur
 ```bash
 canu network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --json
 ```
-           
+
 Potential output:
 
 ```json
@@ -1351,13 +1351,17 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [1.6.28]
+## [1.6.29]
 
 - Modify nmn-hmn ACL to block traffic between the NMNLB and HMNLB networks.
 
+## [1.6.28]
+
+- Using Python 3.10.8 instead of Python 3.10.4; new pipeline code.
+
 ## [1.6.27]
 
-- Fix login node shasta name for v1 architecture
+- Fix login node shasta name for v1 architecture.
 
 ## [1.6.26]
 
