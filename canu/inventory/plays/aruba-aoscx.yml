@@ -1,0 +1,238 @@
+---
+- hosts: sw-leaf-bmc-001
+  collections:
+    - arubanetworks.aoscx
+  gather_facts: true
+  vars:
+    leaf_config: files/sw-leaf-bmc-001.cfg
+    login_url: "https://{{ ansible_host }}/rest/v1/login"
+    dryrun_url: "https://{{ ansible_host }}/rest/v1/configs/running-config?dryrun"
+    checkpoint_name: "ac_{{ ansible_date_time.year }}_{{ ansible_date_time.month }}_{{ ansible_date_time.day }}_{{ansible_date_time.hour }}_{{ ansible_date_time.minute }}_{{ ansible_date_time.second }}"
+    checkpoint_url: "https://{{ ansible_host }}/rest/v1/fullconfigs/{{ checkpoint_name }}?from=/rest/v1/fullconfigs/running-config"
+    configs_url: "https://{{ ansible_host }}/rest/v1/fullconfigs"
+    munged_banner: "Adjusted by Ansible for checkpoint: {{ checkpoint_name }}"
+    pseudo_checkpoint_url: "https://{{ ansible_host }}/rest/v1/fullconfigs/{{ checkpoint_name }}"
+    validated_config_json: "{{ playbook_dir }}/{{ checkpoint_name }}.json"
+    logout_url: "https://{{ ansible_host }}/rest/v1/logout"
+  tasks:
+    - name: get running config as json
+      arubanetworks.aoscx.aoscx_backup_config:
+        config_name: 'running-config'
+        output_file: '{{ inventory_hostname }}.json'
+    
+    # put the dryun tasks in a block to handle failures
+    - name: dryrun config
+      block:
+        # log in and register the cookie
+        - name: login to api
+          ansible.builtin.uri:
+            url: "{{ login_url }}"
+            validate_certs: false
+            force_basic_auth: true
+            use_proxy: false
+            method: POST
+            body_format: raw
+            body: username={{ ansible_user }}&password={{ ansible_password }}
+            return_content: true
+          register: login
+
+        # upload the new config in dryrun mode
+        - name: upload new config in dryrun mode
+          ansible.builtin.uri:
+            url: "{{ dryrun_url }}"
+            validate_certs: false
+            use_proxy: false
+            method: POST
+            return_content: true
+            # config to validate with dryun
+            src: "{{ leaf_config }}"
+            # per Ansible: should be used with force_basic_auth to ensure 
+            # success when the remote end sends a 401
+            force_basic_auth: true
+            follow_redirects: all
+            headers:
+              Content-Type: "text/plain"
+              Cookie: "{{ login.set_cookie }}"
+            # success returns Accepted
+            status_code: 202
+          register: this
+
+        # loop on the status until no longer pending
+        - name: check dry run status
+          ansible.builtin.uri:
+            url: "{{ dryrun_url }}"
+            validate_certs: false
+            use_proxy: false
+            method: GET
+            return_content: true
+            headers:
+              Cookie: "{{ login.set_cookie }}"
+          register: _result
+          until: _result.json.state != "pending"
+          retries: 125
+          delay: 5 # Every 5 seconds
+
+        # fail if the config is bad
+        - name: show errors and fail if needed
+          debug:
+            msg: "{{ item }}"
+          loop: "{{ _result.json.errors }}"
+          when: _result.json.state == "error"
+          failed_when: _result.json.state == "error"
+        
+        # Begin munging operations
+        # Per the aruba docs, it's not possible to have two checkpoints with the same configuration
+        # Thus, a checkpoint with this exact JSON cannot be used as a new checkpoint or it is detected as a duplicate
+        # As a workaround, one semi-harmless key is modified--the banner
+        # Changing this makes the config different from the running config without any operational side-effects
+        # 
+        - name: begin munging by setting facts using the existing config
+          ansible.builtin.set_fact:
+            original_config: "{{ _result.json.configs.json }}"
+            munge_me: "{{ _result.json.configs.json }}"
+
+        - name: munge the ansible fact to update the banner to create a new config
+          ansible.utils.update_fact:
+            updates:
+              - path: munge_me.System.other_config.banner_exec
+                value: "{{ munged_banner }}"
+          register: munged_config
+
+        # # Display the modified key
+        # - debug:
+        #     var: original_config.System.other_config.banner_exec
+        # - debug:
+        #     var: munged_config.munge_me.System.other_config.banner_exec 
+
+        # TODO: Technically, we should do another dry run here to validate there is no garbage in the config
+        - name: write jsonified config to a local file
+          ansible.builtin.copy:
+            content: "{{ munged_config.munge_me | to_json(indent=4) }}"
+            dest: "{{ validated_config_json }}"
+          
+        # also set the banner on the running-config so it is different
+        # this seems to allow the checkpoint to be 
+        - name: add or update the banner to make the config harmlessly different allowing for a checkpoint to be made
+          aoscx_banner:
+            banner_type: banner
+            banner: "{{ munged_banner }}"
+
+        # First path (ideal)
+        # Without making a modification such as the harmless banner change above, the aoscx_checkpoint module
+        # fails with:
+        #     'GENERIC OPERATION ERROR: Checkpoint already exists in the database or it is a duplicate checkpoint.'
+        #
+        # see tasks below for other attempts to the same result
+        - name: create checkpoint from running-config
+          arubanetworks.aoscx.aoscx_checkpoint:
+            source_config: 'running-config'
+            destination_config: "{{ checkpoint_name }}"
+
+        # # list configs again for human validation
+        # - name: list all configurations
+        #   ansible.builtin.uri:
+        #     url: "{{ configs_url }}"
+        #     validate_certs: false
+        #     use_proxy: false
+        #     method: GET
+        #     return_content: true
+        #     headers:
+        #       Cookie: "{{ login.set_cookie }}"
+        #   register: _all_configs
+
+        # - debug:
+        #     var: _all_configs.json
+
+        # Second path is a pseudo-checkpoint by uploading the munged config (known to be validated now)
+        #   'VERIFICATION ERROR: Upload Config DETAIL: Only running-config or startup-config can be uploaded using TFTP'
+        # - name: copy validated local json config to switch as a named checkpoint
+        #   aoscx_upload_config:
+        #     config_name: "{{ checkpoint_name }}"
+        #     remote_config_file_tftp_path: "{{ validated_config_json }}"
+        #     vrf: 'Customer'
+
+        # Third path is to use uri and create a checkpoint by calling the api manually
+        #   "Checkpoint already exists in the database or it is a duplicate checkpoint.\n"
+        # - name: create checkpoint from the running-config
+        #   ansible.builtin.uri:
+        #     url: "{{ checkpoint_url }}"
+        #     validate_certs: false
+        #     use_proxy: false
+        #     method: PUT
+        #     return_content: true
+        #     # per Ansible: should be used with force_basic_auth to ensure 
+        #     # success when the remote end sends a 401
+        #     force_basic_auth: true
+        #     follow_redirects: all
+        #     headers:
+        #       Content-Type: "text/plain"
+        #       Cookie: "{{ login.set_cookie }}"
+        #       Accept: "*/*"
+        #     # success returns Accepted
+        #     status_code: 200
+        #   register: checkpoint_made
+
+        # Fourth path is to use uri and create a checkpoint by calling the api manually and uploading the config
+        # "Invalid configuration name.\n"
+        # This does not actually work since it can only be applied to the running-config or startup-config
+        # - name: create pseudo checkpoint by uploading the munged config
+        #   ansible.builtin.uri:
+        #     url: "{{ pseudo_checkpoint_url }}"
+        #     validate_certs: false
+        #     use_proxy: false
+        #     method: PUT
+        #     return_content: true
+        #     src: "{{ validated_config_json }}"
+        #     # per Ansible: should be used with force_basic_auth to ensure 
+        #     # success when the remote end sends a 401
+        #     force_basic_auth: true
+        #     follow_redirects: all
+        #     headers:
+        #       Content-Type: "text/plain"
+        #       Cookie: "{{ login.set_cookie }}"
+        #       Accept: "*/*"
+        #     # success returns Accepted
+        #     status_code: 200
+        #   register: checkpoint_made
+
+        - name: upload local json config to the running-config
+          aoscx_upload_config:
+            config_name: "running-config"
+            config_json: "{{ validated_config_json }}"
+
+      # always log out so no session is left open
+      always:
+        - name: always logout of api
+          ansible.builtin.uri:
+            url: "{{ logout_url }}"
+            validate_certs: false
+            force_basic_auth: true
+            use_proxy: true
+            method: POST
+            headers:
+              Cookie: "{{ login.set_cookie }}"
+            return_content: true
+          register: logout
+
+# # backup the running config before any manipulations
+# - hosts: sw-leaf-bmc-001
+#   collections:
+#     - arubanetworks.aoscx
+#   gather_facts: false
+#   vars:
+#     checkpoint_name: "ansible_checkpoint"
+#     validated_config_json: "{{ playbook_dir }}/{{ checkpoint_name }}.json"
+#     ansible_network_os: network_cli
+#   tasks: 
+#     # If the dry-run passes, create a checkpoint, just before the new config is applied
+#     # To avoid TFTP, the switch to network_cli is needed to upload via ssh
+#     # Two bugs here, however:
+#     # https://github.com/aruba/aoscx-ansible-collection/issues/33
+#     #     https://github.com/aruba/pyaoscx/commit/2f4ad1ef7be331546edf20297e60cbedb97de978#diff-d63dcaa86f0b6b1761dbd27d5e936775086eb915ba9435716b4172b7ba432086 
+#     #     https://github.com/aruba/aoscx-ansible-collection/issues/8#issue-898359136
+#     #
+#     # I can fix the first, but cannot upload it as a cli_config
+#     # Upload the config over SSH (because network_cli is set)
+#     - name: upload validated config to running-config
+#       arubanetworks.aoscx.aoscx_upload_config:
+#         config_json: "{{ validated_config_json }}"
