@@ -119,7 +119,7 @@ setup(
             "flake8",
             "flake8-black",
             "flake8-bugbear",
-            "flake8-commas",
+            "flake8-commas==1.0.0",
             "flake8-comprehensions",
             "flake8-debugger",
             "flake8-docstrings",
@@ -183,6 +183,9 @@ setup(
         'yamale<=4.0.2',
     ],
     entry_points={
-        "console_scripts": ["canu=canu.cli:cli"],
+        "console_scripts": [
+          "canu=canu.cli:cli",
+          "canu-inventory=canu.inventory.ansible:ansible_inventory"
+          ],
     },
 )
