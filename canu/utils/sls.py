@@ -112,9 +112,16 @@ def pull_sls_networks(sls_file=None):
         #
         # Get an auth token by using the secret
         #
-        token = None
+        if os.getenv("SLS_TOKEN") == "":
+            token = None
+        else:
+            token = os.getenv("SLS_TOKEN")
         sls_cache = None
-        sls_url = "http://cray-sls.services.svc.cluster.local/v1/networks"
+
+        if os.getenv("SLS_API_GW") == "":
+            sls_url = "http://cray-sls.services.svc.cluster.local/v1/networks"
+        else:
+            sls_url = "http://" + os.getenv("SLS_API_GW") + "/apis/sls/v1/networks"
         if cenv != "k8s":
             sls_url = "https://api-gw-service-nmn.local/apis/sls/v1/networks"
             try:
@@ -396,9 +403,15 @@ def pull_sls_hardware(sls_file=None):
         #
         # Get an auth token by using the secret
         #
-        token = None
+        if os.getenv("SLS_TOKEN") == "":
+            token = None
+        else:
+            token = os.getenv("SLS_TOKEN")
         sls_cache = None
-        sls_url = "http://cray-sls.services.svc.cluster.local/v1/hardware"
+        if os.getenv("SLS_API_GW") == "":
+            sls_url = "http://cray-sls.services.svc.cluster.local/v1/hardware"
+        else:
+            sls_url = "http://" + os.getenv("SLS_API_GW") + "/apis/sls/v1/hardware"
         if cenv != "k8s":
             sls_url = "https://api-gw-service-nmn.local/apis/sls/v1/hardware"
             try:
