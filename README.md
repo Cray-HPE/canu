@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.28
+# 🛶 CANU v1.6.29
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1313,6 +1313,20 @@ Version      : GL.10.09.0010
 ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ```
 
+## Using `canu-inventory` with Ansible
+
+`canu-inventory` is a dynamic inventory script that queries a `sls_input_file.json` in the working directory, or an API gateway (`$SLS_API_GW`).  It can be called directly to print the information or it can be passed as an argument to `ansible-inventory`.
+
+```bash
+# examples
+ansible-inventory -i canu-inventory --list
+ansible-playbook -i canu-inventory my_play.yml # set hosts in the playbook
+```
+
+If using the API, `$TOKEN` or `$SLS_TOKEN` need to be set.
+
+If running this from outside the cluster over the CMN, `$REQUESTS_CA_BUNDLE` needs to be set
+
 ## Uninstallation
 
 `pip3 uninstall canu`
@@ -1350,6 +1364,11 @@ To run a specific test file:
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 # Changelog
+
+## [1.6.29]
+
+- Added dynamic ansible inventory script, installed as `canu-inventory`.
+- Added a playbook to validate/upload a config.
 
 ## [1.6.28]
 
