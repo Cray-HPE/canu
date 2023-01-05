@@ -1366,7 +1366,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## [1.6.26]
 
-- Added gpu and kvm node definitions to v1 arrchitecture.
+- Added gpu and kvm node definitions to v1 architecture.
 - Added logging to `canu generate switch/network config` to clean up output.
 - Provided better messaging about next-step handling of missing configs in generated files.
 
