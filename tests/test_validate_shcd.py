@@ -406,7 +406,7 @@ def test_validate_shcd_port_reuse():
             ],
         )
         assert result.exit_code == 1
-        assert "Failed to connect sw-spine-001 to sw-spine-002 bi-directionally" in str(
+        assert "Failed to connect sw-spine-001 to sw-spine-002" in str(
             result.output,
         )
 

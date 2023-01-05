@@ -144,12 +144,12 @@ class NetworkNode:
                 )
             port_block = port_block[0]
         else:
-            free_slots = ""
+            free_ports = ""
             for s in self.__ports_block_metadata:
-                free_slots += f'{s["slot"]}:{s["count"]} '
+                free_ports += f'{s["slot"]}:{s["count"]}:{s["speed"]} '
             raise Exception(
-                f"{__name__}: No available ports found for slot {slot} and speed {speed} "
-                f"in node {self.__common_name}.  Available slot:ports - {free_slots}",
+                f"{__name__}: Node {self.__common_name} does not have slot {slot} with port {port} "
+                f"available at speed {speed}.  Available slot:ports:[speeds] - {free_ports}",
             )
         return port_block
 
@@ -179,11 +179,63 @@ class NetworkNode:
     # of the other so we compare "bi-directionally" and return the speed
     # of the south-to-north direction.
     def __connection_allowed(self, node):
+        new_speed = self.__new_connection_allowed(node)
+        old_speed = self.__old_connection_allowed(node)
+
+        if new_speed[0] != old_speed[0]:
+            log.warning(
+                f"Usable speed mismatch between new calculations {new_speed} and old calculations {old_speed}",
+            )
+        return old_speed[0]
+
+    def __new_connection_allowed(self, node):
+        connection_speeds = list(
+            dict.fromkeys(
+                [
+                    x["speed"]
+                    for x in self.device_connections()
+                    if x["name"] == node.arch_type()
+                ]
+                + [
+                    x["speed"]
+                    for x in node.device_connections()
+                    if x["name"] == self.arch_type()
+                ],
+            ),
+        )
+
+        if len(connection_speeds) == 0:
+            raise Exception(
+                f"__new_connection_allowed The plan-of-record architectural definition does not allow connections "
+                f"between {self.common_name()} ({self.arch_type()}) "
+                f"and {node.common_name()} ({node.arch_type()}). "
+                f"\nCheck that the correct architecture was selected or remove the connection.",
+            )
+
+        if len(connection_speeds) != 1:
+            log.warning(
+                f"__new_connection_allowed Multiple architectural connection matches found between "
+                f"{self.common_name()} ({self.arch_type()}) "
+                f"and {node.common_name()} ({node.arch_type()}). "
+                "This may not be an error, but validating the architectural definition is suggested.",
+            )
+
+        log.debug(
+            f"__new_connection_allowed Connection from {self.arch_type()} to {node.arch_type()} "
+            f"architecturally allowed at speed {connection_speeds}.",
+        )
+
+        return connection_speeds
+
+    def __old_connection_allowed(self, node):
         connection_speed = None
         south_node = None
         north_node = None
         match_count = 0
 
+        # NOTE: there is bug in the logic below in that there may actually be
+        # several allowed speeds in the model but only the very last speed match
+        # found will be used... FIXME!!!
         for connection in self.device_connections():
             if connection["name"] == node.arch_type():
                 match_count += 1
@@ -199,7 +251,7 @@ class NetworkNode:
 
         if match_count == 0:
             raise Exception(
-                f"{__name__} The plan-of-record architectural definition does not allow connections "
+                f"{__name__}.__old_connection_allowed The plan-of-record architectural definition does not allow connections "
                 f"between {self.common_name()} ({self.arch_type()}) "
                 f"and {node.common_name()} ({node.arch_type()}). "
                 f"\nCheck that the correct architecture was selected or remove the connection.",
@@ -213,7 +265,7 @@ class NetworkNode:
 
         if match_count != 1:
             log.warning(
-                f"{__name__} Multiple architectural connection matches found between "
+                f"__old_connection_allowed Multiple architectural connection matches found between "
                 f"{self.common_name()} ({self.arch_type()}) "
                 f"and {node.common_name()} ({node.arch_type()}). "
                 "This may not be an error, but validating the architectural definition is suggested.",
@@ -221,7 +273,7 @@ class NetworkNode:
 
         if south_node is None or north_node is None:
             raise Exception(
-                f"{__name__} Cannot determine architectural direction between "
+                f"{__name__}.__old_connection_allowed Cannot determine architectural direction between "
                 f"{self.common_name()} ({self.arch_type()}) "
                 f"and {node.common_name()} ({node.arch_type()}).  "
                 "Check architectural definition.",
@@ -229,18 +281,18 @@ class NetworkNode:
 
         if connection_speed is None:
             raise Exception(
-                f"{__name__} Connection not architecturally allowed between "
+                f"{__name__}.__old_connection_allowed Connection not architecturally allowed between "
                 f"{self.common_name()} ({self.arch_type()}) "
                 f"and {node.common_name()} ({node.arch_type()}) at any speed. "
                 "Check architectural definition.",
             )
 
         log.debug(
-            f"Connection from {south_node.arch_type()} to {north_node.arch_type()} "
+            f"__old_connection_allowed Connection from {south_node.arch_type()} to {north_node.arch_type()} "
             f"architecturally allowed at speed {connection_speed}.",
         )
 
-        return connection_speed
+        return [connection_speed]
 
     # Unique node ID
     def id(self):
@@ -422,7 +474,7 @@ class NetworkNode:
             self.__ports[next_free_port_index] = src_port
             self.__decrement_available_ports(port_block=selected_ports)
             log.debug(
-                f"  Successfully connected {dst_node.common_name()} to {self.common_name()} at speed {connection_speed}",
+                f"Successfully connected {dst_node.common_name()} to {self.common_name()} at speed {connection_speed}",
             )
         return True
 
