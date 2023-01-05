@@ -481,7 +481,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                         log.fatal(
                             click.secho(
                                 f"Failed to connect {src_node.common_name()} "
-                                + f"to {dst_node.common_name()} bi-directionally ",
+                                + f"to {dst_node.common_name()}",
                                 fg="red",
                             ),
                         )
@@ -489,13 +489,13 @@ def node_model_from_canu(factory, canu_cache, ips):
                     if connected:
                         log.info(
                             f"Connected {src_node.common_name()} to"
-                            + f" {dst_node.common_name()} bi-directionally",
+                            + f" {dst_node.common_name()}",
                         )
                     else:
                         log.error("")
                         click.secho(
                             f"Failed to connect {src_node.common_name()}"
-                            + f" to {dst_node.common_name()} bi-directionally",
+                            + f" to {dst_node.common_name()}",
                             fg="red",
                         )
                         for node in node_list:
@@ -505,7 +505,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                             )
                         log.fatal(
                             f"Failed to connect {src_node.common_name()} "
-                            + f"to {dst_node.common_name()} bi-directionally",
+                            + f"to {dst_node.common_name()}",
                         )
                         sys.exit(1)  # TODO: this should probably be an exception
     return node_list, warnings
