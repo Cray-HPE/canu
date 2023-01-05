@@ -183,6 +183,9 @@ setup(
         'yamale<=4.0.2',
     ],
     entry_points={
-        "console_scripts": ["canu=canu.cli:cli"],
+        "console_scripts": [
+          "canu=canu.cli:cli",
+          "canu-inventory=canu.inventory.ansible:ansible_inventory"
+          ],
     },
 )
