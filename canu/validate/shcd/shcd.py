@@ -412,6 +412,7 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False, node_type=
     if cell.value is not None:
         location = cell.coordinate
     port = cell.value
+    # Clean up the port if the cell is messy enough to be interpreted as a string
     if isinstance(port, str):
         port = port.strip()
         if not port:
@@ -446,17 +447,21 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False, node_type=
                 fg="red",
             )
             sys.exit(1)
-        if is_src_port:
-            # Awful hack around the convention that src slot can be blank and a bmc
-            # is noted by port 3 when there is physically one port.
-            # NOTE: This assumes that the slot has already been corrected to "bmc"
-            if sheet == "HMN" and int(port) == 3:
-                warnings["shcd_port_conventions"].append(f"{sheet}:{location}")
-                log.warning(
-                    f'Bad slot/port convention for port "j{port}" in location {sheet}:{location}.'
-                    + 'This should be slot "bmc" for servers and "mgmt" for switches, and port "1".',
-                )
-                port = 1
+
+        # String tests and corrections completed, convert the port to an int.
+        port = int(port)
+
+    if is_src_port:
+        # Awful hack around the convention that src slot can be blank and a bmc
+        # is noted by port 3 when there is physically one port.
+        # NOTE: This assumes that the slot has already been corrected to "bmc"
+        if sheet == "HMN" and port == 3:
+            warnings["shcd_port_conventions"].append(f"{sheet}:{location}")
+            log.warning(
+                f'Bad slot/port convention for port "j{port}" in location {sheet}:{location}.'
+                + 'This should be slot "bmc" for servers and "mgmt" for switches, and port "1".',
+            )
+            port = 1
 
     if port is None:
         if node_type == "subrack":
@@ -754,7 +759,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     log.fatal(err)
                     click.secho(
                         f"Failed to connect {src_node.common_name()} "
-                        + f"to parent {parent_node.common_name()} bi-directionally "
+                        + f"to parent {parent_node.common_name()} "
                         + f"while working on sheet {sheet}, row {current_row}.",
                         fg="red",
                     )
@@ -778,7 +783,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
             if node_type == "subrack" and src_port is None:
                 continue
 
-            log.debug(f"Source Data:  {src_name} {src_slot} {src_port}")
+            log.debug(f"Corrected Source Data:  {src_name} {src_slot} {src_port}")
             # Create the source port for the node
             src_node_port = NetworkPort(number=src_port, slot=src_slot)
 
@@ -866,7 +871,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                     click.secho(err, fg="red")
                     click.secho(
                         f"Failed to connect {src_node.common_name()} "
-                        + f"to {dst_node.common_name()} bi-directionally "
+                        + f"to {dst_node.common_name()} "
                         + f"while working on sheet {sheet}, row {current_row}.",
                         fg="red",
                     )
@@ -958,11 +963,11 @@ def connect_src_dst(
 
     if connected:
         log.info(
-            f"Connected {src_node.common_name()} to {dst_node.common_name()} bi-directionally",
+            f"Connected {src_node.common_name()} to {dst_node.common_name()} ",
         )
     else:
         raise Exception(
-            f"Failed to connect {src_node.common_name()} to {dst_node.common_name()} bi-directionally. "
+            f"Failed to connect {src_node.common_name()} to {dst_node.common_name()}. "
             "More information is often found by re-running with --log DEBUG enabled. "
             "Often the source of the error is that ports are being used twice on the device, "
             "that the correct network architecture model was specified, or plan-of-record hardware "
