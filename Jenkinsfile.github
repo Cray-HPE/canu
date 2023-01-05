@@ -23,15 +23,13 @@
  *  OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-
 @Library('csm-shared-library') _
 
-def isStable = env.TAG_NAME != null ? true : false
+def mainSleVersion = '15.4'
 def pythonImage = 'artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python'
-def pythonVersion = '3.10'
-
+def pythonVersion = '3.10.8'
+def isStable = env.TAG_NAME != null ? true : false
 pipeline {
-
     agent {
         label "metal-gcp-builder"
     }
@@ -51,64 +49,105 @@ pipeline {
 
     stages {
 
-        stage('Prepare: RPMs') {
-            agent {
-                docker {
-                    label 'docker'
-                    image "${pythonImage}:${pythonVersion}"
-                    reuseNode true
-                }
-            }
-            steps {
-                runLibraryScript("addRpmMetaData.sh", "${env.NAME}.spec")
-                sh "make prepare"
-                sh "git update-index --assume-unchanged ${env.NAME}.spec"
-            }
-        }
+        stage('Build & Publish') {
 
-        stage('Build: RPMs') {
-            agent {
-                docker {
-                    label 'docker'
-                    image "${pythonImage}:${pythonVersion}"
-                    reuseNode true
-                }
-            }
-            steps {
-                sh "make rpm"
-            }
-        }
+            matrix {
 
-        stage('Publish: RPMs') {
-            steps {
-                script {
-                    publishCsmRpms(component: env.NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: "sle-15sp2", arch: "x86_64", isStable: isStable)
-                    publishCsmRpms(component: env.NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", os: "sle-15sp3", arch: "x86_64", isStable: isStable)
-                    publishCsmRpms(component: env.NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: "sle-15sp2", arch: "src", isStable: isStable)
-                    publishCsmRpms(component: env.NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", os: "sle-15sp3", arch: "src", isStable: isStable)
+                agent {
+                    node {
+                        label "metal-gcp-builder"
+                        customWorkspace "${env.WORKSPACE}/${sleVersion}/${pythonVersion}"
+                    }
                 }
-            }
-        }
 
-        stage('Build: Image') {
-            steps {
-                script {
-                    sh "make image"
+                axes {
+                    axis {
+                        name 'sleVersion'
+                        values 15.3, 15.4
+                    }
                 }
-            }
-        }
 
-        stage('Publish: Image') {
-            steps {
-                script {
-                    publishCsmDockerImage(image: "cray-${env.NAME}", tag: env.IMAGE_VERSION, isStable: isStable)
+                stages {
+
+                    stage('Prepare: RPMs') {
+
+                        agent {
+                            docker {
+                                label "metal-gcp-builder"
+                                reuseNode true
+                                image "${pythonImage}:${pythonVersion}-SLES${sleVersion}"
+                            }
+                        }
+                        steps {
+                            // Inject distro-specific metadata (e.g. which distro and service pack).
+                            runLibraryScript("addRpmMetaData.sh", "${env.NAME}.spec")
+                            sh "make prepare"
+                            sh "git update-index --assume-unchanged ${env.NAME}.spec"
+                        }
+                    }
+
+                    stage('Build: RPMs') {
+
+                        environment {
+                            PYTHON_VERSION = "${pythonVersion}"
+                        }
+                        agent {
+                            docker {
+                                label "metal-gcp-builder"
+                                reuseNode true
+                                image "${pythonImage}:${pythonVersion}-SLES${sleVersion}"
+                            }
+                        }
+                        steps {
+                            sh "make rpm"
+                        }
+                    }
+
+                    stage('Build: Image') {
+                        when {
+                            expression { "${sleVersion}" == "${mainSleVersion}" }
+                        }
+                        steps {
+                            script {
+                                sh "make image"
+                            }
+                        }
+                    }
+                    stage('Publish: Image') {
+                        when {
+                            expression { "${sleVersion}" == "${mainSleVersion}" }
+                        }
+                        steps {
+                            script {
+                                publishCsmDockerImage(image: "cray-${env.NAME}", tag: env.IMAGE_VERSION, isStable: isStable)
+                            }
+                        }
+                    }
+                    stage('Publish: RPMs') {
+
+                        steps {
+                            script {
+                                sles_version_parts = "${sleVersion}".tokenize('.')
+                                sles_major = "${sles_version_parts[0]}"
+                                sles_minor = "${sles_version_parts[1]}"
+                                publishCsmRpms(
+                                        arch: "x86_64", isStable: isStable,
+                                        component: env.NAME,
+                                        os: "sle-${sles_major}sp${sles_minor}",
+                                        pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm",
+                                )
+                                publishCsmRpms(
+                                        arch: "src",
+                                        component: env.NAME,
+                                        isStable: isStable,
+                                        os: "sle-${sles_major}sp${sles_minor}",
+                                        pattern: "dist/rpmbuild/SRPMS/*.rpm",
+                                )
+                            }
+                        }
+                    }
                 }
             }
-        }
-    }
-    post {
-        cleanup {
-            postChownFiles()
         }
     }
 }

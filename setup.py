@@ -127,6 +127,7 @@ setup(
             "flake8-import-order",
             "flake8-quotes",
             "flake8-string-format",
+            "pep8",
             "pep8-naming",
             "toml",
         ],
