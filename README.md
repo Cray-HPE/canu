@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.27
+# 🛶 CANU v1.6.28
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1351,7 +1351,16 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [1.6.26]
+## [1.6.28]
+
+- Fix a bug where `bmc` slots were allowed non-existent port `3`.
+- Remove confusing references to "bi-directional" in warnings and errors.
+- Change versioning of flake8-commas to break dependency loop.
+- Add logging to `validate paddle`.
+- Begin refactoring the model to better validate and pick slot/port/speed requests.
+- Enhance node connection exception messaging in the model.
+
+## [1.6.27]
 
 - Fix login node shasta name for v1 architecture
 
