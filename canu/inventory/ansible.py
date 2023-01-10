@@ -27,9 +27,9 @@ import re
 import socket
 import sys
 
+import certifi
 import click
 import requests
-import urllib3
 
 from canu.utils.inventory import inventory
 
@@ -61,16 +61,24 @@ def ansible_inventory(
     list_,
     host_,
 ):
-    """Generate a dynamic Ansible inventory.
+    r"""Generate a dynamic Ansible inventory.
 
-    Prints an inventory of switches from SLS or an sls_input_file.json
-    from the current working directory.
+    Print an inventory of switches from the SLS API or an sls_input_file.json in the current working directory.
 
-    $SLS_API_GW and $SLS_TOKEN must be set in order to query the API
+    $SLS_API_GW and $SLS_TOKEN (or $TOKEN) must be set in order to query the API.
 
-    $SWITCH_USERNAME and $SWITCH_PASSWORD must be set in order to query the API.
+    $SWITCH_USERNAME and $SWITCH_PASSWORD must be set in order to execute playbooks.
 
-    To find the CMN GW: kubectl -n istio-system get services istio-ingressgateway
+    The CA certificate on an NCN will be used by default.
+    If running from outside the cluster, the CA certificate can be set using $REQUESTS_CA_BUNDLE.
+
+    To find the HMN or CMN gateway:
+
+      kubectl get svc -n istio-system istio-ingressgateway-hmn \
+        -o jsonpath='{.metadata.external-dns\.alpha\.kubernetes\.io\/hostname}'
+
+      kubectl get svc -n istio-system istio-ingressgateway-cmn \
+        -o jsonpath='{.metadata.external-dns\.alpha\.kubernetes\.io\/hostname}'
 
     Args:
         list_ : A full inventory of all hosts.
@@ -79,6 +87,18 @@ def ansible_inventory(
     Returns:
         None
     """
+    if is_context_ncn():
+        network = "HMN"
+        # If running on an NCN, use the CA certificate from the NCN
+        # The system python uses it by default, but the python in the venv does
+        # not, nor does this binary version of canu{-inventory}
+        crt_path = "/etc/pki/trust/anchors/platform-ca-certs.crt"
+    else:
+        # If running off an NCN, use the CA certificate defined by the env var
+        # defaultig to what certifi thinks is the right one
+        crt_path = os.getenv("REQUESTS_CA_BUNDLE", certifi.where())
+        network = "CMN"
+
     sls_file = "./sls_input_file.json"
     password = os.getenv("SWITCH_PASSWORD")
     username = os.getenv("SWITCH_USERNAME")
@@ -99,12 +119,14 @@ def ansible_inventory(
         dump = sls_json
     else:
         # SLS
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         if sls_address is None:
+            # If the address is not set, use the default
             sls_address = "api-gw-service-nmn.local"
+        # If a TOKEN var is already set, use that
         if os.getenv("TOKEN") is not None:
             token = os.getenv("TOKEN")
         else:
+            # Otherwise, look for SLS_TOKEN
             token = os.getenv("SLS_TOKEN")
         sls_url = "https://" + sls_address + "/apis/sls/v1/dumpstate"
         try:
@@ -114,7 +136,7 @@ def ansible_inventory(
                     "Content-Type": "application/json",
                     "Authorization": f"Bearer {token}",
                 },
-                verify=False,
+                verify=crt_path,
             )
             api_req.raise_for_status()
             dump = api_req.json()
@@ -133,11 +155,6 @@ def ansible_inventory(
                 fg="white",
                 bg="red",
             )
-
-    if is_context_ncn():
-        network = "HMN"
-    else:
-        network = "CMN"
 
     switch_inventory, _ = inventory(
         username,
