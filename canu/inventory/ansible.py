@@ -21,6 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """Generates a dynamic Ansible inventory from SLS data."""
 import json
+import logging
 import os
 from pathlib import Path
 import re
@@ -41,6 +42,9 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent
 
 
+logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+
+
 @click.option(
     "--list",
     "list_",
@@ -55,57 +59,80 @@ else:
     required=False,
     type=click.STRING,
 )
+@click.option(
+    "--debug",
+    "debug_",
+    help="Show debug output.",
+    default=False,
+    required=False,
+    is_flag=True,
+)
+@click.option(
+    "--examples",
+    "examples_",
+    help="Example commands to run.",
+    required=False,
+    is_flag=True,
+)
 # @pysnooper.snoop()
 @click.command()
 def ansible_inventory(
     list_,
     host_,
+    debug_,
+    examples_,
 ):
     r"""Generate a dynamic Ansible inventory.
-
-    Print an inventory of switches from the SLS API or an sls_input_file.json in the current working directory.
-
-    $SLS_API_GW and $SLS_TOKEN (or $TOKEN) must be set in order to query the API.
-
-    $SWITCH_USERNAME and $SWITCH_PASSWORD must be set in order to execute playbooks.
-
-    The CA certificate on an NCN will be used by default.
-    If running from outside the cluster, the CA certificate can be set using $REQUESTS_CA_BUNDLE.
-
-    To find the HMN or CMN gateway:
-
-      kubectl get svc -n istio-system istio-ingressgateway-hmn \
-        -o jsonpath='{.metadata.external-dns\.alpha\.kubernetes\.io\/hostname}'
-
-      kubectl get svc -n istio-system istio-ingressgateway-cmn \
-        -o jsonpath='{.metadata.external-dns\.alpha\.kubernetes\.io\/hostname}'
 
     Args:
         list_ : A full inventory of all hosts.
         host_ : A specific host to query.
+        debug_ : Show debug output.
+        examples_ : Show example commands.
 
     Returns:
         None
     """
-    if is_context_ncn():
-        network = "HMN"
-        # If running on an NCN, use the CA certificate from the NCN
-        # The system python uses it by default, but the python in the venv does
-        # not, nor does this binary version of canu{-inventory}
-        crt_path = "/etc/pki/trust/anchors/platform-ca-certs.crt"
-    else:
-        # If running off an NCN, use the CA certificate defined by the env var
-        # defaultig to what certifi thinks is the right one
-        crt_path = os.getenv("REQUESTS_CA_BUNDLE", certifi.where())
-        network = "CMN"
+    if examples_:
+        examples()
+        sys.exit(0)
 
     sls_file = "./sls_input_file.json"
     password = os.getenv("SWITCH_PASSWORD")
     username = os.getenv("SWITCH_USERNAME")
     sls_address = os.getenv("SLS_API_GW")
+    network = os.getenv("CANU_NET")
+    crt_path = None
+
+    if network is None:
+        # Default to HMN
+        network = "HMN"
+
+    if network == "HMN":
+        # If running on an NCN, use the CA certificate from the NCN
+        # The system python uses it by default, but the python in the venv does
+        # not, nor does this binary version of canu{-inventory}
+        crt_path = "/etc/pki/trust/anchors/platform-ca-certs.crt"
+    elif network == "CMN":
+        try:
+            # If running off an NCN, use the CA certificate defined by the env var
+            # defaultig to what certifi thinks is the right one
+            crt_path = os.getenv("REQUESTS_CA_BUNDLE", certifi.where())
+        except OSError as e:
+            click.secho(
+                f"Unable to find CA certificate: {e}",
+                fg="red",
+            )
+            sys.exit(1)
+
+    if debug_:
+        logging.debug(f"Network: {network}")
+        logging.debug(f"CA: {crt_path}")
 
     # use a local file if that exists
-    if os.path.exists(sls_file):
+    if os.path.exists(sls_file) and os.stat(sls_file).st_size != 0:
+        if debug_:
+            logging.debug(f"Using local file {sls_file}")
         sls_file = click.open_file(sls_file, mode="r")
         try:
             with open(sls_file.name, "r", encoding="utf-8") as f:
@@ -122,6 +149,9 @@ def ansible_inventory(
         if sls_address is None:
             # If the address is not set, use the default
             sls_address = "api-gw-service-nmn.local"
+
+        if debug_:
+            logging.debug(f"Using API at {sls_address}")
         # If a TOKEN var is already set, use that
         if os.getenv("TOKEN") is not None:
             token = os.getenv("TOKEN")
@@ -177,6 +207,67 @@ def ansible_inventory(
         ansible_list(
             datasource=switch_inventory,
         )
+
+
+def examples():
+    """Print examples of using the script.
+
+    Args:
+        None
+    """
+    click.secho(r"""
+Print an inventory of switches from the SLS API or an sls_input_file.json in the current working directory.
+
+$SLS_API_GW and $SLS_TOKEN (or $TOKEN) must be set in order to query the API.
+
+$SWITCH_USERNAME and $SWITCH_PASSWORD must be set in order to execute playbooks.
+
+The CA certificate on an NCN will be used by default (/etc/pki/trust/anchors/platform-ca-certs.crt)
+
+If running from outside the cluster, the CA certificate can be set using $REQUESTS_CA_BUNDLE.
+
+To find the HMN or CMN gateway:
+
+kubectl get svc -n istio-system istio-ingressgateway-cmn \
+-o=jsonpath='{range .items[*]}{.metadata.annotations.external-dns\.alpha\.kubernetes\.io\/hostname}{"\n"}' | tr ',' '\n'
+
+Query the API from the CMN (running from a laptop)
+
+    docker run \
+      -e CANU_NET="CMN" \
+      -e SLS_API_GW=$SLS_API_GW \
+      -e SLS_TOKEN=$SLS_TOKEN \
+      -v "${PWD}"/platform-ca-certs.crt:/etc/pki/trust/anchors/platform-ca-certs.crt \
+      --platform linux/amd64 \
+      cray-canu-inventory:x.x.x \
+      --list
+
+Query the API from HMN (running on an NCN)
+
+    docker run \
+      -e CANU_NET="HMN" \
+      -e SLS_API_GW=$SLS_API_GW \
+      -e SLS_TOKEN=$SLS_TOKEN \
+      cray-canu-inventory:x.x.x \
+      --list
+
+Use a local SLS file (running on a laptop)\
+
+    docker run \
+      -e CANU_NET="CMN" \
+      -v "${PWD}"/platform-ca-certs.crt:/etc/pki/trust/anchors/platform-ca-certs.crt \
+      -v "${PWD}"/sls_input_file.json:/app/canu/sls_input_file.json \
+      --platform linux/amd64 \
+      cray-canu-inventory:x.x.x \
+      --list
+
+Use a local SLS file (running on an NCN)
+
+    docker run \
+      -e CANU_NET="HMN" \
+      -v "${PWD}/sls_input_file.json:/app/sls_input_file.json \
+      cray-canu-inventory:x.x.x --list
+    """)
 
 
 # is_context_ncn performs a stupid simple hostname regex to determine if this is

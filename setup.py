@@ -148,7 +148,7 @@ setup(
         ],
     },
     install_requires=[
-        'aiohttp==3.8.0',
+        'aiohttp==3.8.2',
         'click-help-colors==0.9.1',
         'click-option-group==0.5.3',
         'click-params==0.1.2',

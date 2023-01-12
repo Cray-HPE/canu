@@ -26,8 +26,9 @@
 @Library('csm-shared-library') _
 
 def mainSleVersion = '15.4'
-def pythonImage = 'artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python'
 def pythonVersion = '3.10.8'
+def crayCanu = 'cray-canu'
+def crayCanuInventory = 'cray-canu-inventory'
 def isStable = env.TAG_NAME != null ? true : false
 pipeline {
     agent {
@@ -42,9 +43,9 @@ pipeline {
     }
 
     environment {
-        NAME = getRepoName()
-        IMAGE_VERSION = sh(returnStdout: true, script: "git describe --tags | tr -s '-' '_' | tr -d '^v'").trim()
-        VERSION = sh(returnStdout: true, script: "git describe --tags | tr -s '-' '~' | tr -d '^v'").trim()
+        CANU = getRepoName()
+        CANU_INVENTORY = "${env.CANU}" + "-inventory"
+        VERSION = sh(returnStdout: true, script: "git describe --tags | tr -s '-' '_' | tr -d '^v'").trim()
     }
 
     stages {
@@ -68,41 +69,6 @@ pipeline {
                 }
 
                 stages {
-
-                    stage('Prepare: RPMs') {
-
-                        agent {
-                            docker {
-                                label "metal-gcp-builder"
-                                reuseNode true
-                                image "${pythonImage}:${pythonVersion}-SLES${sleVersion}"
-                            }
-                        }
-                        steps {
-                            // Inject distro-specific metadata (e.g. which distro and service pack).
-                            runLibraryScript("addRpmMetaData.sh", "${env.NAME}.spec")
-                            sh "make prepare"
-                            sh "git update-index --assume-unchanged ${env.NAME}.spec"
-                        }
-                    }
-
-                    stage('Build: RPMs') {
-
-                        environment {
-                            PYTHON_VERSION = "${pythonVersion}"
-                        }
-                        agent {
-                            docker {
-                                label "metal-gcp-builder"
-                                reuseNode true
-                                image "${pythonImage}:${pythonVersion}-SLES${sleVersion}"
-                            }
-                        }
-                        steps {
-                            sh "make rpm"
-                        }
-                    }
-
                     stage('Build: Image') {
                         when {
                             expression { "${sleVersion}" == "${mainSleVersion}" }
@@ -119,29 +85,17 @@ pipeline {
                         }
                         steps {
                             script {
-                                publishCsmDockerImage(image: "cray-${env.NAME}", tag: env.IMAGE_VERSION, isStable: isStable)
-                            }
-                        }
-                    }
-                    stage('Publish: RPMs') {
-
-                        steps {
-                            script {
-                                sles_version_parts = "${sleVersion}".tokenize('.')
-                                sles_major = "${sles_version_parts[0]}"
-                                sles_minor = "${sles_version_parts[1]}"
-                                publishCsmRpms(
-                                        arch: "x86_64", isStable: isStable,
-                                        component: env.NAME,
-                                        os: "sle-${sles_major}sp${sles_minor}",
-                                        pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm",
+                                publishCsmDockerImage(
+                                  snykTargetFile: "Dockerfile." + "${env.CANU}", 
+                                  image: "${crayCanu}", 
+                                  tag: "${env.VERSION}",
+                                  isStable: isStable
                                 )
-                                publishCsmRpms(
-                                        arch: "src",
-                                        component: env.NAME,
-                                        isStable: isStable,
-                                        os: "sle-${sles_major}sp${sles_minor}",
-                                        pattern: "dist/rpmbuild/SRPMS/*.rpm",
+                                publishCsmDockerImage(
+                                  snykTargetFile: "Dockerfile." + "${env.CANU_INVENTORY}", 
+                                  image: "${crayCanuInventory}", 
+                                  tag: "${env.VERSION}", 
+                                  isStable: isStable
                                 )
                             }
                         }

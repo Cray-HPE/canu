@@ -55,11 +55,17 @@ prepare:
 		mkdir -p $(BUILD_DIR)/SPECS $(BUILD_DIR)/SOURCES
 		cp $(SPEC_FILE) $(BUILD_DIR)/SPECS/
 
-image:
-		docker build --no-cache --pull --build-arg SLE_VERSION='${SLE_VERSION}' --build-arg PY_VERSION='${PY_VERSION}' --tag 'cray-${NAME}:${IMAGE_VERSION}' .
+image: cli inventory
+
+cli:
+	docker build --tag cray-canu:${IMAGE_VERSION} -f Dockerfile.canu . 
+
+inventory:
+	docker build --tag cray-canu-inventory:${IMAGE_VERSION} -f Dockerfile.canu-inventory .
 
 snyk:
-		$(MAKE) -s image | xargs --verbose -n 1 snyk container test
+		snyk container test --file=Dockerfile.canu
+		snyk container test --file=Dockerfile.canu-inventory
 
 rpm_package_source:
 		tar --transform 'flags=r;s,^,/$(SOURCE_NAME)/,' --exclude .nox --exclude dist/rpmbuild -cvjf $(SOURCE_PATH) .

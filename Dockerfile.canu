@@ -1,4 +1,3 @@
-#!/bin/bash
 # MIT License
 #
 # (C) Copyright [2022] Hewlett Packard Enterprise Development LP
@@ -20,43 +19,44 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-#
-set -euo pipefail
 
-# get local path
-script_name=$(basename "$0")
-path=$(pwd)
+# Stage 1 Create wheels for dependencies
+FROM      artifactory.algol60.net/csm-docker/stable/docker.io/python:slim-bullseye as wheels_builder
 
-case $1 in
+RUN       apt-get -yq update && \
+          apt-get -yq install \
+            gcc \
+            openssl \
+            jq \
+            vim \
+            libffi-dev \
+            musl-dev \
+            python3 \
+            python3-dev \
+            python3-pip \
+            git
 
-    up)
-        # check for folder call files
-        # used to mount data between local and container
-        if [[ ! -d "files" ]]
-        then
-            mkdir files
-        fi
+RUN        mkdir /wheels
 
-        docker-compose up -d --build
-        echo
-        echo "The folder [${path}/files]"
-        echo "is mounted on the container at /files"
-        echo
-        echo "Type exit to disconnect from container before trying to shutdown the container"
-        echo
-        docker exec -it canu /bin/bash
-    ;;
+COPY       . /source
 
-    down)
-        docker-compose down
-    ;;
+WORKDIR    /source
 
-    *)
-        echo
-        echo "${script_name} usage is:"
-        echo
-        printf '%14s %-8s - %s\n' "${script_name}" 'up' 'for starting container'
-        printf '%14s %-8s - %s\n' "${script_name}" 'down' 'for stopping container'
-        echo
-    ;;
-esac
+RUN        pip install --upgrade pip wheel setuptools && pip wheel . --wheel-dir=/wheels
+
+
+# Stage 2 Build the final image without build depoendencies
+FROM       artifactory.algol60.net/csm-docker/stable/docker.io/python:slim-bullseye as prod
+
+# Git it still used in find_version() in setup.py
+RUN       apt-get -yq update && apt-get -yq install git
+
+COPY       . /source
+
+COPY       --from=wheels_builder /wheels /tmp/wheels
+
+WORKDIR    /source
+
+RUN        python3 -m pip install --no-index --find-links=/tmp/wheels .
+
+ENTRYPOINT [ "canu" ]
