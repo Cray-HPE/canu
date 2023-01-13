@@ -112,7 +112,7 @@ class NetworkModel:  # pragma: no cover
                         # should be fewer (more used). Either way this will fully connect or roll back.
                         if new.connect(old):
                             print(
-                                "    Connected existing node {} to node {} (bi-directionally)".format(
+                                "    Connected existing node {} to node {}".format(
                                     old.id(),
                                     new.id(),
                                 ),
@@ -165,7 +165,7 @@ class NetworkModel:  # pragma: no cover
                     # should be fewer (more used). Either way this will fully connect or roll back.
                     if new_node.connect(old):
                         print(
-                            "    Connected {} to {} (bi-directionally)".format(
+                            "    Connected {} to {}".format(
                                 old.id(),
                                 new_node.id(),
                             ),
@@ -174,7 +174,7 @@ class NetworkModel:  # pragma: no cover
                         break
                     else:
                         print(
-                            "    DEBUG: Could not connect new {} to {} (bi-directionally)".format(
+                            "    DEBUG: Could not connect new {} to {}".format(
                                 old.id(),
                                 new_node.id(),
                             ),

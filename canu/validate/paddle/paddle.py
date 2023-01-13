@@ -22,6 +22,7 @@
 """CANU commands that validate the paddle."""
 from collections import defaultdict
 import json
+import logging
 
 import click
 from click_help_colors import HelpColorsCommand
@@ -33,6 +34,8 @@ from canu.validate.shcd.shcd import (
     node_list_warnings,
     print_node_list,
 )
+
+log = logging.getLogger("validate_paddle")
 
 
 @click.command(
@@ -51,8 +54,15 @@ from canu.validate.shcd.shcd import (
     type=click.File("w"),
     default="-",
 )
+@click.option(
+    "--log",
+    "log_",
+    help="Level of logging.",
+    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
+    default="ERROR",
+)
 @click.pass_context
-def paddle(ctx, ccj, out):
+def paddle(ctx, ccj, out, log_):
     """Validate a CCJ file.
 
     Pass in a CCJ file to validate that it works architecturally. The validation will ensure that spine switches,
@@ -65,7 +75,10 @@ def paddle(ctx, ccj, out):
         ctx: CANU context settings
         ccj: Paddle CCJ file
         out: Filename for the JSON Topology if requested.
+        log_: Level of logging.
     """
+    logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
+
     ccj_json = json.load(ccj)
     architecture = ccj_json.get("architecture")
 

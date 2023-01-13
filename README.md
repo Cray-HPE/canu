@@ -1,5 +1,6 @@
 # 🛶 CANU v1.6.29
 
+
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
 CANU can be used to:
@@ -1357,7 +1358,12 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## [1.6.28]
 
-- Using Python 3.10.8 instead of Python 3.10.4; new pipeline code.
+- Fix a bug where `bmc` slots were allowed non-existent port `3`.
+- Remove confusing references to "bi-directional" in warnings and errors.
+- Change versioning of flake8-commas to break dependency loop.
+- Add logging to `validate paddle`.
+- Begin refactoring the model to better validate and pick slot/port/speed requests.
+- Enhance node connection exception messaging in the model.
 
 ## [1.6.27]
 
@@ -1365,7 +1371,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## [1.6.26]
 
-- Added gpu and kvm node definitions to v1 arrchitecture.
+- Added gpu and kvm node definitions to v1 architecture.
 - Added logging to `canu generate switch/network config` to clean up output.
 - Provided better messaging about next-step handling of missing configs in generated files.
 
