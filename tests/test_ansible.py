@@ -144,14 +144,44 @@ dumpstate = {
                 "VlanRange": [7],
             },
         },
+        "HMN": {
+            "Name": "HMN",
+            "FullName": "Hardware Management Network",
+            "IPRanges": ["127.127.0.0/16"],
+            "Type": "ethernet",
+            "LastUpdated": 1669049191,
+            "LastUpdatedTime": "2022-11-21 16:45:39.675539 +0000 +0000",
+            "ExtraProperties": {
+                "CIDR": "127.127.0.0/16",
+                "MTU": 9000,
+                "MyASN": 65532,
+                "PeerASN": 65533,
+                "Subnets": [
+                    {
+                        "CIDR": "127.127.0.0/16",
+                        "FullName": "HMN Management Network Infrastructure",
+                        "Gateway": "127.127.1.1",
+                        "IPReservations": [
+                            {
+                                "Comment": "x3000c0h12s1",
+                                "IPAddress": "127.127.3.2",
+                                "Name": "sw-spine-001",
+                            },
+                            {
+                                "Comment": "x3000c0h13s1",
+                                "IPAddress": "127.127.6.5",
+                                "Name": "sw-spine-002",
+                            },
+                        ],
+                        "Name": "network_hardware",
+                        "VlanID": 4,
+                    },
+                ],
+                "VlanRange": [4],
+            },
+        },
     },
 }
-
-
-def test_canu_inventory():
-    """Run canu-inventory with no errors."""
-    result = runner.invoke(ansible.ansible_inventory)
-    assert result.exit_code == 0
 
 
 @mock.patch("socket.gethostname")
@@ -228,7 +258,7 @@ def mockenv(**envvars):
     return mock.patch.dict(os.environ, envvars)
 
 
-@mockenv(LANG="C.UTF-8", LC_ALL="C.UTF-8", SLS_API_GW=sls_address)
+@mockenv(LANG="C.UTF-8", LC_ALL="C.UTF-8", SLS_API_GW=sls_address, CANU_NET="CMN")
 @mock.patch("requests.get")
 @responses.activate
 def test_mock_api_dumpstate(mock_get):
@@ -248,7 +278,7 @@ def test_mock_api_dumpstate(mock_get):
     assert result.exit_code == 0
 
 
-@mockenv(LANG="C.UTF-8", LC_ALL="C.UTF-8")
+@mockenv(LANG="C.UTF-8", LC_ALL="C.UTF-8", CANU_NET="CMN")
 def test_mock_file_dumpstate():
     """Run canu-inventory using a local file."""
     with runner.isolated_filesystem():
@@ -264,3 +294,45 @@ def test_mock_file_dumpstate():
         )
         assert result.exit_code == 0
         assert "127.4.5.6" in result.output
+
+
+@mockenv(LANG="C.UTF-8", LC_ALL="C.UTF-8", SLS_API_GW=sls_address, CANU_NET="CMN")
+@mock.patch("requests.get")
+@responses.activate
+def test_mock_api_get_cmn_ip(mock_get):
+    """Run canu-inventory to get CMN IPs using the API."""
+    mock_get.return_value = mock.Mock(ok=True)
+    result = mock_get.return_value.json.return_value = dumpstate
+    with runner.isolated_filesystem():
+        result = runner.invoke(
+            ansible_inventory,
+            [
+                "--host",
+                "sw-spine-001",
+            ],
+        )
+
+    # Check that the CMN IP is in the output
+    assert "127.1.2.3" in result.stdout
+    assert result.exit_code == 0
+
+
+@mockenv(LANG="C.UTF-8", LC_ALL="C.UTF-8", SLS_API_GW=sls_address, CANU_NET="HMN")
+@mock.patch("requests.get")
+@responses.activate
+def test_mock_api_get_hmn_ip(mock_get):
+    """Run canu-inventory to get CMN IPs using the API."""
+    mock_get.return_value = mock.Mock(ok=True)
+    result = mock_get.return_value.json.return_value = dumpstate
+    with runner.isolated_filesystem():
+        result = runner.invoke(
+            ansible_inventory,
+            [
+                "--host",
+                "sw-spine-001",
+            ],
+        )
+
+    # Check that the HMN IP is in the output
+    assert "127.127.3.2" in result.stdout
+    assert result.exit_code == 0
