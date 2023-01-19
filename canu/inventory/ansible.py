@@ -55,7 +55,6 @@ else:
     required=False,
     type=click.STRING,
 )
-# @pysnooper.snoop()
 @click.command()
 def ansible_inventory(
     list_,
