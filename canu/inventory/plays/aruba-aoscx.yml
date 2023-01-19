@@ -4,8 +4,8 @@
     - arubanetworks.aoscx
   gather_facts: true
   vars:
-    # This should be a template
-    leaf_config: files/sw-leaf-bmc-001.cfg
+    # This should be a template but for now, pass is an extra var path to whatever config is needed
+    leaf_config: "{{ leaf_bmc_config }}"
     login_url: "https://{{ ansible_host }}/rest/v1/login"
     dryrun_url: "https://{{ ansible_host }}/rest/v1/configs/running-config?dryrun"
     checkpoint_name: "ac_{{ ansible_date_time.year }}_{{ ansible_date_time.month }}_{{ ansible_date_time.day }}_{{ansible_date_time.hour }}_{{ ansible_date_time.minute }}_{{ ansible_date_time.second }}"
