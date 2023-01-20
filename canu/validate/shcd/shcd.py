@@ -427,7 +427,7 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False, node_type=
             warnings["shcd_port_data"].append(f"{sheet}:{location}")
             log.warning(
                 'Prepending the character "j" to a port will not be allowed in the future. '
-                + f"Please correct cell {sheet}:{location} in the SHCD with value {port}",
+                + f'Please correct cell {sheet}:{location} in the SHCD with value "{port}"',
             )
             port = port[1:]
         # For SubRacks
