@@ -1,11 +1,13 @@
 ---
-- hosts: sw-leaf-bmc-001
+- hosts: aruba
   collections:
     - arubanetworks.aoscx
   gather_facts: true
   vars:
     # This should be a template but for now, pass is an extra var path to whatever config is needed
-    leaf_config: "{{ leaf_bmc_config }}"
+    # pass in the folder containing the switch configs or be in the same directory
+    config_folder: ""
+    switch_config: "{{ config_folder }}/{{ inventory_hostname }}.cfg"
     login_url: "https://{{ ansible_host }}/rest/v1/login"
     dryrun_url: "https://{{ ansible_host }}/rest/v1/configs/running-config?dryrun"
     checkpoint_name: "ac_{{ ansible_date_time.year }}_{{ ansible_date_time.month }}_{{ ansible_date_time.day }}_{{ansible_date_time.hour }}_{{ ansible_date_time.minute }}_{{ ansible_date_time.second }}"
@@ -13,14 +15,14 @@
     configs_url: "https://{{ ansible_host }}/rest/v1/fullconfigs"
     munged_banner: "Adjusted by Ansible for checkpoint: {{ checkpoint_name }}"
     pseudo_checkpoint_url: "https://{{ ansible_host }}/rest/v1/fullconfigs/{{ checkpoint_name }}"
-    validated_config_json: "{{ playbook_dir }}/{{ checkpoint_name }}.json"
+    validated_config_json: "{{ playbook_dir }}/{{ inventory_hostname }}_{{ checkpoint_name }}.json"
     logout_url: "https://{{ ansible_host }}/rest/v1/logout"
   tasks:
     - name: get running config as json
       arubanetworks.aoscx.aoscx_backup_config:
-        config_name: 'running-config'
-        output_file: '{{ inventory_hostname }}.json'
-    
+        config_name: "running-config"
+        output_file: "{{ inventory_hostname }}.json"
+
     # put the dryun tasks in a block to handle failures
     - name: dryrun config
       block:
@@ -46,8 +48,8 @@
             method: POST
             return_content: true
             # config to validate with dryun
-            src: "{{ leaf_config }}"
-            # per Ansible: should be used with force_basic_auth to ensure 
+            src: "{{ switch_config }}"
+            # per Ansible: should be used with force_basic_auth to ensure
             # success when the remote end sends a 401
             force_basic_auth: true
             follow_redirects: all
@@ -80,7 +82,7 @@
           loop: "{{ _result.json.errors }}"
           when: _result.json.state == "error"
           failed_when: _result.json.state == "error"
-        
+
         # Begin munging operations
         # Per the aruba docs, it's not possible to have two checkpoints with the same configuration
         # Thus, a checkpoint with this exact JSON cannot be used as a new checkpoint or it is detected as a duplicate
@@ -89,35 +91,12 @@
         - name: begin munging by setting facts using the existing config
           ansible.builtin.set_fact:
             original_config: "{{ _result.json.configs.json }}"
-            munge_me: "{{ _result.json.configs.json }}"
 
-        - name: munge the ansible fact to update the banner to create a new config
-          ansible.utils.update_fact:
-            updates:
-              - path: munge_me.System.other_config.banner_exec
-                value: "{{ munged_banner }}"
-          register: munged_config
-
-        # TODO: Technically, we should do another dry run here to validate there is no garbage in the config
+        # # TODO: Technically, we should do another dry run here to validate there is no garbage in the config
         - name: write jsonified config to a local file
           ansible.builtin.copy:
-            content: "{{ munged_config.munge_me | to_json(indent=4) }}"
+            content: "{{ original_config | to_json(indent=4) }}"
             dest: "{{ validated_config_json }}"
-          
-        # also set the banner on the running-config so it is different
-        # this seems to allow the checkpoint to be 
-        - name: add or update the banner to make the config harmlessly different allowing for a checkpoint to be made
-          aoscx_banner:
-            banner_type: banner
-            banner: "{{ munged_banner }}"
-
-        # Without making a modification such as the harmless banner change above, the aoscx_checkpoint module
-        # fails with:
-        #     'GENERIC OPERATION ERROR: Checkpoint already exists in the database or it is a duplicate checkpoint.'
-        - name: create checkpoint from running-config
-          arubanetworks.aoscx.aoscx_checkpoint:
-            source_config: 'running-config'
-            destination_config: "{{ checkpoint_name }}"
 
         # Finally, upload the new config as the running-config
         - name: upload local json config to the running-config
