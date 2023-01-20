@@ -585,6 +585,11 @@ network_v1:
       shasta_name: "gn"
       architecture_type: "river_ncn_node_2_port_gigabyte"
     - lookup_name:
+        - "viz"
+        - "vn"
+      shasta_name: "viz"
+      architecture_type: "river_ncn_node_2_port_gigabyte"
+    - lookup_name:
         - "gpu"
       shasta_name: "gpu"
       architecture_type: "river_ncn_node_4_port_gigabyte"
