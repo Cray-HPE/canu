@@ -1,0 +1,148 @@
+#
+# MIT License
+#
+# (C) Copyright 2023 Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the 'Software'),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
+#
+[project]
+name = 'canu'
+authors = [
+    { name = 'Lucas Bates', email = 'lucas.bates@hpe.com' },
+    { name = 'Sean Lynn', email = 'sean.lynn@hpe.com' },
+]
+classifiers = [
+    'License :: OSI Approved :: MIT License',
+    'Natural Language :: English',
+    'Operating System :: POSIX',
+    'Programming Language :: Python :: 3 :: Only',
+    'Programming Language :: Python :: 3.10',
+]
+description = 'CSM Automatic Network Utility'
+dependencies = [
+    'aiohttp==3.8.0',
+    'click-help-colors==0.9.1',
+    'click-option-group==0.5.3',
+    'click-params==0.1.2',
+    'click-spinner==0.1.10',
+    'click==8.0.3',
+    'colorama==0.4.4',
+    'emoji==2.1.0',
+    'hier-config==1.6.1',
+    'ipython==7.16.3',
+    'jinja2==3.1.2',
+    'jsonschema==3.2.0',
+    'kubernetes==24.2.0',
+    'mac-vendor-lookup==0.1.11',
+    'matplotlib<=3.5.1',
+    'natsort==7.1.1',
+    'netaddr==0.8.0',
+    'netmiko==3.4.0',
+    'netutils==1.2.0',
+    'networkx<=2.6.3',
+    'nornir-netmiko==0.1.2',
+    'nornir-salt==0.16.1',
+    'nornir-scrapli==2022.7.30',
+    'nornir-utils==0.2.0',
+    'nornir==3.3.0',
+    'openpyxl==3.0.10',
+    'pyyaml==6.0',
+    'requests==2.26.0',
+    'responses==0.14.0',
+    'ruamel.yaml<0.17.22',
+    'tabulate==0.8.9',
+    'tokenize-rt==3.2.0',
+    'tomli==1.1.0',
+    'ttp==0.8.4',
+    'urllib3==1.26.7',
+    'yamale<=4.0.2',
+]
+dynamic = ['entry-points', 'scripts', 'version']
+requires-python = '>=3.10'
+
+[metadata]
+url = 'https://github.com/Cray-HPE/canu'
+
+license = { file = 'LICENSE' }
+
+[project.optional-dependencies]
+ci = [
+    'nox',
+]
+docs = [
+    "myst-parser",
+    "sphinx",
+    "sphinx-markdown-builder",
+    "sphinx_click",
+]
+lint = [
+    "darglint",
+    "flake8",
+    "flake8-black",
+    "flake8-bugbear",
+    "flake8-commas==1.0.0",
+    "flake8-comprehensions",
+    "flake8-debugger",
+    "flake8-docstrings",
+    "flake8-eradicate",
+    "flake8-import-order",
+    "flake8-quotes",
+    "flake8-string-format",
+    "pep8",
+    "pep8-naming",
+    "toml",
+]
+network_modeling = [
+    "jsonschema<=4.4.0",
+    "matplotlib<=3.5.1",
+    "networkx<=2.6.3",
+    "yamale<=4.0.2",
+]
+test = [
+    "coverage",
+    "mock",
+    "py>=1.11.0",
+    "pytest<7.2.1",
+    "pytest-cov",
+    "pytest-sugar",
+    "testfixtures",
+]
+
+# Defines which folders belong to our package.
+[tool.setuptools.packages]
+find = {}
+
+[tool.setuptools.dynamic]
+entry-points = { file = ['entry_points.ini'] }
+readme = { file = ['README.md'], content-type = 'text/markdown' }
+
+# Allows for dynamic versioning via git-tag.
+[tool.setuptools_scm]
+version_scheme = 'no-guess-dev'
+
+[build-system]
+build-backend = 'setuptools.build_meta'
+requires = [
+    'setuptools >= 66.0',
+    'setuptools_scm[toml] >= 7.1.0',
+    'wheel',
+]
+
+[tool.distutils.bdist_wheel]
+universal = true
