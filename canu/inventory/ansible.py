@@ -21,6 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """Generates a dynamic Ansible inventory from SLS data."""
 import json
+import logging
 import os
 from pathlib import Path
 import re
@@ -41,6 +42,102 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent
 
 
+logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+# urllib3 shows stuff by default, which messes with clean output ansible needs
+# so just display WARNINGS and above
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+
+
+@click.option(
+    "--debug",
+    "debug_",
+    help="Show debug output.",
+    default=False,
+    required=False,
+    is_flag=True,
+)
+@click.option(
+    "--examples",
+    "examples_",
+    help="Example commands to run.",
+    required=False,
+    is_flag=True,
+)
+@click.option(
+    "--sls-file",
+    "sls_file_",
+    envvar="SLS_FILE",
+    help="Path to a local SLS dumpstate file (or a path in the container).",
+    default="./sls_input_file.json",
+    show_default=True,
+    required=False,
+    show_envvar=True,
+    type=click.Path(dir_okay=False, readable=True, allow_dash=True),
+)
+@click.option(
+    "--sls-api-gw",
+    "sls_address_",
+    envvar="SLS_API_GW",
+    help="The SLS API gateway address.",
+    default="api-gw-service-nmn.local",
+    show_default=True,
+    required=False,
+    show_envvar=True,
+    type=click.STRING,
+)
+@click.option(
+    "--sls-token",
+    "sls_token_",
+    envvar="SLS_TOKEN",
+    help="The SLS API token.",
+    required=False,
+    show_envvar=True,
+    hide_input=True,
+    type=click.STRING,
+)
+@click.option(
+    "--ca-path",
+    "ca_path_",
+    default=certifi.where(),
+    envvar="REQUESTS_CA_BUNDLE",
+    show_default=True,
+    help="The path to the CA certificate to use for the SLS API (or a path in the container).",
+    required=False,
+    show_envvar=True,
+    type=click.Path(dir_okay=False, readable=True),
+)
+@click.option(
+    "--network",
+    "network_",
+    envvar="CANU_NET",
+    help="The network plays should be executed over.",
+    default="HMN",
+    show_default=True,
+    required=False,
+    show_envvar=True,
+    type=click.STRING,
+)
+@click.option(
+    "--switch-username",
+    "switch_username_",
+    envvar="SWITCH_USERNAME",
+    help="The username to use when connecting to switches.",
+    default="admin",
+    show_default=True,
+    required=False,
+    show_envvar=True,
+    type=click.STRING,
+)
+@click.option(
+    "--switch-password",
+    "switch_password_",
+    envvar="SWITCH_PASSWORD",
+    help="The password to use when connecting to switches.",
+    required=False,
+    show_envvar=True,
+    hide_input=True,
+    type=click.STRING,
+)
 @click.option(
     "--list",
     "list_",
@@ -57,89 +154,75 @@ else:
 )
 @click.command()
 def ansible_inventory(
+    debug_,
+    examples_,
+    sls_file_,
+    switch_username_,
+    switch_password_,
+    sls_token_,
+    sls_address_,
+    ca_path_,
+    network_,
     list_,
     host_,
 ):
-    r"""Generate a dynamic Ansible inventory.
+    # noqa: DAR101, DAR201
+    """Generate a dynamic Ansible inventory."""
+    if examples_:
+        examples()
+        sys.exit(0)
 
-    Print an inventory of switches from the SLS API or an sls_input_file.json in the current working directory.
+    if debug_:
+        logging.debug(f"Network: {network_}")
 
-    $SLS_API_GW and $SLS_TOKEN (or $TOKEN) must be set in order to query the API.
-
-    $SWITCH_USERNAME and $SWITCH_PASSWORD must be set in order to execute playbooks.
-
-    The CA certificate on an NCN will be used by default.
-    If running from outside the cluster, the CA certificate can be set using $REQUESTS_CA_BUNDLE.
-
-    To find the HMN or CMN gateway:
-
-      kubectl get svc -n istio-system istio-ingressgateway-hmn \
-        -o jsonpath='{.metadata.external-dns\.alpha\.kubernetes\.io\/hostname}'
-
-      kubectl get svc -n istio-system istio-ingressgateway-cmn \
-        -o jsonpath='{.metadata.external-dns\.alpha\.kubernetes\.io\/hostname}'
-
-    Args:
-        list_ : A full inventory of all hosts.
-        host_ : A specific host to query.
-
-    Returns:
-        None
-    """
-    if is_context_ncn():
-        network = "HMN"
+    if network_ == "HMN" and ca_path_ == "":
         # If running on an NCN, use the CA certificate from the NCN
         # The system python uses it by default, but the python in the venv does
         # not, nor does this binary version of canu{-inventory}
-        crt_path = "/etc/pki/trust/anchors/platform-ca-certs.crt"
-    else:
-        # If running off an NCN, use the CA certificate defined by the env var
-        # defaultig to what certifi thinks is the right one
-        crt_path = os.getenv("REQUESTS_CA_BUNDLE", certifi.where())
-        network = "CMN"
-
-    sls_file = "./sls_input_file.json"
-    password = os.getenv("SWITCH_PASSWORD")
-    username = os.getenv("SWITCH_USERNAME")
-    sls_address = os.getenv("SLS_API_GW")
+        ca_path_ = "/etc/pki/trust/anchors/platform-ca-certs.crt"
 
     # use a local file if that exists
-    if os.path.exists(sls_file):
-        sls_file = click.open_file(sls_file, mode="r")
-        try:
-            with open(sls_file.name, "r", encoding="utf-8") as f:
-                sls_json = json.load(f)
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            click.secho(
-                f"The file {sls_file.name} is not valid JSON.",
-                fg="red",
-            )
-            sys.exit(1)
-        dump = sls_json
+    if os.path.exists(sls_file_):
+        if sls_file_ is not None:
+            if debug_:
+                logging.debug(f"Using local file {sls_file_}")
+            sls_file_ = click.open_file(sls_file_, mode="r")
+            try:
+                with open(sls_file_.name, "r", encoding="utf-8") as f:
+                    sls_json = json.load(f)
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                click.secho(
+                    f"The file {sls_file_.name} is not valid JSON.",
+                    fg="red",
+                )
+                sys.exit(1)
+            dump = sls_json
     else:
-        # SLS
-        if sls_address is None:
-            # If the address is not set, use the default
-            sls_address = "api-gw-service-nmn.local"
-        # If a TOKEN var is already set, use that
-        if os.getenv("TOKEN") is not None:
-            token = os.getenv("TOKEN")
-        else:
-            # Otherwise, look for SLS_TOKEN
-            token = os.getenv("SLS_TOKEN")
-        sls_url = "https://" + sls_address + "/apis/sls/v1/dumpstate"
+        if debug_:
+            logging.debug("Using API")
+            logging.debug(f"CA: {ca_path_}")
+            logging.debug(f"Using API at {sls_address_}")
+
+        if sls_token_ is None:
+            logging.debug("No SLS token provided. Please set the $SLS_TOKEN environment variable.")
+            return click.secho(
+                "No SLS token provided. Please set the $SLS_TOKEN environment variable.",
+                fg="white",
+                bg="red",
+            )
+        sls_url = "https://" + sls_address_ + "/apis/sls/v1/dumpstate"
         try:
             api_req = requests.get(
                 sls_url,
                 headers={
                     "Content-Type": "application/json",
-                    "Authorization": f"Bearer {token}",
+                    "Authorization": f"Bearer {sls_token_}",
                 },
-                verify=crt_path,
+                verify=ca_path_,
             )
             api_req.raise_for_status()
             dump = api_req.json()
-            sls_file = None
+            sls_file_ = None
 
         except requests.exceptions.ConnectionError as e:
             return click.secho(
@@ -147,19 +230,24 @@ def ansible_inventory(
                 fg="white",
                 bg="red",
             )
-        except requests.exceptions.HTTPError:
-            bad_token_reason = "environmental variable 'SLS_TOKEN' is correct."
+        except requests.exceptions.HTTPError as e:
             return click.secho(
-                f"Error connecting SLS {sls_url}, check that the $SLS_API_GW and $SLS_TOKEN are correct.\\nn{bad_token_reason}",
+                f"Error connecting SLS {sls_url}, check that the $SLS_API_GW and $SLS_TOKEN are correct.\n{e}",
+                fg="white",
+                bg="red",
+            )
+        except OSError as e:
+            return click.secho(
+                f"Could not find a suitable TLS CA certificate bundle\n{e}",
                 fg="white",
                 bg="red",
             )
 
     switch_inventory, _ = inventory(
-        username,
-        password,
-        network,
-        sls_file=sls_file,
+        switch_username_,
+        switch_password_,
+        network_,
+        sls_file=sls_file_,
         sls_inventory=True,
         dumpstate=dump,
     )
@@ -411,6 +499,79 @@ def ansible_hostvars(datasource=None, hostname=None):
             ansible_inventory.update(var)
 
     return ansible_inventory
+
+
+def examples():
+    # noqa: DAR101, DAR201
+    """Print examples of using the script."""
+    # noqa: D301
+    click.secho(r"""
+ENVIRONMENTAL VARIABLES AND VOLUME MOUNTS:
+
+Required query the API:
+
+  - $SLS_API_GW or --sls-api-gw (default: api-gw-service-nmn.local)
+  - $SLS_TOKEN or --sls-token
+  - $REQUESTS_CA_BUNDLE or --ca-path (default: /etc/pki/trust/anchors/platform-ca-certs.crt)
+
+Required to query a local file:
+
+  - $SLS_FILE or --sls-file (default: /home/canu/sls_input_file.json)
+
+Optional (must be set in order to execute playbooks):
+
+  - $SWITCH_USERNAME or --switch-username (default: admin)
+  - $SWITCH_PASSWORD or --switch-password
+
+
+IMPORTANT: sls_input_file.json and/or a CA bundle must be volume mounted into the container:
+
+  - docker -v "${PWD}"/sls_input_file.json:/home/canu/sls_input_file.json ...
+  - podman -v "${PWD}"/platform-ca-certs.crt:/etc/pki/trust/anchors/platform-ca-certs.crt ...
+
+GATHERING ENVIRONMENTAL VARIABLE VALUES:
+
+To find the gateway (use -cmn or -hmn to specify the network):
+
+  - kubectl get svc -n istio-system istio-ingressgateway-xxx \
+    -o=jsonpath='{range .items[*]}{.metadata.annotations.external-dns\.alpha\.kubernetes\.io\/hostname}{"\n"}' \
+    | tr ',' '\n'
+
+
+EXAMPLES:
+
+Query the API (gateway, token, and a volume-mounted cert are required):
+
+docker run \
+  --entrypoint canu-inventory \
+  -e SLS_API_GW=$SLS_API_GW \
+  -e SLS_TOKEN=$SLS_TOKEN \
+  -v "${PWD}"/platform-ca-certs.crt:/etc/pki/trust/anchors/platform-ca-certs.crt \
+  cray-canu:x.x.x \
+  --host sw-leaf-bmc-001
+
+
+Query the API using canu-inventory flags instead of ENV vars:
+
+docker run \
+  --entrypoint canu-inventory \
+  -v "${PWD}"/platform-ca-certs.crt:/etc/pki/trust/anchors/platform-ca-certs.crt \
+  cray-canu:x.x.x \
+  --sls-api-gw $SLS_API_GW \
+  --sls-token $SLS_TOKEN \
+  --network CMN \
+  --list
+
+
+Use a local SLS file (a local file volume mount is required):
+
+docker run \                                                                                                         14:20
+  --entrypoint canu-inventory \
+  -v "${PWD}"/sls_input_file.json:/home/canu/sls_input_file.json \
+  cray-canu:x.x.x --host sw-spine-001
+
+
+""")
 
 
 if __name__ == "__main__":

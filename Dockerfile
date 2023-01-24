@@ -24,8 +24,8 @@
 FROM       artifactory.algol60.net/docker.io/library/alpine:3.17 as wheels_builder
 
 # set environment variables to avoid py cache files
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV        PYTHONDONTWRITEBYTECODE 1
+ENV        PYTHONUNBUFFERED 1
 
 RUN        apk add --update --no-cache \
              py3-pip \
@@ -70,8 +70,8 @@ RUN        pip --no-cache-dir install --upgrade pip wheel setuptools && pip --no
 FROM       artifactory.algol60.net/docker.io/library/alpine:3.17 as prod
 
 # set environment variables to avoid py cache files
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV        PYTHONDONTWRITEBYTECODE 1
+ENV        PYTHONUNBUFFERED 1
 
 # In order to volume mount the CA certs file, we need to create the directory and file
 # othwerwise the volume mount will mount the file as a directory
@@ -108,9 +108,13 @@ USER       canu
 
 WORKDIR    /home/canu
 
+# create a dummy input file for canu-inventory so it can be volume mounted
+RUN        touch /home/canu/slsls_input_file.json
+
 # update command prompt
 RUN        echo 'export PS1="canu \w : "' >> /home/canu/bash.bashrc
 
+ENV        SLS_NETWORK "HMN"
 # The gateway and token are needed to connect to the SLS API
 ENV        SLS_API_GW "api-gw-service.local"
 ENV        SLS_TOKEN ""
