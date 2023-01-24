@@ -1379,7 +1379,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## [1.6.30]
 
-- Updated 
+- Updated Aruba ansible playbook and documentation.
 
 ## [1.6.29]
 
