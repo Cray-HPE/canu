@@ -1,5 +1,5 @@
 {#- uan-nmn #}
-{%- for node in cabling.nodes if node.slot == "onboard" %}
+{%- for node in cabling.nodes if node.slot == "onboard" and node.subtype == "uan" %}
 interface ethernet1/1/{{ node.config.PORT }}
   description {{ node.config.DESCRIPTION }}
   no shutdown
