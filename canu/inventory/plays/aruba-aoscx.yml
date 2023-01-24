@@ -83,26 +83,73 @@
           when: _result.json.state == "error"
           failed_when: _result.json.state == "error"
 
-        # Begin munging operations
-        # Per the aruba docs, it's not possible to have two checkpoints with the same configuration
-        # Thus, a checkpoint with this exact JSON cannot be used as a new checkpoint or it is detected as a duplicate
-        # As a workaround, one semi-harmless key is modified--the banner
-        # Changing this makes the config different from the running config without any operational side-effects
-        - name: begin munging by setting facts using the existing config
+        - name: get original config
           ansible.builtin.set_fact:
             original_config: "{{ _result.json.configs.json }}"
+
+        # Get the mgmt interface config from the running-config and apply it to the generated config.
+        # This should prevent users from accidentally locking themselves out.
+        - name: Read the JSON file content in a variable
+          shell: "cat {{ inventory_hostname }}.json"
+          register: result
+
+        - name: jsondata
+          set_fact:
+            jsondata: "{{ result.stdout | from_json }}"
+
+        - name: get mgmt interface config
+          set_fact:
+            mgmt_int: "{{ jsondata.System.mgmt_intf }}"
+
+        - name: add mgmt int config to generated config
+          ansible.utils.update_fact:
+            updates:
+              - path: original_config.System.mgmt_intf
+                value: "{{ mgmt_int }}"
+          register: updated_config
 
         # # TODO: Technically, we should do another dry run here to validate there is no garbage in the config
         - name: write jsonified config to a local file
           ansible.builtin.copy:
-            content: "{{ original_config | to_json(indent=4) }}"
+            content: "{{ updated_config.original_config | to_json(indent=4) }}"
             dest: "{{ validated_config_json }}"
+
+        # set checkpoint for 1 minute.
+        # This play uses ssh instead of the default api.
+        - name: set checkpoint for one minute "checkpoint auto 1"
+          vars:
+            ansible_connection: network_cli
+          aoscx_command:
+            commands:
+              - checkpoint auto 1
 
         # Finally, upload the new config as the running-config
         - name: upload local json config to the running-config
           aoscx_upload_config:
             config_name: "running-config"
             config_json: "{{ validated_config_json }}"
+            vrf: "mgmt"
+          timeout: 30
+
+        # Accept the checkpoint
+        - name: confirm checkpoint "checkpoint auto confirm"
+          vars:
+            ansible_connection: network_cli
+          aoscx_command:
+            commands:
+              - checkpoint auto confirm
+          retries: 5
+          delay: 5 # Every 5 seconds
+
+        # Save the config
+        - name: Save the configuration "write memory"
+          vars:
+            ansible_connection: network_cli
+          aoscx_command:
+            commands:
+              - write memory
+          retries: 5
+          delay: 5 # Every 5 seconds
 
       # always log out so no session is left open
       always:
