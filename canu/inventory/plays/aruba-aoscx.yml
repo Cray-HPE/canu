@@ -17,6 +17,7 @@
     pseudo_checkpoint_url: "https://{{ ansible_host }}/rest/v1/fullconfigs/{{ checkpoint_name }}"
     validated_config_json: "{{ playbook_dir }}/{{ inventory_hostname }}_{{ checkpoint_name }}.json"
     logout_url: "https://{{ ansible_host }}/rest/v1/logout"
+    running_config_url: "https://{{ ansible_host }}/rest/v10.09/configs/running-config"
   tasks:
     - name: get running config as json
       arubanetworks.aoscx.aoscx_backup_config:
@@ -83,23 +84,28 @@
           when: _result.json.state == "error"
           failed_when: _result.json.state == "error"
 
-        - name: get original config
+        - name: get generated config in json format
           ansible.builtin.set_fact:
             original_config: "{{ _result.json.configs.json }}"
 
         # Get the mgmt interface config from the running-config and apply it to the generated config.
         # This should prevent users from accidentally locking themselves out.
-        - name: Read the JSON file content in a variable
-          shell: "cat {{ inventory_hostname }}.json"
-          register: result
+        # We can't get query the API direclty for the mgmt interface config because
+        # there are additional fields added that won't work when we upload the running-config json payload.
+        - name: get mgmt int config from running config
+          ansible.builtin.uri:
+            url: "{{ running_config_url }}"
+            validate_certs: false
+            use_proxy: false
+            method: GET
+            return_content: true
+            headers:
+              Cookie: "{{ login.set_cookie }}"
+          register: running_config_data
 
-        - name: jsondata
-          set_fact:
-            jsondata: "{{ result.stdout | from_json }}"
-
-        - name: get mgmt interface config
-          set_fact:
-            mgmt_int: "{{ jsondata.System.mgmt_intf }}"
+        - name: get mgmt int json
+          ansible.builtin.set_fact:
+            mgmt_int: "{{ running_config_data.json.System.mgmt_intf }}"
 
         - name: add mgmt int config to generated config
           ansible.utils.update_fact:
