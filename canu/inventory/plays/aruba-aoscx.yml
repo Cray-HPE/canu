@@ -8,15 +8,15 @@
     # pass in the folder containing the switch configs or be in the same directory
     config_folder: ""
     switch_config: "{{ config_folder }}/{{ inventory_hostname }}.cfg"
-    login_url: "https://{{ ansible_host }}/rest/v1/login"
-    dryrun_url: "https://{{ ansible_host }}/rest/v1/configs/running-config?dryrun"
+    login_url: "https://{{ ansible_host }}/rest/v10.09/login"
+    dryrun_url: "https://{{ ansible_host }}/rest/v10.09/configs/running-config?dryrun"
     checkpoint_name: "ac_{{ ansible_date_time.year }}_{{ ansible_date_time.month }}_{{ ansible_date_time.day }}_{{ansible_date_time.hour }}_{{ ansible_date_time.minute }}_{{ ansible_date_time.second }}"
-    checkpoint_url: "https://{{ ansible_host }}/rest/v1/fullconfigs/{{ checkpoint_name }}?from=/rest/v1/fullconfigs/running-config"
-    configs_url: "https://{{ ansible_host }}/rest/v1/fullconfigs"
+    checkpoint_url: "https://{{ ansible_host }}/rest/v10.09/fullconfigs/{{ checkpoint_name }}?from=/rest/v10.09/fullconfigs/running-config"
+    configs_url: "https://{{ ansible_host }}/rest/v10.09/fullconfigs"
     munged_banner: "Adjusted by Ansible for checkpoint: {{ checkpoint_name }}"
-    pseudo_checkpoint_url: "https://{{ ansible_host }}/rest/v1/fullconfigs/{{ checkpoint_name }}"
+    pseudo_checkpoint_url: "https://{{ ansible_host }}/rest/v10.09/fullconfigs/{{ checkpoint_name }}"
     validated_config_json: "{{ playbook_dir }}/{{ inventory_hostname }}_{{ checkpoint_name }}.json"
-    logout_url: "https://{{ ansible_host }}/rest/v1/logout"
+    logout_url: "https://{{ ansible_host }}/rest/v10.09/logout"
     running_config_url: "https://{{ ansible_host }}/rest/v10.09/configs/running-config"
   tasks:
     - name: get running config as json
@@ -127,15 +127,37 @@
             ansible_connection: network_cli
           aoscx_command:
             commands:
+              - checkpoint auto confirm
               - checkpoint auto 1
 
         # Finally, upload the new config as the running-config
-        - name: upload local json config to the running-config
+        - name: upload local json config to the startup-config
           aoscx_upload_config:
-            config_name: "running-config"
+            config_name: "startup-config"
             config_json: "{{ validated_config_json }}"
             vrf: "mgmt"
-          timeout: 30
+          timeout: 15
+
+        - name: get diff between running-config and startup-config
+          register: diff
+          vars:
+            ansible_connection: network_cli
+          aoscx_command:
+            commands:
+              - checkpoint diff startup-config running-config
+
+        - name: diff output
+          debug:
+            msg: "{{ item }}"
+          with_items: "{{ diff['stdout'] }}"
+
+        # copy startup-config to running-config if there are changes needed.
+        - name: Copy startup-config to running-config
+          arubanetworks.aoscx.aoscx_checkpoint:
+            destination_config: running-config
+            source_config: startup-config
+          timeout: 15
+          when: diff.stdout[0] != "No difference in configs."
 
         # Accept the checkpoint
         - name: confirm checkpoint "checkpoint auto confirm"
