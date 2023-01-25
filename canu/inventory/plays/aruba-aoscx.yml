@@ -11,16 +11,13 @@
     login_url: "https://{{ ansible_host }}/rest/v10.09/login"
     dryrun_url: "https://{{ ansible_host }}/rest/v10.09/configs/running-config?dryrun"
     checkpoint_name: "ac_{{ ansible_date_time.year }}_{{ ansible_date_time.month }}_{{ ansible_date_time.day }}_{{ansible_date_time.hour }}_{{ ansible_date_time.minute }}_{{ ansible_date_time.second }}"
-    checkpoint_url: "https://{{ ansible_host }}/rest/v10.09/fullconfigs/{{ checkpoint_name }}?from=/rest/v10.09/fullconfigs/running-config"
     configs_url: "https://{{ ansible_host }}/rest/v10.09/fullconfigs"
-    munged_banner: "Adjusted by Ansible for checkpoint: {{ checkpoint_name }}"
-    pseudo_checkpoint_url: "https://{{ ansible_host }}/rest/v10.09/fullconfigs/{{ checkpoint_name }}"
     validated_config_json: "{{ playbook_dir }}/{{ inventory_hostname }}_{{ checkpoint_name }}.json"
     logout_url: "https://{{ ansible_host }}/rest/v10.09/logout"
     running_config_url: "https://{{ ansible_host }}/rest/v10.09/configs/running-config"
   tasks:
     - name: get running config as json
-      arubanetworks.aoscx.aoscx_backup_config:
+      aoscx_backup_config:
         config_name: "running-config"
         output_file: "{{ inventory_hostname }}.json"
 
@@ -114,7 +111,6 @@
                 value: "{{ mgmt_int }}"
           register: updated_config
 
-        # # TODO: Technically, we should do another dry run here to validate there is no garbage in the config
         - name: write jsonified config to a local file
           ansible.builtin.copy:
             content: "{{ updated_config.original_config | to_json(indent=4) }}"
@@ -127,7 +123,7 @@
             ansible_connection: network_cli
           aoscx_command:
             commands:
-              - checkpoint auto confirm
+              - checkpoint auto confirm # accept lingering checkpoints, ran into issues after uploadding full json conifg
               - checkpoint auto 1
 
         # Finally, upload the new config as the running-config
@@ -146,6 +142,7 @@
             commands:
               - checkpoint diff startup-config running-config
 
+        # print cli diff output
         - name: diff output
           debug:
             msg: "{{ item }}"
@@ -153,7 +150,7 @@
 
         # copy startup-config to running-config if there are changes needed.
         - name: Copy startup-config to running-config
-          arubanetworks.aoscx.aoscx_checkpoint:
+          aoscx_checkpoint:
             destination_config: running-config
             source_config: startup-config
           timeout: 15
@@ -169,15 +166,14 @@
           retries: 5
           delay: 5 # Every 5 seconds
 
-        # Save the config
+        # Save the config.  Shouldn't need this but just incase.
         - name: Save the configuration "write memory"
           vars:
             ansible_connection: network_cli
           aoscx_command:
             commands:
               - write memory
-          retries: 5
-          delay: 5 # Every 5 seconds
+          when: diff.stdout[0] != "No difference in configs."
 
       # always log out so no session is left open
       always:
