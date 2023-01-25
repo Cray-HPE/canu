@@ -1332,7 +1332,7 @@ When running the playbook you may need to input the full path to `canu-inventory
 
 ```bash
 # example
-ansible-playbook -i /Users/lucasbates/canu-container/venv/bin/canu-inventory /Users/lucasbates/canu-container/canu/canu/inventory/plays/aruba-aoscx.yml -e config_folder=/Users/lucasbates/canu-container/canu
+ansible-playbook -i /Users/bin/canu-inventory /Users/bin/canu/inventory/plays/aruba-aoscx.yml -e config_folder=/Users/canu
 ```
 
 If using the API, `$TOKEN` or `$SLS_TOKEN` need to be set.
