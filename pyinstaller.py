@@ -97,13 +97,22 @@ added_files = [
         "network_modeling/configs/templates/1.3/dellmellanox/full/*.j2",
         "network_modeling/configs/templates/1.3/dellmellanox/full",
     ),
-    ("canu/test/aruba/test_suite.yaml", "canu/test/aruba"),
-    ("canu/test/dellanox/test_suite.yaml", "canu/test/dellanox"),
+    (
+        "canu/test/aruba/test_suite.yaml", 
+        "canu/test/aruba"
+    ),
+    (
+        "canu/test/dellanox/test_suite.yaml",
+        "canu/test/dellanox"
+    ),
     (
         "canu/generate/switch/config/ttp_templates/*.txt",
         "canu/generate/switch/config/ttp_templates",
     ),
-    ("canu/utils/sls_utils/schemas/*.json", "canu/utils/sls_utils/schemas"),
+    (
+        "canu/utils/sls_utils/schemas/*.json",
+        "canu/utils/sls_utils/schemas"
+    ),
 ]
 a = Analysis(
     ["canu/cli.py"],
@@ -119,9 +128,9 @@ a = Analysis(
     cipher=block_cipher,
     noarchive=False,
 )
-pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
-exe = EXE(
-    pyz,
+a_pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+a_exe = EXE(
+    a_pyz,
     a.scripts,
     a.binaries,
     a.zipfiles,
@@ -129,10 +138,57 @@ exe = EXE(
     [],
     name="canu",
     debug=False,
-    bootloader_ignore_signals=False,
+    bootloader_ignore_signal=False,
     strip=False,
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
     console=True,
 )
+
+
+b = Analysis(
+    ["canu/inventory/ansible.py"],
+    pathex=["canu"],
+    binaries=[],
+    datas=added_files,
+    hiddenimports=["network_modeling"],
+    hookspath=["./pyinstaller_hooks"],
+    runtime_hooks=[],
+    excludes=["tests"],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
+    noarchive=False,
+)
+
+b_pyz = PYZ(b.pure, b.zipped_data, cipher=block_cipher)
+b_exe = EXE(
+    b_pyz,
+    b.scripts,
+    b.binaries,
+    b.zipfiles,
+    b.datas,
+    [],
+    name="canu-inventory",
+    debug=False,
+    bootloader_ignore_signal=False,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    runtime_tmpdir=None,
+    console=True,
+)
+
+coll = COLLECT(
+    b_exe,
+    b.binaries,
+    b.zipfiles,
+    b.datas,
+    a_exe,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    name="canupkg",
+)
+

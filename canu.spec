@@ -54,6 +54,7 @@ chown -R --reference=. ./dist/linux
 %install
 mkdir -p %{buildroot}%{_bindir}
 install -m 755 dist/linux/canu %{buildroot}%{_bindir}/canu
+install -m 755 dist/linux/canu-inventory %{buildroot}%{_bindir}/canu-inventory
 
 %pre
 getent passwd canu >/dev/null || \
@@ -61,6 +62,7 @@ getent passwd canu >/dev/null || \
 
 %files
 %attr(755, canu, canu) %{_bindir}/canu
+%attr(755, canu, canu) %{_bindir}/canu-inventory
 %license LICENSE
 
 %changelog

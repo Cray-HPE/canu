@@ -28,12 +28,16 @@ import click
 from canu.utils.sls import pull_sls_hardware, pull_sls_networks
 
 
-def inventory(username, password, network, sls_file=None, sls_inventory=None):
+def inventory(username, password, network, sls_file=None, sls_inventory=None, dumpstate=None):
     """Build Nornir inventory from sls_input."""
     inventory = {"groups": {}, "hosts": {}}
     if sls_file:
         try:
-            sls_json = json.load(sls_file)
+            if dumpstate:
+                with open(sls_file.name, 'r', encoding='utf-8') as f:
+                    sls_json = json.load(f)
+            else:
+                sls_json = json.load(sls_file)
         except (json.JSONDecodeError, UnicodeDecodeError):
             click.secho(
                 f"The file {sls_file.name} is not valid JSON.",
@@ -42,6 +46,9 @@ def inventory(username, password, network, sls_file=None, sls_inventory=None):
             sys.exit(1)
         sls_variables = pull_sls_networks(sls_json)
         sls_hardware = pull_sls_hardware(sls_json)
+    elif dumpstate:
+        sls_variables = pull_sls_networks(dumpstate)
+        sls_hardware = pull_sls_hardware(dumpstate)
     else:
         sls_variables = pull_sls_networks()
         sls_hardware = pull_sls_hardware()

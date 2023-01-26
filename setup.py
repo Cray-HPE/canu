@@ -133,6 +133,7 @@ setup(
         ],
         "test": [
             "coverage",
+            "mock",
             "py>==1.11.0",
             "pytest<7.2.1",
             "pytest-cov",
@@ -183,6 +184,9 @@ setup(
         'yamale<=4.0.2',
     ],
     entry_points={
-        "console_scripts": ["canu=canu.cli:cli"],
+        "console_scripts": [
+          "canu=canu.cli:cli",
+          "canu-inventory=canu.inventory.ansible:ansible_inventory"
+          ],
     },
 )

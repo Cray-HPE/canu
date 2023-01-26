@@ -427,7 +427,7 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False, node_type=
             warnings["shcd_port_data"].append(f"{sheet}:{location}")
             log.warning(
                 'Prepending the character "j" to a port will not be allowed in the future. '
-                + f"Please correct cell {sheet}:{location} in the SHCD with value {port}",
+                + f'Please correct cell {sheet}:{location} in the SHCD with value "{port}"',
             )
             port = port[1:]
         # For SubRacks
@@ -436,14 +436,14 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False, node_type=
         if re.search(r"\D", port) is not None:
             click.secho(
                 "Port numbers must be integers. "
-                + f'Please correct in the SHCD for cell {sheet}:{location} with value "{port}"',
+                + f'Please correct in the SHCD for cell {sheet}:{location} with value "{port!r}"',
                 fg="red",
             )
             sys.exit(1)
         if int(port) < 1:
             click.secho(
                 "Ports numbers must be greater than 1. Port numbering must begin at 1. "
-                + f'Please correct in the SHCD for cell {sheet}:{location} with value "{port}"',
+                + f'Please correct in the SHCD for cell {sheet}:{location} with value "{port!r}"',
                 fg="red",
             )
             sys.exit(1)
