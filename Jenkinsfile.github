@@ -2,7 +2,7 @@
  *
  *  MIT License
  *
- *  (C) Copyright 2021-2022 Hewlett Packard Enterprise Development LP
+ *  (C) Copyright 2021-2023 Hewlett Packard Enterprise Development LP
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a
  *  copy of this software and associated documentation files (the "Software"),
@@ -56,11 +56,17 @@ pipeline {
                 agent {
                     node {
                         label "metal-gcp-builder"
-                        customWorkspace "${env.WORKSPACE}/${sleVersion}/${pythonVersion}"
+                        customWorkspace "${env.WORKSPACE}/${sleVersion}/${architecture}/${pythonVersion}"
                     }
                 }
 
                 axes {
+
+                    axis {
+                        name 'architecture'
+                        values 'x86_64'
+                    }
+
                     axis {
                         name 'sleVersion'
                         values 15.3, 15.4
@@ -89,8 +95,10 @@ pipeline {
                     stage('Build: RPMs') {
 
                         environment {
+                            ARCH = "${architecture}"
                             PYTHON_VERSION = "${pythonVersion}"
                         }
+
                         agent {
                             docker {
                                 label "metal-gcp-builder"
@@ -131,10 +139,10 @@ pipeline {
                                 sles_major = "${sles_version_parts[0]}"
                                 sles_minor = "${sles_version_parts[1]}"
                                 publishCsmRpms(
-                                        arch: "x86_64", isStable: isStable,
+                                        arch: "${architecture}", isStable: isStable,
                                         component: env.NAME,
                                         os: "sle-${sles_major}sp${sles_minor}",
-                                        pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm",
+                                        pattern: "dist/rpmbuild/RPMS/${architecture}/*.rpm",
                                 )
                                 publishCsmRpms(
                                         arch: "src",

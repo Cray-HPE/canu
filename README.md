@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.32
+# 🛶 CANU
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -27,7 +27,7 @@ To checkout a fresh system using CSI:
   ```
 
 1. Parse CSI files and save switch IP addresses
-
+   
     ```bash
     canu init --sls-file sls_input_file.json --out ips.txt`
     ```
@@ -180,8 +180,8 @@ In order to run CANU, both python3 and pip3 need to be installed.
       ```bash
       python3 -m venv .venv
       source ./.venv/bin/activate
+      python3 -m pip install 'setuptools_scm[toml]'
       python3 -m pip install .
-      python3 -m pip install .[network_modeling]
       ```
 
   - When you are done working in the Python Virtualenv.
@@ -203,23 +203,39 @@ In order to run CANU, both python3 and pip3 need to be installed.
 
 ### Versioning
 
-- (stable) Production/stable copies will report an `X.Y.Z` version:
+The version is derived from Git by the `setuptools_scm` Python module.
 
-  ```bash
-  canu, version 1.6.20
-  ```
+- (stable) No distance and clean; the build came from a commit with a git-tag and the repository folder had no modified files.
 
-- (unstable) Feature/bugfix branches will report an `X.Y.Z.postA` version:
+    ```bash
+    # Format:     {tag}
+    canu, version 1.6.28
+    ```
+  
+- (unstable) Distance and clean; the build came from a commit that is after a git-tag, and the repository folder had no modified files.
 
-  ```bash
-  canu, version 1.6.20.post1
-  ```
+    ```bash
+    # Format       {tag}.post1.dev{distance}+{scm letter}{revision hash}
+    canu, version 1.6.28.post1.dev14+g818da8a
+    ```
 
-- (unstable/dev) Development builds with uncommitted changes present report an `X.Y.Z.postA.dev1` version:
+- (unstable/dev) Distance and not clean; the build came from a commit that has a git-tag, and the repository had modified changes.
 
-  ```bash
-  canu, version 1.6.20.post1.dev1
-  ```
+    ```bash
+    # Format       {tag}.dYYYYMMDD
+    canu, version 1.6.28.d20230123
+    ```
+
+- (unstable/dev) Distance and clean; the build came from a commit that is after a git-tag, and the repository had modified changes.
+
+    ```bash
+    # Format       {tag}.post1.dev{distance}+{scm letter}{revision hash}.dYYYYMMDD
+    canu, version 1.6.28.post1.dev3+g3071655.d20230123
+    ```
+
+The `setuptools_scm` module is configured by `pyproject.toml`.
+
+More information about versioning, see [version number construction](https://github.com/pypa/setuptools_scm#version-number-construction).
 
 ## Usage
 
@@ -346,7 +362,7 @@ To get the JSON output from a single switch, or from multiple switches, make sur
 ```bash
 canu network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --json
 ```
-
+           
 Potential output:
 
 ```json
@@ -1408,7 +1424,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## [1.6.27]
 
-- Fix login node shasta name for v1 architecture.
+- Fix login node shasta name for v1 architecture
 
 ## [1.6.26]
 
