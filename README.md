@@ -1365,9 +1365,13 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
+## [1.6.31]
+
+- Modify nmn-hmn ACL to block traffic between the NMNLB and HMNLB networks.
+
 ## [1.6.30]
 
-- - Modify nmn-hmn ACL to block traffic between the NMNLB and HMNLB networks.
+- Add the ability to generate NMN configs for application nodes (v1 architecture).
 
 ## [1.6.29]
 
