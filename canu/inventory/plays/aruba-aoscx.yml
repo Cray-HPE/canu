@@ -8,18 +8,16 @@
     # pass in the folder containing the switch configs or be in the same directory
     config_folder: ""
     switch_config: "{{ config_folder }}/{{ inventory_hostname }}.cfg"
-    login_url: "https://{{ ansible_host }}/rest/v1/login"
-    dryrun_url: "https://{{ ansible_host }}/rest/v1/configs/running-config?dryrun"
+    login_url: "https://{{ ansible_host }}/rest/v10.09/login"
+    dryrun_url: "https://{{ ansible_host }}/rest/v10.09/configs/running-config?dryrun"
     checkpoint_name: "ac_{{ ansible_date_time.year }}_{{ ansible_date_time.month }}_{{ ansible_date_time.day }}_{{ansible_date_time.hour }}_{{ ansible_date_time.minute }}_{{ ansible_date_time.second }}"
-    checkpoint_url: "https://{{ ansible_host }}/rest/v1/fullconfigs/{{ checkpoint_name }}?from=/rest/v1/fullconfigs/running-config"
-    configs_url: "https://{{ ansible_host }}/rest/v1/fullconfigs"
-    munged_banner: "Adjusted by Ansible for checkpoint: {{ checkpoint_name }}"
-    pseudo_checkpoint_url: "https://{{ ansible_host }}/rest/v1/fullconfigs/{{ checkpoint_name }}"
+    configs_url: "https://{{ ansible_host }}/rest/v10.09/fullconfigs"
     validated_config_json: "{{ playbook_dir }}/{{ inventory_hostname }}_{{ checkpoint_name }}.json"
-    logout_url: "https://{{ ansible_host }}/rest/v1/logout"
+    logout_url: "https://{{ ansible_host }}/rest/v10.09/logout"
+    running_config_url: "https://{{ ansible_host }}/rest/v10.09/configs/running-config"
   tasks:
     - name: get running config as json
-      arubanetworks.aoscx.aoscx_backup_config:
+      aoscx_backup_config:
         config_name: "running-config"
         output_file: "{{ inventory_hostname }}.json"
 
@@ -83,26 +81,99 @@
           when: _result.json.state == "error"
           failed_when: _result.json.state == "error"
 
-        # Begin munging operations
-        # Per the aruba docs, it's not possible to have two checkpoints with the same configuration
-        # Thus, a checkpoint with this exact JSON cannot be used as a new checkpoint or it is detected as a duplicate
-        # As a workaround, one semi-harmless key is modified--the banner
-        # Changing this makes the config different from the running config without any operational side-effects
-        - name: begin munging by setting facts using the existing config
+        - name: get generated config in json format
           ansible.builtin.set_fact:
             original_config: "{{ _result.json.configs.json }}"
 
-        # # TODO: Technically, we should do another dry run here to validate there is no garbage in the config
+        # Get the mgmt interface config from the running-config and apply it to the generated config.
+        # This should prevent users from accidentally locking themselves out.
+        # We can't get query the API direclty for the mgmt interface config because
+        # there are additional fields added that won't work when we upload the running-config json payload.
+        - name: get mgmt int config from running config
+          ansible.builtin.uri:
+            url: "{{ running_config_url }}"
+            validate_certs: false
+            use_proxy: false
+            method: GET
+            return_content: true
+            headers:
+              Cookie: "{{ login.set_cookie }}"
+          register: running_config_data
+
+        - name: get mgmt int json
+          ansible.builtin.set_fact:
+            mgmt_int: "{{ running_config_data.json.System.mgmt_intf }}"
+
+        - name: add mgmt int config to generated config
+          ansible.utils.update_fact:
+            updates:
+              - path: original_config.System.mgmt_intf
+                value: "{{ mgmt_int }}"
+          register: updated_config
+
         - name: write jsonified config to a local file
           ansible.builtin.copy:
-            content: "{{ original_config | to_json(indent=4) }}"
+            content: "{{ updated_config.original_config | to_json(indent=4) }}"
             dest: "{{ validated_config_json }}"
 
+        # set checkpoint for 1 minute.
+        # This play uses ssh instead of the default api.
+        - name: set checkpoint for one minute "checkpoint auto 1"
+          vars:
+            ansible_connection: network_cli
+          aoscx_command:
+            commands:
+              - checkpoint auto confirm # accept lingering checkpoints, ran into issues after uploadding full json conifg
+              - checkpoint auto 1
+
         # Finally, upload the new config as the running-config
-        - name: upload local json config to the running-config
+        - name: upload local json config to the startup-config
           aoscx_upload_config:
-            config_name: "running-config"
+            config_name: "startup-config"
             config_json: "{{ validated_config_json }}"
+            vrf: "mgmt"
+          timeout: 15
+
+        - name: get diff between running-config and startup-config
+          register: diff
+          vars:
+            ansible_connection: network_cli
+          aoscx_command:
+            commands:
+              - checkpoint diff startup-config running-config
+
+        # print cli diff output
+        - name: diff output
+          debug:
+            msg: "{{ item }}"
+          with_items: "{{ diff['stdout'] }}"
+
+        # copy startup-config to running-config if there are changes needed.
+        - name: Copy startup-config to running-config
+          aoscx_checkpoint:
+            destination_config: running-config
+            source_config: startup-config
+          timeout: 15
+          when: diff.stdout[0] != "No difference in configs."
+
+        # Accept the checkpoint
+        - name: confirm checkpoint "checkpoint auto confirm"
+          vars:
+            ansible_connection: network_cli
+          aoscx_command:
+            commands:
+              - checkpoint auto confirm
+          retries: 5
+          delay: 5 # Every 5 seconds
+
+        # Save the config.  Shouldn't need this but just incase.
+        - name: Save the configuration "write memory"
+          vars:
+            ansible_connection: network_cli
+          aoscx_command:
+            commands:
+              - write memory
+          when: diff.stdout[0] != "No difference in configs."
 
       # always log out so no session is left open
       always:
