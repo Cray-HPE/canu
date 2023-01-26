@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2022 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -25,7 +25,7 @@
 %define __pyinstaller /home/jenkins/.local/bin/pyinstaller
 
 Name: %(echo $NAME)
-BuildArch: x86_64
+BuildArch: %(echo $ARCH)
 License: MIT License
 Summary: CSM Automatic Network Utility
 Version: %(echo $VERSION)
@@ -42,8 +42,8 @@ Vendor: Cray HPE
 %build
 %{__python} -m pip install -U pyinstaller
 %{__python} -m pip install -q build
-%{__python} -m build
-%{__python} -m pip install dist/%{name}*.tar.gz
+%{__python} -m build --wheel
+%{__python} -m pip install dist/%{name}*.whl
 
 cp -pv pyinstaller.py pyinstaller.spec
 
