@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.29
+# 🛶 CANU v1.6.32
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1377,7 +1377,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [1.6.30]
+## [1.6.32]
 
 - Updated Aruba ansible playbook and documentation.
 - Added ansible play to retain mgmt interface configuration.  This will help avoid lockouts.
