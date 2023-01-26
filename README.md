@@ -1,4 +1,4 @@
-# 🛶 CANU v1.6.31
+# 🛶 CANU v1.6.30
 
 CANU (CSM Automatic Network Utility) will float through a Shasta network and make switch setup and validation a breeze.
 
@@ -1365,7 +1365,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 # Changelog
 
-## [1.6.31]
+## [1.6.30]
 
 - Add the ability to generate NMN configs for application nodes (v1 architecture).
 
