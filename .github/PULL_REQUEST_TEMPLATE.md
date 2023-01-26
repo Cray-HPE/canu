@@ -11,7 +11,6 @@ PR checklist (you may replace this section):
 - [ ] My code follows the style guidelines of this project
 - [ ] If adding a new file, I have updated `pyinstaller.py`
 - [ ] I have updated the appropriate Changelog entries in `README.md`
-- [ ] I have incremented the version in the `README.md`
 
 ### Issues and Related PRs
 
