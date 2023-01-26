@@ -1369,6 +1369,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 - Added dynamic ansible inventory script, installed as `canu-inventory`.
 - Added a playbook to validate/upload a config.
+- Add viz node to v1 architecture
 
 ## [1.6.28]
 
