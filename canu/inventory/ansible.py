@@ -368,6 +368,31 @@ def get_aruba_vars(datasource=None, hostname=None):
         ]
 
 
+def get_dellos10_vars(datasource=None, hostname=None):
+    """Get extra variables needed by Aruba ansible modules.
+
+    Args:
+        datasource : Data from the datasource.
+        hostname : The hostname to query.
+
+    Returns:
+        The ansible user defined in the datasource.
+    """
+    # aruba needs extra variables for ansible community module
+    if "dell" in datasource["options"]["hosts"][hostname]["groups"]:
+        # arubanetworks.aoscx.aoscx for API
+        # network_cli for CLI/SSH
+        # httpapi legacy
+        ansible_network_os = "dellemc.os10.os10"
+        ansible_connection = "network_cli"
+
+        return [
+            {"ansible_network_os": ansible_network_os},
+            {"ansible_connection": ansible_connection},
+            {"authorize": True},
+        ]
+
+
 def ansible_host(datasource=None, hostname=None):
     """Print a specific host inventory in JSON.
 
@@ -408,6 +433,11 @@ def ansible_hostvars(datasource=None, hostname=None):
     if "aruba" in ansible_inventory["groups"]:
         aruba_vars = get_aruba_vars(datasource, hostname)
         for var in aruba_vars:
+            ansible_inventory.update(var)
+
+    if "dell" in ansible_inventory["groups"]:
+        dell_vars = get_dellos10_vars(datasource, hostname)
+        for var in dell_vars:
             ansible_inventory.update(var)
 
     return ansible_inventory

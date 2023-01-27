@@ -1,0 +1,25 @@
+---
+- hosts: sw-cdu-001
+  collections:
+    - dellemc.os10
+  gather_facts: true
+  vars:
+    # This should be a template but for now, pass is an extra var path to whatever config is needed
+    # pass in the folder containing the switch configs or be in the same directory
+    config_folder: ""
+    switch_config: "{{ config_folder }}/{{ inventory_hostname }}.cfg"
+
+  tasks:
+    - name: dry run
+      os10_config:
+        src: "{{ switch_config }}"
+        match: none
+        update: check
+
+    # - name: upload config
+    #   os10_config:
+    #     src: "{{ switch_config }}"
+    #     match: line
+    #     update: check
+    #   vars:
+    #     ansible_command_timeout: 600

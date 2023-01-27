@@ -982,6 +982,8 @@ def generate_switch_config(
             hier_v1.set_order_weight()
             for line in hier_v1.all_children_sorted():
                 switch_config_v1 += line.cisco_style_text() + "\n"
+            # for line in switch_config.split("\n"):
+            #     switch_config_v1 += line + "\n"
 
         if preserve:
             preserve_lag_config = add_preserve_config(switch_config_v1)
@@ -1414,7 +1416,12 @@ def get_switch_nodes(
 
             # sw-cdu ==> sw-spine
             elif switch_name.startswith("sw-cdu"):
-                lag_number = 255
+                # dell has a max lag number of 128.
+                # We are keeping 255 for Aruba so we don't have to renumber LAGs.
+                if architecture == "network_v1":
+                    lag_number = 110
+                else:
+                    lag_number = 255
                 is_primary, primary, secondary = switch_is_primary(switch_name)
 
             # sw-leaf-bmc ==> sw-spine
