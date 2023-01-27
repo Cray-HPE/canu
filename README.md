@@ -205,28 +205,28 @@ In order to run CANU, both python3 and pip3 need to be installed.
 
 The version is derived from Git by the `setuptools_scm` Python module.
 
-- (stable) No distance and clean; the build came from a commit with a git-tag and the repository folder had no modified files.
+- **(stable)** No distance and clean; the build came from a commit with a git-tag and the repository folder had no modified files.
 
     ```bash
     # Format:     {tag}
     canu, version 1.6.28
     ```
-  
-- (unstable) Distance and clean; the build came from a commit that is after a git-tag, and the repository folder had no modified files.
+
+- **(unstable)** Distance and clean; the build came from a commit that is after a git-tag, and the repository folder had no modified files.
 
     ```bash
     # Format       {tag}.post1.dev{distance}+{scm letter}{revision hash}
     canu, version 1.6.28.post1.dev14+g818da8a
     ```
 
-- (unstable/dev) Distance and not clean; the build came from a commit that has a git-tag, and the repository had modified changes.
+- **(unstable/dev)** No distance and not clean; the build came from a commit that has a git-tag, and the repository had uncommitted changes.
 
     ```bash
     # Format       {tag}.dYYYYMMDD
     canu, version 1.6.28.d20230123
     ```
 
-- (unstable/dev) Distance and clean; the build came from a commit that is after a git-tag, and the repository had modified changes.
+- **(unstable/dev)** Distance and not clean; the build came from one or more commits after a git-tag, and the repository had uncommitted changes.
 
     ```bash
     # Format       {tag}.post1.dev{distance}+{scm letter}{revision hash}.dYYYYMMDD
