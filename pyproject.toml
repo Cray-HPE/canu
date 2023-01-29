@@ -134,7 +134,6 @@ readme = { file = ['README.md'], content-type = 'text/markdown' }
 
 # Allows for dynamic versioning via git-tag.
 [tool.setuptools_scm]
-version_scheme = 'no-guess-dev'
 
 [build-system]
 build-backend = 'setuptools.build_meta'

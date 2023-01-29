@@ -28,7 +28,11 @@
 def mainSleVersion = '15.4'
 def pythonImage = 'artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python'
 def pythonVersion = '3.10.8'
-def isStable = env.TAG_NAME != null ? true : false
+
+// Only consider X.Y.Z tags as stable, do not consider X.Y.Z{[a|b|rc]N} or X.Y.Z.* tags as stable.
+// The ==~ operator performs an exact match.
+def stableToken = ~/v?\d+\.\d+\.\d+/
+def isStable = (env.TAG_NAME != null & env.TAG_NAME ==~ stableToken) ? true : false
 pipeline {
     agent {
         label "metal-gcp-builder"
@@ -113,6 +117,7 @@ pipeline {
 
                     stage('Build: Image') {
                         when {
+                            // This could be removed if we published CANU images with the SLES version in the tag, or if we just built for one distro.
                             expression { "${sleVersion}" == "${mainSleVersion}" }
                         }
                         steps {
@@ -121,8 +126,10 @@ pipeline {
                             }
                         }
                     }
+
                     stage('Publish: Image') {
                         when {
+                            // This could be removed if we published CANU images with the SLES version in the tag, or if we just built for one distro
                             expression { "${sleVersion}" == "${mainSleVersion}" }
                         }
                         steps {
@@ -131,6 +138,7 @@ pipeline {
                             }
                         }
                     }
+
                     stage('Publish: RPMs') {
 
                         steps {
