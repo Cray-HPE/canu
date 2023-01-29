@@ -21,9 +21,14 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 #
-%global __python /usr/local/bin/python3.10
-%define __pyinstaller /home/jenkins/.local/bin/pyinstaller
 
+# Define which Python flavors python-rpm-macros will use (this can be a list).
+# https://github.com/openSUSE/python-rpm-macros#terminology
+%define pythons %(echo $PYTHON_VERSION)
+
+# python310-devel is not listed because our build environments install Python from source and not from OS packaging.
+BuildRequires: python-rpm-generators
+BuildRequires: python-rpm-macros
 Name: %(echo $NAME)
 BuildArch: %(echo $ARCH)
 License: MIT License
@@ -34,20 +39,29 @@ Source: %{name}-%{version}.tar.bz2
 Vendor: Cray HPE
 
 %description
-%{summary}
+A network device configuration and firmware utility. Designed for use on Cray-HPE Shasta systems, canu
+will faciliate paddling through network topology plumbing.
 
 %prep
 %setup -q
 
 %build
-%{__python} -m pip install -U pyinstaller
-%{__python} -m pip install -q build
-%{__python} -m build --wheel
-%{__python} -m pip install dist/%{name}*.whl
+# Install pyinstaller for our onefile binary.
+%python_exec -m pip install -U pyinstaller
+
+# Install setuptools_scm[toml] so any context in this RPM build can resolve the module version.
+%python_exec -m pip install -U setuptools_scm[toml]
+
+# Build a wheel is built.
+%pyproject_wheel
+
+# Build a source distribution.
+%python_exec -m pip install -U build
+%python_exec -m build --sdist
 
 cp -pv pyinstaller.py pyinstaller.spec
 
-%{__pyinstaller} --clean -y --dist ./dist/linux --workpath /tmp pyinstaller.spec
+pyintaller --clean -y --dist ./dist/linux --workpath /tmp pyinstaller.spec
 rm pyinstaller.spec
 chown -R --reference=. ./dist/linux
 

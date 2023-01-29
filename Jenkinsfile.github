@@ -27,7 +27,7 @@
 
 def mainSleVersion = '15.4'
 def pythonImage = 'artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python'
-def pythonVersion = '3.10.8'
+def pythonVersion = '3.10'
 
 // Only consider X.Y.Z tags as stable, do not consider X.Y.Z{[a|b|rc]N} or X.Y.Z.* tags as stable.
 // The ==~ operator performs an exact match.
@@ -100,11 +100,12 @@ pipeline {
 
                         environment {
                             ARCH = "${architecture}"
-                            PYTHON_VERSION = "${pythonVersion}"
+                            PYTHON_VERSION = "python${pythonVersion}"
                         }
 
                         agent {
                             docker {
+                                args '-u root' // Build Python RPMs as root for Python rpm macros to build with the right sitelib.
                                 label "metal-gcp-builder"
                                 reuseNode true
                                 image "${pythonImage}:${pythonVersion}-SLES${sleVersion}"
