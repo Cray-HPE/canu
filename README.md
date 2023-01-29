@@ -164,7 +164,7 @@ and dependency specification for [final](https://peps.python.org/pep-0440/#final
 The items below denote how stable, pre-release, and unstable versions are classified through
 version strings.
 
-* *release (stable)* A git-tag following the `X.Y.Z` semver format, a release that is considered a stable release.
+* ***(stable) final release***: A git-tag following the `X.Y.Z` semver format is considered a final release version.
 
     ```text
     # Format:
@@ -176,9 +176,10 @@ version strings.
     0.1.2
     ```
 
-- ***pre-release (unstable)*** A git-tag with an `a`(lpha), `b`(eta), or `r`(elease) `c`(andidate) annotation and a pre-release number `N`.
+- ***(unstable) pre-release***: A git-tag with an `a`(lpha), `b`(eta), or `r`(elease) `c`(andidate) annotation and an identification number `N` denotes a pre-release/preview.
 
-  > For `canu`, these are sometimes created before an official release (e.g. 1.7.0a1 might exist before 1.7.0 is released). Additionally the beta and release candidate tags may be skipped.
+  > For `canu`, these are sometimes created before an official release (e.g. 1.7.0a1 might exist before 1.7.0 is released).
+  > Additionally the beta and release candidate tags may be skipped.
   > Whether an alpha, beta, or release candidate pre-release is taken is entirely up to the `canu` release management team.
 
     ```text
@@ -189,7 +190,7 @@ version strings.
     0.1.2rc1
     ```
 
-- ***development (unstable)*** Development builds **auto-increment the micro version (the `Z` in `X.Y.Z`) or pre-release version (the `N` in `X.Y.Z{[a|b|rc]N}`), and
+- ***(unstable) development***: Development builds **auto-increment** the micro version (the `Z` in `X.Y.Z`) or pre-release version (the `N` in `X.Y.Z{[a|b|rc]N}`), and
   then append a suffix based on whether the working directory was **clean**, **dirty**, or **mixed**.
 
     - ***clean***: When the version shows an appended `devN+{scm_letter}{revision_short_hash}`, that means there have been commits made since the previous git-tag.
