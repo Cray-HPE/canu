@@ -25,9 +25,19 @@
  */
 @Library('csm-shared-library') _
 
-def mainSleVersion = '15.4'
+def mainPythonVersion = '3.10'
 def pythonImage = 'artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python'
-def pythonVersion = '3.10'
+def sleVersion
+def sles_version_parts
+def sles_major
+def sles_minor
+
+// Disable pr-merge builds; not used.
+if (env.BRANCH_NAME ==~ ~"^PR-\\d+") {
+    currentBuild.result = 'SUCCESS'
+    echo "Pull-Request builds are skipped."
+    return
+}
 
 // Only consider X.Y.Z tags as stable, do not consider X.Y.Z{[a|b|rc]N} or X.Y.Z.* tags as stable.
 // The ==~ operator performs an exact match.
@@ -47,8 +57,6 @@ pipeline {
 
     environment {
         NAME = getRepoName()
-        IMAGE_VERSION = sh(returnStdout: true, script: "git describe --tags | tr -s '-' '_' | tr -d '^v'").trim()
-        VERSION = sh(returnStdout: true, script: "git describe --tags | tr -s '-' '~' | tr -d '^v'").trim()
     }
 
     stages {
@@ -60,21 +68,22 @@ pipeline {
                 agent {
                     node {
                         label "metal-gcp-builder"
-                        customWorkspace "${env.WORKSPACE}/${sleVersion}/${architecture}/${pythonVersion}"
+                        customWorkspace "${env.WORKSPACE}/${ARCH}/${PYTHON_VERSION}"
                     }
                 }
 
                 axes {
 
                     axis {
-                        name 'architecture'
+                        name 'ARCH'
                         values 'x86_64'
                     }
 
                     axis {
-                        name 'sleVersion'
-                        values 15.3, 15.4
+                        name 'PYTHON_VERSION'
+                        values '3.10', '3.9'
                     }
+
                 }
 
                 stages {
@@ -85,22 +94,28 @@ pipeline {
                             docker {
                                 label "metal-gcp-builder"
                                 reuseNode true
-                                image "${pythonImage}:${pythonVersion}-SLES${sleVersion}"
+                                image "${pythonImage}:${PYTHON_VERSION}"
                             }
                         }
                         steps {
-                            // Inject distro-specific metadata (e.g. which distro and service pack).
-                            runLibraryScript("addRpmMetaData.sh", "${env.NAME}.spec")
-                            sh "make prepare"
-                            sh "git update-index --assume-unchanged ${env.NAME}.spec"
+                            script {
+                                // Use setuptools_scm to resolve the version(s) to use for the build.
+                                sh "python3 -m pip install setuptools_scm[toml]"
+                                image_version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '+' '_' | sed 's/^v//'").trim()
+                                version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | sed 's/^v//'").trim()
+
+                                // Inject distro-specific metadata (e.g. which distro and service pack).
+                                runLibraryScript("addRpmMetaData.sh", "${env.NAME}.spec")
+                                sh "make prepare"
+                                sh "git update-index --assume-unchanged ${env.NAME}.spec"
+                            }
                         }
                     }
 
                     stage('Build: RPMs') {
 
                         environment {
-                            ARCH = "${architecture}"
-                            PYTHON_VERSION = "python${pythonVersion}"
+                            VERSION = "${version}"
                         }
 
                         agent {
@@ -108,19 +123,24 @@ pipeline {
                                 args '-u root' // Build Python RPMs as root for Python rpm macros to build with the right sitelib.
                                 label "metal-gcp-builder"
                                 reuseNode true
-                                image "${pythonImage}:${pythonVersion}-SLES${sleVersion}"
+                                image "${pythonImage}:${PYTHON_VERSION}"
                             }
                         }
+
                         steps {
-                            sh "make rpm"
+                            script {
+                                sh "make rpm"
+                                sleVersion = sh(returnStdout: true, script: 'awk -F= \'/VERSION_ID/{gsub(/["]/,""); print \$NF}\' /etc/os-release').trim()
+                            }
                         }
                     }
 
                     stage('Build: Image') {
-                        when {
-                            // This could be removed if we published CANU images with the SLES version in the tag, or if we just built for one distro.
-                            expression { "${sleVersion}" == "${mainSleVersion}" }
+
+                        environment {
+                            IMAGE_VERSION = "${image_version}"
                         }
+
                         steps {
                             script {
                                 sh "make image"
@@ -129,13 +149,14 @@ pipeline {
                     }
 
                     stage('Publish: Image') {
-                        when {
-                            // This could be removed if we published CANU images with the SLES version in the tag, or if we just built for one distro
-                            expression { "${sleVersion}" == "${mainSleVersion}" }
-                        }
                         steps {
                             script {
-                                publishCsmDockerImage(image: "cray-${env.NAME}", tag: env.IMAGE_VERSION, isStable: isStable)
+                                publishCsmDockerImage(image: "cray-${env.NAME}", tag: "${image_version}-p${PYTHON_VERSION}", isStable: isStable)
+
+                                // Only publish the simple version images on the latest/newest base image.
+                                if ("${PYTHON_VERSION}" == "${mainPythonVersion}") {
+                                    publishCsmDockerImage(image: "cray-${env.NAME}", tag: "${image_version}", isStable: isStable)
+                                }
                             }
                         }
                     }
@@ -148,10 +169,11 @@ pipeline {
                                 sles_major = "${sles_version_parts[0]}"
                                 sles_minor = "${sles_version_parts[1]}"
                                 publishCsmRpms(
-                                        arch: "${architecture}", isStable: isStable,
+                                        arch: "${ARCH}",
                                         component: env.NAME,
+                                        isStable: isStable,
                                         os: "sle-${sles_major}sp${sles_minor}",
-                                        pattern: "dist/rpmbuild/RPMS/${architecture}/*.rpm",
+                                        pattern: "dist/rpmbuild/RPMS/${ARCH}/*.rpm",
                                 )
                                 publishCsmRpms(
                                         arch: "src",
@@ -165,6 +187,11 @@ pipeline {
                     }
                 }
             }
+        }
+    }
+    post {
+        always {
+            postChownFiles()
         }
     }
 }

@@ -22,28 +22,25 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 ifeq ($(NAME),)
-NAME := $(shell basename $(shell pwd))
+export NAME := $(shell basename $(shell pwd))
 endif
 
 ifeq ($(ARCH),)
-ARCH := x86_64
+export ARCH := x86_64
 endif
 
 ifeq ($(IMAGE_VERSION),)
-IMAGE_VERSION := $(shell git describe --tags | tr -s '-' '_' | tr -d '^v')
+export IMAGE_VERSION := $(shell python3 -m setuptools_scm | tr -s '+' '_' | tr -d '^v')
 endif
 
-ifeq ($(PY_FULL_VERSION),)
-PY_FULL_VERSION := $(shell awk -v replace="'" '/pythonVersion/{gsub(replace,"", $$NF); print $$NF; exit}' Jenkinsfile.github)
-PY_VERSION := $(shell echo ${PY_FULL_VERSION} | awk -F '.' '{print $$1"."$$2}')
+ifeq ($(PYTHON_VERSION),)
+export PYTHON_VERSION := 3.10
 endif
 
-ifeq ($(SLE_VERSION),)
-SLE_VERSION := $(shell awk -v replace="'" '/mainSleVersion/{gsub(replace,"", $$NF); print $$NF; exit}' Jenkinsfile.github)
-endif
+export PYTHON_BIN := python$(PYTHON_VERSION)
 
 ifeq ($(VERSION),)
-VERSION := $(shell git describe --tags | tr -s '-' '~' | tr -d '^v')
+export VERSION := $(shell python3 -m setuptools_scm | tr -s '-' '~' | tr -d '^v')
 endif
 
 SPEC_FILE := ${NAME}.spec
@@ -62,7 +59,8 @@ prepare:
 		cp $(SPEC_FILE) $(BUILD_DIR)/SPECS/
 
 image:
-		docker build --no-cache --pull --build-arg SLE_VERSION='${SLE_VERSION}' --build-arg PY_VERSION='${PY_VERSION}' --tag 'cray-${NAME}:${IMAGE_VERSION}' .
+		docker build --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag 'cray-${NAME}:${IMAGE_VERSION}' .
+		docker tag 'cray-${NAME}:${IMAGE_VERSION}' 'cray-${NAME}:${IMAGE_VERSION}-p${PYTHON_VERSION}'
 
 snyk:
 		$(MAKE) -s image | xargs --verbose -n 1 snyk container test

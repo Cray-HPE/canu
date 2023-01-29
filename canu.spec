@@ -24,9 +24,9 @@
 
 # Define which Python flavors python-rpm-macros will use (this can be a list).
 # https://github.com/openSUSE/python-rpm-macros#terminology
-%define pythons %(echo $PYTHON_VERSION)
+%define pythons %(echo $PYTHON_BIN)
 
-# python310-devel is not listed because our build environments install Python from source and not from OS packaging.
+# python*-devel is not listed because our build environments install Python from source and not from OS packaging.
 BuildRequires: python-rpm-generators
 BuildRequires: python-rpm-macros
 Name: %(echo $NAME)
@@ -36,7 +36,7 @@ Summary: CSM Automatic Network Utility
 Version: %(echo $VERSION)
 Release: 1
 Source: %{name}-%{version}.tar.bz2
-Vendor: Cray HPE
+Vendor: Hewlett Packard Enterprise Development LP
 
 %description
 A network device configuration and firmware utility. Designed for use on Cray-HPE Shasta systems, canu
@@ -46,26 +46,29 @@ will faciliate paddling through network topology plumbing.
 %setup -q
 
 %build
+
 # Install pyinstaller for our onefile binary.
 %python_exec -m pip install -U pyinstaller
 
 # Install setuptools_scm[toml] so any context in this RPM build can resolve the module version.
 %python_exec -m pip install -U setuptools_scm[toml]
 
-# Build a wheel is built.
-%pyproject_wheel
-
 # Build a source distribution.
 %python_exec -m pip install -U build
 %python_exec -m build --sdist
 
+# Ensure a wheel is built.
+%pyproject_wheel
+
 cp -pv pyinstaller.py pyinstaller.spec
 
-pyintaller --clean -y --dist ./dist/linux --workpath /tmp pyinstaller.spec
+%install
+%python_exec -m pip install *.whl
+
+# Make the --onefile binary.
+pyinstaller --clean -y --dist ./dist/linux --workpath /tmp pyinstaller.spec
 rm pyinstaller.spec
 chown -R --reference=. ./dist/linux
-
-%install
 mkdir -p %{buildroot}%{_bindir}
 install -m 755 dist/linux/canu %{buildroot}%{_bindir}/canu
 install -m 755 dist/linux/canu-inventory %{buildroot}%{_bindir}/canu-inventory

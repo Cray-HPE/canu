@@ -1,5 +1,5 @@
 ---
-name: 🛶 Request for enhancement (RFE)
+name: ✨ Request for enhancement (RFE)
 about: Suggest an idea for this project
 ---
 

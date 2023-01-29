@@ -24,6 +24,7 @@
 [project]
 name = 'canu'
 authors = [
+    { name = 'Jacob Salmela', email = 'jacob.salmela@hpe.com'},
     { name = 'Lucas Bates', email = 'lucas.bates@hpe.com' },
     { name = 'Sean Lynn', email = 'sean.lynn@hpe.com' },
 ]
@@ -32,6 +33,7 @@ classifiers = [
     'Natural Language :: English',
     'Operating System :: POSIX',
     'Programming Language :: Python :: 3 :: Only',
+    'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
 ]
 description = 'CSM Automatic Network Utility'
@@ -71,10 +73,13 @@ dependencies = [
     'tomli==1.1.0',
     'ttp==0.8.4',
     'urllib3==1.26.7',
-    'yamale<=4.0.2',
+    'yamale~=4.0.2',
 ]
 dynamic = ['entry-points', 'scripts', 'version']
-requires-python = '>=3.10'
+maintainers = [
+    { name = 'Russell Bunch', email = 'doomslayer@hpe.com'}
+]
+requires-python = '>=3.9'
 
 [metadata]
 url = 'https://github.com/Cray-HPE/canu'
@@ -83,50 +88,51 @@ license = { file = 'LICENSE' }
 
 [project.optional-dependencies]
 ci = [
-    'nox',
+    'nox~=2022.11.21',
 ]
 docs = [
-    "myst-parser",
-    "sphinx",
-    "sphinx-markdown-builder",
-    "sphinx_click",
+    'myst-parser~=0.18.1',
+    'sphinx~=5.3.0',
+    'sphinx-click~=4.4.0',
+    'sphinx-markdown-builder~=0.5.5',
 ]
 lint = [
-    "darglint",
-    "flake8",
-    "flake8-black",
-    "flake8-bugbear",
-    "flake8-commas==1.0.0",
-    "flake8-comprehensions",
-    "flake8-debugger",
-    "flake8-docstrings",
-    "flake8-eradicate",
-    "flake8-import-order",
-    "flake8-quotes",
-    "flake8-string-format",
-    "pep8",
-    "pep8-naming",
-    "toml",
+    'darglint~=1.8.1',
+    'flake8~=3.9.2',
+    'flake8-black~=0.3.6',
+    'flake8-bugbear~=23.1.20',
+    'flake8-commas~=1.0.0',
+    'flake8-comprehensions~=3.10.1',
+    'flake8-debugger~=4.1.2',
+    'flake8-docstrings~=1.7.0',
+    'flake8-eradicate~=1.4.0',
+    'flake8-import-order~=0.18.2',
+    'flake8-quotes~=3.3.2',
+    'flake8-string-format==0.3.0',
+    'pep8~=1.7.1',
+    'pep8-naming~=0.13.2',
+    'toml~=0.10.2',
 ]
 network_modeling = [
-    "jsonschema<=4.4.0",
-    "matplotlib<=3.5.1",
-    "networkx<=2.6.3",
-    "yamale<=4.0.2",
+    'jsonschema~=4.4.0',
+    'matplotlib~=3.5.1',
+    'networkx~=2.6.3',
+    'yamale~=4.0.2',
 ]
 test = [
-    "coverage",
-    "mock",
-    "py>=1.11.0",
-    "pytest<7.2.1",
-    "pytest-cov",
-    "pytest-sugar",
-    "testfixtures",
+    'coverage~=7.1.0',
+    'mock~=5.0.1',
+    'py~=1.11.0',
+    'pytest~=7.2.1',
+    'pytest-cov~=4.0.0',
+    'pytest-sugar~=0.9.6',
+    'testfixtures~=7.0.4',
 ]
 
 # Defines which folders belong to our package.
-[tool.setuptools.packages]
-find = {}
+[tool.setuptools.packages.find]
+include = ["canu*", "network_modeling*"]
+exclude = ["canu.tests*"]
 
 [tool.setuptools.dynamic]
 entry-points = { file = ['entry_points.ini'] }
@@ -138,10 +144,10 @@ readme = { file = ['README.md'], content-type = 'text/markdown' }
 [build-system]
 build-backend = 'setuptools.build_meta'
 requires = [
-    'setuptools >= 66.0',
-    'setuptools_scm[toml] >= 7.1.0',
-    'wheel',
+    'setuptools ~= 66.0',
+    'setuptools_scm[toml] ~= 7.1.0',
+    'wheel ~= 0.38.4',
 ]
 
 [tool.distutils.bdist_wheel]
-universal = true
+universal = false # This app. is not compatible with Python2.
