@@ -62,10 +62,10 @@ prepare:
 		cp $(SPEC_FILE) $(BUILD_DIR)/SPECS/
 
 image:
-		docker build --no-cache --pull --build-arg SLE_VERSION='${SLE_VERSION}' --build-arg PY_VERSION='${PY_VERSION}' --tag 'cray-${NAME}:${IMAGE_VERSION}' .
+		docker build --build-arg SLE_VERSION='${SLE_VERSION}' --build-arg PY_VERSION='${PY_VERSION}' --tag 'cray-${NAME}:${IMAGE_VERSION}' .
 
 snyk:
-		$(MAKE) -s image | xargs --verbose -n 1 snyk container test
+	snyk container test --severity-threshold=high --file=Dockerfile --fail-on=all --docker cray-canu:${IMAGE_VERSION}
 
 rpm_package_source:
 		tar --transform 'flags=r;s,^,/$(SOURCE_NAME)/,' --exclude .nox --exclude dist/rpmbuild -cvjf $(SOURCE_PATH) .

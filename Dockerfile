@@ -19,24 +19,71 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-ARG     PY_VERSION
-ARG     SLE_VERSION
-FROM    artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${PY_VERSION}-SLES${SLE_VERSION}
+# STAGE 1
+FROM       artifactory.algol60.net/docker.io/library/alpine:3.17 as builder
+RUN        apk add --update --no-cache \
+             py3-pip \
+             gcc \
+             openssl \
+             jq \
+             vim \
+             libffi-dev \
+             musl-dev \
+             python3 \
+             python3-dev \
+             git
+# make canu group, create (system) canu user, add to canu group, make home folder, and set login shell, no password
+RUN        addgroup -S canu 
+RUN        adduser \
+             -S canu \
+             -G canu \
+             -h /home/canu \
+             -s /bin/bash \
+             -D
+USER       canu
+RUN        mkdir -p /home/canu/app/wheels
+WORKDIR    /home/canu/app
+# copy the source code into the container
+COPY       . .
+# Install the build dependencies as wheels
+ENV        PYTHONDONTWRITEBYTECODE 1
+ENV        PYTHONUNBUFFERED 1
+RUN        python -m pip install --user -U pyinstaller wheel setuptools
+RUN        python -m pip install --user build
+RUN        python -m pip --no-cache-dir wheel . '.[build-system]' --wheel-dir wheels/
 
-# update command prompt
-RUN     echo 'export PS1="canu \w : "' >> /etc/bash.bashrc
-
-# make files dir
-RUN     mkdir /files
-
-COPY    dist/rpmbuild/RPMS/x86_64/ /files
-
-RUN     ls -l /files && \
-        zypper --no-gpg-checks -n in --allow-unsigned-rpm --auto-agree-with-licenses -y /files/canu*.rpm
-
-# set file perms for canu
-RUN      chown -R canu /files /home
-
-USER     canu
-
-WORKDIR /files
+# STAGE 2
+FROM       artifactory.algol60.net/docker.io/library/alpine:3.17 as prod
+RUN        apk add --update --no-cache \
+              git \
+              py3-pip \
+              python3 
+# add the canu user and group to the prod container
+RUN        addgroup -S canu 
+RUN        adduser \
+             -S canu \
+             -G canu \
+             -h /home/canu \
+             -s /bin/bash \
+             -D
+# copy the wheels from the builder container
+COPY       --from=builder /home/canu/app/wheels /home/canu/app/wheels
+RUN        chown -R canu:canu /home/canu
+USER       canu
+WORKDIR    /home/canu/app
+COPY       . .
+# install using the wheels compiled from stage 1
+ENV        PATH "/home/canu/.local/bin:$PATH"
+ENV        PYTHONDONTWRITEBYTECODE 1
+ENV        PYTHONUNBUFFERED 1
+# not all wheels are possible on alpine: https://github.com/pypa/manylinux/issues/37
+RUN        python -m pip --no-cache-dir install --user --find-links=wheels/ .
+WORKDIR    /home/canu
+ENV        PS1 "canu \w$ "
+# env vars for cray-inventory
+ENV        SLS_API_GW "api-gw-service.local"
+ENV        SLS_TOKEN ""
+ENV        REQUESTS_CA_BUNDLE ""
+ENV        SWITCH_USERNAME "admin"
+ENV        SWITCH_PASSWORD ""
+CMD        [ "canu" ]
