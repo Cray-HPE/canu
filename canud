@@ -1,0 +1,159 @@
+#!/usr/bin/env bash
+# MIT License
+#
+# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
+#
+set -eo pipefail
+if [[ "${DEBUG:-false}" == "true" ]]; then
+  set -x
+fi
+
+NAME=""
+NAME=artifactory.algol60.net/csm-docker/stable/canu
+IMAGE_VERSION="latest"
+platforms=("podman" "docker")
+PLATFORM=""
+detect_platforms() {
+
+  # Find a container platform (podman, docker, etc...)
+  for platform in "${platforms[@]}";do
+    if which "${platform}" >/dev/null 2>&1;then
+      # set the filepath
+      PLATFORM=$(which "${platform}")
+      break
+    fi
+  done
+
+  if [[ -z "${PLATFORM}" ]];then
+    >&2 echo "No container platform (podman, docker etc...) found.  Exiting..."
+    exit 1
+  fi
+}
+
+
+usage() {
+  echo
+  echo "${BASH_SOURCE[0]} -d(ev) | -p(rod) [-r(ebuild)] [-i(mage) <image>] [-o(ptions) <runopts>] [-h(elp)]"
+  echo
+}
+
+main() {
+  if [[ $# -eq 0 ]];then
+    usage
+    exit 1
+  fi
+
+  detect_platforms
+
+  # Defaults
+  MOUNTOPTS=""
+  image="$NAME:$IMAGE_VERSION"
+  runopts=""
+  dev=false
+  prod=true
+  mounted=""
+  name="${NAME}"
+  container_name="${name}"
+  rebuild=false
+
+  # Parse short options
+  OPTIND=1
+  while getopts "hi:o:rdp" opt
+  do
+    case "$opt" in
+      'h') usage; exit 0 ;;
+      'i') image=$OPTARG ;;
+      'o') runopts=$OPTARG ;;
+      'r') rebuild=true ;;
+      'd') dev=true ;;
+      'p') prod=true ;;
+        *) usage >&2; exit 1 ;;
+    esac
+  done
+  shift $((OPTIND - 1))
+
+  # Set mount options depending on container platform
+  if [[ $(basename "${PLATFORM}") == "podman" ]];then
+      MOUNTOPTS="Z,U"
+      MOUNTOPTS_SSH="ro"
+  else
+      MOUNTOPTS="rw"
+      MOUNTOPTS_SSH="ro"
+  fi
+  
+  # Set mounted directory depending on dev or prod
+  if [[ "$dev" == "true" ]];then
+    prod=false
+    mounted="/root/mounted"
+    image="${image}-dev"
+    container_name="${name}-dev"
+    target="dev"
+    tag="latest-${target}"
+  fi
+
+  if [[ "$prod" == "true" ]];then
+    dev=false
+    mounted="/home/canu/mounted"
+    #shellcheck disable=SC2269
+    image="${image}"
+    container_name="${name}-prod"
+    target="prod"
+    tag="latest-${target}"
+  fi
+
+  if [[ -z $(${PLATFORM} image ls -q "${name}:${tag}") ]] || [[ "$rebuild" == "true" ]]; then
+    # if the image cannot be pulled, try building it instead
+    if ! "${PLATFORM}" pull "${image}"; then
+      >&2 echo "ERROR Image pull failed.  Attempting to build image ${image}..."
+      if "${PLATFORM}" build \
+        --build-arg PYTHON_VERSION="${PYTHON_VERSION}" \
+        --tag "${image}" \
+        -f Dockerfile \
+        --target "${target}" .; then
+        "${PLATFORM}" tag "${image}" "${name}:${tag}"
+      else
+        >&2 echo "ERROR Image build failed.  Exiting..."
+        exit 1
+      fi
+    fi
+  fi
+
+  # if the ssh socket is not set, then do not mount it into the container
+  if [[ -z "${SSH_AUTH_SOCK}" ]]; then
+    cmd="${PLATFORM} run -it --rm --net=host -v ${PWD}:${mounted}:${MOUNTOPTS} --name ${container_name##*/} ${image} ${runopts}"
+  else
+    cmd="${PLATFORM} run -it --rm --net=host -v ${PWD}:${mounted}:${MOUNTOPTS} -v ${SSH_AUTH_SOCK}:/ssh-agent:${MOUNTOPTS_SSH} --name ${container_name##*/} ${image} ${runopts}"
+  fi
+  
+
+  $cmd
+}
+
+# ${BASH_SOURCE[0]} is the name of the current file that the shell is reading regardless of whether it is being sourced or executed
+# ${0} is the name of the current file being executed
+# thus, if ${BASH_SOURCE[0]} is the same as ${0}, run the script as normal
+if [[ "${BASH_SOURCE[0]}" -ef "${0}" ]]; then
+  main "$@"
+else
+  # this script is being sourced so do not run the functions
+  # this helps with unit tests and/or other scripts needing to utilize the functions defined here
+  :
+fi
