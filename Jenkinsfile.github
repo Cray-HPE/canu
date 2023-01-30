@@ -130,8 +130,8 @@ pipeline {
                         }
                     }
 
-                    stage('Build: Image') {
 
+                    stage('Build: Image') {
                         environment {
                             IMAGE_VERSION = "${image_version}"
                         }
@@ -146,12 +146,7 @@ pipeline {
                     stage('Publish: Image') {
                         steps {
                             script {
-                                publishCsmDockerImage(image: "cray-${env.NAME}", tag: "${image_version}-p${PYTHON_VERSION}", isStable: isStable)
-
-                                // Only publish the simple version images on the latest/newest base image.
-                                if ("${PYTHON_VERSION}" == "${mainPythonVersion}") {
-                                    publishCsmDockerImage(image: "cray-${env.NAME}", tag: "${image_version}", isStable: isStable)
-                                }
+                              publishCsmDockerImage(image: "${env.NAME}", tag: "${image_version}", isStable: isStable)
                             }
                         }
                     }

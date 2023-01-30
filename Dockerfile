@@ -19,23 +19,73 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-ARG     PYTHON_VERSION
-FROM    artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${PYTHON_VERSION}
+# STAGE 1 - install build dependencies and activate virtualenv
+ARG         ALPINE_IMAGE=artifactory.algol60.net/docker.io/library/alpine:3.17
+FROM        ${ALPINE_IMAGE} as deps
+USER        root
+RUN         mkdir -p /root/canu
+WORKDIR     /root/canu
+VOLUME      [ "/root/mounted" ]
+RUN         apk add --no-cache \
+              cmake=3.24.3-r0 \
+              g++=12.2.1_git20220924-r4 \
+              gcc=12.2.1_git20220924-r4 \
+              git=2.38.3-r1 \
+              libffi-dev=3.4.4-r0 \
+              make=4.3-r1 \
+              musl-dev=1.2.3-r4 \
+              openssl=3.0.8-r0 \
+              py3-pip=22.3.1-r1 \
+              py3-virtualenv=20.16.7-r0 \
+              python3=3.10.10-r0 \
+              python3-dev=3.10.10-r0
+ENV         VIRTUAL_ENV=/opt/venv
+RUN         python -m venv $VIRTUAL_ENV
+ENV         PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# update command prompt
-RUN     echo 'export PS1="canu \w : "' >> /etc/bash.bashrc
+# STAGE 2 - install canu in editable mode
+FROM        deps as dev
+USER        root
+VOLUME      [ "/root/mounted" ]
+ENV         VIRTUAL_ENV=/opt/venv
+WORKDIR     $VIRTUAL_ENV
+RUN         source $VIRTUAL_ENV/bin/activate
+COPY        . .
+RUN         python -m pip install --editable .
 
-# make files dir
-RUN     mkdir /files
+# STAGE 3 - build the binaries with pyinstaller
+FROM        dev as build
+USER        root
+VOLUME      [ "/root/mounted" ]
+ENV         VIRTUAL_ENV=/opt/venv
+WORKDIR     $VIRTUAL_ENV
+RUN         source $VIRTUAL_ENV/bin/activate
+RUN         python -m pip install . pyinstaller
+RUN         cp -pv pyinstaller.py pyinstaller.spec
+RUN         pyinstaller --clean -y --dist ./dist/linux --workpath /tmp pyinstaller.spec
 
-COPY    dist/rpmbuild/RPMS/x86_64/ /files
-
-RUN     ls -l /files && \
-        zypper --no-gpg-checks -n in --allow-unsigned-rpm --auto-agree-with-licenses -y /files/canu*.rpm
-
-# set file perms for canu
-RUN      chown -R canu /files /home
-
-USER     canu
-
-WORKDIR /files
+# STAGE 4 - final production image
+FROM        ${ALPINE_IMAGE} as prod
+USER        root
+ENV         VIRTUAL_ENV=/opt/venv
+COPY        --from=build $VIRTUAL_ENV/dist/linux/canu /usr/local/bin/canu
+# COPY        --from=build $VIRTUAL_ENV/dist/linux/canu-inventory /usr/local/bin/canu-inventory
+RUN         addgroup -S canu && \
+              adduser \
+              -S canu \
+              -G canu \
+              -h /home/canu \
+              -s /bin/bash \
+              -D
+USER        canu
+WORKDIR     /home/canu
+RUN         mkdir -p /home/canu/mounted
+ENV         CANU_NET="HMN" \
+            PS1="canu \w$ " \
+            REQUESTS_CA_BUNDLE="" \
+            SLS_API_GW="api-gw-service.local" \
+            SLS_FILE="" \
+            SLS_TOKEN="" \
+            SWITCH_USERNAME="admin" \
+            SWITCH_PASSWORD=""
+CMD         [ "sh" ]
