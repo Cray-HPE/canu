@@ -157,6 +157,16 @@ network_hardware:
     ports:
       - count: 48
         speed: 100
+  - name: "Aruba_JL636A_edge_router"
+    vendor: "aruba"
+    type: "switch"
+    model: "8325_JL636A"
+    ports:
+      - count: 32
+        speed: [100, 40]
+      - count: 1
+        speed: 1
+        slot: "mgmt"
   - name: "Generic Multi-chassis SubRack"
     vendor: "none"
     type: "subrack"
