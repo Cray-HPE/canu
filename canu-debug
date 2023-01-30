@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
-python -m pip install --user --editable app/
-echo "canu is now installed in editable mode"
-echo "Make changes using 'vi' in app/ and run canu from the command line"
+if python -m pip install --user --editable app/; then
+  echo "canu is now installed in editable mode"
+  echo "Make changes using 'vi' in app/ and run canu from the command line"
+fi
