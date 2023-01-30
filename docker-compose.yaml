@@ -24,8 +24,8 @@ services:
   canu:
     build: .
     container_name: canu
-    command: "tail -f /dev/null"
+    command: "sh"
     stdin_open: true
     tty: true
     volumes:
-      - ./files:/files:rw
+      - $PWD:/home/canu:rw
