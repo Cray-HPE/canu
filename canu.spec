@@ -70,11 +70,16 @@ mkdir -p %{buildroot}%{_bindir}
 install -m 755 dist/linux/canu %{buildroot}%{_bindir}/canu
 install -m 755 dist/linux/canu-inventory %{buildroot}%{_bindir}/canu-inventory
 
+# install the 'canu' wrapper script to the bindir
+mkdir -p %{buildroot}%{_bindir}
+install -m 755 ./canuctl %{buildroot}%{_bindir}/canuctl
+
 %pre
 getent passwd canu >/dev/null || \
     useradd -U -m -s /bin/bash -c "CANU user" canu
 
 %files
+%attr(755, canu, canu) %{_bindir}/canuctl
 %attr(755, canu, canu) %{_bindir}/canu
 %attr(755, canu, canu) %{_bindir}/canu-inventory
 %license LICENSE
