@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+# MIT License
+#
+# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
+#
+set -euo pipefail
+if [[ "${DEBUG:-false}" == "true" ]]; then
+  set -x
+fi
+
+platforms=("podman" "docker")
+PLATFORM=""
+detect_platforms() {
+
+  # Find a container platform (podman, docker, etc...)
+  for platform in "${platforms[@]}";do
+    if which "${platform}" >/dev/null 2>&1;then
+      # set the filepath
+      PLATFORM=$(which "${platform}")
+      break
+    fi
+  done
+
+  if [[ -z "${PLATFORM}" ]];then
+    echo "No container platform (podman, docker etc...) found.  Exiting..."
+    exit 1
+  fi
+
+}
+run_canu() {
+  local environment="${1:-prod}"
+  shift
+  local image="${1:-canu-prod}"
+  shift
+  local rebuild=${1:-"same"}
+  shift
+  local mountopts=""
+  local runopts=""
+  local vers=""
+  vers=$(git describe --tags | tr -s '-' '_' | tr -d '^v')
+
+  # Build an image if required
+  if [[ -z $("${PLATFORM}" image ls -q "${image}") || "${rebuild}" == "rebuild" ]];then
+    echo "# Building CANU image ${image}. This may take time to download and create."
+    "${PLATFORM}" build -t "${image}" -f Dockerfile."${environment}" .
+  fi
+
+  if [[ $(basename "${PLATFORM}") == "podman" ]];then
+      mountopts="Z,U"
+      runopts=""
+  else
+      mountopts="rw"
+      runopts=""
+  fi
+
+  if [[ ${environment} == "prod" ]];then
+    echo
+    echo "The folder [${PWD}]"
+    echo "is mounted on the container at /home/canu/mounted"
+    echo
+    echo "Type 'exit' to disconnect before trying to shutdown the container"
+    echo
+  fi
+
+  if [[ ${environment} == "devel" ]]; then
+    echo "# Launching CANU container"
+    echo "#   CANU version ${vers}"
+    echo '#   Type "exit" or "Ctrl+D" to exit the container'
+  fi
+
+  # Start CANU container
+  echo "Starting ${image}..."
+  #shellcheck disable=SC2086
+  "${PLATFORM}" run ${runopts} -it --rm \
+      -v "${PWD}"/:/home/canu/mounted:"${mountopts}" \
+      "${image}" \
+      "${@:4}"
+}
+
+usage() {
+  echo
+  echo "${BASH_SOURCE[0]} [devel|prod] CONTAINER_NAME [rebuild|same] [args]"
+  echo
+}
+
+main() {
+  if [[ $# -eq 0 ]];then
+    usage
+    exit 1
+  fi
+
+  detect_platforms
+
+  case "${1:-}" in
+    devel)
+      run_canu \
+        "devel" \
+        "${2:-}" \
+        "${3:-same}" \
+        "${@}"
+      ;;
+
+
+    prod)
+      run_canu \
+        prod \
+        "${2:-}" \
+        "${3:-same}" \
+        "${@}"
+      ;;
+
+
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+}
+
+
+# ${BASH_SOURCE[0]} is the name of the current file that the shell is reading regardless of whether it is being sourced or executed
+# ${0} is the name of the current file being executed
+# thus, if ${BASH_SOURCE[0]} is the same as ${0}, run the script as normal
+if [[ "${BASH_SOURCE[0]}" -ef "${0}" ]]; then
+  main "$@"
+else
+  # this script is being sourced so do not run the functions
+  # this helps with unit tests and/or other scripts needing to utilize the functions defined here
+  :
+fi
