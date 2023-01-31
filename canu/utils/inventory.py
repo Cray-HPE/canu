@@ -29,7 +29,7 @@ from canu.utils.sls import pull_sls_hardware, pull_sls_networks
 
 
 def inventory(
-    username, password, network, sls_file=None, sls_inventory=None, dumpstate=None
+    username, password, network, sls_file=None, sls_inventory=None, dumpstate=None,
 ):
     """Build Nornir inventory from sls_input."""
     inventory = {"groups": {}, "hosts": {}}
