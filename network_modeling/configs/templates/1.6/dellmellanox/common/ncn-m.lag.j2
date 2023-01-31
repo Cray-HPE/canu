@@ -1,0 +1,24 @@
+{#- master #}
+{%- for node in cabling.nodes if node.subtype == "master" %}
+
+interface mlag-port-channel {{ node.config.LAG_NUMBER }}
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport mode hybrid
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} description "{{ node.config.DESCRIPTION }}"
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} no shutdown
+{%- if variables.HOSTNAME == "sw-spine-001" %}
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} lacp-individual enable force
+{%- endif %}
+
+
+interface ethernet 1/{{ node.config.PORT }} speed 40G force
+interface ethernet 1/{{ node.config.PORT }} mlag-channel-group {{ node.config.LAG_NUMBER }} mode active
+interface ethernet 1/{{ node.config.PORT }} description "{{ node.config.DESCRIPTION }}"
+
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport hybrid allowed-vlan add {{ variables.NMN_VLAN }}
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport hybrid allowed-vlan add {{ variables.HMN_VLAN }}
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport hybrid allowed-vlan add {{ variables.CMN_VLAN }}
+{%- if variables.CAN != None %}
+interface mlag-port-channel {{ node.config.LAG_NUMBER }} switchport hybrid allowed-vlan add {{ variables.CAN_VLAN }}
+{%- endif %}
+{%- endfor %}
+{#- end master #}

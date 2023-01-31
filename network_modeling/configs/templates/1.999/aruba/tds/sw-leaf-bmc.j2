@@ -1,0 +1,84 @@
+{#- sw-leaf-bmc #}
+{%- include '1.999/aruba/common/unknown.j2' %}
+hostname {{ variables.HOSTNAME }}
+{%- include '1.999/aruba/common/banner-motd.j2' %}
+no ip icmp redirect
+vrf Customer
+ntp server {{ variables.NCN_W001 }}
+ntp server {{ variables.NCN_W002 }}
+ntp server {{ variables.NCN_W003 }}
+ntp enable
+
+
+
+ssh server vrf default
+ssh server vrf mgmt
+ssh server vrf Customer
+{%- include '1.999/aruba/common/acl.j2' %}
+
+vlan 1
+vlan {{ variables.NMN_VLAN }}
+    name NMN
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
+vlan {{ variables.HMN_VLAN }}
+    name HMN
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
+vlan {{ variables.CMN_VLAN }}
+    name CMN
+    apply access-list ip cmn-can in
+    apply access-list ip cmn-can out
+
+spanning-tree
+{#- forward delay added to help with pxe boots. CASMNET-1099 + CASMTRIAGE-2793 #}
+spanning-tree forward-delay 4
+spanning-tree config-name MST0
+spanning-tree config-revision 1
+interface mgmt
+    shutdown
+    ip dhcp
+
+{% include '1.999/aruba/common/four_port_ocp.j2' %}
+{% include '1.999/aruba/common/compute.j2' %}
+{% include '1.999/aruba/common/bmc.j2' %}
+{% include '1.999/aruba/tds/leaf-bmc-to-spine.lag.j2' %}
+{% include '1.999/aruba/common/leaf_bmc_unused_port.j2' %}
+
+interface loopback 0
+    ip address {{ variables.LOOPBACK_IP }}/32
+    ip ospf 1 area 0.0.0.0
+interface vlan 1
+    ip mtu 9198
+    ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}}
+    ip ospf 1 area 0.0.0.0
+    ip ospf passive
+interface vlan {{ variables.NMN_VLAN }}
+    description NMN
+    ip mtu 9198
+    ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}}
+    ip ospf 1 area 0.0.0.0
+interface vlan {{ variables.HMN_VLAN }}
+    description HMN
+    ip mtu 9198
+    ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
+    ip ospf 1 area 0.0.0.0
+    ip ospf passive
+interface vlan {{ variables.CMN_VLAN }}
+    vrf attach Customer
+    description CMN
+    ip mtu 9198
+    ip address {{ variables.CMN_IP }}/{{variables.CMN_PREFIX_LEN}}
+    ip ospf 2 area 0.0.0.0
+snmp-server vrf default
+ip dns server-address {{ variables.NMNLB_DNS }}
+router ospf 2 vrf Customer
+    router-id {{ variables.LOOPBACK_IP }}
+    area 0.0.0.0
+router ospf 1
+    router-id {{ variables.LOOPBACK_IP }}
+    area 0.0.0.0
+https-server vrf Customer
+https-server vrf default
+https-server vrf mgmt
+{# end sw-leaf-bmc #}

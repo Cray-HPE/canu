@@ -98,6 +98,54 @@ added_files = [
         "network_modeling/configs/templates/1.3/dellmellanox/full",
     ),
     (
+        "network_modeling/configs/templates/1.4/arista/*.j2",
+        "network_modeling/configs/templates/1.4/arista",
+    ),
+    (
+        "network_modeling/configs/templates/1.4/aruba/common/*.j2",
+        "network_modeling/configs/templates/1.4/aruba/common",
+    ),
+    (
+        "network_modeling/configs/templates/1.4/aruba/full/*.j2",
+        "network_modeling/configs/templates/1.4/aruba/full",
+    ),
+    (
+        "network_modeling/configs/templates/1.4/aruba/tds/*.j2",
+        "network_modeling/configs/templates/1.4/aruba/tds",
+    ),
+    (
+        "network_modeling/configs/templates/1.4/dellmellanox/common/*.j2",
+        "network_modeling/configs/templates/1.4/dellmellanox/common",
+    ),
+    (
+        "network_modeling/configs/templates/1.4/dellmellanox/full/*.j2",
+        "network_modeling/configs/templates/1.4/dellmellanox/full",
+    ),
+    (
+        "network_modeling/configs/templates/1.6/arista/*.j2",
+        "network_modeling/configs/templates/1.6/arista",
+    ),
+    (
+        "network_modeling/configs/templates/1.6/aruba/common/*.j2",
+        "network_modeling/configs/templates/1.6/aruba/common",
+    ),
+    (
+        "network_modeling/configs/templates/1.6/aruba/full/*.j2",
+        "network_modeling/configs/templates/1.6/aruba/full",
+    ),
+    (
+        "network_modeling/configs/templates/1.6/aruba/tds/*.j2",
+        "network_modeling/configs/templates/1.6/aruba/tds",
+    ),
+    (
+        "network_modeling/configs/templates/1.6/dellmellanox/common/*.j2",
+        "network_modeling/configs/templates/1.6/dellmellanox/common",
+    ),
+    (
+        "network_modeling/configs/templates/1.6/dellmellanox/full/*.j2",
+        "network_modeling/configs/templates/1.6/dellmellanox/full",
+    ),
+    (
         "canu/test/aruba/test_suite.yaml", 
         "canu/test/aruba"
     ),
