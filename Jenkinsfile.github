@@ -27,10 +27,6 @@
 
 def mainPythonVersion = '3.10'
 def pythonImage = 'artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python'
-def sleVersion
-def sles_version_parts
-def sles_major
-def sles_minor
 
 // Disable pr-merge builds; not used.
 if (env.BRANCH_NAME ==~ ~"^PR-\\d+") {
@@ -130,7 +126,6 @@ pipeline {
                         steps {
                             script {
                                 sh "make rpm"
-                                sleVersion = sh(returnStdout: true, script: 'awk -F= \'/VERSION_ID/{gsub(/["]/,""); print \$NF}\' /etc/os-release').trim()
                             }
                         }
                     }
@@ -163,11 +158,21 @@ pipeline {
 
                     stage('Publish: RPMs') {
 
+                        agent {
+                            docker {
+                                args '-u root' // Build Python RPMs as root for Python rpm macros to build with the right sitelib.
+                                label "metal-gcp-builder"
+                                reuseNode true
+                                image "${pythonImage}:${PYTHON_VERSION}"
+                            }
+                        }
+
                         steps {
                             script {
-                                sles_version_parts = "${sleVersion}".tokenize('.')
-                                sles_major = "${sles_version_parts[0]}"
-                                sles_minor = "${sles_version_parts[1]}"
+                                def sleVersion = sh(returnStdout: true, script: 'awk -F= \'/VERSION_ID/{gsub(/["]/,""); print \$NF}\' /etc/os-release').trim()
+                                def sles_version_parts = "${sleVersion}".tokenize('.')
+                                def sles_major = "${sles_version_parts[0]}"
+                                def sles_minor = "${sles_version_parts[1]}"
                                 publishCsmRpms(
                                         arch: "${ARCH}",
                                         component: env.NAME,

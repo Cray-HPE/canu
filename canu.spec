@@ -53,17 +53,14 @@ will faciliate paddling through network topology plumbing.
 # Install setuptools_scm[toml] so any context in this RPM build can resolve the module version.
 %python_exec -m pip install -U setuptools_scm[toml]
 
-# Build a source distribution.
+# Build a source distribution and a wheel.
 %python_exec -m pip install -U build
-%python_exec -m build --sdist
-
-# Ensure a wheel is built.
-%pyproject_wheel
+%python_exec -m build --sdist --wheel
 
 cp -pv pyinstaller.py pyinstaller.spec
 
 %install
-%python_exec -m pip install *.whl
+%python_exec -m pip install dist/*.whl
 
 # Make the --onefile binary.
 pyinstaller --clean -y --dist ./dist/linux --workpath /tmp pyinstaller.spec
