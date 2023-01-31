@@ -1395,6 +1395,10 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## [1.6.32]
 
+- Modify ansible playbook to work with aruba 6300s.
+
+## [1.6.32]
+
 - Updated Aruba ansible playbook and documentation.
 - Added ansible play to retain mgmt interface configuration.  This will help avoid lockouts.
 - Added ansible play utilize the aruba checkpoint feature.  This will revert the switch config after 1 minute if the switch becomes unresponsive. 
