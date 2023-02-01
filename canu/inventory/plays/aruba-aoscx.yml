@@ -132,7 +132,7 @@
             ansible_connection: network_cli
           aoscx_command:
             commands:
-              - checkpoint auto confirm # accept lingering checkpoints, ran into issues after uploadding full json conifg
+              - checkpoint auto confirm # accept lingering checkpoints, ran into issues after uploadding full json config
               - checkpoint auto 2
 
         # Finally, upload the new config as the running-config
