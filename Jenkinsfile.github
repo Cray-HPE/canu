@@ -160,7 +160,7 @@ pipeline {
 
                         agent {
                             docker {
-                                args '-u root' // Build Python RPMs as root for Python rpm macros to build with the right sitelib.
+                                args '-u root -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /home/jenkins/.ssh:/root/.ssh -v /home/jenkins/.ssh:/home/jenkins/.ssh --group-add 999'
                                 label "metal-gcp-builder"
                                 reuseNode true
                                 image "${pythonImage}:${PYTHON_VERSION}"
