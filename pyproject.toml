@@ -49,7 +49,7 @@ dependencies = [
     'hier-config==1.6.1',
     'ipython==7.16.3',
     'jinja2==3.1.2',
-    'jsonschema==3.2.0',
+    'jsonschema==4.17.3',
     'kubernetes==24.2.0',
     'mac-vendor-lookup==0.1.11',
     'matplotlib<=3.5.1',
@@ -114,7 +114,7 @@ lint = [
     'toml~=0.10.2',
 ]
 network_modeling = [
-    'jsonschema==3.2.0',
+    'jsonschema==4.17.3',
     'matplotlib~=3.5.1',
     'networkx~=2.6.3',
     'yamale<=4.0.2',
