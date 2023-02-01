@@ -82,6 +82,10 @@ added_files = [
         "network_modeling/configs/templates/1.3/aruba/common",
     ),
     (
+        "network_modeling/configs/templates/1.3/aruba/edge/*.j2",
+        "network_modeling/configs/templates/1.3/aruba/edge",
+    ),
+    (
         "network_modeling/configs/templates/1.3/aruba/full/*.j2",
         "network_modeling/configs/templates/1.3/aruba/full",
     ),
