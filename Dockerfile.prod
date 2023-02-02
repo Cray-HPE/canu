@@ -20,7 +20,8 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 # STAGE 1
-FROM       artifactory.algol60.net/docker.io/library/alpine:3.17 as builder
+ARG        STAGE1_IMAGE=artifactory.algol60.net/docker.io/library/alpine:3.17
+FROM       ${STAGE1_IMAGE} as builder
 RUN        apk add --update --no-cache \
              cmake=3.24.3-r0 \
              g++=12.2.1_git20220924-r4 \
@@ -62,17 +63,16 @@ RUN        apk add --update --no-cache \
               py3-pip=22.3.1-r1 \
               python3=3.10.9-r1
 # add the canu user and group to the prod container
-RUN        addgroup -S canu 
-RUN        adduser \
+RUN        addgroup -S canu && \
+             adduser \
              -S canu \
              -G canu \
              -h /home/canu \
              -s /bin/bash \
              -D
 USER       canu
-RUN        mkdir -p /home/canu/app
-RUN        mkdir -p /home/canu/mounted
 WORKDIR    /home/canu/app
+RUN        mkdir -p /home/canu/{app,mounted}
 # copy the wheels from the builder container
 COPY       --chown=canu:canu --from=builder /home/canu/app/wheels /home/canu/app/wheels
 COPY       --chown=canu:canu . .
@@ -85,13 +85,12 @@ RUN        python -m pip --no-cache-dir install --user --find-links=wheels/ .
 # add a script that installs in editable mode for ad-hoc debugging
 RUN        install -m 0755 -o canu -g canu /home/canu/app/canu-debug /home/canu/.local/bin/canu-debug
 WORKDIR    /home/canu
-ENV        PS1 "canu \w$ "
-# env vars for canu-inventory
-ENV        CANU_NET "HMN"
-ENV        SLS_API_GW "api-gw-service.local"
-ENV        SLS_TOKEN ""
-ENV        REQUESTS_CA_BUNDLE ""
-ENV        SLS_FILE ""
-ENV        SWITCH_USERNAME "admin"
-ENV        SWITCH_PASSWORD ""
+ENV        CANU_NET "HMN" \
+           PS1 "canu \w$ " \
+           REQUESTS_CA_BUNDLE "" \
+           SLS_API_GW "api-gw-service.local" \
+           SLS_FILE "" \
+           SLS_TOKEN "" \
+           SWITCH_USERNAME "admin" \
+           SWITCH_PASSWORD ""
 CMD        [ "canu" ]

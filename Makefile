@@ -37,6 +37,10 @@ ifeq ($(PYTHON_VERSION),)
 export PYTHON_VERSION := 3.10
 endif
 
+ifeq ($(STAGE1_IMAGE),)
+export STAGE1_IMAGE := artifactory.algol60.net/docker.io/library/alpine:3.17
+endif
+
 export PYTHON_BIN := python$(PYTHON_VERSION)
 
 ifeq ($(VERSION),)
@@ -59,7 +63,7 @@ prepare:
 		cp $(SPEC_FILE) $(BUILD_DIR)/SPECS/
 
 image:
-		docker build --no-cache --pull --build-arg SLE_VERSION='${SLE_VERSION}' --build-arg PY_VERSION='${PY_VERSION}' --tag '${NAME}:${IMAGE_VERSION}' .
+		docker build --progress plain --no-cache --pull --build-arg SLE_VERSION='${SLE_VERSION}' --build-arg PY_VERSION='${PY_VERSION}' --build-arg STAGE1_IMAGE='${STAGE1_IMAGE}' --tag '${NAME}:${IMAGE_VERSION}' -f Dockerfile .
 
 snyk:
 	snyk container test --severity-threshold=high --file=Dockerfile --fail-on=all --docker canu:${IMAGE_VERSION}
