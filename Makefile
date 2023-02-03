@@ -63,7 +63,7 @@ prepare:
 		cp $(SPEC_FILE) $(BUILD_DIR)/SPECS/
 
 image:
-		docker build --progress plain --no-cache --pull --build-arg SLE_VERSION='${SLE_VERSION}' --build-arg PY_VERSION='${PY_VERSION}' --build-arg STAGE1_IMAGE='${STAGE1_IMAGE}' --tag '${NAME}:${IMAGE_VERSION}' -f Dockerfile .
+		docker build --progress plain --no-cache --build-arg SLE_VERSION='${SLE_VERSION}' --build-arg PY_VERSION='${PY_VERSION}' --build-arg STAGE1_IMAGE='${STAGE1_IMAGE}' --tag '${NAME}:${IMAGE_VERSION}' -f Dockerfile.prod .
 
 snyk:
 	snyk container test --severity-threshold=high --file=Dockerfile --fail-on=all --docker canu:${IMAGE_VERSION}

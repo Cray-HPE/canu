@@ -34,27 +34,15 @@ RUN        apk add --update --no-cache \
              py3-pip=22.3.1-r1 \
              python3=3.10.9-r1 \
              python3-dev=3.10.9-r1
-# make canu group, create (system) canu user, add to canu group, make home folder, and set login shell, no password
-RUN        addgroup -S canu 
-RUN        adduser \
-             -S canu \
-             -G canu \
-             -h /home/canu \
-             -s /bin/bash \
-             -D
-USER       canu
-RUN        mkdir -p /home/canu/app/wheels
-WORKDIR    /home/canu/app
-# copy the source code into the container
-COPY       --chown=canu:canu . .
 # Install the build dependencies as wheels
-ENV        PYTHONDONTWRITEBYTECODE 1
-ENV        PYTHONUNBUFFERED 1
+ENV        PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 # Specific to canu-in-a-container, wheel is used to reduce the final image size
 # by building the dependencies as wheels and copying them into stage2, eliminating
 # the need to install the build dependencies in stage2
-RUN        python -m pip install --user -U wheel
-RUN        python -m pip --no-cache-dir wheel . '.[build-system]' --wheel-dir wheels/
+WORKDIR    /root
+COPY       . .
+RUN        python -m pip install -U wheel
+RUN        python -m pip --no-cache-dir wheel '.[build-system]' --wheel-dir /root/wheels/
 
 # STAGE 2
 FROM       artifactory.algol60.net/docker.io/library/alpine:3.17 as prod
@@ -74,12 +62,11 @@ USER       canu
 WORKDIR    /home/canu/app
 RUN        mkdir -p /home/canu/app && mkdir -p /home/canu/mounted
 # copy the wheels from the builder container
-COPY       --chown=canu:canu --from=builder /home/canu/app/wheels /home/canu/app/wheels
+COPY       --chown=canu:canu --from=builder /root/wheels /home/canu/app/wheels
 COPY       --chown=canu:canu . .
 # install using the wheels compiled from stage 1
 ENV        PATH "/home/canu/.local/bin:$PATH"
-ENV        PYTHONDONTWRITEBYTECODE 1
-ENV        PYTHONUNBUFFERED 1
+ENV        PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 # not all wheels are possible on alpine: https://github.com/pypa/manylinux/issues/37
 RUN        python -m pip --no-cache-dir install --user --find-links=wheels/ .
 # add a script that installs in editable mode for ad-hoc debugging
