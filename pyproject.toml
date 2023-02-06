@@ -58,7 +58,7 @@ dependencies = [
     'netmiko==3.4.0',
     'netutils==1.2.0',
     'networkx<=2.6.3',
-    'nornir-netmiko==0.1.2',
+    'nornir-netmiko==0.2.0',
     'nornir-salt==0.18.0',
     'nornir-scrapli==2022.7.30',
     'nornir-utils==0.2.0',
