@@ -165,15 +165,6 @@ pipeline {
                     }
                 }
             }
-          stage('Image') {
-                    agent {
-                            docker {
-                                label "metal-gcp-builder"
-                                reuseNode true
-                                image "${pythonImage}:${PYTHON_VERSION}"
-                            }
-                        }
-                stages {
 
                     stage('Build: Image') {
 
@@ -195,9 +186,7 @@ pipeline {
                                 publishCsmDockerImage(image: "${env.NAME}", tag: "${image_version}-p${PYTHON_VERSION}", isStable: isStable)
                             }
                         }
-                    }
-                }
-          }
+                     }
         }
     }
     post {
