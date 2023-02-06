@@ -57,43 +57,6 @@ pipeline {
     }
 
     stages {
-          stage('Image') {
-                    agent {
-                            docker {
-                                label "metal-gcp-builder"
-                                reuseNode true
-                                image "${pythonImage}:${PYTHON_VERSION}"
-                            }
-                        }
-                stages {
-
-                    stage('Build: Image') {
-
-                        environment {
-                            PYTHON_VERSION = "${PYTHON_VERSION}"
-                        }
-
-                        steps {
-                  
-                            script {
-                                sh "make image"
-                            }
-                        }
-                    }
-
-                    stage('Publish: Image') {
-                        steps {
-                            script {
-                                // Use setuptools_scm to resolve the version(s) to use for the build.
-                                sh "python3 -m pip install setuptools_scm[toml]"
-                                image_version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '+' '_' | sed 's/^v//'").trim()
-                                publishCsmDockerImage(image: "${env.NAME}", tag: "${image_version}-p${PYTHON_VERSION}", isStable: isStable)
-                            }
-                        }
-                    }
-                }
-          }
-
         stage('Build & Publish') {
                  
             matrix {
@@ -202,6 +165,39 @@ pipeline {
                     }
                 }
             }
+          stage('Image') {
+                    agent {
+                            docker {
+                                label "metal-gcp-builder"
+                                reuseNode true
+                                image "${pythonImage}:${PYTHON_VERSION}"
+                            }
+                        }
+                stages {
+
+                    stage('Build: Image') {
+
+                        environment {
+                            PYTHON_VERSION = "${PYTHON_VERSION}"
+                        }
+
+                        steps {
+                  
+                            script {
+                                sh "make image"
+                            }
+                        }
+                    }
+
+                    stage('Publish: Image') {
+                        steps {
+                            script {
+                                publishCsmDockerImage(image: "${env.NAME}", tag: "${image_version}-p${PYTHON_VERSION}", isStable: isStable)
+                            }
+                        }
+                    }
+                }
+          }
         }
     }
     post {
