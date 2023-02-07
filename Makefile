@@ -42,7 +42,8 @@ export ALPINE_VERSION := 3.17
 endif
 
 ifeq ($(STAGE1_IMAGE),)
-export STAGE1_IMAGE := artifactory.algol60.net/csm-docker/unstable/csm-docker-alpine-python:ALP3.17-64c0179
+export STAGE1_IMAGE := artifactory.algol60.net/csm-docker/unstable/csm-docker-alpine-python:ALP3.17-bdea3a7
+
 endif
 
 ifeq ($(STAGE2_IMAGE),)
@@ -71,7 +72,7 @@ prepare:
 		cp $(SPEC_FILE) $(BUILD_DIR)/SPECS/
 
 image:
-		docker build --progress plain --build-arg SLE_VERSION='${SLE_VERSION}' --build-arg PY_VERSION='${PY_VERSION}' --build-arg STAGE1_IMAGE='${STAGE1_IMAGE}' --build-arg STAGE2_IMAGE='${STAGE2_IMAGE}' --tag '${NAME}:${IMAGE_VERSION}' -f Dockerfile.prod .
+		docker build --no-cache --progress plain --build-arg SLE_VERSION='${SLE_VERSION}' --build-arg PY_VERSION='${PY_VERSION}' --build-arg STAGE1_IMAGE='${STAGE1_IMAGE}' --build-arg STAGE2_IMAGE='${STAGE2_IMAGE}' --tag '${NAME}:${IMAGE_VERSION}' -f Dockerfile.prod .
 
 snyk:
 	snyk container test --severity-threshold=high --file=Dockerfile --fail-on=all --docker canu:${IMAGE_VERSION}
