@@ -23,17 +23,16 @@
 ARG        STAGE1_IMAGE
 ARG        STAGE2_IMAGE
 FROM       ${STAGE1_IMAGE} AS builder
-# Install the build dependencies as wheels
-ENV        PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 # Specific to canu-in-a-container, wheel is used to reduce the final image size
 # by building the dependencies as wheels and copying them into stage2, eliminating
 # the need to install the build dependencies in stage2
 WORKDIR    /root
 COPY       . .
-RUN        python -m pip -v --no-cache-dir wheel '.[build-system]' --wheel-dir /root/wheels/
+ENV        PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+RUN        python -m pip -vvv --no-cache-dir wheel '.[build-system]' --wheel-dir /root/wheels/
 
 # STAGE 2
-FROM       ${STAGE2_IMAGE} AS prod
+FROM       artifactory.algol60.net/docker.io/library/alpine:3.17 as prod 
 RUN        apk add --update --no-cache \
               git=2.38.3-r1 \
               py3-pip=22.3.1-r1 \
@@ -56,7 +55,7 @@ COPY       --chown=canu:canu . .
 ENV        PATH "/home/canu/.local/bin:$PATH"
 ENV        PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 # not all wheels are possible on alpine: https://github.com/pypa/manylinux/issues/37
-RUN        python -m pip -v --no-cache-dir install --user --find-links=wheels/ .
+RUN        python -m pip -vvv --no-cache-dir install --user --find-links=wheels/ . 
 # add a script that installs in editable mode for ad-hoc debugging
 RUN        install -m 0755 -o canu -g canu /home/canu/app/canu-debug /home/canu/.local/bin/canu-debug
 WORKDIR    /home/canu
