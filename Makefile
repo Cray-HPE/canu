@@ -42,7 +42,7 @@ export ALPINE_VERSION := 3.17
 endif
 
 ifeq ($(STAGE1_IMAGE),)
-export STAGE1_IMAGE := artifactory.algol60.net/csm-docker/unstable/csm-docker-alpine-python:ALP3.17-df5aa21
+export STAGE1_IMAGE := artifactory.algol60.net/csm-docker/unstable/csm-docker-alpine-python:ALP3.17-64c0179
 endif
 
 ifeq ($(STAGE2_IMAGE),)
