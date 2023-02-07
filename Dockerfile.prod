@@ -20,32 +20,20 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 # STAGE 1
-ARG        STAGE1_IMAGE=artifactory.algol60.net/docker.io/library/alpine:3.17
-FROM       ${STAGE1_IMAGE} as builder
-RUN        apk add --update --no-cache \
-             cmake=3.24.3-r0 \
-             g++=12.2.1_git20220924-r4 \
-             gcc=12.2.1_git20220924-r4 \
-             git=2.38.3-r1 \
-             libffi-dev=3.4.4-r0 \
-             make=4.3-r1 \
-             musl-dev=1.2.3-r4 \
-             openssl=3.0.7-r2 \
-             py3-pip=22.3.1-r1 \
-             python3=3.10.9-r1 \
-             python3-dev=3.10.9-r1
-# Install the build dependencies as wheels
-ENV        PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+ARG        STAGE1_IMAGE
+ARG        STAGE2_IMAGE
+FROM       ${STAGE1_IMAGE} AS builder
+
 # Specific to canu-in-a-container, wheel is used to reduce the final image size
 # by building the dependencies as wheels and copying them into stage2, eliminating
 # the need to install the build dependencies in stage2
+ENV        PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR    /root
 COPY       . .
-RUN        python -m pip install -U wheel
 RUN        python -m pip --no-cache-dir wheel '.[build-system]' --wheel-dir /root/wheels/
 
 # STAGE 2
-FROM       artifactory.algol60.net/docker.io/library/alpine:3.17 as prod
+FROM       ${STAGE2_IMAGE} AS prod
 RUN        apk add --update --no-cache \
               git=2.38.3-r1 \
               py3-pip=22.3.1-r1 \
