@@ -85,11 +85,10 @@
           ansible.builtin.set_fact:
             original_config: "{{ _result.json.configs.json }}"
 
-        # Get the mgmt interface config and subsystem conifg from the running-config and apply it to the generated config.
+        # Get the mgmt interface config from the running-config and apply it to the generated config.
         # This should prevent users from accidentally locking themselves out.
         # We can't get query the API direclty for the mgmt interface config because
         # there are additional fields added that won't work when we upload the running-config json payload.
-
         - name: get mgmt int config from running config
           ansible.builtin.uri:
             url: "{{ running_config_url }}"
@@ -105,18 +104,11 @@
           ansible.builtin.set_fact:
             mgmt_int: "{{ running_config_data.json.System.mgmt_intf }}"
 
-        # subsystem config is needed for the 6300s.  Otherwise when we upload the config the switch will wipe itself.
-        - name: get subsystems json
-          ansible.builtin.set_fact:
-            subsystems: "{{ running_config_data.json.System.subsystems }}"
-
         - name: add mgmt int config to generated config
           ansible.utils.update_fact:
             updates:
               - path: original_config.System.mgmt_intf
                 value: "{{ mgmt_int }}"
-              - path: original_config.System.subsystems
-                value: "{{ subsystems }}"
           register: updated_config
 
         - name: write jsonified config to a local file
@@ -124,16 +116,15 @@
             content: "{{ updated_config.original_config | to_json(indent=4) }}"
             dest: "{{ validated_config_json }}"
 
-        # set checkpoint for 2 minute.
+        # set checkpoint for 1 minute.
         # This play uses ssh instead of the default api.
-        #TODO test out API for this play.  This play takes its sweet time.
-        - name: set checkpoint for two minutes "checkpoint auto 2"
+        - name: set checkpoint for one minute "checkpoint auto 1"
           vars:
             ansible_connection: network_cli
           aoscx_command:
             commands:
               - checkpoint auto confirm # accept lingering checkpoints, ran into issues after uploadding full json conifg
-              - checkpoint auto 2
+              - checkpoint auto 1
 
         # Finally, upload the new config as the running-config
         - name: upload local json config to the startup-config
@@ -141,7 +132,7 @@
             config_name: "startup-config"
             config_json: "{{ validated_config_json }}"
             vrf: "mgmt"
-          timeout: 120
+          timeout: 15
 
         - name: get diff between running-config and startup-config
           register: diff
@@ -162,7 +153,7 @@
           aoscx_checkpoint:
             destination_config: running-config
             source_config: startup-config
-          timeout: 120
+          timeout: 15
           when: diff.stdout[0] != "No difference in configs."
 
         # Accept the checkpoint
