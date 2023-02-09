@@ -1451,9 +1451,13 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## Changelog
 
-### [1.6.33]
+### [1.6.34]
 
 - Add viz node to v2 TDS architecture.
+
+### [1.6.33]
+
+- Modify ansible playbook to work with aruba 6300s.
 
 ### [1.6.32]
 
