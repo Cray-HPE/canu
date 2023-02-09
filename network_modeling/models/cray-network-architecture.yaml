@@ -385,6 +385,9 @@ network_v2_tds:
         - "lmem"
       shasta_name: "lmem"
       architecture_type: "river_ncn_node_4_port"
+    - lookup_name: ["viz"]
+      shasta_name: "viz"
+      architecture_type: "river_ncn_node_4_port"
     - lookup_name:
         - "lnet"
       shasta_name: "lnet"
