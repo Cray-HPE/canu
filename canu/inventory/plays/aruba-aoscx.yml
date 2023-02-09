@@ -85,7 +85,7 @@
           ansible.builtin.set_fact:
             original_config: "{{ _result.json.configs.json }}"
 
-        # Get the mgmt interface config and subsystem conifg from the running-config and apply it to the generated config.
+        # Get the mgmt interface config and subsystem config from the running-config and apply it to the generated config.
         # This should prevent users from accidentally locking themselves out.
         # We can't get query the API direclty for the mgmt interface config because
         # there are additional fields added that won't work when we upload the running-config json payload.
