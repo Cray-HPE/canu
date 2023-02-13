@@ -51,7 +51,8 @@ def switch_vendor(
 
     Raises:
         Exception: Unknown error
-        NetmikoTimeoutException: Could not determine switch vendor
+        NetmikoTimeoutException: Timeout error connecting to switch
+        NetmikoAuthenticationException: Authentication error connecting to switch
     """
     # Check if switch in cache
     try:

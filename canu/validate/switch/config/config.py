@@ -353,6 +353,8 @@ def get_switch_config(ip, credentials, return_error=False):
 
     Raises:
         Exception: Netmiko exception
+        NetmikoTimeoutException: Timeout error connecting to switch
+        NetmikoAuthenticationException: Authentication error connecting to switch
     """
     try:
         vendor = switch_vendor(ip, credentials, return_error)

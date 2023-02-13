@@ -432,6 +432,8 @@ def get_firmware_mellanox(ip, credentials, return_error=False, cache_minutes=10)
 
     Raises:
         Exception: Error
+        NetmikoTimeoutException: Timeout error connecting to switch
+        NetmikoAuthenticationException: Authentication error connecting to switch
     """
     if firmware_cached_recently(ip, cache_minutes):
         cached_switch = get_switch_from_cache(ip)

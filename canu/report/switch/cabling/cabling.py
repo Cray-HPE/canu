@@ -105,6 +105,10 @@ def get_lldp(ip, credentials, return_error=False):
         switch_info: Dictionary with switch platform_name, hostname and IP address
         lldp_dict: Dictionary with LLDP information
         arp: ARP dictionary
+
+    Raises:
+        NetmikoTimeoutException: Timeout error connecting to switch
+        NetmikoAuthenticationException: Authentication error connecting to switch
     """
     try:
         vendor = switch_vendor(ip, credentials, return_error)
@@ -316,6 +320,8 @@ def get_lldp_dell(ip, credentials, return_error):
 
     Raises:
         Exception: Unknown error
+        NetmikoTimeoutException: Timeout error connecting to switch
+        NetmikoAuthenticationException: Authentication error connecting to switch
     """
     try:
         neighbors_dict = defaultdict(dict)
@@ -478,8 +484,8 @@ def get_lldp_dell(ip, credentials, return_error):
         cache_lldp(switch_json, lldp_dict, arp)
 
     except (
-        ssh_exception.NetmikoTimeoutException,
-        ssh_exception.NetmikoAuthenticationException,
+        NetmikoTimeoutException,
+        NetmikoAuthenticationException,
         Exception,
     ) as err:
         if return_error:
