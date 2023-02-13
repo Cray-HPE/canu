@@ -28,7 +28,7 @@ from urllib.parse import unquote
 import click
 from click_help_colors import HelpColorsCommand
 import natsort
-from netmiko import ssh_exception
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
 import urllib3
 
@@ -130,8 +130,8 @@ def get_lldp(ip, credentials, return_error=False):
         requests.exceptions.HTTPError,
         requests.exceptions.RequestException,
         requests.exceptions.ConnectionError,
-        ssh_exception.NetmikoTimeoutException,
-        ssh_exception.NetmikoAuthenticationException,
+        NetmikoTimeoutException,
+        NetmikoAuthenticationException,
     ) as error:
         if return_error:
             raise error

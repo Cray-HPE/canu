@@ -31,7 +31,7 @@ from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from click_params import IPV4_ADDRESS
 import click_spinner
 from hier_config import HConfig, Host
-from netmiko import ssh_exception
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 from ruamel.yaml import YAML
 
 from canu.utils.ssh import netmiko_command, netmiko_commands
@@ -396,8 +396,8 @@ def get_switch_config(ip, credentials, return_error=False):
             hostname = command_output[1].split()[1]
 
     except (
-        ssh_exception.NetmikoTimeoutException,
-        ssh_exception.NetmikoAuthenticationException,
+        NetmikoTimeoutException,
+        NetmikoAuthenticationException,
         Exception,
     ) as error:
         if return_error:

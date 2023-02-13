@@ -34,7 +34,7 @@ from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
 import natsort
-from netmiko import ssh_exception
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import requests
 from ruamel.yaml import YAML
@@ -237,8 +237,8 @@ def shcd_cabling(
                     requests.exceptions.HTTPError,
                     requests.exceptions.ConnectionError,
                     requests.exceptions.RequestException,
-                    ssh_exception.NetmikoTimeoutException,
-                    ssh_exception.NetmikoAuthenticationException,
+                    NetmikoTimeoutException,
+                    NetmikoAuthenticationException,
                 ) as err:
                     exception_type = type(err).__name__
 

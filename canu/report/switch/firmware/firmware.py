@@ -29,7 +29,7 @@ import sys
 import click
 from click_help_colors import HelpColorsCommand
 import emoji
-from netmiko import ssh_exception
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
 from ruamel.yaml import YAML
 import urllib3
@@ -489,8 +489,8 @@ def get_firmware_mellanox(ip, credentials, return_error=False, cache_minutes=10)
         cache_switch(switch_json)
 
     except (
-        ssh_exception.NetmikoTimeoutException,
-        ssh_exception.NetmikoAuthenticationException,
+        NetmikoTimeoutException,
+        NetmikoAuthenticationException,
         Exception,
     ) as err:
         if return_error:
