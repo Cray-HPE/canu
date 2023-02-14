@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright [2022] Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -23,7 +23,7 @@
 from unittest.mock import patch
 
 from click import testing
-from netmiko import ssh_exception
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import pytest
 import requests
 import responses
@@ -369,7 +369,7 @@ def test_switch_cabling_dell_timeout(netmiko_commands, switch_vendor):
     """Test that the `canu switch cabling` command errors on ssh timeout."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "dell"
-        netmiko_commands.side_effect = ssh_exception.NetmikoTimeoutException
+        netmiko_commands.side_effect = NetmikoTimeoutException
 
         result = runner.invoke(
             cli,
@@ -400,7 +400,7 @@ def test_switch_cabling_dell_auth(netmiko_commands, switch_vendor):
     """Test that the `canu switch cabling` command errors on ssh auth."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "dell"
-        netmiko_commands.side_effect = ssh_exception.NetmikoAuthenticationException
+        netmiko_commands.side_effect = NetmikoAuthenticationException
 
         result = runner.invoke(
             cli,

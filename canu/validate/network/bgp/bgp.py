@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright [2022] Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -26,7 +26,7 @@ import click
 from click_help_colors import HelpColorsCommand
 import click_spinner
 import natsort
-from netmiko import ssh_exception
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
 
 from canu.utils.sls import pull_sls_networks
@@ -235,8 +235,8 @@ def get_bgp_neighbors(ip, credentials, asn, network):
         requests.exceptions.HTTPError,
         requests.exceptions.RequestException,
         requests.exceptions.ConnectionError,
-        ssh_exception.NetmikoTimeoutException,
-        ssh_exception.NetmikoAuthenticationException,
+        NetmikoTimeoutException,
+        NetmikoAuthenticationException,
     ) as error:
         exception_type = type(error).__name__
         click.secho(

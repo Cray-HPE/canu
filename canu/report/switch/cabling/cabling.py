@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright [2022] Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -28,7 +28,7 @@ from urllib.parse import unquote
 import click
 from click_help_colors import HelpColorsCommand
 import natsort
-from netmiko import ssh_exception
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
 import urllib3
 
@@ -105,6 +105,10 @@ def get_lldp(ip, credentials, return_error=False):
         switch_info: Dictionary with switch platform_name, hostname and IP address
         lldp_dict: Dictionary with LLDP information
         arp: ARP dictionary
+
+    Raises:
+        NetmikoTimeoutException: Timeout error connecting to switch
+        NetmikoAuthenticationException: Authentication error connecting to switch
     """
     try:
         vendor = switch_vendor(ip, credentials, return_error)
@@ -130,8 +134,8 @@ def get_lldp(ip, credentials, return_error=False):
         requests.exceptions.HTTPError,
         requests.exceptions.RequestException,
         requests.exceptions.ConnectionError,
-        ssh_exception.NetmikoTimeoutException,
-        ssh_exception.NetmikoAuthenticationException,
+        NetmikoTimeoutException,
+        NetmikoAuthenticationException,
     ) as error:
         if return_error:
             raise error
@@ -316,6 +320,8 @@ def get_lldp_dell(ip, credentials, return_error):
 
     Raises:
         Exception: Unknown error
+        NetmikoTimeoutException: Timeout error connecting to switch
+        NetmikoAuthenticationException: Authentication error connecting to switch
     """
     try:
         neighbors_dict = defaultdict(dict)
@@ -478,8 +484,8 @@ def get_lldp_dell(ip, credentials, return_error):
         cache_lldp(switch_json, lldp_dict, arp)
 
     except (
-        ssh_exception.NetmikoTimeoutException,
-        ssh_exception.NetmikoAuthenticationException,
+        NetmikoTimeoutException,
+        NetmikoAuthenticationException,
         Exception,
     ) as err:
         if return_error:

@@ -1,29 +1,23 @@
 ---
-name: Bug report
-about: Create a report to help us improve
-title: ''
-labels: bug
-assignees: brooksvinyard, trad511, lukebates123
-
+name: 🐛 Report a bug
+about: Create a report to help us improve 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+##### SUMMARY
 
-**canu Version**
+##### ISSUE TYPE
+- Bug Report
 
-If able, please include:
-- The output of `canu --version`
+##### STEPS TO REPRODUCE
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+1.
+2.
+3.
+4.
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+##### EXPECTED RESULTS
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+
+##### ACTUAL RESULTS
+
+

@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright [2022] Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -29,7 +29,7 @@ import sys
 import click
 from click_help_colors import HelpColorsCommand
 import emoji
-from netmiko import ssh_exception
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
 from ruamel.yaml import YAML
 import urllib3
@@ -432,6 +432,8 @@ def get_firmware_mellanox(ip, credentials, return_error=False, cache_minutes=10)
 
     Raises:
         Exception: Error
+        NetmikoTimeoutException: Timeout error connecting to switch
+        NetmikoAuthenticationException: Authentication error connecting to switch
     """
     if firmware_cached_recently(ip, cache_minutes):
         cached_switch = get_switch_from_cache(ip)
@@ -489,8 +491,8 @@ def get_firmware_mellanox(ip, credentials, return_error=False, cache_minutes=10)
         cache_switch(switch_json)
 
     except (
-        ssh_exception.NetmikoTimeoutException,
-        ssh_exception.NetmikoAuthenticationException,
+        NetmikoTimeoutException,
+        NetmikoAuthenticationException,
         Exception,
     ) as err:
         if return_error:

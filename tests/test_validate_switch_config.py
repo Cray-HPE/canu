@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright [2022] Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -24,7 +24,7 @@ from os import urandom
 from unittest.mock import patch
 
 from click import testing
-from netmiko import ssh_exception
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 
 from canu.cli import cli
 
@@ -462,7 +462,7 @@ def test_validate_config_timeout(netmiko_command, switch_vendor):
     switch_config_edit = switch_config[:-15] + "router add\n"
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
-        netmiko_command.side_effect = ssh_exception.NetmikoTimeoutException
+        netmiko_command.side_effect = NetmikoTimeoutException
         with open("switch.cfg", "w") as f:
             f.writelines(switch_config_edit)
 
@@ -498,7 +498,7 @@ def test_validate_config_auth_exception(netmiko_command, switch_vendor):
     switch_config_edit = switch_config[:-15] + "router add\n"
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
-        netmiko_command.side_effect = ssh_exception.NetmikoAuthenticationException
+        netmiko_command.side_effect = NetmikoAuthenticationException
         with open("switch.cfg", "w") as f:
             f.writelines(switch_config_edit)
 

@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright [2022] Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -19,9 +19,8 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-ARG     PY_VERSION
-ARG     SLE_VERSION
-FROM    artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${PY_VERSION}-SLES${SLE_VERSION}
+ARG     PYTHON_VERSION
+FROM    artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python:${PYTHON_VERSION}
 
 # update command prompt
 RUN     echo 'export PS1="canu \w : "' >> /etc/bash.bashrc

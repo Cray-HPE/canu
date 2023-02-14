@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright [2022] Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -34,7 +34,7 @@ from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
 import natsort
-from netmiko import ssh_exception
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import requests
 from ruamel.yaml import YAML
@@ -237,8 +237,8 @@ def shcd_cabling(
                     requests.exceptions.HTTPError,
                     requests.exceptions.ConnectionError,
                     requests.exceptions.RequestException,
-                    ssh_exception.NetmikoTimeoutException,
-                    ssh_exception.NetmikoAuthenticationException,
+                    NetmikoTimeoutException,
+                    NetmikoAuthenticationException,
                 ) as err:
                     exception_type = type(err).__name__
 
