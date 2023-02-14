@@ -1451,6 +1451,12 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## Changelog
 
+### [1.6.35]
+
+- Bump netmiko version
+- Bump nornir_netmiko version
+- Fix canu test and canu validate bgp
+
 ### [1.6.34]
 
 - Add viz node to v2 TDS architecture.

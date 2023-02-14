@@ -24,7 +24,7 @@ import datetime
 import re
 
 import click
-from netmiko import ssh_exception, SSHDetect
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException, SSHDetect
 import requests
 
 from canu.utils.cache import (
@@ -51,7 +51,8 @@ def switch_vendor(
 
     Raises:
         Exception: Unknown error
-        NetmikoTimeoutException: Could not determine switch vendor
+        NetmikoTimeoutException: Timeout error connecting to switch
+        NetmikoAuthenticationException: Authentication error connecting to switch
     """
     # Check if switch in cache
     try:
@@ -116,7 +117,7 @@ def switch_vendor(
             # Could not determine switch vendor
             else:
                 if return_error:
-                    raise ssh_exception.NetmikoTimeoutException
+                    raise NetmikoTimeoutException
                 return None
 
         # Put vendor in cache
@@ -129,8 +130,8 @@ def switch_vendor(
         cache_switch(switch_cache)
 
     except (
-        ssh_exception.NetmikoTimeoutException,
-        ssh_exception.NetmikoAuthenticationException,
+        NetmikoTimeoutException,
+        NetmikoAuthenticationException,
         Exception,
     ) as err:
         if return_error:
