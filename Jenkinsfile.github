@@ -58,6 +58,7 @@ pipeline {
 
     stages {
       stage('Image: Build & Publish') {
+        stages {
           stage('Image') {
                 stages {
 
@@ -86,6 +87,7 @@ pipeline {
                         }
                     }
                 }
+            }
           }
         }
         stage('RPM: Build & Publish') {
