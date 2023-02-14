@@ -61,7 +61,7 @@ pipeline {
               docker {
                   label "metal-gcp-builder"
                   reuseNode true
-                  image "${pythonImage}:${PYTHON_VERSION}"
+                  image "${pythonImage}:${mainPythonVersion}"
               }
           }
           stages {
