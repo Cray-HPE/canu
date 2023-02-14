@@ -30,7 +30,7 @@ export ARCH := x86_64
 endif
 
 ifeq ($(IMAGE_VERSION),)
-export IMAGE_VERSION := $(shell python3 -m setuptools_scm | tr -s '+' '_' | tr -d '^v')
+export IMAGE_VERSION := $(shell python3 -m setuptools_scm | tr -s '+' '_' | sed 's/^v//')
 endif
 
 ifeq ($(PYTHON_VERSION),)
