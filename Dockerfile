@@ -30,7 +30,7 @@ RUN         apk add --no-cache \
               cmake=3.24.3-r0 \
               g++=12.2.1_git20220924-r4 \
               gcc=12.2.1_git20220924-r4 \
-              git=2.38.3-r1 \
+              git=2.38.4-r0 \
               libffi-dev=3.4.4-r0 \
               make=4.3-r1 \
               musl-dev=1.2.3-r4 \
