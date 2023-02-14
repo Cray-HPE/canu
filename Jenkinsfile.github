@@ -56,41 +56,7 @@ pipeline {
     }
 
     stages {
-        stage('Image: Build & Publish') {
-          stages {
 
-            stage('Build: Image') {
-
-                agent {
-                    docker {
-                        label "metal-gcp-builder"
-                        reuseNode true
-                        image "${pythonImage}:${mainPythonVersion}"
-                    }
-                }
-
-                steps {
-                    script {
-                        // Use setuptools_scm to resolve the version(s) to use for the build.
-                        sh "python3 -m pip install setuptools_scm[toml]"
-                        image_version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '+' '_' | sed 's/^v//'").trim()
-                        version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | sed 's/^v//'").trim()
-                        sh "make image"
-                    }
-                }
-            }
-
-            stage('Publish: Image') {
-                agent {
-                    docker {
-                        label "metal-gcp-builder"
-                        reuseNode true
-                        image "${pythonImage}:${mainPythonVersion}"
-                    }
-                }
-            }
-          }
-        }
         stage('Build & Publish') {
 
             matrix {
@@ -160,6 +126,29 @@ pipeline {
                         steps {
                             script {
                                 sh "make rpm"
+                            }
+                        }
+                    }
+
+                    stage('Build: Image') {
+
+                        environment {
+                            IMAGE_VERSION = "${image_version}"
+                        }
+
+                        steps {
+                            script {
+                                // Use setuptools_scm to resolve the version(s) to use for the build.
+                                sh "python3 -m pip install setuptools_scm[toml]"
+                                image_version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '+' '_' | sed 's/^v//'").trim()
+                                version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | sed 's/^v//'").trim()
+                                sh "make image"
+                                publishCsmDockerImage(image: "${env.NAME}", tag: "${image_version}-p${PYTHON_VERSION}", isStable: isStable)
+
+                                // Only publish the simple version images on the latest/newest base image.
+                                if ("${PYTHON_VERSION}" == "${mainPythonVersion}") {
+                                    publishCsmDockerImage(image: "${env.NAME}", tag: "${image_version}", isStable: isStable)
+                                }
                             }
                         }
                     }
