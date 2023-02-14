@@ -58,6 +58,13 @@ pipeline {
     stages {
         stage('Build & Publish: Image') {
           stages {
+            agent {
+                node {
+                    label "metal-gcp-builder"
+                    customWorkspace "${env.WORKSPACE}/${ARCH}/${PYTHON_VERSION}"
+                }
+            }
+
             stage('Build: Image') {
                 environment {
                     IMAGE_VERSION = "${image_version}"
