@@ -57,14 +57,22 @@ pipeline {
 
     stages {
         stage('Build & Publish: Image') {
+
           agent {
-              docker {
+              node {
                   label "metal-gcp-builder"
-                  reuseNode true
-                  image "${pythonImage}:${mainPythonVersion}"
+                  customWorkspace "${env.WORKSPACE}/${ARCH}/${PYTHON_VERSION}"
               }
           }
+
           stages {
+              agent {
+                  docker {
+                      label "metal-gcp-builder"
+                      reuseNode true
+                      image "${pythonImage}:${mainPythonVersion}"
+                  }
+              }
             stage('Build: Image') {
                 environment {
                     IMAGE_VERSION = "${image_version}"
