@@ -65,7 +65,7 @@ pipeline {
                     stage('Build: Image') {
 
                         environment {
-                            PYTHON_VERSION = "${PYTHON_VERSION}"
+                            PYTHON_VERSION = "${mainPythonVersion}"
                         }
 
                         steps {
