@@ -56,43 +56,34 @@ pipeline {
     }
 
     stages {
-        stage('Build & Publish: Image') {
-
+        stage('Image: Build & Publish') {
           agent {
-              node {
-                  label "metal-gcp-builder"
-                  customWorkspace "${env.WORKSPACE}/${ARCH}/${PYTHON_VERSION}"
-              }
+            node {
+                label "metal-gcp-builder"
+                customWorkspace "${env.WORKSPACE}/${ARCH}/${PYTHON_VERSION}"
+            }
           }
+          stage('Build: Image') {
+              environment {
+                  IMAGE_VERSION = "${image_version}"
+              }
 
-          stages {
-              agent {
-                  docker {
-                      label "metal-gcp-builder"
-                      reuseNode true
-                      image "${pythonImage}:${mainPythonVersion}"
+              steps {
+                  script {
+                      sh "make image"
                   }
               }
-            stage('Build: Image') {
-                environment {
-                    IMAGE_VERSION = "${image_version}"
-                }
-                steps {
-                    script {
-                        sh "make image"
-                    }
-                }
-            }
-            stage('Publish: Image') {
-                steps {
-                    script {
-                      publishCsmDockerImage(image: "${env.NAME}", tag: "${image_version}", isStable: isStable)
-                    }
-                }
-            }
+          }
+
+          stage('Publish: Image') {
+              steps {
+                  script {
+                    publishCsmDockerImage(image: "${env.NAME}", tag: "${image_version}", isStable: isStable)
+                  }
+              }
           }
         }
-        stage('Build & Publish: RPM') {
+        stage('RPM: Build & Publish') {
 
             matrix {
 
