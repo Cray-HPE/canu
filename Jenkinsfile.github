@@ -56,8 +56,28 @@ pipeline {
     }
 
     stages {
-
-        stage('Build & Publish') {
+        stage('Build & Publish: Image') {
+          stages {
+            stage('Build: Image') {
+                environment {
+                    IMAGE_VERSION = "${image_version}"
+                }
+                steps {
+                    script {
+                        sh "make image"
+                    }
+                }
+            }
+            stage('Publish: Image') {
+                steps {
+                    script {
+                      publishCsmDockerImage(image: "${env.NAME}", tag: "${image_version}", isStable: isStable)
+                    }
+                }
+            }
+          }
+        }
+        stage('Build & Publish: RPM') {
 
             matrix {
 
@@ -126,27 +146,6 @@ pipeline {
                         steps {
                             script {
                                 sh "make rpm"
-                            }
-                        }
-                    }
-
-
-                    stage('Build: Image') {
-                        environment {
-                            IMAGE_VERSION = "${image_version}"
-                        }
-
-                        steps {
-                            script {
-                                sh "make image"
-                            }
-                        }
-                    }
-
-                    stage('Publish: Image') {
-                        steps {
-                            script {
-                              publishCsmDockerImage(image: "${env.NAME}", tag: "${image_version}", isStable: isStable)
                             }
                         }
                     }
