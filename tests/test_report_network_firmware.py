@@ -23,7 +23,7 @@
 from unittest.mock import patch
 
 from click import testing
-from netmiko import ssh_exception
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
 import responses
 
@@ -512,7 +512,7 @@ def test_network_firmware_timeout_exception(switch_vendor, get_firmware_dell):
     """Test that the `canu report network firmware` command catches timeout exception."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "dell"
-        get_firmware_dell.side_effect = ssh_exception.NetmikoTimeoutException
+        get_firmware_dell.side_effect = NetmikoTimeoutException
         result = runner.invoke(
             cli,
             [
@@ -544,7 +544,7 @@ def test_network_firmware_auth_exception(switch_vendor, get_firmware_dell):
     """Test that the `canu report network firmware` command catches auth exception."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "dell"
-        get_firmware_dell.side_effect = ssh_exception.NetmikoAuthenticationException
+        get_firmware_dell.side_effect = NetmikoAuthenticationException
         result = runner.invoke(
             cli,
             [
@@ -691,7 +691,7 @@ def test_network_firmware_mellanox_timeout_error(netmiko_commands, switch_vendor
     """Test that the `canu network firmware` command errors on timeout error."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "mellanox"
-        netmiko_commands.side_effect = ssh_exception.NetmikoTimeoutException
+        netmiko_commands.side_effect = NetmikoTimeoutException
 
         result = runner.invoke(
             cli,
@@ -724,7 +724,7 @@ def test_network_firmware_mellanox_auth_error(netmiko_commands, switch_vendor):
     """Test that the `canu network firmware` command errors on authentication error."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "mellanox"
-        netmiko_commands.side_effect = ssh_exception.NetmikoAuthenticationException
+        netmiko_commands.side_effect = NetmikoAuthenticationException
 
         result = runner.invoke(
             cli,
