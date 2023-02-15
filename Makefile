@@ -62,16 +62,16 @@ image: prod_image
 	docker tag 'cray-${NAME}:${IMAGE_VERSION}' 'cray-${NAME}:${IMAGE_VERSION}-p${PYTHON_VERSION}'
 
 deps_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${IMAGE_VERSION}-deps' -f Dockerfile --target deps .
+	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag 'cray-${NAME}:${IMAGE_VERSION}-deps' -f Dockerfile --target deps .
 
 dev_image:
-	docker build --progress plain --no-cache --pull  --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${IMAGE_VERSION}-dev' -f Dockerfile --target dev .
+	docker build --progress plain --no-cache --pull  --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag 'cray-${NAME}:${IMAGE_VERSION}-dev' -f Dockerfile --target dev .
 
 build_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${IMAGE_VERSION}-build' -f Dockerfile --target build .
+	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag 'cray-${NAME}:${IMAGE_VERSION}-build' -f Dockerfile --target build .
 
 prod_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${IMAGE_VERSION}' -f Dockerfile --target prod .
+	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag 'cray-${NAME}:${IMAGE_VERSION}' -f Dockerfile --target prod .
 
 dev:
 	./canu-docker -d
