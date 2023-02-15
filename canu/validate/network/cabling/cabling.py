@@ -233,11 +233,11 @@ def validate_cabling_slot_data(lldp_info, warnings, vendor="aruba"):
     # NCN slot case
     port_result = re.search(
         r"([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}",
-        lldp_info["neighbor_port"],
+        lldp_info.get("neighbor_port"),
     )
     port_description_result = re.search(
         r"mgmt(\d)",
-        lldp_info["neighbor_port_description"],
+        lldp_info.get("neighbor_port_description),
     )
     if port_result is not None and port_description_result is not None:
         port_number = int(port_description_result.group(1))
@@ -265,18 +265,18 @@ def validate_cabling_port_data(lldp_info, warnings):
     # TODO:  Integrate with cabling standards and remove this hack.
 
     # Switch port case
-    port_result = re.search(r"1/1/(\d+)$", lldp_info["neighbor_port"])
+    port_result = re.search(r"1/1/(\d+)$", lldp_info.get("neighbor_port")
     if port_result is not None:
         return int(port_result.group(1))
 
     # NCN port case
     port_result = re.search(
         r"([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}",
-        lldp_info["neighbor_port"],
+        lldp_info.get("neighbor_port"),
     )
     port_description_result = re.search(
         r"mgmt(\d)",
-        lldp_info["neighbor_port_description"],
+        lldp_info.get("neighbor_port_description"),
     )
     if port_result is not None and port_description_result is not None:
         port_number = int(port_description_result.group(1))
