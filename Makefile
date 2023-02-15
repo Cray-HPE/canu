@@ -93,5 +93,6 @@ rpm_package_source:
 
 rpm_build_source:
 		rpmbuild -ts $(SOURCE_PATH) --define "_topdir $(BUILD_DIR)"
+
 rpm_build:
 		rpmbuild -ba $(SPEC_FILE) --define "_topdir $(BUILD_DIR)"

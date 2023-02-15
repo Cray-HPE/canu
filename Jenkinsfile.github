@@ -115,8 +115,8 @@ pipeline {
                             script {
                                 // Use setuptools_scm to resolve the version(s) to use for the build.
                                 sh "python3 -m pip install setuptools_scm[toml]"
-                                image_version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '+' '_' | sed 's/^v//'").trim()
-                                version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | sed 's/^v//'").trim()
+                                image_version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | tr -d '^v'").trim()
+                                version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | tr -d '^v'").trim()
 
                                 // Inject distro-specific metadata (e.g. which distro and service pack).
                                 runLibraryScript("addRpmMetaData.sh", "${env.NAME}.spec")
