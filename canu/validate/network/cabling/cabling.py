@@ -266,8 +266,8 @@ def validate_cabling_port_data(lldp_info, warnings):
 
     # Switch port case
     port_result = re.search(
-        r"(1/1/(\d+)$", lldp_info.get("neighbor_port", "")
-    if port_result is not None
+        r"1/1/(\d+)$", lldp_info.get("neighbor_port", "")
+        if port_result is not None
         else int(port_result.group(1))
     )
     # NCN port case
