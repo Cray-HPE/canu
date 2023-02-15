@@ -88,8 +88,7 @@ snyk:
 
 # touch the archive before creating it to prevent 'tar: .: file changed as we read it' errors
 rpm_package_source:
-		touch $(SOURCE_PATH)
-		tar --transform 'flags=r;s,^,/$(SOURCE_NAME)/,' --exclude .nox --exclude dist/rpmbuild --exclude ${SOURCE_NAME}.tar.bz2 -cvjf $(SOURCE_PATH) .
+		tar --transform 'flags=r;s,^,/$(SOURCE_NAME)/,' --exclude .nox --exclude dist/rpmbuild -cvjf $(SOURCE_PATH) .
 
 rpm_build_source:
 		rpmbuild -ts $(SOURCE_PATH) --define "_topdir $(BUILD_DIR)"
