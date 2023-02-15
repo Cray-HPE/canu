@@ -170,7 +170,6 @@ pipeline {
               agent {
                   node {
                       label "metal-gcp-builder"
-                      reuseNode true
                   }
               }
 
@@ -184,14 +183,11 @@ pipeline {
             }
         }
         stage('Image: Publish') {
-
               agent {
                   node {
                       label "metal-gcp-builder"
-                      reuseNode true
                   }
               }
-
             steps {
                 script {
                     // Use setuptools_scm to resolve the version(s) to use for the build.
