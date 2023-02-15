@@ -56,115 +56,115 @@ pipeline {
     }
 
     stages {
-        // stage('Build & Publish') {
+        stage('Build & Publish') {
 
-        //     matrix {
+            matrix {
 
-        //         agent {
-        //             node {
-        //                 label "metal-gcp-builder"
-        //                 customWorkspace "${env.WORKSPACE}/${ARCH}/${PYTHON_VERSION}"
-        //             }
-        //         }
+                agent {
+                    node {
+                        label "metal-gcp-builder"
+                        customWorkspace "${env.WORKSPACE}/${ARCH}/${PYTHON_VERSION}"
+                    }
+                }
 
-        //         axes {
+                axes {
 
-        //             axis {
-        //                 name 'ARCH'
-        //                 values 'x86_64'
-        //             }
+                    axis {
+                        name 'ARCH'
+                        values 'x86_64'
+                    }
 
-        //             axis {
-        //                 name 'PYTHON_VERSION'
-        //                 values '3.10', '3.9'
-        //             }
+                    axis {
+                        name 'PYTHON_VERSION'
+                        values '3.10', '3.9'
+                    }
 
-        //         }
+                }
 
-        //         stages {
+                stages {
                     
-        //             stage('Prepare: RPMs') {
+                    stage('Prepare: RPMs') {
 
-        //                 agent {
-        //                     docker {
-        //                         label "metal-gcp-builder"
-        //                         reuseNode true
-        //                         image "${pythonImage}:${PYTHON_VERSION}"
-        //                     }
-        //                 }
-        //                 steps {
-        //                     script {
-        //                         // Use setuptools_scm to resolve the version(s) to use for the build.
-        //                         sh "python3 -m pip install setuptools_scm[toml]"
-        //                         version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
+                        agent {
+                            docker {
+                                label "metal-gcp-builder"
+                                reuseNode true
+                                image "${pythonImage}:${PYTHON_VERSION}"
+                            }
+                        }
+                        steps {
+                            script {
+                                // Use setuptools_scm to resolve the version(s) to use for the build.
+                                sh "python3 -m pip install setuptools_scm[toml]"
+                                version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
 
-        //                         // Inject distro-specific metadata (e.g. which distro and service pack).
-        //                         runLibraryScript("addRpmMetaData.sh", "${env.NAME}.spec")
-        //                         sh "make prepare"
-        //                         sh "git update-index --assume-unchanged ${env.NAME}.spec"
-        //                     }
-        //                 }
-        //             }
+                                // Inject distro-specific metadata (e.g. which distro and service pack).
+                                runLibraryScript("addRpmMetaData.sh", "${env.NAME}.spec")
+                                sh "make prepare"
+                                sh "git update-index --assume-unchanged ${env.NAME}.spec"
+                            }
+                        }
+                    }
 
-        //             stage('Build: RPMs') {
+                    stage('Build: RPMs') {
 
-        //                 environment {
-        //                     VERSION = "${version}"
-        //                 }
+                        environment {
+                            VERSION = "${version}"
+                        }
 
-        //                 agent {
-        //                     docker {
-        //                         args '-u root' // Build Python RPMs as root for Python rpm macros to build with the right sitelib.
-        //                         label "metal-gcp-builder"
-        //                         reuseNode true
-        //                         image "${pythonImage}:${PYTHON_VERSION}"
-        //                     }
-        //                 }
+                        agent {
+                            docker {
+                                args '-u root' // Build Python RPMs as root for Python rpm macros to build with the right sitelib.
+                                label "metal-gcp-builder"
+                                reuseNode true
+                                image "${pythonImage}:${PYTHON_VERSION}"
+                            }
+                        }
 
-        //                 steps {
-        //                     script {
-        //                         sh "make rpm"
-        //                     }
-        //                 }
-        //             }
+                        steps {
+                            script {
+                                sh "make rpm"
+                            }
+                        }
+                    }
 
-        //             stage('Publish: RPMs') {
+                    stage('Publish: RPMs') {
 
-        //                 agent {
-        //                     docker {
-        //                         args '-u root -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /home/jenkins/.ssh:/root/.ssh -v /home/jenkins/.ssh:/home/jenkins/.ssh --group-add 999'
-        //                         label "metal-gcp-builder"
-        //                         reuseNode true
-        //                         image "${pythonImage}:${PYTHON_VERSION}"
-        //                     }
-        //                 }
+                        agent {
+                            docker {
+                                args '-u root -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /home/jenkins/.ssh:/root/.ssh -v /home/jenkins/.ssh:/home/jenkins/.ssh --group-add 999'
+                                label "metal-gcp-builder"
+                                reuseNode true
+                                image "${pythonImage}:${PYTHON_VERSION}"
+                            }
+                        }
 
-        //                 steps {
-        //                     script {
-        //                         def sleVersion = sh(returnStdout: true, script: 'awk -F= \'/VERSION_ID/{gsub(/["]/,""); print \$NF}\' /etc/os-release').trim()
-        //                         def sles_version_parts = "${sleVersion}".tokenize('.')
-        //                         def sles_major = "${sles_version_parts[0]}"
-        //                         def sles_minor = "${sles_version_parts[1]}"
-        //                         publishCsmRpms(
-        //                                 arch: "${ARCH}",
-        //                                 component: env.NAME,
-        //                                 isStable: isStable,
-        //                                 os: "sle-${sles_major}sp${sles_minor}",
-        //                                 pattern: "dist/rpmbuild/RPMS/${ARCH}/*.rpm",
-        //                         )
-        //                         publishCsmRpms(
-        //                                 arch: "src",
-        //                                 component: env.NAME,
-        //                                 isStable: isStable,
-        //                                 os: "sle-${sles_major}sp${sles_minor}",
-        //                                 pattern: "dist/rpmbuild/SRPMS/*.rpm",
-        //                         )
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+                        steps {
+                            script {
+                                def sleVersion = sh(returnStdout: true, script: 'awk -F= \'/VERSION_ID/{gsub(/["]/,""); print \$NF}\' /etc/os-release').trim()
+                                def sles_version_parts = "${sleVersion}".tokenize('.')
+                                def sles_major = "${sles_version_parts[0]}"
+                                def sles_minor = "${sles_version_parts[1]}"
+                                publishCsmRpms(
+                                        arch: "${ARCH}",
+                                        component: env.NAME,
+                                        isStable: isStable,
+                                        os: "sle-${sles_major}sp${sles_minor}",
+                                        pattern: "dist/rpmbuild/RPMS/${ARCH}/*.rpm",
+                                )
+                                publishCsmRpms(
+                                        arch: "src",
+                                        component: env.NAME,
+                                        isStable: isStable,
+                                        os: "sle-${sles_major}sp${sles_minor}",
+                                        pattern: "dist/rpmbuild/SRPMS/*.rpm",
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
         stage('Image: Build & Publish') {
 
               agent {
