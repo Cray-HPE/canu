@@ -59,7 +59,7 @@ prepare:
 		cp $(SPEC_FILE) $(BUILD_DIR)/SPECS/
 
 image: prod_image
-	docker tag '${NAME}:${VERSION}' 'cray-${NAME}:${IMAGE_VERSION}-p${PYTHON_VERSION}'
+	docker tag 'cray-${NAME}:${IMAGE_VERSION}' 'cray-${NAME}:${IMAGE_VERSION}-p${PYTHON_VERSION}'
 
 deps_image:
 	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${IMAGE_VERSION}-deps' -f Dockerfile --target deps .
