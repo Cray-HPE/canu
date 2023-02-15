@@ -92,7 +92,7 @@ rpm_package_source:
 		tar --transform 'flags=r;s,^,/$(SOURCE_NAME)/,' --exclude .nox --exclude dist/rpmbuild --exclude ${SOURCE_NAME}.tar.bz2 -cvjf $(SOURCE_PATH) .
 
 rpm_build_source:
-		rpmbuild -ts $(SOURCE_PATH) --define "_topdir $(BUILD_DIR)"
+		rpmbuild -vv -ts $(SOURCE_PATH) --define "_topdir $(BUILD_DIR)"
 
 rpm_build:
 		rpmbuild -vv -ba $(SPEC_FILE) --define "_topdir $(BUILD_DIR)"
