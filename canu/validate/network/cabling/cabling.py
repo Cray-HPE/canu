@@ -237,7 +237,7 @@ def validate_cabling_slot_data(lldp_info, warnings, vendor="aruba"):
     )
     port_description_result = re.search(
         r"mgmt(\d)",
-        lldp_info.get("neighbor_port_description),
+        lldp_info.get("neighbor_port_description"),
     )
     if port_result is not None and port_description_result is not None:
         port_number = int(port_description_result.group(1))
