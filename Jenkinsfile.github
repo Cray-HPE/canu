@@ -27,7 +27,7 @@
 
 def mainSleVersion = '15.4'
 def pythonImage = 'artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python'
-def pythonVersion = '3.10.8'
+def pythonVersion = '3.10'
 def isStable = env.TAG_NAME != null ? true : false
 pipeline {
     agent {
