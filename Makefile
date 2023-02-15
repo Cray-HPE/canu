@@ -29,6 +29,10 @@ ifeq ($(ARCH),)
 export ARCH := x86_64
 endif
 
+ifeq ($(IMAGE_VERSION),)
+export IMAGE_VERSION := $(shell python3 -m setuptools_scm | tr -s '+' '_' | tr -d '^v')
+endif
+
 ifeq ($(PYTHON_VERSION),)
 export PYTHON_VERSION := 3.10
 endif
@@ -59,19 +63,19 @@ prepare:
 		cp $(SPEC_FILE) $(BUILD_DIR)/SPECS/
 
 image: prod_image
-	docker tag '${NAME}:${VERSION}' '${NAME}:${VERSION}-p${PYTHON_VERSION}'
+	docker tag '${NAME}:${IMAGE_VERSION}' '${NAME}:${IMAGE_VERSION}-p${PYTHON_VERSION}'
 
 deps_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${VERSION}-deps' -f Dockerfile --target deps .
+	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${IMAGE_VERSION}-deps' -f Dockerfile --target deps .
 
 dev_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${VERSION}-dev' -f Dockerfile --target dev .
+	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${IMAGE_VERSION}-dev' -f Dockerfile --target dev .
 
 build_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${VERSION}-build' -f Dockerfile --target build .
+	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${IMAGE_VERSION}-build' -f Dockerfile --target build .
 
 prod_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${VERSION}' -f Dockerfile --target prod .
+	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${IMAGE_VERSION}' -f Dockerfile --target prod .
 
 dev:
 	./canu-docker -d
@@ -80,7 +84,7 @@ prod:
 	./canu-docker -p
 
 snyk:
-	snyk container test --severity-threshold=high --file=Dockerfile --fail-on=all --docker ${NAME}:${VERSION}
+	snyk container test --severity-threshold=high --file=Dockerfile --fail-on=all --docker ${NAME}:${IMAGE_VERSION}
 
 # touch the archive before creating it to prevent 'tar: .: file changed as we read it' errors
 rpm_package_source:
