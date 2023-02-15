@@ -56,6 +56,7 @@ pipeline {
     }
 
     stages {
+
         stage('Build & Publish') {
 
             matrix {
@@ -82,7 +83,7 @@ pipeline {
                 }
 
                 stages {
-                    
+
                     stage('Prepare: RPMs') {
 
                         agent {
@@ -96,7 +97,8 @@ pipeline {
                             script {
                                 // Use setuptools_scm to resolve the version(s) to use for the build.
                                 sh "python3 -m pip install setuptools_scm[toml]"
-                                version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
+                                image_version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '+' '_' | sed 's/^v//'").trim()
+                                version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | sed 's/^v//'").trim()
 
                                 // Inject distro-specific metadata (e.g. which distro and service pack).
                                 runLibraryScript("addRpmMetaData.sh", "${env.NAME}.spec")
@@ -124,6 +126,32 @@ pipeline {
                         steps {
                             script {
                                 sh "make rpm"
+                            }
+                        }
+                    }
+
+                    stage('Build: Image') {
+
+                        environment {
+                            IMAGE_VERSION = "${image_version}"
+                        }
+
+                        steps {
+                            script {
+                                sh "make image"
+                            }
+                        }
+                    }
+
+                    stage('Publish: Image') {
+                        steps {
+                            script {
+                                publishCsmDockerImage(image: "cray-${env.NAME}", tag: "${image_version}-p${PYTHON_VERSION}", isStable: isStable)
+
+                                // Only publish the simple version images on the latest/newest base image.
+                                if ("${PYTHON_VERSION}" == "${mainPythonVersion}") {
+                                    publishCsmDockerImage(image: "cray-${env.NAME}", tag: "${image_version}", isStable: isStable)
+                                }
                             }
                         }
                     }
@@ -162,38 +190,6 @@ pipeline {
                             }
                         }
                     }
-                }
-            }
-        }
-        stage('Image: Build') {
-
-              agent {
-                  node {
-                      label "metal-gcp-builder"
-                  }
-              }
-
-            steps {
-                script {
-                    // Use setuptools_scm to resolve the version(s) to use for the build.
-                    sh "python3 -m pip install setuptools_scm[toml]"
-                    version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
-                    sh "make image"
-                }
-            }
-        }
-        stage('Image: Publish') {
-              agent {
-                  node {
-                      label "metal-gcp-builder"
-                  }
-              }
-            steps {
-                script {
-                    // Use setuptools_scm to resolve the version(s) to use for the build.
-                    sh "python3 -m pip install setuptools_scm[toml]"
-                    version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
-                    publishCsmDockerImage(image: "${env.NAME}", tag: "${version}", isStable: isStable)
                 }
             }
         }
