@@ -58,12 +58,11 @@ pipeline {
     stages {
         stage('Image: Build & Publish') {
 
-            agent {
-                node {
-                    label "metal-gcp-builder"
-                    customWorkspace "${env.WORKSPACE}/${ARCH}/${PYTHON_VERSION}"
-                }
-            }
+              agent {
+                  node {
+                      label "metal-gcp-builder"
+                  }
+              }
 
             steps {
                 script {
@@ -72,9 +71,9 @@ pipeline {
                     image_version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | tr -d '^v'").trim()
                     sh "make image"
                     publishCsmDockerImage(image: "${env.NAME}", tag: "${image_version}-p${PYTHON_VERSION}", isStable: isStable)
-                    // if ("${PYTHON_VERSION}" == "${mainPythonVersion}") {
-                    //     publishCsmDockerImage(image: "${env.NAME}", tag: "${image_version}", isStable: isStable)
-                    // }
+                    if ("${PYTHON_VERSION}" == "${mainPythonVersion}") {
+                        publishCsmDockerImage(image: "${env.NAME}", tag: "${image_version}", isStable: isStable)
+                    }
                 }
             }
         }
