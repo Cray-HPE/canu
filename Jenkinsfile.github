@@ -60,8 +60,11 @@ pipeline {
             agent {
                 node {
                     label "metal-gcp-builder"
+                    reuseNode true
                 }
             }
+          stages {
+            stage {
             environment {
                 IMAGE_VERSION = "${image_version}"
             }
@@ -77,14 +80,7 @@ pipeline {
         }
 
         stage('Publish: Image') {
-            agent {
-                node {
-                    label "metal-gcp-builder"
-                }
-            }
-            environment {
-                IMAGE_VERSION = "${image_version}"
-            }
+
             steps {
                 script {
                                                   // Use setuptools_scm to resolve the version(s) to use for the build.
@@ -99,6 +95,8 @@ pipeline {
                     }
                 }
             }
+        }
+          }
         }
 
         stage('Build & Publish') {
