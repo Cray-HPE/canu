@@ -30,7 +30,7 @@ export ARCH := x86_64
 endif
 
 ifeq ($(IMAGE_VERSION),)
-export IMAGE_VERSION := $(shell python3 -m setuptools_scm | tr -s '-' '~' | tr -d '^v')
+export IMAGE_VERSION := $(shell python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | tr -d '^v')
 endif
 
 ifeq ($(PYTHON_VERSION),)
@@ -44,7 +44,7 @@ endif
 export PYTHON_BIN := python$(PYTHON_VERSION)
 
 ifeq ($(VERSION),)
-export VERSION := $(shell python3 -m setuptools_scm | tr -s '-' '~' | tr -d '^v')
+export VERSION := $(shell python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | tr -d '^v')
 endif
 
 SPEC_FILE := ${NAME}.spec
