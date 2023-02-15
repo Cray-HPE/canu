@@ -56,26 +56,6 @@ pipeline {
     }
 
     stages {
-        stage('Image: Build & Publish') {
-
-              agent {
-                  node {
-                      label "metal-gcp-builder"
-                      reuseNode true
-                  }
-              }
-
-            steps {
-                script {
-                    // Use setuptools_scm to resolve the version(s) to use for the build.
-                    sh "python3 -m pip install setuptools_scm[toml]"
-                    version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
-                    sh "make image"
-                    publishCsmDockerImage(image: "${env.NAME}", tag: "${version}", isStable: isStable)
-                }
-            }
-        }
-
         stage('Build & Publish') {
 
             matrix {
@@ -182,6 +162,24 @@ pipeline {
                             }
                         }
                     }
+                }
+            }
+        }
+        stage('Image: Build & Publish') {
+
+              agent {
+                  node {
+                      label "metal-gcp-builder"
+                  }
+              }
+
+            steps {
+                script {
+                    // Use setuptools_scm to resolve the version(s) to use for the build.
+                    sh "python3 -m pip install setuptools_scm[toml]"
+                    version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
+                    sh "make image"
+                    publishCsmDockerImage(image: "${env.NAME}", tag: "${version}", isStable: isStable)
                 }
             }
         }
