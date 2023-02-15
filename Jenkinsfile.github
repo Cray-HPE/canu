@@ -56,18 +56,13 @@ pipeline {
     }
 
     stages {
-        stage('Build: Image') {
-            agent {
-                node {
-                    label "metal-gcp-builder"
-                    reuseNode true
-                }
-            }
-          stages {
-            stage {
-            environment {
-                IMAGE_VERSION = "${image_version}"
-            }
+        stage('Image: Build & Publish') {
+
+              agent {
+                  node {
+                      label "metal-gcp-builder"
+                  }
+              }
 
             steps {
                 script {
@@ -75,28 +70,9 @@ pipeline {
                     sh "python3 -m pip install setuptools_scm[toml]"
                     image_version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '+' '_' | sed 's/^v//'").trim()
                     sh "make image"
-                }
-            }
-        }
-
-        stage('Publish: Image') {
-
-            steps {
-                script {
-                                                  // Use setuptools_scm to resolve the version(s) to use for the build.
-                    sh "python3 -m pip install setuptools_scm[toml]"
-                    image_version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '+' '_' | sed 's/^v//'").trim()
-                    
                     publishCsmDockerImage(image: "cray-${env.NAME}", tag: "${image_version}", isStable: isStable)
-
-                    // Only publish the simple version images on the latest/newest base image.
-                    if ("${PYTHON_VERSION}" == "${mainPythonVersion}") {
-                        publishCsmDockerImage(image: "cray-${env.NAME}", tag: "${image_version}", isStable: isStable)
-                    }
                 }
             }
-        }
-          }
         }
 
         stage('Build & Publish') {
