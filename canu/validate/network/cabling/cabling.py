@@ -237,7 +237,7 @@ def validate_cabling_slot_data(lldp_info, warnings, vendor="aruba"):
     )
     port_description_result = re.search(
         r"mgmt(\d)",
-        lldp_info.get("neighbor_port_description" ,""),
+        lldp_info.get("neighbor_port_description", ""),
     )
     if port_result is not None and port_description_result is not None:
         port_number = int(port_description_result.group(1))
@@ -266,8 +266,8 @@ def validate_cabling_port_data(lldp_info, warnings):
 
     # Switch port case
     port_result = re.search(r"1/1/(\d+)$", lldp_info.get("neighbor_port", "")
-        if port_result is not None
-            else int(port_result.group(1))
+                            if port_result is not None
+                            else int(port_result.group(1))
     )
     # NCN port case
     port_result = re.search(
@@ -276,7 +276,7 @@ def validate_cabling_port_data(lldp_info, warnings):
     )
     port_description_result = re.search(
         r"mgmt(\d)",
-        lldp_info.get("neighbor_port_description" ,""),
+        lldp_info.get("neighbor_port_description", ""),
     )
     if port_result is not None and port_description_result is not None:
         port_number = int(port_description_result.group(1))
