@@ -1453,7 +1453,7 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ### [1.6.36]
 
-- Fix Canu cabling to support splitter cables
+- Fix handling of LLDP data for that caused exception in cable validation
 
 ### [1.6.35]
 
