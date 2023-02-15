@@ -72,9 +72,9 @@ pipeline {
                     image_version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | tr -d '^v'").trim()
                     sh "make image"
                     publishCsmDockerImage(image: "${env.NAME}", tag: "${image_version}-p${PYTHON_VERSION}", isStable: isStable)
-                    if ("${PYTHON_VERSION}" == "${mainPythonVersion}") {
-                        publishCsmDockerImage(image: "${env.NAME}", tag: "${image_version}", isStable: isStable)
-                    }
+                    // if ("${PYTHON_VERSION}" == "${mainPythonVersion}") {
+                    //     publishCsmDockerImage(image: "${env.NAME}", tag: "${image_version}", isStable: isStable)
+                    // }
                 }
             }
         }
