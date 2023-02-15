@@ -30,7 +30,7 @@ export ARCH := x86_64
 endif
 
 ifeq ($(IMAGE_VERSION),)
-export IMAGE_VERSION := $(shell python3 -m setuptools_scm | tr -s '+' '_' | sed 's/^v//')
+export IMAGE_VERSION := $(shell python3 -m setuptools_scm | tr -s '-' '~' | tr -d '^v')
 endif
 
 ifeq ($(PYTHON_VERSION),)
@@ -53,7 +53,7 @@ SOURCE_NAME := ${NAME}-${VERSION}
 BUILD_DIR := $(PWD)/dist/rpmbuild
 SOURCE_PATH := ${BUILD_DIR}/SOURCES/${SOURCE_NAME}.tar.bz2
 
-all : prepare rpm
+all : prepare binary test rpm
 rpm: rpm_package_source rpm_build_source rpm_build
 
 prepare:
@@ -63,18 +63,19 @@ prepare:
 		cp $(SPEC_FILE) $(BUILD_DIR)/SPECS/
 
 image: prod_image
+	docker tag '${NAME}:${IMAGE_VERSION}' '${NAME}:${IMAGE_VERSION}-p${PYTHON_VERSION}'
 
 deps_image:
-	docker build --progress plain --build-arg SLE_VERSION='${SLE_VERSION}' --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${IMAGE_VERSION}-deps' -f Dockerfile --target deps .
+	docker build --progress plain --no-cache --pull --build-arg SLE_VERSION='${SLE_VERSION}' --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${IMAGE_VERSION}-deps' -f Dockerfile --target deps .
 
 dev_image:
-	docker build --progress plain --build-arg SLE_VERSION='${SLE_VERSION}' --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${IMAGE_VERSION}-dev' -f Dockerfile --target dev .
+	docker build --progress plain --no-cache --pull --build-arg SLE_VERSION='${SLE_VERSION}' --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${IMAGE_VERSION}-dev' -f Dockerfile --target dev .
 
 build_image:
-	docker build --progress plain --no-cache --build-arg SLE_VERSION='${SLE_VERSION}' --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${IMAGE_VERSION}-build' -f Dockerfile --target build .
+	docker build --progress plain --no-cache --pull --build-arg SLE_VERSION='${SLE_VERSION}' --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${IMAGE_VERSION}-build' -f Dockerfile --target build .
 
 prod_image:
-	docker build --progress plain --no-cache --build-arg SLE_VERSION='${SLE_VERSION}' --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${IMAGE_VERSION}' -f Dockerfile --target prod .
+	docker build --progress plain --no-cache --pull --build-arg SLE_VERSION='${SLE_VERSION}' --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${IMAGE_VERSION}' -f Dockerfile --target prod .
 
 dev:
 	./canu-docker -d
