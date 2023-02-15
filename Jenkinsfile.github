@@ -25,20 +25,10 @@
  */
 @Library('csm-shared-library') _
 
-def mainPythonVersion = '3.10'
+def mainSleVersion = '15.4'
 def pythonImage = 'artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python'
-
-// Disable pr-merge builds; not used.
-if (env.BRANCH_NAME ==~ ~"^PR-\\d+") {
-    currentBuild.result = 'SUCCESS'
-    echo "Pull-Request builds are skipped."
-    return
-}
-
-// Only consider X.Y.Z tags as stable, do not consider X.Y.Z{[a|b|rc]N} or X.Y.Z.* tags as stable.
-// The ==~ operator performs an exact match.
-def stableToken = ~/v?\d+\.\d+\.\d+/
-def isStable = (env.TAG_NAME != null & env.TAG_NAME ==~ stableToken) ? true : false
+def pythonVersion = '3.10.8'
+def isStable = env.TAG_NAME != null ? true : false
 pipeline {
     agent {
         label "metal-gcp-builder"
@@ -53,27 +43,11 @@ pipeline {
 
     environment {
         NAME = getRepoName()
+        IMAGE_VERSION = sh(returnStdout: true, script: "git describe --tags | tr -s '-' '_' | tr -d '^v'").trim()
+        VERSION = sh(returnStdout: true, script: "git describe --tags | tr -s '-' '~' | tr -d '^v'").trim()
     }
 
     stages {
-        stage('Image: Build & Publish') {
-
-              agent {
-                  node {
-                      label "metal-gcp-builder"
-                  }
-              }
-
-            steps {
-                script {
-                    // Use setuptools_scm to resolve the version(s) to use for the build.
-                    sh "python3 -m pip install setuptools_scm[toml]"
-                    image_version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '+' '_' | sed 's/^v//'").trim()
-                    sh "make image"
-                    publishCsmDockerImage(image: "cray-${env.NAME}", tag: "${image_version}", isStable: isStable)
-                }
-            }
-        }
 
         stage('Build & Publish') {
 
@@ -82,22 +56,21 @@ pipeline {
                 agent {
                     node {
                         label "metal-gcp-builder"
-                        customWorkspace "${env.WORKSPACE}/${ARCH}/${PYTHON_VERSION}"
+                        customWorkspace "${env.WORKSPACE}/${sleVersion}/${architecture}/${pythonVersion}"
                     }
                 }
 
                 axes {
 
                     axis {
-                        name 'ARCH'
+                        name 'architecture'
                         values 'x86_64'
                     }
 
                     axis {
-                        name 'PYTHON_VERSION'
-                        values '3.10', '3.9'
+                        name 'sleVersion'
+                        values 15.3, 15.4
                     }
-
                 }
 
                 stages {
@@ -108,69 +81,62 @@ pipeline {
                             docker {
                                 label "metal-gcp-builder"
                                 reuseNode true
-                                image "${pythonImage}:${PYTHON_VERSION}"
+                                image "${pythonImage}:${pythonVersion}-SLES${sleVersion}"
                             }
                         }
                         steps {
-                            script {
-                                // Use setuptools_scm to resolve the version(s) to use for the build.
-                                sh "python3 -m pip install setuptools_scm[toml]"
-                                image_version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '+' '_' | sed 's/^v//'").trim()
-                                version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | sed 's/^v//'").trim()
-
-                                // Inject distro-specific metadata (e.g. which distro and service pack).
-                                runLibraryScript("addRpmMetaData.sh", "${env.NAME}.spec")
-                                sh "make prepare"
-                                sh "git update-index --assume-unchanged ${env.NAME}.spec"
-                            }
+                            // Inject distro-specific metadata (e.g. which distro and service pack).
+                            runLibraryScript("addRpmMetaData.sh", "${env.NAME}.spec")
+                            sh "make prepare"
+                            sh "git update-index --assume-unchanged ${env.NAME}.spec"
                         }
                     }
 
                     stage('Build: RPMs') {
 
                         environment {
-                            VERSION = "${version}"
+                            ARCH = "${architecture}"
+                            PYTHON_VERSION = "${pythonVersion}"
                         }
 
                         agent {
                             docker {
-                                args '-u root' // Build Python RPMs as root for Python rpm macros to build with the right sitelib.
                                 label "metal-gcp-builder"
                                 reuseNode true
-                                image "${pythonImage}:${PYTHON_VERSION}"
+                                image "${pythonImage}:${pythonVersion}-SLES${sleVersion}"
                             }
                         }
-
                         steps {
-                            script {
-                                sh "make rpm"
-                            }
+                            sh "make rpm"
                         }
                     }
 
-                    stage('Publish: RPMs') {
-
-                        agent {
-                            docker {
-                                args '-u root -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /home/jenkins/.ssh:/root/.ssh -v /home/jenkins/.ssh:/home/jenkins/.ssh --group-add 999'
-                                label "metal-gcp-builder"
-                                reuseNode true
-                                image "${pythonImage}:${PYTHON_VERSION}"
+                    stage('Build: Image') {
+                        steps {
+                            script {
+                                sh "make image"
                             }
                         }
+                    }
+                    stage('Publish: Image') {
+                        steps {
+                            script {
+                                publishCsmDockerImage(image: "${env.NAME}", tag: env.IMAGE_VERSION, isStable: isStable)
+                            }
+                        }
+                    }
+                    stage('Publish: RPMs') {
 
                         steps {
                             script {
-                                def sleVersion = sh(returnStdout: true, script: 'awk -F= \'/VERSION_ID/{gsub(/["]/,""); print \$NF}\' /etc/os-release').trim()
-                                def sles_version_parts = "${sleVersion}".tokenize('.')
-                                def sles_major = "${sles_version_parts[0]}"
-                                def sles_minor = "${sles_version_parts[1]}"
+                                sles_version_parts = "${sleVersion}".tokenize('.')
+                                sles_major = "${sles_version_parts[0]}"
+                                sles_minor = "${sles_version_parts[1]}"
                                 publishCsmRpms(
-                                        arch: "${ARCH}",
+                                        arch: "${architecture}", isStable: isStable,
                                         component: env.NAME,
-                                        isStable: isStable,
                                         os: "sle-${sles_major}sp${sles_minor}",
-                                        pattern: "dist/rpmbuild/RPMS/${ARCH}/*.rpm",
+                                        pattern: "dist/rpmbuild/RPMS/${architecture}/*.rpm",
                                 )
                                 publishCsmRpms(
                                         arch: "src",
@@ -184,11 +150,6 @@ pipeline {
                     }
                 }
             }
-        }
-    }
-    post {
-        always {
-            postChownFiles()
         }
     }
 }
