@@ -56,24 +56,24 @@ pipeline {
     }
 
     stages {
-        // stage('Image: Build & Publish') {
+        stage('Image: Build & Publish') {
 
-        //       agent {
-        //           node {
-        //               label "metal-gcp-builder"
-        //           }
-        //       }
+              agent {
+                  node {
+                      label "metal-gcp-builder"
+                  }
+              }
 
-        //     steps {
-        //         script {
-        //             // Use setuptools_scm to resolve the version(s) to use for the build.
-        //             sh "python3 -m pip install setuptools_scm[toml]"
-        //             image_version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | tr -d '^v'").trim()
-        //             sh "make image"
-        //             publishCsmDockerImage(image: "${env.NAME}", tag: "${image_version}", isStable: isStable)
-        //         }
-        //     }
-        // }
+            steps {
+                script {
+                    // Use setuptools_scm to resolve the version(s) to use for the build.
+                    sh "python3 -m pip install setuptools_scm[toml]"
+                    version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
+                    sh "make image"
+                    publishCsmDockerImage(image: "${env.NAME}", tag: "${version}", isStable: isStable)
+                }
+            }
+        }
 
         stage('Build & Publish') {
 
@@ -115,8 +115,7 @@ pipeline {
                             script {
                                 // Use setuptools_scm to resolve the version(s) to use for the build.
                                 sh "python3 -m pip install setuptools_scm[toml]"
-                                image_version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | tr -d '^v'").trim()
-                                version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | tr -d '^v'").trim()
+                                version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
 
                                 // Inject distro-specific metadata (e.g. which distro and service pack).
                                 runLibraryScript("addRpmMetaData.sh", "${env.NAME}.spec")
