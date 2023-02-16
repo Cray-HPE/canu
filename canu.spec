@@ -22,13 +22,6 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
-# Define which Python flavors python-rpm-macros will use (this can be a list).
-# https://github.com/openSUSE/python-rpm-macros#terminology
-%define pythons %(echo $PYTHON_BIN)
-
-# python*-devel is not listed because our build environments install Python from source and not from OS packaging.
-BuildRequires: python-rpm-generators
-BuildRequires: python-rpm-macros
 Name: %(echo $NAME)
 BuildArch: %(echo $ARCH)
 License: MIT License
@@ -45,30 +38,10 @@ will faciliate paddling through network topology plumbing.
 %prep
 %setup -q
 
-%build
-
-# Install pyinstaller for our onefile binary.
-%python_exec -m pip install -U pyinstaller
-
-# Install setuptools_scm[toml] so any context in this RPM build can resolve the module version.
-%python_exec -m pip install -U setuptools_scm[toml]
-
-# Build a source distribution and a wheel.
-%python_exec -m pip install -U build
-%python_exec -m build --sdist --wheel
-
-cp -pv pyinstaller.py pyinstaller.spec
-
 %install
-%python_exec -m pip install dist/*.whl
-
-# Make the --onefile binary.
-pyinstaller --clean -y --dist ./dist/linux --workpath /tmp pyinstaller.spec
-rm pyinstaller.spec
-chown -R --reference=. ./dist/linux
+# install the 'canu' wrapper script to the bindir
 mkdir -p %{buildroot}%{_bindir}
-install -m 755 dist/linux/canu %{buildroot}%{_bindir}/canu
-install -m 755 dist/linux/canu-inventory %{buildroot}%{_bindir}/canu-inventory
+install -m 755 ./canu %{buildroot}%{_bindir}/canu
 
 %pre
 getent passwd canu >/dev/null || \
@@ -76,7 +49,6 @@ getent passwd canu >/dev/null || \
 
 %files
 %attr(755, canu, canu) %{_bindir}/canu
-%attr(755, canu, canu) %{_bindir}/canu-inventory
 %license LICENSE
 
 %changelog

@@ -23,8 +23,7 @@
 ARG         ALPINE_IMAGE=artifactory.algol60.net/docker.io/library/alpine:3.17
 FROM        ${ALPINE_IMAGE} as deps
 USER        root
-RUN         mkdir -p /root/canu
-WORKDIR     /root/canu
+WORKDIR     /root
 VOLUME      [ "/root/mounted" ]
 RUN         apk add --no-cache \
               cmake=3.24.3-r0 \
@@ -39,6 +38,7 @@ RUN         apk add --no-cache \
               py3-virtualenv=20.16.7-r0 \
               python3=3.10.10-r0 \
               python3-dev=3.10.10-r0
+# setup a virtulenv to transfer it between stages
 ENV         VIRTUAL_ENV=/opt/venv
 RUN         python -m venv $VIRTUAL_ENV
 ENV         PATH="$VIRTUAL_ENV/bin:$PATH"
@@ -49,7 +49,6 @@ USER        root
 VOLUME      [ "/root/mounted", "/ssh-agent" ]
 ENV         VIRTUAL_ENV=/opt/venv \
             SSH_AUTH_SOCK=/ssh-agent
-WORKDIR     $VIRTUAL_ENV
 RUN         source $VIRTUAL_ENV/bin/activate
 COPY        . .
 RUN         python -m pip install --editable .
@@ -57,10 +56,11 @@ RUN         python -m pip install --editable .
 # STAGE 3 - build the binaries with pyinstaller
 FROM        dev as build
 USER        root
-# ssh is needed for 'canu test' command
+# must mount ${SSH_AUTH_SOCK} to /ssh-agent to use host ssh
+VOLUME      [ "/root/mounted", "/ssh-agent" ]
+# ssh is needed for 'canu test' command since some users may run the dev image
 RUN         apk --update add \
               openssh-client=9.1_p1-r2
-VOLUME      [ "/root/mounted", "/ssh-agent" ]
 ENV         VIRTUAL_ENV=/opt/venv \
             SSH_AUTH_SOCK=/ssh-agent
 WORKDIR     $VIRTUAL_ENV
@@ -72,13 +72,16 @@ RUN         pyinstaller --clean -y --dist ./dist/linux --workpath /tmp pyinstall
 # STAGE 4 - final production image
 FROM        ${ALPINE_IMAGE} as prod
 USER        root
+# ssh is needed for 'canu test' command
 RUN         apk --update add \
               openssh-client=9.1_p1-r2
+# must mount ${SSH_AUTH_SOCK} to /ssh-agent to use host ssh
 VOLUME      [ "/home/canu/mounted", "/ssh-agent" ]
 ENV         VIRTUAL_ENV=/opt/venv \
             SSH_AUTH_SOCK=/ssh-agent
+# copy the binaries.  The final image has the base image, ssh, and these binaries only
 COPY        --from=build $VIRTUAL_ENV/dist/linux/canu /usr/local/bin/canu
-# COPY        --from=build $VIRTUAL_ENV/dist/linux/canu-inventory /usr/local/bin/canu-inventory
+COPY        --from=build $VIRTUAL_ENV/dist/linux/canu-inventory /usr/local/bin/canu-inventory
 RUN         addgroup -S canu && \
               adduser \
               -S canu \
