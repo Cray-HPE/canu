@@ -29,7 +29,7 @@ fi
 NAME=""
 NAME=$(basename "${PWD}")
 IMAGE_VERSION=""
-IMAGE_VERSION=$(python3 -m setuptools_scm | tr -s '+' '_' | tr -d '^v')
+IMAGE_VERSION=$(python3 -m setuptools_scm | tr -s '+' '_' | sed 's/^v//')
 platforms=("podman" "docker")
 PLATFORM=""
 detect_platforms() {
@@ -119,7 +119,7 @@ main() {
     make "${make_cmd}"
   fi
 
-  cmd="${PLATFORM} run -it --rm --net=host -v ${PWD}:${mounted}:${MOUNTOPTS} --name ${container_name} ${image} ${runopts}"
+  cmd="${PLATFORM} run -it --rm --net=host -v ${PWD}:${mounted}:${MOUNTOPTS} -v ${SSH_AUTH_SOCK}:/ssh-agent --name ${container_name} ${image} ${runopts}"
   echo
   echo "Running: ${cmd}..."
   echo

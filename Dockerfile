@@ -46,8 +46,9 @@ ENV         PATH="$VIRTUAL_ENV/bin:$PATH"
 # STAGE 2 - install canu in editable mode
 FROM        deps as dev
 USER        root
-VOLUME      [ "/root/mounted" ]
-ENV         VIRTUAL_ENV=/opt/venv
+VOLUME      [ "/root/mounted", "/ssh-agent" ]
+ENV         VIRTUAL_ENV=/opt/venv \
+            SSH_AUTH_SOCK=/ssh-agent
 WORKDIR     $VIRTUAL_ENV
 RUN         source $VIRTUAL_ENV/bin/activate
 COPY        . .
@@ -56,8 +57,12 @@ RUN         python -m pip install --editable .
 # STAGE 3 - build the binaries with pyinstaller
 FROM        dev as build
 USER        root
-VOLUME      [ "/root/mounted" ]
-ENV         VIRTUAL_ENV=/opt/venv
+# ssh is needed for 'canu test' command
+RUN         apk --update add \
+              openssh-client=9.1_p1-r2
+VOLUME      [ "/root/mounted", "/ssh-agent" ]
+ENV         VIRTUAL_ENV=/opt/venv \
+            SSH_AUTH_SOCK=/ssh-agent
 WORKDIR     $VIRTUAL_ENV
 RUN         source $VIRTUAL_ENV/bin/activate
 RUN         python -m pip install . pyinstaller
@@ -67,7 +72,11 @@ RUN         pyinstaller --clean -y --dist ./dist/linux --workpath /tmp pyinstall
 # STAGE 4 - final production image
 FROM        ${ALPINE_IMAGE} as prod
 USER        root
-ENV         VIRTUAL_ENV=/opt/venv
+RUN         apk --update add \
+              openssh-client=9.1_p1-r2
+VOLUME      [ "/home/canu/mounted", "/ssh-agent" ]
+ENV         VIRTUAL_ENV=/opt/venv \
+            SSH_AUTH_SOCK=/ssh-agent
 COPY        --from=build $VIRTUAL_ENV/dist/linux/canu /usr/local/bin/canu
 # COPY        --from=build $VIRTUAL_ENV/dist/linux/canu-inventory /usr/local/bin/canu-inventory
 RUN         addgroup -S canu && \
@@ -86,6 +95,7 @@ ENV         CANU_NET="HMN" \
             SLS_API_GW="api-gw-service.local" \
             SLS_FILE="" \
             SLS_TOKEN="" \
+            SSH_AUTH_SOCK=/ssh-agent \
             SWITCH_USERNAME="admin" \
             SWITCH_PASSWORD=""
 CMD         [ "sh" ]
