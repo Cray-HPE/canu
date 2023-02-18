@@ -424,7 +424,7 @@ def test_validate_cabling_bad_ip(switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert "check the IP address and try again" in str(result.output)
+        assert "check the entered username, IP address and password" in str(result.output)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -465,7 +465,7 @@ def test_validate_cabling_bad_ip_file(switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert "check the IP address and try again" in str(result.output)
+        assert "check the entered username, IP address and password" in str(result.output)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")

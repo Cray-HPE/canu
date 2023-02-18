@@ -280,7 +280,7 @@ def get_firmware_aruba(ip, credentials, return_error=False, cache_minutes=10):
                     f"Error connecting to switch {ip}, check the username or password"
                 )
             elif exception_type == "ConnectionError":
-                error_message = f"Error connecting to switch {ip}, check the IP address and try again"
+                error_message = f"Error connecting to switch {ip}, check the entered username, IP address and password"
             else:  # pragma: no cover
                 error_message = f"Error connecting to switch {ip}."
 
@@ -501,7 +501,7 @@ def get_firmware_mellanox(ip, credentials, return_error=False, cache_minutes=10)
         exception_type = type(err).__name__
 
         if exception_type == "NetmikoTimeoutException":
-            error_message = f"Timeout error connecting to switch {ip}, check the IP address and try again."
+            error_message = f"Timeout error connecting to switch {ip}, check the entered username, IP address and password."
         elif exception_type == "NetmikoAuthenticationException":
             error_message = f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again."
         else:

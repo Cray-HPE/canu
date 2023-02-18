@@ -22,6 +22,7 @@
 """CANU commands that report the cabling of the entire Shasta network."""
 from collections import defaultdict
 import ipaddress
+import logging
 import re
 
 import click
@@ -33,6 +34,8 @@ from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
 
 from canu.report.switch.cabling.cabling import get_lldp, print_lldp
+
+log = logging.getLogger("report_cabling")
 
 
 @click.command(
@@ -75,8 +78,15 @@ from canu.report.switch.cabling.cabling import get_lldp, print_lldp
     default="switch",
     show_default=True,
 )
+@click.option(
+    "--log",
+    "log_",
+    help="Level of logging.",
+    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
+    default="ERROR",
+)
 @click.pass_context
-def cabling(ctx, ips, ips_file, username, password, out, view):
+def cabling(ctx, ips, ips_file, username, password, out, view, log_):
     """Report the cabling of all switches (Aruba, Dell, or Mellanox) on the network by using LLDP.
 
     Pass in either a comma separated list of IP addresses using the --ips option
@@ -121,7 +131,10 @@ def cabling(ctx, ips, ips_file, username, password, out, view):
         password: Switch password
         out: Name of the output file
         view: View of the cabling results.
+        log_: Level of logging.
     """
+    logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
+
     if ips_file:
         ips = []
         lines = [line.strip().replace(",", "") for line in ips_file]
@@ -162,15 +175,15 @@ def cabling(ctx, ips, ips_file, username, password, out, view):
                     exception_type = type(err).__name__
 
                     if exception_type == "HTTPError":
-                        error_message = f"Error connecting to switch {ip}, check the IP address and try again."
+                        error_message = f"Error connecting to switch {ip}, check the entered username, IP address and password."
                     if exception_type == "ConnectionError":
-                        error_message = f"Error connecting to switch {ip}, check the IP address and try again."
+                        error_message = f"Error connecting to switch {ip}, check the entered username, IP address and password."
                     if exception_type == "RequestException":
                         error_message = f"Error connecting to switch {ip}."
                     if exception_type == "NetmikoTimeoutException":
-                        error_message = f"Timeout error connecting to switch {ip}, check the IP address and try again."
+                        error_message = f"Timeout error connecting to switch {ip}, check the entered username, IP address and password."  # noqa: B950
                     if exception_type == "NetmikoAuthenticationException":
-                        error_message = f"Auth error connecting to switch {ip}, check the credentials or IP address and try again."
+                        error_message = f"Auth error connecting to switch {ip}, check the entered username, IP address and password."  # noqa: B950
 
                     errors.append(
                         [

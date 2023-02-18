@@ -250,7 +250,7 @@ def test_switch_cabling_invalid_ip():
             ],
         )
         assert result.exit_code == 0
-        assert "check the IP address and try again" in str(result.output)
+        assert "check the entered username, IP address and password" in str(result.output)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -286,7 +286,7 @@ def test_switch_cabling_bad_ip(switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert "check the IP address and try again" in str(result.output)
+        assert "check the entered username, IP address and password" in str(result.output)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -389,7 +389,7 @@ def test_switch_cabling_dell_timeout(netmiko_commands, switch_vendor):
         )
         assert result.exit_code == 0
         assert (
-            "Timeout error connecting to switch 192.168.1.2, check the IP address and try again."
+            "Timeout error connecting to switch 192.168.1.2, check the entered username, IP address and password."
             in str(result.output)
         )
 
@@ -561,7 +561,7 @@ def test_switch_cabling_mellanox_connection_error(switch_vendor):
         )
         assert result.exit_code == 0
         assert (
-            "Error connecting to switch 192.168.1.3, check the IP address and try again."
+            "Error connecting to switch 192.168.1.3, check the entered username, IP address and password."
             in str(result.output)
         )
 

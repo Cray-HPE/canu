@@ -37,7 +37,7 @@ Interface Lag:                   1  |
 
 Errors
 ----------------------------------------------------------------------------------------------------
-192.168.1.3      - Timeout error connecting to switch 192.168.1.3, check the IP address and try again.
+192.168.1.3      - Timeout error connecting to switch 192.168.1.3, check the entered username, IP address and password.
 ```
 
 ![](/images/canu_validate_switch_config.png)
