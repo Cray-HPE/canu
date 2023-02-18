@@ -1457,6 +1457,9 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ### [1.6.36]
 
+- Add better LLDP data error handling for `canu report network cabling` and `canu validate network cabling`.
+- Refine error messaging for failed logins.
+- Detect and respond to a rare condition where LLDP queries to Mellanox switches succeed, but the return data is not JSON.
 
 ### [1.6.35]
 
