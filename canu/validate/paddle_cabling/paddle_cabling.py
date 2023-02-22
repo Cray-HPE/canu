@@ -210,7 +210,7 @@ def paddle_cabling(
                     if exception_type == "HTTPError":
                         error_message = f"Error connecting to switch {ip}, check the IP, username, or password."
                     elif exception_type == "ConnectionError":
-                        error_message = f"Error connecting to switch {ip}, check the IP address and try again."
+                        error_message = f"Error connecting to switch {ip}, check the entered username, IP address and password."
                     elif exception_type == "NetmikoTimeoutException":
                         error_message = f"Timeout error connecting to {ip}. Check the IP address and try again."
                     elif exception_type == "NetmikoAuthenticationException":

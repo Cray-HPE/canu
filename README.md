@@ -1196,7 +1196,7 @@ Interface Lag:                   1  |
 
 Errors
 ----------------------------------------------------------------------------------------------------
-192.168.1.3      - Timeout error connecting to switch 192.168.1.3, check the IP address and try again.
+192.168.1.3      - Timeout error connecting to switch 192.168.1.3, check the entered username, IP address and password.
 ```
 
 #### File Output and JSON
@@ -1450,6 +1450,12 @@ To run a specific test file:
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 ## Changelog
+
+### [1.6.36]
+
+- Add better LLDP data error handling for `canu report network cabling` and `canu validate network cabling`.
+- Refine error messaging for failed logins.
+- Detect and respond to a rare condition where LLDP queries to Mellanox switches succeed, but the return data is not JSON.
 
 ### [1.6.35]
 

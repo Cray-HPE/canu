@@ -997,7 +997,7 @@ def node_list_warnings(node_list, warnings, out="-"):
         click.secho("\nWarnings", fg="red", file=out)
         if warnings["node_type"]:
             click.secho(
-                "\nNode type could not be determined for the following."
+                "\nNode type or port number could not be determined for the following."
                 + "\nThese nodes are not currently included in the model."
                 + "\n(This may be a missing architectural definition/lookup or a spelling error)",
                 fg="red",
