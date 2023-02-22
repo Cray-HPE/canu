@@ -86,6 +86,9 @@ prod:
 snyk:
 	snyk container test --severity-threshold=high --file=Dockerfile --fail-on=all --docker ${NAME}:${VERSION}
 
+integrate:
+	shellspec --format documentation --jobs 3
+
 # touch the archive before creating it to prevent 'tar: .: file changed as we read it' errors
 rpm_package_source:
 		touch $(SOURCE_PATH)
