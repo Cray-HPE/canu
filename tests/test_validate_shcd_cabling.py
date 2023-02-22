@@ -146,7 +146,7 @@ def test_validate_shcd_cabling(netmiko_command, switch_vendor):
         ) in str(result.output)
 
         assert (
-            "Node type could not be determined for the following.\n"
+            "Node type or port number could not be determined for the following.\n"
             + "These nodes are not currently included in the model.\n"
             + "(This may be a missing architectural definition/lookup or a spelling error)\n"
             + "--------------------------------------------------------------------------------\n"
@@ -329,7 +329,7 @@ def test_validate_shcd_cabling_full_architecture(netmiko_command, switch_vendor)
         ) in str(result.output)
 
         assert (
-            "Node type could not be determined for the following.\n"
+            "Node type or port number could not be determined for the following.\n"
             + "These nodes are not currently included in the model.\n"
             + "(This may be a missing architectural definition/lookup or a spelling error)\n"
             + "--------------------------------------------------------------------------------\n"
@@ -448,7 +448,7 @@ def test_validate_shcd_cabling_file(netmiko_command, switch_vendor):
         ) in str(result.output)
 
         assert (
-            "Node type could not be determined for the following.\n"
+            "Node type or port number could not be determined for the following.\n"
             + "These nodes are not currently included in the model.\n"
             + "(This may be a missing architectural definition/lookup or a spelling error)\n"
             + "--------------------------------------------------------------------------------\n"
@@ -656,7 +656,7 @@ def test_validate_shcd_cabling_bad_ip(netmiko_command, switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert "check the IP address and try again" in str(result.output)
+        assert "check the entered username, IP address and password" in str(result.output)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -706,7 +706,7 @@ def test_validate_shcd_cabling_bad_ip_file(netmiko_command, switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert "check the IP address and try again" in str(result.output)
+        assert "check the entered username, IP address and password" in str(result.output)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -918,7 +918,7 @@ def test_validate_shcd_cabling_missing_tabs(netmiko_command, switch_vendor):
         ) in str(result.output)
 
         assert (
-            "Node type could not be determined for the following.\n"
+            "Node type or port number could not be determined for the following.\n"
             + "These nodes are not currently included in the model.\n"
             + "(This may be a missing architectural definition/lookup or a spelling error)\n"
             + "--------------------------------------------------------------------------------\n"
@@ -1096,7 +1096,7 @@ def test_validate_shcd_cabling_corner_prompt(netmiko_command, switch_vendor):
         ) in str(result.output)
 
         assert (
-            "Node type could not be determined for the following.\n"
+            "Node type or port number could not be determined for the following.\n"
             + "These nodes are not currently included in the model.\n"
             + "(This may be a missing architectural definition/lookup or a spelling error)\n"
             + "--------------------------------------------------------------------------------\n"

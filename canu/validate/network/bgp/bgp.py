@@ -285,7 +285,7 @@ def get_bgp_neighbors_aruba(ip, credentials, asn, network):
             )
         elif exception_type == "ConnectionError":
             error_message = (
-                f"Error connecting to switch {ip}, check the IP address and try again."
+                f"Error connecting to switch {ip}, check the entered username, IP address and password."
             )
         else:
             error_message = f"Error connecting to switch {ip}."

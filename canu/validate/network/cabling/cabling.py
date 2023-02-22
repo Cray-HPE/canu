@@ -163,7 +163,7 @@ def cabling(ctx, architecture, ips, ips_file, username, password, log_, out):
                     if exception_type == "HTTPError":
                         error_message = f"Error connecting to switch {ip}, check the IP, username, or password."
                     elif exception_type == "ConnectionError":
-                        error_message = f"Error connecting to switch {ip}, check the IP address and try again."
+                        error_message = f"Error connecting to switch {ip}, check the entered username, IP address and password."
                     elif exception_type == "NetmikoTimeoutException":
                         error_message = f"Timeout error connecting to {ip}. Check the IP address and try again."
                     elif exception_type == "NetmikoAuthenticationException":
@@ -264,6 +264,11 @@ def validate_cabling_port_data(lldp_info, warnings):
     """
     # TODO:  Integrate with cabling standards and remove this hack.
 
+    # Arista edge port case
+    port_result = re.search(r"Ethernet1/(\d+)$", lldp_info["neighbor_port"])
+    if port_result is not None:
+        return int(port_result.group(1))
+
     # Switch port case
     port_result = re.search(r"1/1/(\d+)$", lldp_info["neighbor_port"])
     if port_result is not None:
@@ -312,7 +317,9 @@ def node_model_from_canu(factory, canu_cache, ips):
             src_name = switch["hostname"]
 
             for port in switch["cabling"]:
-
+                #
+                # Source is always a switch
+                #
                 src_slot = None  # Always local switch
                 src_lldp = {"neighbor_port": port, "neighbor_port_description": None}
                 src_port = validate_cabling_port_data(src_lldp, warnings)
@@ -381,6 +388,9 @@ def node_model_from_canu(factory, canu_cache, ips):
                 # Create the source port for the node
                 src_node_port = NetworkPort(number=src_port, slot=src_slot)
 
+                #
+                # Destinations could be a switch or a server
+                #
                 # Cable destination
                 dst_lldp = switch["cabling"][port][0]
 
@@ -465,6 +475,14 @@ def node_model_from_canu(factory, canu_cache, ips):
 
                 # Create the destination
                 dst_node_port = NetworkPort(number=dst_port, slot=dst_slot)
+
+                # The destination node has been created, but the port number cannot be determined so skip connecting
+                if dst_port is None:
+                    log.warning(
+                        f'Physical port number for {dst_name} cannot be determined from LLDP data '
+                        f'"{dst_lldp["neighbor_port"]}" or "{dst_lldp["neighbor_port_description"]}"',
+                    )
+                    continue
 
                 # Connect src_node and dst_node if possible
                 if src_index is not None and dst_index is not None:

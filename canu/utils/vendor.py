@@ -140,7 +140,7 @@ def switch_vendor(
         exception_type = type(err).__name__
 
         if exception_type == "NetmikoTimeoutException":
-            error_message = f"Timeout error connecting to switch {ip}, check the IP address and try again."
+            error_message = f"Timeout error connecting to switch {ip}, check the entered username, IP address and password."
         elif exception_type == "NetmikoAuthenticationException":
             error_message = f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again."
         else:
