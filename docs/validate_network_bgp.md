@@ -33,7 +33,7 @@ Switch username
 
 * **Default**
 
-    admin
+    `admin`
 
 
 
@@ -47,7 +47,7 @@ The network that BGP neighbors are checked.
 
 * **Default**
 
-    ALL
+    `ALL`
 
 
 
@@ -114,7 +114,26 @@ Errors
 192.168.1.3     - sw-leaf01 not a spine switch
 ```
 
+CANU can be used to validate BGP neighbors. All neighbors of a switch must return status **Established** or the verification will fail.
 
----
 
-<a href="/readme.md">Back To Readme</a><br>
+* The default **asn** is set to *65533* if it needs to be changed, use the flag `--asn NEW_ASN_NUMBER` to set the new number
+
+If you want to see the individual status of all the neighbors of a switch, use the `--verbose` flag.
+
+To validate BGP run: `canu validate network bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
+
+```bash
+canu validate network bgp --username USERNAME --password PASSWORD
+```
+
+Potential output:
+
+```text
+BGP Neighbors Established
+--------------------------------------------------
+PASS - IP: 192.168.1.1 Hostname: sw-spine01
+PASS - IP: 192.168.1.2 Hostname: sw-spine01
+```
+
+If any of the spine switch neighbors for a connection other than **Established**, the switch will **FAIL** validation.

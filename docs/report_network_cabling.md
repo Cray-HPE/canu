@@ -59,7 +59,7 @@ Switch username
 
 * **Default**
 
-    admin
+    `admin`
 
 
 
@@ -77,13 +77,23 @@ View of the cabling results.
 
 * **Default**
 
-    switch
+    `switch`
 
 
 
 * **Options**
 
     switch | equipment
+
+
+
+### --log( <log_>)
+Level of logging.
+
+
+* **Options**
+
+    DEBUG | INFO | WARNING | ERROR
 
 
 ## Examples
@@ -149,7 +159,49 @@ cc:cc:cc:cc:cc:cc
 cc:cc:cc:cc:cc:cc mgmt1   <=== sw-test01       1/1/4
 ```
 
+The cabling of multiple switches (Aruba, Dell, or Mellanox) on a network can be checked at the same time using LLDP. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the `---ips` flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like `--ips-file FILENAME` to input the file.
 
----
+An example of checking the cabling of multiple switches: `canu report network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD`
 
-<a href="/readme.md">Back To Readme</a><br>
+There are two different `--view` options, **switch** and **equipment**.
+
+
+1. The `--view switch` option displays a table for every switch IP address passed in showing connections. This is the same view as shown in the above example of checking single switch cabling.
+
+
+2. The `--view equipment` option displays a table for each mac address connection. This means that servers and switches will both display incoming and outgoing connections.
+
+An example of checking the cabling of multiple switches and displaying with the equipment view: `canu network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --view equipment`
+
+```bash
+canu report network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --view equipment
+```
+
+Potential output:
+
+```text
+sw-spine01 Aruba JL635A  GL.10.06.0010
+aa:aa:aa:aa:aa:aa
+----------------------------------------------------------------------------------------------------
+1/1/1                     <==> sw-spine02      1/1/1  Aruba JL635A  GL.10.06.0010
+1/1/3                     ===>                 00:00:00:00:00:00 mgmt1
+1/1/4                     ===> ncn-test        bb:bb:bb:bb:bb:bb mgmt1 Linux ncn-test
+
+
+sw-spine02 Aruba JL635A  GL.10.06.0010
+bb:bb:bb:bb:bb:bb
+----------------------------------------------------------------------------------------------------
+1/1/1                     <==> sw-spine01      1/1/1  Aruba JL635A  GL.10.06.0010
+
+
+00:00:00:00:00:00
+192.168.2.2:vlan3, 192.168.1.2:vlan1
+----------------------------------------------------------------------------------------------------
+00:00:00:00:00:00 mgmt1   <=== sw-spine01      1/1/3
+
+
+ncn-test Linux ncn-test2
+bb:bb:bb:bb:bb:bb
+----------------------------------------------------------------------------------------------------
+bb:bb:bb:bb:bb:bb mgmt1   <=== sw-spine01      1/1/4
+```
