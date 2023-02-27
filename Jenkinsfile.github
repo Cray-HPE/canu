@@ -76,9 +76,6 @@ pipeline {
                           sh "make dev_image"
                       }
                       script {
-                          // Use setuptools_scm to resolve the version(s) to use for the build.
-                          sh "python3 -m pip install setuptools_scm[toml]"
-                          version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
                           publishCsmDockerImage(image: "${env.NAME}", tag: "${version}-dev", isStable: isStable)
                       }
                     }
@@ -86,14 +83,9 @@ pipeline {
                  stage('Prod') {
                     steps {
                       script {
-                          sh "python3 -m pip install setuptools_scm[toml]"
-                          version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
                           sh "make prod_image"
                       }
                       script {
-                          // Use setuptools_scm to resolve the version(s) to use for the build.
-                          sh "python3 -m pip install setuptools_scm[toml]"
-                          version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
                           publishCsmDockerImage(image: "${env.NAME}", tag: "${version}", isStable: isStable)
                       }
                     }
