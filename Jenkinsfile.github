@@ -66,8 +66,8 @@ pipeline {
             }
 
             stages {
-              parallel {
                 stage('Images') {
+                parallel {
                 stage('Dev') {
                     steps {
                       script {
