@@ -69,7 +69,7 @@ pipeline {
             stages {
                 stage('Images') {
                 parallel {
-                  stage('Build') {
+                  stage('Dev') {
                     steps {
                       script {
                           sh "python3 -m pip install setuptools_scm[toml]"
@@ -81,7 +81,7 @@ pipeline {
                     }
                   }
 
-                  stage('Build') {
+                  stage('Prod') {
                     steps {
                       script {
                           sh "python3 -m pip install setuptools_scm[toml]"
