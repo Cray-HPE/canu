@@ -881,7 +881,7 @@ If any of the spine switch neighbors for a connection other than **Established**
 
 ### Generate Switch Config
 
-**[Details](docs/switch_config.md)**<br>
+**[Details](docs/generate_switch_config.md)**<br>
 To see all the lags that are generated, see [lags](docs/lags.md)
 
 CANU can be used to generate switch config.
