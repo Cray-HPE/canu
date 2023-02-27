@@ -1,0 +1,1851 @@
+{
+    "Hardware": {
+      "x3000": {
+        "Parent": "s0",
+        "Xname": "x3000",
+        "Type": "comptype_cabinet",
+        "Class": "River",
+        "TypeString": "Cabinet",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "Networks": {
+            "cn": {
+              "HMN": {
+                "CIDR": "10.107.0.0/22",
+                "Gateway": "10.107.0.1",
+                "VLan": 1513
+              },
+              "NMN": {
+                "CIDR": "10.106.0.0/22",
+                "Gateway": "10.106.0.1",
+                "VLan": 1770
+              }
+            },
+            "ncn": {
+              "HMN": {
+                "CIDR": "10.107.0.0/22",
+                "Gateway": "10.107.0.1",
+                "VLan": 1513
+              },
+              "NMN": {
+                "CIDR": "10.106.0.0/22",
+                "Gateway": "10.106.0.1",
+                "VLan": 1770
+              }
+            }
+          }
+        }
+      },
+      "x3000c0h23s1": {
+        "Parent": "x3000c0h23",
+        "Xname": "x3000c0h23s1",
+        "Type": "comptype_hl_switch",
+        "Class": "River",
+        "TypeString": "MgmtHLSwitch",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "Aliases": [
+            "sw-spine-001"
+          ],
+          "Brand": "Mellanox",
+          "IP4addr": "10.254.0.2"
+        }
+      },
+      "x3000c0h23s2": {
+        "Parent": "x3000c0h23",
+        "Xname": "x3000c0h23s2",
+        "Type": "comptype_hl_switch",
+        "Class": "River",
+        "TypeString": "MgmtHLSwitch",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "Aliases": [
+            "sw-spine-002"
+          ],
+          "Brand": "Mellanox",
+          "IP4addr": "10.254.0.3"
+        }
+      },
+      "x3000c0r24b0": {
+        "Parent": "x3000c0r24",
+        "Xname": "x3000c0r24b0",
+        "Type": "comptype_rtr_bmc",
+        "Class": "River",
+        "TypeString": "RouterBMC",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "Password": "vault://hms-creds/x3000c0r24b0",
+          "Username": "vault://hms-creds/x3000c0r24b0"
+        }
+      },
+      "x3000c0s11b0n0": {
+        "Parent": "x3000c0s11b0",
+        "Xname": "x3000c0s11b0n0",
+        "Type": "comptype_node",
+        "Class": "River",
+        "TypeString": "Node",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "Aliases": [
+            "ncn-w003"
+          ],
+          "NID": 100006,
+          "Role": "Management",
+          "SubRole": "Worker"
+        }
+      },
+      "x3000c0s13b0n0": {
+        "Parent": "x3000c0s13b0",
+        "Xname": "x3000c0s13b0n0",
+        "Type": "comptype_node",
+        "Class": "River",
+        "TypeString": "Node",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "Aliases": [
+            "ncn-s001"
+          ],
+          "NID": 100008,
+          "Role": "Management",
+          "SubRole": "Storage"
+        }
+      },
+      "x3000c0s15b0n0": {
+        "Parent": "x3000c0s15b0",
+        "Xname": "x3000c0s15b0n0",
+        "Type": "comptype_node",
+        "Class": "River",
+        "TypeString": "Node",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "Aliases": [
+            "ncn-s002"
+          ],
+          "NID": 100009,
+          "Role": "Management",
+          "SubRole": "Storage"
+        }
+      },
+      "x3000c0s17b0n0": {
+        "Parent": "x3000c0s17b0",
+        "Xname": "x3000c0s17b0n0",
+        "Type": "comptype_node",
+        "Class": "River",
+        "TypeString": "Node",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "Aliases": [
+            "ncn-s003"
+          ],
+          "NID": 100010,
+          "Role": "Management",
+          "SubRole": "Storage"
+        }
+      },
+      "x3000c0s19b1n0": {
+        "Parent": "x3000c0s19b1",
+        "Xname": "x3000c0s19b1n0",
+        "Type": "comptype_node",
+        "Class": "River",
+        "TypeString": "Node",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "Aliases": [
+            "nid000001"
+          ],
+          "NID": 1,
+          "Role": "Compute"
+        }
+      },
+      "x3000c0s19b2n0": {
+        "Parent": "x3000c0s19b2",
+        "Xname": "x3000c0s19b2n0",
+        "Type": "comptype_node",
+        "Class": "River",
+        "TypeString": "Node",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "Aliases": [
+            "nid000002"
+          ],
+          "NID": 2,
+          "Role": "Compute"
+        }
+      },
+      "x3000c0s19b3n0": {
+        "Parent": "x3000c0s19b3",
+        "Xname": "x3000c0s19b3n0",
+        "Type": "comptype_node",
+        "Class": "River",
+        "TypeString": "Node",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "Aliases": [
+            "nid000003"
+          ],
+          "NID": 3,
+          "Role": "Compute"
+        }
+      },
+      "x3000c0s19b4n0": {
+        "Parent": "x3000c0s19b4",
+        "Xname": "x3000c0s19b4n0",
+        "Type": "comptype_node",
+        "Class": "River",
+        "TypeString": "Node",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "Aliases": [
+            "nid000004"
+          ],
+          "NID": 4,
+          "Role": "Compute"
+        }
+      },
+      "x3000c0s19b999": {
+        "Parent": "x3000c0s19",
+        "Xname": "x3000c0s19b999",
+        "Type": "comptype_ncard",
+        "Class": "River",
+        "TypeString": "NodeBMC",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000"
+      },
+      "x3000c0s1b0n0": {
+        "Parent": "x3000c0s1b0",
+        "Xname": "x3000c0s1b0n0",
+        "Type": "comptype_node",
+        "Class": "River",
+        "TypeString": "Node",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "Aliases": [
+            "ncn-m001"
+          ],
+          "NID": 100001,
+          "Role": "Management",
+          "SubRole": "Master"
+        }
+      },
+      "x3000c0s27b0n0": {
+        "Parent": "x3000c0s27b0",
+        "Xname": "x3000c0s27b0n0",
+        "Type": "comptype_node",
+        "Class": "River",
+        "TypeString": "Node",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "Aliases": [
+            "uan01"
+          ],
+          "Role": "Application",
+          "SubRole": "UAN"
+        }
+      },
+      "x3000c0s29b0n0": {
+        "Parent": "x3000c0s29b0",
+        "Xname": "x3000c0s29b0n0",
+        "Type": "comptype_node",
+        "Class": "River",
+        "TypeString": "Node",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "Aliases": [
+            "ncn-w004"
+          ],
+          "NID": 100007,
+          "Role": "Management",
+          "SubRole": "Worker"
+        }
+      },
+      "x3000c0s3b0n0": {
+        "Parent": "x3000c0s3b0",
+        "Xname": "x3000c0s3b0n0",
+        "Type": "comptype_node",
+        "Class": "River",
+        "TypeString": "Node",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "Aliases": [
+            "ncn-m002"
+          ],
+          "NID": 100002,
+          "Role": "Management",
+          "SubRole": "Master"
+        }
+      },
+      "x3000c0s5b0n0": {
+        "Parent": "x3000c0s5b0",
+        "Xname": "x3000c0s5b0n0",
+        "Type": "comptype_node",
+        "Class": "River",
+        "TypeString": "Node",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "Aliases": [
+            "ncn-m003"
+          ],
+          "NID": 100003,
+          "Role": "Management",
+          "SubRole": "Master"
+        }
+      },
+      "x3000c0s7b0n0": {
+        "Parent": "x3000c0s7b0",
+        "Xname": "x3000c0s7b0n0",
+        "Type": "comptype_node",
+        "Class": "River",
+        "TypeString": "Node",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "Aliases": [
+            "ncn-w001"
+          ],
+          "NID": 100004,
+          "Role": "Management",
+          "SubRole": "Worker"
+        }
+      },
+      "x3000c0s9b0n0": {
+        "Parent": "x3000c0s9b0",
+        "Xname": "x3000c0s9b0n0",
+        "Type": "comptype_node",
+        "Class": "River",
+        "TypeString": "Node",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "Aliases": [
+            "ncn-w002"
+          ],
+          "NID": 100005,
+          "Role": "Management",
+          "SubRole": "Worker"
+        }
+      },
+      "x3000c0w22": {
+        "Parent": "x3000c0",
+        "Children": [
+          "x3000c0w22j18",
+          "x3000c0w22j25",
+          "x3000c0w22j26",
+          "x3000c0w22j27",
+          "x3000c0w22j28",
+          "x3000c0w22j29",
+          "x3000c0w22j30",
+          "x3000c0w22j31",
+          "x3000c0w22j32",
+          "x3000c0w22j33",
+          "x3000c0w22j34",
+          "x3000c0w22j35",
+          "x3000c0w22j36",
+          "x3000c0w22j37",
+          "x3000c0w22j48"
+        ],
+        "Xname": "x3000c0w22",
+        "Type": "comptype_mgmt_switch",
+        "Class": "River",
+        "TypeString": "MgmtSwitch",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "Aliases": [
+            "sw-leaf-bmc-001"
+          ],
+          "Brand": "Dell",
+          "IP4addr": "10.254.0.4",
+          "SNMPAuthPassword": "vault://hms-creds/x3000c0w22",
+          "SNMPAuthProtocol": "MD5",
+          "SNMPPrivPassword": "vault://hms-creds/x3000c0w22",
+          "SNMPPrivProtocol": "DES",
+          "SNMPUsername": "testuser"
+        }
+      },
+      "x3000c0w22j18": {
+        "Parent": "x3000c0w22",
+        "Xname": "x3000c0w22j18",
+        "Type": "comptype_mgmt_switch_connector",
+        "Class": "River",
+        "TypeString": "MgmtSwitchConnector",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "NodeNics": [
+            "x3000c0s29b0"
+          ],
+          "VendorName": "ethernet1/1/18"
+        }
+      },
+      "x3000c0w22j25": {
+        "Parent": "x3000c0w22",
+        "Xname": "x3000c0w22j25",
+        "Type": "comptype_mgmt_switch_connector",
+        "Class": "River",
+        "TypeString": "MgmtSwitchConnector",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "NodeNics": [
+            "x3000c0s7b0"
+          ],
+          "VendorName": "ethernet1/1/25"
+        }
+      },
+      "x3000c0w22j26": {
+        "Parent": "x3000c0w22",
+        "Xname": "x3000c0w22j26",
+        "Type": "comptype_mgmt_switch_connector",
+        "Class": "River",
+        "TypeString": "MgmtSwitchConnector",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "NodeNics": [
+            "x3000c0s3b0"
+          ],
+          "VendorName": "ethernet1/1/26"
+        }
+      },
+      "x3000c0w22j27": {
+        "Parent": "x3000c0w22",
+        "Xname": "x3000c0w22j27",
+        "Type": "comptype_mgmt_switch_connector",
+        "Class": "River",
+        "TypeString": "MgmtSwitchConnector",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "NodeNics": [
+            "x3000c0s5b0"
+          ],
+          "VendorName": "ethernet1/1/27"
+        }
+      },
+      "x3000c0w22j28": {
+        "Parent": "x3000c0w22",
+        "Xname": "x3000c0w22j28",
+        "Type": "comptype_mgmt_switch_connector",
+        "Class": "River",
+        "TypeString": "MgmtSwitchConnector",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "NodeNics": [
+            "x3000c0s9b0"
+          ],
+          "VendorName": "ethernet1/1/28"
+        }
+      },
+      "x3000c0w22j29": {
+        "Parent": "x3000c0w22",
+        "Xname": "x3000c0w22j29",
+        "Type": "comptype_mgmt_switch_connector",
+        "Class": "River",
+        "TypeString": "MgmtSwitchConnector",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "NodeNics": [
+            "x3000c0s11b0"
+          ],
+          "VendorName": "ethernet1/1/29"
+        }
+      },
+      "x3000c0w22j30": {
+        "Parent": "x3000c0w22",
+        "Xname": "x3000c0w22j30",
+        "Type": "comptype_mgmt_switch_connector",
+        "Class": "River",
+        "TypeString": "MgmtSwitchConnector",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "NodeNics": [
+            "x3000c0s13b0"
+          ],
+          "VendorName": "ethernet1/1/30"
+        }
+      },
+      "x3000c0w22j31": {
+        "Parent": "x3000c0w22",
+        "Xname": "x3000c0w22j31",
+        "Type": "comptype_mgmt_switch_connector",
+        "Class": "River",
+        "TypeString": "MgmtSwitchConnector",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "NodeNics": [
+            "x3000c0s15b0"
+          ],
+          "VendorName": "ethernet1/1/31"
+        }
+      },
+      "x3000c0w22j32": {
+        "Parent": "x3000c0w22",
+        "Xname": "x3000c0w22j32",
+        "Type": "comptype_mgmt_switch_connector",
+        "Class": "River",
+        "TypeString": "MgmtSwitchConnector",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "NodeNics": [
+            "x3000c0s17b0"
+          ],
+          "VendorName": "ethernet1/1/32"
+        }
+      },
+      "x3000c0w22j33": {
+        "Parent": "x3000c0w22",
+        "Xname": "x3000c0w22j33",
+        "Type": "comptype_mgmt_switch_connector",
+        "Class": "River",
+        "TypeString": "MgmtSwitchConnector",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "NodeNics": [
+            "x3000c0s19b1"
+          ],
+          "VendorName": "ethernet1/1/33"
+        }
+      },
+      "x3000c0w22j34": {
+        "Parent": "x3000c0w22",
+        "Xname": "x3000c0w22j34",
+        "Type": "comptype_mgmt_switch_connector",
+        "Class": "River",
+        "TypeString": "MgmtSwitchConnector",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "NodeNics": [
+            "x3000c0s19b2"
+          ],
+          "VendorName": "ethernet1/1/34"
+        }
+      },
+      "x3000c0w22j35": {
+        "Parent": "x3000c0w22",
+        "Xname": "x3000c0w22j35",
+        "Type": "comptype_mgmt_switch_connector",
+        "Class": "River",
+        "TypeString": "MgmtSwitchConnector",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "NodeNics": [
+            "x3000c0s19b3"
+          ],
+          "VendorName": "ethernet1/1/35"
+        }
+      },
+      "x3000c0w22j36": {
+        "Parent": "x3000c0w22",
+        "Xname": "x3000c0w22j36",
+        "Type": "comptype_mgmt_switch_connector",
+        "Class": "River",
+        "TypeString": "MgmtSwitchConnector",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "NodeNics": [
+            "x3000c0s19b4"
+          ],
+          "VendorName": "ethernet1/1/36"
+        }
+      },
+      "x3000c0w22j37": {
+        "Parent": "x3000c0w22",
+        "Xname": "x3000c0w22j37",
+        "Type": "comptype_mgmt_switch_connector",
+        "Class": "River",
+        "TypeString": "MgmtSwitchConnector",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "NodeNics": [
+            "x3000c0s27b0"
+          ],
+          "VendorName": "ethernet1/1/37"
+        }
+      },
+      "x3000c0w22j48": {
+        "Parent": "x3000c0w22",
+        "Xname": "x3000c0w22j48",
+        "Type": "comptype_mgmt_switch_connector",
+        "Class": "River",
+        "TypeString": "MgmtSwitchConnector",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.647642 +0000 +0000",
+        "ExtraProperties": {
+          "NodeNics": [
+            "x3000c0r24b0"
+          ],
+          "VendorName": "ethernet1/1/48"
+        }
+      }
+    },
+    "Networks": {
+      "BICAN": {
+        "Name": "BICAN",
+        "FullName": "SystemDefaultRoute points the network name of the default route",
+        "IPRanges": [
+          "0.0.0.0/0"
+        ],
+        "Type": "ethernet",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.699512 +0000 +0000",
+        "ExtraProperties": {
+          "CIDR": "0.0.0.0/0",
+          "MTU": 9000,
+          "Subnets": [],
+          "SystemDefaultRoute": "CAN",
+          "VlanRange": [
+            0
+          ]
+        }
+      },
+      "CAN": {
+        "Name": "CAN",
+        "FullName": "Customer Access Network",
+        "IPRanges": [
+          "10.102.3.128/26"
+        ],
+        "Type": "ethernet",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.699512 +0000 +0000",
+        "ExtraProperties": {
+          "CIDR": "10.102.3.128/26",
+          "MTU": 9000,
+          "Subnets": [
+            {
+              "CIDR": "10.102.3.160/27",
+              "FullName": "CAN Dynamic MetalLB",
+              "Gateway": "10.102.3.161",
+              "MetalLBPoolName": "customer-access",
+              "Name": "can_metallb_address_pool",
+              "VlanID": 6
+            },
+            {
+              "CIDR": "10.102.3.128/26",
+              "DHCPEnd": "10.102.3.159",
+              "DHCPStart": "10.102.3.144",
+              "FullName": "CAN Bootstrap DHCP Subnet",
+              "Gateway": "10.102.3.129",
+              "IPReservations": [
+                {
+                  "IPAddress": "10.102.3.130",
+                  "Name": "can-switch-1"
+                },
+                {
+                  "IPAddress": "10.102.3.131",
+                  "Name": "can-switch-2"
+                },
+                {
+                  "Comment": "k8s-virtual-ip",
+                  "IPAddress": "10.102.3.132",
+                  "Name": "kubeapi-vip"
+                },
+                {
+                  "Aliases": [
+                    "ncn-m001-can",
+                    "time-can",
+                    "time-can.local"
+                  ],
+                  "Comment": "x3000c0s1b0n0",
+                  "IPAddress": "10.102.3.133",
+                  "Name": "ncn-m001"
+                },
+                {
+                  "Aliases": [
+                    "ncn-m002-can",
+                    "time-can",
+                    "time-can.local"
+                  ],
+                  "Comment": "x3000c0s3b0n0",
+                  "IPAddress": "10.102.3.134",
+                  "Name": "ncn-m002"
+                },
+                {
+                  "Aliases": [
+                    "ncn-m003-can",
+                    "time-can",
+                    "time-can.local"
+                  ],
+                  "Comment": "x3000c0s5b0n0",
+                  "IPAddress": "10.102.3.135",
+                  "Name": "ncn-m003"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w001-can",
+                    "time-can",
+                    "time-can.local"
+                  ],
+                  "Comment": "x3000c0s7b0n0",
+                  "IPAddress": "10.102.3.136",
+                  "Name": "ncn-w001"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w002-can",
+                    "time-can",
+                    "time-can.local"
+                  ],
+                  "Comment": "x3000c0s9b0n0",
+                  "IPAddress": "10.102.3.137",
+                  "Name": "ncn-w002"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w003-can",
+                    "time-can",
+                    "time-can.local"
+                  ],
+                  "Comment": "x3000c0s11b0n0",
+                  "IPAddress": "10.102.3.138",
+                  "Name": "ncn-w003"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w004-can",
+                    "time-can",
+                    "time-can.local"
+                  ],
+                  "Comment": "x3000c0s29b0n0",
+                  "IPAddress": "10.102.3.139",
+                  "Name": "ncn-w004"
+                },
+                {
+                  "Aliases": [
+                    "ncn-s001-can",
+                    "time-can",
+                    "time-can.local"
+                  ],
+                  "Comment": "x3000c0s13b0n0",
+                  "IPAddress": "10.102.3.140",
+                  "Name": "ncn-s001"
+                },
+                {
+                  "Aliases": [
+                    "ncn-s002-can",
+                    "time-can",
+                    "time-can.local"
+                  ],
+                  "Comment": "x3000c0s15b0n0",
+                  "IPAddress": "10.102.3.141",
+                  "Name": "ncn-s002"
+                },
+                {
+                  "Aliases": [
+                    "ncn-s003-can",
+                    "time-can",
+                    "time-can.local"
+                  ],
+                  "Comment": "x3000c0s17b0n0",
+                  "IPAddress": "10.102.3.142",
+                  "Name": "ncn-s003"
+                },
+                {
+                  "Comment": "x3000c0s27b0n0",
+                  "IPAddress": "10.102.3.143",
+                  "Name": "uan01"
+                }
+              ],
+              "Name": "bootstrap_dhcp",
+              "VlanID": 6
+            }
+          ],
+          "VlanRange": [
+            6
+          ]
+        }
+      },
+      "CMN": {
+        "Name": "CMN",
+        "FullName": "Customer Management Network",
+        "IPRanges": [
+          "10.102.3.0/25"
+        ],
+        "Type": "ethernet",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.699512 +0000 +0000",
+        "ExtraProperties": {
+          "CIDR": "10.102.3.0/25",
+          "MTU": 9000,
+          "MyASN": 65532,
+          "PeerASN": 65533,
+          "Subnets": [
+            {
+              "CIDR": "10.102.3.60/30",
+              "FullName": "CMN Static Pool MetalLB",
+              "Gateway": "10.102.3.61",
+              "IPReservations": [
+                {
+                  "Comment": "site to system lookups",
+                  "IPAddress": "10.102.3.61",
+                  "Name": "external-dns"
+                }
+              ],
+              "MetalLBPoolName": "customer-management-static",
+              "Name": "cmn_metallb_static_pool",
+              "VlanID": 7
+            },
+            {
+              "CIDR": "10.102.3.64/26",
+              "FullName": "CMN Dynamic MetalLB",
+              "Gateway": "10.102.3.65",
+              "MetalLBPoolName": "customer-management",
+              "Name": "cmn_metallb_address_pool",
+              "VlanID": 7
+            },
+            {
+              "CIDR": "10.102.3.0/25",
+              "FullName": "CMN Management Network Infrastructure",
+              "Gateway": "10.102.3.1",
+              "IPReservations": [
+                {
+                  "Comment": "x3000c0h23s1",
+                  "IPAddress": "10.100.252.11",
+                  "Name": "sw-spine-001"
+                },
+                {
+                  "Comment": "x3000c0h23s2",
+                  "IPAddress": "10.102.3.3",
+                  "Name": "sw-spine-002"
+                },
+                {
+                  "Comment": "x3000c0w22",
+                  "IPAddress": "10.100.252.63",
+                  "Name": "sw-leaf-bmc-001"
+                }
+              ],
+              "Name": "network_hardware",
+              "VlanID": 7
+            },
+            {
+              "CIDR": "10.102.3.16/25",
+              "DHCPEnd": "10.102.3.59",
+              "DHCPStart": "10.102.3.29",
+              "FullName": "CMN Bootstrap DHCP Subnet",
+              "Gateway": "10.102.3.1",
+              "IPReservations": [
+                {
+                  "Comment": "k8s-virtual-ip",
+                  "IPAddress": "10.102.3.18",
+                  "Name": "kubeapi-vip"
+                },
+                {
+                  "Aliases": [
+                    "ncn-m001-cmn",
+                    "time-cmn",
+                    "time-cmn.local"
+                  ],
+                  "Comment": "x3000c0s1b0n0",
+                  "IPAddress": "10.102.3.19",
+                  "Name": "ncn-m001"
+                },
+                {
+                  "Aliases": [
+                    "ncn-m002-cmn",
+                    "time-cmn",
+                    "time-cmn.local"
+                  ],
+                  "Comment": "x3000c0s3b0n0",
+                  "IPAddress": "10.102.3.20",
+                  "Name": "ncn-m002"
+                },
+                {
+                  "Aliases": [
+                    "ncn-m003-cmn",
+                    "time-cmn",
+                    "time-cmn.local"
+                  ],
+                  "Comment": "x3000c0s5b0n0",
+                  "IPAddress": "10.102.3.21",
+                  "Name": "ncn-m003"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w001-cmn",
+                    "time-cmn",
+                    "time-cmn.local"
+                  ],
+                  "Comment": "x3000c0s7b0n0",
+                  "IPAddress": "10.102.3.22",
+                  "Name": "ncn-w001"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w002-cmn",
+                    "time-cmn",
+                    "time-cmn.local"
+                  ],
+                  "Comment": "x3000c0s9b0n0",
+                  "IPAddress": "10.102.3.23",
+                  "Name": "ncn-w002"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w003-cmn",
+                    "time-cmn",
+                    "time-cmn.local"
+                  ],
+                  "Comment": "x3000c0s11b0n0",
+                  "IPAddress": "10.102.3.24",
+                  "Name": "ncn-w003"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w004-cmn",
+                    "time-cmn",
+                    "time-cmn.local"
+                  ],
+                  "Comment": "x3000c0s29b0n0",
+                  "IPAddress": "10.102.3.25",
+                  "Name": "ncn-w004"
+                },
+                {
+                  "Aliases": [
+                    "ncn-s001-cmn",
+                    "time-cmn",
+                    "time-cmn.local"
+                  ],
+                  "Comment": "x3000c0s13b0n0",
+                  "IPAddress": "10.102.3.26",
+                  "Name": "ncn-s001"
+                },
+                {
+                  "Aliases": [
+                    "ncn-s002-cmn",
+                    "time-cmn",
+                    "time-cmn.local"
+                  ],
+                  "Comment": "x3000c0s15b0n0",
+                  "IPAddress": "10.102.3.27",
+                  "Name": "ncn-s002"
+                },
+                {
+                  "Aliases": [
+                    "ncn-s003-cmn",
+                    "time-cmn",
+                    "time-cmn.local"
+                  ],
+                  "Comment": "x3000c0s17b0n0",
+                  "IPAddress": "10.102.3.28",
+                  "Name": "ncn-s003"
+                }
+              ],
+              "Name": "bootstrap_dhcp",
+              "VlanID": 7
+            }
+          ],
+          "VlanRange": [
+            7
+          ]
+        }
+      },
+      "HMN": {
+        "Name": "HMN",
+        "FullName": "Hardware Management Network",
+        "IPRanges": [
+          "10.254.0.0/17"
+        ],
+        "Type": "ethernet",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.699512 +0000 +0000",
+        "ExtraProperties": {
+          "CIDR": "10.254.0.0/17",
+          "MTU": 9000,
+          "Subnets": [
+            {
+              "CIDR": "10.254.0.0/17",
+              "FullName": "HMN Management Network Infrastructure",
+              "Gateway": "10.254.0.1",
+              "IPReservations": [
+                {
+                  "Comment": "x3000c0h23s1",
+                  "IPAddress": "10.254.0.2",
+                  "Name": "sw-spine-001"
+                },
+                {
+                  "Comment": "x3000c0h23s2",
+                  "IPAddress": "10.254.0.3",
+                  "Name": "sw-spine-002"
+                },
+                {
+                  "Comment": "x3000c0w22",
+                  "IPAddress": "10.254.0.4",
+                  "Name": "sw-leaf-bmc-001"
+                }
+              ],
+              "Name": "network_hardware",
+              "VlanID": 4
+            },
+            {
+              "CIDR": "10.254.1.0/17",
+              "DHCPEnd": "10.254.1.223",
+              "DHCPStart": "10.254.1.23",
+              "FullName": "HMN Bootstrap DHCP Subnet",
+              "Gateway": "10.254.0.1",
+              "IPReservations": [
+                {
+                  "Comment": "k8s-virtual-ip",
+                  "IPAddress": "10.254.1.2",
+                  "Name": "kubeapi-vip"
+                },
+                {
+                  "Aliases": [
+                    "ncn-m001-mgmt"
+                  ],
+                  "Comment": "x3000c0s1b0",
+                  "IPAddress": "10.254.1.3",
+                  "Name": "x3000c0s1b0"
+                },
+                {
+                  "Aliases": [
+                    "ncn-m001-hmn",
+                    "time-hmn",
+                    "time-hmn.local"
+                  ],
+                  "Comment": "x3000c0s1b0n0",
+                  "IPAddress": "10.254.1.4",
+                  "Name": "ncn-m001"
+                },
+                {
+                  "Aliases": [
+                    "ncn-m002-mgmt"
+                  ],
+                  "Comment": "x3000c0s3b0",
+                  "IPAddress": "10.254.1.5",
+                  "Name": "x3000c0s3b0"
+                },
+                {
+                  "Aliases": [
+                    "ncn-m002-hmn",
+                    "time-hmn",
+                    "time-hmn.local"
+                  ],
+                  "Comment": "x3000c0s3b0n0",
+                  "IPAddress": "10.254.1.6",
+                  "Name": "ncn-m002"
+                },
+                {
+                  "Aliases": [
+                    "ncn-m003-mgmt"
+                  ],
+                  "Comment": "x3000c0s5b0",
+                  "IPAddress": "10.254.1.7",
+                  "Name": "x3000c0s5b0"
+                },
+                {
+                  "Aliases": [
+                    "ncn-m003-hmn",
+                    "time-hmn",
+                    "time-hmn.local"
+                  ],
+                  "Comment": "x3000c0s5b0n0",
+                  "IPAddress": "10.254.1.8",
+                  "Name": "ncn-m003"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w001-mgmt"
+                  ],
+                  "Comment": "x3000c0s7b0",
+                  "IPAddress": "10.254.1.9",
+                  "Name": "x3000c0s7b0"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w001-hmn",
+                    "time-hmn",
+                    "time-hmn.local"
+                  ],
+                  "Comment": "x3000c0s7b0n0",
+                  "IPAddress": "10.254.1.10",
+                  "Name": "ncn-w001"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w002-mgmt"
+                  ],
+                  "Comment": "x3000c0s9b0",
+                  "IPAddress": "10.254.1.11",
+                  "Name": "x3000c0s9b0"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w002-hmn",
+                    "time-hmn",
+                    "time-hmn.local"
+                  ],
+                  "Comment": "x3000c0s9b0n0",
+                  "IPAddress": "10.254.1.12",
+                  "Name": "ncn-w002"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w003-mgmt"
+                  ],
+                  "Comment": "x3000c0s11b0",
+                  "IPAddress": "10.254.1.13",
+                  "Name": "x3000c0s11b0"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w003-hmn",
+                    "time-hmn",
+                    "time-hmn.local"
+                  ],
+                  "Comment": "x3000c0s11b0n0",
+                  "IPAddress": "10.254.1.14",
+                  "Name": "ncn-w003"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w004-mgmt"
+                  ],
+                  "Comment": "x3000c0s29b0",
+                  "IPAddress": "10.254.1.15",
+                  "Name": "x3000c0s29b0"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w004-hmn",
+                    "time-hmn",
+                    "time-hmn.local"
+                  ],
+                  "Comment": "x3000c0s29b0n0",
+                  "IPAddress": "10.254.1.16",
+                  "Name": "ncn-w004"
+                },
+                {
+                  "Aliases": [
+                    "ncn-s001-mgmt"
+                  ],
+                  "Comment": "x3000c0s13b0",
+                  "IPAddress": "10.254.1.17",
+                  "Name": "x3000c0s13b0"
+                },
+                {
+                  "Aliases": [
+                    "ncn-s001-hmn",
+                    "time-hmn",
+                    "time-hmn.local",
+                    "rgw-vip.hmn"
+                  ],
+                  "Comment": "x3000c0s13b0n0",
+                  "IPAddress": "10.254.1.18",
+                  "Name": "ncn-s001"
+                },
+                {
+                  "Aliases": [
+                    "ncn-s002-mgmt"
+                  ],
+                  "Comment": "x3000c0s15b0",
+                  "IPAddress": "10.254.1.19",
+                  "Name": "x3000c0s15b0"
+                },
+                {
+                  "Aliases": [
+                    "ncn-s002-hmn",
+                    "time-hmn",
+                    "time-hmn.local",
+                    "rgw-vip.hmn"
+                  ],
+                  "Comment": "x3000c0s15b0n0",
+                  "IPAddress": "10.254.1.20",
+                  "Name": "ncn-s002"
+                },
+                {
+                  "Aliases": [
+                    "ncn-s003-mgmt"
+                  ],
+                  "Comment": "x3000c0s17b0",
+                  "IPAddress": "10.254.1.21",
+                  "Name": "x3000c0s17b0"
+                },
+                {
+                  "Aliases": [
+                    "ncn-s003-hmn",
+                    "time-hmn",
+                    "time-hmn.local",
+                    "rgw-vip.hmn"
+                  ],
+                  "Comment": "x3000c0s17b0n0",
+                  "IPAddress": "10.254.1.22",
+                  "Name": "ncn-s003"
+                }
+              ],
+              "Name": "bootstrap_dhcp",
+              "VlanID": 4
+            }
+          ],
+          "VlanRange": [
+            4
+          ]
+        }
+      },
+      "HMNLB": {
+        "Name": "HMNLB",
+        "FullName": "Hardware Management Network LoadBalancers",
+        "IPRanges": [
+          "10.94.100.0/24"
+        ],
+        "Type": "ethernet",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.699512 +0000 +0000",
+        "ExtraProperties": {
+          "CIDR": "10.94.100.0/24",
+          "MTU": 9000,
+          "Subnets": [
+            {
+              "CIDR": "10.94.100.0/24",
+              "FullName": "HMN MetalLB",
+              "Gateway": "10.94.100.1",
+              "IPReservations": [
+                {
+                  "Aliases": [
+                    "rsyslog-agg-service"
+                  ],
+                  "Comment": "rsyslog-agg-service",
+                  "IPAddress": "10.94.100.72",
+                  "Name": "rsyslog-aggregator"
+                },
+                {
+                  "Aliases": [
+                    "tftp-service"
+                  ],
+                  "Comment": "tftp-service",
+                  "IPAddress": "10.94.100.60",
+                  "Name": "cray-tftp"
+                },
+                {
+                  "Aliases": [
+                    "unbound"
+                  ],
+                  "Comment": "unbound",
+                  "IPAddress": "10.94.100.225",
+                  "Name": "unbound"
+                },
+                {
+                  "Aliases": [
+                    "docker_registry_service"
+                  ],
+                  "Comment": "docker_registry_service",
+                  "IPAddress": "10.94.100.73",
+                  "Name": "docker-registry"
+                },
+                {
+                  "IPAddress": "10.94.100.71",
+                  "Name": "istio-ingressgateway"
+                }
+              ],
+              "MetalLBPoolName": "hardware-management",
+              "Name": "hmn_metallb_address_pool",
+              "VlanID": 4
+            }
+          ],
+          "VlanRange": null
+        }
+      },
+      "HMN_RVR": {
+        "Name": "HMN_RVR",
+        "FullName": "River Compute Hardware Management Network",
+        "IPRanges": [
+          "10.107.0.0/17"
+        ],
+        "Type": "ethernet",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.699512 +0000 +0000",
+        "ExtraProperties": {
+          "CIDR": "10.107.0.0/17",
+          "MTU": 9000,
+          "Subnets": [
+            {
+              "CIDR": "10.107.0.0/22",
+              "DHCPEnd": "10.107.3.254",
+              "DHCPStart": "10.107.0.10",
+              "FullName": "",
+              "Gateway": "10.107.0.1",
+              "Name": "cabinet_3000",
+              "VlanID": 1513
+            }
+          ],
+          "VlanRange": [
+            1513,
+            1513
+          ]
+        }
+      },
+      "HSN": {
+        "Name": "HSN",
+        "FullName": "High Speed Network",
+        "IPRanges": [
+          "10.253.0.0/16"
+        ],
+        "Type": "slingshot10",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.699512 +0000 +0000",
+        "ExtraProperties": {
+          "CIDR": "10.253.0.0/16",
+          "MTU": 9000,
+          "Subnets": [
+            {
+              "CIDR": "10.253.0.0/16",
+              "FullName": "HSN Base Subnet",
+              "Gateway": "10.253.0.1",
+              "Name": "hsn_base_subnet",
+              "VlanID": 613
+            }
+          ],
+          "VlanRange": [
+            613,
+            868
+          ]
+        }
+      },
+      "MTL": {
+        "Name": "MTL",
+        "FullName": "Provisioning Network (untagged)",
+        "IPRanges": [
+          "10.1.1.0/16"
+        ],
+        "Type": "ethernet",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.699512 +0000 +0000",
+        "ExtraProperties": {
+          "CIDR": "10.1.1.0/16",
+          "Comment": "This network is only valid for the NCNs",
+          "MTU": 9000,
+          "Subnets": [
+            {
+              "CIDR": "10.1.0.0/16",
+              "FullName": "MTL Management Network Infrastructure",
+              "Gateway": "10.1.0.1",
+              "IPReservations": [
+                {
+                  "Comment": "x3000c0h23s1",
+                  "IPAddress": "10.1.0.2",
+                  "Name": "sw-spine-001"
+                },
+                {
+                  "Comment": "x3000c0h23s2",
+                  "IPAddress": "10.1.0.3",
+                  "Name": "sw-spine-002"
+                },
+                {
+                  "Comment": "x3000c0w22",
+                  "IPAddress": "10.1.0.4",
+                  "Name": "sw-leaf-bmc-001"
+                }
+              ],
+              "Name": "network_hardware",
+              "VlanID": 0
+            },
+            {
+              "CIDR": "10.1.1.0/16",
+              "DHCPEnd": "10.1.1.212",
+              "DHCPStart": "10.1.1.12",
+              "FullName": "MTL Bootstrap DHCP Subnet",
+              "Gateway": "10.1.0.1",
+              "IPReservations": [
+                {
+                  "Aliases": [
+                    "ncn-m001-mtl",
+                    "time-mtl",
+                    "time-mtl.local"
+                  ],
+                  "Comment": "x3000c0s1b0n0",
+                  "IPAddress": "10.1.1.2",
+                  "Name": "ncn-m001"
+                },
+                {
+                  "Aliases": [
+                    "ncn-m002-mtl",
+                    "time-mtl",
+                    "time-mtl.local"
+                  ],
+                  "Comment": "x3000c0s3b0n0",
+                  "IPAddress": "10.1.1.3",
+                  "Name": "ncn-m002"
+                },
+                {
+                  "Aliases": [
+                    "ncn-m003-mtl",
+                    "time-mtl",
+                    "time-mtl.local"
+                  ],
+                  "Comment": "x3000c0s5b0n0",
+                  "IPAddress": "10.1.1.4",
+                  "Name": "ncn-m003"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w001-mtl",
+                    "time-mtl",
+                    "time-mtl.local"
+                  ],
+                  "Comment": "x3000c0s7b0n0",
+                  "IPAddress": "10.1.1.5",
+                  "Name": "ncn-w001"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w002-mtl",
+                    "time-mtl",
+                    "time-mtl.local"
+                  ],
+                  "Comment": "x3000c0s9b0n0",
+                  "IPAddress": "10.1.1.6",
+                  "Name": "ncn-w002"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w003-mtl",
+                    "time-mtl",
+                    "time-mtl.local"
+                  ],
+                  "Comment": "x3000c0s11b0n0",
+                  "IPAddress": "10.1.1.7",
+                  "Name": "ncn-w003"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w004-mtl",
+                    "time-mtl",
+                    "time-mtl.local"
+                  ],
+                  "Comment": "x3000c0s29b0n0",
+                  "IPAddress": "10.1.1.8",
+                  "Name": "ncn-w004"
+                },
+                {
+                  "Aliases": [
+                    "ncn-s001-mtl",
+                    "time-mtl",
+                    "time-mtl.local"
+                  ],
+                  "Comment": "x3000c0s13b0n0",
+                  "IPAddress": "10.1.1.9",
+                  "Name": "ncn-s001"
+                },
+                {
+                  "Aliases": [
+                    "ncn-s002-mtl",
+                    "time-mtl",
+                    "time-mtl.local"
+                  ],
+                  "Comment": "x3000c0s15b0n0",
+                  "IPAddress": "10.1.1.10",
+                  "Name": "ncn-s002"
+                },
+                {
+                  "Aliases": [
+                    "ncn-s003-mtl",
+                    "time-mtl",
+                    "time-mtl.local"
+                  ],
+                  "Comment": "x3000c0s17b0n0",
+                  "IPAddress": "10.1.1.11",
+                  "Name": "ncn-s003"
+                }
+              ],
+              "Name": "bootstrap_dhcp",
+              "VlanID": 0
+            }
+          ],
+          "VlanRange": [
+            0
+          ]
+        }
+      },
+      "NMN": {
+        "Name": "NMN",
+        "FullName": "Node Management Network",
+        "IPRanges": [
+          "10.252.0.0/17"
+        ],
+        "Type": "ethernet",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.699512 +0000 +0000",
+        "ExtraProperties": {
+          "CIDR": "10.252.0.0/17",
+          "MTU": 9000,
+          "MyASN": 65531,
+          "PeerASN": 65533,
+          "Subnets": [
+            {
+              "CIDR": "10.252.0.0/17",
+              "FullName": "NMN Management Network Infrastructure",
+              "Gateway": "10.252.0.1",
+              "IPReservations": [
+                {
+                  "Comment": "x3000c0h23s1",
+                  "IPAddress": "10.252.0.2",
+                  "Name": "sw-spine-001"
+                },
+                {
+                  "Comment": "x3000c0h23s2",
+                  "IPAddress": "10.252.0.3",
+                  "Name": "sw-spine-002"
+                },
+                {
+                  "Comment": "x3000c0w22",
+                  "IPAddress": "10.252.0.4",
+                  "Name": "sw-leaf-bmc-001"
+                }
+              ],
+              "Name": "network_hardware",
+              "VlanID": 2
+            },
+            {
+              "CIDR": "10.252.1.0/17",
+              "DHCPEnd": "10.252.1.214",
+              "DHCPStart": "10.252.1.14",
+              "FullName": "NMN Bootstrap DHCP Subnet",
+              "Gateway": "10.252.0.1",
+              "IPReservations": [
+                {
+                  "Aliases": [
+                    "kubeapi-vip.local"
+                  ],
+                  "Comment": "k8s-virtual-ip",
+                  "IPAddress": "10.252.1.2",
+                  "Name": "kubeapi-vip"
+                },
+                {
+                  "Aliases": [
+                    "rgw-vip.local"
+                  ],
+                  "Comment": "rgw-virtual-ip",
+                  "IPAddress": "10.252.1.3",
+                  "Name": "rgw-vip"
+                },
+                {
+                  "Aliases": [
+                    "ncn-m001-nmn",
+                    "time-nmn",
+                    "time-nmn.local",
+                    "x3000c0s1b0n0",
+                    "ncn-m001.local"
+                  ],
+                  "Comment": "x3000c0s1b0n0",
+                  "IPAddress": "10.252.1.4",
+                  "Name": "ncn-m001"
+                },
+                {
+                  "Aliases": [
+                    "ncn-m002-nmn",
+                    "time-nmn",
+                    "time-nmn.local",
+                    "x3000c0s3b0n0",
+                    "ncn-m002.local"
+                  ],
+                  "Comment": "x3000c0s3b0n0",
+                  "IPAddress": "10.252.1.5",
+                  "Name": "ncn-m002"
+                },
+                {
+                  "Aliases": [
+                    "ncn-m003-nmn",
+                    "time-nmn",
+                    "time-nmn.local",
+                    "x3000c0s5b0n0",
+                    "ncn-m003.local"
+                  ],
+                  "Comment": "x3000c0s5b0n0",
+                  "IPAddress": "10.252.1.6",
+                  "Name": "ncn-m003"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w001-nmn",
+                    "time-nmn",
+                    "time-nmn.local",
+                    "x3000c0s7b0n0",
+                    "ncn-w001.local"
+                  ],
+                  "Comment": "x3000c0s7b0n0",
+                  "IPAddress": "10.252.1.7",
+                  "Name": "ncn-w001"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w002-nmn",
+                    "time-nmn",
+                    "time-nmn.local",
+                    "x3000c0s9b0n0",
+                    "ncn-w002.local"
+                  ],
+                  "Comment": "x3000c0s9b0n0",
+                  "IPAddress": "10.252.1.8",
+                  "Name": "ncn-w002"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w003-nmn",
+                    "time-nmn",
+                    "time-nmn.local",
+                    "x3000c0s11b0n0",
+                    "ncn-w003.local"
+                  ],
+                  "Comment": "x3000c0s11b0n0",
+                  "IPAddress": "10.252.1.9",
+                  "Name": "ncn-w003"
+                },
+                {
+                  "Aliases": [
+                    "ncn-w004-nmn",
+                    "time-nmn",
+                    "time-nmn.local",
+                    "x3000c0s29b0n0",
+                    "ncn-w004.local"
+                  ],
+                  "Comment": "x3000c0s29b0n0",
+                  "IPAddress": "10.252.1.10",
+                  "Name": "ncn-w004"
+                },
+                {
+                  "Aliases": [
+                    "ncn-s001-nmn",
+                    "time-nmn",
+                    "time-nmn.local",
+                    "x3000c0s13b0n0",
+                    "ncn-s001.local"
+                  ],
+                  "Comment": "x3000c0s13b0n0",
+                  "IPAddress": "10.252.1.11",
+                  "Name": "ncn-s001"
+                },
+                {
+                  "Aliases": [
+                    "ncn-s002-nmn",
+                    "time-nmn",
+                    "time-nmn.local",
+                    "x3000c0s15b0n0",
+                    "ncn-s002.local"
+                  ],
+                  "Comment": "x3000c0s15b0n0",
+                  "IPAddress": "10.252.1.12",
+                  "Name": "ncn-s002"
+                },
+                {
+                  "Aliases": [
+                    "ncn-s003-nmn",
+                    "time-nmn",
+                    "time-nmn.local",
+                    "x3000c0s17b0n0",
+                    "ncn-s003.local"
+                  ],
+                  "Comment": "x3000c0s17b0n0",
+                  "IPAddress": "10.252.1.13",
+                  "Name": "ncn-s003"
+                }
+              ],
+              "Name": "bootstrap_dhcp",
+              "VlanID": 2
+            },
+            {
+              "CIDR": "10.252.2.0/23",
+              "FullName": "NMN UAIs",
+              "Gateway": "10.252.0.1",
+              "IPReservations": [
+                {
+                  "Aliases": [
+                    "pbs-comm-service",
+                    "pbs-comm-service-nmn",
+                    "pbs_comm_service.local"
+                  ],
+                  "Comment": "pbs-comm-service,pbs-comm-service-nmn",
+                  "IPAddress": "10.252.2.2",
+                  "Name": "pbs_comm_service"
+                },
+                {
+                  "Aliases": [
+                    "pbs-service",
+                    "pbs-service-nmn",
+                    "pbs_service.local"
+                  ],
+                  "Comment": "pbs-service,pbs-service-nmn",
+                  "IPAddress": "10.252.2.3",
+                  "Name": "pbs_service"
+                },
+                {
+                  "Aliases": [
+                    "slurmctld-service",
+                    "slurmctld-service-nmn",
+                    "slurmctld_service.local"
+                  ],
+                  "Comment": "slurmctld-service,slurmctld-service-nmn",
+                  "IPAddress": "10.252.2.4",
+                  "Name": "slurmctld_service"
+                },
+                {
+                  "Aliases": [
+                    "slurmdbd-service",
+                    "slurmdbd-service-nmn",
+                    "slurmdbd_service.local"
+                  ],
+                  "Comment": "slurmdbd-service,slurmdbd-service-nmn",
+                  "IPAddress": "10.252.2.5",
+                  "Name": "slurmdbd_service"
+                },
+                {
+                  "Aliases": [
+                    "uai-nmn-blackhole",
+                    "uai_nmn_blackhole.local"
+                  ],
+                  "Comment": "uai-nmn-blackhole",
+                  "IPAddress": "10.252.2.6",
+                  "Name": "uai_nmn_blackhole"
+                }
+              ],
+              "Name": "uai_macvlan",
+              "ReservationEnd": "10.252.3.254",
+              "ReservationStart": "10.252.2.10",
+              "VlanID": 2
+            }
+          ],
+          "VlanRange": [
+            2
+          ]
+        }
+      },
+      "NMNLB": {
+        "Name": "NMNLB",
+        "FullName": "Node Management Network LoadBalancers",
+        "IPRanges": [
+          "10.92.100.0/24"
+        ],
+        "Type": "ethernet",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.699512 +0000 +0000",
+        "ExtraProperties": {
+          "CIDR": "10.92.100.0/24",
+          "MTU": 9000,
+          "Subnets": [
+            {
+              "CIDR": "10.92.100.0/24",
+              "FullName": "NMN MetalLB",
+              "Gateway": "10.92.100.1",
+              "IPReservations": [
+                {
+                  "Aliases": [
+                    "api-gw-service",
+                    "api-gw-service-nmn.local",
+                    "packages",
+                    "registry",
+                    "spire.local",
+                    "api_gw_service",
+                    "registry.local",
+                    "packages",
+                    "packages.local",
+                    "spire"
+                  ],
+                  "Comment": "api-gw-service,api-gw-service-nmn.local,packages,registry,spire.local,api_gw_service,registry.local,packages,packages.local,spire",
+                  "IPAddress": "10.92.100.71",
+                  "Name": "istio-ingressgateway"
+                },
+                {
+                  "Aliases": [
+                    "api-gw-service.local"
+                  ],
+                  "Comment": "api-gw-service.local",
+                  "IPAddress": "10.92.100.81",
+                  "Name": "istio-ingressgateway-local"
+                },
+                {
+                  "Aliases": [
+                    "rsyslog-agg-service"
+                  ],
+                  "Comment": "rsyslog-agg-service",
+                  "IPAddress": "10.92.100.72",
+                  "Name": "rsyslog-aggregator"
+                },
+                {
+                  "Aliases": [
+                    "tftp-service"
+                  ],
+                  "Comment": "tftp-service",
+                  "IPAddress": "10.92.100.60",
+                  "Name": "cray-tftp"
+                },
+                {
+                  "Aliases": [
+                    "unbound"
+                  ],
+                  "Comment": "unbound",
+                  "IPAddress": "10.92.100.225",
+                  "Name": "unbound"
+                },
+                {
+                  "Aliases": [
+                    "docker_registry_service"
+                  ],
+                  "Comment": "docker_registry_service",
+                  "IPAddress": "10.92.100.73",
+                  "Name": "docker-registry"
+                }
+              ],
+              "MetalLBPoolName": "node-management",
+              "Name": "nmn_metallb_address_pool",
+              "VlanID": 2
+            }
+          ],
+          "VlanRange": null
+        }
+      },
+      "NMN_RVR": {
+        "Name": "NMN_RVR",
+        "FullName": "River Compute Node Management Network",
+        "IPRanges": [
+          "10.106.0.0/17"
+        ],
+        "Type": "ethernet",
+        "LastUpdated": 1676278084,
+        "LastUpdatedTime": "2023-02-13 08:48:04.699512 +0000 +0000",
+        "ExtraProperties": {
+          "CIDR": "10.106.0.0/17",
+          "MTU": 9000,
+          "Subnets": [
+            {
+              "CIDR": "10.106.0.0/22",
+              "DHCPEnd": "10.106.3.254",
+              "DHCPStart": "10.106.0.10",
+              "FullName": "",
+              "Gateway": "10.106.0.1",
+              "Name": "cabinet_3000",
+              "VlanID": 1770
+            }
+          ],
+          "VlanRange": [
+            1770,
+            1770
+          ]
+        }
+      }
+    }
+  }
+  

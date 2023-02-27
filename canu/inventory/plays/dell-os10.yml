@@ -1,5 +1,5 @@
 ---
-- hosts: sw-cdu-001
+- hosts: sw-leaf-bmc-001
   collections:
     - dellemc.os10
   gather_facts: true
@@ -10,11 +10,15 @@
     switch_config: "{{ config_folder }}/{{ inventory_hostname }}.cfg"
 
   tasks:
-    - name: dry run
+    - name: upload config
       os10_config:
         src: "{{ switch_config }}"
-        match: none
-        update: check
+        match: line
+        update: merge
+        replace: line
+        save: true
+      vars:
+        ansible_command_timeout: 600
 
     # - name: upload config
     #   os10_config:
