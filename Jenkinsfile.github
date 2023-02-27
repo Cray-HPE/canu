@@ -95,9 +95,7 @@ pipeline {
                 }
                 }
               }
-              }
             }
-
         stage('RPM: Build & Publish') {
 
             matrix {
@@ -211,6 +209,7 @@ pipeline {
             }
         }
     }
+}
     post {
         always {
             postChownFiles()
