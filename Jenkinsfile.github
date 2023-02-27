@@ -69,7 +69,6 @@ pipeline {
             stages {
                 stage('Images') {
                 parallel {
-                stage('Dev') {
                     steps {
                       script {
                           sh "python3 -m pip install setuptools_scm[toml]"
@@ -79,8 +78,7 @@ pipeline {
                           publishCsmDockerImage(image: "${env.NAME}", tag: "${env.IMAGE_VERISON}-dev", isStable: isStable)
                       }
                     }
-                }
-                 stage('Prod') {
+
                     steps {
                       script {
                           sh "python3 -m pip install setuptools_scm[toml]"
