@@ -53,6 +53,7 @@ pipeline {
 
     environment {
         NAME = getRepoName()
+        IMAGE_VERISON = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
     }
 
     stages {
@@ -72,11 +73,10 @@ pipeline {
                     steps {
                       script {
                           sh "python3 -m pip install setuptools_scm[toml]"
-                          version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
                           sh "make dev_image"
                       }
                       script {
-                          publishCsmDockerImage(image: "${env.NAME}", tag: "${version}-dev", isStable: isStable)
+                          publishCsmDockerImage(image: "${env.NAME}", tag: "${env.IMAGE_VERISON}-dev", isStable: isStable)
                       }
                     }
                 }
@@ -86,7 +86,7 @@ pipeline {
                           sh "make prod_image"
                       }
                       script {
-                          publishCsmDockerImage(image: "${env.NAME}", tag: "${version}", isStable: isStable)
+                          publishCsmDockerImage(image: "${env.NAME}", tag: "${env.IMAGE_VERSION}", isStable: isStable)
                       }
                     }
                   }
