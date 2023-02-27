@@ -881,7 +881,7 @@ If any of the spine switch neighbors for a connection other than **Established**
 
 ### Generate Switch Config
 
-**[Details](docs/switch_config.md)**<br>
+**[Details](docs/generate_switch_config.md)**<br>
 To see all the lags that are generated, see [lags](docs/lags.md)
 
 CANU can be used to generate switch config.
@@ -1450,6 +1450,10 @@ To run a specific test file:
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 ## Changelog
+
+### [1.6.37]
+
+- Fix link to generate switch configuration documentation.
 
 ### [1.6.36]
 
