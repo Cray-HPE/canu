@@ -79,7 +79,9 @@ pipeline {
                           publishCsmDockerImage(image: "${env.NAME}", tag: "${env.IMAGE_VERISON}-dev", isStable: isStable)
                       }
                     }
+                  }
 
+                  stage('Build') {
                     steps {
                       script {
                           sh "python3 -m pip install setuptools_scm[toml]"
