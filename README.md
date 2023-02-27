@@ -1451,6 +1451,10 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## Changelog
 
+### [1.6.37]
+
+- Fix link to generate switch configuration documentation.
+
 ### [1.6.36]
 
 - Add better LLDP data error handling for `canu report network cabling` and `canu validate network cabling`.
