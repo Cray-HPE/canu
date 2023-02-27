@@ -131,6 +131,15 @@ network_v2:
       connections:
         - name: "mountain_compute_leaf"
           speed: 10
+    - name: "aruba_jl636a_edge_router"
+      model: "8325_JL636A"
+      connections:
+        - name: "spine"
+          speed: 100
+        - name: "aruba_jl636a_edge_router"
+          number: 2
+          speed: 100
+          comment: "ISL"
     - name: "customer_edge_router"
       model: "customer_edge_router"
       connections:
@@ -312,6 +321,15 @@ network_v2_tds:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
+    - name: "aruba_jl636a_edge_router"
+      model: "8325_JL636A"
+      connections:
+        - name: "spine"
+          speed: 100
+        - name: "aruba_jl636a_edge_router"
+          number: 2
+          speed: 100
+          comment: "ISL"
     - name: "customer_edge_router"
       model: "customer_edge_router"
       connections:
@@ -384,9 +402,6 @@ network_v2_tds:
         - "lm"
         - "lmem"
       shasta_name: "lmem"
-      architecture_type: "river_ncn_node_4_port"
-    - lookup_name: ["viz"]
-      shasta_name: "viz"
       architecture_type: "river_ncn_node_4_port"
     - lookup_name:
         - "lnet"

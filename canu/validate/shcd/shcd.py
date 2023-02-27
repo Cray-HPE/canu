@@ -81,6 +81,13 @@ log = logging.getLogger("validate_shcd")
     help="The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.",
 )
 @click.option(
+    "--edge",
+    type=click.Choice(["Aruba", "Arista"], case_sensitive=False),
+    help="Vendor of Edge router",
+    required=True,
+    default="Arista",
+)
+@click.option(
     "--out",
     help="Output results to a file",
     type=click.File("w"),
@@ -95,7 +102,7 @@ log = logging.getLogger("validate_shcd")
     default="ERROR",
 )
 @click.pass_context
-def shcd(ctx, architecture, shcd, tabs, corners, out, json_, log_):
+def shcd(ctx, architecture, shcd, tabs, corners, edge, out, json_, log_):
     """Validate a SHCD file.
 
     CANU can be used to validate that an SHCD (SHasta Cabling Diagram) passes basic validation checks.
@@ -116,6 +123,7 @@ def shcd(ctx, architecture, shcd, tabs, corners, out, json_, log_):
         shcd: SHCD file
         tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
         corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
+        edge: Vendor of the edge router
         out: Filename for the JSON Topology if requested.
         json_: Bool indicating json output
         log_: Level of logging.
@@ -143,6 +151,7 @@ def shcd(ctx, architecture, shcd, tabs, corners, out, json_, log_):
         factory=factory,
         spreadsheet=shcd,
         sheets=sheets,
+        edge=edge.lower(),
     )
 
     if json_:
@@ -479,13 +488,14 @@ def validate_shcd_port_data(cell, sheet, warnings, is_src_port=False, node_type=
     return int(port)
 
 
-def node_model_from_shcd(factory, spreadsheet, sheets):
+def node_model_from_shcd(factory, spreadsheet, sheets, edge=None):
     """Create a list of nodes from SHCD.
 
     Args:
         factory: Node factory object
         spreadsheet: The SHCD spreadsheet
         sheets: An array of tabs and their corners on the spreadsheet
+        edge: Allow override of edge router
 
     Returns:
         node_list: A list of created nodes
@@ -663,6 +673,11 @@ def node_model_from_shcd(factory, spreadsheet, sheets):
                 if node_name not in node_name_list:
                     log.info(f"Creating new node {node_name} of type {node_type}")
                     try:
+                        # hack for edge routers
+                        if node_type == "customer_edge_router" and edge == "aruba":
+                            node_type = "aruba_JL636A_edge_router"
+                            print(node_type)
+
                         src_node = factory.generate_node(node_type)
                     except Exception as err:
                         log.fatal(err)

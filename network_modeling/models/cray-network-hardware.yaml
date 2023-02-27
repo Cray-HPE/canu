@@ -150,13 +150,23 @@ network_hardware:
     ports:
       - count: 2
         speed: 10
-  - name: "Customer Edge Router - generic stub"
-    vendor: "none"
+  - name: "arista_edge_router"
+    vendor: "arista"
     type: "switch"
     model: "customer_edge_router"
     ports:
       - count: 48
         speed: 100
+  - name: "Aruba_JL636A_edge_router"
+    vendor: "aruba"
+    type: "switch"
+    model: "8325_JL636A"
+    ports:
+      - count: 32
+        speed: [100, 40]
+      - count: 1
+        speed: 1
+        slot: "mgmt"
   - name: "Generic Multi-chassis SubRack"
     vendor: "none"
     type: "subrack"
