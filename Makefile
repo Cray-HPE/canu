@@ -30,17 +30,21 @@ export ARCH := x86_64
 endif
 
 ifeq ($(IMAGE_VERSION),)
-export IMAGE_VERSION := $(shell python3 -m setuptools_scm | tr -s '+' '_' | tr -d '^v')
+export IMAGE_VERSION := $(shell python3 -m setuptools_scm | tr -s '+' '_' | sed 's/^v//')
 endif
 
 ifeq ($(PYTHON_VERSION),)
 export PYTHON_VERSION := 3.10
 endif
 
+ifeq ($(ALPINE_IMAGE),)
+export ALPINE_IMAGE := artifactory.algol60.net/docker.io/library/alpine:3.17
+endif
+
 export PYTHON_BIN := python$(PYTHON_VERSION)
 
 ifeq ($(VERSION),)
-export VERSION := $(shell python3 -m setuptools_scm | tr -s '-' '~' | tr -d '^v')
+export VERSION := $(shell python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//')
 endif
 
 SPEC_FILE := ${NAME}.spec
@@ -58,18 +62,37 @@ prepare:
 		mkdir -p $(BUILD_DIR)/SPECS $(BUILD_DIR)/SOURCES
 		cp $(SPEC_FILE) $(BUILD_DIR)/SPECS/
 
-image:
-		docker build --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag 'cray-${NAME}:${IMAGE_VERSION}' .
-		docker tag 'cray-${NAME}:${IMAGE_VERSION}' 'cray-${NAME}:${IMAGE_VERSION}-p${PYTHON_VERSION}'
+image: prod_image
+	docker tag '${NAME}:${VERSION}' '${NAME}:${VERSION}-p${PYTHON_VERSION}'
+
+deps_image:
+	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${VERSION}-deps' -f Dockerfile --target deps .
+
+dev_image:
+	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${VERSION}-dev' -f Dockerfile --target dev .
+
+build_image:
+	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${VERSION}-build' -f Dockerfile --target build .
+
+prod_image:
+	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${VERSION}' -f Dockerfile --target prod .
+
+dev:
+	./canu-docker -d
+
+prod:
+	./canu-docker -p
 
 snyk:
-		$(MAKE) -s image | xargs --verbose -n 1 snyk container test
+	snyk container test --severity-threshold=high --file=Dockerfile --fail-on=all --docker ${NAME}:${VERSION}
 
+# touch the archive before creating it to prevent 'tar: .: file changed as we read it' errors
 rpm_package_source:
-		tar --transform 'flags=r;s,^,/$(SOURCE_NAME)/,' --exclude .nox --exclude dist/rpmbuild -cvjf $(SOURCE_PATH) .
+		touch $(SOURCE_PATH)
+		tar --transform 'flags=r;s,^,/$(SOURCE_NAME)/,' --exclude .nox --exclude dist/rpmbuild --exclude ${SOURCE_NAME}.tar.bz2 -cvjf $(SOURCE_PATH) .
 
 rpm_build_source:
-		rpmbuild -ts $(SOURCE_PATH) --define "_topdir $(BUILD_DIR)"
+		rpmbuild -vv -ts $(SOURCE_PATH) --define "_topdir $(BUILD_DIR)"
 
 rpm_build:
-		rpmbuild -ba $(SPEC_FILE) --define "_topdir $(BUILD_DIR)"
+		rpmbuild -vv -ba $(SPEC_FILE) --define "_topdir $(BUILD_DIR)"
