@@ -1472,6 +1472,9 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## Changelog
 
+### [1.7,1]
+
+- Added support to chose vendor for edge router
 
 ### [1.7.0]
 
