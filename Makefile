@@ -47,14 +47,31 @@ ifeq ($(VERSION),)
 export VERSION := $(shell python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//')
 endif
 
+ifeq ($(DOCKER_BUILDKIT),)
+export DOCKER_BUILDKIT := 1
+endif
+
 SPEC_FILE := ${NAME}.spec
 SOURCE_NAME := ${NAME}-${VERSION}
 
 BUILD_DIR := $(PWD)/dist/rpmbuild
 SOURCE_PATH := ${BUILD_DIR}/SOURCES/${SOURCE_NAME}.tar.bz2
 
+BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
+
+.PHONY: docs
+
 all : prepare binary test rpm
 rpm: rpm_package_source rpm_build_source rpm_build
+
+# docs are deployed with mike, but we can build them locally with mkdocs
+# mike can also serve local docs, but requires a bit more setup
+# with deploy and set-default and using a specfic branch so as not to overwrite gh-pages
+docs:
+	mkdocs serve --config-file mkdocs.yml
+
+cdocs:
+	docker run -it --rm -p 8000:8000 '${NAME}:${VERSION}-docs'
 
 prepare:
 		@echo $(NAME)
@@ -66,22 +83,25 @@ image: prod_image
 	docker tag '${NAME}:${VERSION}' '${NAME}:${VERSION}-p${PYTHON_VERSION}'
 
 deps_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${VERSION}-deps' -f Dockerfile --target deps .
+	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --build-arg ALPINE_IMAGE='${ALPINE_IMAGE}' --tag '${NAME}:${VERSION}-deps' -f Dockerfile --target deps .
 
 dev_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${VERSION}-dev' -f Dockerfile --target dev .
+	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --build-arg ALPINE_IMAGE='${ALPINE_IMAGE}' --tag '${NAME}:${VERSION}-dev' -f Dockerfile --target dev .
+
+docs_image:
+	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --build-arg ALPINE_IMAGE='${ALPINE_IMAGE}' --tag '${NAME}:${VERSION}-docs' -f Dockerfile --target docs .
 
 build_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${VERSION}-build' -f Dockerfile --target build .
+	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --build-arg ALPINE_IMAGE='${ALPINE_IMAGE}' --tag '${NAME}:${VERSION}-build' -f Dockerfile --target build .
 
 prod_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --tag '${NAME}:${VERSION}' -f Dockerfile --target prod .
+	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --build-arg ALPINE_IMAGE='${ALPINE_IMAGE}' --tag '${NAME}:${VERSION}' -f Dockerfile --target prod .
 
 dev:
-	./canu-docker -d
+	./canuctl -d
 
 prod:
-	./canu-docker -p
+	./canuctl -p
 
 snyk:
 	snyk container test --severity-threshold=high --file=Dockerfile --fail-on=all --docker ${NAME}:${VERSION}
