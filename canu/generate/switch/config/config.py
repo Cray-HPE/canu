@@ -197,6 +197,13 @@ dash = "-" * 60
     type=click.Path(),
 )
 @click.option(
+    "--edge",
+    type=click.Choice(["Aruba", "Arista"], case_sensitive=False),
+    help="Vendor of Edge router",
+    required=True,
+    default="Arista",
+)
+@click.option(
     "--preserve",
     help="Path to current running configs.",
     type=click.Path(),
@@ -237,6 +244,7 @@ def config(
     out,
     preserve,
     custom_config,
+    edge,
     reorder,
     bgp_control_plane,
     log_,
@@ -298,6 +306,7 @@ def config(
         out: Name of the output file
         preserve: Folder where switch running configs exist.
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
+        edge: Vendor of the edge router
         reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
         bgp_control_plane: Network used for BGP control plane
         log_: Level of Logging
@@ -437,6 +446,7 @@ def config(
         vendor_folder,
         preserve,
         custom_config,
+        edge,
         reorder,
         bgp_control_plane,
     )
@@ -559,6 +569,7 @@ def generate_switch_config(
     vendor_folder,
     preserve,
     custom_config,
+    edge,
     reorder,
     bgp_control_plane,
 ):
@@ -612,8 +623,8 @@ def generate_switch_config(
         )
     elif node_shasta_name == "sw-edge" and float(csm) >= 1.2:
         templates["sw-edge"] = {
-            "primary": f"{csm}/arista/sw-edge.primary.j2",
-            "secondary": f"{csm}/arista/sw-edge.secondary.j2",
+            "primary": f"{csm}/{edge.lower()}/sw-edge.primary.j2",
+            "secondary": f"{csm}/{edge.lower()}/sw-edge.secondary.j2",
         }
     elif node_shasta_name not in [
         "sw-cdu",
