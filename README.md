@@ -1472,6 +1472,10 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## Changelog
 
+### [1.7.3]
+
+-- Adding Aruba as optional edge vendor
+
 ### [1.7.1]
 
 -- Remove drawing code and dependencies.
