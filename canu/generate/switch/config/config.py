@@ -586,6 +586,7 @@ def generate_switch_config(
         vendor_folder: Vendor folder contaning the template_folder
         preserve: Folder where switch running configs exist.  This folder should be populated from the "canu backup network"
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
+        edge: edge: Vendor of the edge router
         reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
         bgp_control_plane: Network used for BGP control plane
 
