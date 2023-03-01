@@ -249,19 +249,40 @@ In order to run CANU, both python3 and pip3 need to be installed.
 - To run CANU inside a container:
 
   - Prerequisites:
-    - docker
-    - docker-compose
+
+    - a container runtime (podman or docker)
+
+    There are a few ways to run `canu` in a container:
+
+    ### Using the wrapper script
+
+    This builds (if necessary) and `exec`s into a container, where you can run `canu` as normal.
 
     ```bash
-    sh canu_docker.sh up
+    # launch an editable development container
+    ./canuctl -d ARGS
+    # launch a prod container
+    ./canuctl  -p ARGS
+    # example: launch canu --version using the production container
+    ./canuctl -p canu --version
     ```
 
-  - CANU source files can be found inside the container at /app/canu
-  - shared folder between local disk is call `files` and is mounted in the container at `/files`
-  - When you are finished with the container and `exit` the container:
+    ### Using make
 
     ```bash
-    sh canu_docker.sh down
+    # make a production image
+    make image
+    # exec into the container
+    make dev # or make prod
+    ```
+
+    ### Using Docker or Podman directly
+
+    ```bash
+    # exec into the container
+    docker run -it canu:<tag> sh
+    # running a removeable container
+    docker run -it --rm --net=host -v ${PWD}:/home/canu/mounted:rw canu:<tag> canu validate shcd /home/canu/mounted/myshcd.xlsx
     ```
 
 - To run CANU in a Python Virtualenv:
@@ -1450,6 +1471,15 @@ To run a specific test file:
 To reuse a session without reinstalling dependencies use the `-rs` flag instead of `-s`.
 
 ## Changelog
+
+### [1.7.1]
+
+-- Remove drawing code and dependencies.
+
+### [1.7.0]
+
+- Create rootless `canu` container image 
+- Add a `canuctl` wrapper command
 
 ### [1.6.37]
 
