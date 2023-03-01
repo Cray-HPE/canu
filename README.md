@@ -1472,6 +1472,9 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## Changelog
 
+### [1.7.1]
+
+-- Remove drawing code and dependencies.
 
 ### [1.7.0]
 
