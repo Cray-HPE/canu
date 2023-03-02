@@ -139,7 +139,12 @@ def cabling(ctx, architecture, ips, ips_file, username, password, log_, out):
     ips_length = len(ips)
 
     if ips:
-        with click_spinner.spinner():
+        with click_spinner.spinner(
+            beep=False,
+            disable=False,
+            force=False,
+            stream=sys.stdout,
+        ):
             for i, ip in enumerate(ips, start=1):
                 print(
                     f"  Connecting to {ip} - Switch {i} of {ips_length}        ",
@@ -494,13 +499,12 @@ def node_model_from_canu(factory, canu_cache, ips):
                             strict=False,
                         )
                     except Exception:
-                        log.fatal(
-                            click.secho(
-                                f"Failed to connect {src_node.common_name()} "
-                                + f"to {dst_node.common_name()}",
-                                fg="red",
-                            ),
-                        )
+                        err_connect = f"Failed to connect {src_node.common_name()} to {dst_node.common_name()}"
+                        log.fatal(err_connect)
+                        click.secho(
+                            err_connect,
+                            fg="red",
+                        ),
                         sys.exit(1)
                     if connected:
                         log.info(

@@ -53,19 +53,22 @@ class NetworkModel:  # pragma: no cover
             factory: factory
 
         Raises:
-            Exception: A list of NetworkNode(s) is required
+            NetworkNodeFactoryRequiredError: A list of NetworkNodeFactory(s) is required
+            NetworkNodeRequiredError: A list of NetworkNode(s) is required
         """
         if factory:
             self.__factory = factory
         else:
-            raise Exception(click.secho("A NetworkNodeFactory is required", fg="red"))
+            err_nnf_req = "A NetworkNodeFactory is required"
+            click.secho(err_nnf_req, fg="red")
+            raise NetworkNodeFactoryRequiredError(err_nnf_req)
 
         if isinstance(nodes, list):
             self.__nodes = nodes
         else:
-            raise Exception(
-                click.secho("A list of NetworkNode(s) is required", fg="red"),
-            )
+            err_node_req = "A list of NetworkNode(s) is required"
+            click.secho(err_node_req, fg="red")
+            raise NetworkNodeRequiredError(err_node_req)
 
         self.__leafs = []
         self.__spines = []
@@ -190,3 +193,15 @@ class NetworkModel:  # pragma: no cover
     def assign_ports(self):
         """Not implemented."""
         pass
+
+
+class NetworkNodeFactoryRequiredError(Exception):
+    """Exception when a NetworkNodeFactory is required."""
+
+    pass
+
+
+class NetworkNodeRequiredError(Exception):
+    """Exception when a NetworkNode is required."""
+
+    pass
