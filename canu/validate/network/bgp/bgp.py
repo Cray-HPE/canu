@@ -21,6 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate the network bgp."""
 from collections import defaultdict
+import sys
 
 import click
 import click_spinner
@@ -91,7 +92,12 @@ def bgp(ctx, username, password, verbose, network):
         sls_cache["HMN_IPs"]["sw-spine-001"],
         sls_cache["HMN_IPs"]["sw-spine-002"],
     ]
-    with click_spinner.spinner():
+    with click_spinner.spinner(
+        beep=False,
+        disable=False,
+        force=False,
+        stream=sys.stdout,
+    ):
         for ip in spine_switches:
             print(
                 "  Connecting",

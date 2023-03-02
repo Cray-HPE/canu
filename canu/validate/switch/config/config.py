@@ -216,7 +216,12 @@ def config(
 
         credentials = {"username": username, "password": password}
 
-        with click_spinner.spinner():
+        with click_spinner.spinner(
+            beep=False,
+            disable=False,
+            force=False,
+            stream=sys.stdout,
+        ):
             print(
                 f"  Connecting to {ip}...",
                 end="\r",

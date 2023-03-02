@@ -194,7 +194,12 @@ def config(
 
         credentials = {"username": username, "password": password}
         ips_length = len(ips)
-        with click_spinner.spinner():
+        with click_spinner.spinner(
+            beep=False,
+            disable=False,
+            force=False,
+            stream=sys.stdout,
+        ):
             for i, ip in enumerate(ips, start=1):
                 if not json_:
                     print(

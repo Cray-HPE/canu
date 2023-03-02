@@ -21,6 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that report the configuration version."""
 import logging
+import sys
 
 import click
 import click_spinner
@@ -126,7 +127,12 @@ def version(ctx, username, password, sls_file, sls_address, network, log_):
     dell_hosts = online_hosts.filter(F(platform="dell_os10"))
 
     # run the version check
-    with click_spinner.spinner():
+    with click_spinner.spinner(
+        beep=False,
+        disable=False,
+        force=False,
+        stream=sys.stdout,
+    ):
         print(
             "  Running version check on switches...",
             end="\r",
