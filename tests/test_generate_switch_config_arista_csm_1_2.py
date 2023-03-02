@@ -20,7 +20,6 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Test CHNU generate switch config commands."""
-import json
 from os import path
 from pathlib import Path
 
@@ -28,7 +27,6 @@ from click import testing
 import pkg_resources
 
 from canu.cli import cli
-from .test_generate_switch_config_aruba_csm_1_2 import sls_input
 
 test_file_directory = Path(__file__).resolve().parent
 
@@ -39,7 +37,8 @@ custom_file = path.join(test_file_directory, "data", custom_file_name)
 architecture = "full"
 tabs = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners = "J14,T44,J14,T53,J14,T34,J14,T27"
-sls_file = "sls_file.json"
+sls_file_name = "sls_input_file_csm_1.2.json"
+sls_file = path.join(test_file_directory, "data", sls_file_name)
 csm = "1.2"
 switch_name = "sw-spine-001"
 cache_minutes = 0
@@ -61,8 +60,6 @@ def test_switch_config_sw_edge_primary():
     sw_edge = "sw-edge-001"
 
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -90,7 +87,6 @@ def test_switch_config_sw_edge_primary():
         )
         assert result.exit_code == 0
 
-        print(result.output)
         assert (
             "interface loopback 0\n"
             + "    ip address 10.2.1.2/32\n"
@@ -138,8 +134,6 @@ def test_switch_config_sw_edge_secondary():
     sw_edge = "sw-edge-002"
 
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -167,7 +161,6 @@ def test_switch_config_sw_edge_secondary():
         )
         assert result.exit_code == 0
 
-        print(result.output)
         assert (
             "interface loopback 0\n"
             + "    ip address 10.2.1.3/32\n"

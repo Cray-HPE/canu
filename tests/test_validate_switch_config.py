@@ -74,7 +74,7 @@ def test_validate_config(netmiko_command, switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert ("- nae-script abc\n" + "+ router add\n") in str(result.output)
 
 
@@ -108,7 +108,7 @@ def test_validate_config_additions(netmiko_command, switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert (
             "- hostname sw-spine-001\n"
             + "+ hostname sw-spine-01\n"
@@ -184,7 +184,7 @@ def test_validate_config_running_file_aruba():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert (
             "- hostname sw-spine-001\n"
             + "+ hostname sw-spine-01\n"
@@ -260,7 +260,7 @@ def test_validate_config_running_file_dell():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert (
             "- interface vlan3000\n"
             + "+ interface vlan7\n"
@@ -337,7 +337,7 @@ def test_validate_config_running_file_mellanox():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert (
             "- router ospf 1 vrf default\n"
             + "- ntp server 192.168.4.6 version 4\n"
@@ -376,7 +376,7 @@ def test_validate_config_password_prompt(netmiko_command, switch_vendor):
             input=password,
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert ("- nae-script abc\n" + "+ router add\n") in str(result.output)
 
 
@@ -409,7 +409,7 @@ def test_validate_config_vendor_prompt():
             input=vendor,
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert (
             "- hostname sw-spine-001\n"
             + "+ hostname sw-spine-01\n"
@@ -485,7 +485,7 @@ def test_validate_config_timeout(netmiko_command, switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert ("Timeout error. Check the IP address and try again.") in str(
             result.output,
         )
@@ -521,7 +521,7 @@ def test_validate_config_auth_exception(netmiko_command, switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert (
             "Authentication error. Check the credentials or IP address and try again"
         ) in str(result.output)
@@ -560,7 +560,7 @@ def test_validate_config_bad_config_file():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert ("The file bad.file is not a valid config file.") in str(result.output)
 
 
@@ -630,7 +630,7 @@ def test_validate_config_dell(netmiko_commands, switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert ("- nae-script abc\n" + "+ router add\n") in str(result.output)
 
 
@@ -666,7 +666,7 @@ def test_validate_config_mellanox(netmiko_commands, switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert ("+ router add") in str(result.output)
 
 

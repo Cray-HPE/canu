@@ -1472,6 +1472,12 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## Changelog
 
+### [1.7.2]
+
+-- Move SLS JSON and SHCDs from inside test python to individual files.
+-- Finish removing drawing code and dependencies.
+-- Prevent nox from running tests twice and clean up test output.
+
 ### [1.7.1]
 
 -- Remove drawing code and dependencies.

@@ -56,15 +56,13 @@ def tests(session):
     # Run pytest against the tests.
     session.run(
         "pytest",
-        "--quiet",
+        "--log-level=ERROR",
+        "--cov-report=",
+        f"--cov-fail-under={COVERAGE_FAIL}",
         "--cov=canu",
         "--cov=tests",
         "--cov=network_modeling",
-        "--cov-append",
-        "--cov-report=",
-        f"--cov-fail-under={COVERAGE_FAIL}",
         path,
-        *session.posargs,
     )
 
 
