@@ -1,0 +1,214 @@
+{
+    "Networks": {
+        "CAN": {
+            "Name": "CAN",
+            "ExtraProperties": {
+                "CIDR": "192.168.11.0/24",
+                "Subnets": [
+                    {
+                        "Name": "bootstrap_dhcp",
+                        "CIDR": "192.168.11.0/24",
+                        "IPReservations": [
+                            {"Name": "can-switch-1", "IPAddress": "192.168.11.2"},
+                            {"Name": "can-switch-2", "IPAddress": "192.168.11.3"}
+                        ],
+                        "VlanID": 7,
+                        "Gateway": "192.168.11.1"
+                    },
+                    {
+                        "FullName": "CAN Bootstrap DHCP Subnet",
+                        "CIDR": "192.168.11.0/24",
+                        "IPReservations": [
+                            {"Name": "ncn-w001", "IPAddress": "192.168.11.4"},
+                            {"Name": "ncn-w002", "IPAddress": "192.168.11.5"},
+                            {"Name": "ncn-w003", "IPAddress": "192.168.11.6"}
+                        ],
+                        "Name": "bootstrap_dhcp",
+                        "VlanID": 7,
+                        "Gateway": "192.168.11.1"
+                    }
+                ]
+            }
+        },
+        "HMN": {
+            "Name": "HMN",
+            "ExtraProperties": {
+                "CIDR": "192.168.0.0/17",
+                "Subnets": [
+                    {
+                        "Name": "network_hardware",
+                        "CIDR": "192.168.0.0/17",
+                        "IPReservations": [
+                            {"Name": "sw-spine-001", "IPAddress": "192.168.0.2"},
+                            {"Name": "sw-spine-002", "IPAddress": "192.168.0.3"},
+                            {"Name": "sw-agg-001", "IPAddress": "192.168.0.4"},
+                            {"Name": "sw-agg-002", "IPAddress": "192.168.0.5"},
+                            {"Name": "sw-agg-003", "IPAddress": "192.168.0.6"},
+                            {"Name": "sw-agg-004", "IPAddress": "192.168.0.7"},
+                            {"Name": "sw-leaf-001", "IPAddress": "192.168.0.12"},
+                            {"Name": "sw-leaf-002", "IPAddress": "192.168.0.13"},
+                            {"Name": "sw-leaf-003", "IPAddress": "192.168.0.14"},
+                            {"Name": "sw-leaf-004", "IPAddress": "192.168.0.15"},
+                            {"Name": "sw-cdu-001", "IPAddress": "192.168.0.16"},
+                            {"Name": "sw-cdu-002", "IPAddress": "192.168.0.17"}
+                        ],
+                        "VlanID": 4,
+                        "Gateway": "192.168.0.1"
+                    },
+                    {
+                        "FullName": "HMN Bootstrap DHCP Subnet",
+                        "CIDR": "192.168.0.0/17",
+                        "IPReservations": [
+                            {"Name": "ncn-w001", "IPAddress": "192.168.0.4"},
+                            {"Name": "ncn-w002", "IPAddress": "192.168.0.5"},
+                            {"Name": "ncn-w003", "IPAddress": "192.168.0.6"}
+                        ],
+                        "Name": "bootstrap_dhcp",
+                        "VlanID": 4,
+                        "Gateway": "192.168.0.1"
+                    }
+                ]
+            }
+        },
+        "MTL": {
+            "Name": "MTL",
+            "ExtraProperties": {
+                "CIDR": "192.168.1.0/16",
+                "Subnets": [
+                    {
+                        "Name": "network_hardware",
+                        "CIDR": "192.168.1.0/16",
+                        "IPReservations": [
+                            {"Name": "sw-spine-001", "IPAddress": "192.168.1.2"},
+                            {"Name": "sw-spine-002", "IPAddress": "192.168.1.3"},
+                            {"Name": "sw-agg-001", "IPAddress": "192.168.1.4"},
+                            {"Name": "sw-agg-002", "IPAddress": "192.168.1.5"},
+                            {"Name": "sw-agg-003", "IPAddress": "192.168.1.6"},
+                            {"Name": "sw-agg-004", "IPAddress": "192.168.1.7"},
+                            {"Name": "sw-leaf-001", "IPAddress": "192.168.1.12"},
+                            {"Name": "sw-leaf-002", "IPAddress": "192.168.1.13"},
+                            {"Name": "sw-leaf-003", "IPAddress": "192.168.1.14"},
+                            {"Name": "sw-leaf-004", "IPAddress": "192.168.1.15"},
+                            {"Name": "sw-cdu-001", "IPAddress": "192.168.1.16"},
+                            {"Name": "sw-cdu-002", "IPAddress": "192.168.1.17"}
+                        ],
+                        "VlanID": 0,
+                        "Gateway": "192.168.1.1"
+                    }
+                ]
+            }
+        },
+        "NMN": {
+            "Name": "NMN",
+            "FullName": "Node Management Network",
+            "ExtraProperties": {
+                "CIDR": "192.168.3.0/17",
+                "Subnets": [
+                    {
+                        "FullName": "NMN Management Network Infrastructure",
+                        "CIDR": "192.168.3.0/17",
+                        "IPReservations": [
+                            {"Name": "sw-spine-001", "IPAddress": "192.168.3.2"},
+                            {"Name": "sw-spine-002", "IPAddress": "192.168.3.3"},
+                            {"Name": "sw-agg-001", "IPAddress": "192.168.3.4"},
+                            {"Name": "sw-agg-002", "IPAddress": "192.168.3.5"},
+                            {"Name": "sw-agg-003", "IPAddress": "192.168.3.6"},
+                            {"Name": "sw-agg-004", "IPAddress": "192.168.3.7"},
+                            {"Name": "sw-leaf-001", "IPAddress": "192.168.3.12"},
+                            {"Name": "sw-leaf-002", "IPAddress": "192.168.3.13"},
+                            {"Name": "sw-leaf-003", "IPAddress": "192.168.3.14"},
+                            {"Name": "sw-leaf-004", "IPAddress": "192.168.3.15"},
+                            {"Name": "sw-cdu-001", "IPAddress": "192.168.3.16"},
+                            {"Name": "sw-cdu-002", "IPAddress": "192.168.3.17"}
+                        ],
+                        "Name": "network_hardware",
+                        "VlanID": 2,
+                        "Gateway": "192.168.3.1"
+                    },
+                    {
+                        "FullName": "NMN Bootstrap DHCP Subnet",
+                        "CIDR": "192.168.4.0/17",
+                        "IPReservations": [
+                            {"Name": "ncn-w001", "IPAddress": "192.168.4.4"},
+                            {"Name": "ncn-w002", "IPAddress": "192.168.4.5"},
+                            {"Name": "ncn-w003", "IPAddress": "192.168.4.6"}
+                        ],
+                        "Name": "bootstrap_dhcp",
+                        "VlanID": 2,
+                        "Gateway": "192.168.3.1"
+                    }
+                ]
+            }
+        },
+        "NMN_MTN": {
+            "Name": "NMN_MTN",
+            "ExtraProperties": {
+                "CIDR": "192.168.100.0/17",
+                "Subnets": [
+                    {
+                        "FullName": "",
+                        "CIDR": "192.168.100.0/22",
+                        "Name": "cabinet_3002",
+                        "VlanID": 2000,
+                        "Gateway": "192.168.100.1",
+                        "DHCPStart": "192.168.100.10",
+                        "DHCPEnd": "192.168.3.254"
+                    }
+                ]
+            }
+        },
+        "HMN_MTN": {
+            "Name": "HMN_MTN",
+            "ExtraProperties": {
+                "CIDR": "192.168.200.0/17",
+                "Subnets": [
+                    {
+                        "FullName": "",
+                        "CIDR": "192.168.104.0/22",
+                        "Name": "cabinet_3002",
+                        "VlanID": 3000,
+                        "Gateway": "192.168.104.1",
+                        "DHCPStart": "192.168.104.10",
+                        "DHCPEnd": "192.168.104.254"
+                    }
+                ]
+            }
+        },
+        "HMNLB": {
+            "Name": "HMNLB",
+            "ExtraProperties": {
+                "CIDR": "10.94.100.0/24",
+                "Subnets": [
+                    {
+                        "FullName": "NMN MetalLB",
+                        "CIDR": "10.94.100.0/24",
+                        "IPReservations": [
+                            {"Name": "cray-tftp", "IPAddress": "10.94.100.60"},
+                            {"Name": "unbound", "IPAddress": "10.94.100.225"}
+                        ],
+                        "Name": "hmn_metallb_address_pool",
+                        "Gateway": "10.94.100.1"
+                    }
+                ]
+            }
+        },
+        "NMNLB": {
+            "Name": "NMNLB",
+            "ExtraProperties": {
+                "CIDR": "10.92.100.0/24",
+                "Subnets": [
+                    {
+                        "FullName": "HMN MetalLB",
+                        "CIDR": "10.92.100.0/24",
+                        "IPReservations": [
+                            {"Name": "cray-tftp", "IPAddress": "10.92.100.60"},
+                            {"Name": "unbound", "IPAddress": "10.92.100.225"}
+                        ],
+                        "Name": "nmn_metallb_address_pool",
+                        "Gateway": "10.92.100.1"
+                    }
+                ]
+            }
+        }
+    }
+}
