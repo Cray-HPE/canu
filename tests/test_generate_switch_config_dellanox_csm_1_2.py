@@ -20,7 +20,6 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Test CANU generate switch config commands."""
-import json
 from os import path
 from pathlib import Path
 
@@ -38,7 +37,8 @@ custom_file = path.join(test_file_directory, "data", custom_file_name)
 architecture = "v1"
 tabs = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners = "J14,T30,J14,T34,J14,T28,J14,T27"
-sls_file = "sls_file.json"
+sls_file_name = "sls_input_file_csm_1.2.json"
+sls_file = path.join(test_file_directory, "data", sls_file_name)
 csm = "1.2"
 switch_name = "sw-spine-001"
 cache_minutes = 0
@@ -60,8 +60,6 @@ runner = testing.CliRunner()
 def test_switch_config_spine_primary():
     """Test that the `canu generate switch config` command runs and returns valid primary spine config."""
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -88,7 +86,7 @@ def test_switch_config_spine_primary():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert (
             "hostname sw-spine-001\n"
             + "no cli default prefix-modes enable\n"
@@ -176,7 +174,7 @@ def test_switch_config_spine_primary():
             + 'interface mlag-port-channel 201 description "sw-cdu-001:27<==sw-spine-001"\n'
             + 'interface mlag-port-channel 201 description "sw-cdu-002:27<==sw-spine-001"\n'
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface port-channel 256\n"
             + "interface ethernet 1/31 channel-group 256 mode active\n"
@@ -184,7 +182,7 @@ def test_switch_config_spine_primary():
             + 'interface port-channel 256 description "mlag-isl"\n'
             + "interface port-channel 256 dcb priority-flow-control mode on force\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface mlag-port-channel 1 no shutdown\n"
             + "interface mlag-port-channel 2 no shutdown\n"
@@ -199,7 +197,7 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 151 no shutdown\n"
             + "interface mlag-port-channel 201 no shutdown\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface mlag-port-channel 1 lacp-individual enable force\n"
             + "interface mlag-port-channel 2 lacp-individual enable force\n"
@@ -211,7 +209,7 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 8 lacp-individual enable force\n"
             + "interface mlag-port-channel 9 lacp-individual enable force\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "vlan 2\n"
             + "vlan 4\n"
@@ -224,7 +222,7 @@ def test_switch_config_spine_primary():
             + "vlan 7\n"
             + 'vlan 7 name "CAN"\n'
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 2\n"
             + "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 4\n"
@@ -270,7 +268,7 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 201 switchport hybrid allowed-vlan add 4\n"
             + "interface mlag-port-channel 201 switchport hybrid allowed-vlan add 6\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "web vrf default enable\n"
             + "vrf definition Customer\n"
@@ -309,7 +307,7 @@ def test_switch_config_spine_primary():
             + "no interface vlan 6 ip icmp redirect\n"
             + "interface vlan 6 mtu 9184\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "ip load-sharing source-ip-port\n"
             + "ip load-sharing type consistent\n"
@@ -323,8 +321,7 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 201 spanning-tree port type network\n"
             + "interface mlag-port-channel 201 spanning-tree guard root\n"
         ) in str(result.output)
-        print(result.output)
-        print(result.output)
+
         assert (
             "ipv4 access-list nmn-hmn\n"
             + "ipv4 access-list nmn-hmn bind-point rif\n"
@@ -347,7 +344,7 @@ def test_switch_config_spine_primary():
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "protocol ospf\n"
             + "router ospf 1 vrf default\n"
@@ -365,7 +362,7 @@ def test_switch_config_spine_primary():
             + "interface vlan 4 ip ospf passive-interface\n"
             + "router ospf 1 vrf default redistribute bgp\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "ip dhcp relay instance 2 vrf default\n"
             + "ip dhcp relay instance 4 vrf default\n"
@@ -375,7 +372,7 @@ def test_switch_config_spine_primary():
             + "interface vlan 2 ip dhcp relay instance 2 downstream\n"
             + "interface vlan 4 ip dhcp relay instance 4 downstream\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "protocol magp\n"
             + "interface vlan 1 magp 1\n"
@@ -485,14 +482,11 @@ def test_switch_config_spine_primary():
             + "ntp server 192.168.4.6 version 4\n"
             + "ntp vrf default enable\n"
         ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_spine_primary_custom():
     """Test that the `canu generate switch config custom` command runs and returns valid primary spine config."""
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -521,7 +515,7 @@ def test_switch_config_spine_primary_custom():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert (
             "# interface ethernet 1/1 speed 10G force\n"
             + '# interface ethernet 1/1 description "sw-spine02-1/16"\n'
@@ -618,7 +612,7 @@ def test_switch_config_spine_primary_custom():
             + 'interface mlag-port-channel 201 description "sw-cdu-001:27<==sw-spine-001"\n'
             + 'interface mlag-port-channel 201 description "sw-cdu-002:27<==sw-spine-001"\n'
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface port-channel 256\n"
             + "interface ethernet 1/31 channel-group 256 mode active\n"
@@ -626,7 +620,7 @@ def test_switch_config_spine_primary_custom():
             + 'interface port-channel 256 description "mlag-isl"\n'
             + "interface port-channel 256 dcb priority-flow-control mode on force\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface ethernet 1/1 ip address 10.102.255.14/30 primary\n"
             + "interface ethernet 1/1 dcb priority-flow-control mode on force\n"
@@ -644,7 +638,7 @@ def test_switch_config_spine_primary_custom():
             + "interface mlag-port-channel 151 no shutdown\n"
             + "interface mlag-port-channel 201 no shutdown\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface mlag-port-channel 1 lacp-individual enable force\n"
             + "interface mlag-port-channel 2 lacp-individual enable force\n"
@@ -668,7 +662,6 @@ def test_switch_config_spine_primary_custom():
             + "vlan 7\n"
             + 'vlan 7 name "CAN"\n'
         ) in str(result.output)
-        print(result.output)
 
         assert (
             "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 2\n"
@@ -715,7 +708,7 @@ def test_switch_config_spine_primary_custom():
             + "interface mlag-port-channel 201 switchport hybrid allowed-vlan add 4\n"
             + "interface mlag-port-channel 201 switchport hybrid allowed-vlan add 6\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "web vrf default enable\n"
             + "vrf definition Customer\n"
@@ -754,7 +747,7 @@ def test_switch_config_spine_primary_custom():
             + "no interface vlan 6 ip icmp redirect\n"
             + "interface vlan 6 mtu 9184\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface ethernet 1/1 no switchport force\n"
             + "interface ethernet 1/16 no switchport force\n"
@@ -771,7 +764,7 @@ def test_switch_config_spine_primary_custom():
             + "interface mlag-port-channel 201 spanning-tree port type network\n"
             + "interface mlag-port-channel 201 spanning-tree guard root\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "ipv4 access-list nmn-hmn\n"
             + "ipv4 access-list nmn-hmn bind-point rif\n"
@@ -794,7 +787,7 @@ def test_switch_config_spine_primary_custom():
             + "interface vlan 2 ipv4 port access-group nmn-hmn\n"
             + "interface vlan 4 ipv4 port access-group nmn-hmn\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "protocol ospf\n"
             + "router ospf 1 vrf default\n"
@@ -812,7 +805,7 @@ def test_switch_config_spine_primary_custom():
             + "interface vlan 4 ip ospf passive-interface\n"
             + "router ospf 1 vrf default redistribute bgp\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "ip dhcp relay instance 2 vrf default\n"
             + "ip dhcp relay instance 4 vrf default\n"
@@ -822,7 +815,7 @@ def test_switch_config_spine_primary_custom():
             + "interface vlan 2 ip dhcp relay instance 2 downstream\n"
             + "interface vlan 4 ip dhcp relay instance 4 downstream\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "protocol magp\n"
             + "interface vlan 1 magp 1\n"
@@ -932,15 +925,12 @@ def test_switch_config_spine_primary_custom():
             + "ntp server 192.168.4.6 version 4\n"
             + "ntp vrf default enable\n"
         ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_spine_secondary():
     """Test that the `canu generate switch config` command runs and returns valid secondary spine config."""
     spine_secondary = "sw-spine-002"
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -1054,7 +1044,6 @@ def test_switch_config_spine_secondary():
             + 'interface mlag-port-channel 201 description "sw-cdu-001:28<==sw-spine-002"\n'
             + 'interface mlag-port-channel 201 description "sw-cdu-002:28<==sw-spine-002"\n'
         ) in str(result.output)
-        print(result.output)
 
         assert (
             "interface port-channel 256\n"
@@ -1089,7 +1078,7 @@ def test_switch_config_spine_secondary():
             + "vlan 7\n"
             + 'vlan 7 name "CAN"\n'
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 2\n"
             + "interface mlag-port-channel 1 switchport hybrid allowed-vlan add 4\n"
@@ -1350,8 +1339,6 @@ def test_switch_config_leaf_bmc():
     leaf_bmc = "sw-leaf-bmc-001"
 
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -1378,14 +1365,14 @@ def test_switch_config_leaf_bmc():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert (
             "ip vrf Customer\n"
             + "ip name-server 10.92.100.225\n"
             + "hostname sw-leaf-bmc-001\n"
             + "rest api restconf\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface vlan1\n"
             + "  description MTL\n"
@@ -1416,7 +1403,7 @@ def test_switch_config_leaf_bmc():
             + "  no shutdown\n"
             + "  ip vrf forwarding Customer\n"
             + "  mtu 9216\n"
-            + "  ip address 192.168.12.4/24\n"
+            + "  ip address 192.168.12.12/24\n"
             + "  ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
         assert (
@@ -1545,7 +1532,7 @@ def test_switch_config_leaf_bmc():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "ip access-list nmn-hmn\n"
             + "  seq 10 deny ip 192.168.3.0/17 192.168.0.0/17\n"
@@ -1573,7 +1560,7 @@ def test_switch_config_leaf_bmc():
             + "no load-balancing tcp-udp-selection l4-destination-port\n"
             + "no load-balancing tcp-udp-selection l4-source-port\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "router ospf 1\n"
             + "  router-id 10.2.0.12\n"
@@ -1594,8 +1581,6 @@ def test_switch_config_leaf_bmc_custom():
     leaf_bmc = "sw-leaf-bmc-001"
 
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -1624,7 +1609,7 @@ def test_switch_config_leaf_bmc_custom():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert (
             "# interface ethernet1/1/12\n"
             + "#   description cn003:2<==sw-leaf-bmc-001\n"
@@ -1638,7 +1623,7 @@ def test_switch_config_leaf_bmc_custom():
             + "hostname sw-leaf-bmc-001\n"
             + "rest api restconf\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface vlan1\n"
             + "  description MTL\n"
@@ -1672,7 +1657,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  ip address 10.102.4.100/25\n"
             + "  ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface port-channel101\n"
             + "  description sw-spine-001:26<==sw-leaf-bmc-001\n"
@@ -1682,7 +1667,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  switchport trunk allowed vlan 2,4,6\n"
             + "  mtu 9216\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface loopback0\n"
             + "  no shutdown\n"
@@ -2005,8 +1990,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  spanning-tree bpduguard enable\n"
             + "  spanning-tree port type edge\n"
         ) in str(result.output)
-        print(result.output)
-        print(result.output)
+
         assert (
             "ip access-list nmn-hmn\n"
             + "  seq 10 deny ip 192.168.3.0/17 192.168.0.0/17\n"
@@ -2025,7 +2009,7 @@ def test_switch_config_leaf_bmc_custom():
             + "  seq 40 deny ip 192.168.200.0/24 192.168.12.0/24\n"
             + "  seq 50 permit ip any any\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "router ospf 1\n"
             + "  router-id 10.2.0.12\n"
@@ -2039,7 +2023,6 @@ def test_switch_config_leaf_bmc_custom():
             + "ntp server 192.168.4.5\n"
             + "ntp server 192.168.4.6\n"
         ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_cdu_primary():
@@ -2047,8 +2030,6 @@ def test_switch_config_cdu_primary():
     cdu_primary = "sw-cdu-001"
 
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -2075,14 +2056,14 @@ def test_switch_config_cdu_primary():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert (
             "ip vrf Customer\n"
             + "ip name-server 10.92.100.225\n"
             + "hostname sw-cdu-001\n"
             + "rest api restconf\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface vlan3000\n"
             + "  mode L3\n"
@@ -2109,7 +2090,7 @@ def test_switch_config_cdu_primary():
             + "    virtual-address 192.168.100.1\n"
             + "    priority 110\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface vlan1\n"
             + "  description MTL\n"
@@ -2140,10 +2121,10 @@ def test_switch_config_cdu_primary():
             + "  no shutdown\n"
             + "  ip vrf forwarding Customer\n"
             + "  mtu 9216\n"
-            + "  ip address 192.168.12.5/24\n"
+            + "  ip address 192.168.12.16/24\n"
             + "  ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface port-channel2\n"
             + "  description cmm-x3002-000:1<==sw-cdu-001\n"
@@ -2182,7 +2163,7 @@ def test_switch_config_cdu_primary():
             + "  vlt-port-channel 5\n"
             + "  spanning-tree guard root\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface port-channel255\n"
             + "  description sw-spine-001:29<==sw-cdu-001\n"
@@ -2436,7 +2417,7 @@ def test_switch_config_cdu_primary():
             + "  switchport access vlan 1\n"
             + "  flowcontrol receive on\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface ethernet1/1/25\n"
             + "  no shutdown\n"
@@ -2449,7 +2430,7 @@ def test_switch_config_cdu_primary():
             + "  flowcontrol receive off\n"
             + "  flowcontrol transmit off\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "ip access-list nmn-hmn\n"
             + "  seq 10 deny ip 192.168.3.0/17 192.168.0.0/17\n"
@@ -2468,7 +2449,7 @@ def test_switch_config_cdu_primary():
             + "  seq 40 deny ip 192.168.200.0/24 192.168.12.0/24\n"
             + "  seq 50 permit ip any any\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "load-balancing ingress-port enable\n"
             + "no load-balancing mac-selection destination-mac\n"
@@ -2478,7 +2459,7 @@ def test_switch_config_cdu_primary():
             + "no load-balancing tcp-udp-selection l4-destination-port\n"
             + "no load-balancing tcp-udp-selection l4-source-port\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "router ospf 1\n"
             + "  router-id 10.2.0.16\n"
@@ -2498,7 +2479,6 @@ def test_switch_config_cdu_primary():
             + "ntp server 192.168.4.5\n"
             + "ntp server 192.168.4.6\n"
         ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_cdu_secondary():
@@ -2506,8 +2486,6 @@ def test_switch_config_cdu_secondary():
     cdu_secondary = "sw-cdu-002"
 
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -2540,7 +2518,7 @@ def test_switch_config_cdu_secondary():
             + "hostname sw-cdu-002\n"
             + "rest api restconf\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface vlan3000\n"
             + "  mode L3\n"
@@ -2567,7 +2545,7 @@ def test_switch_config_cdu_secondary():
             + "    virtual-address 192.168.100.1\n"
             + "    priority 90\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface vlan1\n"
             + "  description MTL\n"
@@ -2598,10 +2576,10 @@ def test_switch_config_cdu_secondary():
             + "  no shutdown\n"
             + "  ip vrf forwarding Customer\n"
             + "  mtu 9216\n"
-            + "  ip address 192.168.12.6/24\n"
+            + "  ip address 192.168.12.17/24\n"
             + "  ip ospf 2 area 0.0.0.0\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface port-channel2\n"
             + "  description cmm-x3002-000:2<==sw-cdu-002\n"
@@ -2640,8 +2618,7 @@ def test_switch_config_cdu_secondary():
             + "  vlt-port-channel 5\n"
             + "  spanning-tree guard root\n"
         ) in str(result.output)
-        print(result.output)
-        print(result.output)
+
         assert (
             "interface port-channel255\n"
             + "  description sw-spine-001:30<==sw-cdu-002\n"
@@ -2900,7 +2877,7 @@ def test_switch_config_cdu_secondary():
             + "  flowcontrol receive off\n"
             + "  flowcontrol transmit off\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "ip access-list nmn-hmn\n"
             + "  seq 10 deny ip 192.168.3.0/17 192.168.0.0/17\n"
@@ -2919,7 +2896,7 @@ def test_switch_config_cdu_secondary():
             + "  seq 40 deny ip 192.168.200.0/24 192.168.12.0/24\n"
             + "  seq 50 permit ip any any\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "load-balancing ingress-port enable\n"
             + "no load-balancing mac-selection destination-mac\n"
@@ -2929,7 +2906,7 @@ def test_switch_config_cdu_secondary():
             + "no load-balancing tcp-udp-selection l4-destination-port\n"
             + "no load-balancing tcp-udp-selection l4-source-port\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "router ospf 1\n"
             + "  router-id 10.2.0.17\n"
@@ -2949,270 +2926,3 @@ def test_switch_config_cdu_secondary():
             + "ntp server 192.168.4.5\n"
             + "ntp server 192.168.4.6\n"
         ) in str(result.output)
-        print(result.output)
-
-
-sls_input = {
-    "Networks": {
-        "CAN": {
-            "Name": "CAN",
-            "ExtraProperties": {
-                "CIDR": "192.168.11.0/24",
-                "Subnets": [
-                    {
-                        "Name": "bootstrap_dhcp",
-                        "CIDR": "192.168.11.0/24",
-                        "IPReservations": [
-                            {"Name": "can-switch-1", "IPAddress": "192.168.11.2"},
-                            {"Name": "can-switch-2", "IPAddress": "192.168.11.3"},
-                        ],
-                        "VlanID": 7,
-                        "Gateway": "192.168.11.1",
-                    },
-                    {
-                        "FullName": "CAN Bootstrap DHCP Subnet",
-                        "CIDR": "192.168.11.0/24",
-                        "IPReservations": [
-                            {"Name": "ncn-w001", "IPAddress": "192.168.11.4"},
-                            {"Name": "ncn-w002", "IPAddress": "192.168.11.5"},
-                            {"Name": "ncn-w003", "IPAddress": "192.168.11.6"},
-                        ],
-                        "Name": "bootstrap_dhcp",
-                        "VlanID": 7,
-                        "Gateway": "192.168.11.1",
-                    },
-                ],
-            },
-        },
-        "CHN": {
-            "Name": "CHN",
-            "ExtraProperties": {
-                "CIDR": "192.168.200.0/24",
-                "MyASN": 65530,
-                "PeerASN": 65533,
-                "Subnets": [
-                    {
-                        "Name": "bootstrap_dhcp",
-                        "CIDR": "192.168.200.0/24",
-                        "IPReservations": [
-                            {"Name": "chn-switch-1", "IPAddress": "192.168.200.2"},
-                            {"Name": "chn-switch-2", "IPAddress": "192.168.200.3"},
-                        ],
-                        "VlanID": 5,
-                        "Gateway": "192.168.200.1",
-                    },
-                    {
-                        "FullName": "CHN Bootstrap DHCP Subnet",
-                        "CIDR": "192.168.200.0/24",
-                        "IPReservations": [
-                            {"Name": "ncn-w001", "IPAddress": "192.168.200.4"},
-                            {"Name": "ncn-w002", "IPAddress": "192.168.200.5"},
-                            {"Name": "ncn-w003", "IPAddress": "192.168.200.6"},
-                        ],
-                        "Name": "bootstrap_dhcp",
-                        "VlanID": 5,
-                        "Gateway": "192.168.200.1",
-                    },
-                ],
-            },
-        },
-        "CMN": {
-            "Name": "CMN",
-            "ExtraProperties": {
-                "CIDR": "192.168.12.0/24",
-                "MyASN": 65532,
-                "PeerASN": 65533,
-                "Subnets": [
-                    {
-                        "Name": "network_hardware",
-                        "CIDR": "192.168.12.0/24",
-                        "IPReservations": [
-                            {"Name": "sw-spine-001", "IPAddress": "192.168.12.2"},
-                            {"Name": "sw-spine-002", "IPAddress": "192.168.12.3"},
-                            {"Name": "sw-leaf-bmc-001", "IPAddress": "192.168.12.4"},
-                            {"Name": "sw-cdu-001", "IPAddress": "192.168.12.5"},
-                            {"Name": "sw-cdu-002", "IPAddress": "192.168.12.6"},
-                        ],
-                        "VlanID": 6,
-                        "Gateway": "192.168.12.1",
-                    },
-                    {
-                        "Name": "bootstrap_dhcp",
-                        "CIDR": "192.168.12.0/24",
-                        "IPReservations": [
-                            {"Name": "ncn-w001", "IPAddress": "192.168.12.4"},
-                            {"Name": "ncn-w002", "IPAddress": "192.168.12.5"},
-                            {"Name": "ncn-w003", "IPAddress": "192.168.12.6"},
-                        ],
-                        "VlanID": 6,
-                        "Gateway": "192.168.12.1",
-                    },
-                ],
-            },
-        },
-        "HMN": {
-            "Name": "HMN",
-            "ExtraProperties": {
-                "CIDR": "192.168.0.0/17",
-                "Subnets": [
-                    {
-                        "Name": "network_hardware",
-                        "CIDR": "192.168.0.0/17",
-                        "IPReservations": [
-                            {"Name": "sw-spine-001", "IPAddress": "192.168.0.2"},
-                            {"Name": "sw-spine-002", "IPAddress": "192.168.0.3"},
-                            {"Name": "sw-leaf-bmc-001", "IPAddress": "192.168.0.12"},
-                            {"Name": "sw-cdu-001", "IPAddress": "192.168.0.16"},
-                            {"Name": "sw-cdu-002", "IPAddress": "192.168.0.17"},
-                        ],
-                        "VlanID": 4,
-                        "Gateway": "192.168.0.1",
-                    },
-                    {
-                        "FullName": "HMN Bootstrap DHCP Subnet",
-                        "CIDR": "192.168.0.0/17",
-                        "IPReservations": [
-                            {"Name": "ncn-w001", "IPAddress": "192.168.0.4"},
-                            {"Name": "ncn-w002", "IPAddress": "192.168.0.5"},
-                            {"Name": "ncn-w003", "IPAddress": "192.168.0.6"},
-                        ],
-                        "Name": "bootstrap_dhcp",
-                        "VlanID": 4,
-                        "Gateway": "192.168.0.1",
-                    },
-                ],
-            },
-        },
-        "MTL": {
-            "Name": "MTL",
-            "ExtraProperties": {
-                "CIDR": "192.168.1.0/16",
-                "Subnets": [
-                    {
-                        "Name": "network_hardware",
-                        "CIDR": "192.168.1.0/16",
-                        "IPReservations": [
-                            {"Name": "sw-spine-001", "IPAddress": "192.168.1.2"},
-                            {"Name": "sw-spine-002", "IPAddress": "192.168.1.3"},
-                            {"Name": "sw-leaf-bmc-001", "IPAddress": "192.168.1.12"},
-                            {"Name": "sw-cdu-001", "IPAddress": "192.168.1.16"},
-                            {"Name": "sw-cdu-002", "IPAddress": "192.168.1.17"},
-                        ],
-                        "VlanID": 0,
-                        "Gateway": "192.168.1.1",
-                    },
-                ],
-            },
-        },
-        "NMN": {
-            "Name": "NMN",
-            "FullName": "Node Management Network",
-            "ExtraProperties": {
-                "CIDR": "192.168.3.0/17",
-                "MyASN": 65531,
-                "PeerASN": 65533,
-                "Subnets": [
-                    {
-                        "FullName": "NMN Management Network Infrastructure",
-                        "CIDR": "192.168.3.0/17",
-                        "IPReservations": [
-                            {"Name": "sw-spine-001", "IPAddress": "192.168.3.2"},
-                            {"Name": "sw-spine-002", "IPAddress": "192.168.3.3"},
-                            {"Name": "sw-leaf-bmc-001", "IPAddress": "192.168.3.12"},
-                            {"Name": "sw-cdu-001", "IPAddress": "192.168.3.16"},
-                            {"Name": "sw-cdu-002", "IPAddress": "192.168.3.17"},
-                        ],
-                        "Name": "network_hardware",
-                        "VlanID": 2,
-                        "Gateway": "192.168.3.1",
-                    },
-                    {
-                        "FullName": "NMN Bootstrap DHCP Subnet",
-                        "CIDR": "192.168.4.0/17",
-                        "IPReservations": [
-                            {"Name": "ncn-w001", "IPAddress": "192.168.4.4"},
-                            {"Name": "ncn-w002", "IPAddress": "192.168.4.5"},
-                            {"Name": "ncn-w003", "IPAddress": "192.168.4.6"},
-                        ],
-                        "Name": "bootstrap_dhcp",
-                        "VlanID": 2,
-                        "Gateway": "192.168.3.1",
-                    },
-                ],
-            },
-        },
-        "NMN_MTN": {
-            "Name": "NMN_MTN",
-            "ExtraProperties": {
-                "CIDR": "192.168.100.0/17",
-                "Subnets": [
-                    {
-                        "FullName": "",
-                        "CIDR": "192.168.100.0/22",
-                        "Name": "cabinet_3002",
-                        "VlanID": 2000,
-                        "Gateway": "192.168.100.1",
-                        "DHCPStart": "192.168.100.10",
-                        "DHCPEnd": "192.168.3.254",
-                    },
-                ],
-            },
-        },
-        "HMN_MTN": {
-            "Name": "HMN_MTN",
-            "ExtraProperties": {
-                "CIDR": "192.168.200.0/17",
-                "Subnets": [
-                    {
-                        "FullName": "",
-                        "CIDR": "192.168.104.0/22",
-                        "Name": "cabinet_3002",
-                        "VlanID": 3000,
-                        "Gateway": "192.168.104.1",
-                        "DHCPStart": "192.168.104.10",
-                        "DHCPEnd": "192.168.104.254",
-                    },
-                ],
-            },
-        },
-        "HMNLB": {
-            "Name": "HMNLB",
-            "ExtraProperties": {
-                "CIDR": "10.94.100.0/24",
-                "Subnets": [
-                    {
-                        "FullName": "NMN MetalLB",
-                        "CIDR": "10.94.100.0/24",
-                        "IPReservations": [
-                            {"Name": "cray-tftp", "IPAddress": "10.94.100.60"},
-                            {"Name": "unbound", "IPAddress": "10.94.100.225"},
-                        ],
-                        "Name": "hmn_metallb_address_pool",
-                        "Gateway": "10.94.100.1",
-                    },
-                ],
-            },
-        },
-        "NMNLB": {
-            "Name": "NMNLB",
-            "ExtraProperties": {
-                "CIDR": "10.92.100.0/24",
-                "Subnets": [
-                    {
-                        "FullName": "HMN MetalLB",
-                        "CIDR": "10.92.100.0/24",
-                        "IPReservations": [
-                            {"Name": "cray-tftp", "IPAddress": "10.92.100.60"},
-                            {"Name": "unbound", "IPAddress": "10.92.100.225"},
-                        ],
-                        "Name": "nmn_metallb_address_pool",
-                        "Gateway": "10.92.100.1",
-                    },
-                ],
-            },
-        },
-    },
-}
-sls_networks = [
-    network[x] for network in [sls_input.get("Networks", {})] for x in network
-]

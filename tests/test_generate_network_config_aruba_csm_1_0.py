@@ -29,7 +29,6 @@ import requests
 import responses
 
 from canu.cli import cli
-from .test_generate_switch_config_aruba_csm_1_0 import sls_input, sls_networks
 
 test_file_directory = Path(__file__).resolve().parent
 
@@ -38,7 +37,8 @@ test_file = path.join(test_file_directory, "data", test_file_name)
 architecture = "full"
 tabs = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners = "J14,T44,J14,T48,J14,T28,J14,T27"
-sls_file = "sls_file.json"
+sls_file_name = "sls_input_file_csm_1.0.json"
+sls_file = path.join(test_file_directory, "data", sls_file_name)
 csm = "1.0"
 folder_name = "test_config"
 cache_minutes = 0
@@ -49,8 +49,6 @@ runner = testing.CliRunner()
 def test_network_config():
     """Test that the `canu generate network config` command runs and generates config."""
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -91,8 +89,6 @@ def test_network_config():
 def test_network_config_folder_prompt():
     """Test that the `canu generate network config` command prompts for missing folder name and runs and generates config."""
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -164,8 +160,6 @@ def test_network_config_csi_file_missing():
 def test_network_config_missing_file():
     """Test that the `canu generate network config` command fails on missing file."""
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -233,8 +227,6 @@ def test_network_config_bad_file():
 def test_network_config_missing_tabs():
     """Test that the `canu generate network config` command prompts for missing tabs."""
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -276,8 +268,6 @@ def test_network_config_bad_tab():
     bad_tab = "BAD_TAB_NAME"
     bad_tab_corners = "I14,S48"
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -310,8 +300,6 @@ def test_network_config_bad_tab():
 def test_network_config_corner_prompt():
     """Test that the `canu generate network config` command prompts for corner input and runs."""
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -352,8 +340,6 @@ def test_network_config_not_enough_corners():
     """Test that the `canu generate network config` command fails on not enough corners."""
     not_enough_corners = "H16"
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -389,6 +375,14 @@ def test_network_config_not_enough_corners():
 def test_network_config_sls():
     """Test that the `canu generate network config` command runs with SLS."""
     with runner.isolated_filesystem():
+
+        with open(sls_file, "r") as read_file:
+            sls_data = json.load(read_file)
+
+        sls_networks = [
+            network[x] for network in [sls_data.get("Networks", {})] for x in network
+        ]
+
         responses.add(
             responses.GET,
             f"https://{sls_address}/apis/sls/v1/networks",
