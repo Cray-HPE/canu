@@ -119,7 +119,7 @@ def pull_sls_networks(sls_file=None):
         sls_cache = None
 
         if os.getenv("SLS_API_GW") is None:
-            sls_url = "http://cray-sls.services.svc.cluster.local/v1/networks"
+            sls_url = "https://cray-sls.services.svc.cluster.local/v1/networks"
         else:
             sls_url = "https://" + os.getenv("SLS_API_GW") + "/apis/sls/v1/networks"
         if cenv != "k8s":
@@ -410,7 +410,7 @@ def pull_sls_hardware(sls_file=None):
         sls_cache = None
 
         if os.getenv("SLS_API_GW") is None:
-            sls_url = "http://cray-sls.services.svc.cluster.local/v1/hardware"
+            sls_url = "https://cray-sls.services.svc.cluster.local/v1/hardware"
         else:
             sls_url = "https://" + os.getenv("SLS_API_GW") + "/apis/sls/v1/hardware"
         if cenv != "k8s":
