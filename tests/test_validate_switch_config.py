@@ -109,7 +109,6 @@ def test_validate_config_additions(netmiko_command, switch_vendor):
         )
         assert result.exit_code == 0
 
-        print(result.output)
         assert (
             "- hostname sw-spine-001\n"
             + "- spanning-tree priority 0\n"
@@ -197,7 +196,7 @@ def test_validate_config_running_file_aruba():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert (
             "- hostname sw-spine-001\n"
             + "- spanning-tree priority 0\n"
@@ -285,7 +284,7 @@ def test_validate_config_running_file_dell():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert (
             "interface vlan3000\n"
             + "  - mode L3\n"
@@ -372,7 +371,7 @@ def test_validate_config_running_file_mellanox():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert (
             "- router ospf 1 vrf default\n"
             + "- no ntp server 192.168.4.6 disable\n"
@@ -413,7 +412,7 @@ def test_validate_config_password_prompt(netmiko_command, switch_vendor):
             input=password,
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert ("- nae-script abc\n" + "+ router add\n") in str(result.output)
 
 
@@ -446,7 +445,7 @@ def test_validate_config_vendor_prompt():
             input=vendor,
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert (
             "Please enter the vendor (Aruba, Dell, Mellanox): aruba\n"
             + "- hostname sw-spine-001\n"
