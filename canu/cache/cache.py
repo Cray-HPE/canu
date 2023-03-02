@@ -24,9 +24,9 @@ from os import path, remove
 import sys
 
 import click
-from click_help_colors import HelpColorsCommand, HelpColorsGroup
 from ruamel.yaml import YAML
 
+from canu.style import Style
 from canu.utils.cache import cache_directory
 
 
@@ -34,9 +34,7 @@ yaml = YAML()
 
 
 @click.group(
-    cls=HelpColorsGroup,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsGroup,
 )
 @click.pass_context
 def cache(ctx):
@@ -44,9 +42,7 @@ def cache(ctx):
 
 
 @cache.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @click.pass_context
 def location(ctx):
@@ -55,9 +51,7 @@ def location(ctx):
 
 
 @cache.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @click.pass_context
 def delete(ctx):
@@ -68,9 +62,7 @@ def delete(ctx):
 
 
 @cache.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @click.pass_context
 def print(ctx):

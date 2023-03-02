@@ -31,7 +31,6 @@ import re
 import sys
 
 import click
-from click_help_colors import HelpColorsCommand
 from click_option_group import optgroup
 from click_option_group import RequiredMutuallyExclusiveOptionGroup
 from hier_config import HConfig
@@ -49,6 +48,7 @@ from ruamel.yaml import YAML
 from ttp import ttp
 import urllib3
 
+from canu.style import Style
 from canu.utils.cache import cache_directory
 from canu.utils.yaml_load import load_yaml
 from canu.validate.paddle.paddle import node_model_from_paddle
@@ -125,9 +125,7 @@ dash = "-" * 60
 
 
 @click.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @click.option(
     "--csm",

@@ -19,29 +19,4 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-"""CANU Commands that validate the Shasta switch network."""
-import click
-
-from canu.style import Style
-from canu.validate.network import network
-from canu.validate.paddle import paddle
-from canu.validate.paddle_cabling import paddle_cabling
-from canu.validate.shcd import shcd
-from canu.validate.shcd_cabling import shcd_cabling
-from canu.validate.switch import switch
-
-
-@click.group(
-    cls=Style.CanuHelpColorsGroup,
-)
-@click.pass_context
-def validate(ctx):
-    """CANU validate commands."""
-
-
-validate.add_command(network.network)
-validate.add_command(paddle.paddle)
-validate.add_command(paddle_cabling.paddle_cabling)
-validate.add_command(shcd.shcd)
-validate.add_command(shcd_cabling.shcd_cabling)
-validate.add_command(switch.switch)
+"""CANU style."""

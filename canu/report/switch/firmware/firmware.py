@@ -27,13 +27,13 @@ from pathlib import Path
 import sys
 
 import click
-from click_help_colors import HelpColorsCommand
 import emoji
 from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
 from ruamel.yaml import YAML
 import urllib3
 
+from canu.style import Style
 from canu.utils.cache import (
     cache_switch,
     firmware_cached_recently,
@@ -66,9 +66,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 @click.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @click.option(
     "--csm",

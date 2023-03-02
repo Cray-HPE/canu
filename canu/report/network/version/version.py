@@ -23,7 +23,6 @@
 import logging
 
 import click
-from click_help_colors import HelpColorsCommand
 import click_spinner
 from nornir import InitNornir
 from nornir.core.filter import F
@@ -31,14 +30,13 @@ from nornir_salt.plugins.tasks import netmiko_send_commands
 from nornir_scrapli.tasks import send_command
 from ttp import ttp
 
+from canu.style import Style
 from canu.utils.host_alive import host_alive
 from canu.utils.inventory import inventory
 
 
 @click.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @click.option(
     "--sls-file",

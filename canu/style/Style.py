@@ -19,29 +19,42 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-"""CANU Commands that validate the Shasta switch network."""
-import click
+"""Style to keep styling in one place."""
 
-from canu.style import Style
-from canu.validate.network import network
-from canu.validate.paddle import paddle
-from canu.validate.paddle_cabling import paddle_cabling
-from canu.validate.shcd import shcd
-from canu.validate.shcd_cabling import shcd_cabling
-from canu.validate.switch import switch
+from click_help_colors import HelpColorsCommand, HelpColorsGroup
 
 
-@click.group(
-    cls=Style.CanuHelpColorsGroup,
-)
-@click.pass_context
-def validate(ctx):
-    """CANU validate commands."""
+class CanuHelpColorsCommand(HelpColorsCommand):
+    """A class for customizing the help colors in a command.
+
+    Attributes
+    ----------
+    help_headers_color : string
+        A color for the help headers.
+    help_options_color : string
+        A color for the help options.
+    """
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Set the header and option colors."""
+        super().__init__(*args, **kwargs)
+        self.help_headers_color = "blue"
+        self.help_options_color = "yellow"
 
 
-validate.add_command(network.network)
-validate.add_command(paddle.paddle)
-validate.add_command(paddle_cabling.paddle_cabling)
-validate.add_command(shcd.shcd)
-validate.add_command(shcd_cabling.shcd_cabling)
-validate.add_command(switch.switch)
+class CanuHelpColorsGroup(HelpColorsGroup):
+    """A class for customizing the help colors in a group.
+
+    Attributes
+    ----------
+    help_headers_color : string
+        A color for the help headers.
+    help_options_color : string
+        A color for the help options.
+    """
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Set the header and option colors."""
+        super().__init__(*args, **kwargs)
+        self.help_headers_color = "blue"
+        self.help_options_color = "yellow"

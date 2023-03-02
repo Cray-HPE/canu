@@ -28,7 +28,6 @@ from pathlib import Path
 import sys
 
 import click
-from click_help_colors import HelpColorsCommand
 from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
@@ -38,6 +37,7 @@ import requests
 from ruamel.yaml import YAML
 
 from canu.report.switch.cabling.cabling import get_lldp
+from canu.style import Style
 from canu.utils.cache import cache_directory
 from canu.validate.network.cabling.cabling import node_model_from_canu
 from canu.validate.paddle.paddle import node_model_from_paddle
@@ -70,9 +70,7 @@ log = logging.getLogger("validate_paddle_cabling")
 
 
 @click.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @click.option(
     "--csm",

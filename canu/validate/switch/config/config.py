@@ -26,7 +26,6 @@ from pathlib import Path
 import sys
 
 import click
-from click_help_colors import HelpColorsCommand
 from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from click_params import IPV4_ADDRESS
 import click_spinner
@@ -34,6 +33,7 @@ from hier_config import HConfig, Host
 from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 from ruamel.yaml import YAML
 
+from canu.style import Style
 from canu.utils.ssh import netmiko_command, netmiko_commands
 from canu.utils.vendor import switch_vendor
 
@@ -117,9 +117,7 @@ with open(mellanox_options_file, "r") as options_f:
 
 
 @click.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @optgroup.group(
     "Running config source",

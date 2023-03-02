@@ -28,7 +28,6 @@ import re
 import sys
 
 import click
-from click_help_colors import HelpColorsCommand
 from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
@@ -39,6 +38,7 @@ import requests
 from ruamel.yaml import YAML
 
 from canu.report.switch.cabling.cabling import get_lldp
+from canu.style import Style
 from canu.utils.cache import cache_directory
 from canu.validate.shcd.shcd import node_list_warnings, print_node_list
 
@@ -50,9 +50,7 @@ log = logging.getLogger("validate_cabling")
 
 
 @click.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @click.option(
     "--architecture",
