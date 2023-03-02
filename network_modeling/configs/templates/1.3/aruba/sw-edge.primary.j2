@@ -31,25 +31,6 @@ interface lag 256
     vlan trunk native 1 tag
     vlan trunk allowed all
     lacp mode active
-interface lag 1 multi-chassis
-    no shutdown
-    description sw-spine
-    no routing
-    vlan trunk native 1
-    vlan trunk allowed all
-    lacp mode active
-    lacp fallback
-    spanning-tree port-type admin-edge
-interface 1/1/1
-    no shutdown
-    mtu 9198
-    description sw-spine-001
-    lag 1
-interface 1/1/2
-    no shutdown
-    mtu 9198
-    description sw-spine-002
-    lag 1
 interface 1/1/30
     no shutdown
     vrf attach keepalive
