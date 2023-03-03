@@ -47,7 +47,7 @@ dependencies = [
     'colorama==0.4.4',
     'emoji==2.2.0',
     'hier-config==1.6.1',
-    'ipython==7.16.3',
+    'ipython==8.10.0',
     'jinja2==3.1.2',
     'jsonschema==4.17.3',
     'kubernetes==24.2.0',
