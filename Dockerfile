@@ -26,18 +26,18 @@ USER        root
 WORKDIR     /root
 VOLUME      [ "/root/mounted" ]
 RUN         apk add --no-cache \
-              cmake=3.24.3-r0 \
-              g++=12.2.1_git20220924-r4 \
-              gcc=12.2.1_git20220924-r4 \
-              git=2.38.4-r0 \
-              libffi-dev=3.4.4-r0 \
-              make=4.3-r1 \
-              musl-dev=1.2.3-r4 \
-              openssl=3.0.8-r0 \
-              py3-pip=22.3.1-r1 \
-              py3-virtualenv=20.16.7-r0 \
-              python3=3.10.10-r0 \
-              python3-dev=3.10.10-r0
+              cmake~=3.24 \
+              g++~=12.2 \
+              gcc~=12.2 \
+              git~=2.38 \
+              libffi-dev~=3.4 \
+              make~=4.3 \
+              musl-dev~=1.2 \
+              openssl~=3.0 \
+              py3-pip~=22.3 \
+              py3-virtualenv~=20.16 \
+              python3~=3.10 \
+              python3-dev~=3.10
 ENV         VIRTUAL_ENV=/opt/venv
 RUN         python -m venv $VIRTUAL_ENV
 ENV         PATH="$VIRTUAL_ENV/bin:$PATH"
@@ -50,7 +50,7 @@ VOLUME      [ "/root/mounted", "/ssh-agent" ]
 ENV         VIRTUAL_ENV=/opt/venv \
             SSH_AUTH_SOCK=/ssh-agent
 RUN         apk --update add \
-              openssh-client=9.1_p1-r2
+              openssh-client~=9.1
 RUN         source $VIRTUAL_ENV/bin/activate
 COPY        .flake8 ./.flake8
 COPY        .git/ ./.git
@@ -114,7 +114,7 @@ FROM        ${ALPINE_IMAGE} AS prod
 USER        root
 # ssh is needed for 'canu test' command
 RUN         apk --update add \
-              openssh-client=9.1_p1-r2
+              openssh-client~=9.1
 # must mount ${SSH_AUTH_SOCK} to /ssh-agent to use host ssh
 VOLUME      [ "/home/canu/mounted", "/ssh-agent" ]
 ENV         VIRTUAL_ENV=/opt/venv \
