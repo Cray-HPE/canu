@@ -42,7 +42,7 @@ ENV         VIRTUAL_ENV=/opt/venv
 RUN         python -m venv $VIRTUAL_ENV
 ENV         PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# STAGE 2 - install canu in editable mode
+# STAGE 2 - install canu in editable mode and generate docs
 FROM        deps AS dev
 USER        root
 WORKDIR     /root
@@ -67,23 +67,49 @@ COPY        entry_points.ini ./entry_points.ini
 COPY        LICENSE ./LICENSE
 COPY        Makefile ./Makefile
 COPY        MANIFEST.in ./MANIFEST.in
+COPY        mkdocs.yml ./mkdocs.yml
 COPY        noxfile.py ./noxfile.py
 COPY        pyinstaller.py ./pyinstaller.py
 COPY        pyproject.toml ./pyproject.toml
-RUN         python -m pip install --editable .
+RUN         python -m pip install --editable .[ci,docs]
+RUN         nox -e docs
 
-# STAGE 3 - build the binaries with pyinstaller
+# STAGE 3 - documentation image
+FROM        ${ALPINE_IMAGE} AS docs
+USER        root
+ENV         VIRTUAL_ENV=/opt/venv
+RUN         apk add --no-cache \
+              py3-pip=22.3.1-r1 \
+              py3-virtualenv=20.16.7-r0 \
+              python3=3.10.10-r0 \
+              python3-dev=3.10.10-r0
+COPY        --from=dev --chown=root:root $VIRTUAL_ENV $VIRTUAL_ENV
+RUN         addgroup -S canu && \
+              adduser \
+              -S canu \
+              -G canu \
+              -h /home/canu \
+              -s /bin/bash \
+              -D
+USER        canu
+WORKDIR     /home/canu
+COPY        --from=dev --chown=canu:canu /root/docs /home/canu/docs
+COPY        --from=dev --chown=canu:canu /root/mkdocs.yml /home/canu/mkdocs.yml
+ENV         PATH="$VIRTUAL_ENV/bin:$PATH"
+RUN         source $VIRTUAL_ENV/bin/activate
+EXPOSE      8000       
+CMD         [ "mkdocs", "serve", "-a", "0.0.0.0:8000", "--config-file", "mkdocs.yml"]
+
+# STAGE 4 - build the binaries with pyinstaller
 FROM        dev AS build
 USER        root
 WORKDIR     /root
-# must mount ${SSH_AUTH_SOCK} to /ssh-agent to use host ssh
-VOLUME      [ "/root/mounted"]
 RUN         source $VIRTUAL_ENV/bin/activate
 RUN         python -m pip install . pyinstaller
 RUN         cp -pv pyinstaller.py pyinstaller.spec
 RUN         pyinstaller --clean -y --dist ./dist/linux --workpath /tmp pyinstaller.spec
 
-# STAGE 4 - final production image
+# STAGE 5 - final production image
 FROM        ${ALPINE_IMAGE} AS prod
 USER        root
 # ssh is needed for 'canu test' command
