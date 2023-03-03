@@ -23,7 +23,7 @@
 from os import path
 import sys
 
-sys.path.insert(0, path.abspath("../.."))
+sys.path.insert(0, path.abspath("."))
 
 project = "canu"
 author = "HPE"
@@ -33,3 +33,4 @@ extensions = [
     "sphinx_click",
     "sphinx_markdown_builder",
 ]
+templates_path = ['templates']
