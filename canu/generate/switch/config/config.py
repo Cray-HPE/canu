@@ -1414,9 +1414,12 @@ def get_switch_nodes(
 
             # sw-cdu ==> sw-spine
             elif switch_name.startswith("sw-cdu"):
-                lag_number = 255
-                is_primary, primary, secondary = switch_is_primary(switch_name)
-
+                # dell has a max lag number of 128.
+                # We are keeping 255 for Aruba so we don't have to renumber LAGs.
+                if architecture == "network_v1":
+                    lag_number = 110
+                else:
+                    lag_number = 255
             # sw-leaf-bmc ==> sw-spine
             elif switch_name.startswith("sw-leaf-bmc"):
                 lag_number = 255

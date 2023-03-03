@@ -20,167 +20,175 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 ---
-    # Indicates the style of the configuration
-    style: dellOS10
-    
-    # if there is a delta, negate the parents and re-write the parents with children
-    sectional_overwrite: []
-    
-    # if there is a delta, overwrite these parents instead of one of their children
-    sectional_overwrite_no_negate: []
-    
-    # The default order value is 500, with a range between 1 - 999.
-    # Commands with smaller order values float to the top in the order of execution.
-    # Commands with larger order values float to the bottom in the order of execution.
-    # Syntax Example:
-    # - lineage:
-    #   - startswith:
-    #     - no route-map
-    #   order: 600
-    ordering:
-    - lineage:
+# Indicates the style of the configuration
+style: dellOS10
+
+# if there is a delta, negate the parents and re-write the parents with children
+sectional_overwrite: []
+
+# if there is a delta, overwrite these parents instead of one of their children
+sectional_overwrite_no_negate: []
+
+# The default order value is 500, with a range between 1 - 999.
+# Commands with smaller order values float to the top in the order of execution.
+# Commands with larger order values float to the bottom in the order of execution.
+# Syntax Example:
+# - lineage:
+#   - startswith:
+#     - no route-map
+#   order: 600
+ordering:
+  - lineage:
       - startswith: ip vrf
-      order: 4
-    - lineage:
+    order: 4
+  - lineage:
       - startswith: no banner motd
-      order: 5
-    - lineage:
+    order: 5
+  - lineage:
       - startswith: ip name-server
-      order: 6
-    - lineage:
+    order: 6
+  - lineage:
       - startswith: hostname
-      order: 10
-    - lineage:
+    order: 10
+  - lineage:
       - startswith: rest api
-      order: 15
-    - lineage:
+    order: 15
+  - lineage:
       - startswith: spanning-tree mode
-      order: 20
-    - lineage:
+    order: 20
+  - lineage:
       - startswith: interface vlan
-      order: 30
-    - lineage:
+    order: 30
+  - lineage:
       - startswith: interface port-channel
-      order: 40
-    - lineage:
+    order: 40
+  - lineage:
       - startswith: interface loopback
-      order: 45
-    - lineage:
+    order: 45
+  - lineage:
       - startswith: interface mgmt
-      order: 50
-    - lineage:
+    order: 50
+  - lineage:
       - startswith: interface ethernet
-      order: 60
-    - lineage:
+    order: 60
+  - lineage:
       - startswith: ip access-list
-      order: 65
-    - lineage:
-      - startswith: router ospf
-      order: 70
-    - lineage:
+    order: 65
+  - lineage:
+      - startswith: router ospf 1
+    order: 70
+  - lineage:
       - startswith: spanning-tree
-      order: 75
-    - lineage:
+    order: 75
+  - lineage:
+      - startswith: router ospf 2
+    order: 78
+  - lineage:
       - startswith: vlt-domain
-      order: 80
-    - lineage:
+    order: 80
+  - lineage:
       - startswith: snmp
-      order: 90
-    - lineage:
+    order: 90
+  - lineage:
       - startswith: ntp
-      order: 100
-    
-    # adds +1 indent to lines following start_expression and removes the +1 indent for lines following end_expression
-    indent_adjust: []
-    
-    parent_allows_duplicate_child: []
-    
-    sectional_exiting:
-    # This rule is used in the hierarchical_configuration unit test for .add_section_exiting()
-    - lineage:
+    order: 100
+  - lineage:
+      - startswith: banner motd
+    order: 550
+# adds +1 indent to lines following start_expression and removes the +1 indent for lines following end_expression
+indent_adjust: []
+
+parent_allows_duplicate_child: []
+
+sectional_exiting:
+  # This rule is used in the hierarchical_configuration unit test for .add_section_exiting()
+  - lineage:
       - startswith: router bgp
       - startswith: template peer-policy
-      exit_text: exit-peer-policy
-    - lineage:
+    exit_text: exit-peer-policy
+  - lineage:
       - startswith: router bgp
       - startswith: template peer-session
-      exit_text: exit-peer-session
-    - lineage:
+    exit_text: exit-peer-session
+  - lineage:
       - startswith: router bgp
       - startswith: address-family
-      exit_text: exit-address-family
-    
-    # substitions against the full multi-line config text
-    full_text_sub: []
-    #- search: 'banner\s(exec|motd)\s(\S)\n(.*\n){1,}(\2)'
-    #  replace: ''
-    #- search: 'banner\s(exec|motd)\s(\S.).+\n(.*\n){1,}.*(\2)'
-    #  replace: ''
-    #- search: 'banner\s(exec|motd)\s(\S.)\n(.*\n){1,}(\2)'
-    #  replace: ''
-    
-    # substitions against each line of the config text
-    per_line_sub:
-    - search: ^Building configuration.*
-      replace: ''
-    - search: ^Current configuration.*
-      replace: ''
-    - search: ^! Last configuration change.*
-      replace: ''
-    - search: ^! NVRAM config last updated.*
-      replace: ''
-    - search: ^ntp clock-period .*
-      replace: ''
-    - search: ^version.*
-      replace: ''
-    - search: ^ logging event link-status$
-      replace: ''
-    - search: ^ logging event subif-link-status$
-      replace: ''
-    - search: ^\s*ipv6 unreachables disable$
-      replace: ''
-    - search: ^end$
-      replace: ''
-    - search: '^\s*[#!].*'
-      replace: ''
-    - search: ^ no ip address
-      replace: ''
-    - search: ^ exit-peer-policy
-      replace: ''
-    - search: ^ exit-peer-session
-      replace: ''
-    - search: ^ exit-address-family
-      replace: ''
-    - search: ^crypto key generate rsa general-keys.*$
-      replace: ''
-    
-    idempotent_commands_blacklist: []
-    
-    # These commands do not require negation, they simply overwrite themselves
-    # Example Syntax
-    # - lineage:
-    #   - startswith: interface
-    #   - startswith: description
-    idempotent_commands:
-    - lineage:
+    exit_text: exit-address-family
+
+# substitions against the full multi-line config text
+full_text_sub: []
+#- search: 'banner\s(exec|motd)\s(\S)\n(.*\n){1,}(\2)'
+#  replace: ''
+#- search: 'banner\s(exec|motd)\s(\S.).+\n(.*\n){1,}.*(\2)'
+#  replace: ''
+#- search: 'banner\s(exec|motd)\s(\S.)\n(.*\n){1,}(\2)'
+#  replace: ''
+
+# substitions against each line of the config text
+per_line_sub:
+  - search: '^\s*[#!].*'
+    replace: ""
+  - search: ^system-user.*
+    replace: ""
+  - search: ^username.*
+    replace: ""
+  - search: ^.*iscsi.*
+    replace: ""
+  - search: ^aaa.*
+    replace: ""
+  - search: ^telemetry.*
+    replace: ""
+  - search: ^snmp-server contact "Contact Support".*
+    replace: ""
+idempotent_commands_blacklist: []
+
+# These commands do not require negation, they simply overwrite themselves
+# Example Syntax
+# - lineage:
+#   - startswith: interface
+#   - startswith: description
+idempotent_commands:
+  - lineage:
       - startswith: vlan
       - startswith: name
-    - lineage:
+  - lineage:
       - startswith: interface
       - startswith:
-        - description
-        - ip address
-        - switchport trunk allowed
-    # Default when expression: list of expressions
-    negation_default_when: []
-    
-    # Negate substitutions: expression -> negate with
-    # Example Syntax:
-    # - lineage:
-    #   - startswith: route-map
-    #   - startswith: description
-    #   use: no description
-    negation_negate_with:
-      - lineage:
-          - startswith: banner motd
-        use: no banner motd
+          - description
+          - ip address
+          - switchport access vlan
+  - lineage:
+      - startswith: hostname
+# Default when expression: list of expressions
+negation_default_when: []
+
+# Negate substitutions: expression -> negate with
+# Example Syntax:
+# - lineage:
+#   - startswith: route-map
+#   - startswith: description
+#   use: no description
+negation_negate_with:
+  - lineage:
+      - startswith: banner motd
+    use: no banner motd
+  - lineage:
+      - startswith: interface
+      - startswith: mtu
+    use: no mtu
+  - lineage:
+      - startswith: interface
+      - startswith: flowcontrol transmit
+    use: no flowcontrol transmit
+  - lineage:
+      - startswith: interface
+      - startswith: flowcontrol receive
+    use: no flowcontrol receive
+  - lineage:
+      - startswith: interface
+      - startswith: spanning-tree bpduguard
+    use: no spanning-tree bpduguard
+  - lineage:
+      - startswith: interface
+      - startswith: description
+    use: no description

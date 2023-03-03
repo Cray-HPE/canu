@@ -1,9 +1,10 @@
 {#- sw-cdu.secondary #}
 {%- include '1.2/dellmellanox/common/unknown.j2' %}
+ip vrf default
 ip vrf Customer
 ip name-server {{ variables.NMNLB_DNS }}
 hostname {{ variables.HOSTNAME }}
-{%- include '1.2/dellmellanox/common/banner-motd.j2' %}
+{%- include '1.2/dellmellanox/common/banner-motd-dell.j2' %}
 rest api restconf
 spanning-tree mode mst
 
@@ -101,7 +102,7 @@ interface ethernet1/1/{{ variables.VSX_ISL_PORT2 }}
 
 vlt-domain 1
  backup destination 192.168.255.242
- discovery-interface ethernet1/1/{{ variables.VSX_ISL_PORT1 }},1/1/{{ variables.VSX_ISL_PORT2 }}
+ discovery-interface ethernet1/1/{{ variables.VSX_ISL_PORT1 }}-1/1/{{ variables.VSX_ISL_PORT2 }}
  peer-routing
  primary-priority 8192
  vlt-mac 00:11:22:aa:bb:cc

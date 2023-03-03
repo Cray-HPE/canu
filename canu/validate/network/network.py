@@ -25,7 +25,6 @@ from click_help_colors import HelpColorsGroup
 
 from canu.validate.network.bgp import bgp
 from canu.validate.network.cabling import cabling
-from canu.validate.network.config import config
 
 
 @click.group(
@@ -40,4 +39,3 @@ def network(ctx):
 
 network.add_command(bgp.bgp)
 network.add_command(cabling.cabling)
-network.add_command(config.config)

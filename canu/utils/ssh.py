@@ -22,6 +22,7 @@
 """CANU ssh utils."""
 
 from netmiko import ConnectHandler
+import logging
 
 device = {
     "aruba": "aruba_os",
@@ -79,7 +80,7 @@ def netmiko_commands(ip, credentials, commands, device_type="autodetect"):
     with ConnectHandler(**switch) as net_connect:
         net_connect.enable()
         for command in commands:
-            command_output = net_connect.send_command(command)
+            command_output = net_connect.send_command(command, read_timeout=60)
             output.append(command_output)
         net_connect.disconnect()
 

@@ -1472,6 +1472,15 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## Changelog
 
+### [1.7.2]
+
+- Fix dell unused port template
+- Fix dell CDU template
+- Fix dell leaf template
+- Improve `canu validate switch config` for dell
+- Increase netmiko timeout
+- Remove `canu send`
+- Remove `canu validate network config`
 ### [1.7.1]
 
 -- Remove drawing code and dependencies.
