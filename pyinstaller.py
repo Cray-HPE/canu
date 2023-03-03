@@ -20,6 +20,11 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 # -*- mode: python ; coding: utf-8 -*-
+from PyInstaller.utils.hooks import collect_submodules
+
+hiddenimports = []
+hiddenimports += collect_submodules('canu')
+hiddenimports += collect_submodules('network_modeling')
 
 block_cipher = None
 
@@ -167,7 +172,7 @@ a = Analysis(
     pathex=["canu"],
     binaries=[],
     datas=added_files,
-    hiddenimports=["network_modeling"],
+    hiddenimports=hiddenimports,
     hookspath=["./pyinstaller_hooks"],
     runtime_hooks=[],
     excludes=["tests"],
@@ -200,7 +205,7 @@ b = Analysis(
     pathex=["canu"],
     binaries=[],
     datas=added_files,
-    hiddenimports=["network_modeling"],
+    hiddenimports=hiddenimports,
     hookspath=["./pyinstaller_hooks"],
     runtime_hooks=[],
     excludes=["tests"],

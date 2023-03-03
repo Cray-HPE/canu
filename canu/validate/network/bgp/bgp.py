@@ -26,7 +26,7 @@ import click
 from click_help_colors import HelpColorsCommand
 import click_spinner
 import natsort
-from netmiko import ssh_exception
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
 
 from canu.utils.sls import pull_sls_networks
@@ -235,8 +235,8 @@ def get_bgp_neighbors(ip, credentials, asn, network):
         requests.exceptions.HTTPError,
         requests.exceptions.RequestException,
         requests.exceptions.ConnectionError,
-        ssh_exception.NetmikoTimeoutException,
-        ssh_exception.NetmikoAuthenticationException,
+        NetmikoTimeoutException,
+        NetmikoAuthenticationException,
     ) as error:
         exception_type = type(error).__name__
         click.secho(
@@ -285,7 +285,7 @@ def get_bgp_neighbors_aruba(ip, credentials, asn, network):
             )
         elif exception_type == "ConnectionError":
             error_message = (
-                f"Error connecting to switch {ip}, check the IP address and try again."
+                f"Error connecting to switch {ip}, check the entered username, IP address and password."
             )
         else:
             error_message = f"Error connecting to switch {ip}."

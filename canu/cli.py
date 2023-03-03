@@ -22,9 +22,10 @@
 """CANU (CSM Automatic Network Utility) floats through a Shasta network and makes setup and config breeze."""
 from collections import defaultdict
 import json
-from os import environ, path
+from os import environ, getenv, path
 import sys
 
+import certifi
 import click
 from click_help_colors import HelpColorsCommand
 from click_help_colors import HelpColorsGroup
@@ -198,6 +199,7 @@ def init(ctx, sls_file, auth_token, sls_address, network, out):
         # SLS
         networks_url = "https://" + sls_address + "/apis/sls/v1/networks"
         hardware_url = "https://" + sls_address + "/apis/sls/v1/hardware"
+        crt_path = getenv("REQUESTS_CA_BUNDLE", certifi.where())
         try:
             # Networks
             networks_response = requests.get(
@@ -206,7 +208,7 @@ def init(ctx, sls_file, auth_token, sls_address, network, out):
                     "Content-Type": "application/json",
                     "Authorization": f"Bearer {token}",
                 },
-                verify=False,
+                verify=crt_path,
             )
             networks_response.raise_for_status()
             csm_networks = networks_response.json()
@@ -222,7 +224,7 @@ def init(ctx, sls_file, auth_token, sls_address, network, out):
                     "Content-Type": "application/json",
                     "Authorization": f"Bearer {token}",
                 },
-                verify=False,
+                verify=crt_path,
             )
             hardware_response.raise_for_status()
             csm_hardware = hardware_response.json()

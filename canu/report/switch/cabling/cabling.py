@@ -22,13 +22,15 @@
 """CANU commands that report the cabling of an individual switch."""
 from collections import defaultdict, OrderedDict
 import datetime
+from json import decoder
 import re
+import sys
 from urllib.parse import unquote
 
 import click
 from click_help_colors import HelpColorsCommand
 import natsort
-from netmiko import ssh_exception
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
 import urllib3
 
@@ -105,6 +107,10 @@ def get_lldp(ip, credentials, return_error=False):
         switch_info: Dictionary with switch platform_name, hostname and IP address
         lldp_dict: Dictionary with LLDP information
         arp: ARP dictionary
+
+    Raises:
+        NetmikoTimeoutException: Timeout error connecting to switch
+        NetmikoAuthenticationException: Authentication error connecting to switch
     """
     try:
         vendor = switch_vendor(ip, credentials, return_error)
@@ -130,8 +136,8 @@ def get_lldp(ip, credentials, return_error=False):
         requests.exceptions.HTTPError,
         requests.exceptions.RequestException,
         requests.exceptions.ConnectionError,
-        ssh_exception.NetmikoTimeoutException,
-        ssh_exception.NetmikoAuthenticationException,
+        NetmikoTimeoutException,
+        NetmikoAuthenticationException,
     ) as error:
         if return_error:
             raise error
@@ -189,7 +195,7 @@ def get_lldp_aruba(ip, credentials, return_error=False):
             )
         elif exception_type == "ConnectionError":
             error_message = (
-                f"Error connecting to switch {ip}, check the IP address and try again."
+                f"Error connecting to switch {ip}, check the entered username, IP address and password."
             )
         else:
             error_message = f"Error connecting to switch {ip}."
@@ -316,6 +322,8 @@ def get_lldp_dell(ip, credentials, return_error):
 
     Raises:
         Exception: Unknown error
+        NetmikoTimeoutException: Timeout error connecting to switch
+        NetmikoAuthenticationException: Authentication error connecting to switch
     """
     try:
         neighbors_dict = defaultdict(dict)
@@ -478,8 +486,8 @@ def get_lldp_dell(ip, credentials, return_error):
         cache_lldp(switch_json, lldp_dict, arp)
 
     except (
-        ssh_exception.NetmikoTimeoutException,
-        ssh_exception.NetmikoAuthenticationException,
+        NetmikoTimeoutException,
+        NetmikoAuthenticationException,
         Exception,
     ) as err:
         if return_error:
@@ -488,7 +496,7 @@ def get_lldp_dell(ip, credentials, return_error):
         exception_type = type(err).__name__
 
         if exception_type == "NetmikoTimeoutException":
-            error_message = f"Timeout error connecting to switch {ip}, check the IP address and try again."
+            error_message = f"Timeout error connecting to switch {ip}, check the entered username, IP address and password."
         elif exception_type == "NetmikoAuthenticationException":
             error_message = f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again."
         else:
@@ -536,7 +544,7 @@ def get_lldp_mellanox(ip, credentials, return_error):
             raise requests.exceptions.ConnectionError
 
         click.secho(
-            f"Error connecting to switch {ip}, check the IP address and try again.",
+            f"Error connecting to switch {ip}, check the entered username, IP address and password.",
             fg="white",
             bg="red",
         )
@@ -761,11 +769,20 @@ def get_lldp_mellanox(ip, credentials, return_error):
 
         exception_type = type(error).__name__
         click.secho(
-            f"{exception_type} {error} while connecting to {ip}.",
+            f"{exception_type} {error} while connecting to {ip}.  Check the entered username, IP address and password.",
             fg="white",
             bg="red",
         )
         return None, None, None
+    except decoder.JSONDecodeError:
+        click.secho(
+            "The switch LLDP query returned successfully, but the result is not valid JSON. "
+            "Often this is a faulted web API process on the switch.\n"
+            'As an administrator on the switch running: "no web enable" and then "web enable" may repair the problem.\n'
+            "Otherwise create a ticket for administrators.",
+            fg="red",
+        )
+        sys.exit(1)
 
     return switch_json, lldp_dict, arp
 

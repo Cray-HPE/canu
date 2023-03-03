@@ -20,7 +20,7 @@ Critically, the Warnings output will contain a section headed “Node type could
 
  
 ```text
-Node type could not be determined for the following. 
+Node type or port number could not be determined for the following. 
 These nodes are not currently included in the model. 
 (This may be a missing architectural definition/lookup or a spelling error) 
 ---------------------------------------------------------------------------

@@ -34,7 +34,7 @@ from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
 import emoji
-from netmiko import ssh_exception
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
 from ruamel.yaml import YAML
 
@@ -227,8 +227,8 @@ def firmware(ctx, csm, ips, ips_file, username, password, json_, out):
                     requests.exceptions.HTTPError,
                     requests.exceptions.ConnectionError,
                     requests.exceptions.RequestException,
-                    ssh_exception.NetmikoTimeoutException,
-                    ssh_exception.NetmikoAuthenticationException,
+                    NetmikoTimeoutException,
+                    NetmikoAuthenticationException,
                     KeyError,
                 ) as err:
                     exception_type = type(err).__name__

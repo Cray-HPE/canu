@@ -32,7 +32,7 @@ from click_help_colors import HelpColorsCommand
 from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
-from netmiko import ssh_exception
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import requests
 from ruamel.yaml import YAML
@@ -202,15 +202,15 @@ def paddle_cabling(
                     requests.exceptions.HTTPError,
                     requests.exceptions.ConnectionError,
                     requests.exceptions.RequestException,
-                    ssh_exception.NetmikoTimeoutException,
-                    ssh_exception.NetmikoAuthenticationException,
+                    NetmikoTimeoutException,
+                    NetmikoAuthenticationException,
                 ) as err:
                     exception_type = type(err).__name__
 
                     if exception_type == "HTTPError":
                         error_message = f"Error connecting to switch {ip}, check the IP, username, or password."
                     elif exception_type == "ConnectionError":
-                        error_message = f"Error connecting to switch {ip}, check the IP address and try again."
+                        error_message = f"Error connecting to switch {ip}, check the entered username, IP address and password."
                     elif exception_type == "NetmikoTimeoutException":
                         error_message = f"Timeout error connecting to {ip}. Check the IP address and try again."
                     elif exception_type == "NetmikoAuthenticationException":
