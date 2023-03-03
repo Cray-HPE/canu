@@ -1472,6 +1472,10 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## Changelog
 
+### [1.7.3]
+
+- fix python:S4830 
+
 ### [1.7.2]
 
 -- Move SLS JSON and SHCDs from inside test python to individual files.
