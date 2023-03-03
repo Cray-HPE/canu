@@ -35,7 +35,7 @@ Token for SLS authentication
 
 * **Default**
 
-    api-gw-service-nmn.local
+    `api-gw-service-nmn.local`
 
 
 
@@ -45,7 +45,7 @@ Switch network e.g. (CAN, MTL, NMN)
 
 * **Default**
 
-    NMN
+    `NMN`
 
 
 

@@ -33,7 +33,7 @@ Switch username
 
 * **Default**
 
-    admin
+    `admin`
 
 
 

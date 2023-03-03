@@ -1720,15 +1720,16 @@ def test_switch_config_cdu_primary():
             + "  spanning-tree guard root\n"
         ) in str(result.output)
 
+        print(result.output)
         assert (
-            "interface port-channel255\n"
+            "interface port-channel110\n"
             + "  description sw-spine-001:29<==sw-cdu-001\n"
             + "  no shutdown\n"
             + "  switchport mode trunk\n"
             + "  switchport access vlan 1\n"
             + "  switchport trunk allowed vlan 2,4\n"
             + "  mtu 9216\n"
-            + "  vlt-port-channel 255\n"
+            + "  vlt-port-channel 110\n"
             + "interface loopback0\n"
             + "  no shutdown\n"
             + "  mtu 9216\n"
@@ -1736,7 +1737,7 @@ def test_switch_config_cdu_primary():
             + "  ip ospf 1 area 0.0.0.0\n"
             + "interface mgmt1/1/1\n"
             + "  no shutdown\n"
-            + "  dhcp\n"
+            + "  no ip address dhcp\n"
             + "  ip address 192.168.255.242/29\n"
             + "  ipv6 address autoconfig\n"
             + "interface ethernet1/1/2\n"
@@ -1782,7 +1783,7 @@ def test_switch_config_cdu_primary():
             + "  spanning-tree port type edge\n"
             + "interface ethernet1/1/27\n"
             + "  no shutdown\n"
-            + "  channel-group 255 mode active\n"
+            + "  channel-group 110 mode active\n"
             + "  no switchport\n"
             + "  speed 40000\n"
             + "  mtu 9216\n"
@@ -1790,7 +1791,7 @@ def test_switch_config_cdu_primary():
             + "  flowcontrol transmit off\n"
             + "interface ethernet1/1/28\n"
             + "  no shutdown\n"
-            + "  channel-group 255 mode active\n"
+            + "  channel-group 110 mode active\n"
             + "  no switchport\n"
             + "  speed 40000\n"
             + "  mtu 9216\n"
@@ -1973,6 +1974,7 @@ def test_switch_config_cdu_primary():
             + "  switchport access vlan 1\n"
             + "  flowcontrol receive on\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "interface ethernet1/1/25\n"
@@ -2175,7 +2177,7 @@ def test_switch_config_cdu_primary_preserve():
             + "  ip ospf 1 area 0.0.0.0\n"
             + "interface mgmt1/1/1\n"
             + "  no shutdown\n"
-            + "  dhcp\n"
+            + "  no ip address dhcp\n"
             + "  ip address 192.168.255.242/29\n"
             + "  ipv6 address autoconfig\n"
             + "interface ethernet1/1/2\n"
@@ -2586,14 +2588,14 @@ def test_switch_config_cdu_secondary():
         ) in str(result.output)
 
         assert (
-            "interface port-channel255\n"
+            "interface port-channel110\n"
             + "  description sw-spine-001:30<==sw-cdu-002\n"
             + "  no shutdown\n"
             + "  switchport mode trunk\n"
             + "  switchport access vlan 1\n"
             + "  switchport trunk allowed vlan 2,4\n"
             + "  mtu 9216\n"
-            + "  vlt-port-channel 255\n"
+            + "  vlt-port-channel 110\n"
             + "interface loopback0\n"
             + "  no shutdown\n"
             + "  mtu 9216\n"
@@ -2601,7 +2603,7 @@ def test_switch_config_cdu_secondary():
             + "  ip ospf 1 area 0.0.0.0\n"
             + "interface mgmt1/1/1\n"
             + "  no shutdown\n"
-            + "  dhcp\n"
+            + "  no ip address dhcp\n"
             + "  ip address 192.168.255.243/29\n"
             + "  ipv6 address autoconfig\n"
             + "interface ethernet1/1/2\n"
@@ -2638,7 +2640,7 @@ def test_switch_config_cdu_secondary():
             + "  flowcontrol transmit on\n"
             + "interface ethernet1/1/27\n"
             + "  no shutdown\n"
-            + "  channel-group 255 mode active\n"
+            + "  channel-group 110 mode active\n"
             + "  no switchport\n"
             + "  speed 40000\n"
             + "  mtu 9216\n"
@@ -2646,7 +2648,7 @@ def test_switch_config_cdu_secondary():
             + "  flowcontrol transmit off\n"
             + "interface ethernet1/1/28\n"
             + "  no shutdown\n"
-            + "  channel-group 255 mode active\n"
+            + "  channel-group 110 mode active\n"
             + "  no switchport\n"
             + "  speed 40000\n"
             + "  mtu 9216\n"

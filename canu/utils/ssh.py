@@ -22,7 +22,6 @@
 """CANU ssh utils."""
 
 from netmiko import ConnectHandler
-import logging
 
 device = {
     "aruba": "aruba_os",
