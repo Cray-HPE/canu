@@ -51,7 +51,7 @@ dependencies = [
     'jinja2==3.1.2',
     'jsonschema==4.17.3',
     'kubernetes==24.2.0',
-    'mac-vendor-lookup==0.1.11',
+    'mac-vendor-lookup==0.1.12',
     'natsort==7.1.1',
     'netaddr==0.8.0',
     'netmiko==4.1.2',
