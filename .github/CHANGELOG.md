@@ -1,5 +1,28 @@
 ## Changelog
 
+### [1.7.4]
+
+- Adding Aruba as optional edge vendor
+
+### [1.7.3]
+
+- fix python:S4830 
+
+### [1.7.2]
+
+- Move SLS JSON and SHCDs from inside test python to individual files.
+- Finish removing drawing code and dependencies.
+- Prevent nox from running tests twice and clean up test output.
+
+### [1.7.1]
+
+- Remove drawing code and dependencies.
+
+### [1.7.0]
+
+- Create rootless `canu` container image 
+- Add a `canuctl` wrapper command
+
 ## [1.7.0]
 
 - Add canu docs in three formats
