@@ -74,7 +74,7 @@ Output results to a file
 
 
 ### --remediation()
-Outputs commands to get from the running-config to generated config
+Outputs commands to get from the running-config to generated config, Mellanox not supported
 
 ## Example
 

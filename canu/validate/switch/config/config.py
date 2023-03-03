@@ -291,9 +291,14 @@ def config(
         fg="green",
         file=out,
     )
+    if vendor == "mellanox":
+        click.secho(
+            "Remediation not supported for Mellanox",
+            fg="white",
+            bg="red",
+        )
 
-    # Build Hierarchical Configuration object for the Remediation Config
-    if remediation and vendor != "mellanox":
+    else:
         click.echo(dash, file=out)
         click.secho(
             "\n" + "Remediation Config" + "\n",
@@ -307,12 +312,6 @@ def config(
 
         for line in remediation_config_hier.all_children():
             click.echo(line.cisco_style_text(), file=out)
-    elif vendor == "mellanox":
-        click.secho(
-            "Remediation not supported for Mellanox",
-            fg="white",
-            bg="red",
-        )
 
 
 def get_switch_config(ip, credentials, return_error=False):
