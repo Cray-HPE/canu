@@ -18,11 +18,6 @@
 
 - Remove drawing code and dependencies.
 
-### [1.7.0]
-
-- Create rootless `canu` container image 
-- Add a `canuctl` wrapper command
-
 ## [1.7.0]
 
 - Add canu docs in three formats
