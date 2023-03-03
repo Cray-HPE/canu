@@ -1,0 +1,136 @@
+{#- edge_router #}
+{%- include '1.3/aruba/common/unknown.j2' %}
+hostname sw-edge-001
+{%- include '1.3/aruba/common/banner-motd.j2' %}
+no ip icmp redirect
+vrf Customer
+vrf keepalive
+ntp server {{ variables.NCN_W001 }}
+ntp server {{ variables.NCN_W002 }}
+ntp server {{ variables.NCN_W003 }}
+ntp enable
+
+ssh server vrf default
+ssh server vrf keepalive
+ssh server vrf mgmt
+ssh server vrf Customer
+
+interface mgmt
+    no shutdown
+    ip static 172.30.52.119/20
+
+vlan {{ variables.NATIVE_VLAN }}
+vlan {{ variables.CHN_VLAN }}
+    name CHN
+
+
+interface lag 256
+    no shutdown
+    description ISL link
+    no routing
+    vlan trunk native 1 tag
+    vlan trunk allowed all
+    lacp mode active
+interface 1/1/30
+    no shutdown
+    vrf attach keepalive
+    description VSX keepalive
+    ip address 192.168.255.0/31
+interface 1/1/31
+    no shutdown
+    mtu 9198
+    description vsx isl
+    lag 256
+interface 1/1/32
+    no shutdown
+    mtu 9198
+    description vsx isl
+    lag 256
+interface loopback 0
+    ip address 10.2.1.194/32
+    ip ospf 1 area 0.0.0.0
+
+interface vlan {{ variables.CHN_VLAN }}
+    description CHN
+    ip mtu 9198
+    ip address {{ variables.CHN_IP }}/{{variables.CHN_PREFIX_LEN}}
+    active-gateway ip mac 12:00:00:00:6c:00
+    active-gateway ip {{ variables.CHN_IP_GATEWAY }}
+    ip helper-address 10.92.100.222
+    ip ospf 1 area 0.0.0.0
+ip dns server-address {{ variables.NMNLB_DNS }}
+
+vsx
+    system-mac 03:03:03:03:03:03
+    inter-switch-link lag 256
+    role primary
+    keepalive peer 192.168.255.1 source 192.168.255.0 vrf keepalive
+    linkup-delay-timer 600
+    vsx-sync vsx-global
+
+router ospf 2 vrf Customer
+    router-id {{ variables.LOOPBACK_IP }}
+    area 0.0.0.0
+    default-information originate
+router ospf 1
+    router-id {{ variables.LOOPBACK_IP }}
+    area 0.0.0.0
+    default-information originate
+
+{# note: hard coded IPs until we get them added to IPAM/SLS #}
+
+{%- if variables.BGP_CONTROL_PLANE == 'CMN' %}
+{%- for name, ip in variables.NMN_IPs.items() if "ncn-w" in name %}
+{% set sequence = namespace(value=10) %}
+route-map {{ name }}-CHN permit {{ sequence.value }}
+     match ip address prefix-list HSN
+     {%- for CHN_name, CHN_ip in variables.CHN_IPs.items() if name == CHN_name %}
+     set ip next-hop {{ CHN_ip }}
+     {%- endfor %}
+{%- endfor %}
+
+router bgp {{ variables.SWITCH_ASN }}
+   router-id 10.2.1.194
+   maximum-paths 8
+   timers bgp 1 3
+   distance bgp 20 70
+   neighbor 10.2.1.195 remote-as 65533
+   neighbor 10.2.1.195 update-source loopback 0
+   {%- for name, ip in variables.CMN_IPs.items() if "ncn-w" in name %}
+   neighbor {{ ip }} remote-as {{ variables.CHN_ASN }}
+   neighbor {{ ip }} passive
+   {%- endfor %}
+   address-family ipv4
+      neighbor 10.2.1.195 activate
+      neighbor 10.2.1.195 next-hop-self
+   {%- for name, ip in variables.CMN_IPs.items() if "ncn-w" in name %}
+      neighbor {{ ip }} activate
+      neighbor {{ ip }} route-map HSN in 
+   {%- endfor %}
+{%- endif %}
+
+{%- if variables.BGP_CONTROL_PLANE == 'CHN' %}
+route-map HSN permit 5
+   match ip address prefix-list HSN
+
+router bgp {{ variables.SWITCH_ASN }}
+   router-id 10.2.1.194
+   maximum-paths 8
+   timers bgp 1 3
+   distance bgp 20 70
+   neighbor 10.2.1.195 remote-as 65533
+   neighbor 10.2.1.195 update-source Loopback 0
+   {%- for name, ip in variables.CHN_IPs.items() if "ncn-w" in name %}
+   neighbor {{ ip }} remote-as {{ variables.CHN_ASN }}
+   neighbor {{ ip }} passive
+   {%- endfor %}
+   address-family ipv4
+      neighbor 10.2.1.195 activate
+      neighbor 10.2.1.195 next-hop-self
+   {%- for name, ip in variables.CHN_IPs.items() if "ncn-w" in name %}
+      neighbor {{ ip }} activate
+      neighbor {{ ip }} route-map HSN in
+   {%- endfor %}
+{%- endif %}
+
+{#- end edge_router #}

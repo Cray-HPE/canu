@@ -147,6 +147,13 @@ csm_options = canu_config["csm_versions"]
     type=click.Path(),
 )
 @click.option(
+    "--edge",
+    type=click.Choice(["Aruba", "Arista"], case_sensitive=False),
+    help="Vendor of Edge router",
+    required=True,
+    default="Arista",
+)
+@click.option(
     "--preserve",
     help="Path to current running configs.",
     type=click.Path(),
@@ -186,6 +193,7 @@ def config(
     folder,
     preserve,
     custom_config,
+    edge,
     reorder,
     bgp_control_plane,
     log_,
@@ -246,6 +254,7 @@ def config(
         folder: Folder to store config files
         preserve: Folder where switch running configs exist.  This folder should be populated from the "canu backup network" command.
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
+        edge: Vendor of the edge router
         reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
         bgp_control_plane: Network used for BGP control plane
         log_: Level of logging.
@@ -420,6 +429,7 @@ def config(
                 vendor_folder,
                 preserve,
                 custom_config,
+                edge,
                 reorder,
                 bgp_control_plane,
             )

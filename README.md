@@ -1472,15 +1472,23 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 
 ## Changelog
 
+### [1.7.4]
+
+-- Adding Aruba as optional edge vendor
+
+### [1.7.3]
+
+- fix python:S4830 
+
 ### [1.7.2]
 
--- Move SLS JSON and SHCDs from inside test python to individual files.
--- Finish removing drawing code and dependencies.
--- Prevent nox from running tests twice and clean up test output.
+- Move SLS JSON and SHCDs from inside test python to individual files.
+- Finish removing drawing code and dependencies.
+- Prevent nox from running tests twice and clean up test output.
 
 ### [1.7.1]
 
--- Remove drawing code and dependencies.
+- Remove drawing code and dependencies.
 
 ### [1.7.0]
 
