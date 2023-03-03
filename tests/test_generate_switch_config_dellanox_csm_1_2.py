@@ -145,6 +145,8 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 13 switchport mode hybrid\n"
             + "interface mlag-port-channel 151 switchport mode hybrid\n"
             + "interface mlag-port-channel 201 switchport mode hybrid\n"
+            + 'interface ethernet 1/31 description "mlag-isl"\n'
+            + 'interface ethernet 1/32 description "mlag-isl"\n'
             + 'interface ethernet 1/1 description "ncn-m001:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface ethernet 1/2 description "ncn-m002:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface ethernet 1/3 description "ncn-m003:pcie-slot1:1<==sw-spine-001"\n'
@@ -158,8 +160,6 @@ def test_switch_config_spine_primary():
             + 'interface ethernet 1/26 description "sw-leaf-bmc-001:51<==sw-spine-001"\n'
             + 'interface ethernet 1/29 description "sw-cdu-001:27<==sw-spine-001"\n'
             + 'interface ethernet 1/30 description "sw-cdu-002:27<==sw-spine-001"\n'
-            + 'interface ethernet 1/31 description "mlag-isl"\n'
-            + 'interface ethernet 1/32 description "mlag-isl"\n'
             + 'interface mlag-port-channel 1 description "ncn-m001:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface mlag-port-channel 2 description "ncn-m002:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface mlag-port-channel 3 description "ncn-m003:pcie-slot1:1<==sw-spine-001"\n'
@@ -524,6 +524,7 @@ def test_switch_config_spine_primary_custom():
             + "# interface ethernet 1/1 dcb priority-flow-control mode on force\n"
             + "# ip route vrf default 0.0.0.0/0 10.102.255.13\n"
         ) in str(result.output)
+        print(result.output)
         assert (
             "hostname sw-spine-001\n"
             + "no cli default prefix-modes enable\n"
@@ -582,7 +583,8 @@ def test_switch_config_spine_primary_custom():
             + "interface mlag-port-channel 13 switchport mode hybrid\n"
             + "interface mlag-port-channel 151 switchport mode hybrid\n"
             + "interface mlag-port-channel 201 switchport mode hybrid\n"
-            + 'interface ethernet 1/1 description "sw-spine02-1/16"\n'
+            + 'interface ethernet 1/31 description "mlag-isl"\n'
+            + 'interface ethernet 1/32 description "mlag-isl"\n'
             + 'interface ethernet 1/2 description "ncn-m002:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface ethernet 1/3 description "ncn-m003:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface ethernet 1/4 description "ncn-w001:pcie-slot1:1<==sw-spine-001"\n'
@@ -592,12 +594,11 @@ def test_switch_config_spine_primary_custom():
             + 'interface ethernet 1/8 description "ncn-s002:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface ethernet 1/9 description "ncn-s003:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface ethernet 1/13 description "uan001:pcie-slot1:1<==sw-spine-001"\n'
-            + 'interface ethernet 1/16 description "sw-spine02-1/16"\n'
             + 'interface ethernet 1/26 description "sw-leaf-bmc-001:51<==sw-spine-001"\n'
             + 'interface ethernet 1/29 description "sw-cdu-001:27<==sw-spine-001"\n'
             + 'interface ethernet 1/30 description "sw-cdu-002:27<==sw-spine-001"\n'
-            + 'interface ethernet 1/31 description "mlag-isl"\n'
-            + 'interface ethernet 1/32 description "mlag-isl"\n'
+            + 'interface ethernet 1/1 description "sw-spine02-1/16"\n'
+            + 'interface ethernet 1/16 description "sw-spine02-1/16"\n'
             + 'interface mlag-port-channel 1 description "ncn-m001:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface mlag-port-channel 2 description "ncn-m002:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface mlag-port-channel 3 description "ncn-m003:pcie-slot1:1<==sw-spine-001"\n'
@@ -611,7 +612,10 @@ def test_switch_config_spine_primary_custom():
             + 'interface mlag-port-channel 151 description "sw-leaf-bmc-001:51<==sw-spine-001"\n'
             + 'interface mlag-port-channel 201 description "sw-cdu-001:27<==sw-spine-001"\n'
             + 'interface mlag-port-channel 201 description "sw-cdu-002:27<==sw-spine-001"\n'
+            + "interface ethernet 1/1 no switchport force\n"
+            + "interface ethernet 1/16 no switchport force\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "interface port-channel 256\n"
@@ -622,10 +626,8 @@ def test_switch_config_spine_primary_custom():
         ) in str(result.output)
 
         assert (
-            "interface ethernet 1/1 ip address 10.102.255.14/30 primary\n"
-            + "interface ethernet 1/1 dcb priority-flow-control mode on force\n"
-            + "interface ethernet 1/16 ip address 10.102.255.14/30 primary\n"
-            + "interface ethernet 1/16 dcb priority-flow-control mode on force\n"
+            "port-channel load-balance ethernet source-destination-ip ingress-port\n"
+            + "interface mlag-port-channel 1 no shutdown\n"
             + "interface mlag-port-channel 2 no shutdown\n"
             + "interface mlag-port-channel 3 no shutdown\n"
             + "interface mlag-port-channel 4 no shutdown\n"
@@ -637,6 +639,8 @@ def test_switch_config_spine_primary_custom():
             + "interface mlag-port-channel 13 no shutdown\n"
             + "interface mlag-port-channel 151 no shutdown\n"
             + "interface mlag-port-channel 201 no shutdown\n"
+            + "interface ethernet 1/1 dcb priority-flow-control mode on force\n"
+            + "interface ethernet 1/16 dcb priority-flow-control mode on force\n"
         ) in str(result.output)
 
         assert (
@@ -749,8 +753,8 @@ def test_switch_config_spine_primary_custom():
         ) in str(result.output)
 
         assert (
-            "interface ethernet 1/1 no switchport force\n"
-            + "interface ethernet 1/16 no switchport force\n"
+            "interface ethernet 1/1 ip address 10.102.255.14/30 primary\n"
+            + "interface ethernet 1/16 ip address 10.102.255.14/30 primary\n"
             + "ip load-sharing source-ip-port\n"
             + "ip load-sharing type consistent\n"
             + "ip route vrf default 0.0.0.0/0 10.102.255.13\n"
@@ -1015,6 +1019,8 @@ def test_switch_config_spine_secondary():
             + "interface mlag-port-channel 13 switchport mode hybrid\n"
             + "interface mlag-port-channel 151 switchport mode hybrid\n"
             + "interface mlag-port-channel 201 switchport mode hybrid\n"
+            + 'interface ethernet 1/31 description "mlag-isl"\n'
+            + 'interface ethernet 1/32 description "mlag-isl"\n'
             + 'interface ethernet 1/1 description "ncn-m001:pcie-slot1:2<==sw-spine-002"\n'
             + 'interface ethernet 1/2 description "ncn-m002:pcie-slot1:2<==sw-spine-002"\n'
             + 'interface ethernet 1/3 description "ncn-m003:pcie-slot1:2<==sw-spine-002"\n'
@@ -1028,8 +1034,6 @@ def test_switch_config_spine_secondary():
             + 'interface ethernet 1/26 description "sw-leaf-bmc-001:52<==sw-spine-002"\n'
             + 'interface ethernet 1/29 description "sw-cdu-001:28<==sw-spine-002"\n'
             + 'interface ethernet 1/30 description "sw-cdu-002:28<==sw-spine-002"\n'
-            + 'interface ethernet 1/31 description "mlag-isl"\n'
-            + 'interface ethernet 1/32 description "mlag-isl"\n'
             + 'interface mlag-port-channel 1 description "ncn-m001:pcie-slot1:2<==sw-spine-002"\n'
             + 'interface mlag-port-channel 2 description "ncn-m002:pcie-slot1:2<==sw-spine-002"\n'
             + 'interface mlag-port-channel 3 description "ncn-m003:pcie-slot1:2<==sw-spine-002"\n'

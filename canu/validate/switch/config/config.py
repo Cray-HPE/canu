@@ -70,41 +70,6 @@ mellanox_options_file = path.join(
     "config",
     "onyx_options.yaml",
 )
-tags_file = path.join(
-    project_root,
-    "canu",
-    "validate",
-    "switch",
-    "config",
-    "tags.yaml",
-)
-
-dell_tags_file = path.join(
-    project_root,
-    "canu",
-    "validate",
-    "switch",
-    "config",
-    "dell_tags.yaml",
-)
-
-mellanox_tags_file = path.join(
-    project_root,
-    "canu",
-    "validate",
-    "switch",
-    "config",
-    "mellanox_tags.yaml",
-)
-
-with open(tags_file, "r") as tags_f:
-    tags = yaml.load(tags_f)
-
-with open(dell_tags_file, "r") as tags_f:
-    dell_tags = yaml.load(tags_f)
-
-with open(mellanox_tags_file, "r") as tags_f:
-    mellanox_tags = yaml.load(tags_f)
 
 with open(options_file, "r") as options_f:
     options = yaml.load(options_f)
@@ -160,7 +125,7 @@ with open(mellanox_options_file, "r") as options_f:
 @click.option(
     "--remediation",
     is_flag=True,
-    help="Outputs commands to get from the running-config to generated config",
+    help="Outputs commands to get from the running-config to generated config, Mellanox not supported",
     required=False,
 )
 @click.pass_context
@@ -294,12 +259,19 @@ def config(
     generated_config_hier.load_from_file(generated_config)
 
     dash = "-" * 73
-    compare_config_heir(
-        running_config_hier.difference(generated_config_hier),
-        generated_config_hier.difference(running_config_hier),
-        vendor,
-        out,
-    )
+    if vendor == "aruba":
+        aruba_banner(generated_config_hier)
+        aruba_banner(running_config_hier)
+    unified_diff = list(running_config_hier.unified_diff(generated_config_hier))
+    for line in unified_diff:
+        if "+" == line.strip()[0]:
+            click.secho(line, fg="green", file=out)
+        elif "-" == line.strip()[0]:
+            click.secho(line, fg="red", file=out)
+        elif line.startswith("? "):
+            pass
+        else:
+            click.secho(line, fg="bright_white", file=out)
 
     click.echo(dash, file=out)
     click.secho(
@@ -321,7 +293,7 @@ def config(
     )
 
     # Build Hierarchical Configuration object for the Remediation Config
-    if remediation:
+    if remediation and vendor != "mellanox":
         click.echo(dash, file=out)
         click.secho(
             "\n" + "Remediation Config" + "\n",
@@ -333,10 +305,14 @@ def config(
             generated_config_hier,
         )
 
-        if vendor == "aruba":
-            aruba_banner(remediation_config_hier)
         for line in remediation_config_hier.all_children():
             click.echo(line.cisco_style_text(), file=out)
+    elif vendor == "mellanox":
+        click.secho(
+            "Remediation not supported for Mellanox",
+            fg="white",
+            bg="red",
+        )
 
 
 def get_switch_config(ip, credentials, return_error=False):
@@ -429,39 +405,6 @@ def get_switch_config(ip, credentials, return_error=False):
     return hostname, switch_config, vendor
 
 
-def print_difference_line(additions, additions_int, deletions, deletions_int, out):
-    """Print the additions and deletions in red and green text. Doesn't print if zero.
-
-    Args:
-        additions: (str) Text of the additions
-        additions_int: (int) Number of additions
-        deletions: (str) Text of the deletions
-        deletions_int: (int) Number of deletions
-        out: Defaults to stdout, but will print to the file name passed in
-    """
-    if additions_int == 0 and deletions_int == 0:
-        return
-    if additions_int == 0:
-        additions = ""
-        additions_int = ""
-    if deletions_int == 0:
-        deletions = ""
-        deletions_int = ""
-    additions = click.style(str(additions), fg="green")
-    additions_int = click.style(str(additions_int), fg="green")
-    deletions = click.style(str(deletions), fg="red")
-    deletions_int = click.style(str(deletions_int), fg="red")
-    click.echo(
-        "{:<40s}{:>12s}  |  {:<40s}{:>12s}".format(
-            additions,
-            additions_int,
-            deletions,
-            deletions_int,
-        ),
-        file=out,
-    )
-
-
 def aruba_banner(config):
     """Hier config removes the ! from the end of the Aruba banner, this function adds it back.
 
@@ -475,52 +418,7 @@ def aruba_banner(config):
     if banner is None:
         return
     else:
-        banner_str = str(banner) + "\n!"
+        banner_str = str(banner.cisco_style_text()) + "\n!"
         config.del_child(banner)
         config.add_child(banner_str)
         return config
-
-
-def compare_config_heir(config1, config2, vendor, out="-"):
-    """Compare and print two switch configurations.
-
-    Args:
-        config1: (Str) Switch 1 config
-        config2: (Str) Switch 2 config
-        vendor: Switch vendor. Aruba, Dell, or Mellanox
-        out: Defaults to stdout, but will print to the file name passed in
-
-    Returns:
-        List with the number of additions and deletions
-    """
-    one = []
-    two = []
-
-    config1.set_order_weight()
-    config2.set_order_weight()
-
-    # fix aruba banner
-    if vendor == "aruba":
-        aruba_banner(config1)
-        aruba_banner(config2)
-    for config1_line in config1.all_children_sorted():
-        one.append(config1_line.cisco_style_text())
-    for config2_line in config2.all_children_sorted():
-        two.append(config2_line.cisco_style_text())
-    d = difflib.Differ()
-    difflist = []
-
-    for line in d.compare(one, two):
-        difflist.append(line)
-    if vendor == "mellanox":
-        difflist.sort(reverse=True)
-    for line in difflist:
-        if "+" == line.strip()[0]:
-            click.secho(line, fg="green", file=out)
-        elif "-" == line.strip()[0]:
-            click.secho(line, fg="red", file=out)
-        elif line.startswith("? "):
-            pass
-        else:
-            click.secho(line, fg="bright_white", file=out)
-    return difflist

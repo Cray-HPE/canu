@@ -1481,6 +1481,9 @@ To reuse a session without reinstalling dependencies use the `-rs` flag instead 
 - Increase netmiko timeout
 - Remove `canu send`
 - Remove `canu validate network config`
+- Remove support for mellanox when using `canu validate switch config --remdation`
+- Fix ordering of mellanox configuration
+- Bump hier config version to 2.2.2
 
 ### [1.7.2]
 

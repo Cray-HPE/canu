@@ -145,6 +145,8 @@ def test_switch_config_spine_primary():
             + "interface mlag-port-channel 13 switchport mode hybrid\n"
             + "interface mlag-port-channel 151 switchport mode hybrid\n"
             + "interface mlag-port-channel 201 switchport mode hybrid\n"
+            + 'interface ethernet 1/31 description "mlag-isl"\n'
+            + 'interface ethernet 1/32 description "mlag-isl"\n'
             + 'interface ethernet 1/1 description "ncn-m001:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface ethernet 1/2 description "ncn-m002:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface ethernet 1/3 description "ncn-m003:pcie-slot1:1<==sw-spine-001"\n'
@@ -158,8 +160,6 @@ def test_switch_config_spine_primary():
             + 'interface ethernet 1/26 description "sw-leaf-bmc-001:51<==sw-spine-001"\n'
             + 'interface ethernet 1/29 description "sw-cdu-001:27<==sw-spine-001"\n'
             + 'interface ethernet 1/30 description "sw-cdu-002:27<==sw-spine-001"\n'
-            + 'interface ethernet 1/31 description "mlag-isl"\n'
-            + 'interface ethernet 1/32 description "mlag-isl"\n'
             + 'interface mlag-port-channel 1 description "ncn-m001:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface mlag-port-channel 2 description "ncn-m002:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface mlag-port-channel 3 description "ncn-m003:pcie-slot1:1<==sw-spine-001"\n'
@@ -462,15 +462,15 @@ def test_switch_config_spine_primary_preserve():
             + "protocol mlag\n"
             + "protocol bgp\n"
             + "lacp\n"
-            + "interface mlag-port-channel 1\n"
-            + "interface mlag-port-channel 2\n"
-            + "interface mlag-port-channel 3\n"
-            + "interface mlag-port-channel 4\n"
-            + "interface mlag-port-channel 5\n"
-            + "interface mlag-port-channel 6\n"
-            + "interface mlag-port-channel 7\n"
-            + "interface mlag-port-channel 8\n"
             + "interface mlag-port-channel 9\n"
+            + "interface mlag-port-channel 8\n"
+            + "interface mlag-port-channel 7\n"
+            + "interface mlag-port-channel 6\n"
+            + "interface mlag-port-channel 5\n"
+            + "interface mlag-port-channel 4\n"
+            + "interface mlag-port-channel 3\n"
+            + "interface mlag-port-channel 2\n"
+            + "interface mlag-port-channel 1\n"
             + "interface mlag-port-channel 10\n"
             + "interface mlag-port-channel 15\n"
             + "interface mlag-port-channel 20\n"
@@ -502,18 +502,20 @@ def test_switch_config_spine_primary_preserve():
             + "interface ethernet 1/26 mlag-channel-group 15 mode active\n"
             + "interface ethernet 1/29 mlag-channel-group 20 mode active\n"
             + "interface ethernet 1/30 mlag-channel-group 20 mode active\n"
-            + "interface mlag-port-channel 1 switchport mode hybrid\n"
-            + "interface mlag-port-channel 2 switchport mode hybrid\n"
-            + "interface mlag-port-channel 3 switchport mode hybrid\n"
-            + "interface mlag-port-channel 4 switchport mode hybrid\n"
-            + "interface mlag-port-channel 5 switchport mode hybrid\n"
-            + "interface mlag-port-channel 6 switchport mode hybrid\n"
-            + "interface mlag-port-channel 7 switchport mode hybrid\n"
-            + "interface mlag-port-channel 8 switchport mode hybrid\n"
             + "interface mlag-port-channel 9 switchport mode hybrid\n"
+            + "interface mlag-port-channel 8 switchport mode hybrid\n"
+            + "interface mlag-port-channel 7 switchport mode hybrid\n"
+            + "interface mlag-port-channel 6 switchport mode hybrid\n"
+            + "interface mlag-port-channel 5 switchport mode hybrid\n"
+            + "interface mlag-port-channel 4 switchport mode hybrid\n"
+            + "interface mlag-port-channel 3 switchport mode hybrid\n"
+            + "interface mlag-port-channel 2 switchport mode hybrid\n"
+            + "interface mlag-port-channel 1 switchport mode hybrid\n"
             + "interface mlag-port-channel 10 switchport mode hybrid\n"
             + "interface mlag-port-channel 15 switchport mode hybrid\n"
             + "interface mlag-port-channel 20 switchport mode hybrid\n"
+            + 'interface ethernet 1/31 description "mlag-isl"\n'
+            + 'interface ethernet 1/32 description "mlag-isl"\n'
             + 'interface ethernet 1/1 description "ncn-m001:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface ethernet 1/2 description "ncn-m002:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface ethernet 1/3 description "ncn-m003:pcie-slot1:1<==sw-spine-001"\n'
@@ -527,17 +529,15 @@ def test_switch_config_spine_primary_preserve():
             + 'interface ethernet 1/26 description "sw-leaf-bmc-001:51<==sw-spine-001"\n'
             + 'interface ethernet 1/29 description "sw-cdu-001:27<==sw-spine-001"\n'
             + 'interface ethernet 1/30 description "sw-cdu-002:27<==sw-spine-001"\n'
-            + 'interface ethernet 1/31 description "mlag-isl"\n'
-            + 'interface ethernet 1/32 description "mlag-isl"\n'
-            + 'interface mlag-port-channel 1 description "ncn-s003:pcie-slot1:1<==sw-spine-001"\n'
-            + 'interface mlag-port-channel 2 description "ncn-s002:pcie-slot1:1<==sw-spine-001"\n'
-            + 'interface mlag-port-channel 3 description "ncn-s001:pcie-slot1:1<==sw-spine-001"\n'
-            + 'interface mlag-port-channel 4 description "ncn-w003:pcie-slot1:1<==sw-spine-001"\n'
-            + 'interface mlag-port-channel 5 description "ncn-w002:pcie-slot1:1<==sw-spine-001"\n'
-            + 'interface mlag-port-channel 6 description "ncn-w001:pcie-slot1:1<==sw-spine-001"\n'
-            + 'interface mlag-port-channel 7 description "ncn-m003:pcie-slot1:1<==sw-spine-001"\n'
-            + 'interface mlag-port-channel 8 description "ncn-m002:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface mlag-port-channel 9 description "ncn-m001:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 8 description "ncn-m002:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 7 description "ncn-m003:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 6 description "ncn-w001:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 5 description "ncn-w002:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 4 description "ncn-w003:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 3 description "ncn-s001:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 2 description "ncn-s002:pcie-slot1:1<==sw-spine-001"\n'
+            + 'interface mlag-port-channel 1 description "ncn-s003:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface mlag-port-channel 10 description "uan001:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface mlag-port-channel 15 description "sw-leaf-bmc-001:51<==sw-spine-001"\n'
             + 'interface mlag-port-channel 20 description "sw-cdu-001:27<==sw-spine-001"\n'
@@ -553,30 +553,30 @@ def test_switch_config_spine_primary_preserve():
         ) in str(result.output)
 
         assert (
-            "interface mlag-port-channel 1 no shutdown\n"
-            + "interface mlag-port-channel 2 no shutdown\n"
-            + "interface mlag-port-channel 3 no shutdown\n"
-            + "interface mlag-port-channel 4 no shutdown\n"
-            + "interface mlag-port-channel 5 no shutdown\n"
-            + "interface mlag-port-channel 6 no shutdown\n"
-            + "interface mlag-port-channel 7 no shutdown\n"
+            "interface mlag-port-channel 9 no shutdown\n"
             + "interface mlag-port-channel 8 no shutdown\n"
-            + "interface mlag-port-channel 9 no shutdown\n"
+            + "interface mlag-port-channel 7 no shutdown\n"
+            + "interface mlag-port-channel 6 no shutdown\n"
+            + "interface mlag-port-channel 5 no shutdown\n"
+            + "interface mlag-port-channel 4 no shutdown\n"
+            + "interface mlag-port-channel 3 no shutdown\n"
+            + "interface mlag-port-channel 2 no shutdown\n"
+            + "interface mlag-port-channel 1 no shutdown\n"
             + "interface mlag-port-channel 10 no shutdown\n"
             + "interface mlag-port-channel 15 no shutdown\n"
             + "interface mlag-port-channel 20 no shutdown\n"
         ) in str(result.output)
 
         assert (
-            "interface mlag-port-channel 1 lacp-individual enable force\n"
-            + "interface mlag-port-channel 2 lacp-individual enable force\n"
-            + "interface mlag-port-channel 3 lacp-individual enable force\n"
-            + "interface mlag-port-channel 4 lacp-individual enable force\n"
-            + "interface mlag-port-channel 5 lacp-individual enable force\n"
-            + "interface mlag-port-channel 6 lacp-individual enable force\n"
-            + "interface mlag-port-channel 7 lacp-individual enable force\n"
+            "interface mlag-port-channel 9 lacp-individual enable force\n"
             + "interface mlag-port-channel 8 lacp-individual enable force\n"
-            + "interface mlag-port-channel 9 lacp-individual enable force\n"
+            + "interface mlag-port-channel 7 lacp-individual enable force\n"
+            + "interface mlag-port-channel 6 lacp-individual enable force\n"
+            + "interface mlag-port-channel 5 lacp-individual enable force\n"
+            + "interface mlag-port-channel 4 lacp-individual enable force\n"
+            + "interface mlag-port-channel 3 lacp-individual enable force\n"
+            + "interface mlag-port-channel 2 lacp-individual enable force\n"
+            + "interface mlag-port-channel 1 lacp-individual enable force\n"
         ) in str(result.output)
 
         assert (
@@ -881,6 +881,8 @@ def test_switch_config_spine_secondary():
             + "interface mlag-port-channel 13 switchport mode hybrid\n"
             + "interface mlag-port-channel 151 switchport mode hybrid\n"
             + "interface mlag-port-channel 201 switchport mode hybrid\n"
+            + 'interface ethernet 1/31 description "mlag-isl"\n'
+            + 'interface ethernet 1/32 description "mlag-isl"\n'
             + 'interface ethernet 1/1 description "ncn-m001:pcie-slot1:2<==sw-spine-002"\n'
             + 'interface ethernet 1/2 description "ncn-m002:pcie-slot1:2<==sw-spine-002"\n'
             + 'interface ethernet 1/3 description "ncn-m003:pcie-slot1:2<==sw-spine-002"\n'
@@ -894,8 +896,6 @@ def test_switch_config_spine_secondary():
             + 'interface ethernet 1/26 description "sw-leaf-bmc-001:52<==sw-spine-002"\n'
             + 'interface ethernet 1/29 description "sw-cdu-001:28<==sw-spine-002"\n'
             + 'interface ethernet 1/30 description "sw-cdu-002:28<==sw-spine-002"\n'
-            + 'interface ethernet 1/31 description "mlag-isl"\n'
-            + 'interface ethernet 1/32 description "mlag-isl"\n'
             + 'interface mlag-port-channel 1 description "ncn-m001:pcie-slot1:2<==sw-spine-002"\n'
             + 'interface mlag-port-channel 2 description "ncn-m002:pcie-slot1:2<==sw-spine-002"\n'
             + 'interface mlag-port-channel 3 description "ncn-m003:pcie-slot1:2<==sw-spine-002"\n'
@@ -1720,7 +1720,6 @@ def test_switch_config_cdu_primary():
             + "  spanning-tree guard root\n"
         ) in str(result.output)
 
-        print(result.output)
         assert (
             "interface port-channel110\n"
             + "  description sw-spine-001:29<==sw-cdu-001\n"
@@ -1974,7 +1973,6 @@ def test_switch_config_cdu_primary():
             + "  switchport access vlan 1\n"
             + "  flowcontrol receive on\n"
         ) in str(result.output)
-        print(result.output)
 
         assert (
             "interface ethernet1/1/25\n"
