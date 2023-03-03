@@ -1720,6 +1720,7 @@ def test_switch_config_cdu_primary():
             + "  spanning-tree guard root\n"
         ) in str(result.output)
 
+        print(result.output)
         assert (
             "interface port-channel110\n"
             + "  description sw-spine-001:29<==sw-cdu-001\n"
@@ -1973,6 +1974,7 @@ def test_switch_config_cdu_primary():
             + "  switchport access vlan 1\n"
             + "  flowcontrol receive on\n"
         ) in str(result.output)
+        print(result.output)
 
         assert (
             "interface ethernet1/1/25\n"
