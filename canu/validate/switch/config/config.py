@@ -309,9 +309,8 @@ def config(
         remediation_config_hier = running_config_hier.config_to_get_to(
             generated_config_hier,
         )
-        remediation_commands = []
+
         for line in remediation_config_hier.all_children():
-            remediation_commands.append(line)
             click.echo(line.cisco_style_text(), file=out)
 
 
