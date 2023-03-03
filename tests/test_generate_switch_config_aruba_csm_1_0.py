@@ -38,7 +38,8 @@ test_file = path.join(test_file_directory, "data", test_file_name)
 architecture = "full"
 tabs = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners = "J14,T44,J14,T53,J14,T34,J14,T27"
-sls_file = "sls_file.json"
+sls_file_name = "sls_input_file_csm_1.0.json"
+sls_file = path.join(test_file_directory, "data", sls_file_name)
 csm = "1.0"
 switch_name = "sw-spine-001"
 cache_minutes = 0
@@ -68,8 +69,6 @@ runner = testing.CliRunner()
 def test_switch_config_spine_primary():
     """Test that the `canu generate switch config` command runs and returns valid primary spine config."""
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -106,7 +105,7 @@ def test_switch_config_spine_primary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "ssh server vrf default\n"
             + "ssh server vrf keepalive\n"
@@ -166,7 +165,7 @@ def test_switch_config_spine_primary():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
-        print(result.output)
+
         sw_spine_to_leaf = (
             "interface lag 101 multi-chassis\n"
             + "    no shutdown\n"
@@ -301,7 +300,6 @@ def test_switch_config_spine_primary():
             + "    ip helper-address 10.92.100.222\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
-        print(result.output)
 
         assert (
             "ip prefix-list pl-can seq 10 permit 192.168.11.0/24 ge 24\n"
@@ -310,7 +308,6 @@ def test_switch_config_spine_primary():
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
-        print(result.output)
 
         assert (
             "route-map ncn-w001 permit seq 10\n"
@@ -381,7 +378,6 @@ def test_switch_config_spine_primary():
             + "     match ip address prefix-list pl-nmn\n"
             + "     set ip next-hop 192.168.4.6\n"
         ) in str(result.output)
-        print(result.output)
 
         assert (
             "router ospf 1\n"
@@ -411,14 +407,11 @@ def test_switch_config_spine_primary():
             + "        neighbor 192.168.4.6 route-map ncn-w003 in\n"
             + "    exit-address-family\n"
         ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_spine_primary_preserve():
     """Test that the `canu generate switch config` command returns the config while preserving LAG #s."""
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -447,7 +440,7 @@ def test_switch_config_spine_primary_preserve():
             ],
         )
         assert result.exit_code == 0
-        print(result.output)
+
         assert "hostname sw-spine-001\n"
 
         sw_spine_to_leaf = (
@@ -584,7 +577,6 @@ def test_switch_config_spine_primary_preserve():
             + "    ip helper-address 10.92.100.222\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_spine_secondary():
@@ -592,8 +584,6 @@ def test_switch_config_spine_secondary():
     spine_secondary = "sw-spine-002"
 
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -631,7 +621,6 @@ def test_switch_config_spine_secondary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
-        print(result.output)
 
         assert (
             "ssh server vrf default\n"
@@ -692,7 +681,7 @@ def test_switch_config_spine_secondary():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
-        print(result.output)
+
         sw_spine_to_leaf = (
             "interface lag 101 multi-chassis\n"
             + "    no shutdown\n"
@@ -827,7 +816,7 @@ def test_switch_config_spine_secondary():
             + "    ip helper-address 10.92.100.222\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "ip prefix-list pl-can seq 10 permit 192.168.11.0/24 ge 24\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24\n"
@@ -835,7 +824,7 @@ def test_switch_config_spine_secondary():
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "route-map ncn-w001 permit seq 10\n"
             + "     match ip address prefix-list tftp\n"
@@ -905,7 +894,6 @@ def test_switch_config_spine_secondary():
             + "     match ip address prefix-list pl-nmn\n"
             + "     set ip next-hop 192.168.4.6\n"
         ) in str(result.output)
-        print(result.output)
 
         assert (
             "router ospf 1\n"
@@ -937,7 +925,6 @@ def test_switch_config_spine_secondary():
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_spine_secondary_preserve():
@@ -945,8 +932,6 @@ def test_switch_config_spine_secondary_preserve():
     spine_secondary = "sw-spine-002"
 
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -1112,7 +1097,6 @@ def test_switch_config_spine_secondary_preserve():
             + "    ip helper-address 10.92.100.222\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_leaf_primary():
@@ -1120,8 +1104,6 @@ def test_switch_config_leaf_primary():
     leaf_primary = "sw-leaf-001"
 
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -1158,7 +1140,7 @@ def test_switch_config_leaf_primary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "ssh server vrf default\n"
             + "ssh server vrf keepalive\n"
@@ -1217,7 +1199,6 @@ def test_switch_config_leaf_primary():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
-        print(result.output)
 
         ncn_m = (
             "interface lag 1 multi-chassis\n"
@@ -1423,7 +1404,6 @@ def test_switch_config_leaf_primary():
             + "    ip address 192.168.3.4/17\n"
             + "    ip ospf 1 area 0.0.0.0\n"
         ) in str(result.output)
-        print(result.output)
 
         assert (
             "interface vlan 4\n"
@@ -1432,7 +1412,6 @@ def test_switch_config_leaf_primary():
             + "    ip address 192.168.0.4/17\n"
             + "    ip ospf 1 area 0.0.0.0\n"
         ) in str(result.output)
-        print(result.output)
 
         assert (
             "router ospf 1\n"
@@ -1441,7 +1420,6 @@ def test_switch_config_leaf_primary():
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_leaf_primary_preserve():
@@ -1449,8 +1427,6 @@ def test_switch_config_leaf_primary_preserve():
     leaf_primary = "sw-leaf-001"
 
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -1691,7 +1667,6 @@ def test_switch_config_leaf_primary_preserve():
             + "    ip ospf 1 area 0.0.0.0\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_leaf_primary_to_uan():
@@ -1699,8 +1674,6 @@ def test_switch_config_leaf_primary_to_uan():
     leaf_primary_3 = "sw-leaf-003"
 
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -1762,8 +1735,6 @@ def test_switch_config_leaf_secondary():
     leaf_secondary = "sw-leaf-002"
 
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -1800,7 +1771,6 @@ def test_switch_config_leaf_secondary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
-        print(result.output)
 
         assert (
             "ssh server vrf default\n"
@@ -1860,7 +1830,6 @@ def test_switch_config_leaf_secondary():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
-        print(result.output)
 
         ncn_m = (
             "interface lag 1 multi-chassis\n"
@@ -2071,7 +2040,6 @@ def test_switch_config_leaf_secondary():
             + "    ip address 192.168.0.5/17\n"
             + "    ip ospf 1 area 0.0.0.0\n"
         ) in str(result.output)
-        print(result.output)
 
         assert (
             "router ospf 1\n"
@@ -2080,7 +2048,6 @@ def test_switch_config_leaf_secondary():
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_leaf_secondary_to_uan():
@@ -2088,8 +2055,6 @@ def test_switch_config_leaf_secondary_to_uan():
     leaf_secondary_3 = "sw-leaf-004"
 
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -2151,8 +2116,6 @@ def test_switch_config_cdu_primary():
     cdu_primary = "sw-cdu-001"
 
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -2189,7 +2152,7 @@ def test_switch_config_cdu_primary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "ssh server vrf default\n"
             + "ssh server vrf keepalive\n"
@@ -2244,7 +2207,6 @@ def test_switch_config_cdu_primary():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
-        print(result.output)
 
         cmm = (
             "interface lag 2 multi-chassis static\n"
@@ -2377,7 +2339,6 @@ def test_switch_config_cdu_primary():
             + "    ip ospf 1 area 0.0.0.0\n"
             + "    ip ospf passive\n"
         ) in str(result.output)
-        print(result.output)
 
         mtn_hmn_vlan = (
             "vlan 3000\n"
@@ -2417,7 +2378,6 @@ def test_switch_config_cdu_primary():
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_cdu_primary_preserve():
@@ -2425,8 +2385,6 @@ def test_switch_config_cdu_primary_preserve():
     cdu_primary = "sw-cdu-001"
 
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -2567,7 +2525,6 @@ def test_switch_config_cdu_primary_preserve():
             + "    linkup-delay-timer 600\n"
             + "    vsx-sync vsx-global\n"
         ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_cdu_secondary():
@@ -2575,8 +2532,6 @@ def test_switch_config_cdu_secondary():
     cdu_secondary = "sw-cdu-002"
 
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -2613,7 +2568,6 @@ def test_switch_config_cdu_secondary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
-        print(result.output)
 
         assert (
             "ssh server vrf default\n"
@@ -2669,7 +2623,6 @@ def test_switch_config_cdu_secondary():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
-        print(result.output)
 
         cmm = (
             "interface lag 2 multi-chassis static\n"
@@ -2790,7 +2743,6 @@ def test_switch_config_cdu_secondary():
             + "    ip ospf 1 area 0.0.0.0\n"
             + "    ip ospf passive\n"
         ) in str(result.output)
-        print(result.output)
 
         mtn_hmn_vlan = (
             "vlan 3000\n"
@@ -2832,7 +2784,6 @@ def test_switch_config_cdu_secondary():
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_leaf_bmc():
@@ -2840,8 +2791,6 @@ def test_switch_config_leaf_bmc():
     leaf_bmc = "sw-leaf-bmc-001"
 
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -2877,7 +2826,6 @@ def test_switch_config_leaf_bmc():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
-        print(result.output)
 
         assert (
             "ssh server vrf default\n"
@@ -2933,7 +2881,7 @@ def test_switch_config_leaf_bmc():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
-        print(result.output)
+
         compute_leaf_bmc = (
             "interface 1/1/24\n"
             + "    no shutdown\n"
@@ -3098,7 +3046,6 @@ def test_switch_config_leaf_bmc():
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_csi_file_missing():
@@ -3136,8 +3083,6 @@ def test_switch_config_csi_file_missing():
 def test_switch_config_missing_file():
     """Test that the `canu generate switch config` command fails on missing file."""
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -3167,7 +3112,6 @@ def test_switch_config_missing_file():
             "  '--ccj'\n"
             "  '--shcd'\n"
         ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_leaf_bmc_preserve():
@@ -3175,8 +3119,6 @@ def test_switch_config_leaf_bmc_preserve():
     leaf_bmc = "sw-leaf-bmc-001"
 
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -3266,8 +3208,6 @@ def test_switch_config_bad_file():
 def test_switch_config_missing_tabs():
     """Test that the `canu generate switch config` command prompts for missing tabs."""
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -3305,8 +3245,6 @@ def test_switch_config_bad_tab():
     bad_tab = "BAD_TAB_NAME"
     bad_tab_corners = "I14,S48"
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -3339,8 +3277,6 @@ def test_switch_config_bad_tab():
 def test_switch_config_switch_name_prompt():
     """Test that the `canu generate switch config` command prompts for missing switch name."""
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -3381,8 +3317,6 @@ def test_switch_config_switch_name_prompt():
 def test_switch_config_corner_prompt():
     """Test that the `canu generate switch config` command prompts for corner input and runs."""
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -3424,8 +3358,7 @@ def test_switch_config_not_enough_corners():
     """Test that the `canu generate switch config` command fails on not enough corners."""
     not_enough_corners = "H16"
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
+
         result = runner.invoke(
             cli,
             [
@@ -3460,8 +3393,6 @@ def test_switch_config_bad_switch_name_1():
     """Test that the `canu generate switch config` command fails on bad switch name."""
     bad_name_1 = "sw-bad"
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -3498,8 +3429,6 @@ def test_switch_config_bad_switch_name_2():
     """Test that the `canu generate switch config` command fails on bad switch name."""
     bad_name_2 = "sw-spine-999"
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -3536,8 +3465,6 @@ def test_switch_config_non_switch():
     """Test that the `canu generate switch config` command fails on non switch."""
     non_switch = "ncn-w001"
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -3574,6 +3501,14 @@ def test_switch_config_non_switch():
 def test_switch_config_sls():
     """Test that the `canu generate switch config` command runs with SLS."""
     with runner.isolated_filesystem():
+
+        with open(sls_file, "r") as read_file:
+            sls_data = json.load(read_file)
+
+        sls_networks = [
+            network[x] for network in [sls_data.get("Networks", {})] for x in network
+        ]
+
         responses.add(
             responses.GET,
             f"https://{sls_address}/apis/sls/v1/networks",
@@ -3747,8 +3682,6 @@ def test_switch_config_sls_address_bad():
 def test_switch_config_tds_spine_primary():
     """Test that the `canu generate switch config` command runs and returns valid TDS primary spine config."""
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -3785,7 +3718,6 @@ def test_switch_config_tds_spine_primary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
-        print(result.output)
 
         assert (
             "ssh server vrf default\n"
@@ -3846,7 +3778,6 @@ def test_switch_config_tds_spine_primary():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
-        print(result.output)
 
         ncn_m = (
             "interface lag 1 multi-chassis\n"
@@ -4185,7 +4116,7 @@ def test_switch_config_tds_spine_primary():
             + "    ip helper-address 10.92.100.222\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "ip prefix-list pl-can seq 10 permit 192.168.11.0/24 ge 24\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24\n"
@@ -4193,7 +4124,7 @@ def test_switch_config_tds_spine_primary():
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "route-map ncn-w001 permit seq 10\n"
             + "     match ip address prefix-list tftp\n"
@@ -4263,7 +4194,6 @@ def test_switch_config_tds_spine_primary():
             + "     match ip address prefix-list pl-nmn\n"
             + "     set ip next-hop 192.168.4.6\n"
         ) in str(result.output)
-        print(result.output)
 
         assert (
             "router ospf 1\n"
@@ -4271,7 +4201,7 @@ def test_switch_config_tds_spine_primary():
             + "    redistribute bgp\n"
             + "    area 0.0.0.0\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "router bgp 65533\n"
             + "    bgp router-id 10.2.0.2\n"
@@ -4297,7 +4227,6 @@ def test_switch_config_tds_spine_primary():
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_tds_spine_secondary():
@@ -4305,8 +4234,6 @@ def test_switch_config_tds_spine_secondary():
     spine_secondary = "sw-spine-002"
 
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -4343,7 +4270,6 @@ def test_switch_config_tds_spine_secondary():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
-        print(result.output)
 
         assert (
             "ssh server vrf default\n"
@@ -4404,7 +4330,6 @@ def test_switch_config_tds_spine_secondary():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
-        print(result.output)
 
         ncn_m = (
             "interface lag 1 multi-chassis\n"
@@ -4742,7 +4667,7 @@ def test_switch_config_tds_spine_secondary():
             + "    ip helper-address 10.92.100.222\n"
             + "ip dns server-address 10.92.100.225\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "ip prefix-list pl-can seq 10 permit 192.168.11.0/24 ge 24\n"
             + "ip prefix-list pl-hmn seq 20 permit 10.94.100.0/24 ge 24\n"
@@ -4750,7 +4675,7 @@ def test_switch_config_tds_spine_secondary():
             + "ip prefix-list tftp seq 10 permit 10.92.100.60/32 ge 32 le 32\n"
             + "ip prefix-list tftp seq 20 permit 10.94.100.60/32 ge 32 le 32\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "route-map ncn-w001 permit seq 10\n"
             + "     match ip address prefix-list tftp\n"
@@ -4820,7 +4745,6 @@ def test_switch_config_tds_spine_secondary():
             + "     match ip address prefix-list pl-nmn\n"
             + "     set ip next-hop 192.168.4.6\n"
         ) in str(result.output)
-        print(result.output)
 
         assert (
             "router ospf 1\n"
@@ -4852,7 +4776,6 @@ def test_switch_config_tds_spine_secondary():
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
-        print(result.output)
 
 
 def test_switch_config_tds_leaf_bmc():
@@ -4860,8 +4783,6 @@ def test_switch_config_tds_leaf_bmc():
     leaf_bmc_tds = "sw-leaf-bmc-001"
 
     with runner.isolated_filesystem():
-        with open(sls_file, "w") as f:
-            json.dump(sls_input, f)
 
         result = runner.invoke(
             cli,
@@ -4897,7 +4818,6 @@ def test_switch_config_tds_leaf_bmc():
             + "ntp server 192.168.4.6\n"
             + "ntp enable\n"
         ) in str(result.output)
-        print(result.output)
 
         assert "ssh server vrf default\n"
         assert banner_motd in str(result.output)
@@ -4954,7 +4874,7 @@ def test_switch_config_tds_leaf_bmc():
             + "    shutdown\n"
             + "    ip dhcp\n"
         ) in str(result.output)
-        print(result.output)
+
         leaf_bmc_to_leaf = (
             "interface lag 101\n"
             + "    no shutdown\n"
@@ -5116,223 +5036,3 @@ def test_switch_config_tds_leaf_bmc():
             + "https-server vrf default\n"
             + "https-server vrf mgmt\n"
         ) in str(result.output)
-        print(result.output)
-
-
-sls_input = {
-    "Networks": {
-        "CAN": {
-            "Name": "CAN",
-            "ExtraProperties": {
-                "CIDR": "192.168.11.0/24",
-                "Subnets": [
-                    {
-                        "Name": "bootstrap_dhcp",
-                        "CIDR": "192.168.11.0/24",
-                        "IPReservations": [
-                            {"Name": "can-switch-1", "IPAddress": "192.168.11.2"},
-                            {"Name": "can-switch-2", "IPAddress": "192.168.11.3"},
-                        ],
-                        "VlanID": 7,
-                        "Gateway": "192.168.11.1",
-                    },
-                    {
-                        "FullName": "CAN Bootstrap DHCP Subnet",
-                        "CIDR": "192.168.11.0/24",
-                        "IPReservations": [
-                            {"Name": "ncn-w001", "IPAddress": "192.168.11.4"},
-                            {"Name": "ncn-w002", "IPAddress": "192.168.11.5"},
-                            {"Name": "ncn-w003", "IPAddress": "192.168.11.6"},
-                        ],
-                        "Name": "bootstrap_dhcp",
-                        "VlanID": 7,
-                        "Gateway": "192.168.11.1",
-                    },
-                ],
-            },
-        },
-        "HMN": {
-            "Name": "HMN",
-            "ExtraProperties": {
-                "CIDR": "192.168.0.0/17",
-                "Subnets": [
-                    {
-                        "Name": "network_hardware",
-                        "CIDR": "192.168.0.0/17",
-                        "IPReservations": [
-                            {"Name": "sw-spine-001", "IPAddress": "192.168.0.2"},
-                            {"Name": "sw-spine-002", "IPAddress": "192.168.0.3"},
-                            {"Name": "sw-agg-001", "IPAddress": "192.168.0.4"},
-                            {"Name": "sw-agg-002", "IPAddress": "192.168.0.5"},
-                            {"Name": "sw-agg-003", "IPAddress": "192.168.0.6"},
-                            {"Name": "sw-agg-004", "IPAddress": "192.168.0.7"},
-                            {"Name": "sw-leaf-001", "IPAddress": "192.168.0.12"},
-                            {"Name": "sw-leaf-002", "IPAddress": "192.168.0.13"},
-                            {"Name": "sw-leaf-003", "IPAddress": "192.168.0.14"},
-                            {"Name": "sw-leaf-004", "IPAddress": "192.168.0.15"},
-                            {"Name": "sw-cdu-001", "IPAddress": "192.168.0.16"},
-                            {"Name": "sw-cdu-002", "IPAddress": "192.168.0.17"},
-                        ],
-                        "VlanID": 4,
-                        "Gateway": "192.168.0.1",
-                    },
-                    {
-                        "FullName": "HMN Bootstrap DHCP Subnet",
-                        "CIDR": "192.168.0.0/17",
-                        "IPReservations": [
-                            {"Name": "ncn-w001", "IPAddress": "192.168.0.4"},
-                            {"Name": "ncn-w002", "IPAddress": "192.168.0.5"},
-                            {"Name": "ncn-w003", "IPAddress": "192.168.0.6"},
-                        ],
-                        "Name": "bootstrap_dhcp",
-                        "VlanID": 4,
-                        "Gateway": "192.168.0.1",
-                    },
-                ],
-            },
-        },
-        "MTL": {
-            "Name": "MTL",
-            "ExtraProperties": {
-                "CIDR": "192.168.1.0/16",
-                "Subnets": [
-                    {
-                        "Name": "network_hardware",
-                        "CIDR": "192.168.1.0/16",
-                        "IPReservations": [
-                            {"Name": "sw-spine-001", "IPAddress": "192.168.1.2"},
-                            {"Name": "sw-spine-002", "IPAddress": "192.168.1.3"},
-                            {"Name": "sw-agg-001", "IPAddress": "192.168.1.4"},
-                            {"Name": "sw-agg-002", "IPAddress": "192.168.1.5"},
-                            {"Name": "sw-agg-003", "IPAddress": "192.168.1.6"},
-                            {"Name": "sw-agg-004", "IPAddress": "192.168.1.7"},
-                            {"Name": "sw-leaf-001", "IPAddress": "192.168.1.12"},
-                            {"Name": "sw-leaf-002", "IPAddress": "192.168.1.13"},
-                            {"Name": "sw-leaf-003", "IPAddress": "192.168.1.14"},
-                            {"Name": "sw-leaf-004", "IPAddress": "192.168.1.15"},
-                            {"Name": "sw-cdu-001", "IPAddress": "192.168.1.16"},
-                            {"Name": "sw-cdu-002", "IPAddress": "192.168.1.17"},
-                        ],
-                        "VlanID": 0,
-                        "Gateway": "192.168.1.1",
-                    },
-                ],
-            },
-        },
-        "NMN": {
-            "Name": "NMN",
-            "FullName": "Node Management Network",
-            "ExtraProperties": {
-                "CIDR": "192.168.3.0/17",
-                "Subnets": [
-                    {
-                        "FullName": "NMN Management Network Infrastructure",
-                        "CIDR": "192.168.3.0/17",
-                        "IPReservations": [
-                            {"Name": "sw-spine-001", "IPAddress": "192.168.3.2"},
-                            {"Name": "sw-spine-002", "IPAddress": "192.168.3.3"},
-                            {"Name": "sw-agg-001", "IPAddress": "192.168.3.4"},
-                            {"Name": "sw-agg-002", "IPAddress": "192.168.3.5"},
-                            {"Name": "sw-agg-003", "IPAddress": "192.168.3.6"},
-                            {"Name": "sw-agg-004", "IPAddress": "192.168.3.7"},
-                            {"Name": "sw-leaf-001", "IPAddress": "192.168.3.12"},
-                            {"Name": "sw-leaf-002", "IPAddress": "192.168.3.13"},
-                            {"Name": "sw-leaf-003", "IPAddress": "192.168.3.14"},
-                            {"Name": "sw-leaf-004", "IPAddress": "192.168.3.15"},
-                            {"Name": "sw-cdu-001", "IPAddress": "192.168.3.16"},
-                            {"Name": "sw-cdu-002", "IPAddress": "192.168.3.17"},
-                        ],
-                        "Name": "network_hardware",
-                        "VlanID": 2,
-                        "Gateway": "192.168.3.1",
-                    },
-                    {
-                        "FullName": "NMN Bootstrap DHCP Subnet",
-                        "CIDR": "192.168.4.0/17",
-                        "IPReservations": [
-                            {"Name": "ncn-w001", "IPAddress": "192.168.4.4"},
-                            {"Name": "ncn-w002", "IPAddress": "192.168.4.5"},
-                            {"Name": "ncn-w003", "IPAddress": "192.168.4.6"},
-                        ],
-                        "Name": "bootstrap_dhcp",
-                        "VlanID": 2,
-                        "Gateway": "192.168.3.1",
-                    },
-                ],
-            },
-        },
-        "NMN_MTN": {
-            "Name": "NMN_MTN",
-            "ExtraProperties": {
-                "CIDR": "192.168.100.0/17",
-                "Subnets": [
-                    {
-                        "FullName": "",
-                        "CIDR": "192.168.100.0/22",
-                        "Name": "cabinet_3002",
-                        "VlanID": 2000,
-                        "Gateway": "192.168.100.1",
-                        "DHCPStart": "192.168.100.10",
-                        "DHCPEnd": "192.168.3.254",
-                    },
-                ],
-            },
-        },
-        "HMN_MTN": {
-            "Name": "HMN_MTN",
-            "ExtraProperties": {
-                "CIDR": "192.168.200.0/17",
-                "Subnets": [
-                    {
-                        "FullName": "",
-                        "CIDR": "192.168.104.0/22",
-                        "Name": "cabinet_3002",
-                        "VlanID": 3000,
-                        "Gateway": "192.168.104.1",
-                        "DHCPStart": "192.168.104.10",
-                        "DHCPEnd": "192.168.104.254",
-                    },
-                ],
-            },
-        },
-        "HMNLB": {
-            "Name": "HMNLB",
-            "ExtraProperties": {
-                "CIDR": "10.94.100.0/24",
-                "Subnets": [
-                    {
-                        "FullName": "NMN MetalLB",
-                        "CIDR": "10.94.100.0/24",
-                        "IPReservations": [
-                            {"Name": "cray-tftp", "IPAddress": "10.94.100.60"},
-                            {"Name": "unbound", "IPAddress": "10.94.100.225"},
-                        ],
-                        "Name": "hmn_metallb_address_pool",
-                        "Gateway": "10.94.100.1",
-                    },
-                ],
-            },
-        },
-        "NMNLB": {
-            "Name": "NMNLB",
-            "ExtraProperties": {
-                "CIDR": "10.92.100.0/24",
-                "Subnets": [
-                    {
-                        "FullName": "HMN MetalLB",
-                        "CIDR": "10.92.100.0/24",
-                        "IPReservations": [
-                            {"Name": "cray-tftp", "IPAddress": "10.92.100.60"},
-                            {"Name": "unbound", "IPAddress": "10.92.100.225"},
-                        ],
-                        "Name": "nmn_metallb_address_pool",
-                        "Gateway": "10.92.100.1",
-                    },
-                ],
-            },
-        },
-    },
-}
-sls_networks = [
-    network[x] for network in [sls_input.get("Networks", {})] for x in network
-]
