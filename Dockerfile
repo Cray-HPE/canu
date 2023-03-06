@@ -46,7 +46,8 @@ ENV         PATH="$VIRTUAL_ENV/bin:$PATH"
 FROM        deps AS dev
 USER        root
 WORKDIR     /root
-VOLUME      [ "/root/mounted", "/ssh-agent" ]
+# must mount ${SSH_AUTH_SOCK} to /ssh-agent to use host ssh
+RUN         mkdir -p /home/canu/mounted
 ENV         VIRTUAL_ENV=/opt/venv \
             SSH_AUTH_SOCK=/ssh-agent
 RUN         apk --update add \
@@ -79,10 +80,10 @@ FROM        ${ALPINE_IMAGE} AS docs
 USER        root
 ENV         VIRTUAL_ENV=/opt/venv
 RUN         apk add --no-cache \
-              py3-pip=22.3.1-r1 \
-              py3-virtualenv=20.16.7-r0 \
-              python3=3.10.10-r0 \
-              python3-dev=3.10.10-r0
+              py3-pip~=22.3 \
+              py3-virtualenv~=20.16 \
+              python3~=3.10 \
+              python3-dev~=3.10
 COPY        --from=dev --chown=root:root $VIRTUAL_ENV $VIRTUAL_ENV
 RUN         addgroup -S canu && \
               adduser \
@@ -116,7 +117,6 @@ USER        root
 RUN         apk --update add \
               openssh-client~=9.1
 # must mount ${SSH_AUTH_SOCK} to /ssh-agent to use host ssh
-VOLUME      [ "/home/canu/mounted", "/ssh-agent" ]
 ENV         VIRTUAL_ENV=/opt/venv \
             SSH_AUTH_SOCK=/ssh-agent
 # copy the binaries.  The final image has the base image, ssh, and these binaries only
