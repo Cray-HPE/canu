@@ -121,7 +121,7 @@ def network(
             },
         },
         inventory=switch_inventory,
-        logging={"enabled": log_, "to_console": True, "level": "DEBUG"},
+        logging={"enabled": log_, "to_console": True, "level": "ERROR"},
     )
 
     # check if switch is reachable before backing up config
