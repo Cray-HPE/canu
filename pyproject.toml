@@ -126,7 +126,7 @@ test = [
     'pytest~=7.2.1',
     'pytest-cov~=4.0.0',
     'pytest-sugar~=0.9.6',
-    'testfixtures~=7.0.4',
+    'testfixtures~=7.1.0',
 ]
 
 # Defines which folders belong to our package.
