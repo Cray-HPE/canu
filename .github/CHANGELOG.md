@@ -1,6 +1,11 @@
 ## Changelog
 
-## [1.7.0]
+### [1.7.4]
+
+- Upgrade CANU directly in venv by connecting to github using 'canu upgrade'
+- CANU dev mode 'canu upgrade --editable'
+
+### [1.7.0]
 
 - Add canu docs in three formats
 - Remove drawing code and dependencies

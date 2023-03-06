@@ -41,8 +41,10 @@ from canu.generate import generate
 from canu.report import report
 from canu.send import send
 from canu.test import test
+from canu.upgrade import upgrade
 from canu.utils.cache import cache_switch
 from canu.validate import validate
+
 
 yaml = YAML()
 
@@ -98,6 +100,7 @@ cli.add_command(report.report)
 cli.add_command(send.send)
 cli.add_command(validate.validate)
 cli.add_command(test.test)
+cli.add_command(upgrade.upgrade)
 
 
 @cli.command(
