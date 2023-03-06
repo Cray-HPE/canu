@@ -2,6 +2,7 @@
 
 ## [1.7.0]
 
+- By default, do not auth to artifactory for image when using `canuctl`
 - Add canu docs in three formats
 - Remove drawing code and dependencies
 - Create rootless canu container image
