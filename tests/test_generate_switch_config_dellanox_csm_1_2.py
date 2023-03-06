@@ -2196,7 +2196,7 @@ def test_switch_config_cdu_primary():
             + "  vlt-port-channel 5\n"
             + "  spanning-tree guard root\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface port-channel110\n"
             + "  description sw-spine-001:29<==sw-cdu-001\n"
@@ -2494,7 +2494,7 @@ def test_switch_config_cdu_primary():
             + "  flowcontrol receive on\n"
             + "  flowcontrol transmit off\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface ethernet1/1/25\n"
             + "  no shutdown\n"
@@ -2695,7 +2695,7 @@ def test_switch_config_cdu_secondary():
             + "  vlt-port-channel 5\n"
             + "  spanning-tree guard root\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface port-channel110\n"
             + "  description sw-spine-001:30<==sw-cdu-002\n"
