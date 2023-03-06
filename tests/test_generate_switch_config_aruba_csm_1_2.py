@@ -709,7 +709,7 @@ def test_switch_config_spine_primary_custom():
             + "    match ip address prefix-list pl-cmn\n"
         )
         assert output in str(result.output)
-
+        print(result.output)
         assert (
             "no ip icmp redirect\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
@@ -822,7 +822,7 @@ def test_switch_config_spine_primary_custom():
             + "    spanning-tree bpdu-guard\n"
             + "    spanning-tree port-type admin-edge\n"
         ) in str(result.output)
-
+        print(result.output)
         assert (
             "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.2\n"

@@ -517,14 +517,14 @@ def test_switch_config_spine_primary_custom():
         assert result.exit_code == 0
 
         assert (
-            "# interface ethernet 1/1 speed 10G force\n"
-            + '# interface ethernet 1/1 description "sw-spine02-1/16"\n'
-            + "# interface ethernet 1/1 no switchport force\n"
-            + "# interface ethernet 1/1 ip address 10.102.255.14/30 primary\n"
-            + "# interface ethernet 1/1 dcb priority-flow-control mode on force\n"
-            + "# ip route vrf default 0.0.0.0/0 10.102.255.13\n"
+            "# ip route vrf default 0.0.0.0/0 10.102.255.13\n"
+            + "# interface ethernet 1/16 speed 10G force\n"
+            + '# interface ethernet 1/16 description "sw-spine02-1/16"\n'
+            + "# interface ethernet 1/16 no switchport force\n"
+            + "# interface ethernet 1/16 ip address 10.102.255.14/30 primary\n"
+            + "# interface ethernet 1/16 dcb priority-flow-control mode on force\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "hostname sw-spine-001\n"
             + "no cli default prefix-modes enable\n"
@@ -545,6 +545,7 @@ def test_switch_config_spine_primary_custom():
             + "interface mlag-port-channel 201\n"
             + "interface ethernet 1/31 speed 40G force\n"
             + "interface ethernet 1/32 speed 40G force\n"
+            + "interface ethernet 1/1 speed 40G force\n"
             + "interface ethernet 1/2 speed 40G force\n"
             + "interface ethernet 1/3 speed 40G force\n"
             + "interface ethernet 1/4 speed 40G force\n"
@@ -557,8 +558,8 @@ def test_switch_config_spine_primary_custom():
             + "interface ethernet 1/26 speed 10G force\n"
             + "interface ethernet 1/29 speed 40G force\n"
             + "interface ethernet 1/30 speed 40G force\n"
-            + "interface ethernet 1/1 speed 10G force\n"
             + "interface ethernet 1/16 speed 10G force\n"
+            + "interface ethernet 1/1 mlag-channel-group 1 mode active\n"
             + "interface ethernet 1/2 mlag-channel-group 2 mode active\n"
             + "interface ethernet 1/3 mlag-channel-group 3 mode active\n"
             + "interface ethernet 1/4 mlag-channel-group 4 mode active\n"
@@ -585,6 +586,7 @@ def test_switch_config_spine_primary_custom():
             + "interface mlag-port-channel 201 switchport mode hybrid\n"
             + 'interface ethernet 1/31 description "mlag-isl"\n'
             + 'interface ethernet 1/32 description "mlag-isl"\n'
+            + 'interface ethernet 1/1 description "ncn-m001:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface ethernet 1/2 description "ncn-m002:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface ethernet 1/3 description "ncn-m003:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface ethernet 1/4 description "ncn-w001:pcie-slot1:1<==sw-spine-001"\n'
@@ -597,7 +599,6 @@ def test_switch_config_spine_primary_custom():
             + 'interface ethernet 1/26 description "sw-leaf-bmc-001:51<==sw-spine-001"\n'
             + 'interface ethernet 1/29 description "sw-cdu-001:27<==sw-spine-001"\n'
             + 'interface ethernet 1/30 description "sw-cdu-002:27<==sw-spine-001"\n'
-            + 'interface ethernet 1/1 description "sw-spine02-1/16"\n'
             + 'interface ethernet 1/16 description "sw-spine02-1/16"\n'
             + 'interface mlag-port-channel 1 description "ncn-m001:pcie-slot1:1<==sw-spine-001"\n'
             + 'interface mlag-port-channel 2 description "ncn-m002:pcie-slot1:1<==sw-spine-001"\n'
@@ -612,10 +613,8 @@ def test_switch_config_spine_primary_custom():
             + 'interface mlag-port-channel 151 description "sw-leaf-bmc-001:51<==sw-spine-001"\n'
             + 'interface mlag-port-channel 201 description "sw-cdu-001:27<==sw-spine-001"\n'
             + 'interface mlag-port-channel 201 description "sw-cdu-002:27<==sw-spine-001"\n'
-            + "interface ethernet 1/1 no switchport force\n"
             + "interface ethernet 1/16 no switchport force\n"
         ) in str(result.output)
-        print(result.output)
 
         assert (
             "interface port-channel 256\n"
@@ -639,7 +638,6 @@ def test_switch_config_spine_primary_custom():
             + "interface mlag-port-channel 13 no shutdown\n"
             + "interface mlag-port-channel 151 no shutdown\n"
             + "interface mlag-port-channel 201 no shutdown\n"
-            + "interface ethernet 1/1 dcb priority-flow-control mode on force\n"
             + "interface ethernet 1/16 dcb priority-flow-control mode on force\n"
         ) in str(result.output)
 
@@ -753,8 +751,7 @@ def test_switch_config_spine_primary_custom():
         ) in str(result.output)
 
         assert (
-            "interface ethernet 1/1 ip address 10.102.255.14/30 primary\n"
-            + "interface ethernet 1/16 ip address 10.102.255.14/30 primary\n"
+            "interface ethernet 1/16 ip address 10.102.255.14/30 primary\n"
             + "ip load-sharing source-ip-port\n"
             + "ip load-sharing type consistent\n"
             + "ip route vrf default 0.0.0.0/0 10.102.255.13\n"
@@ -2199,7 +2196,7 @@ def test_switch_config_cdu_primary():
             + "  vlt-port-channel 5\n"
             + "  spanning-tree guard root\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface port-channel110\n"
             + "  description sw-spine-001:29<==sw-cdu-001\n"
@@ -2497,7 +2494,7 @@ def test_switch_config_cdu_primary():
             + "  flowcontrol receive on\n"
             + "  flowcontrol transmit off\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface ethernet1/1/25\n"
             + "  no shutdown\n"
@@ -2698,7 +2695,7 @@ def test_switch_config_cdu_secondary():
             + "  vlt-port-channel 5\n"
             + "  spanning-tree guard root\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "interface port-channel110\n"
             + "  description sw-spine-001:30<==sw-cdu-002\n"

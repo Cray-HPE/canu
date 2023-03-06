@@ -500,9 +500,10 @@ def add_custom_config(custom_config, switch_config, host, switch_os, custom_file
 
     # delete custom config that exists in the generated config
     # If interface 1/1 has any config under it, it will be deleted and overwritten with the custom config
-    for line_custom in custom_config_hier.all_children_sorted():
-        switch_config_hier.add_ancestor_copy_of(line_custom)
-        switch_config_hier.del_child_by_text(str(line_custom))
+
+    for line in custom_config_hier.all_children_sorted():
+        child = switch_config_hier.get_child("equals", line.cisco_style_text())
+        switch_config_hier.del_child(child)
 
     if switch_os == "onyx":
         mellanox_config = ""
@@ -544,7 +545,6 @@ def add_custom_config(custom_config, switch_config, host, switch_os, custom_file
             custom_config_merge += "\n" + line.cisco_style_text()
         else:
             custom_config_merge += "\n" + line.cisco_style_text().lstrip()
-
     return custom_config_merge
 
 
