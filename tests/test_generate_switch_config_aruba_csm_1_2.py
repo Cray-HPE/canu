@@ -42,6 +42,7 @@ tabs = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners = "J14,T44,J14,T53,J14,T34,J14,T27"
 sls_file_name = "sls_input_file_csm_1.2.json"
 sls_file = path.join(test_file_directory, "data", sls_file_name)
+
 csm = "1.2"
 switch_name = "sw-spine-001"
 cache_minutes = 0
@@ -709,7 +710,7 @@ def test_switch_config_spine_primary_custom():
             + "    match ip address prefix-list pl-cmn\n"
         )
         assert output in str(result.output)
-        print(result.output)
+
         assert (
             "no ip icmp redirect\n"
             + "apply access-list ip mgmt control-plane vrf default\n"
@@ -822,7 +823,7 @@ def test_switch_config_spine_primary_custom():
             + "    spanning-tree bpdu-guard\n"
             + "    spanning-tree port-type admin-edge\n"
         ) in str(result.output)
-        print(result.output)
+
         assert (
             "router ospf 2 vrf Customer\n"
             + "    router-id 10.2.0.2\n"

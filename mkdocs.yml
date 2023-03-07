@@ -1,0 +1,92 @@
+#
+# MIT License
+#
+# (C) Copyright 2022 Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
+#
+docs_dir: docs
+site_name: canu
+site_description: canu documenation
+site_author: Cray-HPE
+# site_url:
+repo_url: https://github.com/Cray-HPE/canu
+edit_uri: edit/main/docs
+theme: 
+  name: material
+  custom_dir: docs/custom_theme
+  logo: custom_theme/img/hpe_pri_wht_rev_rgb.png
+  locale: en
+  favicon: custom_theme/img/favicon.ico
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        primary: teal
+        accent: indigo
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        primary: teal
+        accent: indigo
+        icon: material/toggle-switch
+        name: Switch to light mode
+# HPE branding
+extra_css:
+  - extra.css
+# version switcher
+extra:
+  version:
+    provider: mike
+nav:
+  - Home: index.md
+  - Installation:
+    - Container: container_install.md
+    - RPM: rpm_install.md
+    - Quick Start: quickstart.md
+  - Upgrade:
+    - Collect Data: network_configuration_and_upgrade/collect_data.md
+    - Validate SHCD: network_configuration_and_upgrade/validate_shcd.md
+    - Checks and Validations: network_configuration_and_upgrade/checks_and_validations.md
+    - Logging and Updates: network_configuration_and_upgrade/logging_and_updates.md
+    - Generate Switch Config: network_configuration_and_upgrade/generate_config.md
+    - Compare Switch Configs: network_configuration_and_upgrade/compare_config.md
+    - Custom Config Injection: network_configuration_and_upgrade/custom_config.md
+    - Analyze Configuration Upgrade: network_configuration_and_upgrade/analyze_config.md
+    - CANU Validation Errors: network_configuration_and_upgrade/validation_errors.md
+  - Command Reference:
+    - backup: backup.md
+    - cache: cache.md
+    - generate: generate.md
+    - init: init.md
+    - report: report.md
+    - send: send_command.md
+    - test: test_network.md
+    - validate: validate.md
+  - Use With Ansible:
+    - Inventory Script: canu_inventory.md
+  - Development:
+    - Testing: nox_testing.md
+    - Releasing: releasing.md
+    - Versioning: versioning.md
+  - Appendix:
+    - Paddle / CCJ: paddle.md
+    - Examples / Output: examples_output.md

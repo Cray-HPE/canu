@@ -26,23 +26,23 @@ USER        root
 WORKDIR     /root
 VOLUME      [ "/root/mounted" ]
 RUN         apk add --no-cache \
-              cmake=3.24.3-r0 \
-              g++=12.2.1_git20220924-r4 \
-              gcc=12.2.1_git20220924-r4 \
-              git=2.38.4-r0 \
-              libffi-dev=3.4.4-r0 \
-              make=4.3-r1 \
-              musl-dev=1.2.3-r4 \
-              openssl=3.0.8-r0 \
-              py3-pip=22.3.1-r1 \
-              py3-virtualenv=20.16.7-r0 \
-              python3=3.10.10-r0 \
-              python3-dev=3.10.10-r0
+              cmake~=3.24 \
+              g++~=12.2 \
+              gcc~=12.2 \
+              git~=2.38 \
+              libffi-dev~=3.4 \
+              make~=4.3 \
+              musl-dev~=1.2 \
+              openssl~=3.0 \
+              py3-pip~=22.3 \
+              py3-virtualenv~=20.16 \
+              python3~=3.10 \
+              python3-dev~=3.10
 ENV         VIRTUAL_ENV=/opt/venv
 RUN         python -m venv $VIRTUAL_ENV
 ENV         PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# STAGE 2 - install canu in editable mode
+# STAGE 2 - install canu in editable mode and generate docs
 FROM        deps AS dev
 USER        root
 WORKDIR     /root
@@ -50,7 +50,7 @@ VOLUME      [ "/root/mounted", "/ssh-agent" ]
 ENV         VIRTUAL_ENV=/opt/venv \
             SSH_AUTH_SOCK=/ssh-agent
 RUN         apk --update add \
-              openssh-client=9.1_p1-r2
+              openssh-client~=9.1
 RUN         source $VIRTUAL_ENV/bin/activate
 COPY        .flake8 ./.flake8
 COPY        .git/ ./.git
@@ -67,28 +67,54 @@ COPY        entry_points.ini ./entry_points.ini
 COPY        LICENSE ./LICENSE
 COPY        Makefile ./Makefile
 COPY        MANIFEST.in ./MANIFEST.in
+COPY        mkdocs.yml ./mkdocs.yml
 COPY        noxfile.py ./noxfile.py
 COPY        pyinstaller.py ./pyinstaller.py
 COPY        pyproject.toml ./pyproject.toml
-RUN         python -m pip install --editable .
+RUN         python -m pip install --editable .[ci,docs]
+RUN         nox -e docs
 
-# STAGE 3 - build the binaries with pyinstaller
+# STAGE 3 - documentation image
+FROM        ${ALPINE_IMAGE} AS docs
+USER        root
+ENV         VIRTUAL_ENV=/opt/venv
+RUN         apk add --no-cache \
+              py3-pip=22.3.1-r1 \
+              py3-virtualenv=20.16.7-r0 \
+              python3=3.10.10-r0 \
+              python3-dev=3.10.10-r0
+COPY        --from=dev --chown=root:root $VIRTUAL_ENV $VIRTUAL_ENV
+RUN         addgroup -S canu && \
+              adduser \
+              -S canu \
+              -G canu \
+              -h /home/canu \
+              -s /bin/bash \
+              -D
+USER        canu
+WORKDIR     /home/canu
+COPY        --from=dev --chown=canu:canu /root/docs /home/canu/docs
+COPY        --from=dev --chown=canu:canu /root/mkdocs.yml /home/canu/mkdocs.yml
+ENV         PATH="$VIRTUAL_ENV/bin:$PATH"
+RUN         source $VIRTUAL_ENV/bin/activate
+EXPOSE      8000       
+CMD         [ "mkdocs", "serve", "-a", "0.0.0.0:8000", "--config-file", "mkdocs.yml"]
+
+# STAGE 4 - build the binaries with pyinstaller
 FROM        dev AS build
 USER        root
 WORKDIR     /root
-# must mount ${SSH_AUTH_SOCK} to /ssh-agent to use host ssh
-VOLUME      [ "/root/mounted"]
 RUN         source $VIRTUAL_ENV/bin/activate
 RUN         python -m pip install . pyinstaller
 RUN         cp -pv pyinstaller.py pyinstaller.spec
 RUN         pyinstaller --clean -y --dist ./dist/linux --workpath /tmp pyinstaller.spec
 
-# STAGE 4 - final production image
+# STAGE 5 - final production image
 FROM        ${ALPINE_IMAGE} AS prod
 USER        root
 # ssh is needed for 'canu test' command
 RUN         apk --update add \
-              openssh-client=9.1_p1-r2
+              openssh-client~=9.1
 # must mount ${SSH_AUTH_SOCK} to /ssh-agent to use host ssh
 VOLUME      [ "/home/canu/mounted", "/ssh-agent" ]
 ENV         VIRTUAL_ENV=/opt/venv \
