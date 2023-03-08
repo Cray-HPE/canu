@@ -1,11 +1,12 @@
 # Quickstart Guide
 
-After installing [the container](container_install.md) or [the RPM](rpm_install.md), there are several ways to invoke CANU, including:
+After installing [the container](container_install.md) or [the RPM](rpm_install.md), or in a [virtualenv](venv.md), there are several ways to invoke CANU, including:
 
 - `docker run` (or other runtime)
 - `docker exec` (or other runtime)
 - `canuctl`
 - `canu` (direct execution of the binary, which will be deprecated in upcoming versions)
+- `canu` (running the Python code)
 
 For consistency and simplification, the invocations of CANU throughout the documentation will simply be show as
 
