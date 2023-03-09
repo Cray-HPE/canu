@@ -61,6 +61,7 @@ nav:
   - Installation:
     - Container: container_install.md
     - RPM: rpm_install.md
+    - Virtualenv: venv.md
     - Quick Start: quickstart.md
   - Upgrade:
     - Collect Data: network_configuration_and_upgrade/collect_data.md
