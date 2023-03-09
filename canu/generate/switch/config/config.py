@@ -37,6 +37,7 @@ from hier_config import HConfig
 from hier_config import Host
 from jinja2 import Environment
 from jinja2 import FileSystemLoader
+from jinja2 import select_autoescape
 from jinja2 import StrictUndefined
 import natsort
 import netaddr
@@ -107,6 +108,7 @@ network_templates_folder = path.join(
     "templates",
 )
 env = Environment(
+    autoescape=select_autoescape(),
     loader=FileSystemLoader(network_templates_folder),
     undefined=StrictUndefined,
 )
