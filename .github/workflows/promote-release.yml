@@ -25,6 +25,7 @@ jobs:
 
       - uses: ncipollo/release-action@v1
         with:
+          allowUpdates: true # if the job is re-ran to catch missed artifacts, allow updates
           generateReleaseNotes: true
           artifacts: ${{ env.DIR_UPLOAD }}/*
           prerelease: false

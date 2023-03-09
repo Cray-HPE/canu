@@ -12,16 +12,19 @@ runs:
           REPOSITORY: csm-rpms
           ORG: hpe
           STREAM: ${{ inputs.STREAM }}
-          WAIT: 10
+          WAIT: 30
       run: |
           sudo apt-get install -y rename
 
-          # Wait for our RPM(s) to finish building.
+          # Wait for our RPM(s) to finish building and publishing.
           echo Looking for "rpm.metadata.version=${{ github.ref_name }};rpm.metadata.name=${GITHUB_REPOSITORY#*/}"
-          while ! jf rt s --fail-no-op=true "${REPOSITORY}/${ORG}/${STREAM}/" --props "rpm.metadata.version=${{ github.ref_name }};rpm.metadata.name=${GITHUB_REPOSITORY#*/}" --exclude-props "rpm.metadata.arch=src" 2>&1; do
+          while ! jf rt s --fail-no-op=true "${REPOSITORY}/${ORG}/${STREAM}/" --props "rpm.metadata.version=${{ github.ref_name }};rpm.metadata.name=${GITHUB_REPOSITORY#*/}" --exclude-props "rpm.metadata.arch=src"; do
            echo "Waiting for artifacts to be available; retrying in ${WAIT} seconds ... " >&2
            sleep ${WAIT}
           done
+
+          # Give parallel builds a chance incase they published at slightly different times.
+          sleep ${WAIT}
 
           # Make a workspace
           DIR_DOWNLOAD=$(mktemp -d)
@@ -50,6 +53,15 @@ runs:
 
           # Cleanup ... prepare to work on src RPMs.
           rm -rf ${DIR_DOWNLOAD}/${ORG}/${STREAM}/
+
+          # Wait for our source RPMs to finish publishing.
+          while ! jf rt s --fail-no-op=true "${REPOSITORY}/${ORG}/${STREAM}/" --props "rpm.metadata.version=${{ github.ref_name }};rpm.metadata.name=${GITHUB_REPOSITORY#*/};rpm.metadata.arch=src"; do
+           echo "Waiting for artifacts to be available; retrying in ${WAIT} seconds ... " >&2
+           sleep ${WAIT}
+          done
+
+          # Give parallel builds a chance incase they published at slightly different times.
+          sleep ${WAIT}
 
           # Rename src RPMs
           jf rt download "${REPOSITORY}/${ORG}/${STREAM}/" ${DIR_DOWNLOAD}/ --props "rpm.metadata.version=${{ github.ref_name }};rpm.metadata.name=${GITHUB_REPOSITORY#*/};rpm.metadata.arch=src";
