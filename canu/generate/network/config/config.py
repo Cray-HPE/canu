@@ -72,6 +72,7 @@ network_templates_folder = path.join(
     "templates",
 )
 env = Environment(
+    autoescape=True,
     loader=FileSystemLoader(network_templates_folder),
     undefined=StrictUndefined,
 )

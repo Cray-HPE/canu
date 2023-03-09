@@ -264,7 +264,7 @@ def test(
         dict_results = {}
         pretty_results = []
         # get the commands and the test suite for each switch type.
-        environment = Environment()
+        environment = Environment(autoescape=True)
         for switch in switch_commands.keys():
             for test_command in test_suite:
                 devices = test_command.get("device")
