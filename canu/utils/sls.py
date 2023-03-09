@@ -99,12 +99,7 @@ def pull_sls_networks(sls_file=None):
                 )
                 secret_dict = secret_obj.to_dict()
                 secret_base64_str = secret_dict["items"][0]["data"]["client-secret"]
-                on_debug(
-                    debug,
-                    "base64 secret from Kubernetes is {}".format(secret_base64_str),
-                )
                 secret = base64.b64decode(secret_base64_str.encode("utf-8"))
-                on_debug(debug, "secret from Kubernetes is {}".format(secret))
             except Exception as err:
                 print("Error collecting secret from Kubernetes: {}".format(err))
                 sys.exit(1)
@@ -392,12 +387,7 @@ def pull_sls_hardware(sls_file=None):
                 )
                 secret_dict = secret_obj.to_dict()
                 secret_base64_str = secret_dict["items"][0]["data"]["client-secret"]
-                on_debug(
-                    debug,
-                    "base64 secret from Kubernetes is {}".format(secret_base64_str),
-                )
                 secret = base64.b64decode(secret_base64_str.encode("utf-8"))
-                on_debug(debug, "secret from Kubernetes is {}".format(secret))
             except Exception as err:
                 print("Error collecting secret from Kubernetes: {}".format(err))
                 sys.exit(1)
