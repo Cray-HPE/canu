@@ -20,8 +20,9 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 # STAGE 1 - install build dependencies and activate virtualenv
-ARG         ALPINE_IMAGE=artifactory.algol60.net/docker.io/library/alpine:3.17
+ARG         ALPINE_IMAGE="artifactory.algol60.net/docker.io/library/alpine:3.17"
 FROM        ${ALPINE_IMAGE} AS deps
+ARG         PYTHON_VERSION='3.10'
 USER        root
 WORKDIR     /root
 VOLUME      [ "/root/mounted" ]
@@ -36,8 +37,9 @@ RUN         apk add --no-cache \
               openssl~=3.0 \
               py3-pip~=22.3 \
               py3-virtualenv~=20.16 \
-              python3~=3.10 \
-              python3-dev~=3.10
+              py3-wheel~=0.38 \
+              python3~=${PYTHON_VERSION} \
+              python3-dev~=${PYTHON_VERSION}
 ENV         VIRTUAL_ENV=/opt/venv
 RUN         python -m venv $VIRTUAL_ENV
 ENV         PATH="$VIRTUAL_ENV/bin:$PATH"
@@ -71,7 +73,7 @@ COPY        mkdocs.yml ./mkdocs.yml
 COPY        noxfile.py ./noxfile.py
 COPY        pyinstaller.py ./pyinstaller.py
 COPY        pyproject.toml ./pyproject.toml
-RUN         python -m pip install --editable .[ci,docs]
+RUN         python -m pip install --no-cache-dir --disable-pip-version-check --editable .[ci,docs]
 RUN         nox -e docs
 
 # STAGE 3 - documentation image
@@ -81,8 +83,9 @@ ENV         VIRTUAL_ENV=/opt/venv
 RUN         apk add --no-cache \
               py3-pip=22.3.1-r1 \
               py3-virtualenv=20.16.7-r0 \
-              python3=3.10.10-r0 \
-              python3-dev=3.10.10-r0
+              py3-wheel~=0.38 \
+              python3~=${PYTHON_VERSION} \
+              python3-dev~=${PYTHON_VERSION}
 COPY        --from=dev --chown=root:root $VIRTUAL_ENV $VIRTUAL_ENV
 RUN         addgroup -S canu && \
               adduser \
@@ -97,7 +100,7 @@ COPY        --from=dev --chown=canu:canu /root/docs /home/canu/docs
 COPY        --from=dev --chown=canu:canu /root/mkdocs.yml /home/canu/mkdocs.yml
 ENV         PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN         source $VIRTUAL_ENV/bin/activate
-EXPOSE      8000       
+EXPOSE      8000
 CMD         [ "mkdocs", "serve", "-a", "0.0.0.0:8000", "--config-file", "mkdocs.yml"]
 
 # STAGE 4 - build the binaries with pyinstaller
@@ -105,7 +108,7 @@ FROM        dev AS build
 USER        root
 WORKDIR     /root
 RUN         source $VIRTUAL_ENV/bin/activate
-RUN         python -m pip install . pyinstaller
+RUN         python -m pip install --no-cache-dir --disable-pip-version-check . pyinstaller
 RUN         cp -pv pyinstaller.py pyinstaller.spec
 RUN         pyinstaller --clean -y --dist ./dist/linux --workpath /tmp pyinstaller.spec
 
