@@ -71,7 +71,7 @@ COPY        mkdocs.yml ./mkdocs.yml
 COPY        noxfile.py ./noxfile.py
 COPY        pyinstaller.py ./pyinstaller.py
 COPY        pyproject.toml ./pyproject.toml
-RUN         python -m pip install --editable .[ci,docs]
+RUN         python -m pip install --no-cache-dir --disable-pip-version-check --editable .[ci,docs]
 RUN         nox -e docs
 
 # STAGE 3 - documentation image
@@ -105,7 +105,7 @@ FROM        dev AS build
 USER        root
 WORKDIR     /root
 RUN         source $VIRTUAL_ENV/bin/activate
-RUN         python -m pip install . pyinstaller
+RUN         python -m pip install --no-cache --disable-pip-version-check . pyinstaller
 RUN         cp -pv pyinstaller.py pyinstaller.spec
 RUN         pyinstaller --clean -y --dist ./dist/linux --workpath /tmp pyinstaller.spec
 
