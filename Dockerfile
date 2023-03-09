@@ -105,7 +105,7 @@ FROM        dev AS build
 USER        root
 WORKDIR     /root
 RUN         source $VIRTUAL_ENV/bin/activate
-RUN         python -m pip install --no-cache --disable-pip-version-check . pyinstaller
+RUN         python -m pip install --no-cache-dir --disable-pip-version-check . pyinstaller
 RUN         cp -pv pyinstaller.py pyinstaller.spec
 RUN         pyinstaller --clean -y --dist ./dist/linux --workpath /tmp pyinstaller.spec
 
