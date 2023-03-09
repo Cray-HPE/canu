@@ -98,7 +98,7 @@ csm_options = canu_config["csm_versions"]
 @click.option(
     "--architecture",
     "-a",
-    type=click.Choice(["Full", "TDS", "V1"], case_sensitive=False),
+    type=click.Choice(["Full", "TDS", "V1", "Mug"], case_sensitive=False),
     help="CSM architecture",
 )
 @optgroup.group(
@@ -269,7 +269,7 @@ def config(
         if not architecture:
             architecture = click.prompt(
                 "Please enter the tabs to check separated by a comma, e.g. 10G_25G_40G_100G,NMN,HMN.",
-                type=click.Choice(["Full", "TDS", "V1"], case_sensitive=False),
+                type=click.Choice(["Full", "TDS", "V1", "Mug"], case_sensitive=False),
             )
 
     # Paddle Parsing
@@ -292,6 +292,10 @@ def config(
         architecture = "network_v2_tds"
         template_folder = "tds"
         vendor_folder = "aruba"
+    elif architecture.lower() == "mug" or architecture == "network_mug":
+        architecture = "network_mug"
+        template_folder = "mug"
+        vendor_folder = "arubadell"
     elif architecture.lower() == "v1" or architecture == "network_v1":
         architecture = "network_v1"
         template_folder = "full"
