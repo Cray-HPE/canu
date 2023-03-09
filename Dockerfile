@@ -37,6 +37,7 @@ RUN         apk add --no-cache \
               openssl~=3.0 \
               py3-pip~=22.3 \
               py3-virtualenv~=20.16 \
+              py3-wheel~=0.38 \
               python3~=${PYTHON_VERSION} \
               python3-dev~=${PYTHON_VERSION}
 ENV         VIRTUAL_ENV=/opt/venv
@@ -82,6 +83,7 @@ ENV         VIRTUAL_ENV=/opt/venv
 RUN         apk add --no-cache \
               py3-pip=22.3.1-r1 \
               py3-virtualenv=20.16.7-r0 \
+              py3-wheel~=0.38 \
               python3~=${PYTHON_VERSION} \
               python3-dev~=${PYTHON_VERSION}
 COPY        --from=dev --chown=root:root $VIRTUAL_ENV $VIRTUAL_ENV
