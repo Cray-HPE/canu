@@ -61,7 +61,7 @@ log = logging.getLogger("validate_shcd")
 @click.option(
     "--architecture",
     "-a",
-    type=click.Choice(["Full", "TDS", "V1"], case_sensitive=False),
+    type=click.Choice(["Full", "TDS", "V1", "Mug"], case_sensitive=False),
     help="CSM architecture",
     required=True,
     prompt="Architecture type",
@@ -134,6 +134,8 @@ def shcd(ctx, architecture, shcd, tabs, corners, edge, out, json_, log_):
         architecture = "network_v2"
     elif architecture.lower() == "tds":
         architecture = "network_v2_tds"
+    elif architecture.lower() == "mug":
+        architecture = "network_mug"
     elif architecture.lower() == "v1":
         architecture = "network_v1"
 

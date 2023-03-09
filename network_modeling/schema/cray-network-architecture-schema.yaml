@@ -22,6 +22,7 @@
 network_v1: include('v1_architecture_profile', required=False)
 network_v2: include('v2_architecture_profile')
 network_v2_tds: include('v2_architecture_profile')
+network_mug: include('v2_architecture_profile')
 ---
 v1_architecture_profile:
   name: str(min=1)
