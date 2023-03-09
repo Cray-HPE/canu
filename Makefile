@@ -83,19 +83,19 @@ image: prod_image
 	docker tag '${NAME}:${VERSION}' '${NAME}:${VERSION}-p${PYTHON_VERSION}'
 
 deps_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --build-arg ALPINE_IMAGE='${ALPINE_IMAGE}' --tag '${NAME}:${VERSION}-deps' -f Dockerfile --target deps .
+	docker build --progress plain --no-cache --pull --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --tag '${NAME}:${VERSION}-deps' -f Dockerfile --target deps .
 
 dev_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --build-arg ALPINE_IMAGE='${ALPINE_IMAGE}' --tag '${NAME}:${VERSION}-dev' -f Dockerfile --target dev .
+	docker build --progress plain --no-cache --pull --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --tag '${NAME}:${VERSION}-dev' -f Dockerfile --target dev .
 
 docs_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --build-arg ALPINE_IMAGE='${ALPINE_IMAGE}' --tag '${NAME}:${VERSION}-docs' -f Dockerfile --target docs .
+	docker build --progress plain --no-cache --pull --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --tag '${NAME}:${VERSION}-docs' -f Dockerfile --target docs .
 
 build_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --build-arg ALPINE_IMAGE='${ALPINE_IMAGE}' --tag '${NAME}:${VERSION}-build' -f Dockerfile --target build .
+	docker build --progress plain --no-cache --pull --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --tag '${NAME}:${VERSION}-build' -f Dockerfile --target build .
 
 prod_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --build-arg ALPINE_IMAGE='${ALPINE_IMAGE}' --tag '${NAME}:${VERSION}' -f Dockerfile --target prod .
+	docker build --progress plain --no-cache --pull --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --tag '${NAME}:${VERSION}' -f Dockerfile --target prod .
 
 dev:
 	./canuctl -d
