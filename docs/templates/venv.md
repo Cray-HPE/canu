@@ -2,7 +2,7 @@
 
 Besides using the CANU container, setting up a Python virtual environment and installing canu from this repo is another option for using and developing CANU.
 
-```shell
+```bash
 git clone
 cd canu
 python3 -m venv .venv
@@ -24,7 +24,7 @@ python3 -m pip install --editable .
 
 You may also want to install some CANU's extras if you are developing it.  For example, you may want to run some of the unit tests, or generate new documentation.  These extras can be seen in `pyproject.toml`.  
 
-```
+```bash
 python3 -m pip install '.[docs,lint,test]'
 ```
 
