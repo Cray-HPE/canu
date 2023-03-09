@@ -476,5 +476,3 @@ def config(
         click.secho(dash)
         for x in all_unknown:
             click.secho(x, fg="bright_white")
-
-    return

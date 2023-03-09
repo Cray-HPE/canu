@@ -477,7 +477,6 @@ def config(
         click.secho(dash)
         for x in unknown:
             click.secho(x, fg="bright_white")
-    return
 
 
 def get_shasta_name(name, mapper):
