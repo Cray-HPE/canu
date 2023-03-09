@@ -20,9 +20,9 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 # STAGE 1 - install build dependencies and activate virtualenv
-ARG         ALPINE_IMAGE
+ARG         ALPINE_IMAGE="artifactory.algol60.net/docker.io/library/alpine:3.17"
 FROM        ${ALPINE_IMAGE} AS deps
-ARG         PYTHON_VERSION
+ARG         PYTHON_VERSION='3.10'
 USER        root
 WORKDIR     /root
 VOLUME      [ "/root/mounted" ]
