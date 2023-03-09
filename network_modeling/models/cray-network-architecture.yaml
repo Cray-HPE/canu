@@ -791,6 +791,20 @@ network_mug:
           speed: 10
         - name: "river_bmc_leaf"
           speed: 1
+    - name: "river_ncn_node_2_port_gigabyte"
+      model: "river_ncn_node_2_port_gigabyte"
+      connections:
+        - name: "spine"
+          speed: 40
+        - name: "river_bmc_leaf"
+          speed: 1
+    - name: "river_ncn_node_4_port_gigabyte"
+      model: "river_ncn_node_4_port_gigabyte"
+      connections:
+        - name: "spine"
+          speed: 40
+        - name: "river_bmc_leaf"
+          speed: 1
   lookup_mapper:
     - lookup_name:
         - "mn"
