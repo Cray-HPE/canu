@@ -201,7 +201,12 @@ def network(
             "replace": r"\1 <removed>",
         },
     ]
-    with click_spinner.spinner():
+    with click_spinner.spinner(
+        beep=False,
+        disable=False,
+        force=False,
+        stream=sys.stdout,
+    ):
         print(
             "  Connecting",
             end="\r",

@@ -29,7 +29,6 @@ from pathlib import Path
 import sys
 
 import click
-from click_help_colors import HelpColorsCommand
 from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
@@ -37,6 +36,7 @@ from hier_config import HConfig, Host
 from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 from ruamel.yaml import YAML
 
+from canu.style import Style
 from canu.utils.cache import cache_directory
 from canu.validate.switch.config.config import (
     compare_config,
@@ -78,9 +78,7 @@ host = Host("example.rtr", "aoscx", options)
 
 
 @click.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @click.option(
     "--csm",
@@ -196,7 +194,12 @@ def config(
 
         credentials = {"username": username, "password": password}
         ips_length = len(ips)
-        with click_spinner.spinner():
+        with click_spinner.spinner(
+            beep=False,
+            disable=False,
+            force=False,
+            stream=sys.stdout,
+        ):
             for i, ip in enumerate(ips, start=1):
                 if not json_:
                     print(
