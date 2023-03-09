@@ -21,9 +21,9 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that report the configuration version."""
 import logging
+import sys
 
 import click
-from click_help_colors import HelpColorsCommand
 import click_spinner
 from nornir import InitNornir
 from nornir.core.filter import F
@@ -31,14 +31,13 @@ from nornir_salt.plugins.tasks import netmiko_send_commands
 from nornir_scrapli.tasks import send_command
 from ttp import ttp
 
+from canu.style import Style
 from canu.utils.host_alive import host_alive
 from canu.utils.inventory import inventory
 
 
 @click.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @click.option(
     "--sls-file",
@@ -128,7 +127,12 @@ def version(ctx, username, password, sls_file, sls_address, network, log_):
     dell_hosts = online_hosts.filter(F(platform="dell_os10"))
 
     # run the version check
-    with click_spinner.spinner():
+    with click_spinner.spinner(
+        beep=False,
+        disable=False,
+        force=False,
+        stream=sys.stdout,
+    ):
         print(
             "  Running version check on switches...",
             end="\r",

@@ -129,5 +129,10 @@ def command(
             )
         return results
 
-    with click_spinner.spinner():
+    with click_spinner.spinner(
+        beep=False,
+        disable=False,
+        force=False,
+        stream=sys.stdout,
+    ):
         print_result(send_command())

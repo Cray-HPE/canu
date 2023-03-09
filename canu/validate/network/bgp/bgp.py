@@ -21,22 +21,21 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate the network bgp."""
 from collections import defaultdict
+import sys
 
 import click
-from click_help_colors import HelpColorsCommand
 import click_spinner
 import natsort
 from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
 
+from canu.style import Style
 from canu.utils.sls import pull_sls_networks
 from canu.utils.vendor import switch_vendor
 
 
 @click.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @click.option("--username", default="admin", show_default=True, help="Switch username")
 @click.option(
@@ -93,7 +92,12 @@ def bgp(ctx, username, password, verbose, network):
         sls_cache["HMN_IPs"]["sw-spine-001"],
         sls_cache["HMN_IPs"]["sw-spine-002"],
     ]
-    with click_spinner.spinner():
+    with click_spinner.spinner(
+        beep=False,
+        disable=False,
+        force=False,
+        stream=sys.stdout,
+    ):
         for ip in spine_switches:
             print(
                 "  Connecting",

@@ -24,9 +24,9 @@ from collections import defaultdict
 import ipaddress
 import logging
 import re
+import sys
 
 import click
-from click_help_colors import HelpColorsCommand
 from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
@@ -34,14 +34,13 @@ from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
 
 from canu.report.switch.cabling.cabling import get_lldp, print_lldp
+from canu.style import Style
 
 log = logging.getLogger("report_cabling")
 
 
 @click.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @optgroup.group(
     "Network cabling IPv4 input sources",
@@ -145,7 +144,12 @@ def cabling(ctx, ips, ips_file, username, password, out, view, log_):
     errors = []
     ips_length = len(ips)
     if ips:
-        with click_spinner.spinner():
+        with click_spinner.spinner(
+            beep=False,
+            disable=False,
+            force=False,
+            stream=sys.stdout,
+        ):
             for i, ip in enumerate(ips, start=1):
                 print(
                     f"  Connecting to {ip} - Switch {i} of {ips_length}        ",

@@ -28,12 +28,12 @@ import sys
 from urllib.parse import unquote
 
 import click
-from click_help_colors import HelpColorsCommand
 import natsort
 from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
 import urllib3
 
+from canu.style import Style
 from canu.utils.cache import cache_switch
 from canu.utils.mac import find_mac
 from canu.utils.ssh import netmiko_command, netmiko_commands
@@ -44,9 +44,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 @click.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @click.option("--ip", required=True, help="The IP address of the switch")
 @click.option("--username", default="admin", show_default=True, help="Switch username")

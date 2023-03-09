@@ -21,13 +21,13 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU generate switch commands."""
 import click
-from click_help_colors import HelpColorsGroup
 
 from canu.generate.switch.config import config
+from canu.style import Style
 
 
 @click.group(
-    cls=HelpColorsGroup,
+    cls=Style.CanuHelpColorsGroup,
     help_headers_color="yellow",
     help_options_color="blue",
 )

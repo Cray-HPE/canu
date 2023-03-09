@@ -21,17 +21,15 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands report on the switch network."""
 import click
-from click_help_colors import HelpColorsGroup
 
 from canu.report.network.cabling import cabling
 from canu.report.network.firmware import firmware
 from canu.report.network.version import version
+from canu.style import Style
 
 
 @click.group(
-    cls=HelpColorsGroup,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsGroup,
 )
 @click.pass_context
 def network(ctx):
