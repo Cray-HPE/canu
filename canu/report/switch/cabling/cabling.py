@@ -144,30 +144,54 @@ def cabling(
 
     # Annotate LLDP data with Kea lease data via MAC lookup.
     try:
-        add_kea_metadata_to_lldp(switch_dict, kea_lease_file)
+        if kea_lease_file is not None:
+            kea_json = json.load(kea_lease_file)
+            add_kea_metadata_to_lldp(switch_dict, kea_json)
     except json.JSONDecodeError:
         click.secho(
             f"The Kea lease file {kea_lease_file.name} is not valid JSON.  LLDP data will not be annotated.",
             fg="white",
             bg="red",
         )
+    except Exception:
+        click.secho(
+            "An error occurred while annotating LLDP data with Kea leases.  Some Kea data will not be used.",
+            fg="white",
+            bg="red",
+        )
 
     # Annotate LLDP data with SLS file data via MAC lookup.
     try:
-        add_sls_metadata_to_lldp(switch_dict, arp, sls_file)
+        if sls_file is not None:
+            sls_json = json.load(sls_file)
+            add_sls_metadata_to_lldp(switch_dict, sls_json)
     except json.JSONDecodeError:
         click.secho(
             f"The SLS  file {sls_file.name} is not valid JSON.  LLDP data will not be annotated.",
             fg="white",
             bg="red",
         )
+    except Exception:
+        click.secho(
+            "An error occurred while annotating LLDP data with SLS.  Some SLS data will not be used.",
+            fg="white",
+            bg="red",
+        )
 
     # Annotate LLDP data with SMD ethernetInterfaces data
     try:
-        add_smd_metadata_to_lldp(switch_dict, smd_file)
+        if smd_file is not None:
+            smd_json = json.load(smd_file)
+            add_smd_metadata_to_lldp(switch_dict, smd_json)
     except json.JSONDecodeError:
         click.secho(
             f"The SMD  file {smd_file.name} is not valid JSON.  LLDP data will not be annotated.",
+            fg="white",
+            bg="red",
+        )
+    except Exception:
+        click.secho(
+            "An error occurred while annotating LLDP data with SMD.  Some SMD data will not be used.",
             fg="white",
             bg="red",
         )
@@ -881,29 +905,14 @@ def get_lldp_mellanox(ip, credentials, return_error):
     return switch_json, lldp_dict, arp
 
 
-def add_kea_metadata_to_lldp(switch_info, kea_lease_file):
+def add_kea_metadata_to_lldp(switch_info, kea_json):
     """Annotate existing switch LLDP data with data from Kea leases.
 
     Args:
         switch_info: Dictionary with switch platform_name, hostname and IP address.
-        kea_lease_file: JSON file export from Kea API call.
-
-    Raises:
-        UnicodeDecodeError: Invalid Kea JSON file.
+        kea_json: JSON export from Kea API call.
     """
-    if kea_lease_file is None:
-        return
-
     log.debug("Adding Kea metadata to switch LLDP data")
-
-    try:
-        kea_json = json.load(kea_lease_file)
-    except (json.decoder.JSONDecodeError, UnicodeDecodeError) as error:
-        log.error(
-            f"The file {kea_lease_file.name} is not valid JSON.  LLDP data will not be annotated.",
-        )
-        log.error(error)
-        raise error
 
     # Create mac-to-name lookup table from Kea data
     kea_lookup = defaultdict()
@@ -937,32 +946,19 @@ def add_kea_metadata_to_lldp(switch_info, kea_lease_file):
         log.debug(f"Kea hostname is {hostname} for LLDP MAC {lldp_mac}")
 
 
-def add_sls_metadata_to_lldp(switch_info, arp, sls_file):
+def add_sls_metadata_to_lldp(switch_info, sls_json):
     """Annotate existing switch LLDP data with data from SLS.
 
     Args:
         switch_info: Dictionary with switch platform_name, hostname and IP address.
-        arp: ARP dictionary
-        sls_file: JSON file export from SLS API call.
-
-    Raises:
-        UnicodeDecodeError: Invalid Kea JSON file.
+        sls_json: JSON export from SLS API call.
     """
-    if sls_file is None:
-        return
-
     log.debug("Adding SLS metadata to switch LLDP data")
-    try:
-        sls_json = json.load(sls_file)
-    except (json.decoder.JSONDecodeError, UnicodeDecodeError) as error:
-        log.error(
-            f"The file {sls_file.name} is not valid JSON.  LLDP data will not be annotated.",
-        )
-        log.error(error)
-        raise error
 
     sls_ip_lookup = defaultdict()
-    networks = Managers.NetworkManager(sls_json.get("Networks"))
+    # Create a clone of the original file because Managers manipulate live data.
+    original_networks = json.loads(json.dumps(sls_json.get("Networks")))
+    networks = Managers.NetworkManager(original_networks)
     for network in networks.values():
         for subnet in network.subnets().values():
             for reservation in subnet.reservations().values():
@@ -984,29 +980,14 @@ def add_sls_metadata_to_lldp(switch_info, arp, sls_file):
             break
 
 
-def add_smd_metadata_to_lldp(switch_info, smd_file):
+def add_smd_metadata_to_lldp(switch_info, smd_json):
     """Annotate existing switch LLDP data with data from SMD ethernetInterfaces.
 
     Args:
         switch_info: Dictionary with switch platform_name, hostname and IP address
-        smd_file: JSON file exported from SMD/HSM ethernetInterfaces
-
-    Raises:
-        UnicodeDecodeError: Invalid Kea JSON file.
+        smd_json: JSON exported from SMD/HSM ethernetInterfaces
     """
-    if smd_file is None:
-        return
-
     log.debug("Adding SMD metadata to switch LLDP data")
-
-    try:
-        smd_json = json.load(smd_file)
-    except (json.decoder.JSONDecodeError, UnicodeDecodeError) as err:
-        log.error(
-            f"The file {smd_file.name} is not valid JSON.  LLDP data will not be annotated.",
-        )
-        log.error(err)
-        raise err
 
     # Create mac-to-name lookup table from SMD data
     smd_lookup = defaultdict()
@@ -1048,7 +1029,6 @@ def add_heuristic_metadata_to_lldp(switch_info):
 
     Args:
         switch_info: Dictionary with switch platform_name, hostname and IP address
-
     """
     # TODO add more Dell, Mellanox, Gigabyte and Intel heuristics
     heuristic_lookup = {
@@ -1167,7 +1147,7 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
                     description,
                 )
             if len(arp_list) > 0 and neighbor_description == "":
-                neighbor_description = "No LLDP data, check ARP vlan info."
+                neighbor_description = "ARP data: MAC, IP and VLAN."
             duplicate = False
             if len(lldp_dict[port_number]) > 1:
                 duplicate = True
