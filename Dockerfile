@@ -147,14 +147,15 @@ RUN         addgroup -S canu && \
 USER        canu
 WORKDIR     /home/canu
 RUN         mkdir -p /home/canu/mounted
-ENV         CANU_NET="HMN" \
-            KUBECONFIG="/etc/kubernetes/admin.conf" \
+ENV         CANU_NET=HMN \
+            KUBECONFIG=/etc/kubernetes/admin.conf \
+            PATH=$VIRTUAL_ENV/bin:$PATH \
             PS1="canu \w$ " \
             REQUESTS_CA_BUNDLE="" \
-            SLS_API_GW="api-gw-service.local" \
+            SLS_API_GW=api-gw-service.local \
             SLS_FILE="" \
             SLS_TOKEN="" \
             SSH_AUTH_SOCK=/ssh-agent \
-            SWITCH_USERNAME="admin" \
+            SWITCH_USERNAME=admin \
             SWITCH_PASSWORD=""
 CMD         [ "sh" ]
