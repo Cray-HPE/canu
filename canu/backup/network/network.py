@@ -26,7 +26,6 @@ from pathlib import Path
 import sys
 
 import click
-from click_help_colors import HelpColorsCommand
 import click_spinner
 from netutils.config.clean import sanitize_config
 from nornir import InitNornir
@@ -36,6 +35,7 @@ from nornir_salt.plugins.functions import ResultSerializer
 from nornir_salt.plugins.tasks import tcp_ping
 from nornir_scrapli.tasks import send_command
 
+from canu.style import Style
 from canu.utils.inventory import inventory
 
 # Get project root directory
@@ -54,9 +54,7 @@ else:
     help="Switch password",
 )
 @click.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @click.option(
     "--sls-file",
