@@ -37,6 +37,7 @@ from canu.cache import cache
 from canu.config import config
 from canu.generate import generate
 from canu.report import report
+from canu.style import Style
 from canu.test import test
 from canu.utils.cache import cache_switch
 from canu.validate import validate
