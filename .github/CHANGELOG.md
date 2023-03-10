@@ -2,20 +2,7 @@
 
 ## [UNRELEASED]
 
-- 
 
-### [1.7.1]
-
-- Fix dell unused port template
-- Fix dell CDU template
-- Fix dell leaf template
-- Improve `canu validate switch config` for dell
-- Increase netmiko timeout
-- Remove `canu send`
-- Remove `canu validate network config`
-- Remove support for mellanox when using `canu validate switch config --remdation`
-- Fix ordering of mellanox configuration
-- Bump hier config version to 2.2.2
 
 ## [1.7.0]
 
@@ -29,6 +16,16 @@
 - Add better LLDP data error handling for `canu report network cabling` and `canu validate network cabling`.
 - Refine error messaging for failed logins.
 - Detect and respond to a rare condition where LLDP queries to Mellanox switches succeed, but the return data is not JSON.
+- Fix dell unused port template
+- Fix dell CDU template
+- Fix dell leaf template
+- Improve `canu validate switch config` for dell
+- Increase netmiko timeout
+- Remove `canu send`
+- Remove `canu validate network config`
+- Remove support for mellanox when using `canu validate switch config --remdation`
+- Fix ordering of mellanox configuration
+- Bump hier config version to 2.2.2
 
 ### [1.6.35]
 
