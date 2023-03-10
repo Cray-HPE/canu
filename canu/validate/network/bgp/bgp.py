@@ -225,8 +225,6 @@ def get_bgp_neighbors(ip, credentials, asn, network):
             bgp_neighbors, switch_info = get_bgp_neighbors_dell(
                 ip,
                 credentials,
-                asn,
-                network,
             )
         elif vendor == "mellanox":
             bgp_neighbors, switch_info = get_bgp_neighbors_mellanox(

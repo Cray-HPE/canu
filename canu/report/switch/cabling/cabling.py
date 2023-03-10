@@ -216,7 +216,6 @@ def get_lldp_aruba(ip, credentials, return_error=False):
         switch_info = switch_info_response.json()
         switch_info["ip"] = ip
         switch_info["vendor"] = "aruba"
-        switch_info["hostname"] = switch_info["hostname"]
 
         # GET LLDP neighbors
         neighbors = session.get(
