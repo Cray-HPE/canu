@@ -4,6 +4,19 @@
 
 - 
 
+### [1.7.1]
+
+- Fix dell unused port template
+- Fix dell CDU template
+- Fix dell leaf template
+- Improve `canu validate switch config` for dell
+- Increase netmiko timeout
+- Remove `canu send`
+- Remove `canu validate network config`
+- Remove support for mellanox when using `canu validate switch config --remdation`
+- Fix ordering of mellanox configuration
+- Bump hier config version to 2.2.2
+
 ## [1.7.0]
 
 - adjusted canuctl script to work with ALPINE_IMAGE/ALPINE_VERSION vars in the Dockerfile
