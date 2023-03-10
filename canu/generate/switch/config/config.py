@@ -619,7 +619,7 @@ def generate_switch_config(
         click.secho(
             f"For switch {switch_name}, the type cannot be determined. Please check the switch name and try again.",
             fg="red",
-        ),
+        )
         return Exception()
     elif node_shasta_name == "sw-edge" and float(csm) >= 1.2:
         templates["sw-edge"] = {
@@ -635,7 +635,7 @@ def generate_switch_config(
         click.secho(
             f"{switch_name} is not a switch. Only switch config can be generated.",
             fg="red",
-        ),
+        )
         return Exception()
 
     if preserve:
@@ -1660,9 +1660,9 @@ def groupby_vlan_range(vlan_list):
 
     values = []
     vlans.sort()
-    for _group_id, members in groupby(enumerate(vlans), key=_group_id):  # noqa: B020
-        members = list(members)
-        first, last = members[0][1], members[-1][1]
+    for _group_id, members in groupby(enumerate(vlans), key=_group_id):  # noqa: B020,B031
+        members = list(members)  # noqa: B031
+        first, last = members[0][1], members[-1][1]  # noqa: B031
 
         if first == last:
             values.append(str(first))
