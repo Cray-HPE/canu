@@ -27,7 +27,6 @@ from pathlib import Path
 import sys
 
 import click
-from click_help_colors import HelpColorsCommand
 from jinja2 import Environment
 from nornir import InitNornir
 from nornir.core.filter import F
@@ -36,6 +35,7 @@ from nornir_salt.plugins.processors import TestsProcessor
 from nornir_salt.plugins.tasks import netmiko_send_commands, scrapli_send_commands
 import yaml
 
+from canu.style import Style
 from canu.utils.host_alive import host_alive
 from canu.utils.inventory import inventory
 from canu.utils.sls_utils.Managers import NetworkManager
@@ -71,9 +71,7 @@ csm_options = canu_config["csm_versions"]
     help="Switch password",
 )
 @click.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @click.option(
     "--sls-file",
