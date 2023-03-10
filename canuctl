@@ -33,7 +33,8 @@ trap 'die ${LINENO} "$BASH_COMMAND"' ERR
 CANU_IMAGE="artifactory.algol60.net/csm-docker/stable/canu"
 CANU_TAG="latest"
 # Use the publicly available alpine image so users do not need to log in
-ALPINE_IMAGE="alpine:3.17"
+ALPINE_IMAGE="alpine"
+ALPINE_VERSION="3.17"
 PYTHON_VERSION="3.10"
 
 # die prints the line number and command that failed
@@ -170,6 +171,7 @@ main() {
     if "${PLATFORM}" build \
       --build-arg ALPINE_IMAGE="${ALPINE_IMAGE}" \
       --build-arg PYTHON_VERSION="${PYTHON_VERSION}" \
+      --build-arg ALPINE_VERSION="${ALPINE_VERSION}" \
       --tag "${CONTAINER_NAME}:${CANU_TAG}" \
       -f Dockerfile \
       --target "${TARGET}" .; then
