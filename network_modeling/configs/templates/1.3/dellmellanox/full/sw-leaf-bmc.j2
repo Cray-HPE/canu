@@ -1,5 +1,6 @@
 {#- sw-leaf-bmc #}
 {%- include '1.3/dellmellanox/common/unknown.j2' %}
+ip vrf default
 ip vrf Customer
 ip name-server {{ variables.NMNLB_DNS }}
 hostname {{ variables.HOSTNAME }}

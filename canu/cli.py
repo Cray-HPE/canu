@@ -37,7 +37,6 @@ from canu.cache import cache
 from canu.config import config
 from canu.generate import generate
 from canu.report import report
-from canu.send import send
 from canu.style import Style
 from canu.test import test
 from canu.utils.cache import cache_switch
@@ -92,7 +91,6 @@ cli.add_command(cache.cache)
 cli.add_command(config.config)
 cli.add_command(generate.generate)
 cli.add_command(report.report)
-cli.add_command(send.send)
 cli.add_command(validate.validate)
 cli.add_command(test.test)
 
