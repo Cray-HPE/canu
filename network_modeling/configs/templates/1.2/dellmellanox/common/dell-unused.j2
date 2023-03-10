@@ -4,6 +4,7 @@ interface ethernet1/1/{{ port }}
  shutdown
  switchport access vlan 1
  flowcontrol receive on
+ flowcontrol transmit off
 
 {%- endfor %}
 {#- end unused #}

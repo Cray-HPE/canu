@@ -1,9 +1,4 @@
 sw-spine-001: |
-    interface ethernet 1/1 speed 10G force
-    interface ethernet 1/1 description "sw-spine02-1/16"
-    interface ethernet 1/1 no switchport force
-    interface ethernet 1/1 ip address 10.102.255.14/30 primary
-    interface ethernet 1/1 dcb priority-flow-control mode on force
     ip route vrf default 0.0.0.0/0 10.102.255.13
     interface ethernet 1/16 speed 10G force
     interface ethernet 1/16 description "sw-spine02-1/16"

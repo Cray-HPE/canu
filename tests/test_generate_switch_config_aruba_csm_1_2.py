@@ -42,6 +42,7 @@ tabs = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners = "J14,T44,J14,T53,J14,T34,J14,T27"
 sls_file_name = "sls_input_file_csm_1.2.json"
 sls_file = path.join(test_file_directory, "data", sls_file_name)
+
 csm = "1.2"
 switch_name = "sw-spine-001"
 cache_minutes = 0
