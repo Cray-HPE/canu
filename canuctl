@@ -92,9 +92,17 @@ set_mount_options() {
 run_container() {
   # if the ssh socket is not set, then   do not mount it into the container
   if [[ -z "${SSH_AUTH_SOCK:-}" ]]; then
-    cmd="${PLATFORM} run -it --rm --net=host -v ${PWD}:${MOUNTED}:${MOUNTOPTS} -v ${K8S_DIR}:${K8S_MOUNT_DIR}:${MOUNTOPTS_KUBE} --name ${CONTAINER_NAME} ${IMAGE_AND_TAG}"
+    if [[ -d "${K8S_DIR}" ]]; then
+      cmd="${PLATFORM} run -it --rm --net=host -v ${PWD}:${MOUNTED}:${MOUNTOPTS} -v ${K8S_DIR}:${K8S_MOUNT_DIR}:${MOUNTOPTS_KUBE} --name ${CONTAINER_NAME} ${IMAGE_AND_TAG}"
+    else 
+      cmd="${PLATFORM} run -it --rm --net=host -v ${PWD}:${MOUNTED}:${MOUNTOPTS} --name ${CONTAINER_NAME} ${IMAGE_AND_TAG}"
+    fi
   else
-    cmd="${PLATFORM} run -it --rm --net=host -v ${PWD}:${MOUNTED}:${MOUNTOPTS} -v ${K8S_DIR}:${K8S_MOUNT_DIR}:${MOUNTOPTS_KUBE} -v ${SSH_AUTH_SOCK}:/ssh-agent:${MOUNTOPTS_SSH} --name ${CONTAINER_NAME} ${IMAGE_AND_TAG}"
+    if [[ -d "${K8S_DIR}" ]]; then
+      cmd="${PLATFORM} run -it --rm --net=host -v ${PWD}:${MOUNTED}:${MOUNTOPTS} -v ${K8S_DIR}:${K8S_MOUNT_DIR}:${MOUNTOPTS_KUBE} -v ${SSH_AUTH_SOCK}:/ssh-agent:${MOUNTOPTS_SSH} --name ${CONTAINER_NAME} ${IMAGE_AND_TAG}"
+    else
+      cmd="${PLATFORM} run -it --rm --net=host -v ${PWD}:${MOUNTED}:${MOUNTOPTS} -v ${SSH_AUTH_SOCK}:/ssh-agent:${MOUNTOPTS_SSH} --name ${CONTAINER_NAME} ${IMAGE_AND_TAG}"
+    fi
   fi
   
   $cmd
