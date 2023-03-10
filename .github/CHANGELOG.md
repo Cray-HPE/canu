@@ -1,7 +1,12 @@
 ## Changelog
 
+## [UNRELEASED]
+
+- 
+
 ## [1.7.0]
 
+- adjusted canuctl script to work with ALPINE_IMAGE/ALPINE_VERSION vars in the Dockerfile
 - By default, do not auth to artifactory for image when using `canuctl`
 - Add canu docs in three formats
 - Remove drawing code and dependencies
