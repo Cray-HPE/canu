@@ -371,6 +371,7 @@ def get_lldp_aruba(ip, credentials, return_error=False):
                     "port_description": neighbor_info["port_description"],
                     "port_id_subtype": neighbor_info["port_id_subtype"],
                     "port_id": lldp_info["port_id"],
+                    "data_sources": "LLDP",
                 }
 
                 lldp_dict[interface].append(lldp_neighbor)
@@ -403,6 +404,7 @@ def get_lldp_aruba(ip, credentials, return_error=False):
                         "chassis_name": "",
                         "port_id": mac,
                         "port_id_subtype": "link_local_addr",
+                        "data_sources": "LLDP",
                     },
                 ]
 
@@ -545,6 +547,7 @@ def get_lldp_dell(ip, credentials, return_error):
                         "chassis_name": "",
                         "port_id": mac,
                         "port_id_subtype": "link_local_addr",
+                        "data_sources": "LLDP"
                     },
                 ]
 
@@ -803,6 +806,7 @@ def get_lldp_mellanox(ip, credentials, return_error):
                             "chassis_name": "",
                             "port_id": mac,
                             "port_id_subtype": "link_local_addr",
+                            "data_sources": "LLDP",
                         },
                     ]
 
@@ -942,7 +946,7 @@ def add_kea_metadata_to_lldp(switch_info, kea_json):
         if not hostname or hostname is None:
             continue
         v[0]["chassis_name"] = hostname
-        v[0]["port_description"] += "Kea data: Neighbor hostname by MAC"
+        v[0]["data_sources"] = f'{v[0]["data_sources"]}, Kea'
         log.debug(f"Kea hostname is {hostname} for LLDP MAC {lldp_mac}")
 
 
@@ -975,7 +979,9 @@ def add_sls_metadata_to_lldp(switch_info, sls_json):
             if f"{ip}:vlan" not in arp_data:
                 continue
             v[0]["chassis_name"] = hostname
-            v[0]["port_description"] += "SLS data: hostname associated to ARP data"
+            v[0]["data_sources"] += ""
+            v[0]["data_sources"] = f'{v[0]["data_sources"]}, SLS'
+
             log.debug(f"SLS hostname is {hostname} for ARP data {arp_data}")
             break
 
@@ -1017,7 +1023,7 @@ def add_smd_metadata_to_lldp(switch_info, smd_json):
         if not hostname or hostname is None:
             continue
         v[0]["chassis_name"] = hostname
-        v[0]["port_description"] += "SMD data: hostname associated to MAC"
+        v[0]["data_sources"] = f'{v[0]["data_sources"]}, SMD'
         log.debug(f"SMD hostname is {hostname} for LLDP MAC {lldp_mac}")
 
 
@@ -1053,7 +1059,8 @@ def add_heuristic_metadata_to_lldp(switch_info):
 
         if heuristic_record is None:
             continue
-        v[0]["port_description"] += f"Heuristic data: {heuristic_record}"
+        v[0]["data_sources"] = f'{v[0]["data_sources"]}, Heuristic'
+        v[0]["chassis_description"] = f'{v[0]["chassis_description"]} {heuristic_record}'
         log.debug(f"MAC {lldp_mac} often a {heuristic_record}")
 
 
@@ -1121,6 +1128,7 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
         "NEIGHBOR PORT",
         "PORT DESCRIPTION",
         "DESCRIPTION",
+        "DATA SOURCES"
     ]
 
     table = []
@@ -1159,7 +1167,7 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
                     neighbor_port,
                     neighbor_description,
                     port[index]["chassis_description"][:54] + str(arp_list),
-                    port[index]["port_id_subtype"],
+                    port[index]["data_sources"],
                     duplicate,
                 ],
             )
@@ -1177,13 +1185,14 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
 
     click.echo(dash, file=out)
     click.echo(
-        "{:<7s}{:^5s}{:<15s}{:<19s}{:<54s}{}".format(
+        "{:<7s}{:^5s}{:<16s}{:<19s}{:<40s}{:<40s}{}".format(
             heading[0],
             heading[1],
             heading[2],
             heading[3],
             heading[4],
             heading[5],
+            heading[6],
         ),
         file=out,
     )
@@ -1200,13 +1209,14 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
             text_color = "bright_white"
 
         click.secho(
-            "{:<7s}{:^5s}{:<15s}{:<19s}{:<54s}{}".format(
+            "{:<7s}{:^5s}{:<16s}{:<19s}{:<40s}{:<40s}{}".format(
                 row[0],
                 "==>",
                 row[1],
                 row[2],
-                row[3],
-                row[4],
+                row[3][:38],
+                row[4][:38],
+                row[5],
             ),
             fg=text_color,
             file=out,
