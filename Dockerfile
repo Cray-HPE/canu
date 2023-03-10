@@ -20,8 +20,11 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 # STAGE 1 - install build dependencies and activate virtualenv
-ARG         ALPINE_IMAGE=artifactory.algol60.net/docker.io/library/alpine:3.17
-FROM        ${ALPINE_IMAGE} AS deps
+ARG         ALPINE_IMAGE="artifactory.algol60.net/docker.io/library/alpine"
+ARG         ALPINE_VERSION="3.17"
+FROM        ${ALPINE_IMAGE}:${ALPINE_VERSION} AS deps
+ARG         PYTHON_VERSION='3.10'
+# hadolint ignore=DL3002
 USER        root
 WORKDIR     /root
 VOLUME      [ "/root/mounted" ]
@@ -36,21 +39,26 @@ RUN         apk add --no-cache \
               openssl~=3.0 \
               py3-pip~=22.3 \
               py3-virtualenv~=20.16 \
-              python3~=3.10 \
-              python3-dev~=3.10
+              py3-wheel~=0.38 \
+              python3~=${PYTHON_VERSION} \
+              python3-dev~=${PYTHON_VERSION}
 ENV         VIRTUAL_ENV=/opt/venv
 RUN         python -m venv $VIRTUAL_ENV
 ENV         PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # STAGE 2 - install canu in editable mode and generate docs
 FROM        deps AS dev
+# hadolint ignore=DL3002
 USER        root
 WORKDIR     /root
-VOLUME      [ "/root/mounted", "/ssh-agent" ]
+# must mount ${SSH_AUTH_SOCK} to /ssh-agent to use host ssh
+RUN         mkdir -p /home/canu/mounted
 ENV         VIRTUAL_ENV=/opt/venv \
             SSH_AUTH_SOCK=/ssh-agent
-RUN         apk --update add \
+RUN         apk --no-cache --update add \
               openssh-client~=9.1
+#shellcheck disable=SC1091 
+# hadolint ignore=DL3059
 RUN         source $VIRTUAL_ENV/bin/activate
 COPY        .flake8 ./.flake8
 COPY        .git/ ./.git
@@ -71,18 +79,22 @@ COPY        mkdocs.yml ./mkdocs.yml
 COPY        noxfile.py ./noxfile.py
 COPY        pyinstaller.py ./pyinstaller.py
 COPY        pyproject.toml ./pyproject.toml
-RUN         python -m pip install --editable .[ci,docs]
+#shellcheck disable=SC2102
+# hadolint ignore=DL3059
+RUN         python -m pip install --no-cache-dir --disable-pip-version-check --editable .[ci,docs]
+# hadolint ignore=DL3059
 RUN         nox -e docs
 
 # STAGE 3 - documentation image
-FROM        ${ALPINE_IMAGE} AS docs
+FROM        ${ALPINE_IMAGE}:${ALPINE_VERSION} AS docs
 USER        root
 ENV         VIRTUAL_ENV=/opt/venv
 RUN         apk add --no-cache \
-              py3-pip=22.3.1-r1 \
-              py3-virtualenv=20.16.7-r0 \
-              python3=3.10.10-r0 \
-              python3-dev=3.10.10-r0
+              py3-pip~=22.3 \
+              py3-virtualenv~=20.16 \
+              py3-wheel~=0.38 \
+              python3~="${PYTHON_VERSION}" \
+              python3-dev~="${PYTHON_VERSION}"
 COPY        --from=dev --chown=root:root $VIRTUAL_ENV $VIRTUAL_ENV
 RUN         addgroup -S canu && \
               adduser \
@@ -97,26 +109,29 @@ COPY        --from=dev --chown=canu:canu /root/docs /home/canu/docs
 COPY        --from=dev --chown=canu:canu /root/mkdocs.yml /home/canu/mkdocs.yml
 ENV         PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN         source $VIRTUAL_ENV/bin/activate
-EXPOSE      8000       
+EXPOSE      8000
 CMD         [ "mkdocs", "serve", "-a", "0.0.0.0:8000", "--config-file", "mkdocs.yml"]
 
 # STAGE 4 - build the binaries with pyinstaller
 FROM        dev AS build
+# hadolint ignore=DL3002
 USER        root
 WORKDIR     /root
-RUN         source $VIRTUAL_ENV/bin/activate
-RUN         python -m pip install . pyinstaller
+RUN         source "$VIRTUAL_ENV"/bin/activate
+# hadolint ignore=DL3059
+RUN         python -m pip install --no-cache-dir --disable-pip-version-check . pyinstaller
+# hadolint ignore=DL3059
 RUN         cp -pv pyinstaller.py pyinstaller.spec
+# hadolint ignore=DL3059
 RUN         pyinstaller --clean -y --dist ./dist/linux --workpath /tmp pyinstaller.spec
 
 # STAGE 5 - final production image
-FROM        ${ALPINE_IMAGE} AS prod
+FROM        ${ALPINE_IMAGE}:${ALPINE_VERSION} AS prod
 USER        root
 # ssh is needed for 'canu test' command
-RUN         apk --update add \
+RUN         apk --update --no-cache add \
               openssh-client~=9.1
 # must mount ${SSH_AUTH_SOCK} to /ssh-agent to use host ssh
-VOLUME      [ "/home/canu/mounted", "/ssh-agent" ]
 ENV         VIRTUAL_ENV=/opt/venv \
             SSH_AUTH_SOCK=/ssh-agent
 # copy the binaries.  The final image has the base image, ssh, and these binaries only
@@ -132,13 +147,15 @@ RUN         addgroup -S canu && \
 USER        canu
 WORKDIR     /home/canu
 RUN         mkdir -p /home/canu/mounted
-ENV         CANU_NET="HMN" \
+ENV         CANU_NET=HMN \
+            KUBECONFIG=/etc/kubernetes/admin.conf \
+            PATH=$VIRTUAL_ENV/bin:$PATH \
             PS1="canu \w$ " \
             REQUESTS_CA_BUNDLE="" \
-            SLS_API_GW="api-gw-service.local" \
+            SLS_API_GW=api-gw-service.local \
             SLS_FILE="" \
             SLS_TOKEN="" \
             SSH_AUTH_SOCK=/ssh-agent \
-            SWITCH_USERNAME="admin" \
+            SWITCH_USERNAME=admin \
             SWITCH_PASSWORD=""
 CMD         [ "sh" ]

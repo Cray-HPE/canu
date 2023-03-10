@@ -21,18 +21,46 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 #
-set -eo pipefail
-if [[ "${DEBUG:-false}" == "true" ]]; then
-  set -x
-fi
+set -e
+set -u
+set -o pipefail
+set -o functrace
 
-NAME=""
-NAME=artifactory.algol60.net/csm-docker/stable/canu
-IMAGE_VERSION="latest"
-platforms=("podman" "docker")
-PLATFORM=""
+# trap on error and print the line number and command
+trap 'die ${LINENO} "$BASH_COMMAND"' ERR
+
+
+CANU_IMAGE="artifactory.algol60.net/csm-docker/stable/canu"
+CANU_TAG="latest"
+# Use the publicly available alpine image so users do not need to log in
+ALPINE_IMAGE="alpine"
+ALPINE_VERSION="3.17"
+PYTHON_VERSION="3.10"
+
+# die prints the line number and command that failed
+die() {
+  local lineno="${1}"
+  local msg="${2}"
+  >&2 echo "**         **"
+  >&2 echo "** FAILURE ** $(basename "${BASH_SOURCE[0]}"):${FUNCNAME[*]:0:${#FUNCNAME[@]}-1}:$lineno:$msg"
+  >&2 echo "**         **"
+}
+
+usage() {
+  echo
+  echo "${BASH_SOURCE[0]} -d(ev) | -p(rod) [-r(ebuild)] [-i(mage) <image>] [args] [-h(elp)]"
+  echo
+  echo "  -d: run the dev container (editable environment for triage, debugging, and development)"
+  echo "  -p: run the prod container (lightweight, rootless canu for everyday use)"
+  echo "  -r: rebuild the container (default \${ALPINE_IMAGE}: ${ALPINE_IMAGE})"
+  echo "  -i: specify the image to use (default \${CANU_IMAGE}: ${CANU_IMAGE})"
+  echo "  -h: print this help message"
+  echo
+}
+
 detect_platforms() {
-
+  PLATFORM=""
+  platforms=("podman" "docker")
   # Find a container platform (podman, docker, etc...)
   for platform in "${platforms[@]}";do
     if which "${platform}" >/dev/null 2>&1;then
@@ -48,11 +76,36 @@ detect_platforms() {
   fi
 }
 
+set_mount_options() {
+  # Set mount options depending on container platform
+  if [[ $(basename "${PLATFORM}") == "podman" ]];then
+      MOUNTOPTS="Z,U"
+      MOUNTOPTS_SSH="ro"
+      MOUNTOPTS_KUBE="Z,U"
+  else
+      MOUNTOPTS="rw"
+      MOUNTOPTS_SSH="ro"
+      MOUNTOPTS_KUBE="ro"
+  fi
+}
 
-usage() {
-  echo
-  echo "${BASH_SOURCE[0]} -d(ev) | -p(rod) [-r(ebuild)] [-i(mage) <image>] [args] [-h(elp)]"
-  echo
+run_container() {
+  # if the ssh socket is not set, then   do not mount it into the container
+  if [[ -z "${SSH_AUTH_SOCK:-}" ]]; then
+    if [[ -d "${K8S_DIR}" ]]; then
+      cmd="${PLATFORM} run -it --rm --net=host -v ${PWD}:${MOUNTED}:${MOUNTOPTS} -v ${K8S_DIR}:${K8S_MOUNT_DIR}:${MOUNTOPTS_KUBE} --name ${CONTAINER_NAME} ${IMAGE_AND_TAG}"
+    else 
+      cmd="${PLATFORM} run -it --rm --net=host -v ${PWD}:${MOUNTED}:${MOUNTOPTS} --name ${CONTAINER_NAME} ${IMAGE_AND_TAG}"
+    fi
+  else
+    if [[ -d "${K8S_DIR}" ]]; then
+      cmd="${PLATFORM} run -it --rm --net=host -v ${PWD}:${MOUNTED}:${MOUNTOPTS} -v ${K8S_DIR}:${K8S_MOUNT_DIR}:${MOUNTOPTS_KUBE} -v ${SSH_AUTH_SOCK}:/ssh-agent:${MOUNTOPTS_SSH} --name ${CONTAINER_NAME} ${IMAGE_AND_TAG}"
+    else
+      cmd="${PLATFORM} run -it --rm --net=host -v ${PWD}:${MOUNTED}:${MOUNTOPTS} -v ${SSH_AUTH_SOCK}:/ssh-agent:${MOUNTOPTS_SSH} --name ${CONTAINER_NAME} ${IMAGE_AND_TAG}"
+    fi
+  fi
+  
+  $cmd
 }
 
 main() {
@@ -61,17 +114,15 @@ main() {
     exit 1
   fi
 
+  if [[ "${DEBUG:-false}" == "true" ]]; then
+    set -x
+  fi
+
+  # check if a container runtime is installed
   detect_platforms
 
-  # Defaults
-  MOUNTOPTS=""
-  image="$NAME:$IMAGE_VERSION"
-  dev=false
-  prod=true
-  mounted=""
-  name="${NAME}"
-  container_name="${name}"
-  rebuild=false
+  K8S_DIR=/etc/kubernetes
+  K8S_MOUNT_DIR=/etc/kubernetes
 
   # Parse short options
   OPTIND=1
@@ -79,70 +130,67 @@ main() {
   do
     case "$opt" in
       'h') usage; exit 0 ;;
-      'i') image=$OPTARG ;;
-      'r') rebuild=true ;;
-      'd') dev=true ;;
-      'p') prod=true ;;
+      'i') CANU_IMAGE=$OPTARG ;;
+      'r') REBUILD=true ;;
+      'd') DEV=true ;;
+      'p') PROD=true ;;
         *) usage >&2; exit 1 ;;
     esac
   done
   shift $((OPTIND - 1))
-
-  # Set mount options depending on container platform
-  if [[ $(basename "${PLATFORM}") == "podman" ]];then
-      MOUNTOPTS="Z,U"
-      MOUNTOPTS_SSH="ro"
-  else
-      MOUNTOPTS="rw"
-      MOUNTOPTS_SSH="ro"
-  fi
+  
+  set_mount_options
   
   # Set mounted directory depending on dev or prod
-  if [[ "$dev" == "true" ]];then
-    prod=false
-    mounted="/root/mounted"
-    image="${image}-dev"
-    container_name="${name}-dev"
-    target="dev"
-    tag="latest-${target}"
+  if [[ "${DEV:-false}" == "true" ]];then
+    # if dev is set, then prod is false explicitly
+    PROD=false
+    # the mount path in the dev container is /root/mounted
+    MOUNTED="/root/mounted"
+    # dev image is the same as prod, but with the suffix 'dev'
+    IMAGE_AND_TAG="${CANU_IMAGE}-dev:${CANU_TAG}"
+    CONTAINER_NAME="${CANU_IMAGE##*/}dev"
+    TARGET="dev"
   fi
 
-  if [[ "$prod" == "true" ]];then
-    dev=false
-    mounted="/home/canu/mounted"
-    #shellcheck disable=SC2269
-    image="${image}"
-    container_name="${name}-prod"
-    target="prod"
-    tag="latest-${target}"
+  if [[ "${PROD:-false}" == "true" ]];then
+    # if prod is set, then dev is false explicitly
+    DEV=false
+    # the mount path in the prod container is /home/canu/mounted
+    MOUNTED="/home/canu/mounted"
+    # prod image is just "canu"...
+    IMAGE_AND_TAG="${CANU_IMAGE}:${CANU_TAG}"
+    # ...as is the container name
+    CONTAINER_NAME="${CANU_IMAGE##*/}"
+    TARGET="prod"
   fi
 
-  if [[ -z $(${PLATFORM} image ls -q "${name}:${tag}") ]] || [[ "$rebuild" == "true" ]]; then
-    # if the image cannot be pulled, try building it instead
-    if ! "${PLATFORM}" pull "${image}"; then
-      >&2 echo "ERROR Image pull failed.  Attempting to build image ${image}..."
-      if "${PLATFORM}" build \
-        --build-arg PYTHON_VERSION="${PYTHON_VERSION}" \
-        --tag "${image}" \
-        -f Dockerfile \
-        --target "${target}" .; then
-        "${PLATFORM}" tag "${image}" "${name}:${tag}"
-      else
-        >&2 echo "ERROR Image build failed.  Exiting..."
-        exit 1
-      fi
+  # if the image does not exist
+  if [[ -z $(${PLATFORM} image ls -q "${IMAGE_AND_TAG}") ]]; then
+    # try to pull it
+    if ! "${PLATFORM}" pull "${IMAGE_AND_TAG}"; then
+      >&2 echo "ERROR Image pull failed.  Attempting to build ${CANU_IMAGE}."
+      REBUILD=true
     fi
   fi
 
-  # if the ssh socket is not set, then do not mount it into the container
-  if [[ -z "${SSH_AUTH_SOCK}" ]]; then
-    cmd="${PLATFORM} run -it --rm --net=host -v ${PWD}:${mounted}:${MOUNTOPTS} --name ${container_name##*/} ${image} ${*}"
-  else
-    cmd="${PLATFORM} run -it --rm --net=host -v ${PWD}:${mounted}:${MOUNTOPTS} -v ${SSH_AUTH_SOCK}:/ssh-agent:${MOUNTOPTS_SSH} --name ${container_name##*/} ${image} ${*}"
+    # if that fails, try to build it and tag the image
+  if [[ "${REBUILD:-}" == "true" ]]; then
+    if "${PLATFORM}" build \
+      --build-arg ALPINE_IMAGE="${ALPINE_IMAGE}" \
+      --build-arg PYTHON_VERSION="${PYTHON_VERSION}" \
+      --build-arg ALPINE_VERSION="${ALPINE_VERSION}" \
+      --tag "${CONTAINER_NAME}:${CANU_TAG}" \
+      -f Dockerfile \
+      --target "${TARGET}" .; then
+      "${PLATFORM}" tag "${CONTAINER_NAME}:${CANU_TAG}" "${IMAGE_AND_TAG}"
+    else
+      >&2 echo "ERROR Image build failed.  Exiting..."
+      exit 1
+    fi
   fi
-  
 
-  $cmd
+  run_container
 }
 
 # ${BASH_SOURCE[0]} is the name of the current file that the shell is reading regardless of whether it is being sourced or executed

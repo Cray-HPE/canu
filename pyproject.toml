@@ -44,7 +44,7 @@ dependencies = [
     'click-params==0.1.2',
     'click-spinner==0.1.10',
     'click==8.0.3',
-    'colorama==0.4.4',
+    'colorama==0.4.6',
     'emoji==2.2.0',
     'hier-config==2.2.2',
     'ipython==8.10.0',

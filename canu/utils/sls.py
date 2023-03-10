@@ -99,12 +99,7 @@ def pull_sls_networks(sls_file=None):
                 )
                 secret_dict = secret_obj.to_dict()
                 secret_base64_str = secret_dict["items"][0]["data"]["client-secret"]
-                on_debug(
-                    debug,
-                    "base64 secret from Kubernetes is {}".format(secret_base64_str),
-                )
                 secret = base64.b64decode(secret_base64_str.encode("utf-8"))
-                on_debug(debug, "secret from Kubernetes is {}".format(secret))
             except Exception as err:
                 print("Error collecting secret from Kubernetes: {}".format(err))
                 sys.exit(1)
@@ -119,8 +114,10 @@ def pull_sls_networks(sls_file=None):
         sls_cache = None
 
         if os.getenv("SLS_API_GW") is None:
+            # this is in mesh pod-to-pod communication
             sls_url = "http://cray-sls.services.svc.cluster.local/v1/networks"
         else:
+            # this is out of the mesh
             sls_url = "https://" + os.getenv("SLS_API_GW") + "/apis/sls/v1/networks"
         if cenv != "k8s":
             sls_url = "https://api-gw-service-nmn.local/apis/sls/v1/networks"
@@ -390,12 +387,7 @@ def pull_sls_hardware(sls_file=None):
                 )
                 secret_dict = secret_obj.to_dict()
                 secret_base64_str = secret_dict["items"][0]["data"]["client-secret"]
-                on_debug(
-                    debug,
-                    "base64 secret from Kubernetes is {}".format(secret_base64_str),
-                )
                 secret = base64.b64decode(secret_base64_str.encode("utf-8"))
-                on_debug(debug, "secret from Kubernetes is {}".format(secret))
             except Exception as err:
                 print("Error collecting secret from Kubernetes: {}".format(err))
                 sys.exit(1)
@@ -410,8 +402,10 @@ def pull_sls_hardware(sls_file=None):
         sls_cache = None
 
         if os.getenv("SLS_API_GW") is None:
+            # this is in mesh pod-to-pod communication
             sls_url = "http://cray-sls.services.svc.cluster.local/v1/hardware"
         else:
+            # this is out of the mesh
             sls_url = "https://" + os.getenv("SLS_API_GW") + "/apis/sls/v1/hardware"
         if cenv != "k8s":
             sls_url = "https://api-gw-service-nmn.local/apis/sls/v1/hardware"

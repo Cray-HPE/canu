@@ -25,11 +25,11 @@ import json
 import logging
 
 import click
-from click_help_colors import HelpColorsCommand
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from network_modeling.NetworkPort import NetworkPort
 from network_modeling.NodeLocation import NodeLocation
 
+from canu.style import Style
 from canu.validate.shcd.shcd import (
     node_list_warnings,
     print_node_list,
@@ -39,9 +39,7 @@ log = logging.getLogger("validate_paddle")
 
 
 @click.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @click.option(
     "--ccj",

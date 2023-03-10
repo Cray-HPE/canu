@@ -27,8 +27,6 @@ import sys
 
 import certifi
 import click
-from click_help_colors import HelpColorsCommand
-from click_help_colors import HelpColorsGroup
 import pkg_resources
 import requests
 from ruamel.yaml import YAML
@@ -69,9 +67,7 @@ CONTEXT_SETTING = {
 
 @click.group(
     context_settings=CONTEXT_SETTING,
-    cls=HelpColorsGroup,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsGroup,
 )
 @click.option(
     "--cache",
@@ -99,9 +95,7 @@ cli.add_command(test.test)
 
 
 @cli.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @click.option(
     "--sls-file",
