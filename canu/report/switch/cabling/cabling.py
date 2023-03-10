@@ -80,8 +80,8 @@ log = logging.getLogger("report_cabling")
 @click.option(
     "--heuristic-lookups",
     help="Make educated guesses and hints about what device is based on MAC.",
+    is_flag=True,
     default=False,
-    show_default=True,
 )
 @click.option(
     "--log",
@@ -98,7 +98,16 @@ log = logging.getLogger("report_cabling")
 )
 @click.pass_context
 def cabling(
-    ctx, ip, username, password, kea_lease_file, sls_file, smd_file, heuristic_lookups, log_, out,
+    ctx,
+    ip,
+    username,
+    password,
+    kea_lease_file,
+    sls_file,
+    smd_file,
+    heuristic_lookups,
+    log_,
+    out,
 ):
     """Report the live cabling of a switch on the network by using LLDP.
 
@@ -943,7 +952,6 @@ def add_sls_metadata_to_lldp(switch_info, arp, sls_file):
         return
 
     log.debug("Adding SLS metadata to switch LLDP data")
-
     try:
         sls_json = json.load(sls_file)
     except (json.decoder.JSONDecodeError, UnicodeDecodeError) as error:
@@ -958,7 +966,22 @@ def add_sls_metadata_to_lldp(switch_info, arp, sls_file):
     for network in networks.values():
         for subnet in network.subnets().values():
             for reservation in subnet.reservations().values():
-                sls_ip_lookup.update({str(reservation.ipv4_address()): reservation.name()})
+                sls_ip_lookup.update(
+                    {str(reservation.ipv4_address()): reservation.name()},
+                )
+    log.debug(f"SLS lookup table: {sls_ip_lookup}")
+
+    for _, v in switch_info.items():
+        if v[0].get("chassis_name"):
+            continue
+        arp_data = v[0]["arp_data"]
+        for ip, hostname in sls_ip_lookup.items():
+            if f"{ip}:vlan" not in arp_data:
+                continue
+            v[0]["chassis_name"] = hostname
+            v[0]["port_description"] += "SLS data: hostname associated to ARP data"
+            log.debug(f"SLS hostname is {hostname} for ARP data {arp_data}")
+            break
 
 
 def add_smd_metadata_to_lldp(switch_info, smd_file):
