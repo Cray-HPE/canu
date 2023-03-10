@@ -37,8 +37,7 @@ import urllib3
 from canu.style import Style
 from canu.utils.cache import cache_switch
 from canu.utils.mac import find_mac
-
-# from canu.utils.sls_utils import Managers
+from canu.utils.sls_utils import Managers
 from canu.utils.ssh import netmiko_command, netmiko_commands
 from canu.utils.vendor import switch_vendor
 
@@ -62,13 +61,19 @@ log = logging.getLogger("report_cabling")
 )
 @click.option(
     "--kea-lease-file",
-    help="Kea leases in JSON format from API call for MAC-to-hostname lookups.",
+    help="Kea leases in JSON format from API call used for MAC-to-hostname lookups.",
+    type=click.File("r"),
+    required=False,
+)
+@click.option(
+    "--sls-file",
+    help="SLS file in JSON format from API call used for MAC-to-hostname lookups.",
     type=click.File("r"),
     required=False,
 )
 @click.option(
     "--smd-file",
-    help="SMD ethernetInterfaces in JSON format from API call for MAC-to-hostname lookups.",
+    help="SMD ethernetInterfaces in JSON format from API call used for MAC-to-hostname lookups.",
     type=click.File("r"),
     required=False,
 )
@@ -93,7 +98,7 @@ log = logging.getLogger("report_cabling")
 )
 @click.pass_context
 def cabling(
-    ctx, ip, username, password, kea_lease_file, smd_file, heuristic_lookups, log_, out
+    ctx, ip, username, password, kea_lease_file, sls_file, smd_file, heuristic_lookups, log_, out,
 ):
     """Report the live cabling of a switch on the network by using LLDP.
 
@@ -115,6 +120,7 @@ def cabling(
         username: Switch username
         password: Switch password
         kea_lease_file: Name of the JSON file containing Kea leases
+        sls_file: Name of the JSON file containing SLS system data
         smd_file: Name of the JSON file containing SMD ethernetInterfaces
         heuristic_lookups: Turn off annotations to LLDP data based on common device use
         log_: Level of logging.
@@ -133,6 +139,16 @@ def cabling(
     except json.JSONDecodeError:
         click.secho(
             f"The Kea lease file {kea_lease_file.name} is not valid JSON.  LLDP data will not be annotated.",
+            fg="white",
+            bg="red",
+        )
+
+    # Annotate LLDP data with SLS file data via MAC lookup.
+    try:
+        add_sls_metadata_to_lldp(switch_dict, arp, sls_file)
+    except json.JSONDecodeError:
+        click.secho(
+            f"The SLS  file {sls_file.name} is not valid JSON.  LLDP data will not be annotated.",
             fg="white",
             bg="red",
         )
@@ -170,6 +186,7 @@ def get_lldp(ip, credentials, return_error=False):
         NetmikoTimeoutException: Timeout error connecting to switch
         NetmikoAuthenticationException: Authentication error connecting to switch
     """
+    log.debug("Collecting LLDP data")
     try:
         vendor = switch_vendor(ip, credentials, return_error)
 
@@ -207,6 +224,19 @@ def get_lldp(ip, credentials, return_error=False):
             bg="red",
         )
         return None, None, None
+
+    if arp or arp is not None:
+        log.debug("Adding ARP metadata to switch LLDP data")
+        for _, port in switch_dict.items():
+            for index, _ in enumerate(port):
+                arp_list = []
+                arp_list = [
+                    f"{arp[mac]['ip_address']}:{list(arp[mac]['port'])[0]}"
+                    for mac in arp
+                    if arp[mac]["mac"] == port[index]["mac_addr"]
+                ]
+                arp_list = ", ".join(arp_list)
+                port[index]["arp_data"] = arp_list
 
     return switch_info, switch_dict, arp
 
@@ -850,21 +880,23 @@ def add_kea_metadata_to_lldp(switch_info, kea_lease_file):
         kea_lease_file: JSON file export from Kea API call.
 
     Raises:
-        json.decoder.JSONDecodeError: Invalid Kea JSON file.
+        UnicodeDecodeError: Invalid Kea JSON file.
     """
     if kea_lease_file is None:
         return
 
-    # Create mac-to-name lookup table from Kea data
+    log.debug("Adding Kea metadata to switch LLDP data")
+
     try:
         kea_json = json.load(kea_lease_file)
-    except (json.decoder.JSONDecodeError, UnicodeDecodeError) as err:
+    except (json.decoder.JSONDecodeError, UnicodeDecodeError) as error:
         log.error(
-            f"The file {kea_lease_file.name} is not valid JSON.  LLDP data will not be annotated."
+            f"The file {kea_lease_file.name} is not valid JSON.  LLDP data will not be annotated.",
         )
-        log.error(err)
-        raise err
+        log.error(error)
+        raise error
 
+    # Create mac-to-name lookup table from Kea data
     kea_lookup = defaultdict()
     for lease in kea_json[0]["arguments"]["leases"]:
         lease_dict = {
@@ -873,13 +905,13 @@ def add_kea_metadata_to_lldp(switch_info, kea_lease_file):
                 "mac_address": lease.get("hw-address"),
                 "vlan": lease.get("subnet-id"),
                 "ipv4address": lease.get("ip-address"),
-            }
+            },
         }
         kea_lookup.update(lease_dict)
     log.debug(f"Kea lookup table: {kea_lookup}")
 
     # Fill in missing names with Kea MAC data
-    for k, v in switch_info.items():
+    for _, v in switch_info.items():
         if v[0].get("chassis_name"):
             continue
         lldp_mac = v[0].get("mac_addr")
@@ -896,6 +928,39 @@ def add_kea_metadata_to_lldp(switch_info, kea_lease_file):
         log.debug(f"Kea hostname is {hostname} for LLDP MAC {lldp_mac}")
 
 
+def add_sls_metadata_to_lldp(switch_info, arp, sls_file):
+    """Annotate existing switch LLDP data with data from SLS.
+
+    Args:
+        switch_info: Dictionary with switch platform_name, hostname and IP address.
+        arp: ARP dictionary
+        sls_file: JSON file export from SLS API call.
+
+    Raises:
+        UnicodeDecodeError: Invalid Kea JSON file.
+    """
+    if sls_file is None:
+        return
+
+    log.debug("Adding SLS metadata to switch LLDP data")
+
+    try:
+        sls_json = json.load(sls_file)
+    except (json.decoder.JSONDecodeError, UnicodeDecodeError) as error:
+        log.error(
+            f"The file {sls_file.name} is not valid JSON.  LLDP data will not be annotated.",
+        )
+        log.error(error)
+        raise error
+
+    sls_ip_lookup = defaultdict()
+    networks = Managers.NetworkManager(sls_json.get("Networks"))
+    for network in networks.values():
+        for subnet in network.subnets().values():
+            for reservation in subnet.reservations().values():
+                sls_ip_lookup.update({str(reservation.ipv4_address()): reservation.name()})
+
+
 def add_smd_metadata_to_lldp(switch_info, smd_file):
     """Annotate existing switch LLDP data with data from SMD ethernetInterfaces.
 
@@ -903,23 +968,24 @@ def add_smd_metadata_to_lldp(switch_info, smd_file):
         switch_info: Dictionary with switch platform_name, hostname and IP address
         smd_file: JSON file exported from SMD/HSM ethernetInterfaces
 
+    Raises:
+        UnicodeDecodeError: Invalid Kea JSON file.
     """
     if smd_file is None:
         return
 
-    # Create mac-to-name lookup table from SMD data
-    if smd_file is None:
-        return
+    log.debug("Adding SMD metadata to switch LLDP data")
 
     try:
         smd_json = json.load(smd_file)
     except (json.decoder.JSONDecodeError, UnicodeDecodeError) as err:
         log.error(
-            f"The file {smd_file.name} is not valid JSON.  LLDP data will not be annotated."
+            f"The file {smd_file.name} is not valid JSON.  LLDP data will not be annotated.",
         )
         log.error(err)
         raise err
 
+    # Create mac-to-name lookup table from SMD data
     smd_lookup = defaultdict()
     for device in smd_json:
         device_dict = {
@@ -928,13 +994,13 @@ def add_smd_metadata_to_lldp(switch_info, smd_file):
                 "mac_address": device.get("MACAddress"),
                 "vlan": None,
                 "ipv4address": "TODO",
-            }
+            },
         }
         smd_lookup.update(device_dict)
     log.debug(f"SMD lookup table: {smd_lookup}")
 
     # Fill in missing names with SMD data
-    for k, v in switch_info.items():
+    for _, v in switch_info.items():
         if v[0].get("chassis_name"):
             continue
         lldp_mac = v[0].get("mac_addr")
@@ -969,7 +1035,9 @@ def add_heuristic_metadata_to_lldp(switch_info):
         "b4:2e:99": "River compute",
     }
 
-    for k, v in switch_info.items():
+    log.debug("Adding heuristic metadata to switch LLDP data")
+
+    for _, v in switch_info.items():
         if v[0].get("chassis_name"):
             continue
         lldp_mac = v[0].get("mac_addr")
