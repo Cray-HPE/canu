@@ -504,7 +504,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                         click.secho(
                             err_connect,
                             fg="red",
-                        ),
+                        )
                         sys.exit(1)
                     if connected:
                         log.info(
