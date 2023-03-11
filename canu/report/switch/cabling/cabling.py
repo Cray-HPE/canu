@@ -36,6 +36,7 @@ import urllib3
 
 from canu.style import Style
 from canu.utils.cache import cache_switch
+from canu.utils.heuristics import heuristic_lookup
 from canu.utils.mac import find_mac
 from canu.utils.sls_utils import Managers
 from canu.utils.ssh import netmiko_command, netmiko_commands
@@ -197,9 +198,9 @@ def cabling(
         )
 
     if heuristic_lookups:
-        add_heuristic_metadata_to_lldp(switch_dict)
+        add_heuristic_metadata_to_lldp(switch_info, switch_dict)
 
-    print_lldp(switch_info, switch_dict, arp, out)
+    print_lldp(switch_info, switch_dict, arp, heuristic_lookups, out)
 
 
 def get_lldp(ip, credentials, return_error=False):
@@ -547,7 +548,7 @@ def get_lldp_dell(ip, credentials, return_error):
                         "chassis_name": "",
                         "port_id": mac,
                         "port_id_subtype": "link_local_addr",
-                        "data_sources": "LLDP"
+                        "data_sources": "LLDP",
                     },
                 ]
 
@@ -1027,35 +1028,31 @@ def add_smd_metadata_to_lldp(switch_info, smd_json):
         log.debug(f"SMD hostname is {hostname} for LLDP MAC {lldp_mac}")
 
 
-def add_heuristic_metadata_to_lldp(switch_info):
+def add_heuristic_metadata_to_lldp(switch_info, switch_dict):
     """Annotate existing switch LLDP data with common MAC-use heuristics.
 
     Often standardized hardware is used for systems.  Based on the vendor of MAC
     addresses, guesses can be made as to what type of device the MAC relates to.
 
     Args:
-        switch_info: Dictionary with switch platform_name, hostname and IP address
+        switch_info: Dictionary with switch platform_name, hostname and IP address source of LLDP data
+        switch_dict: Dictionary with switch collected LLDP data.
     """
-    # TODO add more Dell, Mellanox, Gigabyte and Intel heuristics
-    heuristic_lookup = {
-        "14:02:ec": "OCP card port",
-        "94:40:c9": "iLO or PCIe card port",
-        "ec:eb:b8": "PDU",
-        "b4:2e:99": "River compute",
-    }
-
     log.debug("Adding heuristic metadata to switch LLDP data")
-
-    for _, v in switch_info.items():
+    for _, v in switch_dict.items():
         if v[0].get("chassis_name"):
             continue
         lldp_mac = v[0].get("mac_addr")
         if lldp_mac is None:
             continue
         heuristic_record = None
-        for lookup_mac, heuristic in heuristic_lookup.items():
-            if lookup_mac in lldp_mac:
-                heuristic_record = heuristic
+        for lookup_mac, switch_types in heuristic_lookup.items():
+            if lookup_mac not in lldp_mac:
+                continue
+            for switch_type, heuristic in switch_types.items():
+                if switch_type not in switch_info["hostname"]:
+                    continue
+                heuristic_record = heuristic["hint"]
 
         if heuristic_record is None:
             continue
@@ -1111,24 +1108,25 @@ def cache_lldp(switch_info, lldp_dict, arp):
     cache_switch(switch)
 
 
-def print_lldp(switch_info, lldp_dict, arp, out="-"):
+def print_lldp(switch_info, lldp_dict, arp, heuristic_lookups, out="-"):
     """Print summary of the switch LLDP data.
 
     Args:
         switch_info: Dictionary with switch platform_name, hostname and IP address
         lldp_dict: Dictionary with LLDP information
         arp: ARP dictionary
+        heuristic_lookups: Table of educated guesses about normal configurations
         out: Defaults to stdout, but will print to the file name passed in
     """
     dash = "-" * 150
     heading = [
-        "PORT",
+        "LOCAL PORT",
         "",
         "NEIGHBOR",
         "NEIGHBOR PORT",
-        "PORT DESCRIPTION",
-        "DESCRIPTION",
-        "DATA SOURCES"
+        "NEIGHBOR MAC",
+        "NEIGHBOR INFO",
+        "DATA SOURCES",
     ]
 
     table = []
@@ -1145,10 +1143,8 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
             arp_list = ", ".join(arp_list)
             description = port[index]["port_description"]
             if description == port[index]["port_id"]:
-                neighbor_port = port[index]["port_id"]
                 neighbor_description = ""
             else:
-                neighbor_port = port[index]["port_id"]
                 neighbor_description = re.sub(
                     r"(Interface\s+[0-9]+ as )",
                     "",
@@ -1156,6 +1152,31 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
                 )
             if len(arp_list) > 0 and neighbor_description == "":
                 neighbor_description = "ARP data: MAC, IP and VLAN."
+
+            # The following is order dependent to unwind macs and bonds.
+            # TODO: Move this logic somewhere else along w/ the heuristic lookup table.
+            neighbor_port = port[index]["port_id"]
+            neighbor_mac = port[index]["mac_addr"]
+            lag_mac = ""
+            if neighbor_port != neighbor_mac:
+                lag_mac = f'LAG_MAC({neighbor_mac})'
+                if neighbor_port.find(":") != -1:  # Cheap MAC find
+                    neighbor_mac = neighbor_port
+            if heuristic_lookups:
+                for h_mac, switch_data in heuristic_lookup.items():
+                    if h_mac not in neighbor_port:
+                        continue
+                    for switch_type, heuristic in switch_data.items():
+                        if switch_type not in switch_info['hostname']:
+                            continue
+                        neighbor_port = heuristic["port"]
+                        if "Heuristic" not in port[index]["data_sources"]:
+                            port[index]["data_sources"] = f'{port[index]["data_sources"]}, Heuristic'
+                        break
+
+            neighbor_info = f'{port[index]["chassis_description"][:54]} {lag_mac} {str(arp_list)}'
+            if neighbor_description:
+                neighbor_info = neighbor_description
             duplicate = False
             if len(lldp_dict[port_number]) > 1:
                 duplicate = True
@@ -1165,8 +1186,8 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
                     port_number,
                     port[index]["chassis_name"],
                     neighbor_port,
-                    neighbor_description,
-                    port[index]["chassis_description"][:54] + str(arp_list),
+                    neighbor_mac,
+                    neighbor_info,
                     port[index]["data_sources"],
                     duplicate,
                 ],
@@ -1185,7 +1206,7 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
 
     click.echo(dash, file=out)
     click.echo(
-        "{:<7s}{:^5s}{:<16s}{:<19s}{:<40s}{:<40s}{}".format(
+        "{:<10s}{:^5s}{:<16s}{:<19s}{:<19s}{:<59s}{}".format(
             heading[0],
             heading[1],
             heading[2],
@@ -1203,19 +1224,19 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
         text_color = ""
         if row[5] == "if_name":
             text_color = "green"
-        elif "ncn" in row[1]:
+        elif "Kea" in row[5] or "SLS" in row[5] or "SMD" in row[5] or "Heuristic" in row[5]:
             text_color = "blue"
         if row[6] is True:
             text_color = "bright_white"
 
         click.secho(
-            "{:<7s}{:^5s}{:<16s}{:<19s}{:<40s}{:<40s}{}".format(
+            "{:<10s}{:^5s}{:<16s}{:<19s}{:<19s}{:<59s}{}".format(
                 row[0],
                 "==>",
                 row[1],
                 row[2],
-                row[3][:38],
-                row[4][:38],
+                row[3],
+                row[4][:57],
                 row[5],
             ),
             fg=text_color,

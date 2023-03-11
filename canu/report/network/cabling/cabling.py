@@ -255,7 +255,7 @@ def cabling(
                         add_smd_metadata_to_lldp(switch_dict, smd_json)
                     # Annotate LLDP data with heuristics
                     if heuristic_lookups:
-                        add_heuristic_metadata_to_lldp(switch_dict)
+                        add_heuristic_metadata_to_lldp(switch_info, switch_dict)
 
                     switch_data.append(
                         [
@@ -272,7 +272,7 @@ def cabling(
                     NetmikoAuthenticationException,
                 ) as err:
                     exception_type = type(err).__name__
-
+                    error_message = "Unchecked"
                     if exception_type == "HTTPError":
                         error_message = f"Error connecting to switch {ip}, check the entered username, IP address and password."
                     if exception_type == "ConnectionError":
@@ -292,7 +292,7 @@ def cabling(
                     )
 
         if view == "switch":
-            switch_table(switch_data, out)
+            switch_table(switch_data, heuristic_lookups, out)
         elif view == "equipment":
             equipment_json = equipment_table(switch_data)
             print_equipment(equipment_json, out)
@@ -510,7 +510,7 @@ def print_equipment(equipment_json, out="-"):
         click.echo("\n", file=out)
 
 
-def switch_table(switch_data, out="-"):
+def switch_table(switch_data, heuristic_lookups, out="-"):
     """Print a table for each switch.
 
     Args:
@@ -518,7 +518,8 @@ def switch_table(switch_data, out="-"):
             switch_data[i][0] -> Dictionary with switch platform_name, hostname and IP address
             switch_data[i][1] -> Dictionary with LLDP information
             switch_data[i][2] -> ARP dictionary
+        heuristic_lookups: Table of educated guesses about normal configurations
         out: Defaults to stdout, but will print to the file name passed in
     """
     for i in range(len(switch_data)):
-        print_lldp(switch_data[i][0], switch_data[i][1], switch_data[i][2], out)
+        print_lldp(switch_data[i][0], switch_data[i][1], switch_data[i][2], heuristic_lookups, out)
