@@ -584,7 +584,6 @@ def node_model_from_shcd(factory, spreadsheet, sheets, edge=None):
                     break
                 else:
                     found = None
-                    continue
             if found is not None:
                 log.info(
                     f"Required header column {required_header[required_index]} "
@@ -593,7 +592,6 @@ def node_model_from_shcd(factory, spreadsheet, sheets, edge=None):
                 required_header[required_index] = found
                 start_index = current_index + 1
                 found = None
-                continue
             else:
                 click.secho(
                     f"On tab {sheet}, header column {required_header[required_index]} not found.",

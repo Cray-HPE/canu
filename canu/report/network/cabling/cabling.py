@@ -416,7 +416,7 @@ def print_equipment(equipment_json, out="-"):
                     entry
                 ]["neighbor_port"]
                 neighbor_port_description = re.sub(
-                    r"(Interface\s+[0-9]+ as )",
+                    r"(Interface\s+\d+ as )",
                     "",
                     equipment_json[equipment]["connections_to"][port][entry][
                         "neighbor_port_description"
@@ -471,7 +471,7 @@ def print_equipment(equipment_json, out="-"):
                     "description"
                 ]
                 port_description = re.sub(
-                    r"(Interface\s+[0-9]+ as )",
+                    r"(Interface\s+\d+ as )",
                     "",
                     equipment_json[equipment]["connections_from"][port][
                         "port_description"

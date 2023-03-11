@@ -489,7 +489,6 @@ class NetworkNode:
             raise TypeError(
                 f"{__name__}: Node needs to be type NetworkNode",
             )
-        pass
 
     def disconnect(self, node):
         """Disconnect one device from another."""
