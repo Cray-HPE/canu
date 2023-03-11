@@ -190,7 +190,6 @@ def bgp(ctx, username, password, verbose, network):
         click.echo(dash)
         for error in errors:
             click.echo("{:<15s} - {}".format(error[0], error[1]))
-    return
 
 
 def get_bgp_neighbors(ip, credentials, asn, network):

@@ -820,7 +820,7 @@ def cache_lldp(switch_info, lldp_dict, arp):
                 "neighbor_description": neighbor_description,
                 "neighbor_port": port[index]["port_id"],
                 "neighbor_port_description": re.sub(
-                    r"(Interface\s+[0-9]+ as )",
+                    r"(Interface\s+\d+ as )",
                     "",
                     port[index]["port_description"],
                 ),
@@ -871,7 +871,7 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
             else:
                 neighbor_port = port[index]["port_id"]
                 neighbor_description = re.sub(
-                    r"(Interface\s+[0-9]+ as )",
+                    r"(Interface\s+\d+ as )",
                     "",
                     description,
                 )
