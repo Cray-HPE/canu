@@ -521,7 +521,7 @@ def get_lldp_dell(ip, credentials, return_error):
 
             neighbors_dict[port]["port_id_subtype"] = "if_name"
             interface = neighbors_dict[port]["local_port_id"]
-
+            neighbors_dict[port]["data_sources"] = "LLDP"
             lldp_dict[interface].append(neighbors_dict[port])
 
         # Get the mac-address-table to help fill in port data if not reported over LLDP
@@ -752,6 +752,7 @@ def get_lldp_mellanox(ip, credentials, return_error):
             if "chassis_name" not in port_info.keys():
                 port_info["chassis_name"] = ""
             port_info["port_id_subtype"] = "if_name"
+            port_info["data_sources"] = "LLDP"
             interface = port_info["local_port_id"]
             lldp_dict[interface].append(port_info)
 
