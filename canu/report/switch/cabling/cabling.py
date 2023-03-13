@@ -263,7 +263,6 @@ def get_lldp(ip, credentials, return_error=False):
         log.debug("Adding ARP metadata to switch LLDP data")
         for _, port in switch_dict.items():
             for index, _ in enumerate(port):
-                arp_list = []
                 arp_list = [
                     f"{arp[mac]['ip_address']}:{list(arp[mac]['port'])[0]}"
                     for mac in arp
