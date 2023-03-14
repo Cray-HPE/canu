@@ -22,6 +22,7 @@
 """CANU commands that report the cabling of the entire Shasta network."""
 from collections import defaultdict
 import ipaddress
+import json
 import logging
 import re
 import sys
@@ -33,7 +34,14 @@ import click_spinner
 from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
 
-from canu.report.switch.cabling.cabling import get_lldp, print_lldp
+from canu.report.switch.cabling.cabling import (
+    add_heuristic_metadata_to_lldp,
+    add_kea_metadata_to_lldp,
+    add_sls_metadata_to_lldp,
+    add_smd_metadata_to_lldp,
+    get_lldp,
+    print_lldp,
+)
 from canu.style import Style
 
 log = logging.getLogger("report_cabling")
@@ -65,17 +73,35 @@ log = logging.getLogger("report_cabling")
     help="Switch password",
 )
 @click.option(
-    "--out",
-    help="Output results to a file",
-    type=click.File("w"),
-    default="-",
-)
-@click.option(
     "--view",
     type=click.Choice(["switch", "equipment"]),
     help="View of the cabling results.",
     default="switch",
     show_default=True,
+)
+@click.option(
+    "--kea-lease-file",
+    help="Kea leases in JSON format from API call used for MAC-to-hostname lookups.",
+    type=click.File("r"),
+    required=False,
+)
+@click.option(
+    "--sls-file",
+    help="SLS file in JSON format from API call used for MAC-to-hostname lookups.",
+    type=click.File("r"),
+    required=False,
+)
+@click.option(
+    "--smd-file",
+    help="SMD ethernetInterfaces in JSON format from API call used for MAC-to-hostname lookups.",
+    type=click.File("r"),
+    required=False,
+)
+@click.option(
+    "--heuristic-lookups",
+    help="Make educated guesses and hints about what device is based on MAC.",
+    is_flag=True,
+    default=False,
 )
 @click.option(
     "--log",
@@ -84,8 +110,27 @@ log = logging.getLogger("report_cabling")
     type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
     default="ERROR",
 )
+@click.option(
+    "--out",
+    help="Output results to a file",
+    type=click.File("w"),
+    default="-",
+)
 @click.pass_context
-def cabling(ctx, ips, ips_file, username, password, out, view, log_):
+def cabling(
+    ctx,
+    ips,
+    ips_file,
+    username,
+    password,
+    view,
+    kea_lease_file,
+    sls_file,
+    smd_file,
+    heuristic_lookups,
+    log_,
+    out,
+):
     """Report the cabling of all switches (Aruba, Dell, or Mellanox) on the network by using LLDP.
 
     Pass in either a comma separated list of IP addresses using the --ips option
@@ -128,11 +173,48 @@ def cabling(ctx, ips, ips_file, username, password, out, view, log_):
         ips_file: File with one IPv4 address per line
         username: Switch username
         password: Switch password
-        out: Name of the output file
         view: View of the cabling results.
+        kea_lease_file: Name of the JSON file containing Kea leases
+        sls_file: Name of the JSON file containing SLS system data
+        smd_file: Name of the JSON file containing SMD ethernetInterfaces
+        heuristic_lookups: Turn off annotations to LLDP data based on common device use
         log_: Level of logging.
+        out: Name of the output file
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
+
+    try:
+        kea_json = None
+        if kea_lease_file is not None:
+            kea_json = json.load(kea_lease_file)
+    except json.JSONDecodeError:
+        click.secho(
+            f"The Kea lease file {kea_lease_file.name} is not valid JSON.  LLDP data will not be annotated.",
+            fg="white",
+            bg="red",
+        )
+
+    try:
+        sls_json = None
+        if sls_file is not None:
+            sls_json = json.load(sls_file)
+    except json.JSONDecodeError:
+        click.secho(
+            f"The SLS  file {sls_file.name} is not valid JSON.  LLDP data will not be annotated.",
+            fg="white",
+            bg="red",
+        )
+
+    try:
+        smd_json = None
+        if smd_file is not None:
+            smd_json = json.load(smd_file)
+    except json.JSONDecodeError:
+        click.secho(
+            f"The SMD  file {smd_file.name} is not valid JSON.  LLDP data will not be annotated.",
+            fg="white",
+            bg="red",
+        )
 
     if ips_file:
         ips = []
@@ -162,6 +244,19 @@ def cabling(ctx, ips, ips_file, username, password, out, view, log_):
                         return_error=True,
                     )
 
+                    # Annotate LLDP data with Kea lease data via MAC lookup.
+                    if kea_json is not None:
+                        add_kea_metadata_to_lldp(switch_dict, kea_json)
+                    # Annotate LLDP data with SLS file data via MAC lookup.
+                    if sls_json is not None:
+                        add_sls_metadata_to_lldp(switch_dict, sls_json)
+                    # Annotate LLDP data with SMD ethernetInterfaces data
+                    if smd_json is not None:
+                        add_smd_metadata_to_lldp(switch_dict, smd_json)
+                    # Annotate LLDP data with heuristics
+                    if heuristic_lookups:
+                        add_heuristic_metadata_to_lldp(switch_info, switch_dict)
+
                     switch_data.append(
                         [
                             switch_info,
@@ -177,7 +272,7 @@ def cabling(ctx, ips, ips_file, username, password, out, view, log_):
                     NetmikoAuthenticationException,
                 ) as err:
                     exception_type = type(err).__name__
-
+                    error_message = "Unchecked"
                     if exception_type == "HTTPError":
                         error_message = f"Error connecting to switch {ip}, check the entered username, IP address and password."
                     if exception_type == "ConnectionError":
@@ -197,7 +292,7 @@ def cabling(ctx, ips, ips_file, username, password, out, view, log_):
                     )
 
         if view == "switch":
-            switch_table(switch_data, out)
+            switch_table(switch_data, heuristic_lookups, out)
         elif view == "equipment":
             equipment_json = equipment_table(switch_data)
             print_equipment(equipment_json, out)
@@ -279,11 +374,9 @@ def equipment_table(switch_data):
 
     # Go through a third time to add all ARP info to equipment_json
     for i in range(len(switch_data)):
-
         for mac in switch_data[i][2]:
             arp_mac = switch_data[i][2][mac]
             if arp_mac["mac"] in equipment_json.keys():
-
                 arp_list = f"{arp_mac['ip_address']}:{list(arp_mac['port'])[0]}"
 
                 if len(equipment_json[arp_mac["mac"]]["arp"]) == 0:
@@ -304,7 +397,6 @@ def print_equipment(equipment_json, out="-"):
     dash = "-" * 100
 
     for equipment in equipment_json:
-
         click.secho(
             f'{equipment_json[equipment]["hostname"]} {equipment_json[equipment]["description"]}                     ',
             fg="bright_white",
@@ -375,7 +467,6 @@ def print_equipment(equipment_json, out="-"):
 
         for port in equipment_json[equipment]["connections_from"]:
             if port not in equipment_json[equipment]["connections_to"]:
-
                 description = equipment_json[equipment]["connections_from"][port][
                     "description"
                 ]
@@ -419,7 +510,7 @@ def print_equipment(equipment_json, out="-"):
         click.echo("\n", file=out)
 
 
-def switch_table(switch_data, out="-"):
+def switch_table(switch_data, heuristic_lookups, out="-"):
     """Print a table for each switch.
 
     Args:
@@ -427,7 +518,8 @@ def switch_table(switch_data, out="-"):
             switch_data[i][0] -> Dictionary with switch platform_name, hostname and IP address
             switch_data[i][1] -> Dictionary with LLDP information
             switch_data[i][2] -> ARP dictionary
+        heuristic_lookups: Table of educated guesses about normal configurations
         out: Defaults to stdout, but will print to the file name passed in
     """
     for i in range(len(switch_data)):
-        print_lldp(switch_data[i][0], switch_data[i][1], switch_data[i][2], out)
+        print_lldp(switch_data[i][0], switch_data[i][1], switch_data[i][2], heuristic_lookups, out)
