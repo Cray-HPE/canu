@@ -176,7 +176,7 @@ main() {
 
     # if that fails, try to build it and tag the image
   if [[ "${REBUILD:-}" == "true" ]]; then
-    if "${PLATFORM}" build \
+    if BUILDKIT=1 "${PLATFORM}" build \
       --build-arg ALPINE_IMAGE="${ALPINE_IMAGE}" \
       --build-arg PYTHON_VERSION="${PYTHON_VERSION}" \
       --build-arg ALPINE_VERSION="${ALPINE_VERSION}" \
