@@ -16,6 +16,7 @@
 
 ## [1.7.0]
 
+- removed pyinstaller and converted rpm to install container image
 - Create baseline CSM 1.4 configuration
 - Fix error handling of the parent column for cmm/cec
 - Add Kea, SLS, SMD and heuristic lookup tables to fill out LLDP data for cabling reports and validation

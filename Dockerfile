@@ -70,8 +70,6 @@ COPY        entry_points.ini ./entry_points.ini
 COPY        mkdocs.yml ./mkdocs.yml
 COPY        network_modeling/ ./network_modeling
 COPY        noxfile.py ./noxfile.py
-COPY        pyinstaller.py ./pyinstaller.py
-COPY        pyinstaller_hooks/ ./pyinstaller_hooks
 COPY        pyproject.toml ./pyproject.toml
 COPY        tests/ ./tests
 
