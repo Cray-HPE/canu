@@ -120,7 +120,7 @@ network_modeling = [
     'yamale<=4.0.2',
 ]
 test = [
-    'coverage~=7.1.0',
+    'coverage~=7.2.2',
     'mock~=5.0.1',
     'py~=1.11.0',
     'pytest~=7.2.1',
