@@ -22,7 +22,8 @@
 """CANU commands that report the cabling of an individual switch."""
 from collections import defaultdict, OrderedDict
 import datetime
-from json import decoder
+import json
+import logging
 import re
 import sys
 from urllib.parse import unquote
@@ -35,12 +36,16 @@ import urllib3
 
 from canu.style import Style
 from canu.utils.cache import cache_switch
+from canu.utils.heuristics import heuristic_lookup
 from canu.utils.mac import find_mac
+from canu.utils.sls_utils import Managers
 from canu.utils.ssh import netmiko_command, netmiko_commands
 from canu.utils.vendor import switch_vendor
 
 # To disable warnings about unsecured HTTPS requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+log = logging.getLogger("report_cabling")
 
 
 @click.command(
@@ -56,18 +61,59 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     help="Switch password",
 )
 @click.option(
+    "--kea-lease-file",
+    help="Kea leases in JSON format from API call used for MAC-to-hostname lookups.",
+    type=click.File("r"),
+    required=False,
+)
+@click.option(
+    "--sls-file",
+    help="SLS file in JSON format from API call used for MAC-to-hostname lookups.",
+    type=click.File("r"),
+    required=False,
+)
+@click.option(
+    "--smd-file",
+    help="SMD ethernetInterfaces in JSON format from API call used for MAC-to-hostname lookups.",
+    type=click.File("r"),
+    required=False,
+)
+@click.option(
+    "--heuristic-lookups",
+    help="Make educated guesses and hints about what device is based on MAC.",
+    is_flag=True,
+    default=False,
+)
+@click.option(
+    "--log",
+    "log_",
+    help="Level of logging.",
+    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
+    default="ERROR",
+)
+@click.option(
     "--out",
     help="Output results to a file",
     type=click.File("w"),
     default="-",
 )
 @click.pass_context
-def cabling(ctx, ip, username, password, out):
-    """Report the cabling of a switch (Aruba, Dell, or Mellanox) on the network by using LLDP.
+def cabling(
+    ctx,
+    ip,
+    username,
+    password,
+    kea_lease_file,
+    sls_file,
+    smd_file,
+    heuristic_lookups,
+    log_,
+    out,
+):
+    """Report the live cabling of a switch on the network by using LLDP.
 
-    If the neighbor name is not in LLDP, the IP and vlan information are displayed
-    by looking up the MAC address in the ARP table or the mac address table.
-
+    LLDP data which is missing the neighbor hostname will optionally be filled out with data
+    from Kea, SLS, SMD and heuristic hints - in that order if all data sources are provided.
     If there is a duplicate port, the duplicates will be highlighted in 'bright white'.
 
     Ports highlighted in 'blue' contain the string "ncn" in the hostname.
@@ -83,14 +129,78 @@ def cabling(ctx, ip, username, password, out):
         ip: Switch IPv4 address
         username: Switch username
         password: Switch password
+        kea_lease_file: Name of the JSON file containing Kea leases
+        sls_file: Name of the JSON file containing SLS system data
+        smd_file: Name of the JSON file containing SMD ethernetInterfaces
+        heuristic_lookups: Turn off annotations to LLDP data based on common device use
+        log_: Level of logging.
         out: Name of the output file
     """
+    logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
+
     credentials = {"username": username, "password": password}
     switch_info, switch_dict, arp = get_lldp(ip, credentials)
     if switch_info is None:
         return
 
-    print_lldp(switch_info, switch_dict, arp, out)
+    # Annotate LLDP data with Kea lease data via MAC lookup.
+    try:
+        if kea_lease_file is not None:
+            kea_json = json.load(kea_lease_file)
+            add_kea_metadata_to_lldp(switch_dict, kea_json)
+    except json.JSONDecodeError:
+        click.secho(
+            f"The Kea lease file {kea_lease_file.name} is not valid JSON.  LLDP data will not be annotated.",
+            fg="white",
+            bg="red",
+        )
+    except Exception:
+        click.secho(
+            "An error occurred while annotating LLDP data with Kea leases.  Some Kea data will not be used.",
+            fg="white",
+            bg="red",
+        )
+
+    # Annotate LLDP data with SLS file data via MAC lookup.
+    try:
+        if sls_file is not None:
+            sls_json = json.load(sls_file)
+            add_sls_metadata_to_lldp(switch_dict, sls_json)
+    except json.JSONDecodeError:
+        click.secho(
+            f"The SLS  file {sls_file.name} is not valid JSON.  LLDP data will not be annotated.",
+            fg="white",
+            bg="red",
+        )
+    except Exception:
+        click.secho(
+            "An error occurred while annotating LLDP data with SLS.  Some SLS data will not be used.",
+            fg="white",
+            bg="red",
+        )
+
+    # Annotate LLDP data with SMD ethernetInterfaces data
+    try:
+        if smd_file is not None:
+            smd_json = json.load(smd_file)
+            add_smd_metadata_to_lldp(switch_dict, smd_json)
+    except json.JSONDecodeError:
+        click.secho(
+            f"The SMD  file {smd_file.name} is not valid JSON.  LLDP data will not be annotated.",
+            fg="white",
+            bg="red",
+        )
+    except Exception:
+        click.secho(
+            "An error occurred while annotating LLDP data with SMD.  Some SMD data will not be used.",
+            fg="white",
+            bg="red",
+        )
+
+    if heuristic_lookups:
+        add_heuristic_metadata_to_lldp(switch_info, switch_dict)
+
+    print_lldp(switch_info, switch_dict, arp, heuristic_lookups, out)
 
 
 def get_lldp(ip, credentials, return_error=False):
@@ -110,6 +220,7 @@ def get_lldp(ip, credentials, return_error=False):
         NetmikoTimeoutException: Timeout error connecting to switch
         NetmikoAuthenticationException: Authentication error connecting to switch
     """
+    log.debug("Collecting LLDP data")
     try:
         vendor = switch_vendor(ip, credentials, return_error)
 
@@ -147,6 +258,18 @@ def get_lldp(ip, credentials, return_error=False):
             bg="red",
         )
         return None, None, None
+
+    if arp or arp is not None:
+        log.debug("Adding ARP metadata to switch LLDP data")
+        for _, port in switch_dict.items():
+            for index, _ in enumerate(port):
+                arp_list = [
+                    f"{arp[mac]['ip_address']}:{list(arp[mac]['port'])[0]}"
+                    for mac in arp
+                    if arp[mac]["mac"] == port[index]["mac_addr"]
+                ]
+                arp_list = ", ".join(arp_list)
+                port[index]["arp_data"] = arp_list
 
     return switch_info, switch_dict, arp
 
@@ -192,9 +315,7 @@ def get_lldp_aruba(ip, credentials, return_error=False):
                 f"Error connecting to switch {ip}, check the username or password."
             )
         elif exception_type == "ConnectionError":
-            error_message = (
-                f"Error connecting to switch {ip}, check the entered username, IP address and password."
-            )
+            error_message = f"Error connecting to switch {ip}, check the entered username, IP address and password."
         else:
             error_message = f"Error connecting to switch {ip}."
 
@@ -250,6 +371,7 @@ def get_lldp_aruba(ip, credentials, return_error=False):
                     "port_description": neighbor_info["port_description"],
                     "port_id_subtype": neighbor_info["port_id_subtype"],
                     "port_id": lldp_info["port_id"],
+                    "data_sources": "LLDP",
                 }
 
                 lldp_dict[interface].append(lldp_neighbor)
@@ -259,7 +381,7 @@ def get_lldp_aruba(ip, credentials, return_error=False):
 
         # Get the mac-address-table to help fill in port data if not reported over LLDP
         command = "show mac-address-table"
-        command_output = netmiko_command(ip, credentials, command, "aruba")
+        command_output = netmiko_command(ip, credentials, command)
         mac_address_table = defaultdict()
 
         # Start parsing after the header
@@ -282,6 +404,7 @@ def get_lldp_aruba(ip, credentials, return_error=False):
                         "chassis_name": "",
                         "port_id": mac,
                         "port_id_subtype": "link_local_addr",
+                        "data_sources": "LLDP",
                     },
                 ]
 
@@ -397,7 +520,7 @@ def get_lldp_dell(ip, credentials, return_error):
 
             neighbors_dict[port]["port_id_subtype"] = "if_name"
             interface = neighbors_dict[port]["local_port_id"]
-
+            neighbors_dict[port]["data_sources"] = "LLDP"
             lldp_dict[interface].append(neighbors_dict[port])
 
         # Get the mac-address-table to help fill in port data if not reported over LLDP
@@ -424,6 +547,7 @@ def get_lldp_dell(ip, credentials, return_error):
                         "chassis_name": "",
                         "port_id": mac,
                         "port_id_subtype": "link_local_addr",
+                        "data_sources": "LLDP",
                     },
                 ]
 
@@ -627,6 +751,7 @@ def get_lldp_mellanox(ip, credentials, return_error):
             if "chassis_name" not in port_info.keys():
                 port_info["chassis_name"] = ""
             port_info["port_id_subtype"] = "if_name"
+            port_info["data_sources"] = "LLDP"
             interface = port_info["local_port_id"]
             lldp_dict[interface].append(port_info)
 
@@ -682,6 +807,7 @@ def get_lldp_mellanox(ip, credentials, return_error):
                             "chassis_name": "",
                             "port_id": mac,
                             "port_id_subtype": "link_local_addr",
+                            "data_sources": "LLDP",
                         },
                     ]
 
@@ -771,7 +897,7 @@ def get_lldp_mellanox(ip, credentials, return_error):
             bg="red",
         )
         return None, None, None
-    except decoder.JSONDecodeError:
+    except json.decoder.JSONDecodeError:
         click.secho(
             "The switch LLDP query returned successfully, but the result is not valid JSON. "
             "Often this is a faulted web API process on the switch.\n"
@@ -782,6 +908,157 @@ def get_lldp_mellanox(ip, credentials, return_error):
         sys.exit(1)
 
     return switch_json, lldp_dict, arp
+
+
+def add_kea_metadata_to_lldp(switch_info, kea_json):
+    """Annotate existing switch LLDP data with data from Kea leases.
+
+    Args:
+        switch_info: Dictionary with switch platform_name, hostname and IP address.
+        kea_json: JSON export from Kea API call.
+    """
+    log.debug("Adding Kea metadata to switch LLDP data")
+
+    # Create mac-to-name lookup table from Kea data
+    kea_lookup = defaultdict()
+    for lease in kea_json[0]["arguments"]["leases"]:
+        lease_dict = {
+            lease.get("hw-address"): {
+                "hostname": lease.get("hostname"),
+                "mac_address": lease.get("hw-address"),
+                "vlan": lease.get("subnet-id"),
+                "ipv4address": lease.get("ip-address"),
+            },
+        }
+        kea_lookup.update(lease_dict)
+    log.debug(f"Kea lookup table: {kea_lookup}")
+
+    # Fill in missing names with Kea MAC data
+    for _, v in switch_info.items():
+        if v[0].get("chassis_name"):
+            continue
+        lldp_mac = v[0].get("mac_addr")
+        if lldp_mac is None:
+            continue
+        kea_record = kea_lookup.get(lldp_mac)
+        if kea_record is None:
+            continue
+        hostname = kea_record.get("hostname")
+        if not hostname or hostname is None:
+            continue
+        v[0]["chassis_name"] = hostname
+        v[0]["data_sources"] = f'{v[0]["data_sources"]}, Kea'
+        log.debug(f"Kea hostname is {hostname} for LLDP MAC {lldp_mac}")
+
+
+def add_sls_metadata_to_lldp(switch_info, sls_json):
+    """Annotate existing switch LLDP data with data from SLS.
+
+    Args:
+        switch_info: Dictionary with switch platform_name, hostname and IP address.
+        sls_json: JSON export from SLS API call.
+    """
+    log.debug("Adding SLS metadata to switch LLDP data")
+
+    sls_ip_lookup = defaultdict()
+    # Create a clone of the original file because Managers manipulate live data.
+    original_networks = json.loads(json.dumps(sls_json.get("Networks")))
+    networks = Managers.NetworkManager(original_networks)
+    for network in networks.values():
+        for subnet in network.subnets().values():
+            for reservation in subnet.reservations().values():
+                sls_ip_lookup.update(
+                    {str(reservation.ipv4_address()): reservation.name()},
+                )
+    log.debug(f"SLS lookup table: {sls_ip_lookup}")
+
+    for _, v in switch_info.items():
+        if v[0].get("chassis_name"):
+            continue
+        arp_data = v[0]["arp_data"]
+        for ip, hostname in sls_ip_lookup.items():
+            if f"{ip}:vlan" not in arp_data:
+                continue
+            v[0]["chassis_name"] = hostname
+            v[0]["data_sources"] += ""
+            v[0]["data_sources"] = f'{v[0]["data_sources"]}, SLS'
+
+            log.debug(f"SLS hostname is {hostname} for ARP data {arp_data}")
+            break
+
+
+def add_smd_metadata_to_lldp(switch_info, smd_json):
+    """Annotate existing switch LLDP data with data from SMD ethernetInterfaces.
+
+    Args:
+        switch_info: Dictionary with switch platform_name, hostname and IP address
+        smd_json: JSON exported from SMD/HSM ethernetInterfaces
+    """
+    log.debug("Adding SMD metadata to switch LLDP data")
+
+    # Create mac-to-name lookup table from SMD data
+    smd_lookup = defaultdict()
+    for device in smd_json:
+        device_dict = {
+            device.get("MACAddress"): {
+                "hostname": device.get("ComponentID"),
+                "mac_address": device.get("MACAddress"),
+                "vlan": None,
+                "ipv4address": "TODO",
+            },
+        }
+        smd_lookup.update(device_dict)
+    log.debug(f"SMD lookup table: {smd_lookup}")
+
+    # Fill in missing names with SMD data
+    for _, v in switch_info.items():
+        if v[0].get("chassis_name"):
+            continue
+        lldp_mac = v[0].get("mac_addr")
+        if lldp_mac is None:
+            continue
+        smd_record = smd_lookup.get(lldp_mac)
+        if smd_record is None:
+            continue
+        hostname = smd_record.get("hostname")
+        if not hostname or hostname is None:
+            continue
+        v[0]["chassis_name"] = hostname
+        v[0]["data_sources"] = f'{v[0]["data_sources"]}, SMD'
+        log.debug(f"SMD hostname is {hostname} for LLDP MAC {lldp_mac}")
+
+
+def add_heuristic_metadata_to_lldp(switch_info, switch_dict):
+    """Annotate existing switch LLDP data with common MAC-use heuristics.
+
+    Often standardized hardware is used for systems.  Based on the vendor of MAC
+    addresses, guesses can be made as to what type of device the MAC relates to.
+
+    Args:
+        switch_info: Dictionary with switch platform_name, hostname and IP address source of LLDP data
+        switch_dict: Dictionary with switch collected LLDP data.
+    """
+    log.debug("Adding heuristic metadata to switch LLDP data")
+    for _, v in switch_dict.items():
+        if v[0].get("chassis_name"):
+            continue
+        lldp_mac = v[0].get("mac_addr")
+        if lldp_mac is None:
+            continue
+        heuristic_record = None
+        for lookup_mac, switch_types in heuristic_lookup.items():
+            if lookup_mac not in lldp_mac:
+                continue
+            for switch_type, heuristic in switch_types.items():
+                if switch_type not in switch_info["hostname"]:
+                    continue
+                heuristic_record = heuristic["hint"]
+
+        if heuristic_record is None:
+            continue
+        v[0]["data_sources"] = f'{v[0]["data_sources"]}, Heuristic'
+        v[0]["chassis_description"] = f'{v[0]["chassis_description"]} {heuristic_record}'
+        log.debug(f"MAC {lldp_mac} often a {heuristic_record}")
 
 
 def cache_lldp(switch_info, lldp_dict, arp):
@@ -802,7 +1079,6 @@ def cache_lldp(switch_info, lldp_dict, arp):
     }
 
     for port_number, port in lldp_dict.items():
-
         for index, _entry in enumerate(port):
             arp_list = []
             if port[index]["chassis_name"] == "":
@@ -832,29 +1108,30 @@ def cache_lldp(switch_info, lldp_dict, arp):
     cache_switch(switch)
 
 
-def print_lldp(switch_info, lldp_dict, arp, out="-"):
+def print_lldp(switch_info, lldp_dict, arp, heuristic_lookups, out="-"):
     """Print summary of the switch LLDP data.
 
     Args:
         switch_info: Dictionary with switch platform_name, hostname and IP address
         lldp_dict: Dictionary with LLDP information
         arp: ARP dictionary
+        heuristic_lookups: Table of educated guesses about normal configurations
         out: Defaults to stdout, but will print to the file name passed in
     """
     dash = "-" * 150
     heading = [
-        "PORT",
+        "LOCAL PORT",
         "",
         "NEIGHBOR",
         "NEIGHBOR PORT",
-        "PORT DESCRIPTION",
-        "DESCRIPTION",
+        "NEIGHBOR MAC",
+        "NEIGHBOR INFO",
+        "DATA SOURCES",
     ]
 
     table = []
     for port_number, port in lldp_dict.items():
         for index, _entry in enumerate(port):
-
             # If the device cannot be discovered by lldp, look it up in the ARP.
             arp_list = []
             if port[index]["chassis_name"] == "":
@@ -866,17 +1143,40 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
             arp_list = ", ".join(arp_list)
             description = port[index]["port_description"]
             if description == port[index]["port_id"]:
-                neighbor_port = port[index]["port_id"]
                 neighbor_description = ""
             else:
-                neighbor_port = port[index]["port_id"]
                 neighbor_description = re.sub(
                     r"(Interface\s+\d+ as )",
                     "",
                     description,
                 )
             if len(arp_list) > 0 and neighbor_description == "":
-                neighbor_description = "No LLDP data, check ARP vlan info."
+                neighbor_description = "ARP data: MAC, IP and VLAN."
+
+            # The following is order dependent to unwind macs and bonds.
+            # TODO: Move this logic somewhere else along w/ the heuristic lookup table.
+            neighbor_port = port[index]["port_id"]
+            neighbor_mac = port[index]["mac_addr"]
+            lag_mac = ""
+            if neighbor_port != neighbor_mac:
+                lag_mac = f'LAG_MAC({neighbor_mac})'
+                if neighbor_port.find(":") != -1:  # Cheap MAC find
+                    neighbor_mac = neighbor_port
+            if heuristic_lookups:
+                for h_mac, switch_data in heuristic_lookup.items():
+                    if h_mac not in neighbor_port:
+                        continue
+                    for switch_type, heuristic in switch_data.items():
+                        if switch_type not in switch_info['hostname']:
+                            continue
+                        neighbor_port = heuristic["port"]
+                        if "Heuristic" not in port[index]["data_sources"]:
+                            port[index]["data_sources"] = f'{port[index]["data_sources"]}, Heuristic'
+                        break
+
+            neighbor_info = f'{port[index]["chassis_description"][:54]} {lag_mac} {str(arp_list)}'
+            if neighbor_description:
+                neighbor_info = neighbor_description
             duplicate = False
             if len(lldp_dict[port_number]) > 1:
                 duplicate = True
@@ -886,9 +1186,9 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
                     port_number,
                     port[index]["chassis_name"],
                     neighbor_port,
-                    neighbor_description,
-                    port[index]["chassis_description"][:54] + str(arp_list),
-                    port[index]["port_id_subtype"],
+                    neighbor_mac,
+                    neighbor_info,
+                    port[index]["data_sources"],
                     duplicate,
                 ],
             )
@@ -906,13 +1206,14 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
 
     click.echo(dash, file=out)
     click.echo(
-        "{:<7s}{:^5s}{:<15s}{:<19s}{:<54s}{}".format(
+        "{:<10s}{:^5s}{:<16s}{:<19s}{:<19s}{:<59s}{}".format(
             heading[0],
             heading[1],
             heading[2],
             heading[3],
             heading[4],
             heading[5],
+            heading[6],
         ),
         file=out,
     )
@@ -923,19 +1224,20 @@ def print_lldp(switch_info, lldp_dict, arp, out="-"):
         text_color = ""
         if row[5] == "if_name":
             text_color = "green"
-        elif "ncn" in row[1]:
+        elif "Kea" in row[5] or "SLS" in row[5] or "SMD" in row[5] or "Heuristic" in row[5]:
             text_color = "blue"
         if row[6] is True:
             text_color = "bright_white"
 
         click.secho(
-            "{:<7s}{:^5s}{:<15s}{:<19s}{:<54s}{}".format(
+            "{:<10s}{:^5s}{:<16s}{:<19s}{:<19s}{:<59s}{}".format(
                 row[0],
                 "==>",
                 row[1],
                 row[2],
                 row[3],
-                row[4],
+                row[4][:57],
+                row[5],
             ),
             fg=text_color,
             file=out,

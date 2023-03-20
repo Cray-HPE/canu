@@ -99,7 +99,7 @@ def test_network_cabling(netmiko_command, switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert "1/1/1   ==> sw-test02      1/1/1" in str(result.output)
+        assert "1/1/1      ==> sw-test02       1/1/1" in str(result.output)
         remove_switch_from_cache(ip)
 
 
@@ -156,7 +156,7 @@ def test_network_cabling_file(netmiko_command, switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert "1/1/1   ==> sw-test02      1/1/1" in str(result.output)
+        assert "1/1/1      ==> sw-test02       1/1/1" in str(result.output)
         remove_switch_from_cache(ip)
 
 
@@ -242,7 +242,7 @@ def test_network_cabling_file_bidirectional(netmiko_command, switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert "1/1/1   ==> sw-test02      1/1/1" in str(result.output)
+        assert "1/1/1      ==> sw-test02       1/1/1" in str(result.output)
         remove_switch_from_cache(ip)
 
 
@@ -647,10 +647,13 @@ def test_network_cabling_dell(netmiko_commands, switch_vendor):
                 password,
             ],
         )
+        print(result.output)
         assert result.exit_code == 0
         assert (
-            "1/1/1   ==> sw-test01      1/1/15             sw-test01                                             Test Switch 1\n"
-            "1/1/2   ==> sw-test02      1/1/15             sw-test02                                             Test Switch 2\n"
+            "1/1/1      ==> sw-test01       1/1/15             00:40:a6:00:44:55  sw-test01"
+        ) in str(result.output)
+        assert (
+            "1/1/2      ==> sw-test02       1/1/15             00:40:a6:00:00:00  sw-test02"
         ) in str(result.output)
         remove_switch_from_cache(ip_dell)
 
@@ -783,8 +786,10 @@ def test_network_cabling_mellanox(switch_vendor):
         )
         assert result.exit_code == 0
         assert (
-            "1/1/1   ==> sw-test03      1/1/11             sw-test03                                             Test Switch 3\n"
-            "1/1/2   ==> sw-test04      1/1/12             sw-test04                                             Test Switch 4\n"
+            "1/1/1      ==> sw-test03       1/1/11             00:40:a6:00:44:55  sw-test03"
+        ) in str(result.output)
+        assert (
+            "1/1/2      ==> sw-test04       1/1/12             00:40:a6:00:00:33  sw-test04"
         ) in str(result.output)
         remove_switch_from_cache(ip_mellanox)
 
