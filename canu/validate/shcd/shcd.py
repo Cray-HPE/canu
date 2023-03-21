@@ -700,6 +700,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets, edge=None):
                 if subrack is not None:
                     parent = row[subrack].value
                     if parent is not None:
+                        parent = parent.strip()
                         src_node = node_list[src_index]
                         src_location.parent(parent)
                         src_node.location(src_location)
