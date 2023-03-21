@@ -1,12 +1,14 @@
 ## Changelog
 
-### [1.7.4]
+## [UNRELEASED]
 
 - Upgrade CANU directly in venv by connecting to github using 'canu upgrade'
 - CANU dev mode 'canu upgrade --editable'
 
-### [1.7.0]
+## [1.7.0]
 
+- adjusted canuctl script to work with ALPINE_IMAGE/ALPINE_VERSION vars in the Dockerfile
+- By default, do not auth to artifactory for image when using `canuctl`
 - Add canu docs in three formats
 - Remove drawing code and dependencies
 - Create rootless canu container image
@@ -15,6 +17,16 @@
 - Add better LLDP data error handling for `canu report network cabling` and `canu validate network cabling`.
 - Refine error messaging for failed logins.
 - Detect and respond to a rare condition where LLDP queries to Mellanox switches succeed, but the return data is not JSON.
+- Fix dell unused port template
+- Fix dell CDU template
+- Fix dell leaf template
+- Improve `canu validate switch config` for dell
+- Increase netmiko timeout
+- Remove `canu send`
+- Remove `canu validate network config`
+- Remove support for mellanox when using `canu validate switch config --remdation`
+- Fix ordering of mellanox configuration
+- Bump hier config version to 2.2.2
 
 ### [1.6.35]
 
