@@ -2,10 +2,6 @@
 
 ## [UNRELEASED]
 
-- 
-
-## [1.7.6]
-
 - Fix error handling of the parent column for cmm/cec
 
 ## [1.7.0]
