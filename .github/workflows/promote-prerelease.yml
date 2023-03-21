@@ -1,0 +1,35 @@
+name: Promote a build to a release candidate
+on:
+  push:
+    tags:
+      - 'v?[0-9]+.[0-9]+.[0-9]+a[0-9]+'
+      - 'v?[0-9]+.[0-9]+.[0-9]+b[0-9]+'
+      - 'v?[0-9]+.[0-9]+.[0-9]+rc[0-9]+'
+
+env:
+  STREAM: unstable
+jobs:
+  Promote:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - name: Jfrog setup
+        uses: jfrog/setup-jfrog-cli@v3
+        env:
+          JF_URL: https://artifactory.algol60.net
+          JF_USER: ${{ secrets.ARTIFACTORY_ALGOL60_USERNAME }}
+          JF_ACCESS_TOKEN: ${{ secrets.ARTIFACTORY_ALGOL60_TOKEN }}
+
+      - uses: ./.github/actions/prepare-artifacts
+        with:
+          STREAM: ${{ env.STREAM }}
+
+      - uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true # if the job is re-ran to catch missed artifacts, allow updates
+          generateReleaseNotes: true
+          artifacts: ${{ env.DIR_UPLOAD }}/*
+          prerelease: true
+          makeLatest: false

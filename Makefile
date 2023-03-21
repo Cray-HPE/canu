@@ -38,7 +38,11 @@ export PYTHON_VERSION := 3.10
 endif
 
 ifeq ($(ALPINE_IMAGE),)
-export ALPINE_IMAGE := artifactory.algol60.net/docker.io/library/alpine:3.17
+export ALPINE_IMAGE := artifactory.algol60.net/docker.io/library/alpine
+endif
+
+ifeq ($(ALPINE_VERSION),)
+export ALPINE_VERSION := 3.17
 endif
 
 export PYTHON_BIN := python$(PYTHON_VERSION)
@@ -83,19 +87,25 @@ image: prod_image
 	docker tag '${NAME}:${VERSION}' '${NAME}:${VERSION}-p${PYTHON_VERSION}'
 
 deps_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --build-arg ALPINE_IMAGE='${ALPINE_IMAGE}' --tag '${NAME}:${VERSION}-deps' -f Dockerfile --target deps .
+	BUILDKIT=1 docker build --progress plain --no-cache --pull --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --build-arg 'ALPINE_VERSION=${ALPINE_VERSION}' --tag '${NAME}:${VERSION}-deps' -f Dockerfile --target deps .
+
+ansible_image:
+	BUILDKIT=1 docker build --progress plain --no-cache --pull --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --build-arg 'ALPINE_VERSION=${ALPINE_VERSION}' --tag '${NAME}:${VERSION}-deps' -f Dockerfile --target ansible .
 
 dev_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --build-arg ALPINE_IMAGE='${ALPINE_IMAGE}' --tag '${NAME}:${VERSION}-dev' -f Dockerfile --target dev .
+	BUILDKIT=1 docker build --progress plain --no-cache --pull --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --build-arg 'ALPINE_VERSION=${ALPINE_VERSION}' --tag '${NAME}:${VERSION}-dev' -f Dockerfile --target dev .
 
 docs_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --build-arg ALPINE_IMAGE='${ALPINE_IMAGE}' --tag '${NAME}:${VERSION}-docs' -f Dockerfile --target docs .
+	BUILDKIT=1 docker build --progress plain --no-cache --pull --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --build-arg 'ALPINE_VERSION=${ALPINE_VERSION}' --tag '${NAME}:${VERSION}-docs' -f Dockerfile --target docs .
 
 build_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --build-arg ALPINE_IMAGE='${ALPINE_IMAGE}' --tag '${NAME}:${VERSION}-build' -f Dockerfile --target build .
+	BUILDKIT=1 docker build --progress plain --no-cache --pull --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --build-arg 'ALPINE_VERSION=${ALPINE_VERSION}' --tag '${NAME}:${VERSION}-build' -f Dockerfile --target build .
+
+build_image_prod:
+	BUILDKIT=1 docker build --progress plain --no-cache --pull --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --build-arg 'ALPINE_VERSION=${ALPINE_VERSION}' --tag '${NAME}:${VERSION}-build' -f Dockerfile --target prod_build .
 
 prod_image:
-	docker build --progress plain --no-cache --pull --build-arg PYTHON_VERSION='${PYTHON_VERSION}' --build-arg ALPINE_IMAGE='${ALPINE_IMAGE}' --tag '${NAME}:${VERSION}' -f Dockerfile --target prod .
+	BUILDKIT=1 docker build --progress plain --no-cache --pull --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --build-arg 'ALPINE_VERSION=${ALPINE_VERSION}' --tag '${NAME}:${VERSION}' -f Dockerfile --target prod .
 
 dev:
 	./canuctl -d

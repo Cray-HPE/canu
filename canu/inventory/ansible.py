@@ -194,7 +194,7 @@ def is_context_ncn():
         None
     """
     host = socket.gethostname()
-    host_reg = re.compile(r"(ncn|pit.*)-([s,w,m][0-9]{3})", re.VERBOSE)
+    host_reg = re.compile(r"(ncn|pit.*)-([s,w,m]\d{3})", re.VERBOSE)
     result = re.match(host_reg, host)
     if result:
         return True

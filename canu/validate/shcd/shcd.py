@@ -32,7 +32,6 @@ import re
 import sys
 
 import click
-from click_help_colors import HelpColorsCommand
 import natsort
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from network_modeling.NetworkPort import NetworkPort
@@ -40,6 +39,7 @@ from network_modeling.NodeLocation import NodeLocation
 from openpyxl import load_workbook
 import pkg_resources
 
+from canu.style import Style
 
 # Get project root directory
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
@@ -54,9 +54,7 @@ log = logging.getLogger("validate_shcd")
 
 
 @click.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @click.option(
     "--architecture",
@@ -586,7 +584,6 @@ def node_model_from_shcd(factory, spreadsheet, sheets, edge=None):
                     break
                 else:
                     found = None
-                    continue
             if found is not None:
                 log.info(
                     f"Required header column {required_header[required_index]} "
@@ -595,7 +592,6 @@ def node_model_from_shcd(factory, spreadsheet, sheets, edge=None):
                 required_header[required_index] = found
                 start_index = current_index + 1
                 found = None
-                continue
             else:
                 click.secho(
                     f"On tab {sheet}, header column {required_header[required_index]} not found.",

@@ -31,13 +31,13 @@ import re
 import sys
 
 import click
-from click_help_colors import HelpColorsCommand
 from click_option_group import optgroup
 from click_option_group import RequiredMutuallyExclusiveOptionGroup
 from hier_config import HConfig
 from hier_config import Host
 from jinja2 import Environment
 from jinja2 import FileSystemLoader
+from jinja2 import select_autoescape
 from jinja2 import StrictUndefined
 import natsort
 import netaddr
@@ -49,6 +49,7 @@ from ruamel.yaml import YAML
 from ttp import ttp
 import urllib3
 
+from canu.style import Style
 from canu.utils.cache import cache_directory
 from canu.utils.yaml_load import load_yaml
 from canu.validate.paddle.paddle import node_model_from_paddle
@@ -107,6 +108,7 @@ network_templates_folder = path.join(
     "templates",
 )
 env = Environment(
+    autoescape=select_autoescape(),
     loader=FileSystemLoader(network_templates_folder),
     undefined=StrictUndefined,
 )
@@ -125,9 +127,7 @@ dash = "-" * 60
 
 
 @click.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @click.option(
     "--csm",
@@ -477,7 +477,6 @@ def config(
         click.secho(dash)
         for x in unknown:
             click.secho(x, fg="bright_white")
-    return
 
 
 def get_shasta_name(name, mapper):
@@ -510,9 +509,10 @@ def add_custom_config(custom_config, switch_config, host, switch_os, custom_file
 
     # delete custom config that exists in the generated config
     # If interface 1/1 has any config under it, it will be deleted and overwritten with the custom config
-    for line_custom in custom_config_hier.all_children_sorted():
-        switch_config_hier.add_ancestor_copy_of(line_custom)
-        switch_config_hier.del_child_by_text(str(line_custom))
+
+    for line in custom_config_hier.all_children_sorted():
+        child = switch_config_hier.get_child("equals", line.cisco_style_text())
+        switch_config_hier.del_child(child)
 
     if switch_os == "onyx":
         mellanox_config = ""
@@ -554,7 +554,6 @@ def add_custom_config(custom_config, switch_config, host, switch_os, custom_file
             custom_config_merge += "\n" + line.cisco_style_text()
         else:
             custom_config_merge += "\n" + line.cisco_style_text().lstrip()
-
     return custom_config_merge
 
 
@@ -616,12 +615,11 @@ def generate_switch_config(
     }
 
     if node_shasta_name is None:
-        return Exception(
-            click.secho(
-                f"For switch {switch_name}, the type cannot be determined. Please check the switch name and try again.",
-                fg="red",
-            ),
+        click.secho(
+            f"For switch {switch_name}, the type cannot be determined. Please check the switch name and try again.",
+            fg="red",
         )
+        return Exception()
     elif node_shasta_name == "sw-edge" and float(csm) >= 1.2:
         templates["sw-edge"] = {
             "primary": f"{csm}/{edge.lower()}/sw-edge.primary.j2",
@@ -633,12 +631,11 @@ def generate_switch_config(
         "sw-leaf",
         "sw-spine",
     ]:
-        return Exception(
-            click.secho(
-                f"{switch_name} is not a switch. Only switch config can be generated.",
-                fg="red",
-            ),
+        click.secho(
+            f"{switch_name} is not a switch. Only switch config can be generated.",
+            fg="red",
         )
+        return Exception()
 
     if preserve:
         try:
@@ -1426,9 +1423,12 @@ def get_switch_nodes(
 
             # sw-cdu ==> sw-spine
             elif switch_name.startswith("sw-cdu"):
-                lag_number = 255
-                is_primary, primary, secondary = switch_is_primary(switch_name)
-
+                # dell has a max lag number of 128.
+                # We are keeping 255 for Aruba so we don't have to renumber LAGs.
+                if architecture == "network_v1":
+                    lag_number = 110
+                else:
+                    lag_number = 255
             # sw-leaf-bmc ==> sw-spine
             elif switch_name.startswith("sw-leaf-bmc"):
                 lag_number = 255
@@ -1659,9 +1659,9 @@ def groupby_vlan_range(vlan_list):
 
     values = []
     vlans.sort()
-    for _group_id, members in groupby(enumerate(vlans), key=_group_id):  # noqa: B020
-        members = list(members)
-        first, last = members[0][1], members[-1][1]
+    for _group_id, members in groupby(enumerate(vlans), key=_group_id):  # noqa: B020,B031
+        members = list(members)  # noqa: B031
+        first, last = members[0][1], members[-1][1]  # noqa: B031
 
         if first == last:
             values.append(str(first))

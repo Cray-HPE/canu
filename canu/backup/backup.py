@@ -21,15 +21,13 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU backup commands."""
 import click
-from click_help_colors import HelpColorsGroup
 
 from canu.backup.network import network
+from canu.style import Style
 
 
 @click.group(
-    cls=HelpColorsGroup,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsGroup,
 )
 @click.pass_context
 def backup(ctx):

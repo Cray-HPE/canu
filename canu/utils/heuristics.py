@@ -19,4 +19,50 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-"""CANU send."""
+"""heuristic_loookups: Table of educated guesses about normal configurations."""
+
+# TODO add more Dell, Mellanox, Gigabyte and Intel heuristics
+heuristic_lookup = {
+    "14:02:ec": {
+        "sw-spine-0": {
+            "hint": "OCP Port",
+            "port": "ocp:[12]",
+        },
+        "leaf-0": {
+            "hint": "OCP Port",
+            "port": "ocp:[12]",
+        },
+    },
+    "94:40:c9": {
+        "sw-spine-0": {
+            "hint": "PCIe Port",
+            "port": "pcie:[12]",
+        },
+        "leaf-0": {
+            "hint": "PCIe Port",
+            "port": "pcie:[12]",
+        },
+        "leaf-bmc-0": {
+            "hint": "iLO Port",
+            "port": "bmc:1",
+        },
+    },
+    "ec:eb:b8": {
+        "leaf-bmc-0": {
+            "hint": "PDU",
+            "port": "bmc:1",
+        },
+    },
+    "b4:2e:99": {
+        "leaf-bmc-0": {
+            "hint": "River Compute",
+            "port": "onboard:1",
+        },
+    },
+    "00:40:a6": {
+        "leaf-bmc-0": {
+            "hint": "Slingshot Switch",
+            "port": "mgmt:1",
+        },
+    },
+}

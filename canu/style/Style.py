@@ -19,21 +19,42 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-"""CANU Commands that are sent to switches on the network."""
-import click
-from click_help_colors import HelpColorsGroup
+"""Style to keep styling in one place."""
 
-from canu.send.command import command
+from click_help_colors import HelpColorsCommand, HelpColorsGroup
 
 
-@click.group(
-    cls=HelpColorsGroup,
-    help_headers_color="yellow",
-    help_options_color="blue",
-)
-@click.pass_context
-def send(ctx):
-    """Commands that are sent to the switches on the network."""
+class CanuHelpColorsCommand(HelpColorsCommand):
+    """A class for customizing the help colors in a command.
+
+    Attributes
+    ----------
+    help_headers_color : string
+        A color for the help headers.
+    help_options_color : string
+        A color for the help options.
+    """
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Set the header and option colors."""
+        super().__init__(*args, **kwargs)
+        self.help_headers_color = "blue"
+        self.help_options_color = "yellow"
 
 
-send.add_command(command.command)
+class CanuHelpColorsGroup(HelpColorsGroup):
+    """A class for customizing the help colors in a group.
+
+    Attributes
+    ----------
+    help_headers_color : string
+        A color for the help headers.
+    help_options_color : string
+        A color for the help options.
+    """
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Set the header and option colors."""
+        super().__init__(*args, **kwargs)
+        self.help_headers_color = "blue"
+        self.help_options_color = "yellow"

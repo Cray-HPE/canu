@@ -25,7 +25,6 @@
  */
 @Library('csm-shared-library') _
 
-def mainPythonVersion = '3.10'
 def pythonImage = 'artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python'
 
 // Disable pr-merge builds; not used.
@@ -39,6 +38,7 @@ if (env.BRANCH_NAME ==~ ~"^PR-\\d+") {
 // The ==~ operator performs an exact match.
 def stableToken = ~/v?\d+\.\d+\.\d+/
 def isStable = (env.TAG_NAME != null & env.TAG_NAME ==~ stableToken) ? true : false
+def version
 pipeline {
     agent {
         label "metal-gcp-builder"
@@ -57,7 +57,16 @@ pipeline {
 
     stages {
 
-        stage('Image: Build & Publish') {
+        stage('Prepare') {
+            steps {
+                script {
+                    sh "python3 -m pip install setuptools_scm[toml]"
+                    version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
+                }
+            }
+        }
+
+        stage('Container Image') {
 
             agent {
                 node {
@@ -65,54 +74,37 @@ pipeline {
                 }
             }
 
+            environment {
+                VERSION = "${version}"
+            }
+
             stages {
-                
-                stage('Build dev image') {
-                  steps {
-                      script {
-                          sh "python3 -m pip install setuptools_scm[toml]"
-                          version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
-                          sh "make dev_image"
-                      }
-                  }
+                stage('Build') {
+                    parallel {
+                        stage('Develop image') {
+                            steps {
+                                sh "make dev_image"
+                            }
+                        }
+                        stage('Production image') {
+                            steps {
+                                sh "make prod_image"
+                            }
+                        }
+                    }
                 }
-
-                stage('Publish dev image') {
-                  steps {
-                      script {
-                          // Use setuptools_scm to resolve the version(s) to use for the build.
-                          sh "python3 -m pip install setuptools_scm[toml]"
-                          version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
-                          publishCsmDockerImage(image: "${env.NAME}", tag: "${version}-dev", isStable: isStable)
-                      }
-                  }
+                stage('Publish') {
+                    steps {
+                        script {
+                            // Use setuptools_scm to resolve the version(s) to use for the build.
+                            publishCsmDockerImage(image: "${env.NAME}", tag: "${version}-dev", isStable: isStable)
+                            publishCsmDockerImage(image: "${env.NAME}", tag: "${version}", isStable: isStable)
+                        }
+                    }
                 }
-
-                stage('Build prod image') {
-                  steps {
-                      script {
-                          sh "python3 -m pip install setuptools_scm[toml]"
-                          version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
-                          sh "make prod_image"
-                      }
-                  }
-                }
-
-                stage('Publish prod image') {
-                  steps {
-                      script {
-                          // Use setuptools_scm to resolve the version(s) to use for the build.
-                          sh "python3 -m pip install setuptools_scm[toml]"
-                          version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
-                          publishCsmDockerImage(image: "${env.NAME}", tag: "${version}", isStable: isStable)
-                      }
-                  }
-                }
-
             }
         }
-
-        stage('RPM: Build & Publish') {
+        stage('RPM') {
 
             matrix {
 
@@ -138,8 +130,8 @@ pipeline {
                 }
 
                 stages {
-                    
-                    stage('Prepare: RPMs') {
+
+                    stage('Prepare') {
 
                         agent {
                             docker {
@@ -150,10 +142,6 @@ pipeline {
                         }
                         steps {
                             script {
-                                // Use setuptools_scm to resolve the version(s) to use for the build.
-                                sh "python3 -m pip install setuptools_scm[toml]"
-                                version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
-
                                 // Inject distro-specific metadata (e.g. which distro and service pack).
                                 runLibraryScript("addRpmMetaData.sh", "${env.NAME}.spec")
                                 sh "make prepare"
@@ -162,7 +150,7 @@ pipeline {
                         }
                     }
 
-                    stage('Build: RPMs') {
+                    stage('Build') {
 
                         environment {
                             VERSION = "${version}"
@@ -170,7 +158,8 @@ pipeline {
 
                         agent {
                             docker {
-                                args '-u root' // Build Python RPMs as root for Python rpm macros to build with the right sitelib.
+                                args '-u root'
+                                // Build Python RPMs as root for Python rpm macros to build with the right sitelib.
                                 label "metal-gcp-builder"
                                 reuseNode true
                                 image "${pythonImage}:${PYTHON_VERSION}"
@@ -180,14 +169,12 @@ pipeline {
                         steps {
                             script {
                                 // Use setuptools_scm to resolve the version(s) to use for the build.
-                                sh "python3 -m pip install setuptools_scm[toml]"
-                                version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
                                 sh "make rpm"
                             }
                         }
                     }
 
-                    stage('Publish: RPMs') {
+                    stage('Publish') {
 
                         agent {
                             docker {

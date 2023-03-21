@@ -20,13 +20,11 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate switch running config against a config file."""
-import difflib
 from os import path
 from pathlib import Path
 import sys
 
 import click
-from click_help_colors import HelpColorsCommand
 from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from click_params import IPV4_ADDRESS
 import click_spinner
@@ -34,6 +32,7 @@ from hier_config import HConfig, Host
 from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 from ruamel.yaml import YAML
 
+from canu.style import Style
 from canu.utils.ssh import netmiko_command, netmiko_commands
 from canu.utils.vendor import switch_vendor
 
@@ -70,41 +69,6 @@ mellanox_options_file = path.join(
     "config",
     "onyx_options.yaml",
 )
-tags_file = path.join(
-    project_root,
-    "canu",
-    "validate",
-    "switch",
-    "config",
-    "tags.yaml",
-)
-
-dell_tags_file = path.join(
-    project_root,
-    "canu",
-    "validate",
-    "switch",
-    "config",
-    "dell_tags.yaml",
-)
-
-mellanox_tags_file = path.join(
-    project_root,
-    "canu",
-    "validate",
-    "switch",
-    "config",
-    "mellanox_tags.yaml",
-)
-
-with open(tags_file, "r") as tags_f:
-    tags = yaml.load(tags_f)
-
-with open(dell_tags_file, "r") as tags_f:
-    dell_tags = yaml.load(tags_f)
-
-with open(mellanox_tags_file, "r") as tags_f:
-    mellanox_tags = yaml.load(tags_f)
 
 with open(options_file, "r") as options_f:
     options = yaml.load(options_f)
@@ -117,9 +81,7 @@ with open(mellanox_options_file, "r") as options_f:
 
 
 @click.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @optgroup.group(
     "Running config source",
@@ -160,7 +122,7 @@ with open(mellanox_options_file, "r") as options_f:
 @click.option(
     "--remediation",
     is_flag=True,
-    help="Outputs commands to get from the running-config to generated config",
+    help="Outputs commands to get from the running-config to generated config, Mellanox not supported",
     required=False,
 )
 @click.pass_context
@@ -218,7 +180,12 @@ def config(
 
         credentials = {"username": username, "password": password}
 
-        with click_spinner.spinner():
+        with click_spinner.spinner(
+            beep=False,
+            disable=False,
+            force=False,
+            stream=sys.stdout,
+        ):
             print(
                 f"  Connecting to {ip}...",
                 end="\r",
@@ -294,12 +261,19 @@ def config(
     generated_config_hier.load_from_file(generated_config)
 
     dash = "-" * 73
-    compare_config_heir(
-        running_config_hier.difference(generated_config_hier),
-        generated_config_hier.difference(running_config_hier),
-        vendor,
-        out,
-    )
+    if vendor == "aruba":
+        aruba_banner(generated_config_hier)
+        aruba_banner(running_config_hier)
+    unified_diff = list(running_config_hier.unified_diff(generated_config_hier))
+    for line in unified_diff:
+        if "+" == line.strip()[0]:
+            click.secho(line, fg="green", file=out)
+        elif "-" == line.strip()[0]:
+            click.secho(line, fg="red", file=out)
+        elif line.startswith("? "):
+            pass
+        else:
+            click.secho(line, fg="bright_white", file=out)
 
     click.echo(dash, file=out)
     click.secho(
@@ -319,9 +293,14 @@ def config(
         fg="green",
         file=out,
     )
+    if vendor == "mellanox":
+        click.secho(
+            "Remediation not supported for Mellanox",
+            fg="white",
+            bg="red",
+        )
 
-    # Build Hierarchical Configuration object for the Remediation Config
-    if remediation:
+    else:
         click.echo(dash, file=out)
         click.secho(
             "\n" + "Remediation Config" + "\n",
@@ -332,9 +311,6 @@ def config(
         remediation_config_hier = running_config_hier.config_to_get_to(
             generated_config_hier,
         )
-
-        if vendor == "aruba":
-            aruba_banner(remediation_config_hier)
         for line in remediation_config_hier.all_children():
             click.echo(line.cisco_style_text(), file=out)
 
@@ -373,7 +349,11 @@ def get_switch_config(ip, credentials, return_error=False):
                 dell_commands,
                 "dell",
             )
-            switch_config = command_output[0]
+            switch_config_list = []
+            # dell automagically appends whitespace to the banner.  Delete them.
+            for line in command_output[0].splitlines():
+                switch_config_list.append(line.rstrip())
+            switch_config = ("\n").join(switch_config_list)
             hostname = command_output[1]
         elif vendor == "mellanox":
             mellanox_commands = [
@@ -425,156 +405,6 @@ def get_switch_config(ip, credentials, return_error=False):
     return hostname, switch_config, vendor
 
 
-def print_config_diff_summary(hostname, ip, differences, out):
-    """Print a summary of the config differences.
-
-    Args:
-        hostname: Switch hostname
-        ip: Switch ip
-        differences: Dict containing config differences.
-        out: Defaults to stdout, but will print to the file name passed in
-    """
-    dash = "-" * 73
-    click.echo("\n", file=out)
-    if ip:
-        title = f"Switch: {hostname} ({ip})"
-    else:
-        title = f"Switch: {hostname}"
-    click.secho(
-        title,
-        fg="bright_white",
-        file=out,
-    )
-    click.secho(
-        "Differences",
-        fg="bright_white",
-        file=out,
-    )
-    click.echo(dash, file=out)
-
-    print_difference_line(
-        "In Generated Not In Running (+)",
-        "",
-        "In Running Not In Generated (-)",
-        "",
-        out,
-    )
-    click.echo(dash, file=out)
-    # Always print total additions and deletions even if 0
-    click.echo(
-        "{:<40s}{:>12s}  |  {:<40s}{:>12s}".format(
-            click.style("Total Additions:", fg="green"),
-            click.style(str(differences["additions"]), fg="green"),
-            click.style("Total Deletions: ", fg="red"),
-            click.style(str(differences["deletions"]), fg="red"),
-        ),
-        file=out,
-    )
-    print_difference_line(
-        "Hostname:",
-        differences["hostname_additions"],
-        "Hostname: ",
-        differences["hostname_deletions"],
-        out,
-    )
-    print_difference_line(
-        "Interface:",
-        differences["interface_additions"],
-        "Interface: ",
-        differences["interface_deletions"],
-        out,
-    )
-    print_difference_line(
-        "Interface Lag:",
-        differences["interface_lag_additions"],
-        "Interface Lag: ",
-        differences["interface_lag_deletions"],
-        out,
-    )
-    print_difference_line(
-        "Spanning Tree:",
-        differences["spanning_tree_additions"],
-        "Spanning Tree: ",
-        differences["spanning_tree_deletions"],
-        out,
-    )
-    print_difference_line(
-        "Script:",
-        differences["script_additions"],
-        "Script: ",
-        differences["script_deletions"],
-        out,
-    )
-    print_difference_line(
-        "Router:",
-        differences["router_additions"],
-        "Router: ",
-        differences["router_deletions"],
-        out,
-    )
-    print_difference_line(
-        "System Mac:",
-        differences["system_mac_additions"],
-        "System Mac: ",
-        differences["system_mac_deletions"],
-        out,
-    )
-    print_difference_line(
-        "Inter Switch Link:",
-        differences["isl_additions"],
-        "Inter Switch Link: ",
-        differences["isl_deletions"],
-        out,
-    )
-    print_difference_line(
-        "Role:",
-        differences["role_additions"],
-        "Role: ",
-        differences["role_deletions"],
-        out,
-    )
-    print_difference_line(
-        "Keepalive:",
-        differences["keepalive_additions"],
-        "Keepalive: ",
-        differences["keepalive_deletions"],
-        out,
-    )
-
-
-def print_difference_line(additions, additions_int, deletions, deletions_int, out):
-    """Print the additions and deletions in red and green text. Doesn't print if zero.
-
-    Args:
-        additions: (str) Text of the additions
-        additions_int: (int) Number of additions
-        deletions: (str) Text of the deletions
-        deletions_int: (int) Number of deletions
-        out: Defaults to stdout, but will print to the file name passed in
-    """
-    if additions_int == 0 and deletions_int == 0:
-        return
-    if additions_int == 0:
-        additions = ""
-        additions_int = ""
-    if deletions_int == 0:
-        deletions = ""
-        deletions_int = ""
-    additions = click.style(str(additions), fg="green")
-    additions_int = click.style(str(additions_int), fg="green")
-    deletions = click.style(str(deletions), fg="red")
-    deletions_int = click.style(str(deletions_int), fg="red")
-    click.echo(
-        "{:<40s}{:>12s}  |  {:<40s}{:>12s}".format(
-            additions,
-            additions_int,
-            deletions,
-            deletions_int,
-        ),
-        file=out,
-    )
-
-
 def aruba_banner(config):
     """Hier config removes the ! from the end of the Aruba banner, this function adds it back.
 
@@ -588,156 +418,7 @@ def aruba_banner(config):
     if banner is None:
         return
     else:
-        banner_str = str(banner) + "\n!"
+        banner_str = str(banner.cisco_style_text()) + "\n!"
         config.del_child(banner)
         config.add_child(banner_str)
         return config
-
-
-def compare_config_heir(config1, config2, vendor, out="-"):
-    """Compare and print two switch configurations.
-
-    Args:
-        config1: (Str) Switch 1 config
-        config2: (Str) Switch 2 config
-        vendor: Switch vendor. Aruba, Dell, or Mellanox
-        out: Defaults to stdout, but will print to the file name passed in
-
-    Returns:
-        List with the number of additions and deletions
-    """
-    one = []
-    two = []
-
-    config1.set_order_weight()
-    config2.set_order_weight()
-
-    # fix aruba banner
-    if vendor == "aruba":
-        aruba_banner(config1)
-        aruba_banner(config2)
-    for config1_line in config1.all_children_sorted():
-        one.append(config1_line.cisco_style_text())
-    for config2_line in config2.all_children_sorted():
-        two.append(config2_line.cisco_style_text())
-    d = difflib.Differ()
-    difflist = []
-
-    for line in d.compare(one, two):
-        difflist.append(line)
-    if vendor == "mellanox":
-        difflist.sort(reverse=True)
-    for line in difflist:
-        if "+" == line.strip()[0]:
-            click.secho(line, fg="green", file=out)
-        elif "-" == line.strip()[0]:
-            click.secho(line, fg="red", file=out)
-        elif line.startswith("? "):
-            pass
-        else:
-            click.secho(line, fg="bright_white", file=out)
-    return difflist
-
-
-def compare_config(config1, config2, print_comparison=True, out="-"):
-    """Compare and print two switch configurations.
-
-    Args:
-        config1: (Str) Switch 1 config
-        config2: (Str) Switch 2 config
-        print_comparison: Print the comparison to the screen (defaults True)
-        out: Defaults to stdout, but will print to the file name passed in
-
-    Returns:
-        List with the number of additions and deletions
-    """
-    one = []
-    two = []
-
-    config1.set_order_weight()
-    config2.set_order_weight()
-
-    for config1_line in config1.all_children_sorted():
-        one.append(config1_line.cisco_style_text())
-    for config2_line in config2.all_children_sorted():
-        two.append(config2_line.cisco_style_text())
-    d = difflib.Differ()
-    differences = {
-        "additions": 0,
-        "deletions": 0,
-        "hostname_additions": 0,
-        "hostname_deletions": 0,
-        "interface_additions": 0,
-        "interface_deletions": 0,
-        "interface_lag_additions": 0,
-        "interface_lag_deletions": 0,
-        "spanning_tree_additions": 0,
-        "spanning_tree_deletions": 0,
-        "script_additions": 0,
-        "script_deletions": 0,
-        "router_additions": 0,
-        "router_deletions": 0,
-        "system_mac_additions": 0,
-        "system_mac_deletions": 0,
-        "isl_additions": 0,
-        "isl_deletions": 0,
-        "role_additions": 0,
-        "role_deletions": 0,
-        "keepalive_additions": 0,
-        "keepalive_deletions": 0,
-    }
-    for diff in d.compare(one, two):
-        color = ""
-        if diff.startswith("- "):
-            color = "red"
-            differences["deletions"] += 1
-        elif diff.startswith("+ "):
-            color = "green"
-            differences["additions"] += 1
-
-        if diff.startswith("+ hostname"):
-            differences["hostname_additions"] += 1
-        if diff.startswith("- hostname"):
-            differences["hostname_deletions"] += 1
-        if diff.startswith("+ interface 1/1/"):
-            differences["interface_additions"] += 1
-        if diff.startswith("- interface 1/1/"):
-            differences["interface_deletions"] += 1
-        if diff.startswith("+ interface lag"):
-            differences["interface_lag_additions"] += 1
-        if diff.startswith("- interface lag"):
-            differences["interface_lag_deletions"] += 1
-        if diff.startswith("+ spanning-tree"):
-            differences["spanning_tree_additions"] += 1
-        if diff.startswith("- spanning-tree"):
-            differences["spanning_tree_deletions"] += 1
-        if diff.startswith("+ nae-script"):
-            differences["script_additions"] += 1
-        if diff.startswith("- nae-script"):
-            differences["script_deletions"] += 1
-        if diff.startswith("+ router"):
-            differences["router_additions"] += 1
-        if diff.startswith("- router"):
-            differences["router_deletions"] += 1
-        if diff.startswith("+   system-mac"):
-            differences["system_mac_additions"] += 1
-        if diff.startswith("-   system-mac"):
-            differences["system_mac_deletions"] += 1
-        if diff.startswith("+   inter-switch-link"):
-            differences["isl_additions"] += 1
-        if diff.startswith("-   inter-switch-link"):
-            differences["isl_deletions"] += 1
-        if diff.startswith("+   role"):
-            differences["role_additions"] += 1
-        if diff.startswith("-   role"):
-            differences["role_deletions"] += 1
-        if diff.startswith("+   keepalive"):
-            differences["keepalive_additions"] += 1
-        if diff.startswith("-   keepalive"):
-            differences["keepalive_deletions"] += 1
-
-        # Print the difference
-        if print_comparison:
-            click.secho(diff, fg=color, file=out)
-
-    return differences

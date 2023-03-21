@@ -27,7 +27,6 @@ from pathlib import Path
 import sys
 
 import click
-from click_help_colors import HelpColorsCommand
 from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
@@ -41,6 +40,7 @@ from canu.generate.switch.config.config import (
     parse_sls_for_config,
     rename_sls_hostnames,
 )
+from canu.style import Style
 from canu.utils.cache import cache_directory
 from canu.validate.paddle.paddle import node_model_from_paddle
 from canu.validate.shcd.shcd import node_model_from_shcd, shcd_to_sheets
@@ -72,6 +72,7 @@ network_templates_folder = path.join(
     "templates",
 )
 env = Environment(
+    autoescape=True,
     loader=FileSystemLoader(network_templates_folder),
     undefined=StrictUndefined,
 )
@@ -84,9 +85,7 @@ csm_options = canu_config["csm_versions"]
 
 
 @click.command(
-    cls=HelpColorsCommand,
-    help_headers_color="yellow",
-    help_options_color="blue",
+    cls=Style.CanuHelpColorsCommand,
 )
 @click.option(
     "--csm",
@@ -477,5 +476,3 @@ def config(
         click.secho(dash)
         for x in all_unknown:
             click.secho(x, fg="bright_white")
-
-    return
