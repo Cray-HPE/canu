@@ -4,6 +4,10 @@
 
 - 
 
+## [1.7.6]
+
+- Fix error handling of the parent column for cmm/cec
+
 ## [1.7.0]
 
 - adjusted canuctl script to work with ALPINE_IMAGE/ALPINE_VERSION vars in the Dockerfile
