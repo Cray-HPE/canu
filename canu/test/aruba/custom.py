@@ -19,31 +19,41 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-"""parse aruba ip route output and return pass or fail."""
-from ntc_templates.parse import parse_output
+"""parse aruba lacp interfaces and return blocked ports."""
+from ttp import ttp
 
 
-def run(result):
-    """Test TFTP route.
+def lacp_test(result):
+    """Test LACP ports.
 
     Args:
-        result: show ip route all-vrfs output
+        result: show lacp interfaces
 
     Returns:
         Pass or fail
     """
-    routes = str(result)
-    result_parsed = (
-        parse_output(
-            platform="aruba_aoscx",
-            command="show ip route all-vrfs",
-            data=routes,
-        ),
-    )
-    for route in result_parsed:
-        if route["ip"] == "10.92.100.60/32" and len(route["iface"]) > 1:
-            return {
-                "exception": "Multiple Routes to tftp server",
-                "result": "FAIL",
-                "success": False,
-            }
+    # TTP template to convert switch show command to structured data.
+    aruba_aoscx_show_lacp_interfaces = """
+<group name = "interfaces.{{interface}}">
+{{ interface }}      lag{{ lag }}   {{ port_id }}     {{ port_pri }}     {{ state }}  {{ system-id }} {{ system_pri }}  {{ aggr_key }}    {{ forwarding_state }}
+</group>
+    """
+
+    result_parsed = ttp(str(result), aruba_aoscx_show_lacp_interfaces)
+    result_parsed.parse()
+    output = result_parsed.result()
+    lacp_blocked_ports = ""
+    exception = None
+    result = "PASS"
+    success = True
+    for interface, data in output[0][0]["interfaces"].items():
+        if data["forwarding_state"] == "lacp-block":
+            lacp_blocked_ports += (interface) + "\n"
+            result = "FAIL"
+            success = False
+            exception = f"LACP port blocks \n{lacp_blocked_ports}"
+    return {
+        "exception": exception,
+        "result": result,
+        "success": success,
+    }

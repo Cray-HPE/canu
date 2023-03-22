@@ -30,6 +30,18 @@
     - leaf
     - leaf-bmc
     - spine
+
+- name: LACP interfaces test
+  task: show lacp interfaces
+  test: custom
+  function_file: ./aruba/custom.py
+  function_name: lacp_test
+  device:
+    - cdu
+    - leaf
+    - leaf-bmc
+    - spine
+
 - name: lacp interfaces test
   task: show lacp interfaces
   test: ncontains_lines

@@ -25,13 +25,19 @@ import logging
 from os import path
 from pathlib import Path
 import sys
+import pprint
+from rich import inspect
 
 import click
 from jinja2 import Environment
 from nornir import InitNornir
 from nornir.core.filter import F
-from nornir_salt.plugins.functions import ResultSerializer, TabulateFormatter
-from nornir_salt.plugins.processors import TestsProcessor
+from nornir_salt.plugins.functions import (
+    ResultSerializer,
+    TabulateFormatter,
+    InventoryFun,
+)
+from nornir_salt.plugins.processors import TestsProcessor, DataProcessor
 from nornir_salt.plugins.tasks import netmiko_send_commands, scrapli_send_commands
 import yaml
 
