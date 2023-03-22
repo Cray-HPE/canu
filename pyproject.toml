@@ -71,7 +71,7 @@ dependencies = [
     'tomli==1.1.0',
     'ttp==0.8.4',
     'urllib3==1.26.14',
-    'yamale<=4.0.2',
+    'yamale<=4.0.4',
 ]
 dynamic = ['entry-points', 'scripts', 'version']
 maintainers = [
@@ -117,7 +117,7 @@ lint = [
 ]
 network_modeling = [
     'jsonschema==4.17.3',
-    'yamale<=4.0.2',
+    'yamale<=4.0.4',
 ]
 test = [
     'coverage~=7.2.2',
