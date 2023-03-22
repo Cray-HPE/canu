@@ -58,7 +58,7 @@ endif
 SPEC_FILE := ${NAME}.spec
 SOURCE_NAME := ${NAME}-${VERSION}
 
-BUILD_DIR := $(PWD)/dist/rpmbuild
+BUILD_DIR ?= $(PWD)/dist/rpmbuild
 SOURCE_PATH := ${BUILD_DIR}/SOURCES/${SOURCE_NAME}.tar.bz2
 
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
@@ -79,7 +79,7 @@ cdocs:
 
 prepare:
 		@echo $(NAME)
-		rm -rf dist
+		rm -rf $(BUILD_DIR)
 		mkdir -p $(BUILD_DIR)/SPECS $(BUILD_DIR)/SOURCES
 		cp $(SPEC_FILE) $(BUILD_DIR)/SPECS/
 
