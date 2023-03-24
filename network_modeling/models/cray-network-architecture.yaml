@@ -777,38 +777,38 @@ network_mug:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
-    - name: "river_ncn_node_2_port_gigabyte"
-      model: "river_ncn_node_2_port_gigabyte"
+    - name: "river_ncn_node_2_port_gigabyte_mug"
+      model: "river_ncn_node_2_port_gigabyte_mug"
       connections:
         - name: "spine"
-          speed: 40
+          speed: 10
         - name: "river_bmc_leaf"
           speed: 1
-    - name: "river_ncn_node_4_port_gigabyte"
-      model: "river_ncn_node_4_port_gigabyte"
+    - name: "river_ncn_node_4_port_gigabyte_mug"
+      model: "river_ncn_node_4_port_gigabyte_mug"
       connections:
         - name: "spine"
-          speed: 40
+          speed: 10
         - name: "river_bmc_leaf"
           speed: 1
   lookup_mapper:
     - lookup_name:
         - "mn"
       shasta_name: "ncn-m"
-      architecture_type: "river_ncn_node_4_port_gigabyte"
+      architecture_type: "river_ncn_node_2_port_gigabyte_mug"
     - lookup_name:
         - "wn"
       shasta_name: "ncn-w"
-      architecture_type: "river_ncn_node_2_port_gigabyte"
+      architecture_type: "river_ncn_node_2_port_gigabyte_mug"
     - lookup_name:
         - "sn"
       shasta_name: "ncn-s"
-      architecture_type: "river_ncn_node_2_port_gigabyte"
+      architecture_type: "river_ncn_node_2_port_gigabyte_mug"
     - lookup_name:
         - "uan"
         - "slurm"
       shasta_name: "uan"
-      architecture_type: "river_ncn_node_4_port_gigabyte"
+      architecture_type: "river_ncn_node_2_port_gigabyte_mug"
     - lookup_name: ["viz"]
       shasta_name: "viz"
       architecture_type: "river_ncn_node_4_port"
