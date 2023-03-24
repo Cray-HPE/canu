@@ -100,9 +100,6 @@ def inventory(username, password, network, sls_file=None, sls_inventory=None, du
         },
     }
 
-    def aruba_aoscx_autoconfirm(conn):
-        conn.channel.send_input("auto-confirm")
-
     nornir_inventory["options"]["groups"] = {
         "aruba": {
             "platform": "aruba_aoscx",
