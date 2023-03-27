@@ -186,7 +186,12 @@ def paddle_cabling(
     ips_length = len(ips)
 
     if ips:
-        with click_spinner.spinner():
+        with click_spinner.spinner(
+            beep=False,
+            disable=False,
+            force=False,
+            stream=sys.stdout,
+        ):
             for i, ip in enumerate(ips, start=1):
                 print(
                     f"  Connecting to {ip} - Switch {i} of {ips_length}        ",

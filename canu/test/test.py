@@ -268,9 +268,8 @@ def test(
                 devices = test_command.get("device")
                 csm_test_version = test_command.get("csm")
                 csm = float(csm)
-                if csm_test_version is not None:
-                    if csm not in csm_test_version:
-                        continue
+                if csm_test_version is not None and csm not in csm_test_version:
+                    continue
                 if switch in devices:
                     switch_test_suite[switch].append(test_command)
                 if switch in devices and isinstance(test_command["task"], str):
