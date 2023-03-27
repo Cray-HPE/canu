@@ -2,10 +2,9 @@
 
 ## [UNRELEASED]
 
-
-
 ## [1.7.0]
 
+- Create baseline CSM 1.4 configuration
 - Fix error handling of the parent column for cmm/cec
 - Add Kea, SLS, SMD and heuristic lookup tables to fill out LLDP data for cabling reports and validation
 - adjusted canuctl script to work with ALPINE_IMAGE/ALPINE_VERSION vars in the Dockerfile
