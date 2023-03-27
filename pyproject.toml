@@ -55,7 +55,7 @@ dependencies = [
     'natsort==7.1.1',
     'netaddr==0.8.0',
     'netmiko==4.1.2',
-    'netutils==1.2.0',
+    'netutils==1.4.1',
     'nornir-netmiko==0.2.0',
     'nornir-salt==0.18.0',
     'nornir-scrapli==2022.7.30',
