@@ -96,7 +96,7 @@ def test_switch_config_spine_primary():
             ],
         )
         assert result.exit_code == 0
-        assert "hostname sw-spine-001\n"
+        assert "hostname sw-spine-001\n" in str(result.output)
         assert banner_motd in str(result.output)
 
         assert (
@@ -1322,7 +1322,7 @@ def test_switch_config_spine_secondary():
         )
         assert result.exit_code == 0
 
-        assert "hostname sw-spine-002\n"
+        assert "hostname sw-spine-002\n" in str(result.output)
         assert banner_motd in str(result.output)
 
         assert (
@@ -1726,7 +1726,7 @@ def test_switch_config_leaf_primary():
             ],
         )
         assert result.exit_code == 0
-        assert "hostname sw-leaf-001\n"
+        assert "hostname sw-leaf-001\n" in str(result.output)
         assert banner_motd in str(result.output)
 
         assert (
@@ -2072,7 +2072,7 @@ def test_switch_config_leaf_primary_to_uan():
             ],
         )
         assert result.exit_code == 0
-        assert "hostname sw-leaf-003\n"
+        assert "hostname sw-leaf-003\n" in str(result.output)
 
         uan = (
             "interface 1/1/7\n"
@@ -2134,7 +2134,7 @@ def test_switch_config_leaf_secondary():
             ],
         )
         assert result.exit_code == 0
-        assert "hostname sw-leaf-002\n"
+        assert "hostname sw-leaf-002\n" in str(result.output)
         assert banner_motd in str(result.output)
 
         assert (
@@ -2477,7 +2477,7 @@ def test_switch_config_leaf_secondary_to_uan():
             ],
         )
         assert result.exit_code == 0
-        assert "hostname sw-leaf-004\n"
+        assert "hostname sw-leaf-004\n" in str(result.output)
 
         uan = (
             "interface 1/1/7\n"
@@ -2538,7 +2538,7 @@ def test_switch_config_cdu_primary():
             ],
         )
         assert result.exit_code == 0
-        assert "hostname sw-cdu-001\n"
+        assert "hostname sw-cdu-001\n" in str(result.output)
         assert banner_motd in str(result.output)
 
         assert (
@@ -2826,7 +2826,7 @@ def test_switch_config_cdu_secondary():
             ],
         )
         assert result.exit_code == 0
-        assert "hostname sw-cdu-002\n"
+        assert "hostname sw-cdu-002\n" in str(result.output)
         assert banner_motd in str(result.output)
 
         assert (
@@ -3104,7 +3104,7 @@ def test_switch_config_leaf_bmc():
             ],
         )
         assert result.exit_code == 0
-        assert "hostname sw-leaf-bmc-001\n"
+        assert "hostname sw-leaf-bmc-001\n" in str(result.output)
         assert banner_motd in str(result.output)
 
         assert (
@@ -3965,7 +3965,7 @@ def test_switch_config_tds_spine_primary():
             ],
         )
         assert result.exit_code == 0
-        assert "hostname sw-spine-001\n"
+        assert "hostname sw-spine-001\n" in str(result.output)
         assert banner_motd in str(result.output)
 
         assert (
@@ -4574,7 +4574,7 @@ def test_switch_config_tds_spine_secondary():
             ],
         )
         assert result.exit_code == 0
-        assert "hostname sw-spine-002\n"
+        assert "hostname sw-spine-002\n" in str(result.output)
         assert banner_motd in str(result.output)
 
         assert (
@@ -5182,7 +5182,7 @@ def test_switch_config_tds_leaf_bmc():
             ],
         )
         assert result.exit_code == 0
-        assert "hostname sw-leaf-bmc-001\n"
+        assert "hostname sw-leaf-bmc-001\n" in str(result.output)
         assert banner_motd in str(result.output)
 
         assert (
@@ -5194,7 +5194,7 @@ def test_switch_config_tds_leaf_bmc():
             + "ntp enable\n"
         ) in str(result.output)
 
-        assert "ssh server vrf default\n"
+        assert "ssh server vrf default\n" in str(result.output)
         assert banner_motd in str(result.output)
 
         assert (
