@@ -343,7 +343,7 @@ def temp_is_subnet_of(a, b):
         )
     except AttributeError as err:  # noqa
         raise TypeError(
-            f"Unable to test subnet containment " f"between {a} and {b}",
+            f"Unable to test subnet containment between {a} and {b}",
         ) from err
 
 
