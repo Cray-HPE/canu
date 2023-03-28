@@ -2,6 +2,8 @@
 
 ## [UNRELEASED]
 
+- adjust docs workflow to run during promote-release
+
 ## [1.7.1]
 
 - rollback yamale version
