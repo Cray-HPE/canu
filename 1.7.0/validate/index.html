@@ -1,0 +1,1450 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="canu documenation">
+      
+      
+        <meta name="author" content="Cray-HPE">
+      
+      
+      
+        <link rel="prev" href="../test_network/">
+      
+      
+        <link rel="next" href="../canu_inventory/">
+      
+      <link rel="icon" href="../custom_theme/img/favicon.ico">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.0.15">
+    
+    
+<title>CANU</title>
+
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.113286f1.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.a0c5b2b5.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent="">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#canu-validate" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="canu" class="md-header__button md-logo" aria-label="canu" data-md-component="logo">
+      
+  <img src="../custom_theme/img/hpe_pri_wht_rev_rgb.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            canu
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              validate
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6zm0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4zM7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+            </label>
+          
+        
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Cray-HPE/canu" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="canu" class="md-nav__button md-logo" aria-label="canu" data-md-component="logo">
+      
+  <img src="../custom_theme/img/hpe_pri_wht_rev_rgb.png" alt="logo">
+
+    </a>
+    canu
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Cray-HPE/canu" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          Installation
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Installation
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../container_install/" class="md-nav__link">
+        Container
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rpm_install/" class="md-nav__link">
+        RPM
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../venv/" class="md-nav__link">
+        Virtualenv
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          Upgrade
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Upgrade
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network_configuration_and_upgrade/collect_data/" class="md-nav__link">
+        Collect Data
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network_configuration_and_upgrade/validate_shcd/" class="md-nav__link">
+        Validate SHCD
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network_configuration_and_upgrade/checks_and_validations/" class="md-nav__link">
+        Checks and Validations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network_configuration_and_upgrade/logging_and_updates/" class="md-nav__link">
+        Logging and Updates
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network_configuration_and_upgrade/generate_config/" class="md-nav__link">
+        Generate Switch Config
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network_configuration_and_upgrade/compare_config/" class="md-nav__link">
+        Compare Switch Configs
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network_configuration_and_upgrade/custom_config/" class="md-nav__link">
+        Custom Config Injection
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network_configuration_and_upgrade/analyze_config/" class="md-nav__link">
+        Analyze Configuration Upgrade
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network_configuration_and_upgrade/validation_errors/" class="md-nav__link">
+        CANU Validation Errors
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          Command Reference
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Command Reference
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../backup/" class="md-nav__link">
+        backup
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cache/" class="md-nav__link">
+        cache
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../generate/" class="md-nav__link">
+        generate
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../init/" class="md-nav__link">
+        init
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../report/" class="md-nav__link">
+        report
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../send_command/" class="md-nav__link">
+        send
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../test_network/" class="md-nav__link">
+        test
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          validate
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        validate
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#network" class="md-nav__link">
+    network
+  </a>
+  
+    <nav class="md-nav" aria-label="network">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bgp" class="md-nav__link">
+    bgp
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          Use With Ansible
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Use With Ansible
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../canu_inventory/" class="md-nav__link">
+        Inventory Script
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          Development
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Development
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../nox_testing/" class="md-nav__link">
+        Testing
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../releasing/" class="md-nav__link">
+        Releasing
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../versioning/" class="md-nav__link">
+        Versioning
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          Appendix
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_7">
+          <span class="md-nav__icon md-icon"></span>
+          Appendix
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../paddle/" class="md-nav__link">
+        Paddle / CCJ
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples_output/" class="md-nav__link">
+        Examples / Output
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#network" class="md-nav__link">
+    network
+  </a>
+  
+    <nav class="md-nav" aria-label="network">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bgp" class="md-nav__link">
+    bgp
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="canu-validate">canu validate</h1>
+<p>CANU validate commands.</p>
+<pre><code class="language-shell">canu validate [OPTIONS] COMMAND [ARGS]...
+</code></pre>
+<h2 id="network">network</h2>
+<p>Commands that validate the network.</p>
+<pre><code class="language-shell">canu validate network [OPTIONS] COMMAND [ARGS]...
+</code></pre>
+<h3 id="bgp">bgp</h3>
+<p>Validate BGP neighbors.</p>
+<p>This command will check the BGP neighbors for the switch IP addresses entered. All of the neighbors of a switch
+must be ‘Established’, or the verification will fail.</p>
+<p>If a switch that is not a spine switch is tested, it will show in the results table as ‘SKIP’.</p>
+<ul>
+<li>
+<p>Enter a comma separated list of IP addresses with the ‘—ips’ flag.</p>
+</li>
+<li>
+<p>Or read the IP addresses from a file, one IP address per line, using ‘–ips-file FILENAME’ flag.</p>
+</li>
+</ul>
+<p>If you want to see the individual status of all the neighbors of a switch, use the ‘–verbose’ flag.</p>
+<hr />
+<h1 id="noqa-d301">noqa: D301</h1>
+<p>Args:</p>
+<pre><code>ctx: CANU context settings
+username: Switch username
+password: Switch password
+verbose: Bool indicating verbose output
+network: The network that BGP neighbors are checked
+</code></pre>
+<pre><code class="language-shell">canu validate network bgp [OPTIONS]
+</code></pre>
+<h3 id="options">Options</h3>
+<h3 id="-username">--username( <username>)</h3>
+<p>Switch username</p>
+<ul>
+<li>
+<p><strong>Default</strong></p>
+<p><code>admin</code></p>
+</li>
+</ul>
+<h3 id="-password">--password( <password>)</h3>
+<p>Switch password</p>
+<h3 id="-network">--network( <network>)</h3>
+<p>The network that BGP neighbors are checked.</p>
+<ul>
+<li>
+<p><strong>Default</strong></p>
+<p><code>ALL</code></p>
+</li>
+<li>
+<p><strong>Options</strong></p>
+<p>ALL | NMN | CMN</p>
+</li>
+</ul>
+<h3 id="-verbose">--verbose()</h3>
+<p>Verbose mode</p>
+<h3 id="cabling">cabling</h3>
+<p>Validate network cabling.</p>
+<p>CANU can be used to validate that network cabling passes basic validation checks.</p>
+<p>This command will use LLDP to determine if the network is properly connected architecturally.</p>
+<p>The validation will ensure that spine switches, leaf switches, edge switches, and nodes all are connected properly.</p>
+<hr />
+<h1 id="noqa-d301-b950">noqa: D301, B950</h1>
+<p>Args:</p>
+<pre><code>ctx: CANU context settings
+architecture: CSM architecture
+ips: Comma separated list of IPv4 addresses of switches
+ips_file: File with one IPv4 address per line
+username: Switch username
+password: Switch password
+
+
+```
+log_
+```
+
+: Level of logging.
+out: Name of the output file
+</code></pre>
+<pre><code class="language-shell">canu validate network cabling [OPTIONS]
+</code></pre>
+<h3 id="options_1">Options</h3>
+<h3 id="-a-architecture">-a(, --architecture( <architecture>)</h3>
+<p><strong>Required</strong> CSM architecture</p>
+<ul>
+<li>
+<p><strong>Options</strong></p>
+<p>Full | TDS | v1</p>
+</li>
+</ul>
+<h3 id="-ips">--ips( <ips>)</h3>
+<p>Comma separated list of IPv4 addresses of switches</p>
+<h3 id="-ips-file">--ips-file( <ips_file>)</h3>
+<p>File with one IPv4 address per line</p>
+<h3 id="-username_1">--username( <username>)</h3>
+<p>Switch username</p>
+<ul>
+<li>
+<p><strong>Default</strong></p>
+<p><code>admin</code></p>
+</li>
+</ul>
+<h3 id="-password_1">--password( <password>)</h3>
+<p>Switch password</p>
+<h3 id="-log">--log( <log_>)</h3>
+<p>Level of logging.</p>
+<ul>
+<li>
+<p><strong>Options</strong></p>
+<p>DEBUG | INFO | WARNING | ERROR</p>
+</li>
+</ul>
+<h3 id="-out">--out( <out>)</h3>
+<p>Output results to a file</p>
+<h2 id="paddle">paddle</h2>
+<p>Validate a CCJ file.</p>
+<p>Pass in a CCJ file to validate that it works architecturally. The validation will ensure that spine switches,
+leaf switches, edge switches, and nodes all are connected properly.</p>
+<h1 id="noqa-d301_1">noqa: D301</h1>
+<p>Args:</p>
+<pre><code>ctx: CANU context settings
+ccj: Paddle CCJ file
+out: Filename for the JSON Topology if requested.
+
+
+```
+log_
+```
+
+: Level of logging.
+</code></pre>
+<pre><code class="language-shell">canu validate paddle [OPTIONS]
+</code></pre>
+<h3 id="options_2">Options</h3>
+<h3 id="-ccj">--ccj( <ccj>)</h3>
+<p>CCJ (CSM Cabling JSON) File containing system topology.</p>
+<h3 id="-out_1">--out( <out>)</h3>
+<p>Output results to a file</p>
+<h3 id="-log_1">--log( <log_>)</h3>
+<p>Level of logging.</p>
+<ul>
+<li>
+<p><strong>Options</strong></p>
+<p>DEBUG | INFO | WARNING | ERROR</p>
+</li>
+</ul>
+<h2 id="paddle-cabling">paddle-cabling</h2>
+<p>Validate a CCJ file against the current network cabling.</p>
+<p>Pass in a CCJ file to validate that it works architecturally.</p>
+<p>This command will also use LLDP to determine the neighbors of the IP addresses passed in to validate that the network
+is properly connected architecturally.</p>
+<p>The validation will ensure that spine switches, leaf switches,
+edge switches, and nodes all are connected properly.</p>
+<h1 id="noqa-d301_2">noqa: D301</h1>
+<p>Args:</p>
+<pre><code>ctx: CANU context settings
+csm: csm version
+ccj: Paddle CCJ file
+ips: Comma separated list of IPv4 addresses of switches
+ips_file: File with one IPv4 address per line
+username: Switch username
+password: Switch password
+
+
+```
+log_
+```
+
+: Level of logging
+out: Name of the output file
+</code></pre>
+<pre><code class="language-shell">canu validate paddle-cabling [OPTIONS]
+</code></pre>
+<h3 id="options_3">Options</h3>
+<h3 id="-csm">--csm( <csm>)</h3>
+<p><strong>Required</strong> CSM network version</p>
+<ul>
+<li>
+<p><strong>Options</strong></p>
+<p>1.0 | 1.2 | 1.3 | 1.4</p>
+</li>
+</ul>
+<h3 id="-ccj_1">--ccj( <ccj>)</h3>
+<p><strong>Required</strong> CCJ (CSM Cabling JSON) File containing system topology.</p>
+<h3 id="-ips_1">--ips( <ips>)</h3>
+<p>Comma separated list of IPv4 addresses of switches</p>
+<h3 id="-ips-file_1">--ips-file( <ips_file>)</h3>
+<p>File with one IPv4 address per line</p>
+<h3 id="-username_2">--username( <username>)</h3>
+<p>Switch username</p>
+<ul>
+<li>
+<p><strong>Default</strong></p>
+<p><code>admin</code></p>
+</li>
+</ul>
+<h3 id="-password_2">--password( <password>)</h3>
+<p>Switch password</p>
+<h3 id="-log_2">--log( <log_>)</h3>
+<p>Level of logging.</p>
+<ul>
+<li>
+<p><strong>Options</strong></p>
+<p>DEBUG | INFO | WARNING | ERROR</p>
+</li>
+</ul>
+<h3 id="-out_2">--out( <out>)</h3>
+<p>Output results to a file</p>
+<h2 id="shcd">shcd</h2>
+<p>Validate a SHCD file.</p>
+<p>CANU can be used to validate that an SHCD (SHasta Cabling Diagram) passes basic validation checks.</p>
+<ul>
+<li>
+<p>Use the ‘–tabs’ flag to select which tabs on the spreadsheet will be included.</p>
+</li>
+<li>
+<p>The ‘–corners’ flag is used to input the upper left and lower right corners of the table on each tab of the worksheet. If the corners are not specified, you will be prompted to enter them for each tab.</p>
+</li>
+<li>
+<p>The table should contain the 11 headers: Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port.</p>
+</li>
+</ul>
+<hr />
+<h1 id="noqa-d301-b950_1">noqa: D301, B950</h1>
+<p>Args:</p>
+<pre><code>ctx: CANU context settings
+architecture: CSM architecture
+shcd: SHCD file
+tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
+corners: The corners on each tab, comma separated e.g. ‘J37,U227,J15,T47,J20,U167’.
+edge: Vendor of the edge router
+out: Filename for the JSON Topology if requested.
+
+
+```
+json_
+```
+
+: Bool indicating json output
+
+
+```
+log_
+```
+
+: Level of logging.
+</code></pre>
+<pre><code class="language-shell">canu validate shcd [OPTIONS]
+</code></pre>
+<h3 id="options_4">Options</h3>
+<h3 id="-a-architecture_1">-a(, --architecture( <architecture>)</h3>
+<p><strong>Required</strong> CSM architecture</p>
+<ul>
+<li>
+<p><strong>Options</strong></p>
+<p>Full | TDS | V1</p>
+</li>
+</ul>
+<h3 id="-shcd">--shcd( <shcd>)</h3>
+<p><strong>Required</strong> SHCD file</p>
+<h3 id="-tabs">--tabs( <tabs>)</h3>
+<p>The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.</p>
+<h3 id="-corners">--corners( <corners>)</h3>
+<p>The corners on each tab, comma separated e.g. ‘J37,U227,J15,T47,J20,U167’.</p>
+<h3 id="-edge">--edge( <edge>)</h3>
+<p><strong>Required</strong> Vendor of Edge router</p>
+<ul>
+<li>
+<p><strong>Options</strong></p>
+<p>Aruba | Arista</p>
+</li>
+</ul>
+<h3 id="-out_3">--out( <out>)</h3>
+<p>Output results to a file</p>
+<h3 id="-json">--json()</h3>
+<p>Output JSON model to a file</p>
+<h3 id="-log_3">--log( <log_>)</h3>
+<p>Level of logging.</p>
+<ul>
+<li>
+<p><strong>Options</strong></p>
+<p>DEBUG | INFO | WARNING | ERROR</p>
+</li>
+</ul>
+<h2 id="shcd-cabling">shcd-cabling</h2>
+<p>Validate a SHCD file against the current network cabling.</p>
+<p>Pass in a SHCD file and a list of IP address to compair the connections.</p>
+<p>The output of the validate shcd-cabling command will show a port by port comparison between the devices found in the SHCD and devices found on the network.
+If there is a difference in what is found connected to a devices port in SHCD and Cabling, the line will be highlighted in ‘red’.</p>
+<hr />
+<h1 id="noqa-d301-b950_2">noqa: D301, B950</h1>
+<p>Args:</p>
+<pre><code>ctx: CANU context settings
+csm: csm version
+architecture: CSM architecture
+shcd: SHCD file
+tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
+corners: The corners on each tab, comma separated e.g. ‘J37,U227,J15,T47,J20,U167’.
+ips: Comma separated list of IPv4 addresses of switches
+ips_file: File with one IPv4 address per line
+macs: Print NCN MAC addresses
+username: Switch username
+password: Switch password
+
+
+```
+log_
+```
+
+: Level of logging
+out: Name of the output file
+</code></pre>
+<pre><code class="language-shell">canu validate shcd-cabling [OPTIONS]
+</code></pre>
+<h3 id="options_5">Options</h3>
+<h3 id="-csm_1">--csm( <csm>)</h3>
+<p><strong>Required</strong> CSM network version</p>
+<ul>
+<li>
+<p><strong>Options</strong></p>
+<p>1.0 | 1.2 | 1.3 | 1.4</p>
+</li>
+</ul>
+<h3 id="-a-architecture_2">-a(, --architecture( <architecture>)</h3>
+<p><strong>Required</strong> CSM architecture</p>
+<ul>
+<li>
+<p><strong>Options</strong></p>
+<p>Full | TDS | V1</p>
+</li>
+</ul>
+<h3 id="-shcd_1">--shcd( <shcd>)</h3>
+<p><strong>Required</strong> SHCD file</p>
+<h3 id="-tabs_1">--tabs( <tabs>)</h3>
+<p>The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.</p>
+<h3 id="-corners_1">--corners( <corners>)</h3>
+<p>The corners on each tab, comma separated e.g. ‘J37,U227,J15,T47,J20,U167’.</p>
+<h3 id="-ips_2">--ips( <ips>)</h3>
+<p>Comma separated list of IPv4 addresses of switches</p>
+<h3 id="-ips-file_2">--ips-file( <ips_file>)</h3>
+<p>File with one IPv4 address per line</p>
+<h3 id="-username_3">--username( <username>)</h3>
+<p>Switch username</p>
+<ul>
+<li>
+<p><strong>Default</strong></p>
+<p><code>admin</code></p>
+</li>
+</ul>
+<h3 id="-password_3">--password( <password>)</h3>
+<p>Switch password</p>
+<h3 id="-log_4">--log( <log_>)</h3>
+<p>Level of logging.</p>
+<ul>
+<li>
+<p><strong>Options</strong></p>
+<p>DEBUG | INFO | WARNING | ERROR</p>
+</li>
+</ul>
+<h3 id="-out_4">--out( <out>)</h3>
+<p>Output results to a file</p>
+<h3 id="-macs">--macs()</h3>
+<p>Print NCN MAC addresses</p>
+<h2 id="switch">switch</h2>
+<p>Commands that validate a switch.</p>
+<pre><code class="language-shell">canu validate switch [OPTIONS] COMMAND [ARGS]...
+</code></pre>
+<h3 id="config">config</h3>
+<p>Validate switch config.</p>
+<p>After config has been generated, CANU can validate the generated config against running switch config. The running config can be from either an IP address, or a config file.</p>
+<ul>
+<li>
+<p>To get running config from an IP address, use the flags ‘–ip 192.168.1.1 –username USERNAME –password PASSWORD’.</p>
+</li>
+<li>
+<p>To get running config from a file, use the flag ‘–running RUNNING_CONFIG.cfg’ instead.</p>
+</li>
+</ul>
+<p>After running the ‘validate switch config’ command, you will be shown a line by line comparison of the currently running switch config against the config file that was passed in. You will also be given a list of remediation commands that can be typed into the switch to get the running config to match the config file. There will be a summary table at the end highlighting the most important differences between the configs.</p>
+<ul>
+<li>
+<p>Lines that are red and start with a ‘-’ are in the running config, but not in the config file</p>
+</li>
+<li>
+<p>Lines that are green and start with a ‘+’ are not in the running config, but are in the config file</p>
+</li>
+<li>
+<p>Lines that are blue and start with a ‘?’ are attempting to point out specific line differences</p>
+</li>
+</ul>
+<hr />
+<h1 id="noqa-d301-b950_3">noqa: D301, B950</h1>
+<p>Args:</p>
+<pre><code>ctx: CANU context settings
+ip: The IP address of the switch
+running: The running switch config file
+username: Switch username
+password: Switch password
+generated_config: Generated config file
+out: Name of the output file
+vendor: Switch vendor. Aruba, Dell, or Mellanox
+remediation: output remediation config
+</code></pre>
+<pre><code class="language-shell">canu validate switch config [OPTIONS]
+</code></pre>
+<h3 id="options_6">Options</h3>
+<h3 id="-ip">--ip( <ip>)</h3>
+<p>The IP address of the switch with running config</p>
+<h3 id="-running">--running( <running>)</h3>
+<p>The running switch config file</p>
+<h3 id="-vendor">--vendor( <vendor>)</h3>
+<p>The vendor is needed if passing in the running config from a file</p>
+<ul>
+<li>
+<p><strong>Options</strong></p>
+<p>Aruba | Dell | Mellanox</p>
+</li>
+</ul>
+<h3 id="-username_4">--username( <username>)</h3>
+<p>Switch username</p>
+<ul>
+<li>
+<p><strong>Default</strong></p>
+<p><code>admin</code></p>
+</li>
+</ul>
+<h3 id="-password_4">--password( <password>)</h3>
+<p>Switch password</p>
+<h3 id="-generated">--generated( <generated_config>)</h3>
+<p>Generated config file</p>
+<h3 id="-out_5">--out( <out>)</h3>
+<p>Output results to a file</p>
+<h3 id="-remediation">--remediation()</h3>
+<p>Outputs commands to get from the running-config to generated config, Mellanox not supported</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.2a6f1dda.min.js"></script>
+      
+    
+  </body>
+</html>
