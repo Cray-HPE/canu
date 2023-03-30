@@ -26,6 +26,7 @@ import logging
 from os import path
 from pathlib import Path
 import sys
+import pprint
 
 import click
 from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
@@ -121,6 +122,12 @@ log = logging.getLogger("validate_paddle_cabling")
     type=click.File("w"),
     default="-",
 )
+@click.option(
+    "--verbose",
+    "-v",
+    help="Print cabling for all nodes",
+    is_flag=True,
+)
 @click.pass_context
 def paddle_cabling(
     ctx,
@@ -132,6 +139,7 @@ def paddle_cabling(
     password,
     log_,
     out,
+    verbose,
 ):
     """Validate a CCJ file against the current network cabling.
 
@@ -156,6 +164,7 @@ def paddle_cabling(
         password: Switch password
         log_: Level of logging
         out: Name of the output file
+        verbose: Print cabling for all nodes
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
@@ -256,7 +265,7 @@ def paddle_cabling(
         csm,
     )
 
-    print_combined_nodes(combined_nodes, out, input_type="CCJ")
+    print_combined_nodes(combined_nodes, out, verbose, input_type="CCJ")
 
     click.echo("\n", file=out)
     click.echo(double_dash, file=out)
