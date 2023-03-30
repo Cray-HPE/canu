@@ -78,10 +78,10 @@ cdocs:
 	docker run -it --rm -p 8000:8000 '${NAME}:${VERSION}-docs'
 
 prepare:
-		@echo $(NAME)
-		rm -rf dist
-		mkdir -p $(BUILD_DIR)/SPECS $(BUILD_DIR)/SOURCES
-		cp $(SPEC_FILE) $(BUILD_DIR)/SPECS/
+	@echo $(NAME)
+	rm -rf $(BUILD_DIR)
+	mkdir -p $(BUILD_DIR)/SPECS $(BUILD_DIR)/SOURCES
+	cp $(SPEC_FILE) $(BUILD_DIR)/SPECS/
 
 image: prod_image
 	docker tag '${NAME}:${VERSION}' '${NAME}:${VERSION}-p${PYTHON_VERSION}'

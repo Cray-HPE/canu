@@ -66,6 +66,9 @@ pipeline {
                 script {
                     sh "python3 -m pip install setuptools_scm[toml]"
                     version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
+
+                    // lock .git for writing - otherwise getting "content has changed" error while preparing tar.bz2 for RPM
+                    sh "chmod -R a-w .git"
                 }
             }
         }
@@ -102,84 +105,52 @@ pipeline {
                 }
             }
         }
+
         stage('RPM') {
-
             matrix {
-
                 agent {
-                    node {
-                        label "metal-gcp-builder"
-                        customWorkspace "${env.WORKSPACE}/${ARCH}/${PYTHON_VERSION}"
+                    docker {
+                        // args "-u root -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /home/jenkins/.ssh:/root/.ssh -v /home/jenkins/.ssh:/home/jenkins/.ssh --group-add 999"
+                        reuseNode true
+                        image "${pythonImage}:${PYTHON_VERSION}"
+                        // image "artifactory.algol60.net/csm-docker/unstable/csm-docker-sle-python:3.10-5a3de28-20230323192859"
                     }
                 }
-
                 axes {
-
                     axis {
                         name 'ARCH'
                         values 'x86_64'
                     }
-
                     axis {
                         name 'PYTHON_VERSION'
-                        values '3.10'
+                        values '3.10', '3.9'
                     }
-
                 }
-
+                environment {
+                    BUILD_DIR = "${env.WORKSPACE}/dist/rpmbuild/${ARCH}/${PYTHON_VERSION}"
+                    VERSION = "${version}"
+                }
                 stages {
-
                     stage('Prepare') {
-
-                        agent {
-                            docker {
-                                reuseNode true
-                                image "${pythonImage}:${PYTHON_VERSION}"
-                            }
-                        }
-                        steps {
-                            script {
-                                // Inject distro-specific metadata (e.g. which distro and service pack).
-                                runLibraryScript("addRpmMetaData.sh", "${env.NAME}.spec")
-                                sh "make prepare"
-                                sh "git update-index --assume-unchanged ${env.NAME}.spec"
-                            }
-                        }
-                    }
-
-                    stage('Build') {
-
-                        environment {
-                            VERSION = "${version}"
-                        }
-
-                        agent {
-                            docker {
-                                args '-u root'
-                                // Build Python RPMs as root for Python rpm macros to build with the right sitelib.
-                                reuseNode true
-                                image "${pythonImage}:${PYTHON_VERSION}"
-                            }
-                        }
-
                         steps {
                             script {
                                 // Use setuptools_scm to resolve the version(s) to use for the build.
-                                sh "make rpm"
+                                sh "python3 -m pip install setuptools setuptools_scm[toml]"
+                                sh "make prepare"
+                                // Inject distro-specific metadata (e.g. which distro and service pack).
+                                runLibraryScript("addRpmMetaData.sh", "${env.BUILD_DIR}/SPECS/${env.NAME}.spec")
                             }
                         }
                     }
-
-                    stage('Publish') {
-
-                        agent {
-                            docker {
-                                args '-u root -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /home/jenkins/.ssh:/root/.ssh -v /home/jenkins/.ssh:/home/jenkins/.ssh --group-add 999'
-                                reuseNode true
-                                image "${pythonImage}:${PYTHON_VERSION}"
+                    stage('Build') {
+                        steps {
+                            script {
+                                // Use setuptools_scm to resolve the version(s) to use for the build.
+                                sh 'PATH=/home/jenkins/.local/bin:$PATH make rpm'
                             }
                         }
-
+                    }
+                    stage('Publish') {
                         steps {
                             script {
                                 def sleVersion = sh(returnStdout: true, script: 'awk -F= \'/VERSION_ID/{gsub(/["]/,""); print \$NF}\' /etc/os-release').trim()
@@ -191,14 +162,14 @@ pipeline {
                                         component: env.NAME,
                                         isStable: isStable,
                                         os: "sle-${sles_major}sp${sles_minor}",
-                                        pattern: "dist/rpmbuild/RPMS/${ARCH}/*.rpm",
+                                        pattern: "dist/rpmbuild/${ARCH}/${PYTHON_VERSION}/RPMS/${ARCH}/*.rpm",
                                 )
                                 publishCsmRpms(
                                         arch: "src",
                                         component: env.NAME,
                                         isStable: isStable,
                                         os: "sle-${sles_major}sp${sles_minor}",
-                                        pattern: "dist/rpmbuild/SRPMS/*.rpm",
+                                        pattern: "dist/rpmbuild/${ARCH}/${PYTHON_VERSION}/SRPMS/*.rpm",
                                 )
                             }
                         }
