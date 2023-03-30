@@ -122,9 +122,8 @@ log = logging.getLogger("validate_paddle_cabling")
     default="-",
 )
 @click.option(
-    "--verbose",
-    "-v",
-    help="Print cabling for all nodes",
+    "--all-nodes",
+    help="Use the --all-nodes flag to print cabling for all nodes. By default, only the cabling for the management switch will be printed.",
     is_flag=True,
 )
 @click.pass_context
@@ -138,7 +137,7 @@ def paddle_cabling(
     password,
     log_,
     out,
-    verbose,
+    all_nodes,
 ):
     """Validate a CCJ file against the current network cabling.
 
@@ -163,7 +162,7 @@ def paddle_cabling(
         password: Switch password
         log_: Level of logging
         out: Name of the output file
-        verbose: Print cabling for all nodes
+        all_nodes: Print cabling for all nodes
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
@@ -264,7 +263,7 @@ def paddle_cabling(
         csm,
     )
 
-    print_combined_nodes(combined_nodes, out, verbose, input_type="CCJ")
+    print_combined_nodes(combined_nodes, out, all_nodes, input_type="CCJ")
 
     click.echo("\n", file=out)
     click.echo(double_dash, file=out)
