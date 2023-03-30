@@ -55,6 +55,10 @@ ifeq ($(DOCKER_BUILDKIT),)
 export DOCKER_BUILDKIT := 1
 endif
 
+BUILD_ARGS ?= --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --build-arg 'ALPINE_VERSION=${ALPINE_VERSION}'
+
+PLATFORMS := linux/amd64,linux/arm64
+
 SPEC_FILE := ${NAME}.spec
 SOURCE_NAME := ${NAME}-${VERSION}
 
@@ -62,6 +66,8 @@ BUILD_DIR := $(PWD)/dist/rpmbuild
 SOURCE_PATH := ${BUILD_DIR}/SOURCES/${SOURCE_NAME}.tar.bz2
 
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
+
+BUILDER ?= canu_builder
 
 .PHONY: docs
 
@@ -83,29 +89,20 @@ prepare:
 	mkdir -p $(BUILD_DIR)/SPECS $(BUILD_DIR)/SOURCES
 	cp $(SPEC_FILE) $(BUILD_DIR)/SPECS/
 
-image: prod_image
-	docker tag '${NAME}:${VERSION}' '${NAME}:${VERSION}-p${PYTHON_VERSION}'
+image_%:
+	@echo Building $@ ...
 
-deps_image:
-	BUILDKIT=1 docker build --progress plain --no-cache --pull --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --build-arg 'ALPINE_VERSION=${ALPINE_VERSION}' --tag '${NAME}:${VERSION}-deps' -f Dockerfile --target deps .
+	# Build multi_arch image.
+	docker buildx use $(BUILDER) 2>/dev/null || docker buildx create --platform ${PLATFORMS} --use --name $(BUILDER)
+	docker buildx build --platform=${PLATFORMS} --pull --progress plain --builder $(BUILDER) ${BUILD_ARGS} ${DOCKER_ARGS} --target $(@:image_%=%) .
 
-ansible_image:
-	BUILDKIT=1 docker build --progress plain --no-cache --pull --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --build-arg 'ALPINE_VERSION=${ALPINE_VERSION}' --tag '${NAME}:${VERSION}-deps' -f Dockerfile --target ansible .
+	# Load only supports one arch at a time, but our tags for one platform will apply to all platforms so just refer to the amd64 platform to work around it.
+	docker buildx build --platform linux/amd64 --pull --load --builder $(BUILDER) ${BUILD_ARGS} ${DOCKER_ARGS} -t '${NAME}:${VERSION}-$(@:image_%=%)' --target $(@:image_%=%) .
 
-dev_image:
-	BUILDKIT=1 docker build --progress plain --no-cache --pull --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --build-arg 'ALPINE_VERSION=${ALPINE_VERSION}' --tag '${NAME}:${VERSION}-dev' -f Dockerfile --target dev .
-
-docs_image:
-	BUILDKIT=1 docker build --progress plain --no-cache --pull --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --build-arg 'ALPINE_VERSION=${ALPINE_VERSION}' --tag '${NAME}:${VERSION}-docs' -f Dockerfile --target docs .
-
-build_image:
-	BUILDKIT=1 docker build --progress plain --no-cache --pull --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --build-arg 'ALPINE_VERSION=${ALPINE_VERSION}' --tag '${NAME}:${VERSION}-build' -f Dockerfile --target build .
-
-build_image_prod:
-	BUILDKIT=1 docker build --progress plain --no-cache --pull --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --build-arg 'ALPINE_VERSION=${ALPINE_VERSION}' --tag '${NAME}:${VERSION}-build' -f Dockerfile --target prod_build .
-
-prod_image:
-	BUILDKIT=1 docker build --progress plain --no-cache --pull --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --build-arg 'ALPINE_VERSION=${ALPINE_VERSION}' --tag '${NAME}:${VERSION}' -f Dockerfile --target prod .
+	if [ $@ = "image_prod" ]; then \
+		docker buildx build --platform linux/amd64 --pull --progress plain --load --builder $(BUILDER) ${BUILD_ARGS} ${DOCKER_ARGS} -t '${NAME}:${VERSION}' --target $(@:image_%=%) . ;\
+		docker buildx build --platform linux/amd64 --pull --progress plain --load --builder $(BUILDER) ${BUILD_ARGS} ${DOCKER_ARGS} -t '${NAME}:${VERSION}-p${PYTHON_VERSION}' --target $(@:image_%=%) . ;\
+	fi
 
 dev:
 	./canuctl -d
@@ -122,7 +119,7 @@ rpm_package_source:
 		tar --transform 'flags=r;s,^,/$(SOURCE_NAME)/,' --exclude .nox --exclude dist/rpmbuild --exclude ${SOURCE_NAME}.tar.bz2 -cvjf $(SOURCE_PATH) .
 
 rpm_build_source:
-		rpmbuild -vv -ts $(SOURCE_PATH) --define "_topdir $(BUILD_DIR)"
+		rpmbuild -vv -ts $(SOURCE_PATH) --target ${ARCH} --define "_topdir $(BUILD_DIR)"
 
 rpm_build:
-		rpmbuild -vv -ba $(SPEC_FILE) --define "_topdir $(BUILD_DIR)"
+		rpmbuild -vv -ba $(SPEC_FILE) --target ${ARCH} --define "_topdir $(BUILD_DIR)"

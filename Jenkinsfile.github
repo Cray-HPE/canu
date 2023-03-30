@@ -57,6 +57,8 @@ pipeline {
 
     environment {
         NAME = getRepoName()
+        DOCKER_ARGS = getDockerBuildArgs(name: getRepoName(), description: 'canu sandbox environment.')
+        MUTLI_ARCH = 1
     }
 
     stages {
@@ -84,12 +86,12 @@ pipeline {
                     parallel {
                         stage('Develop image') {
                             steps {
-                                sh "make dev_image"
+                                sh "make image_dev"
                             }
                         }
                         stage('Production image') {
                             steps {
-                                sh "make prod_image"
+                                sh "make image_prod"
                             }
                         }
                     }
@@ -98,8 +100,8 @@ pipeline {
                     steps {
                         script {
                             // Use setuptools_scm to resolve the version(s) to use for the build.
-                            publishCsmDockerImage(image: "${env.NAME}", tag: "${version}-dev", isStable: isStable)
-                            publishCsmDockerImage(image: "${env.NAME}", tag: "${version}", isStable: isStable)
+                            publishCsmDockerImage(image: "${env.NAME}", multiArch: env.MULTI_ARCH, tag: "${version}-dev", isStable: isStable)
+                            publishCsmDockerImage(image: "${env.NAME}", multiArch: env.MULTI_ARCH, tag: "${version}", isStable: isStable)
                         }
                     }
                 }
@@ -110,10 +112,8 @@ pipeline {
             matrix {
                 agent {
                     docker {
-                        // args "-u root -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /home/jenkins/.ssh:/root/.ssh -v /home/jenkins/.ssh:/home/jenkins/.ssh --group-add 999"
                         reuseNode true
                         image "${pythonImage}:${PYTHON_VERSION}"
-                        // image "artifactory.algol60.net/csm-docker/unstable/csm-docker-sle-python:3.10-5a3de28-20230323192859"
                     }
                 }
                 axes {
