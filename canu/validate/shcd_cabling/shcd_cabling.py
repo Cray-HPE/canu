@@ -144,9 +144,8 @@ log = logging.getLogger("validate_shcd_cabling")
     is_flag=True,
 )
 @click.option(
-    "--verbose",
-    "-v",
-    help="Print cabling for all nodes",
+    "--all-nodes",
+    help="Use the --all-nodes flag to print cabling for all nodes. By default, only the cabling for the management switch will be printed.",
     is_flag=True,
 )
 @click.pass_context
@@ -164,7 +163,7 @@ def shcd_cabling(
     password,
     log_,
     out,
-    verbose,
+    all_nodes,
 ):
     """Validate a SHCD file against the current network cabling.
 
@@ -191,7 +190,7 @@ def shcd_cabling(
         password: Switch password
         log_: Level of logging
         out: Name of the output file
-        verbose: Print cabling for all nodes
+        all_nodes: Print cabling for all nodes
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
@@ -354,7 +353,7 @@ def shcd_cabling(
     )
     click.echo(double_dash, file=out)
 
-    print_combined_nodes(combined_nodes, out, verbose)
+    print_combined_nodes(combined_nodes, out, all_nodes)
 
     click.echo("\n", file=out)
     click.echo(double_dash, file=out)
@@ -543,19 +542,19 @@ def combine_shcd_cabling(shcd_node_list, cabling_node_list, canu_cache, ips, csm
     return combined_nodes
 
 
-def print_combined_nodes(combined_nodes, out="-", verbose=False, input_type="SHCD"):
+def print_combined_nodes(combined_nodes, out="-", all_nodes=False, input_type="SHCD"):
     """Print device comparison by port between SHCD and cabling.
 
     Args:
         combined_nodes: dict of the combined shcd and cabling nodes
         out: Defaults to stdout, but will print to the file name passed in
-        verbose: Print cabling for all nodes
+        all_nodes: Print cabling for all nodes
         input_type: String for the input to compair, typically SHCD or CCJ
     """
     dash = "-" * 80
 
     for node, node_info in combined_nodes.items():
-        if node.startswith("sw-") and "hsn" not in node or verbose:
+        if node.startswith("sw-") and "hsn" not in node or all_nodes:
             click.secho(f"\n{node}", fg="bright_white", file=out)
             if "location" in node_info:
                 rack = node_info["location"].get("rack")
