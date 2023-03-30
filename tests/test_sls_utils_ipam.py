@@ -86,16 +86,19 @@ def test_raises_exception_if_subnets_overlap():
 
 
 def test_next_free_ipv4_address():
+    """Test proper return of next free IP address."""
     subnet = Subnet("test1", "192.168.0.0/24", "192.168.0.1", 1)
     next_free_ip = next_free_ipv4_address(subnet)
     assert next_free_ip == ipaddress.IPv4Address("192.168.0.2")
 
 
 def test_requested_ipv4_address():
+    """Test proper return of requested IP address."""
     # TODO: looks like this code is broken next_free_ipv4_address(subnet, requested_ipv4_address)
     assert True
 
 
 def test_value_error():
+    """Test raising of exception if the function is not passed a Suubnet."""
     with pytest.raises(ValueError):
         next_free_ipv4_address('not a subnet')
