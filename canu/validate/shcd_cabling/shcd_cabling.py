@@ -143,6 +143,12 @@ log = logging.getLogger("validate_shcd_cabling")
     help="Print NCN MAC addresses",
     is_flag=True,
 )
+@click.option(
+    "--verbose",
+    "-v",
+    help="Print cabling for all nodes",
+    is_flag=True,
+)
 @click.pass_context
 def shcd_cabling(
     ctx,
@@ -158,6 +164,7 @@ def shcd_cabling(
     password,
     log_,
     out,
+    verbose,
 ):
     """Validate a SHCD file against the current network cabling.
 
@@ -184,6 +191,7 @@ def shcd_cabling(
         password: Switch password
         log_: Level of logging
         out: Name of the output file
+        verbose: Print cabling for all nodes
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
@@ -346,7 +354,7 @@ def shcd_cabling(
     )
     click.echo(double_dash, file=out)
 
-    print_combined_nodes(combined_nodes, out)
+    print_combined_nodes(combined_nodes, out, verbose)
 
     click.echo("\n", file=out)
     click.echo(double_dash, file=out)
@@ -524,49 +532,54 @@ def combine_shcd_cabling(shcd_node_list, cabling_node_list, canu_cache, ips, csm
                             f"1/1/{port_number}",
                             [{"neighbor_port": None, "neighbor_description": ""}],
                         )
-
-                        cache_description = f"{cache_port[0]['neighbor_port']} {cache_port[0]['neighbor_description']}"
+                        if cache_port[0]["neighbor_port"] is None:
+                            cache_description = None
+                        else:
+                            cache_description = f"{cache_port[0]['neighbor_port']} {cache_port[0]['neighbor_description']}"
                         port_info["cabling"] = cache_description
 
     # Order the ports in natural order
     combined_nodes = OrderedDict(natsort.natsorted(combined_nodes.items()))
-
     return combined_nodes
 
 
-def print_combined_nodes(combined_nodes, out="-", input_type="SHCD"):
+def print_combined_nodes(combined_nodes, out="-", verbose=False, input_type="SHCD"):
     """Print device comparison by port between SHCD and cabling.
 
     Args:
         combined_nodes: dict of the combined shcd and cabling nodes
         out: Defaults to stdout, but will print to the file name passed in
+        verbose: Print cabling for all nodes
         input_type: String for the input to compair, typically SHCD or CCJ
     """
     dash = "-" * 80
+
     for node, node_info in combined_nodes.items():
-        click.secho(f"\n{node}", fg="bright_white", file=out)
-        if "location" in node_info.keys():
-            rack = node_info.get("location").get("rack")
-            elevation = node_info.get("location").get("elevation")
-
+        if node.startswith("sw-") and "hsn" not in node or verbose:
+            click.secho(f"\n{node}", fg="bright_white", file=out)
+            if "location" in node_info:
+                rack = node_info["location"].get("rack")
+                elevation = node_info["location"].get("elevation")
+                click.secho(
+                    f"Rack: {rack:<7}  Elevation: {elevation}",
+                    file=out,
+                )
+            click.secho(dash, file=out)
             click.secho(
-                f"Rack: {rack:<7s}  Elevation: {elevation}",
+                f"{'Port':<7}{input_type:<25}{'Cabling'}",
+                fg="bright_white",
                 file=out,
             )
-        click.secho(dash, file=out)
-        click.secho(
-            f"{'Port':<7s}{input_type:<25s}{'Cabling'}",
-            fg="bright_white",
-            file=out,
-        )
-        click.secho(dash, file=out)
+            click.secho(dash, file=out)
 
-        for port_number, port_info in node_info["ports"].items():
-            text_color = "red"
-            if port_info["shcd"] == port_info["cabling"]:
-                text_color = None
-            click.secho(
-                f"{str(port_number):<7s}{str(port_info['shcd']):<25s}{str(port_info['cabling'])}",
-                fg=text_color,
-                file=out,
-            )
+            for port_number, port_info in node_info["ports"].items():
+                text_color = "yellow"
+                if port_info["shcd"] == port_info["cabling"]:
+                    text_color = "green"
+                if port_info["cabling"] is None:
+                    text_color = "red"
+                click.secho(
+                    f"{port_number:<7}{port_info['shcd']:<25}{port_info['cabling']}",
+                    fg=text_color,
+                    file=out,
+                )
