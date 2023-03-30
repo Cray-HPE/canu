@@ -25,7 +25,16 @@ import ipaddress
 
 import pytest
 
-from canu.utils.sls_utils.ipam import free_ipv4_subnets, next_free_ipv4_address
+from canu.utils.sls_utils.ipam import (
+    free_ipv4_subnets,
+    hosts_from_prefixlength,
+    is_supernet_hacked,
+    last_free_ipv4_address,
+    next_free_ipv4_address,
+    prefixlength,
+    prefixlength_from_hosts,
+    temp_is_subnet_of,
+)
 from canu.utils.sls_utils.Networks import Network, Subnet
 
 
@@ -93,12 +102,68 @@ def test_next_free_ipv4_address():
 
 
 def test_requested_ipv4_address():
-    """Test proper return of requested IP address."""
-    # TODO: looks like this code is broken next_free_ipv4_address(subnet, requested_ipv4_address)
-    assert True
+    """Test proper return of requested IP address if it's free."""
+    subnet = Subnet("test1", "192.168.0.0/30", "192.168.0.1", 1)
+    next_free_ip = next_free_ipv4_address(subnet, "192.168.0.2")
+    assert next_free_ip == ipaddress.IPv4Address("192.168.0.2")
 
 
-def test_value_error():
+def test_next_free_address_value_error():
     """Test raising of exception if the function is not passed a Suubnet."""
     with pytest.raises(ValueError):
-        next_free_ipv4_address('not a subnet')
+        next_free_ipv4_address("not a subnet")
+
+
+def test_last_free_ipv4_address():
+    """Test return of the last IP address in a list."""
+    subnet = Subnet("test1", "192.168.0.0/24", "192.168.0.1", 1)
+    last_free_ip = last_free_ipv4_address(subnet)
+    assert last_free_ip == ipaddress.IPv4Address("192.168.0.254")
+
+
+def test_last_free_ipv4_address_with_requested_ip():
+    """Test return of requested IP address in the list."""
+    requested_ipv4_address = "192.168.0.253"
+    subnet = Subnet("test1", "192.168.0.0/24", "192.168.0.1", 1)
+    last_free_ip = last_free_ipv4_address(subnet, requested_ipv4_address)
+    assert last_free_ip == ipaddress.IPv4Address(requested_ipv4_address)
+
+
+def test_last_free_ipv4_address_invalid_input():
+    """Test catching invalid input to last ip address."""
+    with pytest.raises(ValueError):
+        last_free_ipv4_address("not a subnet")
+
+
+def test_is_not_supernet_hacked():
+    """Test if the CSI supernet hack has been applied to the network."""
+    # Need to eventually test where it's hacked.
+    network_address = ipaddress.IPv4Network("192.168.0.0/24")
+    subnet = Subnet("test1", "192.168.0.0/24", "192.168.0.1", 1)
+    assert is_supernet_hacked(network_address, subnet) is None
+
+
+def test_prefixlength():
+    """Test that the appropriate CIDR/prefix is returned."""
+    network_address = ipaddress.IPv4Network("192.168.0.0/24")
+    assert prefixlength(network_address) == 24
+    network = Network("test", "ethernet", "192.168.0.0/24")
+    assert prefixlength(network) == 24
+
+
+def test_temp_is_subnet_of():
+    """Test bugfix hack of ipaddress function to see if one address is a subnet of other."""
+    network_address = ipaddress.IPv4Network("192.168.0.0/24")
+    subnet = Subnet("test1", "192.168.0.128/25", "192.168.0.129", 1)
+    assert temp_is_subnet_of(subnet.ipv4_network(), network_address)
+
+
+def test_prefixlength_from_hosts():
+    """Test determining the minimum CIDR/prefix that contains a number of hosts."""
+    # We reserve 1st and last so it's normal network math minus 2.
+    assert prefixlength_from_hosts(2) == 30
+
+
+def test_hosts_from_prefixlength():
+    """Test determining the number of hosts in a given CIDR/prefix."""
+    assert hosts_from_prefixlength(24) == 254
