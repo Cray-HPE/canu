@@ -2,6 +2,10 @@
 
 ## [UNRELEASED]
 
+## [1.7.1]
+
+- rollback yamale version
+
 ## [1.7.0]
 
 - Create baseline CSM 1.4 configuration
