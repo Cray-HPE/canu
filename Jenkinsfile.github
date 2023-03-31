@@ -123,12 +123,12 @@ pipeline {
                     }
                     axis {
                         name 'PYTHON_VERSION'
-                        values '3.10', '3.9'
+                        values '3.10'
                     }
                 }
                 environment {
                     BUILD_DIR = "${env.WORKSPACE}/dist/rpmbuild/${ARCH}/${PYTHON_VERSION}"
-                    VERSION = "${version}"
+                    VERSION = ""
                 }
                 stages {
                     stage('Prepare') {
@@ -136,6 +136,10 @@ pipeline {
                             script {
                                 // Use setuptools_scm to resolve the version(s) to use for the build.
                                 sh "python3 -m pip install setuptools setuptools_scm[toml]"
+
+                                // Set env.VERSION here incase just the RPM stage is being re-ran without the starting stages.
+                                env.VERSION = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
+
                                 sh "make prepare"
                                 // Inject distro-specific metadata (e.g. which distro and service pack).
                                 runLibraryScript("addRpmMetaData.sh", "${env.BUILD_DIR}/SPECS/${env.NAME}.spec")
