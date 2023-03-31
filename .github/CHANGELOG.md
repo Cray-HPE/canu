@@ -2,6 +2,10 @@
 
 ## [UNRELEASED]
 
+## [1.7.2]
+
+- Bump Yamale and add pyinstaller hook file
+
 ## [1.7.1]
 
 - rollback yamale version
