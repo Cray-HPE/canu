@@ -82,7 +82,14 @@ pipeline {
             }
 
             stages {
-                stage('Build') {
+                stage('Build: Base Image') {
+                    steps {
+                        // All targets require the ansible and deps target, so build those first so parallel builds
+                        // don't duplicate effort.
+                        sh "make image_ansible"
+                    }
+                }
+                stage('Build: Development and Production Images') {
                     parallel {
                         stage('Develop image') {
                             steps {
