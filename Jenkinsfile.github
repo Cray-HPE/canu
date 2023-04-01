@@ -45,7 +45,7 @@ def isStable = (env.TAG_NAME != null & env.TAG_NAME ==~ stableToken) ? true : fa
 def version
 pipeline {
     agent {
-        label "metal-gcp-builder"
+        label "metal-gcp-builder-large"
     }
 
     options {

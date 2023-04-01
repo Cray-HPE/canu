@@ -72,7 +72,12 @@ ifeq ($(VERSION),)
 $(error VERSION not set! Verify setuptools_scm[toml] is installed and try again.)
 endif
 
+#############################################################################
+# General targets
+#############################################################################
+
 .PHONY: \
+	all \
 	clean \
 	cdocs \
 	dev \
@@ -86,7 +91,7 @@ endif
 	rpm_package_source \
 	synk
 
-all : image rpm
+all: image prepare rpm
 
 help:
 	@echo 'Usage: make <OPTIONS> ... <TARGETS>'
@@ -94,6 +99,7 @@ help:
 	@echo 'Available targets are:'
 	@echo ''
 	@echo '    help               	Show this help screen.'
+	@echo '    clean               	Remove build files.'
 	@echo
 	@echo '    image_deps           Build the base/dependency environment image.'
 	@echo '    image_ansible        Build the Ansible equipped image.'
@@ -104,7 +110,7 @@ help:
 	@echo
 	@echo '    image     			Build the canu \(production\) image.'
 	@echo '    rpm                	Build a YUM/SUSE RPM.'
-	@echo '    all 					Build both canu \(production\) image and YUM/SUSE RPM.'
+	@echo '    all 					Build all production artifacts.'
 	@echo
 	@echo '    docs					Make and serve the docs locally.'
 	@echo '    cdocs				Make and serve the docs image.'
@@ -112,13 +118,16 @@ help:
 	@echo '    dev					Run the wrapper script in development mode.'
 	@echo '    prod					Run the wrapper script in prod mode.'
 	@echo
-	@echo '    synk					Runs a snyk scan on the production container.'
+	@echo '    synk					Runs a snyk scan.'
 	@echo
 	@echo '    prepare              Prepare for making an RPM.'
 	@echo '    rpm_build            Builds the RPM.'
 	@echo '    rpm_build_source		Builds the SRPM.'
 	@echo '    rpm_package_source   Creates the RPM source tarball.'
 	@echo ''
+
+clean:
+	rm -rf build dist
 
 #############################################################################
 # Doc targets
@@ -165,6 +174,7 @@ SOURCE_NAME := ${NAME}-${VERSION}
 
 BUILD_DIR ?= $(PWD)/dist/rpmbuild
 SOURCE_PATH := ${BUILD_DIR}/SOURCES/${SOURCE_NAME}.tar.bz2
+
 rpm: rpm_package_source rpm_build_source rpm_build
 
 prepare:
