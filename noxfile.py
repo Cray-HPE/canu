@@ -94,7 +94,6 @@ def black(session):
 def cover(session):
     """Run the final coverage report."""
     session.install(".[test]")
-    session.install(".[network_modeling]")
     session.install(".")
     session.run(
         "coverage",
