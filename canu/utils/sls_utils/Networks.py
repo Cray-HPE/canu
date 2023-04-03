@@ -372,7 +372,7 @@ class Subnet(Network):
             ipv4_gateway (xxx): IPv4 gateway of the subnet for the getter
         """
         if subnet_ipv4_gateway is not None:
-            self.__ipv4_gateway = subnet_ipv4_gateway
+            self.__ipv4_gateway = ipaddress.IPv4Address(subnet_ipv4_gateway)
         return self.__ipv4_gateway
 
     def dhcp_start_address(self, subnet_dhcp_start_address=None):
