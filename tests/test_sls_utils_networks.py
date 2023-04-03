@@ -25,7 +25,7 @@ import ipaddress
 
 import pytest
 
-from canu.utils.sls_utils.Networks import Network, Subnet
+from canu.utils.sls_utils.Networks import BicanNetwork, Network, Subnet
 
 
 @pytest.fixture
@@ -145,3 +145,15 @@ def test_to_sls(network):
         },
     }
     assert network.to_sls() == expected_sls
+
+
+def test_bican_network_init():
+    """Test creating default BiCAN network."""
+    bican = BicanNetwork()
+    assert bican.name() == "BICAN"
+    assert bican.full_name() == "System Default Route Network Name for Bifurcated CAN"
+    assert bican.type() == "ethernet"
+    assert bican.ipv4_address() == ipaddress.IPv4Interface("0.0.0.0/0")
+    assert bican.mtu() == 9000
+    bican_sls = bican.to_sls()
+    assert bican_sls["ExtraProperties"]["SystemDefaultRoute"] == "CMN"
