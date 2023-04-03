@@ -94,7 +94,7 @@ run_container() {
   if [[ -z "${SSH_AUTH_SOCK:-}" ]]; then
     if [[ -d "${K8S_DIR}" ]]; then
       cmd="${PLATFORM} run -it --rm --net=host -v ${PWD}:${MOUNTED}:${MOUNTOPTS} -v ${K8S_DIR}:${K8S_MOUNT_DIR}:${MOUNTOPTS_KUBE} --name ${CONTAINER_NAME} ${IMAGE_AND_TAG}"
-    else 
+    else
       cmd="${PLATFORM} run -it --rm --net=host -v ${PWD}:${MOUNTED}:${MOUNTOPTS} --name ${CONTAINER_NAME} ${IMAGE_AND_TAG}"
     fi
   else
@@ -104,7 +104,7 @@ run_container() {
       cmd="${PLATFORM} run -it --rm --net=host -v ${PWD}:${MOUNTED}:${MOUNTOPTS} -v ${SSH_AUTH_SOCK}:/ssh-agent:${MOUNTOPTS_SSH} --name ${CONTAINER_NAME} ${IMAGE_AND_TAG}"
     fi
   fi
-  
+
   $cmd
 }
 
@@ -138,9 +138,9 @@ main() {
     esac
   done
   shift $((OPTIND - 1))
-  
+
   set_mount_options
-  
+
   # Set mounted directory depending on dev or prod
   if [[ "${DEV:-false}" == "true" ]];then
     # if dev is set, then prod is false explicitly
@@ -174,7 +174,7 @@ main() {
     fi
   fi
 
-    # if that fails, try to build it and tag the image
+  # if that fails, try to build it and tag the image
   if [[ "${REBUILD:-}" == "true" ]]; then
     if BUILDKIT=1 "${PLATFORM}" build \
       --build-arg ALPINE_IMAGE="${ALPINE_IMAGE}" \
