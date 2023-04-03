@@ -45,7 +45,7 @@ def isStable = (env.TAG_NAME != null & env.TAG_NAME ==~ stableToken) ? true : fa
 def version
 pipeline {
     agent {
-        label "metal-gcp-builder"
+        label "metal-gcp-builder-large"
     }
 
     options {
@@ -57,6 +57,8 @@ pipeline {
 
     environment {
         NAME = getRepoName()
+        DOCKER_ARGS = getDockerBuildArgs(name: getRepoName(), description: 'canu sandbox environment.')
+        MUTLI_ARCH = 1
     }
 
     stages {
@@ -66,6 +68,9 @@ pipeline {
                 script {
                     sh "python3 -m pip install setuptools_scm[toml]"
                     version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
+
+                    // lock .git for writing - otherwise getting "content has changed" error while preparing tar.bz2 for RPM
+                    sh "chmod -R a-w .git"
                 }
             }
         }
@@ -77,16 +82,23 @@ pipeline {
             }
 
             stages {
-                stage('Build') {
+                stage('Build: Base Image') {
+                    steps {
+                        // All targets require the ansible and deps target, so build those first so parallel builds
+                        // don't duplicate effort.
+                        sh "make image_ansible"
+                    }
+                }
+                stage('Build: Development and Production Images') {
                     parallel {
                         stage('Develop image') {
                             steps {
-                                sh "make dev_image"
+                                sh "make image_dev"
                             }
                         }
                         stage('Production image') {
                             steps {
-                                sh "make prod_image"
+                                sh "make image_prod"
                             }
                         }
                     }
@@ -95,91 +107,61 @@ pipeline {
                     steps {
                         script {
                             // Use setuptools_scm to resolve the version(s) to use for the build.
-                            publishCsmDockerImage(image: "${env.NAME}", tag: "${version}-dev", isStable: isStable)
-                            publishCsmDockerImage(image: "${env.NAME}", tag: "${version}", isStable: isStable)
+                            publishCsmDockerImage(image: "${env.NAME}", multiArch: env.MULTI_ARCH, tag: "${version}-dev", isStable: isStable)
+                            publishCsmDockerImage(image: "${env.NAME}", multiArch: env.MULTI_ARCH, tag: "${version}", isStable: isStable)
                         }
                     }
                 }
             }
         }
+
         stage('RPM') {
-
             matrix {
-
                 agent {
-                    node {
-                        label "metal-gcp-builder"
-                        customWorkspace "${env.WORKSPACE}/${ARCH}/${PYTHON_VERSION}"
+                    docker {
+                        reuseNode true
+                        image "${pythonImage}:${PYTHON_VERSION}"
                     }
                 }
-
                 axes {
-
                     axis {
                         name 'ARCH'
                         values 'x86_64'
                     }
-
                     axis {
                         name 'PYTHON_VERSION'
                         values '3.10'
                     }
-
                 }
-
+                environment {
+                    BUILD_DIR = "${env.WORKSPACE}/dist/rpmbuild/${ARCH}/${PYTHON_VERSION}"
+                    VERSION = ""
+                }
                 stages {
-
                     stage('Prepare') {
-
-                        agent {
-                            docker {
-                                reuseNode true
-                                image "${pythonImage}:${PYTHON_VERSION}"
-                            }
-                        }
-                        steps {
-                            script {
-                                // Inject distro-specific metadata (e.g. which distro and service pack).
-                                runLibraryScript("addRpmMetaData.sh", "${env.NAME}.spec")
-                                sh "make prepare"
-                                sh "git update-index --assume-unchanged ${env.NAME}.spec"
-                            }
-                        }
-                    }
-
-                    stage('Build') {
-
-                        environment {
-                            VERSION = "${version}"
-                        }
-
-                        agent {
-                            docker {
-                                args '-u root'
-                                // Build Python RPMs as root for Python rpm macros to build with the right sitelib.
-                                reuseNode true
-                                image "${pythonImage}:${PYTHON_VERSION}"
-                            }
-                        }
-
                         steps {
                             script {
                                 // Use setuptools_scm to resolve the version(s) to use for the build.
-                                sh "make rpm"
+                                sh "python3 -m pip install setuptools setuptools_scm[toml]"
+
+                                // Set env.VERSION here incase just the RPM stage is being re-ran without the starting stages.
+                                env.VERSION = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
+
+                                sh "make prepare"
+                                // Inject distro-specific metadata (e.g. which distro and service pack).
+                                runLibraryScript("addRpmMetaData.sh", "${env.BUILD_DIR}/SPECS/${env.NAME}.spec")
                             }
                         }
                     }
-
-                    stage('Publish') {
-
-                        agent {
-                            docker {
-                                args '-u root -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /home/jenkins/.ssh:/root/.ssh -v /home/jenkins/.ssh:/home/jenkins/.ssh --group-add 999'
-                                reuseNode true
-                                image "${pythonImage}:${PYTHON_VERSION}"
+                    stage('Build') {
+                        steps {
+                            script {
+                                // Use setuptools_scm to resolve the version(s) to use for the build.
+                                sh 'PATH=/home/jenkins/.local/bin:$PATH make rpm'
                             }
                         }
-
+                    }
+                    stage('Publish') {
                         steps {
                             script {
                                 def sleVersion = sh(returnStdout: true, script: 'awk -F= \'/VERSION_ID/{gsub(/["]/,""); print \$NF}\' /etc/os-release').trim()
@@ -191,14 +173,14 @@ pipeline {
                                         component: env.NAME,
                                         isStable: isStable,
                                         os: "sle-${sles_major}sp${sles_minor}",
-                                        pattern: "dist/rpmbuild/RPMS/${ARCH}/*.rpm",
+                                        pattern: "dist/rpmbuild/${ARCH}/${PYTHON_VERSION}/RPMS/${ARCH}/*.rpm",
                                 )
                                 publishCsmRpms(
                                         arch: "src",
                                         component: env.NAME,
                                         isStable: isStable,
                                         os: "sle-${sles_major}sp${sles_minor}",
-                                        pattern: "dist/rpmbuild/SRPMS/*.rpm",
+                                        pattern: "dist/rpmbuild/${ARCH}/${PYTHON_VERSION}/SRPMS/*.rpm",
                                 )
                             }
                         }
