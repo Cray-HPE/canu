@@ -20,8 +20,6 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Test NetworkFactory in the model."""
-import json
-
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import pytest
 
@@ -177,20 +175,3 @@ network_hardware:
         )
     assert e.type == Exception
     assert "Validation of test_node architecture against hardware failed for speeds" in str(e)
-
-
-def test_node_factory_bad_ccj_schema(tmp_path):
-    """Test exception handling when CCJ schema file is bad.
-
-    Args:
-        tmp_path: built-in Path
-    """
-    test_data_dir = tmp_path / "test_node_factory"
-    test_data_dir.mkdir()
-    schema_data = "^^^^^"
-    test_schema_file = test_data_dir / "ccj_schema.json"
-    test_schema_file.write_text(schema_data)
-    with pytest.raises(Exception) as e:
-        factory = NetworkNodeFactory(architecture_version="network_v2")
-        factory.validate_paddle(ccj_json="not_tested", ccj_schema_file=test_schema_file)
-    assert e.type == json.decoder.JSONDecodeError

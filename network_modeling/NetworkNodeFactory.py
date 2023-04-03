@@ -195,6 +195,7 @@ class NetworkNodeFactory:
         hw_ports_by_model = []
         for component in hardware_data:
             hw_models.append(component["model"])
+            # TODO: Take the following out or test it later!
             hw_ports_by_model.append(component["ports"])
 
         for arch_component in architecture_data[architecture_version]["components"]:
