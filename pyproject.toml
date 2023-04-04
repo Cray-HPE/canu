@@ -71,7 +71,7 @@ dependencies = [
     'tomli==2.0.1',
     'ttp==0.9.2',
     'urllib3==1.26.15',
-    'yamale<=4.0.2',
+    'yamale<=4.0.4',
 ]
 dynamic = ['entry-points', 'scripts', 'version']
 maintainers = [
