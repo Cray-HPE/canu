@@ -119,6 +119,7 @@ pipeline {
             matrix {
                 agent {
                     docker {
+                        args '-v /home/jenkins/.ssh:/home/jenkins/.ssh'
                         reuseNode true
                         image "${pythonImage}:${PYTHON_VERSION}"
                     }
