@@ -30,3 +30,35 @@ jobs:
           artifacts: ${{ env.DIR_UPLOAD }}/*
           prerelease: false
           makeLatest: true
+
+  generate_publish_docs:
+    name: generate docs with nox/sphinx and publish with mike
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 # Also fetch git-tags
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    - name: nox
+      env:
+        GIT_REPO_NAME: "${GITHUB_REPOSITORY#*/}"
+      run: |
+        pip install .[ci,docs]
+        nox -e docs
+
+    - name: configure git user for bot commits
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+
+    - name: deploy docs with mike 🚀 and set as latest
+      run: |
+        mike deploy -F mkdocs.yml -b gh-pages --push --update-aliases ${{ github.ref_name}} latest
+        mike set-default -F mkdocs.yml -b gh-pages --push latest
+
+    - name: list doc versions 🚀
+      run: |
+        mike list -F mkdocs.yml -b gh-pages

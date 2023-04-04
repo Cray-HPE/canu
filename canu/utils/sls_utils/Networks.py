@@ -484,11 +484,11 @@ class Subnet(Network):
             self.__ipv4_reservation_start_address is not None
             and self.__ipv4_reservation_end_address is not None  # noqa W503
         ):
-            range = {
+            resrange = {
                 "ReservationStart": str(self.__ipv4_reservation_start_address),
                 "ReservationEnd": str(self.__ipv4_reservation_end_address),
             }
-            sls.update(range)
+            sls.update(resrange)
 
         if self.__pool_name is not None:
             sls.update({"MetalLBPoolName": self.__pool_name})

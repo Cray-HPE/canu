@@ -3,6 +3,8 @@ canu_cache.yaml
 files/*
 nornir.log
 pyinstaller.spec
+Jenkinsfile.github
+canu.spec
 
 # Build artifacts
 *.py[cod]

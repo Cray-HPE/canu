@@ -10,4 +10,14 @@ updates:
     schedule:
       interval: "weekly"
     labels:
+      - "pip"
+      - "dependencies"
+  - package-ecosystem: "github-actions"
+    # Look for `.github/workflows` in the `root` directory
+    directory: "/"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+    labels:
+      - "github_actions"
       - "dependencies"
