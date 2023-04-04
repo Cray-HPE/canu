@@ -1,9 +1,10 @@
 ## Changelog
 
-## [UNRELEASED]
+## [1.7.2]
 
-- Adjust docs workflow to run during promote-release
+- Bump Yamale and add pyinstaller hook file
 - Add significant testing to network_modeling and sls_utils modules and fix a couple bugs.
+- Adjust docs workflow to run during promote-release
 
 ## [1.7.1]
 
