@@ -1,10 +1,9 @@
 ## Changelog
 
-## [UNRELEASED]
-
 ## [1.7.2]
 
 - Bump Yamale and add pyinstaller hook file
+- adjust docs workflow to run during promote-release
 
 ## [1.7.1]
 
