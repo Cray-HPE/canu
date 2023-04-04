@@ -406,7 +406,7 @@ class NetworkNode:
             slot=src_port.slot(),
             port=src_port.port(),
         )
-        if selected_ports is None:
+        if not selected_ports:
             log.error(
                 f"No ports available in slot {src_port.slot()} at speed {connection_speed}",
             )

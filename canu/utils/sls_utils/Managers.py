@@ -22,10 +22,19 @@
 """Wrapper Classes to manage SLS Networks and Subnets as dictionaries."""
 from collections import UserDict
 import ipaddress
-import os
+from os import path
+from pathlib import Path
+import sys
 
 from canu.utils.sls_utils.json_utils import validate as validate_sls_json
 from canu.utils.sls_utils.Networks import Network, Subnet
+
+# Get project root directory
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
+    project_root = sys._MEIPASS
+else:
+    prog = __file__
+    project_root = Path(__file__).resolve().parent.parent
 
 
 class NetworkManager(UserDict):
@@ -109,11 +118,13 @@ class NetworkManager(UserDict):
         Args:
             sls_data: SLS data structure to schema validate
         """
-        schema_file = "sls_networks_schema.json"
-
-        schema_dir = os.path.dirname(os.path.realpath(__file__)) + "/schemas/"
-        schema_file = schema_dir + schema_file
-        validate_sls_json(schema_file=schema_file, sls_data=sls_data)
+        default_sls_networks_schema_file = path.join(
+            project_root,
+            "sls_utils",
+            "schemas",
+            "sls_networks_schema.json",
+        )
+        validate_sls_json(schema_file=default_sls_networks_schema_file, sls_data=sls_data)
 
 
 class SubnetManager(UserDict):
@@ -194,8 +205,10 @@ class SubnetManager(UserDict):
         Args:
             sls_data: SLS Subnet data to schema validate
         """
-        schema_file = "sls_subnets_schema.json"
-
-        schema_dir = os.path.dirname(os.path.realpath(__file__)) + "/schemas/"
-        schema_file = schema_dir + schema_file
-        validate_sls_json(schema_file=schema_file, sls_data=sls_data)
+        default_sls_subnets_schema_file = path.join(
+            project_root,
+            "sls_utils",
+            "schemas",
+            "sls_subnets_schema.json",
+        )
+        validate_sls_json(schema_file=default_sls_subnets_schema_file, sls_data=sls_data)

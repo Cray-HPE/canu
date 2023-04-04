@@ -47,7 +47,6 @@ def tests(session):
     # Install all test dependencies, then install this package in-place.
     path = "tests"
     session.install(".[test]")
-    session.install(".[network_modeling]")
     session.install(".")
 
     if session.posargs:
@@ -95,7 +94,6 @@ def black(session):
 def cover(session):
     """Run the final coverage report."""
     session.install(".[test]")
-    session.install(".[network_modeling]")
     session.install(".")
     session.run(
         "coverage",

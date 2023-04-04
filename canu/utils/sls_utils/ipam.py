@@ -171,7 +171,8 @@ def next_free_ipv4_address(subnet, requested_ipv4_address=None):
     next_free_ip = None
     free_ips = free_ipv4_addresses(subnet)
     if requested_ipv4_address is not None:
-        pass
+        if requested_ipv4_address in free_ips:
+            return requested_ipv4_address
     else:
         next_free_ip = sorted(free_ips)[0]
 
@@ -200,7 +201,8 @@ def last_free_ipv4_address(subnet, requested_ipv4_address=None):
     last_free_ip = None
     free_ips = free_ipv4_addresses(subnet)
     if requested_ipv4_address is not None:
-        pass
+        if requested_ipv4_address in free_ips:
+            return requested_ipv4_address
     else:
         last_free_ip = sorted(free_ips)[-1]
 

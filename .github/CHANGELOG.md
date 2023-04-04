@@ -2,7 +2,8 @@
 
 ## [UNRELEASED]
 
-- adjust docs workflow to run during promote-release
+- Adjust docs workflow to run during promote-release
+- Add significant testing to network_modeling and sls_utils modules and fix a couple bugs.
 
 ## [1.7.1]
 

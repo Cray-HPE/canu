@@ -104,7 +104,7 @@ class Reservation:
         }
         if self.__aliases:
             sls.update({"Aliases": [str(a) for a in self.__aliases]})
-        if self.__comment is not None:
+        if self.__comment:
             sls.update({"Comment": str(self.__comment)})
 
         return sls
