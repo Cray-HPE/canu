@@ -12,6 +12,7 @@ updates:
     labels:
       - "pip"
       - "dependencies"
+    open-pull-requests-limit: 10
   - package-ecosystem: "github-actions"
     # Look for `.github/workflows` in the `root` directory
     directory: "/"
