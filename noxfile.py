@@ -55,6 +55,7 @@ def tests(session):
     # Run pytest against the tests.
     session.run(
         "pytest",
+        "-vvv",
         "--log-level=ERROR",
         "--cov-report=",
         f"--cov-fail-under={COVERAGE_FAIL}",

@@ -1,0 +1,7 @@
+{
+    "hostname": "sw-leaf-bmc-002",
+    "platform_name": "6300",
+    "system_mac": "88:3a:30:a9:89:80",
+    "ip": "10.103.0.9",
+    "vendor": "aruba"
+}

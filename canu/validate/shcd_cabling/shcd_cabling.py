@@ -27,6 +27,7 @@ from os import path
 from pathlib import Path
 import re
 import sys
+import pprint
 
 import click
 from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
@@ -470,6 +471,7 @@ def combine_shcd_cabling(shcd_node_list, cabling_node_list, canu_cache, ips, csm
 
     # Add nodes from Cabling to combined_nodes
     for cabling_hostname, node_info in cabling_dict.items():
+
         # For versions of csm < 1.2, the hostname might need to be renamed
         if float(csm) < 1.2:
             cabling_hostname = cabling_hostname.replace("-leaf-", "-leaf-bmc-")
@@ -552,7 +554,6 @@ def print_combined_nodes(combined_nodes, out="-", all_nodes=False, input_type="S
         input_type: String for the input to compair, typically SHCD or CCJ
     """
     dash = "-" * 80
-
     for node, node_info in combined_nodes.items():
         if node.startswith("sw-") and "hsn" not in node or all_nodes:
             click.secho(f"\n{node}", fg="bright_white", file=out)
@@ -570,7 +571,6 @@ def print_combined_nodes(combined_nodes, out="-", all_nodes=False, input_type="S
                 file=out,
             )
             click.secho(dash, file=out)
-
             for port_number, port_info in node_info["ports"].items():
                 text_color = "yellow"
                 if port_info["shcd"] == port_info["cabling"]:

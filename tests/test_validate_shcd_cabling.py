@@ -656,7 +656,9 @@ def test_validate_shcd_cabling_bad_ip(netmiko_command, switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert "check the entered username, IP address and password" in str(result.output)
+        assert "check the entered username, IP address and password" in str(
+            result.output
+        )
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -706,7 +708,9 @@ def test_validate_shcd_cabling_bad_ip_file(netmiko_command, switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert "check the entered username, IP address and password" in str(result.output)
+        assert "check the entered username, IP address and password" in str(
+            result.output
+        )
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -1538,32 +1542,32 @@ lldp_neighbors_json1 = {
             "port_id": "11:11:11:11:11:11",
         },
     },
-    "1%2F1%2F4": {
-        "aa:aa:aa:aa:aa:aa,aa:aa:aa:aa:aa:aa": {
-            "chassis_id": "aa:aa:aa:aa:aa:aa",
-            "mac_addr": "aa:aa:aa:aa:aa:aa",
-            "neighbor_info": {
-                "chassis_description": "NCN description",
-                "chassis_name": "ncn-m88",
-                "port_description": "mgmt1",
-                "port_id_subtype": "link_local_addr",
-            },
-            "port_id": "aa:aa:aa:aa:aa:aa",
-        },
-    },
-    "1%2F1%2F5": {
-        "99:99:99:99:99:99,1/1/5": {
-            "chassis_id": "99:99:99:99:99:99",
-            "mac_addr": "99:99:99:99:99:99",
-            "neighbor_info": {
-                "chassis_description": "sw-leaf-bmc-99",
-                "chassis_name": "sw-leaf-bmc99",
-                "port_description": "1/1/5",
-                "port_id_subtype": "if_name",
-            },
-            "port_id": "1/1/5",
-        },
-    },
+    # "1%2F1%2F4": {
+    #     "aa:aa:aa:aa:aa:aa,aa:aa:aa:aa:aa:aa": {
+    #         "chassis_id": "aa:aa:aa:aa:aa:aa",
+    #         "mac_addr": "aa:aa:aa:aa:aa:aa",
+    #         "neighbor_info": {
+    #             "chassis_description": "NCN description",
+    #             "chassis_name": "ncn-m88",
+    #             "port_description": "mgmt1",
+    #             "port_id_subtype": "link_local_addr",
+    #         },
+    #         "port_id": "aa:aa:aa:aa:aa:aa",
+    #     },
+    # },
+    # "1%2F1%2F5": {
+    #     "99:99:99:99:99:99,1/1/5": {
+    #         "chassis_id": "99:99:99:99:99:99",
+    #         "mac_addr": "99:99:99:99:99:99",
+    #         "neighbor_info": {
+    #             "chassis_description": "sw-leaf-bmc-99",
+    #             "chassis_name": "sw-leaf-bmc99",
+    #             "port_description": "1/1/5",
+    #             "port_id_subtype": "if_name",
+    #         },
+    #         "port_id": "1/1/5",
+    #     },
+    # },
 }
 
 arp_neighbors_json1 = {

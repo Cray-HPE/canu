@@ -1,0 +1,110 @@
+{
+    "1%2F1%2F51": {
+        "b8:d4:e7:40:56:00,1/1/48": {
+            "chassis_id": "b8:d4:e7:40:56:00",
+            "eee_lastchange": "",
+            "mac_addr": "b8:d4:e7:40:56:b8",
+            "med_network_policy": {},
+            "neighbor_info": {
+                "chassis_capability_available": "Bridge, Router",
+                "chassis_capability_enabled": "Bridge, Router",
+                "chassis_description": "Aruba JL635A  GL.10.09.0010",
+                "chassis_id_len": "6",
+                "chassis_id_subtype": "link_local_addr",
+                "chassis_index": "1",
+                "chassis_name": "sw-leaf-004",
+                "chassis_protocol": "LLDP",
+                "chassis_refcount": "1",
+                "chassis_ttl": "120",
+                "eee_wake_time_fallback": 0,
+                "eee_wake_time_rx": 0,
+                "eee_wake_time_rx_echo": 0,
+                "eee_wake_time_tx": 0,
+                "eee_wake_time_tx_echo": 0,
+                "mgmt_iface_list": "33554432",
+                "mgmt_iface_oid_list": "1.3.6.1.2.1.31.1.1.1.1.33554432",
+                "mgmt_ip_list": "10.2.0.7",
+                "port_description": "sw-leaf-bmc-002:51<==sw-leaf-004",
+                "port_hidden_in": "0",
+                "port_hidden_out": "0",
+                "port_id_len": "6",
+                "port_id_subtype": "if_name",
+                "port_lastchange": "631cbfa4",
+                "port_lastupdate": "642b0a41",
+                "port_mfs": "0",
+                "port_protocol": "LLDP",
+                "port_pvid": "1",
+                "power_allocated": 0.0,
+                "power_allocated_pair_a": 0.0,
+                "power_allocated_pair_b": 0.0,
+                "power_requested": 0.0,
+                "power_requested_pair_a": 0.0,
+                "power_requested_pair_b": 0.0,
+                "power_supported": 0.0,
+                "remote_index": 1
+            },
+            "neighbor_info_organizational": {
+                "1": {
+                    "oui": "0080c2",
+                    "oui_data": "0001",
+                    "oui_subtype": 1
+                }
+            },
+            "port_id": "1/1/48"
+        }
+    },
+    "1%2F1%2F52": {
+        "b8:d4:e7:43:d3:00,1/1/48": {
+            "chassis_id": "b8:d4:e7:43:d3:00",
+            "eee_lastchange": "",
+            "mac_addr": "b8:d4:e7:43:d3:b8",
+            "med_network_policy": {},
+            "neighbor_info": {
+                "chassis_capability_available": "Bridge, Router",
+                "chassis_capability_enabled": "Bridge, Router",
+                "chassis_description": "Aruba JL635A  GL.10.09.0010",
+                "chassis_id_len": "6",
+                "chassis_id_subtype": "link_local_addr",
+                "chassis_index": "2",
+                "chassis_name": "sw-leaf-003",
+                "chassis_protocol": "LLDP",
+                "chassis_refcount": "1",
+                "chassis_ttl": "120",
+                "eee_wake_time_fallback": 0,
+                "eee_wake_time_rx": 0,
+                "eee_wake_time_rx_echo": 0,
+                "eee_wake_time_tx": 0,
+                "eee_wake_time_tx_echo": 0,
+                "mgmt_iface_list": "33554432",
+                "mgmt_iface_oid_list": "1.3.6.1.2.1.31.1.1.1.1.33554432",
+                "mgmt_ip_list": "10.2.0.6",
+                "port_description": "sw-leaf-bmc-002:52<==sw-leaf-003",
+                "port_hidden_in": "0",
+                "port_hidden_out": "0",
+                "port_id_len": "6",
+                "port_id_subtype": "if_name",
+                "port_lastchange": "631cbfa4",
+                "port_lastupdate": "642b0a41",
+                "port_mfs": "0",
+                "port_protocol": "LLDP",
+                "port_pvid": "1",
+                "power_allocated": 0.0,
+                "power_allocated_pair_a": 0.0,
+                "power_allocated_pair_b": 0.0,
+                "power_requested": 0.0,
+                "power_requested_pair_a": 0.0,
+                "power_requested_pair_b": 0.0,
+                "power_supported": 0.0,
+                "remote_index": 2
+            },
+            "neighbor_info_organizational": {
+                "1": {
+                    "oui": "0080c2",
+                    "oui_data": "0001",
+                    "oui_subtype": 1
+                }
+            },
+            "port_id": "1/1/48"
+        }
+    }
+}

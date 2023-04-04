@@ -1,0 +1,1102 @@
+{
+    "10.1.0.3,vlan1": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.1.0.3",
+        "last_updated": 0,
+        "mac": "54:80:28:ff:07:00",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag256": "/rest/v10.04/system/interfaces/lag256"
+        },
+        "port": {
+            "vlan1": "/rest/v10.04/system/interfaces/vlan1"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.0.10,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.0.10",
+        "last_updated": 0,
+        "mac": "44:5b:ed:83:11:00",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag201": "/rest/v10.04/system/interfaces/lag201"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.0.11,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.0.11",
+        "last_updated": 0,
+        "mac": "44:5b:ed:83:f0:80",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag201": "/rest/v10.04/system/interfaces/lag201"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.0.3,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.0.3",
+        "last_updated": 0,
+        "mac": "54:80:28:ff:07:00",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag256": "/rest/v10.04/system/interfaces/lag256"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.0.4,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.0.4",
+        "last_updated": 0,
+        "mac": "b8:d4:e7:43:62:00",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.0.5,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.0.5",
+        "last_updated": 0,
+        "mac": "b8:d4:e7:d3:2d:00",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.0.6,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.0.6",
+        "last_updated": 0,
+        "mac": "b8:d4:e7:43:d3:00",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag103": "/rest/v10.04/system/interfaces/lag103"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.0.7,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.0.7",
+        "last_updated": 0,
+        "mac": "b8:d4:e7:40:56:00",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag103": "/rest/v10.04/system/interfaces/lag103"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.0.8,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.0.8",
+        "last_updated": 0,
+        "mac": "88:3a:30:a9:69:80",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.0.9,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.0.9",
+        "last_updated": 0,
+        "mac": "88:3a:30:a9:89:80",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag103": "/rest/v10.04/system/interfaces/lag103"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.1.10,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.1.10",
+        "last_updated": 0,
+        "mac": "14:02:ec:da:d4:f8",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.1.11,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.1.11",
+        "last_updated": 0,
+        "mac": "14:02:ec:da:bc:08",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag103": "/rest/v10.04/system/interfaces/lag103"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.1.12,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.1.12",
+        "last_updated": 0,
+        "mac": "14:02:ec:d9:7a:60",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.1.13,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.1.13",
+        "last_updated": 0,
+        "mac": "14:02:ec:da:d4:38",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.1.14,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.1.14",
+        "last_updated": 0,
+        "mac": "14:02:ec:e7:83:10",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.1.15,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.1.15",
+        "last_updated": 0,
+        "mac": "14:02:ec:da:d5:70",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.1.3,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.1.3",
+        "last_updated": 0,
+        "mac": "14:02:ec:da:be:48",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag103": "/rest/v10.04/system/interfaces/lag103"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.1.4,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.1.4",
+        "last_updated": 0,
+        "mac": "14:02:ec:da:bc:50",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag103": "/rest/v10.04/system/interfaces/lag103"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.1.5,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.1.5",
+        "last_updated": 0,
+        "mac": "14:02:ec:da:bd:10",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.1.6,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.1.6",
+        "last_updated": 0,
+        "mac": "14:02:ec:da:be:48",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag103": "/rest/v10.04/system/interfaces/lag103"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.1.7,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.1.7",
+        "last_updated": 0,
+        "mac": "14:02:ec:da:bc:f8",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag103": "/rest/v10.04/system/interfaces/lag103"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.1.8,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.1.8",
+        "last_updated": 0,
+        "mac": "14:02:ec:da:d4:68",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.252.1.9,vlan2": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.252.1.9",
+        "last_updated": 0,
+        "mac": "14:02:ec:d9:78:c8",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan2": "/rest/v10.04/system/interfaces/vlan2"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.0.10,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.0.10",
+        "last_updated": 0,
+        "mac": "44:5b:ed:83:11:00",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag201": "/rest/v10.04/system/interfaces/lag201"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.0.11,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.0.11",
+        "last_updated": 0,
+        "mac": "44:5b:ed:83:f0:80",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag201": "/rest/v10.04/system/interfaces/lag201"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.0.3,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.0.3",
+        "last_updated": 0,
+        "mac": "54:80:28:ff:07:00",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag256": "/rest/v10.04/system/interfaces/lag256"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.0.4,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.0.4",
+        "last_updated": 0,
+        "mac": "b8:d4:e7:43:62:00",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.0.5,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.0.5",
+        "last_updated": 0,
+        "mac": "b8:d4:e7:d3:2d:00",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.0.6,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.0.6",
+        "last_updated": 0,
+        "mac": "b8:d4:e7:43:d3:00",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag103": "/rest/v10.04/system/interfaces/lag103"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.0.7,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.0.7",
+        "last_updated": 0,
+        "mac": "b8:d4:e7:40:56:00",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag103": "/rest/v10.04/system/interfaces/lag103"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.0.8,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.0.8",
+        "last_updated": 0,
+        "mac": "88:3a:30:a9:69:80",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.0.9,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.0.9",
+        "last_updated": 0,
+        "mac": "88:3a:30:a9:89:80",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag103": "/rest/v10.04/system/interfaces/lag103"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.10,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.10",
+        "last_updated": 0,
+        "mac": "14:02:ec:da:bc:f8",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag103": "/rest/v10.04/system/interfaces/lag103"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.11,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.11",
+        "last_updated": 0,
+        "mac": "94:40:c9:35:13:28",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.12,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.12",
+        "last_updated": 0,
+        "mac": "14:02:ec:da:d4:68",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.13,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.13",
+        "last_updated": 0,
+        "mac": "94:40:c9:35:f2:b8",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.14,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.14",
+        "last_updated": 0,
+        "mac": "14:02:ec:d9:78:c8",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.15,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.15",
+        "last_updated": 0,
+        "mac": "94:40:c9:35:f2:c6",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.16,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.16",
+        "last_updated": 0,
+        "mac": "14:02:ec:da:d4:f8",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.17,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.17",
+        "last_updated": 0,
+        "mac": "94:40:c9:35:13:a0",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag103": "/rest/v10.04/system/interfaces/lag103"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.18,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.18",
+        "last_updated": 0,
+        "mac": "14:02:ec:da:bc:08",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag103": "/rest/v10.04/system/interfaces/lag103"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.19,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.19",
+        "last_updated": 0,
+        "mac": "94:40:c9:35:03:76",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.22,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.22",
+        "last_updated": 0,
+        "mac": "14:02:ec:da:d4:38",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.23,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.23",
+        "last_updated": 0,
+        "mac": "00:40:a6:82:f7:a5",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.24,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.24",
+        "last_updated": 0,
+        "mac": "00:40:a6:82:f7:63",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag103": "/rest/v10.04/system/interfaces/lag103"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.25,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.25",
+        "last_updated": 0,
+        "mac": "ec:eb:b8:3d:88:f6",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.26,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.26",
+        "last_updated": 0,
+        "mac": "ec:eb:b8:3d:79:24",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag103": "/rest/v10.04/system/interfaces/lag103"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.3,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.3",
+        "last_updated": 0,
+        "mac": "94:40:c9:35:13:7a",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag103": "/rest/v10.04/system/interfaces/lag103"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.4,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.4",
+        "last_updated": 0,
+        "mac": "14:02:ec:da:bc:50",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag103": "/rest/v10.04/system/interfaces/lag103"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.40,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.40",
+        "last_updated": 0,
+        "mac": "94:40:c9:35:f2:8a",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.41,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.41",
+        "last_updated": 0,
+        "mac": "94:40:c9:35:13:36",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.5,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.5",
+        "last_updated": 0,
+        "mac": "94:40:c9:35:f2:be",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.7,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.7",
+        "last_updated": 0,
+        "mac": "94:40:c9:35:f2:c0",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag101": "/rest/v10.04/system/interfaces/lag101"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.8,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.8",
+        "last_updated": 0,
+        "mac": "14:02:ec:da:be:48",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag103": "/rest/v10.04/system/interfaces/lag103"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    },
+    "10.254.1.9,vlan4": {
+        "address_family": "ipv4",
+        "from": "dynamic",
+        "in_use_by_routes": false,
+        "ip_address": "10.254.1.9",
+        "last_updated": 0,
+        "mac": "94:40:c9:35:13:22",
+        "multicast_l3_neighbor_forwarding": null,
+        "phy_port": {
+            "lag103": "/rest/v10.04/system/interfaces/lag103"
+        },
+        "port": {
+            "vlan4": "/rest/v10.04/system/interfaces/vlan4"
+        },
+        "state": "reachable",
+        "status": {
+            "dp_hit": true
+        },
+        "tunnel_endpoint": null
+    }
+}
