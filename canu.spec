@@ -68,6 +68,10 @@ rm pyinstaller.spec
 chown -R --reference=. ./dist/linux
 mkdir -p %{buildroot}%{_bindir}
 install -m 755 dist/linux/canu %{buildroot}%{_bindir}/canu
+
+# Test our installed binary.
+%{buildroot}%{_bindir}/canu --version
+
 install -m 755 dist/linux/canu-inventory %{buildroot}%{_bindir}/canu-inventory
 
 # install the 'canu' wrapper script to the bindir
