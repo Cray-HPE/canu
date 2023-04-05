@@ -110,6 +110,14 @@ added_files += [
         "network_modeling/configs/templates/1.3/dellmellanox/full",
     ),
     (
+        "network_modeling/configs/templates/1.3/arubadell/common/*.j2",
+        "network_modeling/configs/templates/1.3/arubadell/common",
+    ),
+    (
+        "network_modeling/configs/templates/1.3/arubadell/mug/*.j2",
+        "network_modeling/configs/templates/1.3/arubadell/mug",
+    ),
+    (
         "network_modeling/configs/templates/1.4/arista/*.j2",
         "network_modeling/configs/templates/1.4/arista",
     ),
@@ -148,6 +156,10 @@ added_files += [
     (
         "network_modeling/configs/templates/1.5/aruba/tds/*.j2",
         "network_modeling/configs/templates/1.5/aruba/tds",
+    ),
+    (
+        "canu/test/aruba/test_suite.yaml",
+        "canu/test/aruba"
     ),
 ]
 a = Analysis(
