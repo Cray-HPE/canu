@@ -56,7 +56,7 @@ dependencies = [
     'netaddr==0.8.0',
     'netmiko==4.1.2',
     'netutils==1.4.1',
-    'nornir-netmiko==0.2.0',
+    'nornir-netmiko==1.0.0',
     'nornir-salt==0.19.1',
     'nornir-scrapli==2023.1.30.post1',
     'nornir-utils==0.2.0',
