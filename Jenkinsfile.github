@@ -43,7 +43,6 @@ if (env.BRANCH_NAME ==~ ~"^PR-\\d+") {
 // The ==~ operator performs an exact match.
 def stableToken = ~/v?\d+\.\d+\.\d+(\.post\d+)?/
 def isStable = (env.TAG_NAME != null & env.TAG_NAME ==~ stableToken) ? true : false
-def version
 pipeline {
     agent {
         label "metal-gcp-builder-large"
