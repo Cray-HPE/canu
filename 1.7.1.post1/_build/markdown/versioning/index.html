@@ -910,7 +910,7 @@ and dependency specification for <a href="https://peps.python.org/pep-0440/#fina
 <p>The items below denote how stable, pre-release, and unstable versions are classified through
 version strings.</p>
 <ul>
-<li><strong><em>(stable) final release</em></strong>: A git-tag following the <code>X.Y.Z</code> semver format is considered a final release version.</li>
+<li><strong><em>(stable) release</em></strong>: A git-tag following the <code>X.Y.Z</code> semver format is considered a stable, release version.</li>
 </ul>
 <pre><code class="language-text"># Format:
 # {tag}
@@ -920,6 +920,24 @@ version strings.</p>
 # Z - Micro (a.k.a. patch)
 0.1.2
 </code></pre>
+<ul>
+<li><strong><em>(stable) post-release</em></strong>: A git-tag following the <code>X.Y.Z.postN</code> (where <code>N</code> is an integer), indicates a post-release.
+These are seldom used, and are strictly for handling documentation, packaging, or other meta
+updates after a release tag was already created where it isn’t warranted to publish an
+entirely new release.</li>
+</ul>
+<pre><code class="language-text"># Format:
+# {tag}
+# X.Y.Z.postN
+# X - Major
+# Y - Minor
+# Z - Micro (a.k.a. patch)
+# Z - Post release [1-9]+
+0.1.2.post1
+</code></pre>
+<blockquote>
+<p><strong><em>NOTE</em></strong> <code>X.Y.Z.post0</code> is equivalent to <code>X.Y.Z</code>, <code>post0</code> indicates the first release.</p>
+</blockquote>
 <ul>
 <li><strong><em>(unstable) pre-release</em></strong>: A git-tag with an <code>a</code>(lpha), <code>b</code>(eta), or <code>r</code>(elease) <code>c</code>(andidate) annotation and an identification number <code>N</code> denotes a pre-release/preview.</li>
 </ul>
