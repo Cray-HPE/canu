@@ -34,7 +34,7 @@ BuildArch: %(echo $ARCH)
 License: MIT License
 Summary: CSM Automatic Network Utility
 Version: %(echo $VERSION)
-Release: 1
+Release: %(echo $RELEASE)
 Source: %{name}-%{version}.tar.bz2
 Vendor: Hewlett Packard Enterprise Development LP
 
