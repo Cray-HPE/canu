@@ -8,7 +8,7 @@ and dependency specification for [final](https://peps.python.org/pep-0440/#final
 The items below denote how stable, pre-release, and unstable versions are classified through
 version strings.
 
-* ***(stable) final release***: A git-tag following the `X.Y.Z` semver format is considered a final release version.
+- ***(stable) release***: A git-tag following the `X.Y.Z` semver format is considered a stable, release version.
 
     ```text
     # Format:
@@ -19,6 +19,23 @@ version strings.
     # Z - Micro (a.k.a. patch)
     0.1.2
     ```
+- ***(stable) post-release***: A git-tag following the `X.Y.Z.postN` \(where `N` is an integer\), indicates a post-release.
+  These are seldom used, and are strictly for handling documentation, packaging, or other meta
+  updates after a release tag was already created where it isn't warranted to publish an 
+  entirely new release.
+
+    ```text
+    # Format:
+    # {tag}
+    # X.Y.Z.postN
+    # X - Major
+    # Y - Minor
+    # Z - Micro (a.k.a. patch)
+    # Z - Post release [1-9]+
+    0.1.2.post1
+    ```
+
+    > ***NOTE*** `X.Y.Z.post0` is equivalent to `X.Y.Z`, `post0` indicates the first release. 
 
 - ***(unstable) pre-release***: A git-tag with an `a`(lpha), `b`(eta), or `r`(elease) `c`(andidate) annotation and an identification number `N` denotes a pre-release/preview.
 

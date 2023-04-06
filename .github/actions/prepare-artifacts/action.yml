@@ -17,8 +17,8 @@ runs:
           sudo apt-get install -y rename
 
           # Wait for our RPM(s) to finish building and publishing.
-          echo Looking for "rpm.metadata.version=${{ github.ref_name }};rpm.metadata.name=${GITHUB_REPOSITORY#*/}"
-          while ! jf rt s --fail-no-op=true "${REPOSITORY}/${ORG}/${STREAM}/" --props "rpm.metadata.version=${{ github.ref_name }};rpm.metadata.name=${GITHUB_REPOSITORY#*/}" --exclude-props "rpm.metadata.arch=src"; do
+          echo Looking for "vcs.branch=${{ github.ref_name }};rpm.metadata.name=${GITHUB_REPOSITORY#*/}"
+          while ! jf rt s --fail-no-op=true "${REPOSITORY}/${ORG}/${STREAM}/" --props "vcs.branch=${{ github.ref_name }};rpm.metadata.name=${GITHUB_REPOSITORY#*/}" --exclude-props "rpm.metadata.arch=src"; do
            echo "Waiting for artifacts to be available; retrying in ${WAIT} seconds ... " >&2
            sleep ${WAIT}
           done
@@ -36,7 +36,7 @@ runs:
           # This effectively ensures that we provide artifacts for the distros we build for by uploading the artifacts with the distro in their name.
 
           # Working on non-SRC
-          jf rt download "${REPOSITORY}/${ORG}/${STREAM}/" ${DIR_DOWNLOAD}/ --props "rpm.metadata.version=${{ github.ref_name }};rpm.metadata.name=${GITHUB_REPOSITORY#*/}" --exclude-props "rpm.metadata.arch=src";
+          jf rt download "${REPOSITORY}/${ORG}/${STREAM}/" ${DIR_DOWNLOAD}/ --props "vcs.branch=${{ github.ref_name }};rpm.metadata.name=${GITHUB_REPOSITORY#*/}" --exclude-props "rpm.metadata.arch=src";
           for dir in ${DIR_DOWNLOAD}/${ORG}/${STREAM}/*; do
              os_dir=$(basename $dir)
 
@@ -55,7 +55,7 @@ runs:
           rm -rf ${DIR_DOWNLOAD}/${ORG}/${STREAM}/
 
           # Wait for our source RPMs to finish publishing.
-          while ! jf rt s --fail-no-op=true "${REPOSITORY}/${ORG}/${STREAM}/" --props "rpm.metadata.version=${{ github.ref_name }};rpm.metadata.name=${GITHUB_REPOSITORY#*/};rpm.metadata.arch=src"; do
+          while ! jf rt s --fail-no-op=true "${REPOSITORY}/${ORG}/${STREAM}/" --props "vcs.branch=${{ github.ref_name }};rpm.metadata.name=${GITHUB_REPOSITORY#*/};rpm.metadata.arch=src"; do
            echo "Waiting for artifacts to be available; retrying in ${WAIT} seconds ... " >&2
            sleep ${WAIT}
           done
@@ -64,7 +64,7 @@ runs:
           sleep ${WAIT}
 
           # Rename src RPMs
-          jf rt download "${REPOSITORY}/${ORG}/${STREAM}/" ${DIR_DOWNLOAD}/ --props "rpm.metadata.version=${{ github.ref_name }};rpm.metadata.name=${GITHUB_REPOSITORY#*/};rpm.metadata.arch=src";
+          jf rt download "${REPOSITORY}/${ORG}/${STREAM}/" ${DIR_DOWNLOAD}/ --props "vcs.branch=${{ github.ref_name }};rpm.metadata.name=${GITHUB_REPOSITORY#*/};rpm.metadata.arch=src";
           for dir in ${DIR_DOWNLOAD}/${ORG}/${STREAM}/*; do
              os_dir=$(basename $dir)
 

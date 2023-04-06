@@ -38,9 +38,10 @@ if (env.BRANCH_NAME ==~ ~"^PR-\\d+") {
     return
 }
 
-// Only consider X.Y.Z tags as stable, do not consider X.Y.Z{[a|b|rc]N} or X.Y.Z.* tags as stable.
+// Only consider X.Y.Z and X.Y.Z.postN tags as stable.
+// Never consider X.Y.Z{[a|b|rc} or X.Y.Z.* tags (that are not post-releases) as stable.
 // The ==~ operator performs an exact match.
-def stableToken = ~/v?\d+\.\d+\.\d+/
+def stableToken = ~/v?\d+\.\d+\.\d+(\.post\d+)?/
 def isStable = (env.TAG_NAME != null & env.TAG_NAME ==~ stableToken) ? true : false
 def version
 pipeline {
@@ -67,9 +68,6 @@ pipeline {
             steps {
                 script {
                     sh "python3 -m pip install setuptools_scm[toml]"
-                    version = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
-
-                    // lock .git for writing - otherwise getting "content has changed" error while preparing tar.bz2 for RPM
                     sh "chmod -R a-w .git"
                 }
             }
@@ -78,7 +76,7 @@ pipeline {
         stage('Container Image') {
 
             environment {
-                VERSION = "${version}"
+                VERSION = sh(returnStdout: true, script: "make version_image").trim()
             }
 
             stages {
@@ -107,8 +105,8 @@ pipeline {
                     steps {
                         script {
                             // Use setuptools_scm to resolve the version(s) to use for the build.
-                            publishCsmDockerImage(image: "${env.NAME}", multiArch: env.MULTI_ARCH, tag: "${version}-dev", isStable: isStable)
-                            publishCsmDockerImage(image: "${env.NAME}", multiArch: env.MULTI_ARCH, tag: "${version}", isStable: isStable)
+                            publishCsmDockerImage(image: "${env.NAME}", multiArch: env.MULTI_ARCH, tag: "${env.VERSION}-dev", isStable: isStable)
+                            publishCsmDockerImage(image: "${env.NAME}", multiArch: env.MULTI_ARCH, tag: "${env.VERSION}", isStable: isStable)
                         }
                     }
                 }
@@ -146,11 +144,15 @@ pipeline {
                                 sh "python3 -m pip install setuptools setuptools_scm[toml]"
 
                                 // Set env.VERSION here incase just the RPM stage is being re-ran without the starting stages.
-                                env.VERSION = sh(returnStdout: true, script: "python3 -m setuptools_scm | tr -s '-' '~' | tr -s '+' '_' | sed 's/^v//'").trim()
+                                env.VERSION = sh(returnStdout: true, script: "make version").trim()
 
                                 sh "make prepare"
+
                                 // Inject distro-specific metadata (e.g. which distro and service pack).
-                                runLibraryScript("addRpmMetaData.sh", "${env.BUILD_DIR}/SPECS/${env.NAME}.spec")
+                                // Change into the env.BUILD_DIR to prevent runLibraryScript from removing another axis' script.
+                                dir("${env.BUILD_DIR}/SPECS/") {
+                                    runLibraryScript("addRpmMetaData.sh", "${env.NAME}.spec")
+                                }
                             }
                         }
                     }
