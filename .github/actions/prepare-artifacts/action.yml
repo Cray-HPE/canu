@@ -12,7 +12,7 @@ runs:
           REPOSITORY: csm-rpms
           ORG: hpe
           STREAM: ${{ inputs.STREAM }}
-          WAIT: 30
+          WAIT: 45
       run: |
           sudo apt-get install -y rename
 
