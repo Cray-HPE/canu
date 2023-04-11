@@ -1,5 +1,9 @@
 ## Changelog
 
+## [1.7.3]
+
+- Add `force` option to generated Mellanox web and ntp configuration.
+
 ## [1.7.2]
 
 - Bump Yamale and add pyinstaller hook file

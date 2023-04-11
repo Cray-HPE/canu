@@ -259,7 +259,7 @@ def test_switch_config_spine_primary():
         ) in str(result.output)
 
         assert (
-            "web vrf default enable\n"
+            "web vrf default enable force\n"
             + "ip routing vrf default\n"
             + "ip name-server vrf vrf-default 10.92.100.225\n"
             + "no ldap vrf mgmt enable\n"
@@ -628,7 +628,7 @@ def test_switch_config_spine_primary_preserve():
         ) in str(result.output)
 
         assert (
-            "web vrf default enable\n"
+            "web vrf default enable force\n"
             + "ip routing vrf default\n"
             + "ip name-server vrf vrf-default 10.92.100.225\n"
             + "no ldap vrf mgmt enable\n"
@@ -789,7 +789,7 @@ def test_switch_config_spine_primary_preserve():
             + "ntp server 192.168.4.6 keyID 0\n"
             + "no ntp server 192.168.4.6 trusted-enable\n"
             + "ntp server 192.168.4.6 version 4\n"
-            + "ntp vrf default enable\n"
+            + "ntp vrf default enable force\n"
         ) in str(result.output)
 
 
@@ -983,7 +983,7 @@ def test_switch_config_spine_secondary():
         ) in str(result.output)
 
         assert (
-            "web vrf default enable\n"
+            "web vrf default enable force\n"
             + "ip routing vrf default\n"
             + "ip name-server vrf vrf-default 10.92.100.225\n"
             + "no ldap vrf mgmt enable\n"
@@ -1144,7 +1144,7 @@ def test_switch_config_spine_secondary():
             + "ntp server 192.168.4.6 keyID 0\n"
             + "no ntp server 192.168.4.6 trusted-enable\n"
             + "ntp server 192.168.4.6 version 4\n"
-            + "ntp vrf default enable\n"
+            + "ntp vrf default enable force\n"
         ) in str(result.output)
 
 

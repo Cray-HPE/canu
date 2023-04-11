@@ -39,8 +39,8 @@ no ntp server {{ variables.NCN_W003 }} disable
 ntp server {{ variables.NCN_W003 }} keyID 0
 no ntp server {{ variables.NCN_W003 }} trusted-enable
 ntp server {{ variables.NCN_W003 }} version 4
-ntp vrf default enable
-web vrf default enable
+ntp vrf default enable force
+web vrf default enable force
 
 ip filter chain input rule append tail target drop dup-delete dest-port 22 in-intf vlan{{ variables.NMN_VLAN }} protocol tcp
 ip filter enable
