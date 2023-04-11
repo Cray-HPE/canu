@@ -204,6 +204,10 @@ per_line_sub:
     replace: ""
   - search: ^snmp-server user testuser v3.*
     replace: ""
+  - search: ^web vrf default enable.*
+    replace: "web vrf default enable force"
+  - search: ^ntp vrf default enable.*
+    replace: "ntp vrf default enable force"
 
 idempotent_commands_blacklist: []
 
