@@ -270,7 +270,7 @@ def test_switch_config_spine_primary():
         ) in str(result.output)
 
         assert (
-            "web vrf default enable\n"
+            "web vrf default enable force\n"
             + "vrf definition Customer\n"
             + "vrf definition Customer rd 7:7\n"
             + "ip routing vrf Customer\n"
@@ -480,7 +480,7 @@ def test_switch_config_spine_primary():
             + "ntp server 192.168.4.6 keyID 0\n"
             + "no ntp server 192.168.4.6 trusted-enable\n"
             + "ntp server 192.168.4.6 version 4\n"
-            + "ntp vrf default enable\n"
+            + "ntp vrf default enable force\n"
         ) in str(result.output)
 
 
@@ -712,7 +712,7 @@ def test_switch_config_spine_primary_custom():
         ) in str(result.output)
 
         assert (
-            "web vrf default enable\n"
+            "web vrf default enable force\n"
             + "vrf definition Customer\n"
             + "vrf definition Customer rd 7:7\n"
             + "ip routing vrf Customer\n"
@@ -924,7 +924,7 @@ def test_switch_config_spine_primary_custom():
             + "ntp server 192.168.4.6 keyID 0\n"
             + "no ntp server 192.168.4.6 trusted-enable\n"
             + "ntp server 192.168.4.6 version 4\n"
-            + "ntp vrf default enable\n"
+            + "ntp vrf default enable force\n"
         ) in str(result.output)
 
 
@@ -1126,7 +1126,7 @@ def test_switch_config_spine_secondary():
             + "interface mlag-port-channel 201 switchport hybrid allowed-vlan add 6\n"
         ) in str(result.output)
         assert (
-            "web vrf default enable\n"
+            "web vrf default enable force\n"
             + "vrf definition Customer\n"
             + "vrf definition Customer rd 7:7\n"
             + "ip routing vrf Customer\n"
@@ -1331,7 +1331,7 @@ def test_switch_config_spine_secondary():
             + "ntp server 192.168.4.6 keyID 0\n"
             + "no ntp server 192.168.4.6 trusted-enable\n"
             + "ntp server 192.168.4.6 version 4\n"
-            + "ntp vrf default enable\n"
+            + "ntp vrf default enable force\n"
         ) in str(result.output)
 
 
