@@ -23,7 +23,7 @@
 - name: Software version test
   task: show version
   test: contains
-  pattern: "10.09.0010"
+  pattern: "10.11.1010"
   err_msg: Software version is wrong
   device:
     - cdu
