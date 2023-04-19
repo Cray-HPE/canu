@@ -46,4 +46,16 @@ jobs:
       run: |
         pip install .[ci]
         nox -e tests
-        nox -e cover
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      with:
+          args: >
+            -Dsonar.organization="${GITHUB_REPOSITORY%/*}"
+            -Dsonar.projectKey="${GITHUB_REPOSITORY#*/}"
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.sources=canu/,network_modeling
+            -Dsonar.test.exclusions=tests/**
+            -Dsonar.tests=tests/

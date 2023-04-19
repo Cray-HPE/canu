@@ -56,7 +56,7 @@ def tests(session):
     session.run(
         "pytest",
         "--log-level=ERROR",
-        "--cov-report=",
+        "--cov-report=xml",
         f"--cov-fail-under={COVERAGE_FAIL}",
         "--cov=canu",
         "--cov=tests",
