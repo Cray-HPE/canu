@@ -55,8 +55,8 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       with:
           args: >
-            -Dsonar.organization="${GIT_ORG_NAME,,}
-            -Dsonar.projectKey="${GIT_ORG_NAME}_${GIT_REPO_NAME,,}"
+            -Dsonar.organization="${env.GIT_ORG_NAME,,}"
+            -Dsonar.projectKey="${env.GIT_ORG_NAME}_${env.GIT_REPO_NAME,,}"
             -Dsonar.python.coverage.reportPaths=coverage.xml
             -Dsonar.sources=canu/,network_modeling
             -Dsonar.test.exclusions=tests/**
