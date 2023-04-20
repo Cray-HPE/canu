@@ -49,15 +49,12 @@ jobs:
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@master
       env:
-        GIT_ORG_NAME: "${GITHUB_REPOSITORY%/*}"
-        GIT_REPO_NAME: "${GITHUB_REPOSITORY#*/}"
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       with:
           args: >
-            -Dsonar.organization="${env.GIT_ORG_NAME,,}"
-            -Dsonar.projectKey="${env.GIT_ORG_NAME}_${env.GIT_REPO_NAME,,}"
+            -Dsonar.organization=cray-hpe
+            -Dsonar.projectKey=Cray-HPE_canu
             -Dsonar.python.coverage.reportPaths=coverage.xml
-            -Dsonar.sources=canu/,network_modeling
-            -Dsonar.test.exclusions=tests/**
-            -Dsonar.tests=tests/
+            -Dsonar.sources=.
+            -Dsonar.verbose=yes
