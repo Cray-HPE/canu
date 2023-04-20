@@ -58,9 +58,6 @@ def tests(session):
         "--log-level=ERROR",
         "--cov-report=xml",
         f"--cov-fail-under={COVERAGE_FAIL}",
-        "--cov=canu",
-        "--cov=tests",
-        "--cov=network_modeling",
         path,
     )
 

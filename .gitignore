@@ -28,7 +28,8 @@ build_version
 pip-log.txt
 
 # Unit test / coverage reports
-*coverage*
+coverage.xml
+.coverage
 .nox
 .tox
 .cache

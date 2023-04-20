@@ -1,0 +1,5 @@
+source =
+    canu
+    network_modeling
+    tests
+relative_files=True
