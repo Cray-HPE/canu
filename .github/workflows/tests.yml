@@ -23,10 +23,12 @@
 #
 name: Python (unit tests)
 
-on: [push]
+on:
+  push:
+  workflow_dispatch:
 
 jobs:
-  nox:
+  unit_tests:
     name: Tests and Coverage
     strategy:
       matrix:
@@ -44,6 +46,46 @@ jobs:
       env:
         GIT_REPO_NAME: "${GITHUB_REPOSITORY#*/}"
       run: |
-        pip install .[ci]
-        nox -e tests
-        nox -e cover
+        pip install setuptools_scm[toml] '.[test]'
+        make unit
+
+  integration_tests:
+    strategy:
+      matrix:
+        version: ['3.10', '3.9']
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.version }}
+
+      - if: ${{ matrix.os == 'ubuntu-latest' }}
+        uses: cachix/install-nix-action@v18
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - if: ${{ matrix.os == 'ubuntu-latest' }}
+        name: Run shellspec
+        run: |
+          pip install setuptools_scm[toml] '.[test]'
+          nix-shell -p shellspec --run 'make integration'
+
+      - if: ${{ matrix.os == 'macos-latest' }}
+        name: Install shellspec (macOS)
+        run: |
+          brew tap shellspec/shellspec
+          brew update
+          brew install shellspec ksh93 bash
+
+      - if: ${{ matrix.os == 'macos-latest' }}
+        name: Run integration tests via shellspec
+        run: |
+          pip install setuptools_scm[toml] '.[test]'
+          make integration

@@ -1,4 +1,7 @@
 ## Changelog
+## [UNRELEASED]
+
+- added very basic integration tests via shellspec for local and github actions
 
 ## [1.7.3]
 
