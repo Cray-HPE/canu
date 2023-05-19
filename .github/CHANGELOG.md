@@ -1,4 +1,7 @@
 ## Changelog
+## [UNRELEASED]
+
+- added very basic integration tests via shellspec for local and github actions
 
 - Update Aruba software version in canu test and canu template
 - Fix storage node lag configuration in Aruba templates to prevent loop

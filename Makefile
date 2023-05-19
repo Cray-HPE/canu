@@ -187,6 +187,21 @@ clean:
 	rm -rf build dist
 
 #############################################################################
+# Testing targets
+#############################################################################
+
+# docs are deployed with mike, but we can build them locally with mkdocs
+# mike can also serve local docs, but requires a bit more setup
+# with deploy and set-default and using a specfic branch so as not to overwrite gh-pages
+unit:
+	pip install .[ci]
+	nox -e tests
+	nox -e cover
+
+integration: 
+	shellspec --format tap --no-warning-as-failure --jobs 3
+
+#############################################################################
 # Doc targets
 #############################################################################
 
