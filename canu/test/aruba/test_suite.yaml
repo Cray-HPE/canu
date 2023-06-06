@@ -30,6 +30,23 @@
     - leaf
     - leaf-bmc
     - spine
+
+- name: BGP Config Test
+  task: show run bgp
+  test: custom
+  function_file: bgp_test.py
+  function_name: bgp_config
+  device:
+    - spine
+
+- name: VLAN Interface Config Test
+  task: show run interface
+  test: custom
+  function_file: vlan_interface_test.py
+  function_name: vlan_interface_config
+  device:
+    - spine
+
 - name: lacp interfaces test
   task: show lacp interfaces
   test: ncontains_lines
@@ -177,14 +194,14 @@
 #   err_msg: IP-Helper is missing
 #   device:
 #     - spine
-- name: tftp route
+- name: TFTP Route
   task: show ip route 10.92.100.60
   test: contains
   pattern: Nexthop
   err_msg: route to tftp incorrect
   device:
     - spine
-- name: BGP Test
+- name: BGP Neighbors Test
   task: show bgp all-vrf all summary
   test: ncontains_lines
   pattern:

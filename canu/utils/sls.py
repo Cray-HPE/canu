@@ -30,6 +30,130 @@ from kubernetes import client, config
 import requests
 import urllib3
 
+def sls_dump(path):
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+    debug = False
+
+    def on_debug(debug=False, message=None):
+        if debug:
+            print("DEBUG: {}".format(message))
+
+    #
+    # Convenience wrapper around remote calls
+    #
+    def remote_request(
+        remote_type,
+        remote_url,
+        headers=None,
+        data=None,
+        verify=False,
+        debug=False,
+    ):
+        remote_response = None
+        while True:
+            try:
+                response = requests.request(
+                    remote_type,
+                    url=remote_url,
+                    headers=headers,
+                    data=data,
+                    verify=verify,
+                )
+                on_debug(debug, "Request response: {}".format(response.text))
+                response.raise_for_status()
+                remote_response = json.dumps({})
+                if response.text:
+                    remote_response = response.json()
+                break
+            except Exception as err:
+                message = "Error calling {}: {}".format(remote_url, err)
+                raise SystemExit(message) from err
+        return remote_response
+
+    #
+    # Get the admin client secret from Kubernetes
+    #
+    secret = None
+    cenv = os.getenv("CRAYENV", "notk8s")
+    if cenv != "k8s":
+        try:
+            config.load_kube_config()
+            v1 = client.CoreV1Api()
+            secret_obj = v1.list_namespaced_secret(
+                "default",
+                field_selector="metadata.name=admin-client-auth",
+            )
+            secret_dict = secret_obj.to_dict()
+            secret_base64_str = secret_dict["items"][0]["data"]["client-secret"]
+            secret = base64.b64decode(secret_base64_str.encode("utf-8"))
+        except Exception as err:
+            print("Error collecting secret from Kubernetes: {}".format(err))
+            sys.exit(1)
+
+    #
+    # Get an auth token by using the secret
+    #
+    if os.getenv("SLS_TOKEN") is None:
+        token = None
+    else:
+        token = os.getenv("SLS_TOKEN")
+    sls_cache = None
+
+    if os.getenv("SLS_API_GW") is None:
+        # this is in mesh pod-to-pod communication
+        sls_url = f"http://cray-sls.services.svc.cluster.local/v1/{path}"
+    else:
+        # this is out of the mesh
+        sls_url = "https://" + os.getenv("SLS_API_GW") + f"/apis/sls/v1/{path}"
+    if cenv != "k8s":
+        sls_url = f"https://api-gw-service-nmn.local/apis/sls/v1/{path}"
+        try:
+            token_url = "https://api-gw-service-nmn.local/keycloak/realms/shasta/protocol/openid-connect/token"
+            token_data = {
+                "grant_type": "client_credentials",
+                "client_id": "admin-client",
+                "client_secret": secret,
+            }
+            token_request = remote_request(
+                "POST",
+                token_url,
+                data=token_data,
+                debug=debug,
+            )
+            token = token_request["access_token"]
+            on_debug(
+                debug=debug,
+                message="Auth Token from keycloak (first 50 char): {}".format(
+                    token[:50],
+                ),
+            )
+
+        except Exception as err:
+            print("Error obtaining keycloak token: {}".format(err))
+            sys.exit(1)
+
+    #
+    # Get existing SLS data for comparison (used as a cache)
+    #
+    sls_cache = None
+    auth_headers = {"Authorization": "Bearer {}".format(token)}
+    try:
+        sls_cache = remote_request(
+            "GET",
+            sls_url,
+            headers=auth_headers,
+            verify=False,
+        )
+        on_debug(
+            debug=debug,
+            message="SLS data has {} records".format(len(sls_cache)),
+        )
+    except Exception as err:
+        print("Error requesting Networks from SLS: {}".format(err))
+        sys.exit(1)
+    on_debug(debug=debug, message="SLS records {}".format(sls_cache))
+    
+    return sls_cache
 
 def pull_sls_networks(sls_file=None):
     """Query API-GW and retrieve token.
@@ -45,129 +169,7 @@ def pull_sls_networks(sls_file=None):
             network[x] for network in [sls_file.get("Networks", {})] for x in network
         ]
     if not sls_file:
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-        debug = False
-
-        def on_debug(debug=False, message=None):
-            if debug:
-                print("DEBUG: {}".format(message))
-
-        #
-        # Convenience wrapper around remote calls
-        #
-        def remote_request(
-            remote_type,
-            remote_url,
-            headers=None,
-            data=None,
-            verify=False,
-            debug=False,
-        ):
-            remote_response = None
-            while True:
-                try:
-                    response = requests.request(
-                        remote_type,
-                        url=remote_url,
-                        headers=headers,
-                        data=data,
-                        verify=verify,
-                    )
-                    on_debug(debug, "Request response: {}".format(response.text))
-                    response.raise_for_status()
-                    remote_response = json.dumps({})
-                    if response.text:
-                        remote_response = response.json()
-                    break
-                except Exception as err:
-                    message = "Error calling {}: {}".format(remote_url, err)
-                    raise SystemExit(message) from err
-            return remote_response
-
-        #
-        # Get the admin client secret from Kubernetes
-        #
-        secret = None
-        cenv = os.getenv("CRAYENV", "notk8s")
-        if cenv != "k8s":
-            try:
-                config.load_kube_config()
-                v1 = client.CoreV1Api()
-                secret_obj = v1.list_namespaced_secret(
-                    "default",
-                    field_selector="metadata.name=admin-client-auth",
-                )
-                secret_dict = secret_obj.to_dict()
-                secret_base64_str = secret_dict["items"][0]["data"]["client-secret"]
-                secret = base64.b64decode(secret_base64_str.encode("utf-8"))
-            except Exception as err:
-                print("Error collecting secret from Kubernetes: {}".format(err))
-                sys.exit(1)
-
-        #
-        # Get an auth token by using the secret
-        #
-        if os.getenv("SLS_TOKEN") is None:
-            token = None
-        else:
-            token = os.getenv("SLS_TOKEN")
-        sls_cache = None
-
-        if os.getenv("SLS_API_GW") is None:
-            # this is in mesh pod-to-pod communication
-            sls_url = "http://cray-sls.services.svc.cluster.local/v1/networks"
-        else:
-            # this is out of the mesh
-            sls_url = "https://" + os.getenv("SLS_API_GW") + "/apis/sls/v1/networks"
-        if cenv != "k8s":
-            sls_url = "https://api-gw-service-nmn.local/apis/sls/v1/networks"
-            try:
-                token_url = "https://api-gw-service-nmn.local/keycloak/realms/shasta/protocol/openid-connect/token"
-                token_data = {
-                    "grant_type": "client_credentials",
-                    "client_id": "admin-client",
-                    "client_secret": secret,
-                }
-                token_request = remote_request(
-                    "POST",
-                    token_url,
-                    data=token_data,
-                    debug=debug,
-                )
-                token = token_request["access_token"]
-                on_debug(
-                    debug=debug,
-                    message="Auth Token from keycloak (first 50 char): {}".format(
-                        token[:50],
-                    ),
-                )
-
-            except Exception as err:
-                print("Error obtaining keycloak token: {}".format(err))
-                sys.exit(1)
-
-        #
-        # Get existing SLS data for comparison (used as a cache)
-        #
-        sls_cache = None
-        auth_headers = {"Authorization": "Bearer {}".format(token)}
-        try:
-            sls_cache = remote_request(
-                "GET",
-                sls_url,
-                headers=auth_headers,
-                verify=False,
-            )
-            on_debug(
-                debug=debug,
-                message="SLS data has {} records".format(len(sls_cache)),
-            )
-        except Exception as err:
-            print("Error requesting Networks from SLS: {}".format(err))
-            sys.exit(1)
-        on_debug(debug=debug, message="SLS records {}".format(sls_cache))
-
-        sls_networks = sls_cache
+        sls_networks = sls_dump("networks")
 
     sls_variables = {
         "SWITCH_ASN": None,
@@ -333,125 +335,5 @@ def pull_sls_hardware(sls_file=None):
         ]
         return sls_hardware
     if not sls_file:
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-        debug = False
-
-        def on_debug(debug=False, message=None):
-            if debug:
-                print("DEBUG: {}".format(message))
-
-        #
-        # Convenience wrapper around remote calls
-        #
-        def remote_request(
-            remote_type,
-            remote_url,
-            headers=None,
-            data=None,
-            verify=False,
-            debug=False,
-        ):
-            remote_response = None
-            while True:
-                try:
-                    response = requests.request(
-                        remote_type,
-                        url=remote_url,
-                        headers=headers,
-                        data=data,
-                        verify=verify,
-                    )
-                    on_debug(debug, "Request response: {}".format(response.text))
-                    response.raise_for_status()
-                    remote_response = json.dumps({})
-                    if response.text:
-                        remote_response = response.json()
-                    break
-                except Exception as err:
-                    message = "Error calling {}: {}".format(remote_url, err)
-                    raise SystemExit(message) from err
-            return remote_response
-
-        #
-        # Get the admin client secret from Kubernetes
-        #
-        secret = None
-        cenv = os.getenv("CRAYENV", "notk8s")
-        if cenv != "k8s":
-            try:
-                config.load_kube_config()
-                v1 = client.CoreV1Api()
-                secret_obj = v1.list_namespaced_secret(
-                    "default",
-                    field_selector="metadata.name=admin-client-auth",
-                )
-                secret_dict = secret_obj.to_dict()
-                secret_base64_str = secret_dict["items"][0]["data"]["client-secret"]
-                secret = base64.b64decode(secret_base64_str.encode("utf-8"))
-            except Exception as err:
-                print("Error collecting secret from Kubernetes: {}".format(err))
-                sys.exit(1)
-
-        #
-        # Get an auth token by using the secret
-        #
-        if os.getenv("SLS_TOKEN") is None:
-            token = None
-        else:
-            token = os.getenv("SLS_TOKEN")
-        sls_cache = None
-
-        if os.getenv("SLS_API_GW") is None:
-            # this is in mesh pod-to-pod communication
-            sls_url = "http://cray-sls.services.svc.cluster.local/v1/hardware"
-        else:
-            # this is out of the mesh
-            sls_url = "https://" + os.getenv("SLS_API_GW") + "/apis/sls/v1/hardware"
-        if cenv != "k8s":
-            sls_url = "https://api-gw-service-nmn.local/apis/sls/v1/hardware"
-            try:
-                token_url = "https://api-gw-service-nmn.local/keycloak/realms/shasta/protocol/openid-connect/token"
-                token_data = {
-                    "grant_type": "client_credentials",
-                    "client_id": "admin-client",
-                    "client_secret": secret,
-                }
-                token_request = remote_request(
-                    "POST",
-                    token_url,
-                    data=token_data,
-                    debug=debug,
-                )
-                token = token_request["access_token"]
-                on_debug(
-                    debug=debug,
-                    message="Auth Token from keycloak (first 50 char): {}".format(
-                        token[:50],
-                    ),
-                )
-
-            except Exception as err:
-                print("Error obtaining keycloak token: {}".format(err))
-                sys.exit(1)
-
-        #
-        # Get existing SLS data for comparison (used as a cache)
-        #
-        auth_headers = {"Authorization": "Bearer {}".format(token)}
-        try:
-            sls_cache = remote_request(
-                "GET",
-                sls_url,
-                headers=auth_headers,
-                verify=False,
-            )
-            on_debug(
-                debug=debug,
-                message="SLS data has {} records".format(len(sls_cache)),
-            )
-        except Exception as err:
-            print("Error requesting Networks from SLS: {}".format(err))
-            sys.exit(1)
-        on_debug(debug=debug, message="SLS records {}".format(sls_cache))
-
-        return sls_cache
+        sls_hardware = sls_dump("hardware")
+        return sls_hardware
