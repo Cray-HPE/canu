@@ -54,7 +54,7 @@ dependencies = [
     'mac-vendor-lookup==0.1.12',
     'natsort==8.3.1',
     'netaddr==0.8.0',
-    'netmiko==4.2.0',
+    'netmiko==4.1.2',
     'netutils==1.4.1',
     'nornir-netmiko==1.0.0',
     'nornir-salt==0.19.2',
