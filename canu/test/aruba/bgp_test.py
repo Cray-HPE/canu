@@ -23,12 +23,12 @@
 from ttp import ttp
 
 
-def bgp_config(result, ncn_switch_ips, ncn_switch_vlan_ips):
-    """Verify NCN-W IPs in SLS are neighbors on the switch.
+def bgp_config(result, vlan_ips):
+    """Verify NCN-W IPs in SLS are BGP neighbors on the switch.
 
     Args:
         result: show run bgp
-        ncn_switch_ips: list of NCN and Switch IPs
+        vlan_ips: list of NCN and Switch IPs
 
     Returns:
         Pass or fail
@@ -88,18 +88,26 @@ router bgp {{ asn }}
 
     # Get the worker nodes CMN and NMN IPs
     # If those are not in the BGP config on the switch add them to the list.
+
     missing_neighbors = [
-        name
-        for name, ip in ncn_switch_ips.items()
-        if "ncn-w" in name
-        and any(s in name for s in ["cmn", "nmn"])
-        and ip not in bgp_peers
+        data["name"]
+        for data in (
+            entry
+            for net, vlan_data in vlan_ips.items()
+            for entry in vlan_data.get("ips", [])
+            if "ncn-w" in entry["name"]
+            and any(s in entry["name"] for s in ["cmn", "nmn"])
+            and entry["ipv4_address"] not in bgp_peers
+        )
     ]
 
     # Add missing neighbors to test exception message.
     if missing_neighbors:
         missing_neighbors_string = ", ".join(missing_neighbors)
-        exception = f"Missing Neighbors {missing_neighbors_string}"
+        exception = (
+            f"Missing BGP Neighbors: {missing_neighbors_string}\n"
+            "This is usually caused by changing networks used by CSM or adding worker nodes"
+        )
         result = "FAIL"
 
     return {

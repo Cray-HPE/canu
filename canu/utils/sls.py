@@ -30,7 +30,16 @@ from kubernetes import client, config
 import requests
 import urllib3
 
+
 def sls_dump(path):
+    """Query API-GW and retrieve SLS.
+
+    Args:
+        path: SLS path.
+
+    Returns:
+        SLS dump.
+    """
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     debug = False
 
@@ -152,8 +161,9 @@ def sls_dump(path):
         print("Error requesting Networks from SLS: {}".format(err))
         sys.exit(1)
     on_debug(debug=debug, message="SLS records {}".format(sls_cache))
-    
+
     return sls_cache
+
 
 def pull_sls_networks(sls_file=None):
     """Query API-GW and retrieve token.

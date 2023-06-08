@@ -20,7 +20,7 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 ---
-- name: Software version test
+- name: Software Version Test
   task: show version
   test: contains
   pattern: "10.09.0010"
@@ -30,6 +30,7 @@
     - leaf
     - leaf-bmc
     - spine
+  pre_install: True
 
 - name: BGP Config Test
   task: show run bgp
@@ -38,39 +39,55 @@
   function_name: bgp_config
   device:
     - spine
+  pre_install: True
 
-- name: VLAN Interface Config Test
-  task: show run interface
+- name: VLAN IP Interface Config Test
+  task: show run
   test: custom
   function_file: vlan_interface_test.py
   function_name: vlan_interface_config
   device:
+    - cdu
+    - leaf
+    - leaf-bmc
     - spine
+  pre_install: True
 
-- name: lacp interfaces test
+- name: LACP Interfaces Test
   task: show lacp interfaces
   test: ncontains_lines
   pattern:
     - "lacp-block"
     - "ASFO"
-  err_msg: lacp port blocking or out of sync
+  err_msg: |
+    LACP port blocking or out of sync.
+    Run "show lacp interfaces" & "show int br" to identify the ports.
+    This error is often caused by a cabling issue.
   device:
     - cdu
     - leaf
     - leaf-bmc
     - spine
-- name: interface speed mismatch check
+  pre_install: True
+
+- name: Interface Speed Mismatch Check
   task: show int br
   test: ncontains_lines
   pattern:
     - "mismatch"
-  err_msg: interface speed mismatch detected
+  err_msg: |
+    Interface speed mismatch detected.
+    Execute "show system interface-group" on the switch.
+    This error indicates a transceiver cannot match the port group speed.
+    You can ignore this message if the affected port is not in use.
   device:
     - cdu
     - leaf
     - leaf-bmc
     - spine
-- name: VSX status check
+  pre_install: True
+
+- name: VSX Status Check
   task: show vsx status
   test: ncontains_lines
   pattern:
@@ -84,7 +101,9 @@
     - leaf
     - cdu
     - spine
-- name: VSX ISL check
+  pre_install: True
+
+- name: VSX ISL Check
   task: show lacp interfaces | include lag256
   test: ncontains_lines
   pattern:
@@ -94,7 +113,9 @@
     - leaf
     - cdu
     - spine
-- name: VSX keepalive check
+  pre_install: True
+
+- name: VSX Keepalive Check
   task: show vsx status keepalive
   test: ncontains_lines
   pattern:
@@ -105,32 +126,36 @@
     - leaf
     - cdu
     - spine
-- name: Interface error check
+  pre_install: True
+
+- name: Interface Error Check
   task: "show interface error-statistics | exclude vlan"
   test: "!contains_re"
   pattern: "\\d{4,}"
-  err_msg: Interfaces errors above 999
+  err_msg: |
+    Interfaces errors above 999.
+    Execute "show interface error-statistics" to display ports with errors.
   device:
     - cdu
     - leaf
     - leaf-bmc
     - spine
-- name: running-config different from startup-config
+  pre_install: True
+
+- name: Running-Config Different from Startup-Config
   task: checkpoint diff startup-config running-config
   test: contains
   pattern: No difference in configs
-  err_msg: running-config does not match startup-config
+  err_msg: |
+    Running-config does not match the startup-config.
+    Execute "Write Memory" on the switch to resolve this message.
   device:
     - cdu
     - leaf
     - leaf-bmc
     - spine
-# - name: custom test
-#   task: show ip route all-vrfs
-#   test: custom
-#   function_file: "custom.py"
-#   function_name: "run"
-- name: STP check for blocked ports
+  pre_install: True
+- name: STP Check for Blocked Ports
   task: show spanning-tree inconsistent-ports
   test: ncontains_lines
   pattern:
@@ -143,41 +168,9 @@
     - leaf
     - leaf-bmc
     - spine
-# - name: CPU Utilization over 70%
-#   task: show system resource-utilization | include "CPU usage"
-#   test: "!contains_re"
-#   pattern: "[7-9][0-9]+"
-#   err_msg: CPU Utilization is over 70%
-#   device:
-#     - cdu
-#     - leaf
-#     - leaf-bmc
-#     - spine
-# - name: Memory Utilization over 70%
-#   task: show system resource-utilization | include "Memory usage"
-#   test: "!contains_re"
-#   pattern: "[7-9][0-9]+"
-#   err_msg: Memory usage is over 70%
-#   device:
-#     - cdu
-#     - leaf
-#     - leaf-bmc
-#     - spine
-# - name: vlan 1 ip-helper test
-#   task: show run interface vlan 1
-#   test: contains
-#   pattern: 10.92.100.222
-#   err_msg: IP-Helper is missing
-#   device:
-#     - spine
-# - name: vlan 2 ip-helper test
-#   task: show run interface vlan 2
-#   test: contains
-#   pattern: 10.92.100.222
-#   err_msg: IP-Helper is missing
-#   device:
-#     - spine
-- name: KEA connection check
+  pre_install: True
+
+- name: KEA Connection Check
   task: ping 10.92.100.222 source vlan{{ variables.NMN_VLAN }} repetitions 1
   test: contains
   pattern: bytes from
@@ -187,13 +180,7 @@
     - leaf-bmc
     - cdu
     - spine
-# - name: vlan 4 ip-helper test
-#   task: show run interface vlan 4
-#   test: contains
-#   pattern: 10.94.100.222
-#   err_msg: IP-Helper is missing
-#   device:
-#     - spine
+
 - name: TFTP Route
   task: show ip route 10.92.100.60
   test: contains
@@ -201,6 +188,7 @@
   err_msg: route to tftp incorrect
   device:
     - spine
+
 - name: BGP Neighbors Test
   task: show bgp all-vrf all summary
   test: ncontains_lines
@@ -211,14 +199,17 @@
   err_msg: BGP has Neighbors not established.
   device:
     - spine
-- name: STP check for root bridge spine
+
+- name: STP Check for Root Bridge
   task: show spanning-tree
   test: contains
   pattern: This bridge is the root
   err_msg: Not the root bridge
   device:
     - spine
-- name: STP check for root bridge leaf
+  pre_install: True
+
+- name: STP Check for Root Bridge
   task: show spanning
   test: ncontains
   pattern: This bridge is the root
@@ -227,7 +218,9 @@
     - leaf
     - leaf-bmc
     - cdu
-- name: Is internal DNS server alive (ping)
+  pre_install: True
+
+- name: Is Internal DNS Server Alive (Ping)
   task: ping 10.92.100.225 repetitions 1
   test: contains
   pattern: bytes from
@@ -237,7 +230,8 @@
     - leaf-bmc
     - cdu
     - spine
-- name: Does internal DNS resolve ncn-m001-nmn
+
+- name: Does Internal DNS Resolve ncn-m001-nmn
   task: ping ncn-m001-nmn repetitions 1
   test: contains
   pattern: bytes from
@@ -247,29 +241,7 @@
     - leaf-bmc
     - cdu
     - spine
-- name: Internet connection check
-  task: ping 8.8.8.8 source vlan{{ variables.CAN_VLAN }} repetitions 1
-  test: contains
-  pattern: bytes from
-  err_msg: External network (internet) does not respond.
-  device:
-    - leaf
-    - leaf-bmc
-    - cdu
-    - spine
+  # used for testing --csm flag
   csm:
-    - 1.0
-- name: Internet connection check
-  task: ping 8.8.8.8 source vlan{{ variables.CMN_VLAN }} vrf Customer repetitions 1
-  test: contains
-  pattern: bytes from
-  err_msg: External network (internet) does not respond.
-  device:
-    - leaf
-    - leaf-bmc
-    - cdu
-    - spine
-  csm:
-    - 1.2
-    - 1.3
     - 1.4
+    - 1.3

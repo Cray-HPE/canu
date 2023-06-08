@@ -20,20 +20,22 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Create Nornir Inventory from SLS."""
-import json
-import sys
-
-import click
-
 from canu.utils.json_load import load_json
 from canu.utils.sls import pull_sls_hardware, pull_sls_networks
 
 
-def inventory(username, password, network, sls_file=None, sls_inventory=None, dumpstate=None):
+def inventory(
+    username,
+    password,
+    network,
+    sls_file=None,
+    sls_inventory=None,
+    dumpstate=None,
+):
     """Build Nornir inventory from sls_input."""
     inventory = {"groups": {}, "hosts": {}}
     if sls_file:
-        sls_json = load_json(file = sls_file)
+        sls_json = load_json(file=sls_file)
         sls_variables = pull_sls_networks(sls_json)
         sls_hardware = pull_sls_hardware(sls_json)
     elif dumpstate:
