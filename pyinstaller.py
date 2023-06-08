@@ -27,16 +27,10 @@ from PyInstaller.utils.hooks import (
 )
 
 hiddenimports = []
-<<<<<<< HEAD
-hiddenimports += collect_submodules('canu')
-hiddenimports += collect_submodules('network_modeling')
-
-=======
 hiddenimports += collect_submodules("canu")
 hiddenimports += collect_submodules("network_modeling")
 added_files = []
 added_files += collect_data_files("canu", True) + copy_metadata("canu")
->>>>>>> 19f9d7ac (pyinstaller test)
 block_cipher = None
 
 added_files += [
@@ -143,22 +137,13 @@ added_files += [
         "network_modeling/configs/templates/1.4/dellmellanox/full/*.j2",
         "network_modeling/configs/templates/1.4/dellmellanox/full",
     ),
-    (
-        "canu/test/aruba/test_suite.yaml", 
-        "canu/test/aruba"
-    ),
-    (
-        "canu/test/dellanox/test_suite.yaml",
-        "canu/test/dellanox"
-    ),
+    ("canu/test/aruba/test_suite.yaml", "canu/test/aruba"),
+    ("canu/test/dellanox/test_suite.yaml", "canu/test/dellanox"),
     (
         "canu/generate/switch/config/ttp_templates/*.txt",
         "canu/generate/switch/config/ttp_templates",
     ),
-    (
-        "canu/utils/sls_utils/schemas/*.json",
-        "canu/utils/sls_utils/schemas"
-    ),
+    ("canu/utils/sls_utils/schemas/*.json", "canu/utils/sls_utils/schemas"),
 ]
 a = Analysis(
     ["canu/cli.py"],
