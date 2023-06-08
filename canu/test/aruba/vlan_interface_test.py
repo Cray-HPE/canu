@@ -23,6 +23,7 @@
 from ttp import ttp
 import pprint
 
+
 def vlan_interface_config(result, ncn_switch_ips, ncn_switch_vlan_ips):
     """Verify NCN-W IPs in SLS are correct Interfaces on switches.
 
@@ -55,12 +56,10 @@ interface vlan {{ vlan }}
     output = result_parsed.result()
 
     vlan_config = output[0][0]
-    
+
     for vlan, data in vlan_config.items():
         print(vlan, data)
 
-    
-    
     exception = None
     result = "PASS"
     success = True

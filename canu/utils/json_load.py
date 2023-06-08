@@ -16,7 +16,9 @@ def load_json(file):
         with open(os.path.join(file.name), "r") as f:
             json_file = json.load(f)
     except FileNotFoundError:
-        print(f"The {file} file was not found, check that you entered the right file name and path")
+        print(
+            f"The {file} file was not found, check that you entered the right file name and path"
+        )
         sys.exit(1)
     except json.JSONDecodeError as e:
         print(f"{str(e)}, JSON error parsing {file}")

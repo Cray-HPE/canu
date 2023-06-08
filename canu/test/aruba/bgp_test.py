@@ -83,18 +83,22 @@ router bgp {{ asn }}
 
     # Get BGP peers from switch config
     bgp_peers = {}
-    bgp_peers.update(output[0][0]["bgp_cfg"]["vrfs"]['Customer']['peers'])
-    bgp_peers.update(output[0][0]["bgp_cfg"]["vrfs"]['default']['peers'])
+    bgp_peers.update(output[0][0]["bgp_cfg"]["vrfs"]["Customer"]["peers"])
+    bgp_peers.update(output[0][0]["bgp_cfg"]["vrfs"]["default"]["peers"])
 
     # Get the worker nodes CMN and NMN IPs
     # If those are not in the BGP config on the switch add them to the list.
-    missing_neighbors = [name for name, ip in ncn_switch_ips.items()
-                            if 'ncn-w' in name and any(s in name for s in ['cmn', 'nmn'])
-                            and ip not in bgp_peers]
+    missing_neighbors = [
+        name
+        for name, ip in ncn_switch_ips.items()
+        if "ncn-w" in name
+        and any(s in name for s in ["cmn", "nmn"])
+        and ip not in bgp_peers
+    ]
 
     # Add missing neighbors to test exception message.
     if missing_neighbors:
-        missing_neighbors_string = ', '.join(missing_neighbors)
+        missing_neighbors_string = ", ".join(missing_neighbors)
         exception = f"Missing Neighbors {missing_neighbors_string}"
         result = "FAIL"
 
