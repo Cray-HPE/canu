@@ -28,13 +28,15 @@ import click
 from canu.utils.sls import pull_sls_hardware, pull_sls_networks
 
 
-def inventory(username, password, network, sls_file=None, sls_inventory=None, dumpstate=None):
+def inventory(
+    username, password, network, sls_file=None, sls_inventory=None, dumpstate=None
+):
     """Build Nornir inventory from sls_input."""
     inventory = {"groups": {}, "hosts": {}}
     if sls_file:
         try:
             if dumpstate:
-                with open(sls_file.name, 'r', encoding='utf-8') as f:
+                with open(sls_file.name, "r", encoding="utf-8") as f:
                     sls_json = json.load(f)
             else:
                 sls_json = json.load(sls_file)
@@ -105,8 +107,15 @@ def inventory(username, password, network, sls_file=None, sls_inventory=None, du
             "platform": "aruba_aoscx",
             "connection_options": {"scrapli": {"extras": {"auth_strict_key": False}}},
         },
-        "dell": {"platform": "dell_os10"},
-        "mellanox": {"platform": "mellanox"},
+        "dell": {
+            "platform": "dell_os10",
+            "connection_options": {
+                "netmiko": {"extras": {"read_timeout_override": 60}}
+            },
+        },
+        "mellanox": {
+            "platform": "mellanox",
+        },
     }
 
     if sls_inventory:
