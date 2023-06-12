@@ -20,10 +20,10 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 ---
-- name: Software Version Test
+- name: Software Version
   task: show version
   test: contains
-  pattern: "10.09.0010"
+  pattern: "10.11.1010"
   err_msg: Software version is wrong
   device:
     - cdu
@@ -32,7 +32,7 @@
     - spine
   pre_install: True
 
-- name: BGP Config Test
+- name: BGP Config
   task: show run bgp
   test: custom
   function_file: bgp_test.py
@@ -41,7 +41,7 @@
     - spine
   pre_install: True
 
-- name: VLAN IP Interface Config Test
+- name: VLAN IP Interface Config
   task: show run
   test: custom
   function_file: vlan_interface_test.py
@@ -53,7 +53,7 @@
     - spine
   pre_install: True
 
-- name: LACP Interfaces Test
+- name: LACP Interfaces
   task: show lacp interfaces
   test: ncontains_lines
   pattern:
@@ -70,7 +70,7 @@
     - spine
   pre_install: True
 
-- name: Interface Speed Mismatch Check
+- name: Interface Speed Mismatch
   task: show int br
   test: ncontains_lines
   pattern:
@@ -87,7 +87,7 @@
     - spine
   pre_install: True
 
-- name: VSX Status Check
+- name: VSX Status
   task: show vsx status
   test: ncontains_lines
   pattern:
@@ -103,7 +103,7 @@
     - spine
   pre_install: True
 
-- name: VSX ISL Check
+- name: VSX ISL
   task: show lacp interfaces | include lag256
   test: ncontains_lines
   pattern:
@@ -115,7 +115,7 @@
     - spine
   pre_install: True
 
-- name: VSX Keepalive Check
+- name: VSX Keepalive
   task: show vsx status keepalive
   test: ncontains_lines
   pattern:
@@ -128,7 +128,7 @@
     - spine
   pre_install: True
 
-- name: Interface Error Check
+- name: Interface Errors
   task: "show interface error-statistics | exclude vlan"
   test: "!contains_re"
   pattern: "\\d{4,}"
@@ -155,7 +155,8 @@
     - leaf-bmc
     - spine
   pre_install: True
-- name: STP Check for Blocked Ports
+
+- name: STP Blocked Ports
   task: show spanning-tree inconsistent-ports
   test: ncontains_lines
   pattern:
@@ -170,7 +171,7 @@
     - spine
   pre_install: True
 
-- name: KEA Connection Check
+- name: KEA Connection
   task: ping 10.92.100.222 source vlan{{ variables.NMN_VLAN }} repetitions 1
   test: contains
   pattern: bytes from
@@ -189,7 +190,7 @@
   device:
     - spine
 
-- name: BGP Neighbors Test
+- name: BGP Neighbors Status
   task: show bgp all-vrf all summary
   test: ncontains_lines
   pattern:
@@ -200,7 +201,15 @@
   device:
     - spine
 
-- name: STP Check for Root Bridge
+- name: BGP vrf Customer Routing Table
+  task: show ip route bgp vrf Customer
+  test: ncontains
+  pattern: No ipv4 routes configured
+  err_msg: There are no BGP routes in the Customer VRF routing table.
+  device:
+    - spine
+
+- name: STP Root Bridge
   task: show spanning-tree
   test: contains
   pattern: This bridge is the root
@@ -209,7 +218,7 @@
     - spine
   pre_install: True
 
-- name: STP Check for Root Bridge
+- name: STP Root Bridge
   task: show spanning
   test: ncontains
   pattern: This bridge is the root
@@ -220,7 +229,7 @@
     - cdu
   pre_install: True
 
-- name: Is Internal DNS Server Alive (Ping)
+- name: Internal DNS Server Alive (Ping)
   task: ping 10.92.100.225 repetitions 1
   test: contains
   pattern: bytes from
@@ -231,7 +240,7 @@
     - cdu
     - spine
 
-- name: Does Internal DNS Resolve ncn-m001-nmn
+- name: DNS lookup (ncn-m001-nmn)
   task: ping ncn-m001-nmn repetitions 1
   test: contains
   pattern: bytes from
@@ -243,5 +252,74 @@
     - spine
   # used for testing --csm flag
   csm:
+    - 1.5
     - 1.4
     - 1.3
+
+- name: Needed Updates
+  task: show needed-updates
+  test: contains
+  pattern: Would have updated 0 device(s)
+  err_msg: |
+    Switch has pending updates.
+    To fix, execute the command "allow-unsafe-updates" and reboot.
+  device:
+    - leaf
+    - leaf-bmc
+    - cdu
+    - spine
+  pre_install: True
+
+- name: OSPF vrf default Neighbors
+  task: show ip ospf neighbors
+  test: ncontains
+  pattern: No OSPF neighbor
+  err_msg: No OSPF neighbors found on the default VRF.
+  device:
+    - leaf
+    - leaf-bmc
+    - cdu
+    - spine
+  pre_install: True
+
+- name: OSPF vrf Customer Neighbors
+  task: show ip ospf neighbors vrf Customer
+  test: ncontains
+  pattern: No OSPF neighbor
+  err_msg: No OSPF neighbors found on the default VRF.
+  device:
+    - leaf
+    - leaf-bmc
+    - cdu
+    - spine
+  pre_install: True
+
+- name: OSPF vrf default EXSTART Neighbors
+  task: show ip ospf neighbors
+  test: ncontains
+  pattern: EXSTART
+  err_msg: |
+    OSPF neighbors found in EXSTART state.
+    This is commonly caused by a MTU mismatch between neighbors.
+    Execute "show ip interface" to see the MTU of L3 interfaces.
+  device:
+    - leaf
+    - leaf-bmc
+    - cdu
+    - spine
+  pre_install: True
+
+- name: OSPF vrf Customer EXSTART Neighbors
+  task: show ip ospf neighbors vrf Customer
+  test: ncontains
+  pattern: EXSTART
+  err_msg: |
+    OSPF neighbors found in EXSTART state.
+    This is commonly caused by a MTU mismatch between neighbors.
+    Execute "show ip interface" to see the MTU of L3 interfaces.
+  device:
+    - leaf
+    - leaf-bmc
+    - cdu
+    - spine
+  pre_install: True
