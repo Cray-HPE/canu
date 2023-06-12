@@ -1,6 +1,7 @@
 ## Changelog
 ## [UNRELEASED]
 
+- Increase Dell netmiko timeout when using nornir.
 - added very basic integration tests via shellspec for local and github actions
 
 ## [1.7.3]
