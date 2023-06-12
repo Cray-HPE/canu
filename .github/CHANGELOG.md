@@ -1,7 +1,8 @@
 ## Changelog
 ## [UNRELEASED]
 
-- Increase Dell netmiko timeout when using nornir.
+- Add CSM 1.5 configs
+- Increase Dell netmiko timeout when using nornir
 - added very basic integration tests via shellspec for local and github actions
 
 ## [1.7.3]

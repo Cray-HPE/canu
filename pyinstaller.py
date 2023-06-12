@@ -23,8 +23,8 @@
 from PyInstaller.utils.hooks import collect_submodules
 
 hiddenimports = []
-hiddenimports += collect_submodules('canu')
-hiddenimports += collect_submodules('network_modeling')
+hiddenimports += collect_submodules("canu")
+hiddenimports += collect_submodules("network_modeling")
 
 block_cipher = None
 
@@ -135,21 +135,40 @@ added_files = [
         "network_modeling/configs/templates/1.4/dellmellanox/full",
     ),
     (
-        "canu/test/aruba/test_suite.yaml", 
-        "canu/test/aruba"
+        "network_modeling/configs/templates/1.5/arista/*.j2",
+        "network_modeling/configs/templates/1.5/arista",
     ),
     (
-        "canu/test/dellanox/test_suite.yaml",
-        "canu/test/dellanox"
+        "network_modeling/configs/templates/1.5/aruba/common/*.j2",
+        "network_modeling/configs/templates/1.5/aruba/common",
     ),
+    (
+        "network_modeling/configs/templates/1.5/aruba/*.j2",
+        "network_modeling/configs/templates/1.5/aruba/",
+    ),
+    (
+        "network_modeling/configs/templates/1.5/aruba/full/*.j2",
+        "network_modeling/configs/templates/1.5/aruba/full",
+    ),
+    (
+        "network_modeling/configs/templates/1.5/aruba/tds/*.j2",
+        "network_modeling/configs/templates/1.5/aruba/tds",
+    ),
+    (
+        "network_modeling/configs/templates/1.5/dellmellanox/common/*.j2",
+        "network_modeling/configs/templates/1.5/dellmellanox/common",
+    ),
+    (
+        "network_modeling/configs/templates/1.5/dellmellanox/full/*.j2",
+        "network_modeling/configs/templates/1.5/dellmellanox/full",
+    ),
+    ("canu/test/aruba/test_suite.yaml", "canu/test/aruba"),
+    ("canu/test/dellanox/test_suite.yaml", "canu/test/dellanox"),
     (
         "canu/generate/switch/config/ttp_templates/*.txt",
         "canu/generate/switch/config/ttp_templates",
     ),
-    (
-        "canu/utils/sls_utils/schemas/*.json",
-        "canu/utils/sls_utils/schemas"
-    ),
+    ("canu/utils/sls_utils/schemas/*.json", "canu/utils/sls_utils/schemas"),
 ]
 a = Analysis(
     ["canu/cli.py"],
