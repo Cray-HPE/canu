@@ -29,7 +29,12 @@ from canu.utils.sls import pull_sls_hardware, pull_sls_networks
 
 
 def inventory(
-    username, password, network, sls_file=None, sls_inventory=None, dumpstate=None
+    username,
+    password,
+    network,
+    sls_file=None,
+    sls_inventory=None,
+    dumpstate=None,
 ):
     """Build Nornir inventory from sls_input."""
     inventory = {"groups": {}, "hosts": {}}
@@ -110,7 +115,7 @@ def inventory(
         "dell": {
             "platform": "dell_os10",
             "connection_options": {
-                "netmiko": {"extras": {"read_timeout_override": 60}}
+                "netmiko": {"extras": {"read_timeout_override": 60}},
             },
         },
         "mellanox": {
