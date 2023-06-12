@@ -148,7 +148,7 @@
   pattern: No difference in configs
   err_msg: |
     Running-config does not match the startup-config.
-    Execute "Write Memory" on the switch to resolve this message.
+    Execute "write memory" on the switch to resolve this message.
   device:
     - cdu
     - leaf
