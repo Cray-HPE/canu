@@ -26,6 +26,7 @@
   pattern: "10.5.1.4"
   err_msg: Software version is wrong
   device:
+    - leaf
     - leaf-bmc
     - cdu
   pre_install: True
