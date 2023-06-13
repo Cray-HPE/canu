@@ -250,14 +250,14 @@ def init(ctx, sls_file, auth_token, sls_address, network, out):
     )
 
 
-def parse_sls_json_for_ips(csm, network="NMN"):
+def parse_sls_json_for_ips(csm, network="HMN"):
     """Parse SLS JSON and return IPv4 addresses.
 
-    Defaults to the "NMN" network, but another network can be passed in. Cache the switch IP and hostname.
+    Defaults to the "HMN" network, but another network can be passed in. Cache the switch IP and hostname.
 
     Args:
         csm: The SLS JSON to be parsed.
-        network: Switch network e.g. (CAN, MTL, NMN).
+        network: Switch network e.g. (CAN, MTL, HMN).
 
     Returns:
         switch_addresses: A list of switch IPs.
