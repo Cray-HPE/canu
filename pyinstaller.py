@@ -20,17 +20,20 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 # -*- mode: python ; coding: utf-8 -*-
-from PyInstaller.utils.hooks import collect_submodules
+from PyInstaller.utils.hooks import (
+    collect_data_files,
+    collect_submodules,
+    copy_metadata,
+)
 
 hiddenimports = []
 hiddenimports += collect_submodules("canu")
 hiddenimports += collect_submodules("network_modeling")
-
+added_files = []
+added_files += collect_data_files("canu", True) + copy_metadata("canu")
 block_cipher = None
 
-added_files = [
-    ("canu/canu.yaml", "canu"),
-    ("canu/validate/switch/config/*.yaml", "canu/validate/switch/config"),
+added_files += [
     ("network_modeling/models/*", "network_modeling/models"),
     ("network_modeling/mac_vendors", "network_modeling"),
     ("network_modeling/schema/*", "network_modeling/schema"),
@@ -134,14 +137,8 @@ added_files = [
         "network_modeling/configs/templates/1.4/dellmellanox/full/*.j2",
         "network_modeling/configs/templates/1.4/dellmellanox/full",
     ),
-    (
-        "network_modeling/configs/templates/1.5/arista/*.j2",
-        "network_modeling/configs/templates/1.5/arista",
-    ),
-    (
-        "network_modeling/configs/templates/1.5/aruba/common/*.j2",
-        "network_modeling/configs/templates/1.5/aruba/common",
-    ),
+    ("canu/test/aruba/test_suite.yaml", "canu/test/aruba"),
+    ("canu/test/dellanox/test_suite.yaml", "canu/test/dellanox"),
     (
         "network_modeling/configs/templates/1.5/aruba/*.j2",
         "network_modeling/configs/templates/1.5/aruba/",
@@ -153,20 +150,6 @@ added_files = [
     (
         "network_modeling/configs/templates/1.5/aruba/tds/*.j2",
         "network_modeling/configs/templates/1.5/aruba/tds",
-    ),
-    (
-        "network_modeling/configs/templates/1.5/dellmellanox/common/*.j2",
-        "network_modeling/configs/templates/1.5/dellmellanox/common",
-    ),
-    (
-        "network_modeling/configs/templates/1.5/dellmellanox/full/*.j2",
-        "network_modeling/configs/templates/1.5/dellmellanox/full",
-    ),
-    ("canu/test/aruba/test_suite.yaml", "canu/test/aruba"),
-    ("canu/test/dellanox/test_suite.yaml", "canu/test/dellanox"),
-    (
-        "canu/generate/switch/config/ttp_templates/*.txt",
-        "canu/generate/switch/config/ttp_templates",
     ),
     ("canu/utils/sls_utils/schemas/*.json", "canu/utils/sls_utils/schemas"),
 ]
