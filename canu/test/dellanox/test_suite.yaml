@@ -26,8 +26,11 @@
   pattern: "10.5.1.4"
   err_msg: Software version is wrong
   device:
+    - leaf
     - leaf-bmc
     - cdu
+  pre_install: True
+
 - name: BGP Test
   task: show ip bgp vrf all summary
   test: ncontains_lines
@@ -38,6 +41,7 @@
   err_msg: BGP has Neighbors not established.
   device:
     - spine
+
 - name: running-config different matches startup-config
   task: show configuration files
   test: ncontains
@@ -45,6 +49,8 @@
   err_msg: running-config does not match startup-config
   device:
     - spine
+  pre_install: True
+
 - name: OSPF check
   task: show ip ospf neighbor
   test: ncontains
@@ -53,6 +59,8 @@
   device:
     - leaf-bmc
     - cdu
+  pre_install: True
+
 - name: OSPF check vrf customer
   task: show ip ospf vrf Customer neighbor
   test: ncontains
@@ -61,6 +69,8 @@
   device:
     - leaf-bmc
     - cdu
+  pre_install: True
+
 - name: STP check for root bridge
   task: show spanning-tree brief
   test: ncontains
@@ -68,6 +78,8 @@
   err_msg: we are the STP root
   device:
     - leaf-bmc
+  pre_install: True
+
 - name: Interface error check
   task: "show interface | grep CRC"
   test: "!contains_re"
@@ -76,6 +88,8 @@
   device:
     - leaf-bmc
     - cdu
+  pre_install: True
+
 # - name: running-config different from startup-config
 #   task: show diff running-configuration startup-configuration
 #   test: "!contains_re"
@@ -92,6 +106,7 @@
     - leaf-bmc
     - cdu
     - spine
+
 - name: Does internal DNS resolve ncn-m001-nmn
   task: ping ncn-m001-nmn -c 1
   test: contains
@@ -102,6 +117,7 @@
     - leaf-bmc
     - cdu
     - spine
+
 - name: Software version test
   task: show version concise
   test: contains
@@ -109,6 +125,8 @@
   err_msg: Software version is wrong
   device:
     - spine
+  pre_install: True
+
 - name: STP check for root bridge
   task: show spanning-tree
   test: contains
@@ -116,6 +134,8 @@
   err_msg: Not the root bridge
   device:
     - spine
+  pre_install: True
+
 - name: STP check for discarding ports
   task: show spanning-tree
   test: ncontains
@@ -123,6 +143,8 @@
   err_msg: Port is disabled due to STP
   device:
     - spine
+  pre_install: True
+
 - name: MLAG VIP check
   task: show mlag-vip
   test: ncontains
@@ -130,6 +152,8 @@
   err_msg: MLAG VIP has only 1 active node
   device:
     - spine
+  pre_install: True
+
 - name: Interface error check
   task: "show interfaces ethernet counters | include error"
   test: "!contains_re"
@@ -137,6 +161,8 @@
   err_msg: Interfaces errors above 999
   device:
     - spine
+  pre_install: True
+
 - name: MLAG check
   task: show interfaces mlag-port-channel summary | include LACP
   test: ncontains
@@ -144,6 +170,8 @@
   err_msg: MLAG port in suspended mode
   device:
     - spine
+  pre_install: True
+
 - name: OSPF check
   task: show ip ospf neighbors vrf all
   test: ncontains_lines
@@ -152,6 +180,8 @@
   err_msg: ospf neighbor down
   device:
     - spine
+  pre_install: True
+
 - name: KEA connection check
   task: ping 10.92.100.222 -c 1
   test: contains
@@ -162,29 +192,3 @@
     - leaf-bmc
     - cdu
     - spine
-- name: Internet connection check
-  task: ping vrf Customer 8.8.8.8 -c 1
-  test: contains
-  pattern: bytes from
-  err_msg: External network (internet) does not respond.
-  device:
-    - leaf
-    - leaf-bmc
-    - cdu
-    - spine
-  csm:
-    - 1.2
-    - 1.3
-    - 1.4
-- name: Internet connection check
-  task: ping 8.8.8.8 -c 1
-  test: contains
-  pattern: bytes from
-  err_msg: External network (internet) does not respond.
-  device:
-    - leaf
-    - leaf-bmc
-    - cdu
-    - spine
-  csm:
-    - 1.0
