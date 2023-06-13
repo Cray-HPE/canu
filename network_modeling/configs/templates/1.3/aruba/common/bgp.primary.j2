@@ -22,7 +22,7 @@ router bgp {{ variables.SWITCH_ASN }}
     exit-address-family
     vrf Customer
         bgp router-id {{ variables.LOOPBACK_IP }}
-        maximum-paths 8
+        maximum-paths 32
         timers bgp 1 3
         distance bgp 20 70
         {%- for name, ip in variables.CMN_IPs.items() if "sw-spine-002" in name %}
