@@ -5,10 +5,11 @@ interface lag {{ node.config.LAG_NUMBER }} multi-chassis
     no shutdown
     description {{ node.config.DESCRIPTION }}
     no routing
-    vlan trunk native {{ variables.NATIVE_VLAN }}
 {%- if node.destination_port == 1%}
+    vlan trunk native {{ variables.NATIVE_VLAN }}
     vlan trunk allowed {{ variables.SPINE_LEAF_VLANS }}
 {%- else %}
+    vlan trunk native 10
     vlan trunk allowed 10
 {%- endif %}
     lacp mode active

@@ -3,6 +3,8 @@
 
 - added very basic integration tests via shellspec for local and github actions
 
+- Fix storage node lag configuration in Aruba templates to prevent loop
+
 ## [1.7.3]
 
 - Add `force` option to generated Mellanox web and ntp configuration.
