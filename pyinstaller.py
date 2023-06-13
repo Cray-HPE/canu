@@ -137,8 +137,6 @@ added_files += [
         "network_modeling/configs/templates/1.4/dellmellanox/full/*.j2",
         "network_modeling/configs/templates/1.4/dellmellanox/full",
     ),
-    ("canu/test/aruba/test_suite.yaml", "canu/test/aruba"),
-    ("canu/test/dellanox/test_suite.yaml", "canu/test/dellanox"),
     (
         "network_modeling/configs/templates/1.5/aruba/*.j2",
         "network_modeling/configs/templates/1.5/aruba/",
@@ -151,7 +149,6 @@ added_files += [
         "network_modeling/configs/templates/1.5/aruba/tds/*.j2",
         "network_modeling/configs/templates/1.5/aruba/tds",
     ),
-    ("canu/utils/sls_utils/schemas/*.json", "canu/utils/sls_utils/schemas"),
 ]
 a = Analysis(
     ["canu/cli.py"],

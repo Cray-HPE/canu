@@ -1,6 +1,7 @@
 ## Changelog
 ## [UNRELEASED]
 
+- Update BGP to use 32 max paths
 - Add CSM 1.5 configs
 - Increase Dell netmiko timeout when using nornir
 - added very basic integration tests via shellspec for local and github actions
