@@ -23,6 +23,6 @@
 
 It 'test --help'
   When call canu test --help
-  The lines of stdout should equal 22
+  The lines of stdout should equal 24
   The line 1 of stdout should equal 'Usage: canu test [OPTIONS]'
 End
