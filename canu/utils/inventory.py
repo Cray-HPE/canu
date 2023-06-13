@@ -97,8 +97,15 @@ def inventory(
             "platform": "aruba_aoscx",
             "connection_options": {"scrapli": {"extras": {"auth_strict_key": False}}},
         },
-        "dell": {"platform": "dell_os10"},
-        "mellanox": {"platform": "mellanox"},
+        "dell": {
+            "platform": "dell_os10",
+            "connection_options": {
+                "netmiko": {"extras": {"read_timeout_override": 60}},
+            },
+        },
+        "mellanox": {
+            "platform": "mellanox",
+        },
     }
 
     if sls_inventory:
