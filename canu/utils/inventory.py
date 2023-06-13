@@ -20,30 +20,22 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Create Nornir Inventory from SLS."""
-import json
-import sys
-
-import click
-
+from canu.utils.json_load import load_json
 from canu.utils.sls import pull_sls_hardware, pull_sls_networks
 
 
-def inventory(username, password, network, sls_file=None, sls_inventory=None, dumpstate=None):
+def inventory(
+    username,
+    password,
+    network,
+    sls_file=None,
+    sls_inventory=None,
+    dumpstate=None,
+):
     """Build Nornir inventory from sls_input."""
     inventory = {"groups": {}, "hosts": {}}
     if sls_file:
-        try:
-            if dumpstate:
-                with open(sls_file.name, 'r', encoding='utf-8') as f:
-                    sls_json = json.load(f)
-            else:
-                sls_json = json.load(sls_file)
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            click.secho(
-                f"The file {sls_file.name} is not valid JSON.",
-                fg="red",
-            )
-            sys.exit(1)
+        sls_json = load_json(file=sls_file)
         sls_variables = pull_sls_networks(sls_json)
         sls_hardware = pull_sls_hardware(sls_json)
     elif dumpstate:
