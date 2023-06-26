@@ -1,0 +1,9 @@
+{#- unused #}
+{%- for port in variables.UNUSED_PORTS %}
+interface 1/1/{{ port }}
+    shutdown
+    no routing
+    vlan access 1
+
+{%- endfor %}
+{#- end unused #}

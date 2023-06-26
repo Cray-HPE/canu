@@ -38,6 +38,8 @@ import yaml
 from canu.style import Style
 from canu.utils.host_alive import host_alive
 from canu.utils.inventory import inventory
+from canu.utils.json_load import load_json
+from canu.utils.sls import sls_dump
 from canu.utils.sls_utils.Managers import NetworkManager
 
 # Get project root directory
@@ -58,10 +60,10 @@ csm_options = canu_config["csm_versions"]
 @click.option("--username", default="admin", show_default=True, help="Switch username")
 @click.option(
     "--csm",
+    default="1.4",
     type=click.Choice(csm_options),
     help="CSM version",
-    prompt="CSM version",
-    required=True,
+    required=False,
     show_choices=True,
 )
 @click.option(
@@ -106,9 +108,15 @@ csm_options = canu_config["csm_versions"]
     help="Ping test from all mgmt switches to all NCNs.",
     required=False,
 )
+@click.option(
+    "--pre-install",
+    "pre_install_",
+    is_flag=True,
+    help="Tests to run before installing CSM",
+    required=False,
+)
 @click.option("--sls-address", default="api-gw-service-nmn.local", show_default=True)
 @click.pass_context
-# @pysnooper.snoop()
 def test(
     ctx,
     username,
@@ -120,6 +128,7 @@ def test(
     log_,
     json_,
     ping,
+    pre_install_,
 ):
     """Run tests against the network.
 
@@ -134,6 +143,7 @@ def test(
         log_: enable logging
         json_: output test results in JSON format
         ping: run the ping test suite
+        pre_install_: Tests to run before CSM installation
     """
     if not password:
         password = click.prompt(
@@ -144,6 +154,52 @@ def test(
 
     # set to ERROR otherwise nornir plugin logs debug messages to the screen.
     logging.basicConfig(level="ERROR")
+
+    csm = float(csm)
+
+    # Get project root directory
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
+        project_root = sys._MEIPASS
+    else:
+        project_root = Path(__file__).resolve().parent.parent.parent
+
+    def get_vlan_ips(network):
+        network_dict = {}
+        for net in network:
+            for subnet in networks.get(net).subnets().values():
+                for reservation in subnet.reservations().values():
+                    if "ncn" in reservation.name() or "sw" in reservation.name():
+                        net_key = net.lower()
+                        vlan = subnet.vlan()
+                        name = reservation.name() + f"-{net}".lower()
+                        ipv4_address = str(reservation.ipv4_address())
+
+                        if net_key not in network_dict:
+                            network_dict[net_key] = {"vlan": vlan, "ips": []}
+                        network_dict[net_key]["ips"].append(
+                            {"name": name, "ipv4_address": ipv4_address},
+                        )
+        return network_dict
+
+    def send_ssh_commands(vendor, commands, nornir_object):
+        if vendor == "aruba":
+            results = nornir_object.run(task=scrapli_send_commands, commands=commands)
+        else:
+            results = nornir_object.run(
+                task=netmiko_send_commands,
+                commands=commands,
+                enable=True,
+            )
+        return results
+
+    if sls_file:
+        sls_json = load_json(file=sls_file)
+    else:
+        sls_json = sls_dump(path="dumpstate")
+
+    networks = NetworkManager(sls_json["Networks"])
+
+    vlan_ips = get_vlan_ips(["HMN", "CMN", "NMN"])
 
     switch_inventory, sls_variables = inventory(
         username,
@@ -171,29 +227,6 @@ def test(
     else:
         vendor = "dellanox"
 
-    def get_ncn_switch_address(network):
-        network_dict = {}
-        for net in network:
-            for subnet in networks.get(net).subnets().values():
-                for reservation in subnet.reservations().values():
-                    if "ncn" in reservation.name() or "sw" in reservation.name():
-                        network_dict[reservation.name() + f"-{net}".lower()] = str(
-                            reservation.ipv4_address(),
-                        )
-        return network_dict
-
-    def send_ssh_commands(vendor, commands, nornir_object):
-
-        if vendor == "aruba":
-            results = nornir_object.run(task=scrapli_send_commands, commands=commands)
-        else:
-            results = nornir_object.run(
-                task=netmiko_send_commands,
-                commands=commands,
-                enable=True,
-            )
-        return results
-
     online_hosts, unreachable_hosts = host_alive(nr)
 
     if unreachable_hosts:
@@ -204,8 +237,6 @@ def test(
             )
 
     if ping:
-        networks = NetworkManager(sls_file["Networks"])
-
         ping = {
             "device": ["leaf", "leaf-bmc", "cdu", "spine"],
             "err_msg": "",
@@ -214,23 +245,26 @@ def test(
             "test": "contains",
         }
 
-        ncn_switch_address = get_ncn_switch_address(["HMN", "CMN", "NMN"])
-
         ping_test = []
 
         # construct pings tests for switches
-        for k, v in ncn_switch_address.items():
-            ping["err_msg"] = f"{k} is not reachable"
-            ping["name"] = f"ping {k} {v}"
-            if "cmn" in k and vendor == "aruba":
-                ping["task"] = f"ping {v} vrf Customer repetitions 1"
-            elif vendor == "aruba":
-                ping["task"] = f"ping {v} repetitions 1"
-            if "cmn" in k and vendor == "dellanox":
-                ping["task"] = f"ping vrf Customer {v} -c 1"
-            elif vendor == "dellanox":
-                ping["task"] = f"ping {v} -c 1"
-            ping_test.append(ping.copy())
+        for _net, net_data in vlan_ips.items():
+            for data in net_data.get("ips", []):
+                ip = data["ipv4_address"]
+                name = data["name"]
+                ping["err_msg"] = f"{name} is not reachable"
+                ping["name"] = f"ping {name} {ip}"
+                if vendor == "aruba":
+                    if "cmn" in name:
+                        ping["task"] = f"ping {ip} vrf Customer repetitions 1"
+                    else:
+                        ping["task"] = f"ping {ip} repetitions 1"
+                elif vendor == "dellanox":
+                    if "cmn" in name:
+                        ping["task"] = f"ping vrf Customer {ip} -c 1"
+                    else:
+                        ping["task"] = f"ping {ip} -c 1"
+                ping_test.append(ping.copy())
 
         nr_with_tests = online_hosts.with_processors([TestsProcessor(ping_test)])
 
@@ -245,7 +279,6 @@ def test(
         pretty_results = ResultSerializer(results, add_details=True, to_dict=False)
         dict_results = ResultSerializer(results, add_details=False, to_dict=True)
     else:
-
         test_file = path.join(
             project_root,
             "canu",
@@ -267,17 +300,35 @@ def test(
             for test_command in test_suite:
                 devices = test_command.get("device")
                 csm_test_version = test_command.get("csm")
-                csm = float(csm)
+                test_type = test_command.get("test")
+                pre_install = test_command.get("pre_install")
+
+                if pre_install_ and pre_install is None:
+                    continue
+
                 if csm_test_version is not None and csm not in csm_test_version:
                     continue
+
                 if switch in devices:
                     switch_test_suite[switch].append(test_command)
-                if switch in devices and isinstance(test_command["task"], str):
 
+                if switch in devices and isinstance(test_command["task"], str):
                     template = environment.from_string(test_command["task"])
                     command = template.render(variables=sls_variables)
                     test_command["task"] = command
                     switch_commands[switch].append(test_command["task"])
+                    if test_type == "custom":
+                        custom_test = test_command.get("function_file")
+                        test_path = path.join(
+                            project_root,
+                            "canu",
+                            "test",
+                            vendor,
+                            custom_test,
+                        )
+                        # Update the dictionary entry
+                        test_command["function_file"] = test_path
+                        test_command["function_kwargs"] = {"vlan_ips": vlan_ips}
 
                 elif switch in devices and isinstance(test_command["task"], list):
                     switch_commands.extend(test_command["task"])

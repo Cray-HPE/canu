@@ -34,7 +34,7 @@ if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cov
     project_root = sys._MEIPASS
 else:
     prog = __file__
-    project_root = Path(__file__).resolve().parent.parent
+    project_root = Path(__file__).resolve().parent.parent.parent.parent
 
 
 class NetworkManager(UserDict):
@@ -120,11 +120,16 @@ class NetworkManager(UserDict):
         """
         default_sls_networks_schema_file = path.join(
             project_root,
+            "canu",
+            "utils",
             "sls_utils",
             "schemas",
             "sls_networks_schema.json",
         )
-        validate_sls_json(schema_file=default_sls_networks_schema_file, sls_data=sls_data)
+        validate_sls_json(
+            schema_file=default_sls_networks_schema_file,
+            sls_data=sls_data,
+        )
 
 
 class SubnetManager(UserDict):
@@ -207,8 +212,13 @@ class SubnetManager(UserDict):
         """
         default_sls_subnets_schema_file = path.join(
             project_root,
+            "canu",
+            "utils",
             "sls_utils",
             "schemas",
             "sls_subnets_schema.json",
         )
-        validate_sls_json(schema_file=default_sls_subnets_schema_file, sls_data=sls_data)
+        validate_sls_json(
+            schema_file=default_sls_subnets_schema_file,
+            sls_data=sls_data,
+        )
