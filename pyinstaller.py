@@ -138,6 +138,14 @@ added_files += [
         "network_modeling/configs/templates/1.4/dellmellanox/full",
     ),
     (
+        "network_modeling/configs/templates/1.5/arista/*.j2",
+        "network_modeling/configs/templates/1.5/arista",
+    ),
+    (
+        "network_modeling/configs/templates/1.5/aruba/common/*.j2",
+        "network_modeling/configs/templates/1.5/aruba/common",
+    ),
+    (
         "network_modeling/configs/templates/1.5/aruba/*.j2",
         "network_modeling/configs/templates/1.5/aruba/",
     ),
@@ -148,6 +156,14 @@ added_files += [
     (
         "network_modeling/configs/templates/1.5/aruba/tds/*.j2",
         "network_modeling/configs/templates/1.5/aruba/tds",
+    ),
+    (
+        "network_modeling/configs/templates/1.5/dellmellanox/common/*.j2",
+        "network_modeling/configs/templates/1.5/dellmellanox/common",
+    ),
+    (
+        "network_modeling/configs/templates/1.5/dellmellanox/full/*.j2",
+        "network_modeling/configs/templates/1.5/dellmellanox/full",
     ),
 ]
 a = Analysis(
