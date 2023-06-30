@@ -16,7 +16,7 @@
    - Take a final release tag or a pre-release tag, release tags are considered ***stable*** and pre-release tags are previews that are considered ***unstable***.
      Pre-release tags are entirely **optional**.
 
-        - Final release tags follow the [PEP0400 Finale release format][5] of `X.Y.Z`:
+        - Final release tags follow the [PEP0400 Finale release format][4] of `X.Y.Z`:
 
             > ***NOTE*** Historically this repository does **NOT** prepend `v` to the git-tag.
 
@@ -25,7 +25,7 @@
             git push orgin --tags
             ```
 
-        - Pre-release tags follow [PEP0440 pre-release format][6] format of `X.Y.Z{[a|b|rc]N}` (e.g. 1.8.0a1, 1.8.0b3, 1.8.0rc1).
+        - Pre-release tags follow [PEP0440 pre-release format][5] format of `X.Y.Z{[a|b|rc]N}` (e.g. 1.8.0a1, 1.8.0b3, 1.8.0rc1).
 
             > ***NOTE*** These are entirely **OPTIONAL**.
             > Examples:
@@ -56,18 +56,15 @@
 
 `canu` exists in the pre-install-toolkit, and needs a manifest updated here:
 
-* [1.3 and older Pre-Install Toolkits][1]
-* [1.4 and newer Pre-Install Toolkits][2]
+* [1.4 and newer Pre-Install Toolkits][1]
 
 `canu` also exists in the CSM tarball, and needs a manfiest update for both its RPM and Docker images here:
 
-* [RPM][3]
-* [Docker Image][4]
+* [RPM][2]
+* [Docker Image][3]
 
-
-[1]: https://github.com/Cray-HPE/csm-rpms/blob/main/packages/cray-pre-install-toolkit
-[2]: https://github.com/Cray-HPE/csm-rpms/blob/main/packages/node-images-pre-install-toolkit
-[3]: https://github.com/Cray-HPE/csm/blob/main/rpm/cray/csm/sle-15sp3/index.yaml
-[4]: https://github.com/Cray-HPE/csm/blob/main/docker/index.yaml
-[5]: https://peps.python.org/pep-0440/#final-releases
-[6]: https://peps.python.org/pep-0440/#pre-releases
+[1]: https://github.com/Cray-HPE/csm-rpms/blob/main/packages/node-images-pre-install-toolkit](https://github.com/Cray-HPE/metal-provision/blob/main/roles/node_images_pre_install_toolkit/vars/packages/suse.yml
+[2]: https://github.com/Cray-HPE/csm/blob/main/rpm/cray/csm/sle-15sp4/index.yaml
+[3]: https://github.com/Cray-HPE/csm/blob/main/docker/index.yaml
+[4]: https://peps.python.org/pep-0440/#final-releases
+[5]: https://peps.python.org/pep-0440/#pre-releases
