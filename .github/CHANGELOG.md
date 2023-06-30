@@ -1,6 +1,8 @@
 ## Changelog
-## [UNRELEASED]
 
+## [1.7.4]
+
+- Updated `canu test`
 - Add CSM 1.5 dell/mellanox configs
 - Update BGP to use 32 max paths
 - Add CSM 1.5 configs
