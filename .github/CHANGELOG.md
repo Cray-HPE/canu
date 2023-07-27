@@ -1,5 +1,9 @@
 ## Changelog
 
+## [UNRELEASED]
+
+- Fix CSM 1.5 templates
+
 ## [1.7.4]
 
 - Updated `canu test`
