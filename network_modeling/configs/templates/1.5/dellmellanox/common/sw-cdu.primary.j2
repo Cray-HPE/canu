@@ -1,22 +1,22 @@
 {#- sw-cdu.primary #}
-{%- include '1.4/dellmellanox/common/unknown.j2' %}
+{%- include '1.5/dellmellanox/common/unknown.j2' %}
 ip vrf default
 ip vrf Customer
 ip name-server {{ variables.NMNLB_DNS }}
 hostname {{ variables.HOSTNAME }}
-{%- include '1.4/dellmellanox/common/banner-motd-dell.j2' %}
+{%- include '1.5/dellmellanox/common/banner-motd-dell.j2' %}
 rest api restconf
 spanning-tree mode mst
 
-{%- include '1.4/dellmellanox/common/mtn_hmn_vlan.j2' %}
-{%- include '1.4/dellmellanox/common/mtn_nmn_vlan.j2' %}
+{%- include '1.5/dellmellanox/common/mtn_hmn_vlan.j2' %}
+{%- include '1.5/dellmellanox/common/mtn_nmn_vlan.j2' %}
 
 ntp server {{ variables.NCN_W001 }}
 ntp server {{ variables.NCN_W002 }}
 ntp server {{ variables.NCN_W003 }}
 
-{%- include '1.4/dellmellanox/common/acl-dell.j2' %}
-{%- include '1.4/dellmellanox/common/load-balancing.j2' %}
+{%- include '1.5/dellmellanox/common/acl-dell.j2' %}
+{%- include '1.5/dellmellanox/common/load-balancing.j2' %}
 
 interface vlan{{ variables.NATIVE_VLAN }}
  description MTL
@@ -55,8 +55,8 @@ interface vlan{{ variables.CMN_VLAN }}
  ip access-group cmn-can out
  ip ospf 2 area 0.0.0.0
 
-{%- include '1.4/dellmellanox/common/mtn_hmn_vlan.j2' %}
-{%- include '1.4/dellmellanox/common/mtn_nmn_vlan.j2' %}
+{%- include '1.5/dellmellanox/common/mtn_hmn_vlan.j2' %}
+{%- include '1.5/dellmellanox/common/mtn_nmn_vlan.j2' %}
 
 interface loopback0
  no shutdown
@@ -71,13 +71,13 @@ spanning-tree mst configuration
 line vty
  ip access-class ssh
 
-{% include '1.4/dellmellanox/common/cmm.j2' %}
+{% include '1.5/dellmellanox/common/cmm.j2' %}
 
-{% include '1.4/dellmellanox/common/cec.j2' %}
+{% include '1.5/dellmellanox/common/cec.j2' %}
 
-{% include '1.4/dellmellanox/common/cdu-to-spine.lag.j2' %}
+{% include '1.5/dellmellanox/common/cdu-to-spine.lag.j2' %}
 
-{% include '1.4/dellmellanox/common/dell-unused.j2' %}
+{% include '1.5/dellmellanox/common/dell-unused.j2' %}
 
 interface mgmt1/1/1
  no shutdown

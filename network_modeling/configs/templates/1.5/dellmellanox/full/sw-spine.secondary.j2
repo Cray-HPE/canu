@@ -1,7 +1,7 @@
 {#- dm-sw-spine.secondary #}
-{%- include '1.4/dellmellanox/common/unknown.j2' %}
+{%- include '1.5/dellmellanox/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
-{%- include '1.4/dellmellanox/common/banner-motd.j2' %}
+{%- include '1.5/dellmellanox/common/banner-motd.j2' %}
 
 no cli default prefix-modes enable
 
@@ -45,7 +45,7 @@ web vrf default enable force
 ip filter chain input rule append tail target drop dup-delete dest-port 22 in-intf vlan{{ variables.NMN_VLAN }} protocol tcp
 ip filter enable
 
-{%- include '1.4/dellmellanox/common/acl-mellanox.j2' %}
+{%- include '1.5/dellmellanox/common/acl-mellanox.j2' %}
 
 {%- include '1.0/dellmellanox/common/mlag_isl.j2' %}
    
@@ -87,9 +87,9 @@ port-channel load-balance ethernet source-destination-ip ingress-port
 no interface mgmt0 dhcp
 interface mgmt0 ip address 192.168.255.243 /29
 
-{%- include '1.4/dellmellanox/common/prefix.list.j2' %}
-{%- include '1.4/dellmellanox/common/route-map.j2' %}
-{%- include '1.4/dellmellanox/common/bgp.j2' %}
+{%- include '1.5/dellmellanox/common/prefix.list.j2' %}
+{%- include '1.5/dellmellanox/common/route-map.j2' %}
+{%- include '1.5/dellmellanox/common/bgp.j2' %}
 
 ip name-server vrf vrf-default {{ variables.NMNLB_DNS }}
 
@@ -99,12 +99,12 @@ spanning-tree port type edge default
 spanning-tree mst name cray
 spanning-tree mst revision 2
 
-{% include '1.4/dellmellanox/common/ncn-m.lag.j2' %}
-{% include '1.4/dellmellanox/common/ncn-w.lag.j2' %}
-{% include '1.4/dellmellanox/common/ncn-s.lag.j2' %}
-{% include '1.4/dellmellanox/common/uan.j2' %}
-{% include '1.4/dellmellanox/full/spine-to-leaf-bmc.lag.j2' %}
-{% include '1.4/dellmellanox/common/spine-to-cdu.lag.j2' %}
+{% include '1.5/dellmellanox/common/ncn-m.lag.j2' %}
+{% include '1.5/dellmellanox/common/ncn-w.lag.j2' %}
+{% include '1.5/dellmellanox/common/ncn-s.lag.j2' %}
+{% include '1.5/dellmellanox/common/uan.j2' %}
+{% include '1.5/dellmellanox/full/spine-to-leaf-bmc.lag.j2' %}
+{% include '1.5/dellmellanox/common/spine-to-cdu.lag.j2' %}
       
 protocol ospf
 router ospf 1 vrf default
@@ -132,7 +132,7 @@ interface vlan {{ variables.NATIVE_VLAN }} ip dhcp relay instance 2 downstream
 interface vlan {{ variables.NMN_VLAN }} ip dhcp relay instance 2 downstream
 interface vlan {{ variables.HMN_VLAN }} ip dhcp relay instance 4 downstream
 
-{% include '1.4/dellmellanox/common/magp.j2' %}
+{% include '1.5/dellmellanox/common/magp.j2' %}
 
 mlag-vip mlag-domain ip 192.168.255.242 /29 force
 no mlag shutdown
