@@ -6,6 +6,8 @@
 - Use CSM version variable in templates.
 - Fix cmn ACL template.
 - Bump Pyyaml.
+- Add DHCP snooping for Aruba.
+
 
 ## [1.7.4]
 
