@@ -1,10 +1,10 @@
 {#- sw-leaf-bmc #}
-{%- include '1.5/dellmellanox/common/unknown.j2' %}
+{%- include variables.CSM_VERSION+'/dellmellanox/common/unknown.j2' %}
 ip vrf default
 ip vrf Customer
 ip name-server {{ variables.NMNLB_DNS }}
 hostname {{ variables.HOSTNAME }}
-{%- include '1.5/dellmellanox/common/banner-motd-dell.j2' %}
+{%- include variables.CSM_VERSION+'/dellmellanox/common/banner-motd-dell.j2' %}
 rest api restconf
 spanning-tree mode mst
 
@@ -12,8 +12,8 @@ ntp server {{ variables.NCN_W001 }}
 ntp server {{ variables.NCN_W002 }}
 ntp server {{ variables.NCN_W003 }}
 
-{%- include '1.5/dellmellanox/common/acl-dell.j2' %}
-{%- include '1.5/dellmellanox/common/load-balancing.j2' %}
+{%- include variables.CSM_VERSION+'/dellmellanox/common/acl-dell.j2' %}
+{%- include variables.CSM_VERSION+'/dellmellanox/common/load-balancing.j2' %}
 
 interface vlan{{ variables.NATIVE_VLAN }}
  description MTL
@@ -70,11 +70,11 @@ spanning-tree mst configuration
 line vty
  ip access-class ssh
 
-{% include '1.5/dellmellanox/full/leaf-bmc-to-spine.lag.j2' %}
-{% include '1.5/dellmellanox/common/bmc.j2' %}
-{% include '1.5/dellmellanox/common/uan-nmn.j2' %}
-{% include '1.5/dellmellanox/common/compute.j2' %}
-{% include '1.5/dellmellanox/common/dell-unused.j2' %}
+{% include variables.CSM_VERSION+'/dellmellanox/full/leaf-bmc-to-spine.lag.j2' %}
+{% include variables.CSM_VERSION+'/dellmellanox/common/bmc.j2' %}
+{% include variables.CSM_VERSION+'/dellmellanox/common/uan-nmn.j2' %}
+{% include variables.CSM_VERSION+'/dellmellanox/common/compute.j2' %}
+{% include variables.CSM_VERSION+'/dellmellanox/common/dell-unused.j2' %}
 router ospf 1
  router-id {{ variables.LOOPBACK_IP }}
 
