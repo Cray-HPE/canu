@@ -1,7 +1,7 @@
 {#- sw-leaf.primary #}
-{%- include '1.0/aruba/common/unknown.j2' %}
+{%- include variables.CSM_VERSION+'/aruba/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
-{%- include '1.0/aruba/common/banner-motd.j2' %}
+{%- include variables.CSM_VERSION+'/aruba/common/banner-motd.j2' %}
 no ip icmp redirect
 vrf keepalive
 ntp server {{ variables.NCN_W001 }}
@@ -14,7 +14,7 @@ ntp enable
 ssh server vrf default
 ssh server vrf keepalive
 ssh server vrf mgmt
-{%- include '1.0/aruba/common/acl.j2' %}
+{%- include variables.CSM_VERSION+'/aruba/common/acl.j2' %}
 
 vlan {{ variables.NATIVE_VLAN }}
 vlan {{ variables.NMN_VLAN }}
@@ -38,13 +38,13 @@ interface mgmt
     shutdown
     ip dhcp
 
-{% include '1.0/aruba/common/ncn-m.lag.j2' %}
-{% include '1.0/aruba/common/ncn-w.lag.j2' %}
-{% include '1.0/aruba/common/ncn-s.lag.j2' %}
-{% include '1.0/aruba/common/uan.j2' %}
-{% include '1.0/aruba/full/leaf-to-leaf-bmc.lag.j2' %}
-{% include '1.0/aruba/full/leaf-to-spine.lag.j2' %}
-{% include '1.0/aruba/common/vsx_isl.primary.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/ncn-m.lag.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/ncn-w.lag.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/ncn-s.lag.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/uan.j2' %}
+{% include variables.CSM_VERSION+'/aruba/full/leaf-to-leaf-bmc.lag.j2' %}
+{% include variables.CSM_VERSION+'/aruba/full/leaf-to-spine.lag.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/vsx_isl.primary.j2' %}
 
 interface loopback 0
     ip address {{ variables.LOOPBACK_IP }}/32

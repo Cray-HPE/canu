@@ -1,7 +1,7 @@
 {#- sw-cdu.secondary #}
-{%- include '1.2/aruba/common/unknown.j2' %}
+{%- include variables.CSM_VERSION+'/aruba/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
-{%- include '1.2/aruba/common/banner-motd.j2' %}
+{%- include variables.CSM_VERSION+'/aruba/common/banner-motd.j2' %}
 no ip icmp redirect
 vrf keepalive
 vrf Customer
@@ -16,7 +16,7 @@ ssh server vrf Customer
 ssh server vrf default
 ssh server vrf keepalive
 ssh server vrf mgmt
-{%- include '1.2/aruba/common/acl.j2' %}
+{%- include variables.CSM_VERSION+'/aruba/common/acl.j2' %}
 
 vlan {{ variables.NATIVE_VLAN }}
 vlan {{ variables.NMN_VLAN }}
@@ -38,12 +38,12 @@ interface mgmt
     shutdown
     ip dhcp
 
-{%- include '1.2/aruba/common/mtn_hmn_vlan.j2' %}
-{%- include '1.2/aruba/common/mtn_nmn_vlan.j2' %}
-{% include '1.2/aruba/common/cmm.j2' %}
-{% include '1.2/aruba/common/cec.j2' %}
-{% include '1.2/aruba/common/cdu-to-spine.lag.j2' %}
-{% include '1.2/aruba/common/vsx_isl.secondary.j2' %}
+{%- include variables.CSM_VERSION+'/aruba/common/mtn_hmn_vlan.j2' %}
+{%- include variables.CSM_VERSION+'/aruba/common/mtn_nmn_vlan.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/cmm.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/cec.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/cdu-to-spine.lag.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/vsx_isl.secondary.j2' %}
 
 interface loopback 0
     ip address {{ variables.LOOPBACK_IP }}/32

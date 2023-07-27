@@ -54,6 +54,7 @@ access-list ip nmn-hmn
 {%- endif %}
 {% set sequence = sequence+10 %}    {{ sequence }} permit any any any
 access-list ip cmn-can
+{%- set sequence = 0 %}
 {%- if variables.CMN and variables.CAN %}
 {% set sequence = 10 %}    {{ sequence }} deny any {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} {{ variables.CAN_NETWORK_IP }}/{{ variables.CAN_NETMASK }}
 {%- endif %}
@@ -62,9 +63,6 @@ access-list ip cmn-can
 {%- endif %}
 {%- if variables.CMN and variables.CHN %}
 {% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} {{ variables.CHN_NETWORK_IP }}/{{ variables.CHN_NETMASK }}
-{%- endif %}
-{%- if not variables.CAN %}
-{% set sequence = 0 %}
 {%- endif %}
 {%- if variables.CMN and variables.CHN %}
 {% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.CHN_NETWORK_IP }}/{{ variables.CHN_NETMASK }} {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }}
