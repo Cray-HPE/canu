@@ -3,6 +3,7 @@
 ## [UNRELEASED]
 
 - Fix CSM 1.5 templates
+- Use CSM version variable in templates.
 
 ## [1.7.4]
 
