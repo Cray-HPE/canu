@@ -1,5 +1,12 @@
 ## Changelog
 
+## [UNRELEASED]
+
+- Fix CSM 1.5 templates
+- Use CSM version variable in templates.
+- Fix cmn ACL template.
+- Bump Pyyaml.
+
 ## [1.7.4]
 
 - Updated `canu test`

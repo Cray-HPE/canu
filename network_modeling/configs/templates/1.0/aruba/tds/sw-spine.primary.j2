@@ -1,7 +1,7 @@
 {#- sw-spine.primary #}
-{%- include '1.0/aruba/common/unknown.j2' %}
+{%- include variables.CSM_VERSION+'/aruba/common/unknown.j2' %}
 hostname {{ variables.HOSTNAME }}
-{%- include '1.0/aruba/common/banner-motd.j2' %}
+{%- include variables.CSM_VERSION+'/aruba/common/banner-motd.j2' %}
 no ip icmp redirect
 vrf keepalive
 ntp server {{ variables.NCN_W001 }}
@@ -13,7 +13,7 @@ ntp enable
 ssh server vrf default
 ssh server vrf keepalive
 ssh server vrf mgmt
-{%- include '1.0/aruba/common/acl.j2' %}
+{%- include variables.CSM_VERSION+'/aruba/common/acl.j2' %}
 
 vlan 1
 vlan {{ variables.NMN_VLAN }}
@@ -38,13 +38,13 @@ interface mgmt
     shutdown
     ip dhcp
 
-{% include '1.0/aruba/common/ncn-m.lag.j2' %}
-{% include '1.0/aruba/common/ncn-w.lag.j2' %}
-{% include '1.0/aruba/common/ncn-s.lag.j2' %}
-{% include '1.0/aruba/common/uan.j2' %}
-{% include '1.0/aruba/tds/spine-to-leaf-bmc.lag.j2' %}
-{% include '1.0/aruba/common/spine-to-cdu.lag.j2' %}
-{% include '1.0/aruba/common/vsx_isl.primary.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/ncn-m.lag.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/ncn-w.lag.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/ncn-s.lag.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/uan.j2' %}
+{% include variables.CSM_VERSION+'/aruba/tds/spine-to-leaf-bmc.lag.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/spine-to-cdu.lag.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/vsx_isl.primary.j2' %}
 
 interface loopback 0
     ip address {{ variables.LOOPBACK_IP }}/32
@@ -79,13 +79,13 @@ interface vlan {{ variables.CAN_VLAN }}
     active-gateway ip {{ variables.CAN_IP_GATEWAY }}
     ip helper-address 10.92.100.222
 ip dns server-address {{ variables.NMNLB_DNS }}
-{% include '1.0/aruba/common/prefix-list.j2' %}
-{% include '1.0/aruba/common/route-map.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/prefix-list.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/route-map.j2' %}
 router ospf 1
     router-id {{ variables.LOOPBACK_IP }}
     redistribute bgp
     area 0.0.0.0
-{% include '1.0/aruba/common/bgp.primary.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/bgp.primary.j2' %}
 https-server vrf default
 https-server vrf mgmt
 {# end sw-spine.primary #}
