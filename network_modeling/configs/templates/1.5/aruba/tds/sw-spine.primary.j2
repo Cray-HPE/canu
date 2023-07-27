@@ -16,14 +16,19 @@ ssh server vrf default
 ssh server vrf keepalive
 ssh server vrf mgmt
 {%- include variables.CSM_VERSION+'/aruba/common/acl.j2' %}
-
+dhcpv4-snooping
+dhcpv4-snooping authorized-server {{ variables.NMNLB_DHCP }}
+dhcpv4-snooping authorized-server {{ variables.HMNLB_DHCP }}
+dhcpv4-snooping event-log client
 vlan 1
 vlan {{ variables.NMN_VLAN }}
     name NMN
+    dhcpv4-snooping
     apply access-list ip nmn-hmn in
     apply access-list ip nmn-hmn out
 vlan {{ variables.HMN_VLAN }}
     name HMN
+    dhcpv4-snooping
     apply access-list ip nmn-hmn in
     apply access-list ip nmn-hmn out
 vlan {{ variables.CMN_VLAN }}

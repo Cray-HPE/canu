@@ -4,6 +4,8 @@
 
 - Fix CSM 1.5 templates
 - Use CSM version variable in templates.
+- Add DHCP snooping for Aruba.
+- Fix cmn ACL template.
 
 ## [1.7.4]
 

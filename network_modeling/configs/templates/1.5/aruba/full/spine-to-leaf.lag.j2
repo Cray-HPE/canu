@@ -4,7 +4,7 @@
 
 interface lag {{ node.config.LAG_NUMBER }} multi-chassis
     no shutdown
-    description spine_to_leaf_lag
+    description {{ node.config.DESCRIPTION }}
     no routing
     vlan trunk native {{ variables.NATIVE_VLAN }}
     vlan trunk allowed {{ variables.SPINE_LEAF_VLANS }}
