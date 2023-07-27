@@ -9,7 +9,7 @@ Two Separate interfaces e.g. (1/1/53, 1/1/54) #}
 
 interface lag {{ ns.lag1 }} multi-chassis
     no shutdown
-    description {{ node.config.DESCRIPTION }}
+    description leaf_to_spines_lag
     no routing
     vlan trunk native {{ variables.NATIVE_VLAN }}
     vlan trunk allowed {{ variables.SPINE_LEAF_VLANS }}

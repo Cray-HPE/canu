@@ -7,7 +7,6 @@ interface lag {{ node.config.LAG_NUMBER }} multi-chassis
     no routing
     vlan trunk native {{ variables.NATIVE_VLAN }}
     vlan trunk allowed {{ variables.SPINE_LEAF_VLANS }}
-    dhcpv4-snooping trust
     lacp mode active
     lacp fallback
     spanning-tree port-type admin-edge

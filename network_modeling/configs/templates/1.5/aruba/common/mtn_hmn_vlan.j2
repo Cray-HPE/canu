@@ -2,7 +2,6 @@
 {%- for cabinet in variables.HMN_MTN_VLANS %}
 vlan {{ cabinet.VlanID }}
     name {{ cabinet.Name }}_hmn
-    dhcpv4-snooping
     apply access-list ip nmn-hmn in
     apply access-list ip nmn-hmn out
 
