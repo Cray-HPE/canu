@@ -8,7 +8,6 @@
 - Bump Pyyaml.
 - Add DHCP snooping for Aruba.
 
-
 ## [1.7.4]
 
 - Updated `canu test`
