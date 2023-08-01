@@ -2,11 +2,13 @@
 
 ## [UNRELEASED]
 
+- Disable Aruba Central in templates
 - Fix CSM 1.5 templates
-- Use CSM version variable in templates.
-- Fix cmn ACL template.
-- Bump Pyyaml.
-- Add DHCP snooping for Aruba.
+- Use CSM version variable in templates
+- Fix cmn ACL template
+- Bump Pyyaml
+- Add DHCP snooping for Aruba
+
 
 ## [1.7.4]
 
