@@ -1,0 +1,9 @@
+{#- dhcp-snooping #}
+dhcpv4-snooping
+dhcpv4-snooping authorized-server {{ variables.NMNLB_DHCP }}
+dhcpv4-snooping authorized-server {{ variables.HMNLB_DHCP }}
+dhcpv4-snooping authorized-server {{ variables.NCN_M001_NMN }}
+dhcpv4-snooping authorized-server {{ variables.NCN_M001_HMN }}
+no dhcpv4-snooping option 82
+dhcpv4-snooping event-log client
+{#- end dhcp-snooping #}
