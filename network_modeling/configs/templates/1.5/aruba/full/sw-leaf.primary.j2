@@ -17,10 +17,7 @@ ssh server vrf keepalive
 ssh server vrf mgmt
 ssh server vrf Customer
 {%- include variables.CSM_VERSION+'/aruba/common/acl.j2' %}
-dhcpv4-snooping
-dhcpv4-snooping authorized-server {{ variables.NMNLB_DHCP }}
-dhcpv4-snooping authorized-server {{ variables.HMNLB_DHCP }}
-dhcpv4-snooping event-log client
+{%- include variables.CSM_VERSION+'/aruba/common/dhcp_snooping.j2' %}
 vlan {{ variables.NATIVE_VLAN }}
 vlan {{ variables.NMN_VLAN }}
     name NMN

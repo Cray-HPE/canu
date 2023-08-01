@@ -13,6 +13,7 @@ interface lag {{ ns.lag1 }} multi-chassis
     no routing
     vlan trunk native {{ variables.NATIVE_VLAN }}
     vlan trunk allowed {{ variables.SPINE_LEAF_VLANS }}
+    dhcpv4-snooping trust
     lacp mode active
 {%- endif %}
 {%- endfor %}

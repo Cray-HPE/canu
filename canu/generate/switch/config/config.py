@@ -737,6 +737,8 @@ def generate_switch_config(
         "NCN_W001": sls_variables["ncn_w001"],
         "NCN_W002": sls_variables["ncn_w002"],
         "NCN_W003": sls_variables["ncn_w003"],
+        "NCN_M001_HMN": sls_variables["ncn_m001_hmn"],
+        "NCN_M001_NMN": sls_variables["ncn_m001_nmn"],
         "CAN": sls_variables["CAN"],
         "CAN_VLAN": sls_variables["CAN_VLAN"],
         "CAN_NETMASK": sls_variables["CAN_NETMASK"],
@@ -836,7 +838,6 @@ def generate_switch_config(
 
     # hack to rename edge switch to chn switch, this is a temporary fix until SLS/CSI is updated
     if "sw-edge" in switch_name:
-
         if switch_name == "sw-edge-001":
             switch_name = "chn-switch-1"
         if switch_name == "sw-edge-002":
@@ -1661,7 +1662,9 @@ def groupby_vlan_range(vlan_list):
 
     values = []
     vlans.sort()
-    for _group_id, members in groupby(enumerate(vlans), key=_group_id):  # noqa: B020,B031
+    for _group_id, members in groupby(
+        enumerate(vlans), key=_group_id
+    ):  # noqa: B020,B031
         members = list(members)  # noqa: B031
         first, last = members[0][1], members[-1][1]  # noqa: B031
 
@@ -1747,6 +1750,8 @@ def parse_sls_for_config(input_json):
         "ncn_w001": None,
         "ncn_w002": None,
         "ncn_w003": None,
+        "ncn_m001_hmn": None,
+        "ncn_m001_nmn": None,
         "CAN_IP_PRIMARY": None,
         "CAN_IP_SECONDARY": None,
         "CHN_IP_PRIMARY": None,
@@ -1863,6 +1868,8 @@ def parse_sls_for_config(input_json):
                     for ip in subnets["IPReservations"]:
                         if "ncn-w" in ip["Name"]:
                             sls_variables["HMN_IPs"][ip["Name"]] = ip["IPAddress"]
+                        elif ip["Name"] == "ncn-m001":
+                            sls_variables["ncn_m001_hmn"] = ip["IPAddress"]
         elif name == "MTL":
             sls_variables["MTL"] = netaddr.IPNetwork(
                 sls_network.get("ExtraProperties", {}).get(
@@ -1906,6 +1913,8 @@ def parse_sls_for_config(input_json):
                             sls_variables["ncn_w002"] = ip["IPAddress"]
                         elif ip["Name"] == "ncn-w003":
                             sls_variables["ncn_w003"] = ip["IPAddress"]
+                        elif ip["Name"] == "ncn-m001":
+                            sls_variables["ncn_m001_nmn"] = ip["IPAddress"]
                 if subnets["Name"] == "bootstrap_dhcp":
                     for ip in subnets["IPReservations"]:
                         if "ncn-w" in ip["Name"]:
@@ -1983,7 +1992,6 @@ def parse_sls_for_config(input_json):
                 sls_network.get("ExtraProperties", {}).get("Subnets", {}),
             )
         for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", {}):
-
             vlan = subnets.get("VlanID", "")
             networks_list.append([name, vlan])
 
