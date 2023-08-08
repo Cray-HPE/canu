@@ -10,6 +10,7 @@ interface port-channel{{ node.config.LAG_NUMBER }}
  switchport access vlan {{ variables.NATIVE_VLAN }}
  switchport trunk allowed vlan {{ variables.NMN_VLAN }},{{ variables.HMN_VLAN }},{{ variables.CMN_VLAN }}
  mtu 9216
+ ip dhcp snooping trust
 {%- endif %}
 {%- endfor %}
 
