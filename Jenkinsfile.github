@@ -166,22 +166,18 @@ pipeline {
                     stage('Publish') {
                         steps {
                             script {
-                                def sleVersion = sh(returnStdout: true, script: 'awk -F= \'/VERSION_ID/{gsub(/["]/,""); print \$NF}\' /etc/os-release').trim()
-                                def sles_version_parts = "${sleVersion}".tokenize('.')
-                                def sles_major = "${sles_version_parts[0]}"
-                                def sles_minor = "${sles_version_parts[1]}"
                                 publishCsmRpms(
                                         arch: "${ARCH}",
                                         component: env.NAME,
                                         isStable: isStable,
-                                        os: "sle-${sles_major}sp${sles_minor}",
+                                        os: "noos",
                                         pattern: "dist/rpmbuild/${ARCH}/${PYTHON_VERSION}/RPMS/${ARCH}/*.rpm",
                                 )
                                 publishCsmRpms(
                                         arch: "src",
                                         component: env.NAME,
                                         isStable: isStable,
-                                        os: "sle-${sles_major}sp${sles_minor}",
+                                        os: "noos",
                                         pattern: "dist/rpmbuild/${ARCH}/${PYTHON_VERSION}/SRPMS/*.rpm",
                                 )
                             }
