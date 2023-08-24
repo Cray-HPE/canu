@@ -330,8 +330,8 @@ def test(
                         test_command["function_file"] = test_path
                         test_command["function_kwargs"] = {"vlan_ips": vlan_ips}
 
-                    elif switch in devices and isinstance(test_command["task"], list):
-                        switch_commands.extend(test_command["task"])
+                elif switch in devices and isinstance(test_command["task"], list):
+                    switch_commands.extend(test_command["task"])
 
         for switch in switch_commands.keys():
             if not json_:
