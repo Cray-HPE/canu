@@ -25,6 +25,10 @@ ipv4 access-list nmn-hmn seq-number {% set sequence = sequence+10 %}{{ sequence 
 {%- if variables.HMN_MTN and variables.NMN_MTN %}
 ipv4 access-list nmn-hmn seq-number {% set sequence = sequence+10 %}{{ sequence }} deny ip {{ variables.HMN_MTN_NETWORK_IP }} mask {{ variables.HMN_MTN_NETMASK }} {{ variables.NMN_MTN_NETWORK_IP }} mask {{ variables.NMN_MTN_NETMASK }}
 {%- endif %}
+ipv4 access-list nmn-hmn seq-number {% set sequence = sequence+10 %}{{ sequence }} permit udp {{ variables.NMNLB_DHCP }} mask 255.255.255.255 any src-port-range 67 68
+ipv4 access-list nmn-hmn seq-number {% set sequence = sequence+10 %}{{ sequence }} permit udp any {{ variables.NMNLB_DHCP }} mask 255.255.255.255 src-port-range 67 68
+ipv4 access-list nmn-hmn seq-number {% set sequence = sequence+10 %}{{ sequence }} deny udp any {{ variables.NMNLB_DHCP }} mask 255.255.255.255
+ipv4 access-list nmn-hmn seq-number {% set sequence = sequence+10 %}{{ sequence }} deny udp {{ variables.NMNLB_DHCP }} mask 255.255.255.255 any
 ipv4 access-list nmn-hmn seq-number {% set sequence = sequence+10 %}{{ sequence }} permit ip any any
 ipv4 access-list cmn-can
 ipv4 access-list cmn-can bind-point rif
