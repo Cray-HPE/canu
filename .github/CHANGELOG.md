@@ -2,6 +2,7 @@
 
 ## [UNRELEASED]
 
+- Add ACL for DHCP
 - Disable Aruba Central in templates
 - Fix CSM 1.5 templates
 - Use CSM version variable in templates

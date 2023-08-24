@@ -52,6 +52,9 @@ access-list ip nmn-hmn
 {%- if variables.NMN and variables.HMNLB %}
 {% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }} {{ variables.HMNLB_NETWORK_IP }}/{{ variables.HMNLB_NETMASK }}
 {%- endif %}
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.NMNLB_DHCP }} range 67 68 any
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp any range 67 68 {{ variables.NMNLB_DHCP }}
+{% set sequence = sequence+10 %}    {{ sequence }} deny any any 10.92.100.222   
 {% set sequence = sequence+10 %}    {{ sequence }} permit any any any
 access-list ip cmn-can
 {%- set sequence = 0 %}
