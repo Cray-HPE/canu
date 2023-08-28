@@ -151,6 +151,7 @@ def bgp(ctx, username, password, verbose, network):
 
             if neighbor_status != "Established":
                 data[switch]["status"] = "FAIL"
+                errors.append(f"{hostname} ===> {neighbor}: {neighbor_status}")
                 if verbose:
                     click.secho(
                         f"{hostname} ===> {neighbor}: {neighbor_status}",
@@ -165,7 +166,6 @@ def bgp(ctx, username, password, verbose, network):
     click.echo(dash)
 
     for switch in data:
-
         bgp_neighbors = data[switch]["neighbors"]
         ip = switch
         hostname = data[switch]["hostname"]
@@ -190,6 +190,7 @@ def bgp(ctx, username, password, verbose, network):
         click.echo(dash)
         for error in errors:
             click.echo("{:<15s} - {}".format(error[0], error[1]))
+        sys.exit(1)
 
 
 def get_bgp_neighbors(ip, credentials, asn, network):
@@ -285,9 +286,7 @@ def get_bgp_neighbors_aruba(ip, credentials, asn, network):
                 f"Error connecting to switch {ip}, check the username or password"
             )
         elif exception_type == "ConnectionError":
-            error_message = (
-                f"Error connecting to switch {ip}, check the entered username, IP address and password."
-            )
+            error_message = f"Error connecting to switch {ip}, check the entered username, IP address and password."
         else:
             error_message = f"Error connecting to switch {ip}."
 
