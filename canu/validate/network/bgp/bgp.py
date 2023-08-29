@@ -151,7 +151,12 @@ def bgp(ctx, username, password, verbose, network):
 
             if neighbor_status != "Established":
                 data[switch]["status"] = "FAIL"
-                errors.append(f"{hostname} ===> {neighbor}: {neighbor_status}")
+                errors.append(
+                    [
+                        neighbor,
+                        neighbor_status,
+                    ],
+                )
                 if verbose:
                     click.secho(
                         f"{hostname} ===> {neighbor}: {neighbor_status}",

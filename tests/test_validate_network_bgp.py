@@ -300,7 +300,7 @@ def test_validate_bgp_bad_password(pull_sls_networks, switch_vendor):
                 bad_password,
             ],
         )
-        assert result.exit_code == 0
+        assert result.exit_code == 1
         assert (
             "Error connecting to switch 192.168.1.1, check the username or password"
             in str(result.output)
@@ -352,7 +352,7 @@ def test_validate_bgp_fail(pull_sls_networks, switch_vendor):
             password,
         ],
     )
-    assert result.exit_code == 0
+    assert result.exit_code == 1
     assert "FAIL - IP: 192.168.1.1 Hostname: sw-spine-001" in str(result.output)
     assert "FAIL - IP: 192.168.1.2 Hostname: sw-spine-002" in str(result.output)
 
@@ -403,7 +403,7 @@ def test_validate_bgp_fail_verbose(pull_sls_networks, switch_vendor):
             "--verbose",
         ],
     )
-    assert result.exit_code == 0
+    assert result.exit_code == 1
     assert "Switch: sw-spine-001 (192.168.1.1)      " in str(result.output)
     assert "sw-spine-001 ===> 192.168.1.2: Established" in str(result.output)
     assert "sw-spine-001 ===> 192.168.1.3: Established" in str(result.output)
@@ -436,7 +436,7 @@ def test_validate_bgp_vendor_error(pull_sls_networks, switch_vendor):
                 password,
             ],
         )
-        assert result.exit_code == 0
+        assert result.exit_code == 1
         assert "192.168.1.1     - Connection Error" in str(result.output)
 
 
@@ -467,7 +467,7 @@ def test_validate_bgp_exception(
                 password,
             ],
         )
-        assert result.exit_code == 0
+        assert result.exit_code == 1
         assert "192.168.1.1     - Connection Error" in str(result.output)
 
 
@@ -480,26 +480,27 @@ def test_validate_bgp_mellanox(pull_sls_networks, switch_vendor):
     with runner.isolated_filesystem():
         switch_vendor.return_value = "mellanox"
         pull_sls_networks.return_value = sls_cache
-        responses.add(
-            responses.POST,
-            f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
-            json={"status": "OK", "status_msg": "Successfully logged-in"},
-        )
-        responses.add(
-            responses.POST,
-            f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
-            json=bgp_status_mellanox,
-        )
-        responses.add(
-            responses.POST,
-            f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
-            json={"data": [{"Hostname": "sw-spine-mellanox"}]},
-        )
-        responses.add(
-            responses.POST,
-            f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
-            json={"data": {"value": ["MSN2100"]}},
-        )
+        for name, ip in sls_cache["HMN_IPs"].items():
+            responses.add(
+                responses.POST,
+                f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
+                json={"status": "OK", "status_msg": "Successfully logged-in"},
+            )
+            responses.add(
+                responses.POST,
+                f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
+                json=bgp_status_mellanox,
+            )
+            responses.add(
+                responses.POST,
+                f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
+                json={"data": [{"Hostname": name}]},
+            )
+            responses.add(
+                responses.POST,
+                f"https://{ip}/admin/launch?script=rh&template=json-request&action=json-login",
+                json={"data": {"value": ["MSN2100"]}},
+            )
 
         result = runner.invoke(
             cli,
@@ -513,10 +514,10 @@ def test_validate_bgp_mellanox(pull_sls_networks, switch_vendor):
                 password,
             ],
         )
+        print(result.output)
         assert result.exit_code == 0
-        assert "PASS - IP: 192.168.1.1 Hostname: sw-spine-mellanox" in str(
-            result.output,
-        )
+        assert "PASS - IP: 192.168.1.1 Hostname: sw-spine-001" in str(result.output)
+        assert "PASS - IP: 192.168.1.2 Hostname: sw-spine-002" in str(result.output)
 
 
 @patch("canu.validate.network.bgp.bgp.switch_vendor")
@@ -545,7 +546,7 @@ def test_validate_bgp_mellanox_connection_error(pull_sls_networks, switch_vendor
                 password,
             ],
         )
-        assert result.exit_code == 0
+        assert result.exit_code == 1
         assert "192.168.1.1     - Connection Error" in str(result.output)
 
 
@@ -575,7 +576,7 @@ def test_validate_bgp_mellanox_bad_login(pull_sls_networks, switch_vendor):
                 password,
             ],
         )
-        assert result.exit_code == 0
+        assert result.exit_code == 1
         assert "192.168.1.1     - Connection Error" in str(result.output)
 
 
@@ -610,7 +611,7 @@ def test_validate_bgp_mellanox_exception(pull_sls_networks, switch_vendor):
                 password,
             ],
         )
-        assert result.exit_code == 0
+        assert result.exit_code == 1
         assert "192.168.1.1     - Connection Error" in str(result.output)
 
 
