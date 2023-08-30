@@ -514,7 +514,6 @@ def test_validate_bgp_mellanox(pull_sls_networks, switch_vendor):
                 password,
             ],
         )
-        print(result.output)
         assert result.exit_code == 0
         assert "PASS - IP: 192.168.1.1 Hostname: sw-spine-001" in str(result.output)
         assert "PASS - IP: 192.168.1.2 Hostname: sw-spine-002" in str(result.output)
