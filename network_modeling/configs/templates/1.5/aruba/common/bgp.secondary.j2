@@ -20,7 +20,7 @@ router bgp {{ variables.SWITCH_ASN }}
         neighbor {{ ip }} route-map {{ name }}-Customer in
         {%- endfor %}
     exit-address-family
-    vrf blue
+    vrf vrf1
         bgp router-id {{ variables.LOOPBACK_IP }}
         maximum-paths 32
         timers bgp 1 3
