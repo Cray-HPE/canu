@@ -2,6 +2,7 @@
 
 ## [UNRELEASED]
 
+- Move NMN/HMN/MTL to new vrf, move CMN/CHN/CAN to default vrf.
 - Add ACL for DHCP
 - Fix CANU exit code on BGP validation
 - Disable Aruba Central in templates

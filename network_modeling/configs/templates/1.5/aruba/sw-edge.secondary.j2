@@ -3,7 +3,7 @@
 hostname sw-edge-002
 {%- include variables.CSM_VERSION+'/aruba/common/banner-motd.j2' %}
 no ip icmp redirect
-vrf Customer
+vrf vrf1
 vrf keepalive
 ntp server {{ variables.NCN_W001 }}
 ntp server {{ variables.NCN_W002 }}
@@ -15,7 +15,7 @@ aruba-central
 ssh server vrf default
 ssh server vrf keepalive
 ssh server vrf mgmt
-ssh server vrf Customer
+ssh server vrf vrf1
 
 interface mgmt
     no shutdown
@@ -69,7 +69,7 @@ vsx
     linkup-delay-timer 600
     vsx-sync vsx-global
 
-router ospf 2 vrf Customer
+router ospf 3 vrf vrf1
     router-id {{ variables.LOOPBACK_IP }}
     area 0.0.0.0
     default-information originate
