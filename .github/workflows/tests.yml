@@ -65,7 +65,7 @@ jobs:
           python-version: ${{ matrix.version }}
 
       - if: ${{ matrix.os == 'ubuntu-latest' }}
-        uses: cachix/install-nix-action@v21
+        uses: cachix/install-nix-action@v23
         with:
           nix_path: nixpkgs=channel:nixos-unstable
           extra_nix_config: |
