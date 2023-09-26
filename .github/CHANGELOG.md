@@ -2,6 +2,8 @@
 
 ## [UNRELEASED]
 
+## [1.7.5]
+
 - Add ACL for DHCP
 - Fix CANU exit code on BGP validation
 - Disable Aruba Central in templates
