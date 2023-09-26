@@ -56,14 +56,14 @@
 
 `canu` exists in the pre-install-toolkit, and needs a manifest updated here:
 
-* [1.4 and newer Pre-Install Toolkits][1]
+* [Metal Provision][1]
 
 `canu` also exists in the CSM tarball, and needs a manfiest update for both its RPM and Docker images here:
 
 * [RPM][2]
 * [Docker Image][3]
 
-[1]: https://github.com/Cray-HPE/csm-rpms/blob/main/packages/node-images-pre-install-toolkit](https://github.com/Cray-HPE/metal-provision/blob/main/roles/node_images_pre_install_toolkit/vars/packages/suse.yml
+[1]: https://github.com/Cray-HPE/metal-provision/blob/main/group_vars/pre_install_toolkit/packages.suse.yml
 [2]: https://github.com/Cray-HPE/csm/blob/main/rpm/cray/csm/sle-15sp4/index.yaml
 [3]: https://github.com/Cray-HPE/csm/blob/main/docker/index.yaml
 [4]: https://peps.python.org/pep-0440/#final-releases
