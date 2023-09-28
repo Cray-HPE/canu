@@ -11,7 +11,7 @@ jobs:
   Promote:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Jfrog setup
         uses: jfrog/setup-jfrog-cli@v3
@@ -36,7 +36,7 @@ jobs:
     name: generate docs with nox/sphinx and publish with mike
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0 # Also fetch git-tags
     - name: Set up Python
