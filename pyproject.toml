@@ -70,7 +70,7 @@ dependencies = [
     'tokenize-rt==5.1.0',
     'tomli==2.0.1',
     'ttp==0.9.4',
-    'urllib3==2.0.5',
+    'urllib3==2.0.6',
     'yamale<=4.0.4',
 ]
 dynamic = ['entry-points', 'scripts', 'version']
