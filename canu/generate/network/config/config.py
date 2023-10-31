@@ -171,6 +171,12 @@ csm_options = canu_config["csm_versions"]
     default="CHN",
 )
 @click.option(
+    "--vrf",
+    help="Named VRF used for CSM networks",
+    required=False,
+    default="CSM",
+)
+@click.option(
     "--log",
     "log_",
     help="Level of logging.",
@@ -195,6 +201,7 @@ def config(
     edge,
     reorder,
     bgp_control_plane,
+    vrf,
     log_,
 ):
     """Generate the config of all switches (Aruba, Dell, or Mellanox) on the network using the SHCD.
@@ -256,6 +263,7 @@ def config(
         edge: Vendor of the edge router
         reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
         bgp_control_plane: Network used for BGP control plane
+        vrf: Named VRF used for CSM networks
         log_: Level of logging.
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
@@ -416,7 +424,6 @@ def config(
             or node_shasta_name == "sw-edge"
             and float(csm) >= 1.2
         ):
-
             switch_config, devices, unknown = generate_switch_config(
                 csm,
                 architecture,
@@ -431,6 +438,7 @@ def config(
                 edge,
                 reorder,
                 bgp_control_plane,
+                vrf,
             )
             all_unknown.extend(unknown)
             config_devices.update(devices)

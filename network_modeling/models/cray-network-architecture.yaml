@@ -98,6 +98,8 @@ network_v2:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
+        - name: "river_ncn_leaf"
+          speed: 1
     - name: "river_ncn_node_2_port"
       model: "river_ncn_node_2_port"
       connections:
@@ -111,6 +113,8 @@ network_v2:
         - name: "river_ncn_leaf"
           speed: 25
         - name: "river_bmc_leaf"
+          speed: 1
+        - name: "river_ncn_leaf"
           speed: 1
     - name: "river_ncn_node_4_port_1g_ocp"
       model: "river_ncn_node_4_port_1g_ocp"
@@ -164,6 +168,8 @@ network_v2:
       connections:
         - name: "river_bmc_leaf"
           speed: 1
+        - name: "river_ncn_leaf"
+          speed: 1
     - name: "subrack"
       model: "subrack"
       connections:
@@ -206,7 +212,7 @@ network_v2:
       architecture_type: "river_ncn_node_4_port"
     - lookup_name: ["gw", "gn", "gateway"]
       shasta_name: "gateway"
-      architecture_type: "river_ncn_node_4_port_1g_ocp"
+      architecture_type: "river_ncn_node_4_port"
     - lookup_name: ["gpu"]
       shasta_name: "gpu"
       architecture_type: "river_ncn_node_4_port_1g_ocp"

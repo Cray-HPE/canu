@@ -222,6 +222,12 @@ dash = "-" * 60
     default="CHN",
 )
 @click.option(
+    "--vrf",
+    help="Named VRF used for CSM networks",
+    required=False,
+    default="csm",
+)
+@click.option(
     "--log",
     "log_",
     help="Level of logging.",
@@ -247,6 +253,7 @@ def config(
     edge,
     reorder,
     bgp_control_plane,
+    vrf,
     log_,
 ):
     """Generate switch config using the SHCD.
@@ -309,6 +316,7 @@ def config(
         edge: Vendor of the edge router
         reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
         bgp_control_plane: Network used for BGP control plane
+        vrf: Named VRF used for CSM networks
         log_: Level of Logging
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
@@ -449,6 +457,7 @@ def config(
         edge,
         reorder,
         bgp_control_plane,
+        vrf,
     )
 
     click.echo("\n")
@@ -571,6 +580,7 @@ def generate_switch_config(
     edge,
     reorder,
     bgp_control_plane,
+    vrf,
 ):
     """Generate switch config.
 
@@ -588,6 +598,7 @@ def generate_switch_config(
         edge: edge: Vendor of the edge router
         reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
         bgp_control_plane: Network used for BGP control plane
+        vrf: Named VRF used for CSM networks
 
 
     Returns:
@@ -815,6 +826,7 @@ def generate_switch_config(
         "HMN_IPs": sls_variables["HMN_IPs"],
         "SWITCH_ASN": sls_variables["SWITCH_ASN"],
         "BGP_CONTROL_PLANE": bgp_control_plane,
+        "VRF": vrf,
     }
 
     cabling = {}
