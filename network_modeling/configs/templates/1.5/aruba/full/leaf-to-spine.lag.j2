@@ -9,11 +9,14 @@ Two Separate interfaces e.g. (1/1/53, 1/1/54) #}
 
 interface lag {{ ns.lag1 }} multi-chassis
     no shutdown
-    description leaf_to_spines_lag
+    description {{ node.config.DESCRIPTION }}
     no routing
     vlan trunk native {{ variables.NATIVE_VLAN }}
     vlan trunk allowed {{ variables.SPINE_LEAF_VLANS }}
     lacp mode active
+{%- if variables.NMN_ISOLATED_VLAN %}
+    private-vlan port-type promiscuous
+{%- endif %}
 {%- endif %}
 {%- endfor %}
 {%- for node in cabling.nodes if node.subtype == "spine"%}

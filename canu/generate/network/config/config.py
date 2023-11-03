@@ -177,6 +177,14 @@ csm_options = canu_config["csm_versions"]
     type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
     default="ERROR",
 )
+@click.option(
+    "--nmn-pvlan",
+    help="VLAN ID used for Isolated NMN PVLAN (must be an integer between 1 and 4094)",
+    is_flag=False,
+    required=False,
+    flag_value=502,
+    type=click.IntRange(1, 4094),
+)
 @click.pass_context
 def config(
     ctx,
@@ -196,6 +204,7 @@ def config(
     reorder,
     bgp_control_plane,
     log_,
+    nmn_pvlan,
 ):
     """Generate the config of all switches (Aruba, Dell, or Mellanox) on the network using the SHCD.
 
@@ -257,6 +266,7 @@ def config(
         reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
         bgp_control_plane: Network used for BGP control plane
         log_: Level of logging.
+        nmn_pvlan: VLAN ID used for Isolated NMN PVLAN
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
@@ -416,7 +426,6 @@ def config(
             or node_shasta_name == "sw-edge"
             and float(csm) >= 1.2
         ):
-
             switch_config, devices, unknown = generate_switch_config(
                 csm,
                 architecture,
@@ -431,6 +440,7 @@ def config(
                 edge,
                 reorder,
                 bgp_control_plane,
+                nmn_pvlan,
             )
             all_unknown.extend(unknown)
             config_devices.update(devices)
