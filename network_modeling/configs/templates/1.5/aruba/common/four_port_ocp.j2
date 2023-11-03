@@ -7,5 +7,8 @@ interface 1/1/{{ node.config.PORT }}
     vlan access {{ variables.NMN_VLAN }}
     spanning-tree bpdu-guard
     spanning-tree port-type admin-edge
+{%- if variables.NMN_ISOLATED_VLAN %}
+    private-vlan port-type secondary
+{%- endif %}
 
 {%- endfor %}

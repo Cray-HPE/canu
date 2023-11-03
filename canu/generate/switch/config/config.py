@@ -241,6 +241,14 @@ dash = "-" * 60
     type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
     default="ERROR",
 )
+@click.option(
+    "--nmn-pvlan",
+    help="VLAN ID used for Isolated NMN PVLAN (must be an integer between 1 and 4094)",
+    is_flag=False,
+    required=False,
+    flag_value=502,
+    type=click.IntRange(1, 4094),
+)
 @click.pass_context
 def config(
     ctx,
@@ -263,6 +271,7 @@ def config(
     vrf,
     bond_app_nodes,
     log_,
+    nmn_pvlan,
 ):
     """Generate switch config using the SHCD.
 
@@ -327,6 +336,7 @@ def config(
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
         log_: Level of Logging
+        nmn_pvlan: VLAN ID used for Isolated NMN PVLAN
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
@@ -468,6 +478,7 @@ def config(
         bgp_control_plane,
         vrf,
         bond_app_nodes,
+        nmn_pvlan,
     )
 
     click.echo("\n")
@@ -592,6 +603,7 @@ def generate_switch_config(
     bgp_control_plane,
     vrf,
     bond_app_nodes,
+    nmn_pvlan,
 ):
     """Generate switch config.
 
@@ -611,7 +623,7 @@ def generate_switch_config(
         bgp_control_plane: Network used for BGP control plane
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
-
+        nmn_pvlan: VLAN ID used for Isolated NMN PVLAN
 
 
     Returns:
@@ -726,17 +738,28 @@ def generate_switch_config(
         native_vlan,
         sls_variables["NMN_VLAN"],
         sls_variables["HMN_VLAN"],
+        nmn_pvlan,
     ]
-    spine_leaf_vlan = [
+
+    ncn_vlans = [
         native_vlan,
         sls_variables["NMN_VLAN"],
         sls_variables["HMN_VLAN"],
         sls_variables["CAN_VLAN"],
     ]
+
+    spine_leaf_vlan = [
+        native_vlan,
+        sls_variables["NMN_VLAN"],
+        sls_variables["HMN_VLAN"],
+        sls_variables["CAN_VLAN"],
+        nmn_pvlan,
+    ]
+
     if sls_variables["CMN_VLAN"] and float(csm) >= 1.2:
         spine_leaf_vlan.append(sls_variables["CMN_VLAN"])
         leaf_bmc_vlan.append(sls_variables["CMN_VLAN"])
-
+        ncn_vlans.append(sls_variables["CMN_VLAN"])
     elif sls_variables["CMN_VLAN"] and float(csm) < 1.2:
         click.secho(
             "\nCMN network found in SLS, the CSM version required to use this network has to be 1.2 or greater. "
@@ -751,8 +774,16 @@ def generate_switch_config(
             fg="red",
         )
         sys.exit(1)
+
+    dup_vlan = {x for x in spine_leaf_vlan if spine_leaf_vlan.count(x) > 1}
+
+    if any(isinstance(item, int) for item in dup_vlan):
+        click.secho(f"Duplicate VLAN found: {dup_vlan}", fg="red")
+        sys.exit(1)
+
     spine_leaf_vlan = groupby_vlan_range(spine_leaf_vlan)
     leaf_bmc_vlan = groupby_vlan_range(leaf_bmc_vlan)
+    ncn_vlans = groupby_vlan_range(ncn_vlans)
 
     black_hole_vlan_1 = 2701
     black_hole_vlan_2 = 2707
@@ -787,6 +818,7 @@ def generate_switch_config(
         "MTL_PREFIX_LEN": sls_variables["MTL_PREFIX_LEN"],
         "NMN": sls_variables["NMN"],
         "NMN_VLAN": sls_variables["NMN_VLAN"],
+        "NMN_ISOLATED_VLAN": nmn_pvlan,
         "NMN_NETMASK": sls_variables["NMN_NETMASK"],
         "NMN_NETWORK_IP": sls_variables["NMN_NETWORK_IP"],
         "NMN_PREFIX_LEN": sls_variables["NMN_PREFIX_LEN"],
@@ -835,6 +867,7 @@ def generate_switch_config(
         "LEAF_BMC_VLANS": leaf_bmc_vlan,
         "SPINE_LEAF_VLANS": spine_leaf_vlan,
         "NATIVE_VLAN": native_vlan,
+        "NCN_VLANS": ncn_vlans,
         "CAN_IPs": sls_variables["CAN_IPs"],
         "CHN_IPs": sls_variables["CHN_IPs"],
         "CMN_IPs": sls_variables["CMN_IPs"],

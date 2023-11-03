@@ -190,6 +190,14 @@ csm_options = canu_config["csm_versions"]
     type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
     default="ERROR",
 )
+@click.option(
+    "--nmn-pvlan",
+    help="VLAN ID used for Isolated NMN PVLAN (must be an integer between 1 and 4094)",
+    is_flag=False,
+    required=False,
+    flag_value=502,
+    type=click.IntRange(1, 4094),
+)
 @click.pass_context
 def config(
     ctx,
@@ -211,6 +219,7 @@ def config(
     vrf,
     bond_app_nodes,
     log_,
+    nmn_pvlan,
 ):
     """Generate the config of all switches (Aruba, Dell, or Mellanox) on the network using the SHCD.
 
@@ -274,6 +283,7 @@ def config(
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
         log_: Level of logging.
+        nmn_pvlan: VLAN ID used for Isolated NMN PVLAN
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
@@ -449,6 +459,7 @@ def config(
                 bgp_control_plane,
                 vrf,
                 bond_app_nodes,
+                nmn_pvlan,
             )
             all_unknown.extend(unknown)
             config_devices.update(devices)
