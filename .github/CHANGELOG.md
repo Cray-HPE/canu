@@ -3,8 +3,15 @@
 ## [UNRELEASED]
 
 - Move NMN/HMN/MTL to new vrf, move CMN/CHN/CAN to default vrf.
+- Fixed exception when bad credentials provided when running `canu validate shcd-cabling`
+
+## [1.7.6]
+
 - Add ACL for DHCP
 - Fix CANU exit code on BGP validation
+
+## [1.7.5]
+
 - Disable Aruba Central in templates
 - Fix CSM 1.5 templates
 - Use CSM version variable in templates
