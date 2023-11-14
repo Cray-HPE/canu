@@ -5,6 +5,7 @@ hostname {{ variables.HOSTNAME }}
 no ip icmp redirect
 vrf Customer
 vrf keepalive
+vrf Storage
 ntp server {{ variables.NCN_W001 }}
 ntp server {{ variables.NCN_W002 }}
 ntp server {{ variables.NCN_W003 }}
@@ -104,6 +105,8 @@ interface vlan {{ variables.CAN_VLAN }}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.CAN_IP_GATEWAY }}
     ip ospf 2 area 0.0.0.0
+interface vlan 10
+    vrf attach Storage
 {%- endif %}
 ip dns server-address {{ variables.NMNLB_DNS }}
 {% include variables.CSM_VERSION+'/aruba/common/prefix-list.j2' %}
