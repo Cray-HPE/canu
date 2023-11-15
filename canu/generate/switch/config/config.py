@@ -734,11 +734,17 @@ def generate_switch_config(
 
     native_vlan = 1
 
-    leaf_bmc_vlan = [
+    leaf_bmc_vlan_full = [
         native_vlan,
         sls_variables["NMN_VLAN"],
         sls_variables["HMN_VLAN"],
         nmn_pvlan,
+    ]
+
+    leaf_bmc_vlan_tds = [
+        native_vlan,
+        sls_variables["NMN_VLAN"],
+        sls_variables["HMN_VLAN"],
     ]
 
     ncn_vlans = [
@@ -758,7 +764,8 @@ def generate_switch_config(
 
     if sls_variables["CMN_VLAN"] and float(csm) >= 1.2:
         spine_leaf_vlan.append(sls_variables["CMN_VLAN"])
-        leaf_bmc_vlan.append(sls_variables["CMN_VLAN"])
+        leaf_bmc_vlan_full.append(sls_variables["CMN_VLAN"])
+        leaf_bmc_vlan_tds.append(sls_variables["CMN_VLAN"])
         ncn_vlans.append(sls_variables["CMN_VLAN"])
     elif sls_variables["CMN_VLAN"] and float(csm) < 1.2:
         click.secho(
@@ -782,7 +789,8 @@ def generate_switch_config(
         sys.exit(1)
 
     spine_leaf_vlan = groupby_vlan_range(spine_leaf_vlan)
-    leaf_bmc_vlan = groupby_vlan_range(leaf_bmc_vlan)
+    leaf_bmc_vlan_full = groupby_vlan_range(leaf_bmc_vlan_full)
+    leaf_bmc_vlan_tds = groupby_vlan_range(leaf_bmc_vlan_tds)
     ncn_vlans = groupby_vlan_range(ncn_vlans)
 
     black_hole_vlan_1 = 2701
@@ -864,7 +872,8 @@ def generate_switch_config(
         "CMN_IP_SECONDARY": sls_variables["CMN_IP_SECONDARY"],
         "NMN_MTN_CABINETS": sls_variables["NMN_MTN_CABINETS"],
         "HMN_MTN_CABINETS": sls_variables["HMN_MTN_CABINETS"],
-        "LEAF_BMC_VLANS": leaf_bmc_vlan,
+        "LEAF_BMC_VLANS_TDS": leaf_bmc_vlan_tds,
+        "LEAF_BMC_VLANS_FULL": leaf_bmc_vlan_full,
         "SPINE_LEAF_VLANS": spine_leaf_vlan,
         "NATIVE_VLAN": native_vlan,
         "NCN_VLANS": ncn_vlans,

@@ -5,7 +5,7 @@ interface lag {{ node.config.LAG_NUMBER }} multi-chassis
     description {{ node.config.DESCRIPTION }}
     no routing
     vlan trunk native {{ variables.NATIVE_VLAN }}
-    vlan trunk allowed {{ variables.LEAF_BMC_VLANS }}
+    vlan trunk allowed {{ variables.LEAF_BMC_VLANS_TDS }}
     lacp mode active
 {%- if variables.NMN_ISOLATED_VLAN %}
     private-vlan port-type promiscuous
