@@ -60,7 +60,7 @@ interface vlan {{ variables.CHN_VLAN }}
     active-gateway ip {{ variables.CHN_IP_GATEWAY }}
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
-ip dns server-address {{ variables.NMNLB_DNS }}
+ip dns server-address {{ variables.NMNLB_DNS }} vrf {{ variables.VRF }}
 
 vsx
     system-mac 03:03:03:03:03:03

@@ -32,6 +32,12 @@ vlan {{ variables.CMN_VLAN }}
     name CMN
     apply access-list ip cmn-can in
     apply access-list ip cmn-can out
+vlan {{ variables.BLACK_HOLE_VLAN_1 }}
+    name NULL{{ variables.BLACK_HOLE_VLAN_1 }}
+    description Black hole VLAN {{ variables.BLACK_HOLE_VLAN_1 }}
+vlan {{ variables.BLACK_HOLE_VLAN_2 }}
+    name NULL{{ variables.BLACK_HOLE_VLAN_2 }}
+    description Black hole VLAN {{ variables.BLACK_HOLE_VLAN_2 }}
 {%- if variables.CAN != None %}
 vlan {{ variables.CAN_VLAN }}
     name CAN
@@ -53,6 +59,7 @@ interface mgmt
 {% include variables.CSM_VERSION+'/aruba/common/ncn-w.lag.j2' %}
 {% include variables.CSM_VERSION+'/aruba/common/ncn-s.lag.j2' %}
 {% include variables.CSM_VERSION+'/aruba/common/uan.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/bonded_nmn.j2' %}
 {% include variables.CSM_VERSION+'/aruba/full/leaf-to-leaf-bmc.lag.j2' %}
 {% include variables.CSM_VERSION+'/aruba/full/leaf-to-spine.lag.j2' %}
 {% include variables.CSM_VERSION+'/aruba/common/vsx_isl.primary.j2' %}
@@ -64,27 +71,27 @@ interface vlan {{ variables.NATIVE_VLAN }}
     vrf attach {{ variables.VRF }}
     ip mtu 9198
     ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}}
-    ip ospf 3 area 0.0.0.0
+    ip ospf 2 area 0.0.0.0
     ip ospf passive
 interface vlan {{ variables.NMN_VLAN }}
     vrf attach {{ variables.VRF }}
     description NMN
     ip mtu 9198
     ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}}
-    ip ospf 3 area 0.0.0.0
+    ip ospf 2 area 0.0.0.0
 interface vlan {{ variables.HMN_VLAN }}
     vrf attach {{ variables.VRF }}
     description HMN
     ip mtu 9198
     ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
-    ip ospf 3 area 0.0.0.0
+    ip ospf 2 area 0.0.0.0
     ip ospf passive
 interface vlan {{ variables.CMN_VLAN }}
     description CMN
     ip mtu 9198
     ip address {{ variables.CMN_IP }}/{{variables.CMN_PREFIX_LEN}}
     ip ospf 1 area 0.0.0.0
-ip dns server-address {{ variables.NMNLB_DNS }}
+ip dns server-address {{ variables.NMNLB_DNS }} vrf {{ variables.VRF }}
 
 router ospf 2 vrf {{ variables.VRF }}
     router-id {{ variables.LOOPBACK_IP }}

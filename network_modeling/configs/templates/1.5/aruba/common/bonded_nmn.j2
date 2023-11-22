@@ -1,0 +1,22 @@
+{#- bonded_nmn #}
+{%- for node in cabling.nodes if node.subtype == "river_app_node_2_port" %}
+
+interface lag {{ node.config.LAG_NUMBER }} multi-chassis
+    description {{ node.config.DESCRIPTION }}
+    no shutdown
+    no routing
+    vlan access {{ variables.NMN_VLAN }}
+    lacp mode active
+{%- if node.destination_port == 1 %}
+    lacp fallback
+{%- endif %}
+    spanning-tree port-type admin-edge
+
+interface 1/1/{{ node.config.PORT }}
+    no shutdown
+    mtu 9198
+    description {{ node.config.DESCRIPTION }}
+    lag {{ node.config.LAG_NUMBER }}
+
+{%- endfor %}
+{#- bonded_nmn #}

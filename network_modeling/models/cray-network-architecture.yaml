@@ -119,6 +119,8 @@ network_v2:
     - name: "river_ncn_node_4_port_1g_ocp"
       model: "river_ncn_node_4_port_1g_ocp"
       connections:
+        - name: "river_ncn_leaf"
+          speed: 25
         - name: "river_bmc_leaf"
           speed: 1
     - name: "river_compute_node"
@@ -219,6 +221,9 @@ network_v2:
     - lookup_name: ["dvs"]
       shasta_name: "dvs"
       architecture_type: "river_ncn_node_4_port_1g_ocp"
+    - lookup_name: ["service"]
+      shasta_name: "service"
+      architecture_type: "river_ncn_node_2_port"
     - lookup_name: ["ssn"]
       shasta_name: "ssn"
       architecture_type: "river_ncn_node_4_port_1g_ocp"
@@ -325,6 +330,8 @@ network_v2_tds:
     - name: "river_ncn_node_4_port_1g_ocp"
       model: "river_ncn_node_4_port_1g_ocp"
       connections:
+        - name: "spine"
+          speed: 25
         - name: "river_bmc_leaf"
           speed: 1
     - name: "aruba_JL636A_edge_router"
@@ -430,6 +437,9 @@ network_v2_tds:
         - "dvs"
       shasta_name: "dvs"
       architecture_type: "river_ncn_node_4_port_1g_ocp"
+    - lookup_name: ["service"]
+      shasta_name: "service"
+      architecture_type: "river_ncn_node_2_port"
     - lookup_name:
         - "ssn"
       shasta_name: "ssn"

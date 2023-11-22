@@ -31,6 +31,12 @@ vlan {{ variables.CMN_VLAN }}
     name CMN
     apply access-list ip cmn-can in
     apply access-list ip cmn-can out
+vlan {{ variables.BLACK_HOLE_VLAN_1 }}
+    name NULL{{ variables.BLACK_HOLE_VLAN_1 }}
+    description Black hole VLAN {{ variables.BLACK_HOLE_VLAN_1 }}
+vlan {{ variables.BLACK_HOLE_VLAN_2 }}
+    name NULL{{ variables.BLACK_HOLE_VLAN_2 }}
+    description Black hole VLAN {{ variables.BLACK_HOLE_VLAN_2 }}
 {%- if variables.CAN != None %}
 vlan {{ variables.CAN_VLAN }}
     name CAN
@@ -53,6 +59,7 @@ interface mgmt
 {% include variables.CSM_VERSION+'/aruba/common/ncn-w.lag.j2' %}
 {% include variables.CSM_VERSION+'/aruba/common/ncn-s.lag.j2' %}
 {% include variables.CSM_VERSION+'/aruba/common/uan.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/bonded_nmn.j2' %}
 {% include variables.CSM_VERSION+'/aruba/tds/spine-to-leaf-bmc.lag.j2' %}
 {% include variables.CSM_VERSION+'/aruba/common/spine-to-cdu.lag.j2' %}
 {% include variables.CSM_VERSION+'/aruba/common/vsx_isl.primary.j2' %}
@@ -67,7 +74,7 @@ interface vlan 1
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.MTL_IP_GATEWAY }}
     ip helper-address 10.92.100.222
-    ip ospf 3 area 0.0.0.0
+    ip ospf 2 area 0.0.0.0
     ip ospf passive
 interface vlan {{ variables.NMN_VLAN }}
     vrf attach {{ variables.VRF }}
@@ -77,7 +84,7 @@ interface vlan {{ variables.NMN_VLAN }}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.NMN_IP_GATEWAY }}
     ip helper-address 10.92.100.222
-    ip ospf 3 area 0.0.0.0
+    ip ospf 2 area 0.0.0.0
 interface vlan {{ variables.HMN_VLAN }}
     vrf attach {{ variables.VRF }}
     description HMN
@@ -86,7 +93,7 @@ interface vlan {{ variables.HMN_VLAN }}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.HMN_IP_GATEWAY }}
     ip helper-address 10.94.100.222
-    ip ospf 3 area 0.0.0.0
+    ip ospf 2 area 0.0.0.0
     ip ospf passive
 {%- if variables.CMN != None %}
 interface vlan {{ variables.CMN_VLAN }}
@@ -106,7 +113,7 @@ interface vlan {{ variables.CAN_VLAN }}
     active-gateway ip {{ variables.CAN_IP_GATEWAY }}
     ip ospf 1 area 0.0.0.0
 {%- endif %}
-ip dns server-address {{ variables.NMNLB_DNS }}
+ip dns server-address {{ variables.NMNLB_DNS }} vrf {{ variables.VRF }}
 {% include variables.CSM_VERSION+'/aruba/common/prefix-list.j2' %}
 {% include variables.CSM_VERSION+'/aruba/common/route-map.j2' %}
 router ospf 2 vrf {{ variables.VRF }}
