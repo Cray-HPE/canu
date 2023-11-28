@@ -193,7 +193,7 @@ RUN         pip install --no-cache-dir .
 #
 ##########################
 ARG         ALPINE_IMAGE="artifactory.algol60.net/docker.io/library/alpine"
-ARG         ALPINE_VERSION="3.17"
+ARG         ALPINE_VERSION="3.18"
 FROM        ${ALPINE_IMAGE}:${ALPINE_VERSION} AS prod
 ARG         PYTHON_VERSION='3.10'
 USER        root

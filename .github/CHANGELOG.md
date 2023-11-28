@@ -2,7 +2,10 @@
 
 ## [UNRELEASED]
 
+## [1.7.7]
+
 - Fixed exception when bad credentials provided when running `canu validate shcd-cabling`
+- bumped prod alpine image to 3.18
 
 ## [1.7.6]
 
