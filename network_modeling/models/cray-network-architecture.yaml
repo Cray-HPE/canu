@@ -223,7 +223,7 @@ network_v2:
       architecture_type: "river_ncn_node_4_port_1g_ocp"
     - lookup_name: ["service"]
       shasta_name: "service"
-      architecture_type: "river_ncn_node_2_port"
+      architecture_type: "river_ncn_node_4_port_1g_ocp"
     - lookup_name: ["ssn"]
       shasta_name: "ssn"
       architecture_type: "river_ncn_node_4_port_1g_ocp"
