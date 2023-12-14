@@ -222,6 +222,19 @@ dash = "-" * 60
     default="CHN",
 )
 @click.option(
+    "--vrf",
+    help="Named VRF used for CSM networks",
+    required=False,
+    default="csm",
+)
+@click.option(
+    "--bond-app-nodes",
+    help="Bond application nodes on the NMN network",
+    required=False,
+    default=False,
+    is_flag=True,
+)
+@click.option(
     "--log",
     "log_",
     help="Level of logging.",
@@ -247,6 +260,8 @@ def config(
     edge,
     reorder,
     bgp_control_plane,
+    vrf,
+    bond_app_nodes,
     log_,
 ):
     """Generate switch config using the SHCD.
@@ -309,6 +324,8 @@ def config(
         edge: Vendor of the edge router
         reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
         bgp_control_plane: Network used for BGP control plane
+        vrf: Named VRF used for CSM networks
+        bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
         log_: Level of Logging
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
@@ -449,6 +466,8 @@ def config(
         edge,
         reorder,
         bgp_control_plane,
+        vrf,
+        bond_app_nodes,
     )
 
     click.echo("\n")
@@ -571,6 +590,8 @@ def generate_switch_config(
     edge,
     reorder,
     bgp_control_plane,
+    vrf,
+    bond_app_nodes,
 ):
     """Generate switch config.
 
@@ -588,6 +609,9 @@ def generate_switch_config(
         edge: edge: Vendor of the edge router
         reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
         bgp_control_plane: Network used for BGP control plane
+        vrf: Named VRF used for CSM networks
+        bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
+
 
 
     Returns:
@@ -730,6 +754,9 @@ def generate_switch_config(
     spine_leaf_vlan = groupby_vlan_range(spine_leaf_vlan)
     leaf_bmc_vlan = groupby_vlan_range(leaf_bmc_vlan)
 
+    black_hole_vlan_1 = 2701
+    black_hole_vlan_2 = 2707
+
     variables = {
         "HOSTNAME": switch_name,
         "CSM_VERSION": csm,
@@ -815,6 +842,10 @@ def generate_switch_config(
         "HMN_IPs": sls_variables["HMN_IPs"],
         "SWITCH_ASN": sls_variables["SWITCH_ASN"],
         "BGP_CONTROL_PLANE": bgp_control_plane,
+        "VRF": vrf,
+        "BOND_APP_NODES": bond_app_nodes,
+        "BLACK_HOLE_VLAN_1": black_hole_vlan_1,
+        "BLACK_HOLE_VLAN_2": black_hole_vlan_2,
     }
 
     cabling = {}
@@ -1329,6 +1360,23 @@ def get_switch_nodes(
                     ),
                     "PORT": f"{source_port}",
                     "INTERFACE_NUMBER": f"{source_port}",
+                },
+            }
+            nodes.append(new_node)
+        elif shasta_name in {"service"}:
+            new_node = {
+                "subtype": "river_app_node_2_port",
+                "slot": destination_slot,
+                "destination_port": destination_port,
+                "config": {
+                    "DESCRIPTION": get_description(
+                        switch_name,
+                        destination_node_name,
+                        destination_slot,
+                        destination_port,
+                    ),
+                    "PORT": f"{source_port}",
+                    "LAG_NUMBER": primary_port,
                 },
             }
             nodes.append(new_node)
