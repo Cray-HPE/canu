@@ -2,6 +2,8 @@
 
 ## [UNRELEASED]
 
+- Fixed exception when bad credentials provided when running `canu validate shcd-cabling`
+
 ## [1.7.6]
 
 - Add ACL for DHCP

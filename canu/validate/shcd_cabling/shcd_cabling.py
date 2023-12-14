@@ -250,7 +250,7 @@ def shcd_cabling(
                     elif exception_type == "ConnectionError":
                         error_message = f"Error connecting to switch {ip}, check the entered username, IP address and password."
                     elif exception_type == "NetmikoTimeoutException":
-                        error_message = f"Timeout error connecting to {ip}. Check the IP address and try again."
+                        error_message = f"Timeout error connecting to {ip}. Check the IP address or credentials and try again."
                     elif exception_type == "NetmikoAuthenticationException":
                         error_message = f"Auth error connecting to {ip}. Check the credentials or IP address and try again"
                     else:
@@ -261,6 +261,24 @@ def shcd_cabling(
     # Open the updated cache to model nodes
     with open(canu_cache_file, "r+") as file:
         canu_cache = yaml.load(file)
+
+    double_dash = "=" * 100
+    # if there are errors and no switches exist or we able to be connected to, error and exit
+    if len(errors) > 0 and canu_cache["switches"] is None:
+        click.echo("\n", file=out)
+        click.echo(double_dash, file=out)
+        click.secho(
+            "Errors",
+            fg="red",
+            file=out,
+        )
+        click.echo(double_dash, file=out)
+        for error in errors:
+            click.echo(
+                "{:<15s} - {}".format(error[0], error[1]),
+                file=out,
+            )
+        sys.exit(1)
 
     # Create Cabling Node factory and model
     log.debug("Creating model from switch LLDP data")
@@ -319,7 +337,6 @@ def shcd_cabling(
             click.secho(f"{host_mac_string}")
         sys.exit(0)
 
-    double_dash = "=" * 100
     click.echo("\n", file=out)
     click.echo(double_dash, file=out)
     click.secho(
