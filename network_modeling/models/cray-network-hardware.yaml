@@ -41,7 +41,7 @@ network_hardware:
     model: "8325_JL627A"
     ports:
       - count: 32
-        speed: [100, 40]
+        speed: [100, 40, 10, 1]
       - count: 1
         speed: 1
         slot: "mgmt"
@@ -110,10 +110,10 @@ network_hardware:
     model: "river_ncn_node_4_port"
     ports:
       - count: 2
-        speed: 25
+        speed: [25, 1]
         slot: "ocp"
       - count: 2
-        speed: 25
+        speed: [25, 1]
         slot: "pcie-slot1"
       - count: 1
         speed: 1
@@ -123,6 +123,9 @@ network_hardware:
     type: "server"
     model: "river_ncn_node_4_port_1g_ocp"
     ports:
+      - count: 2
+        speed: [25, 1]
+        slot: "ocp"
       - count: 4
         speed: 1
         slot: ocp
