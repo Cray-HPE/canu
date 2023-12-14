@@ -2,7 +2,7 @@
 
 ## [UNRELEASED]
 
-## [1.7.7]
+## [1.8.0]
 
 - Move NMN/HMN/MTL to new vrf, move CMN/CHN/CAN to default vrf.
 - Added support for bonded application nodes.
