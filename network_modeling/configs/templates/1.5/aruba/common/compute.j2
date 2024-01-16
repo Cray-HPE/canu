@@ -5,12 +5,13 @@ interface 1/1/{{ node.config.PORT }}
     mtu 9198
     description {{ node.config.DESCRIPTION }}
     no routing
-    vlan access {{ variables.NMN_VLAN }}
     spanning-tree bpdu-guard
     spanning-tree port-type admin-edge
 {%- if variables.NMN_ISOLATED_VLAN %}
+    vlan access {{ variables.NMN_ISOLATED_VLAN }}
     private-vlan port-type secondary
+{%- else %}
+    vlan access {{ variables.NMN_VLAN }}
 {%- endif %}
-
 {%- endfor %}
 {#- end compute #}
