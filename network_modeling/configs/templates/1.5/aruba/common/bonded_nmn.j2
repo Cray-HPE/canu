@@ -1,15 +1,16 @@
-{#- leaf-to-leaf-bmc #}
-{%- for node in cabling.nodes if node.subtype == "leaf-bmc" %}
+{#- bonded_nmn #}
+{%- for node in cabling.nodes if node.subtype == "river_app_node_2_port" %}
+
 interface lag {{ node.config.LAG_NUMBER }} multi-chassis
-    no shutdown
     description {{ node.config.DESCRIPTION }}
+    no shutdown
     no routing
-    vlan trunk native {{ variables.NATIVE_VLAN }}
-    vlan trunk allowed {{ variables.LEAF_BMC_VLANS }}
+    vlan access {{ variables.NMN_VLAN }}
     lacp mode active
-{%- if variables.NMN_ISOLATED_VLAN %}
-    private-vlan port-type promiscuous
+{%- if node.destination_port == 1 %}
+    lacp fallback
 {%- endif %}
+    spanning-tree port-type admin-edge
 
 interface 1/1/{{ node.config.PORT }}
     no shutdown
@@ -18,4 +19,4 @@ interface 1/1/{{ node.config.PORT }}
     lag {{ node.config.LAG_NUMBER }}
 
 {%- endfor %}
-{#- end leaf-to-leaf-bmc #}
+{#- bonded_nmn #}
