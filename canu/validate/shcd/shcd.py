@@ -511,6 +511,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets, edge=None):
     wb = load_workbook(spreadsheet, read_only=True, data_only=True)
 
     for tab in sheets:
+
         sheet = tab[0]
         range_start = tab[1]
         range_end = tab[2]
@@ -615,7 +616,7 @@ def node_model_from_shcd(factory, spreadsheet, sheets, edge=None):
             try:
                 current_row = row[required_header[0]].row
                 log.debug(f"---- Working in sheet {sheet} on row {current_row} ----")
-                src_name = row[required_header[0]].value.strip().lower()
+                src_name = row[required_header[0]].value.strip()
                 tmp_slot = row[required_header[3]]
                 tmp_port = row[required_header[4]]
                 src_rack = None
@@ -1147,6 +1148,7 @@ def switch_unused_ports(node_list):
     unused_ports = {}
     for node in node_list:
         if "sw" in node.common_name() and "sw-hsn" not in node.common_name():
+
             unused_ports[node.common_name()] = []
             unused_block = []
             logical_index = 1
