@@ -129,6 +129,9 @@ network_hardware:
       - count: 4
         speed: 1
         slot: ocp
+      - count: 2
+        speed: [25, 1]
+        slot: "pcie-slot1"
       - count: 1
         speed: 1
         slot: "bmc"
