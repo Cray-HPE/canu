@@ -11,7 +11,6 @@ interface lag {{ node.config.LAG_NUMBER }}
     vlan trunk allowed {{ variables.LEAF_BMC_VLANS_TDS }}
     lacp mode active
 {%- if variables.NMN_ISOLATED_VLAN %}
-    private-vlan port-type promiscuous
 {%- endif %}
 {%- endif %}
 {%- endfor %}

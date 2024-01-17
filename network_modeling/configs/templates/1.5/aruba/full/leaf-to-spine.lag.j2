@@ -15,7 +15,6 @@ interface lag {{ ns.lag1 }} multi-chassis
     vlan trunk allowed {{ variables.SPINE_LEAF_VLANS }}
     lacp mode active
 {%- if variables.NMN_ISOLATED_VLAN %}
-    private-vlan port-type promiscuous
 {%- endif %}
 {%- endif %}
 {%- endfor %}
