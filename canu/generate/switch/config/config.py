@@ -751,6 +751,7 @@ def generate_switch_config(
         native_vlan,
         sls_variables["NMN_VLAN"],
         sls_variables["HMN_VLAN"],
+        nmn_pvlan,
     ]
 
     ncn_vlans = [
