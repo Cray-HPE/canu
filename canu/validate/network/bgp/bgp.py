@@ -406,6 +406,7 @@ def get_bgp_neighbors_mellanox(ip, credentials, network):
     Raises:
         ConnectionError: Connection error exception
         HTTPError: Authentication exception
+        JSONDecodeError: Password complexity exception
     """
     session = requests.Session()
 
@@ -419,7 +420,11 @@ def get_bgp_neighbors_mellanox(ip, credentials, network):
     if login.status_code == 404:
         raise requests.exceptions.ConnectionError
     if login.json()["status"] != "OK":
-        raise requests.exceptions.HTTPError
+        if requests.exceptions.JSONDecodeError:
+            e = requests.exceptions.JSONDecodeError
+            raise Exception("Check password complexity settings") from e
+        else:
+            raise requests.exceptions.HTTPError
 
     if network == "NMN":
         net_vrf = "default"
@@ -484,6 +489,7 @@ def get_bgp_neighbors_mellanox(ip, credentials, network):
 
     except (
         requests.exceptions.HTTPError,
+        requests.exceptions.JSONDecodeError,
         requests.exceptions.RequestException,
         requests.exceptions.ConnectionError,
         Exception,
