@@ -2,6 +2,8 @@
 
 ## [UNRELEASED]
 
+- Ensure that the variable designating a switch as primary is always initialized.
+
 ## [1.8.0]
 
 - Move NMN/HMN/MTL to new vrf, move CMN/CHN/CAN to default vrf.
