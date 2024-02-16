@@ -1466,9 +1466,10 @@ def get_switch_nodes(
             }
             nodes.append(new_node)
         elif shasta_name == "sw-spine":
+            is_primary, primary, secondary = switch_is_primary(switch_name)
+
             # sw-leaf ==> sw-spine
             if switch_name.startswith("sw-leaf"):
-                is_primary, primary, secondary = switch_is_primary(switch_name)
                 digits = re.findall(r"(\d+)", primary)[0]
                 lag_number = 100 + int(digits)
 
@@ -1486,10 +1487,8 @@ def get_switch_nodes(
 
             # sw-spine ==> sw-spine
             elif switch_name.startswith("sw-spine"):
-                is_primary, primary, secondary = switch_is_primary(switch_name)
                 lag_number = 256
             elif switch_name.startswith("sw-edge"):
-                is_primary, primary, secondary = switch_is_primary(switch_name)
                 lag_number = 250
             new_node = {
                 "subtype": "spine",
