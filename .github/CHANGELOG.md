@@ -2,6 +2,14 @@
 
 ## [UNRELEASED]
 
+- Ensure that the variable designating a switch as primary is always initialized.
+
+## [1.8.0]
+
+- Move NMN/HMN/MTL to new vrf, move CMN/CHN/CAN to default vrf.
+- Added support for bonded application nodes.
+- Fixed exception when bad credentials provided when running `canu validate shcd-cabling`
+
 ## [1.7.6]
 
 - Add ACL for DHCP

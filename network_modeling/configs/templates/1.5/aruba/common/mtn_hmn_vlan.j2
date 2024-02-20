@@ -6,6 +6,7 @@ vlan {{ cabinet.VlanID }}
     apply access-list ip nmn-hmn out
 
 interface vlan {{ cabinet.VlanID }}
+    vrf attach {{ variables.VRF }}
     description {{ cabinet.Name }}_hmn
     ip mtu 9198
     ip address {{ cabinet.IP }}/{{ cabinet.PREFIX_LENGTH }}
