@@ -41,7 +41,7 @@ End
 
 It 'cache report network firmware --help'
   When call canu report network firmware --help
-  The lines of stdout should equal 37
+  The lines of stdout should equal 38
   The line 1 of stdout should equal 'Usage: canu report network firmware [OPTIONS]'
 End
 
@@ -65,6 +65,6 @@ End
 
 It 'cache report switch firmware --help'
   When call canu report switch firmware --help
-  The lines of stdout should equal 22
+  The lines of stdout should equal 23
   The line 1 of stdout should equal 'Usage: canu report switch firmware [OPTIONS]'
 End
