@@ -252,6 +252,8 @@ def get_node_common_name(name, rack_number, rack_elevation, mapper):
         ValueError: When name cannot be appropriately found
     """
     common_name = None
+    if name is not None:
+        name = name.lower()
     for node in mapper:
         for lookup_name in node[0]:
             if re.match("^{}".format(lookup_name.strip()), name):
@@ -332,6 +334,8 @@ def get_node_type(name, mapper):
     Returns:
         node_type: A string with the device type
     """
+    if name is not None:
+        name = name.lower()
     node_type = None
     for node in mapper:
         for lookup_name in node[0]:
