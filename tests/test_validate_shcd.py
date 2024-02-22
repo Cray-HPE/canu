@@ -487,6 +487,7 @@ def test_validate_shcd_subrack():
             ],
         )
         assert result.exit_code == 0
+        print(result.output)
         assert "15: cn008 connects to 1 nodes: [16]" in str(result.output)
         assert "16: SubRack002-rcm connects to 2 nodes: [15, 17]" in str(result.output)
         assert "17: sw-leaf-bmc-002 connects to 2 nodes: [18, 16]" in str(result.output)
