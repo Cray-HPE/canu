@@ -53,7 +53,7 @@ End
 
 It 'validate paddle-cabling --help'
   When call canu validate paddle-cabling --help
-  The lines of stdout should equal 27
+  The lines of stdout should equal 28
   The line 1 of stdout should equal 'Usage: canu validate paddle-cabling [OPTIONS]'
 End
 
@@ -65,7 +65,7 @@ End
 
 It 'validate shcd-cabling --help'
   When call canu validate shcd-cabling --help
-  The lines of stdout should equal 33
+  The lines of stdout should equal 34
   The line 1 of stdout should equal 'Usage: canu validate shcd-cabling [OPTIONS]'
 End
 

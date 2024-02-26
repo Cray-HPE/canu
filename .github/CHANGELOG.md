@@ -4,6 +4,11 @@
 
 - Ensure that the variable designating a switch as primary is always initialized.
 
+## [1.9.0]
+- Add CSM 1.6 templates
+- Fix case sensitivity when reading nodes from SHCD
+- Add Storage node support
+
 ## [1.8.0]
 
 - Move NMN/HMN/MTL to new vrf, move CMN/CHN/CAN to default vrf.
