@@ -42,6 +42,7 @@ from canu.generate.switch.config.config import (
 )
 from canu.style import Style
 from canu.utils.cache import cache_directory
+from canu.utils.validate_node_list import validate_node_list
 from canu.validate.paddle.paddle import node_model_from_paddle
 from canu.validate.shcd.shcd import node_model_from_shcd, shcd_to_sheets
 
@@ -184,6 +185,11 @@ csm_options = canu_config["csm_versions"]
     is_flag=True,
 )
 @click.option(
+    "--river-nmn",
+    callback=validate_node_list,
+    help="Nodes to be placed on RIVER NMN network",
+)
+@click.option(
     "--log",
     "log_",
     help="Level of logging.",
@@ -210,6 +216,7 @@ def config(
     bgp_control_plane,
     vrf,
     bond_app_nodes,
+    river_nmn,
     log_,
 ):
     """Generate the config of all switches (Aruba, Dell, or Mellanox) on the network using the SHCD.
@@ -449,6 +456,7 @@ def config(
                 bgp_control_plane,
                 vrf,
                 bond_app_nodes,
+                river_nmn,
             )
             all_unknown.extend(unknown)
             config_devices.update(devices)

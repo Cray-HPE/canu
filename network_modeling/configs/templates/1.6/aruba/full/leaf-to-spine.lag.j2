@@ -12,7 +12,11 @@ interface lag {{ ns.lag1 }} multi-chassis
     description leaf_to_spines_lag
     no routing
     vlan trunk native {{ variables.NATIVE_VLAN }}
-    vlan trunk allowed {{ variables.SPINE_LEAF_VLANS }}
+{%- if variables.RVR_NMN_NODES  %}
+    vlan trunk allowed {{ groupby_vlan_range(variables.NMN_RVR_VLAN_LIST + variables.SPINE_LEAF_VLANS) }}
+{%- else %}
+    vlan trunk allowed {{ groupby_vlan_range(variables.LEAF_BMC_VLANS) }}
+{%- endif %}
     lacp mode active
 {%- endif %}
 {%- endfor %}

@@ -17,7 +17,9 @@ ssh server vrf default
 ssh server vrf keepalive
 ssh server vrf mgmt
 {%- include variables.CSM_VERSION+'/aruba/common/acl.j2' %}
-
+{%- if variables.RVR_NMN_NODES  %}
+{%- include variables.CSM_VERSION+'/aruba/common/rvr_acl.j2' %}
+{%- endif %}
 vlan {{ variables.NATIVE_VLAN }}
 vlan {{ variables.NMN_VLAN }}
     name NMN
@@ -45,6 +47,9 @@ vlan {{ variables.CAN_VLAN }}
 {%- endif %}
 vlan 10
     name SUN
+{%- if variables.RVR_NMN_NODES  %}
+{% include variables.CSM_VERSION+'/aruba/common/rvr_nmn_vlan_interface.j2' %}
+{%- endif %}
 spanning-tree
 {#- forward delay added to help with pxe boots. CASMNET-1099 + CASMTRIAGE-2793 #}
 spanning-tree forward-delay 4
