@@ -1416,6 +1416,9 @@ def get_switch_nodes(
                 new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name in {"uan", "login", "viz", "lmem"}:
+            vlan_key = "NMN_RVR_CABINETS"
+            destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
+            nmn_rvr_vlan = get_vlan_id(destination_rack_int, sls_variables, vlan_key)
             primary_port_uan = get_primary_port(
                 nodes_by_name,
                 switch_name,
@@ -1426,6 +1429,7 @@ def get_switch_nodes(
                 "subtype": "uan",
                 "slot": destination_slot,
                 "destination_port": destination_port,
+                "node_name": destination_node_name,
                 "config": {
                     "DESCRIPTION": get_description(
                         switch_name,
@@ -1436,6 +1440,7 @@ def get_switch_nodes(
                     "PORT": f"{source_port}",
                     "LAG_NUMBER": primary_port_uan,
                     "LAG_NUMBER_V1": primary_port,
+                    "VLAN": nmn_rvr_vlan,
                 },
             }
             if preserve and architecture == "network_v1":

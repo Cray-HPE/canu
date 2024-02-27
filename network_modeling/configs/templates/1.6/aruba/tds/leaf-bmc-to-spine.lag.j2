@@ -8,7 +8,11 @@ interface lag {{ node.config.LAG_NUMBER }}
     description {{ node.config.DESCRIPTION }}
     no routing
     vlan trunk native {{ variables.NATIVE_VLAN }}
+{%- if variables.RVR_NMN_NODES  %}
+    vlan trunk allowed {{ groupby_vlan_range(variables.NMN_RVR_VLAN_LIST + variables.LEAF_BMC_VLANS) }}
+{%- else %}
     vlan trunk allowed {{ groupby_vlan_range(variables.LEAF_BMC_VLANS) }}
+{%- endif %}
     lacp mode active
 {%- endif %}
 {%- endfor %}
