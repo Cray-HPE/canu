@@ -949,6 +949,8 @@ def generate_switch_config(
     variables["NMN_RVR_VLAN_LIST"] = []
     variables["HMN_RVR_VLAN_LIST"] = []
 
+    # Get RVR VLANs for spine and leaf switches
+    # This is ALL the RVR VLANS and IP addresses
     if node_shasta_name in ["sw-spine", "sw-leaf"]:
         nodes_by_name = {}
         nodes_by_id = {}
@@ -970,7 +972,7 @@ def generate_switch_config(
         for vlan in variables["NMN_RVR_VLANS"]:
             variables["NMN_RVR_VLAN_LIST"].append(vlan["VlanID"])
 
-    # get VLANs and IPs for leaf-bmc switches
+    # Get RVR VLAN for a leaf-bmc switch
     if "sw-leaf-bmc" in node_shasta_name:
         nodes_by_name = {}
         nodes_by_id = {}
