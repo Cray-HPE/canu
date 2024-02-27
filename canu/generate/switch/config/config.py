@@ -333,6 +333,7 @@ def config(
         bgp_control_plane: Network used for BGP control plane
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
+        river_nmn: Assigns River nodes to the RVR_NMN VLAN based on their cabinet designation. e.g. storage01,storage04,storage10-15,cn001-cn0050
         log_: Level of Logging
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
@@ -585,8 +586,8 @@ def add_custom_config(custom_config, switch_config, host, switch_os, custom_file
 
 
 def get_rack_vlans(sls_variables, rack_vlans, destination_rack_list, switch_name):
+    """Get list of VLANs based on rack."""
     rack_vlans_list = []
-
     for cabinets in sls_variables[rack_vlans]:
         ip_address = netaddr.IPNetwork(cabinets["CIDR"])
         is_primary = switch_is_primary(switch_name)
@@ -639,6 +640,7 @@ def generate_switch_config(
         bgp_control_plane: Network used for BGP control plane
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
+        river_nmn: Assigns River nodes to the RVR_NMN VLAN based on their cabinet designation.
 
 
 
@@ -778,8 +780,6 @@ def generate_switch_config(
             fg="red",
         )
         sys.exit(1)
-    # spine_leaf_vlan = groupby_vlan_range(spine_leaf_vlan)
-    # leaf_bmc_vlan = groupby_vlan_range(leaf_bmc_vlan)
 
     black_hole_vlan_1 = 4900
     black_hole_vlan_2 = 4901
@@ -952,18 +952,6 @@ def generate_switch_config(
     if node_shasta_name in ["sw-spine", "sw-leaf"]:
         nodes_by_name = {}
         nodes_by_id = {}
-        destination_rack_list = []
-        for node in network_node_list:
-            node_tmp = node.serialize()
-            name = node_tmp["common_name"]
-            nodes_by_name[name] = node_tmp
-            nodes_by_id[node_tmp["id"]] = node_tmp
-        for port in nodes_by_name[switch_name]["ports"]:
-            destination_rack = nodes_by_id[port["destination_node_id"]]["location"][
-                "rack"
-            ]
-
-            destination_rack_list.append(int(re.search(r"\d+", destination_rack)[0]))
         for cabinets in (
             sls_variables["NMN_RVR_CABINETS"] + sls_variables["HMN_RVR_CABINETS"]
         ):
@@ -979,15 +967,6 @@ def generate_switch_config(
                 ip = str(ip_address[3])
                 variables["NMN_RVR_VLANS"][-1]["IP"] = ip
 
-        if cabinets in sls_variables["HMN_RVR_CABINETS"]:
-            variables["HMN_RVR_VLANS"].append(cabinets)
-            variables["HMN_RVR_VLANS"][-1]["PREFIX_LENGTH"] = ip_address.prefixlen
-            if is_primary[0]:
-                ip = str(ip_address[2])
-                variables["HMN_RVR_VLANS"][-1]["IP"] = ip
-            else:
-                ip = str(ip_address[3])
-                variables["HMN_RVR_VLANS"][-1]["IP"] = ip
         for vlan in variables["NMN_RVR_VLANS"]:
             variables["NMN_RVR_VLAN_LIST"].append(vlan["VlanID"])
 
@@ -995,8 +974,6 @@ def generate_switch_config(
     if "sw-leaf-bmc" in node_shasta_name:
         nodes_by_name = {}
         nodes_by_id = {}
-        destination_rack_list = []
-
         for node in network_node_list:
             node_tmp = node.serialize()
             name = node_tmp["common_name"]
@@ -1004,11 +981,6 @@ def generate_switch_config(
             nodes_by_id[node_tmp["id"]] = node_tmp
         switch_rack = nodes_by_name[switch_name]["location"]["rack"]
         switch_rack_int = int(switch_rack[1:])
-        for port in nodes_by_name[switch_name]["ports"]:
-            destination_rack = nodes_by_id[port["destination_node_id"]]["location"][
-                "rack"
-            ]
-            destination_rack_list.append(int(re.search(r"\d+", destination_rack)[0]))
         for cabinets in (
             sls_variables["NMN_RVR_CABINETS"] + sls_variables["HMN_RVR_CABINETS"]
         ):
@@ -1021,24 +993,6 @@ def generate_switch_config(
                     variables["NMN_RVR_VLANS"][-1][
                         "PREFIX_LENGTH"
                     ] = ip_address.prefixlen
-                    if is_primary[0]:
-                        ip = str(ip_address[2])
-                        variables["NMN_RVR_VLANS"][-1]["IP"] = ip
-                    else:
-                        ip = str(ip_address[3])
-                        variables["NMN_RVR_VLANS"][-1]["IP"] = ip
-
-                if cabinets in sls_variables["HMN_RVR_CABINETS"]:
-                    variables["HMN_RVR_VLANS"].append(cabinets)
-                    variables["HMN_RVR_VLANS"][-1][
-                        "PREFIX_LENGTH"
-                    ] = ip_address.prefixlen
-                    if is_primary[0]:
-                        ip = str(ip_address[2])
-                        variables["HMN_RVR_VLANS"][-1]["IP"] = ip
-                    else:
-                        ip = str(ip_address[3])
-                        variables["HMN_RVR_VLANS"][-1]["IP"] = ip
         for vlan in variables["NMN_RVR_VLANS"]:
             variables["NMN_RVR_VLAN_LIST"].append(vlan["VlanID"])
 
@@ -1264,6 +1218,7 @@ def preserve_port(
 
 
 def get_vlan_id(destination_rack_int, sls_variables, cabinet_key):
+    """Get the VLAN based on the cabinet."""
     for cabinets in sls_variables[cabinet_key]:
         sls_rack_int = int(re.search(r"\d+", cabinets["Name"])[0])
         if destination_rack_int == sls_rack_int:
@@ -1430,10 +1385,14 @@ def get_switch_nodes(
             vlan_key_nmn = "NMN_MTN_CABINETS"
             destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
             hmn_mtn_vlan = get_vlan_id(
-                destination_rack_int, sls_variables, vlan_key_hmn
+                destination_rack_int,
+                sls_variables,
+                vlan_key_hmn,
             )
             nmn_mtn_vlan = get_vlan_id(
-                destination_rack_int, sls_variables, vlan_key_nmn
+                destination_rack_int,
+                sls_variables,
+                vlan_key_nmn,
             )
             new_node = {
                 "subtype": "cmm",

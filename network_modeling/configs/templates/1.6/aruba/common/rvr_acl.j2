@@ -1,5 +1,5 @@
 {#- acl_rvr #}
-access-list ip rvr-nmn
+access-list ip rvr-hmn-nmn
 {%- if variables.NMN_RVR and variables.HMN_RVR %}
 {% set sequence = 10 %}    {{ sequence }} permit any {{ variables.NMN_RVR_NETWORK_IP }}/{{ variables.NMN_RVR_NETMASK }} {{ variables.NMNLB_NETWORK_IP }}/{{ variables.NMNLB_NETMASK }}
 {% set sequence = sequence+10  %}    {{ sequence }} permit any {{ variables.HMN_RVR_NETWORK_IP }}/{{ variables.HMN_RVR_NETMASK }} {{ variables.HMNLB_NETWORK_IP }}/{{ variables.HMNLB_NETMASK }}
