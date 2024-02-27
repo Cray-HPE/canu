@@ -30,6 +30,7 @@
 - Fix case sensitivity when reading nodes from SHCD
 - Add Storage node support
 - Add config generation support for River NMN nodes
+- Fix Aruba Edge switch templates
 
 ## [1.8.0]
 
