@@ -280,7 +280,7 @@ def config(
         bgp_control_plane: Network used for BGP control plane
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
-        river_nmn: Assigns River nodes to the RVR_NMN VLAN based on their cabinet designation. e.g. storage01,storage04,storage10-15,cn001-cn0050
+        river_nmn: Assigns River nodes to the RVR_NMN VLAN based on their cabinet location. e.g. storage01,storage04,storage10-15,cn001-cn0050
         log_: Level of logging.
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
