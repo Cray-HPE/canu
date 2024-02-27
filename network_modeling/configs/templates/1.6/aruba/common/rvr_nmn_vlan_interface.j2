@@ -2,10 +2,8 @@
 {%- for cabinet in variables.NMN_RVR_VLANS %}
 vlan {{ cabinet.VlanID }}
     name {{ cabinet.Name }}_nmn
-    apply access-list ip nmn-hmn in
-    apply access-list ip nmn-hmn out
-    apply access-list ip rvr-nmn in
-    apply access-list ip rvr-nmn out
+    apply access-list ip rvr-hmn-nmn in
+    apply access-list ip rvr-hmn-nmn out
 interface vlan {{ cabinet.VlanID }}
     vrf attach {{ variables.VRF }}
     description {{ cabinet.Name }}_nmn
