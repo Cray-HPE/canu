@@ -1067,8 +1067,8 @@ def generate_switch_config(
 
     if len(dupe_vlans) > 0:
         click.secho(
-            f"Error: Duplicate VLANs detected: {', '.join(map(str, dupe_vlans))}.
-            Verify the VLANs in SLS and custom_configuration.yaml.",
+            f"Error: Duplicate VLANs detected: {', '.join(map(str, dupe_vlans))}.\n",
+            f"Verify the VLANs in SLS and custom_configuration.yaml.",
             fg="red",
         )
         sys.exit(1)
@@ -1402,7 +1402,7 @@ def get_switch_nodes(
                 new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name == "cec":
-            destination_rack_int = int(re.search(r"\d+", destination_rack)[0]),
+            destination_rack_int = (int(re.search(r"\d+", destination_rack)[0]),)
             vlan_key = "HMN_MTN_CABINETS"
             hmn_mtn_vlan = get_vlan_id_by_cabinet(
                 destination_rack_int, sls_variables, vlan_key
@@ -1459,7 +1459,9 @@ def get_switch_nodes(
             vlan_key = "NMN_RVR_CABINETS"
             destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
             nmn_rvr_vlan = get_vlan_id_by_cabinet(
-                destination_rack_int, sls_variables, vlan_key,
+                destination_rack_int,
+                sls_variables,
+                vlan_key,
             )
             primary_port_uan = get_primary_port(
                 nodes_by_name,
@@ -1506,7 +1508,9 @@ def get_switch_nodes(
             vlan_key = "NMN_RVR_CABINETS"
             destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
             nmn_rvr_vlan = get_vlan_id_by_cabinet(
-                destination_rack_int, sls_variables, vlan_key,
+                destination_rack_int,
+                sls_variables,
+                vlan_key,
             )
             new_node = {
                 "subtype": "river_ncn_node_4_port_1g_ocp",
@@ -1547,7 +1551,9 @@ def get_switch_nodes(
             vlan_key = "NMN_RVR_CABINETS"
             destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
             nmn_rvr_vlan = get_vlan_id_by_cabinet(
-                destination_rack_int, sls_variables, vlan_key,
+                destination_rack_int,
+                sls_variables,
+                vlan_key,
             )
             new_node = {
                 "subtype": "compute",
