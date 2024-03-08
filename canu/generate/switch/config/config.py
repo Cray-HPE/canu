@@ -1064,11 +1064,10 @@ def generate_switch_config(
                         variables["HMN_MTN_VLANS"][-1]["IP"] = ip
 
     dupe_vlans, vlan_range = vlan_check(variables)
-
     if len(dupe_vlans) > 0:
         click.secho(
-            f"Error: Duplicate VLANs detected: {', '.join(map(str, dupe_vlans))}.\n",
-            "Verify the VLANs in SLS and custom_configuration.yaml.",
+            f"Error: Duplicate VLANs detected: {', '.join(map(str, dupe_vlans))}."
+            + "\nValidate that there are no duplicate VLANs in SLS or the custom_switch config file.",
             fg="red",
         )
         sys.exit(1)
