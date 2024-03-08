@@ -185,11 +185,6 @@ csm_options = canu_config["csm_versions"]
     is_flag=True,
 )
 @click.option(
-    "--river-nmn",
-    callback=validate_node_list,
-    help="Nodes to be placed on RIVER NMN network",
-)
-@click.option(
     "--log",
     "log_",
     help="Level of logging.",
@@ -216,7 +211,6 @@ def config(
     bgp_control_plane,
     vrf,
     bond_app_nodes,
-    river_nmn,
     log_,
 ):
     """Generate the config of all switches (Aruba, Dell, or Mellanox) on the network using the SHCD.
@@ -275,12 +269,12 @@ def config(
         folder: Folder to store config files
         preserve: Folder where switch running configs exist.  This folder should be populated from the "canu backup network" command.
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
+                    river_nmn: Assigns River nodes to the RVR_NMN VLAN based on their cabinet location. e.g. storage01,storage04,storage10-15,cn001-cn0050
         edge: Vendor of the edge router
         reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
         bgp_control_plane: Network used for BGP control plane
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
-        river_nmn: Assigns River nodes to the RVR_NMN VLAN based on their cabinet location. e.g. storage01,storage04,storage10-15,cn001-cn0050
         log_: Level of logging.
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
@@ -457,7 +451,6 @@ def config(
                 bgp_control_plane,
                 vrf,
                 bond_app_nodes,
-                river_nmn,
             )
             all_unknown.extend(unknown)
             config_devices.update(devices)

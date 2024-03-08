@@ -23,10 +23,8 @@
 
 import re
 
-import click
 
-
-def validate_node_list(ctx, param, value):
+def validate_node_list(value):
     """.
 
     Args:
@@ -47,7 +45,7 @@ def validate_node_list(ctx, param, value):
     range_pattern = re.compile(r"^([a-zA-Z0-9_]+)-?(\d+)?$")
 
     nodes = []
-    for item in value.split(","):
+    for item in value:
         item = item.strip().lower()
         if node_pattern.match(item):
             match = re.match(r"^([a-zA-Z]+)(\d+)$", item)
@@ -87,7 +85,7 @@ def validate_node_list(ctx, param, value):
             else:
                 nodes.append(start_node)
         else:
-            raise click.BadParameter(
-                'Invalid node format. Use "NodeName" or "NodeName-5" for ranges.',
+            raise Exception(
+                'Invalid node format. Use "NodeName" or "NodeName1-5" for ranges.',
             )
     return nodes
