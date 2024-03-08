@@ -1068,7 +1068,7 @@ def generate_switch_config(
     if len(dupe_vlans) > 0:
         click.secho(
             f"Error: Duplicate VLANs detected: {', '.join(map(str, dupe_vlans))}.\n",
-            f"Verify the VLANs in SLS and custom_configuration.yaml.",
+            "Verify the VLANs in SLS and custom_configuration.yaml.",
             fg="red",
         )
         sys.exit(1)
@@ -1405,7 +1405,9 @@ def get_switch_nodes(
             destination_rack_int = (int(re.search(r"\d+", destination_rack)[0]),)
             vlan_key = "HMN_MTN_CABINETS"
             hmn_mtn_vlan = get_vlan_id_by_cabinet(
-                destination_rack_int, sls_variables, vlan_key
+                destination_rack_int,
+                sls_variables,
+                vlan_key,
             )
             new_node = {
                 "subtype": "cec",
