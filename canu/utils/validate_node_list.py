@@ -28,15 +28,13 @@ def validate_node_list(value):
     """.
 
     Args:
-        ctx: click
-        param: click paramater
         value: node list
 
     Returns:
         nodes: list of nodes.
 
     Raises:
-        BadParameter: If the node list is invalid.
+        Exception: If the node list is invalid.
     """
     if value is None:
         return []
