@@ -42,7 +42,6 @@ from canu.generate.switch.config.config import (
 )
 from canu.style import Style
 from canu.utils.cache import cache_directory
-from canu.utils.validate_node_list import validate_node_list
 from canu.validate.paddle.paddle import node_model_from_paddle
 from canu.validate.shcd.shcd import node_model_from_shcd, shcd_to_sheets
 
