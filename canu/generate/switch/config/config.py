@@ -237,7 +237,7 @@ dash = "-" * 60
 )
 @click.option(
     "--river-nmn",
-    callback=validate_node_list,
+    # callback=validate_node_list,
     help="Nodes to be placed on RIVER NMN network",
 )
 @click.option(
@@ -268,7 +268,6 @@ def config(
     bgp_control_plane,
     vrf,
     bond_app_nodes,
-    river_nmn,
     log_,
 ):
     """Generate switch config using the SHCD.
@@ -333,7 +332,6 @@ def config(
         bgp_control_plane: Network used for BGP control plane
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
-        river_nmn: Assigns River nodes to the RVR_NMN VLAN based on their cabinet location. e.g. storage01,storage04,storage10-15,cn001-cn0050
         log_: Level of Logging
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
@@ -476,7 +474,6 @@ def config(
         bgp_control_plane,
         vrf,
         bond_app_nodes,
-        river_nmn,
     )
 
     click.echo("\n")
@@ -620,7 +617,6 @@ def generate_switch_config(
     bgp_control_plane,
     vrf,
     bond_app_nodes,
-    river_nmn,
 ):
     """Generate switch config.
 
@@ -640,7 +636,6 @@ def generate_switch_config(
         bgp_control_plane: Network used for BGP control plane
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
-        river_nmn: Assigns River nodes to the RVR_NMN VLAN based on their cabinet location.
 
 
 
@@ -723,6 +718,8 @@ def generate_switch_config(
     if custom_config:
         custom_config_file = os.path.basename(custom_config)
         custom_config = load_yaml(custom_config)
+
+    river_nmn = validate_node_list(custom_config.get("river_nmn"))
 
     is_primary, primary, secondary = switch_is_primary(switch_name)
 
