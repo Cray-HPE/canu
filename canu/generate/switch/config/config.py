@@ -1401,7 +1401,7 @@ def get_switch_nodes(
                 new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name == "cec":
-            destination_rack_int = (int(re.search(r"\d+", destination_rack)[0]),)
+            destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
             vlan_key = "HMN_MTN_CABINETS"
             hmn_mtn_vlan = get_vlan_id_by_cabinet(
                 destination_rack_int,
