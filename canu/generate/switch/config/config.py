@@ -236,11 +236,6 @@ dash = "-" * 60
     is_flag=True,
 )
 @click.option(
-    "--river-nmn",
-    # callback=validate_node_list,
-    help="Nodes to be placed on RIVER NMN network",
-)
-@click.option(
     "--log",
     "log_",
     help="Level of logging.",
@@ -715,11 +710,11 @@ def generate_switch_config(
                 fg="red",
             )
             exit(1)
+    river_nmn = None
     if custom_config:
         custom_config_file = os.path.basename(custom_config)
         custom_config = load_yaml(custom_config)
-
-    river_nmn = validate_node_list(custom_config.get("river_nmn"))
+        river_nmn = validate_node_list(custom_config.get("river_nmn"))
 
     is_primary, primary, secondary = switch_is_primary(switch_name)
 
