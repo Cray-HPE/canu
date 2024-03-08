@@ -269,7 +269,6 @@ def config(
         folder: Folder to store config files
         preserve: Folder where switch running configs exist.  This folder should be populated from the "canu backup network" command.
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
-                    river_nmn: Assigns River nodes to the RVR_NMN VLAN based on their cabinet location. e.g. storage01,storage04,storage10-15,cn001-cn0050
         edge: Vendor of the edge router
         reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
         bgp_control_plane: Network used for BGP control plane
