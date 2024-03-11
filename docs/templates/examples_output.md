@@ -686,6 +686,30 @@ To generate switch configuration with custom config injection.
 canu generate switch config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --name sw-spine-001 --custom-config CUSTOM_CONFIG_FILE.yaml
 ```
 
+## Custom Config Parameters
+
+Additional configuration parameters can be added to the custom config file.
+
+- `river_nmn:` Allows you to specify what River Nodes you want on the NMN_RVR network.  By default these nodes will be on the NMN network.
+  - The VLANs and IPs for these networks are from SLS.
+- `black_hole_vlan_1:` Black hole VLAN 1. Default value is 4000
+- `black_hole_vlan_2:` Black hole VLAN. 2 Default value is 4001
+
+```yaml
+river_nmn:
+  - storage001-3
+  - storage10-11
+  - cn926
+black_hole_vlan_1: 4010
+black_hole_vlan_2: 4022
+sw-spine-001:  |
+    ip route 0.0.0.0/0 10.103.15.185
+    interface 1/1/36
+        no shutdown
+        ip address 10.103.15.186/30
+        exit
+```
+
 ## Generate Switch Config while preserving LAG #s
 
 This option allows you to generate swtich configs while preserving the lag #s of the previous running config.
@@ -957,53 +981,6 @@ sw-cdu-001.cfg
 sw-cdu-002.cfg
 ```
 
-# Send Command
-
-Canu can send commands to the switches via the CLI.
-This is primarily used for `show` commands since we do not elevate to configuration mode.
-
-
-You can either use an SLS file or pull the SLS file from the API-Gateway using a token.
-- `--sls-file`
-- `--log` outputs the nornir debug logs
-- `--network [HMN|CMN]` This gives the user the ability to connect to the switches over the CMN.  This allows the use of this tool from outside the Mgmt Network.  The default network used is the HMN.
-- `--command` command to send to the switch/switches.
-- `--password` prompts if password is not entered
-- `--username` defaults to admin
-- `--name` The name of the switch that you want to back up. e.g. 'sw-spine-001'
-
-Examples
-
-  ```bash
-  canu send command --sls-file ./sls_input_file.json --network cmn --command "show banner exec" --name sw-spine-001
-  -netmiko_send_command************************************************************
-  * sw-spine-001 ** changed : False **********************************************
-  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-  ###############################################################################
-  # CSM version:  1.2
-  # CANU version: 1.3.2
-  ###############################################################################
-
-  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  ```
-
-  ```bash
-  canu send command --command 'show version | include "Version      :"'
-  \netmiko_send_command************************************************************
-  * sw-leaf-bmc-001 ** changed : False *******************************************
-  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-  Version      : FL.10.09.0010                                                 
-  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  * sw-spine-001 ** changed : False **********************************************
-  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-  Version      : GL.10.09.0010                                                 
-  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  * sw-spine-002 ** changed : False **********************************************
-  vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-  Version      : GL.10.09.0010                                                 
-  ^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  ```
-
 # Report Network Version
 
 Canu reports the version of configuration on the switch.  It reads the exec baner of all the switches and outputs to the screen.
@@ -1025,20 +1002,3 @@ Example
   sw-spine-002      1.5.12            1.2  
   sw-leaf-bmc-001   1.5.12            1.2
   ```
-
-```bash
-canu send command --command 'show version | include "Version      :"'
-\netmiko_send_command************************************************************
-* sw-leaf-bmc-001 ** changed : False *******************************************
-vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-Version      : FL.10.09.0010
-^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-* sw-spine-001 ** changed : False **********************************************
-vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-Version      : GL.10.09.0010
-^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-* sw-spine-002 ** changed : False **********************************************
-vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
-Version      : GL.10.09.0010
-^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-```
