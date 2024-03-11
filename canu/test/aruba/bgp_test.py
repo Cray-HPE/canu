@@ -83,8 +83,21 @@ router bgp {{ asn }}
 
     # Get BGP peers from switch config
     bgp_peers = {}
-    bgp_peers.update(output[0][0]["bgp_cfg"]["vrfs"]["Customer"]["peers"])
-    bgp_peers.update(output[0][0]["bgp_cfg"]["vrfs"]["default"]["peers"])
+
+    if output and output[0] and output[0][0] and "bgp_cfg" in output[0][0]:
+        bgp_cfg = output[0][0]["bgp_cfg"]
+
+        if "vrfs" in bgp_cfg:
+            vrfs = bgp_cfg["vrfs"]
+
+            if "Customer" in vrfs and "peers" in vrfs["Customer"]:
+                bgp_peers.update(vrfs["Customer"]["peers"])
+
+            if "CSM" in vrfs and "peers" in vrfs["CSM"]:
+                bgp_peers.update(vrfs["CSM"]["peers"])
+
+            if "default" in vrfs and "peers" in vrfs["default"]:
+                bgp_peers.update(vrfs["default"]["peers"])
 
     # Get the worker nodes CMN and NMN IPs
     # If those are not in the BGP config on the switch add them to the list.

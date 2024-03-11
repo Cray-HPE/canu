@@ -741,8 +741,8 @@ def generate_switch_config(
         custom_config_file = os.path.basename(custom_config)
         custom_config = load_yaml(custom_config)
         river_nmn = validate_node_list(custom_config.get("river_nmn"))
-        black_hole_vlan_1 = custom_config.get("black_hole_vlan_1")
-        black_hole_vlan_2 = custom_config.get("black_hole_vlan_2")
+        black_hole_vlan_1 = custom_config.get("black_hole_vlan_1", black_hole_vlan_1)
+        black_hole_vlan_2 = custom_config.get("black_hole_vlan_2", black_hole_vlan_2)
 
     is_primary, primary, secondary = switch_is_primary(switch_name)
 
@@ -964,14 +964,12 @@ def generate_switch_config(
     variables["NMN_RVR_VLAN_LIST"] = []
     variables["HMN_RVR_VLAN_LIST"] = []
 
-    # Get RVR VLANs for spine and leaf switches
+    # Get NMN RVR VLANs for spine and leaf switches
     # This is ALL the RVR VLANS and IP addresses
     if node_shasta_name in ["sw-spine", "sw-leaf"]:
         nodes_by_name = {}
         nodes_by_id = {}
-        for cabinets in (
-            sls_variables["NMN_RVR_CABINETS"] + sls_variables["HMN_RVR_CABINETS"]
-        ):
+        for cabinets in sls_variables["NMN_RVR_CABINETS"]:
             ip_address = netaddr.IPNetwork(cabinets["CIDR"])
             is_primary = switch_is_primary(switch_name)
             sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
@@ -987,7 +985,7 @@ def generate_switch_config(
         for vlan in variables["NMN_RVR_VLANS"]:
             variables["NMN_RVR_VLAN_LIST"].append(vlan["VlanID"])
 
-    # Get RVR VLAN for a leaf-bmc switch
+    # Get NMN RVR VLAN for a leaf-bmc switch
     if "sw-leaf-bmc" in node_shasta_name:
         nodes_by_name = {}
         nodes_by_id = {}

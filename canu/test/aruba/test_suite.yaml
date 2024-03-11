@@ -181,6 +181,10 @@
     - leaf-bmc
     - cdu
     - spine
+  csm:
+    - 1.5
+    - 1.4
+    - 1.3
 
 - name: TFTP Route
   task: show ip route 10.92.100.60
@@ -208,6 +212,20 @@
   err_msg: There are no BGP routes in the Customer VRF routing table.
   device:
     - spine
+  csm:
+    - 1.5
+    - 1.4
+    - 1.3
+
+- name: BGP vrf CSM Routing Table
+  task: show ip route bgp vrf CSM
+  test: ncontains
+  pattern: No ipv4 routes configured
+  err_msg: There are no BGP routes in the CSM VRF routing table.
+  device:
+    - spine
+  csm:
+    - 1.6
 
 - name: STP Root Bridge
   task: show spanning-tree
@@ -239,6 +257,10 @@
     - leaf-bmc
     - cdu
     - spine
+  csm:
+    - 1.5
+    - 1.4
+    - 1.3
 
 - name: DNS lookup (ncn-m001-nmn)
   task: ping ncn-m001-nmn repetitions 1
@@ -252,7 +274,6 @@
     - spine
   # used for testing --csm flag
   csm:
-    - 1.6
     - 1.5
     - 1.4
     - 1.3
@@ -287,13 +308,31 @@
   task: show ip ospf neighbors vrf Customer
   test: ncontains
   pattern: No OSPF neighbor
-  err_msg: No OSPF neighbors found on the default VRF.
+  err_msg: No OSPF neighbors found on the Customer VRF.
   device:
     - leaf
     - leaf-bmc
     - cdu
     - spine
   pre_install: True
+  csm:
+    - 1.5
+    - 1.4
+    - 1.3
+
+- name: OSPF vrf CSM Neighbors
+  task: show ip ospf neighbors vrf CSM
+  test: ncontains
+  pattern: No OSPF neighbor
+  err_msg: No OSPF neighbors found on the CSM VRF.
+  device:
+    - leaf
+    - leaf-bmc
+    - cdu
+    - spine
+  pre_install: True
+  csm:
+    - 1.6
 
 - name: OSPF vrf default EXSTART Neighbors
   task: show ip ospf neighbors
@@ -324,3 +363,24 @@
     - cdu
     - spine
   pre_install: True
+  csm:
+    - 1.5
+    - 1.4
+    - 1.3
+
+- name: OSPF vrf CSM EXSTART Neighbors
+  task: show ip ospf neighbors vrf CSM
+  test: ncontains
+  pattern: EXSTART
+  err_msg: |
+    OSPF neighbors found in EXSTART state.
+    This is commonly caused by a MTU mismatch between neighbors.
+    Execute "show ip interface" to see the MTU of L3 interfaces.
+  device:
+    - leaf
+    - leaf-bmc
+    - cdu
+    - spine
+  pre_install: True
+  csm:
+    - 1.6
