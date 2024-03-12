@@ -750,6 +750,7 @@ def generate_switch_config(
     black_hole_vlan_1 = 4001
     black_hole_vlan_2 = 4002
     river_nmn_dhcp = False
+    river_nmn = None
     if custom_config:
         custom_config_file = os.path.basename(custom_config)
         custom_config = load_yaml(custom_config)
