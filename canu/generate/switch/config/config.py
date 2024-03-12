@@ -747,13 +747,16 @@ def generate_switch_config(
                 fg="red",
             )
             exit(1)
-    river_nmn = None
     black_hole_vlan_1 = 4001
     black_hole_vlan_2 = 4002
+    river_nmn_dhcp = False
     if custom_config:
         custom_config_file = os.path.basename(custom_config)
         custom_config = load_yaml(custom_config)
-        river_nmn = validate_node_list(custom_config.get("river_nmn"))
+        river_nmn = validate_node_list(
+            custom_config.get("river_nmn", {}).get("nodes", []),
+        )
+        river_nmn_dhcp = custom_config.get("river_nmn", {}).get("dhcp", [])
         black_hole_vlan_1 = custom_config.get("black_hole_vlan_1", black_hole_vlan_1)
         black_hole_vlan_2 = custom_config.get("black_hole_vlan_2", black_hole_vlan_2)
 
@@ -908,6 +911,7 @@ def generate_switch_config(
         "VRF": vrf,
         "BOND_APP_NODES": bond_app_nodes,
         "RVR_NMN_NODES": river_nmn,
+        "RVR_NMN_DHCP": river_nmn_dhcp,
         "BLACK_HOLE_VLAN_1": black_hole_vlan_1,
         "BLACK_HOLE_VLAN_2": black_hole_vlan_2,
     }

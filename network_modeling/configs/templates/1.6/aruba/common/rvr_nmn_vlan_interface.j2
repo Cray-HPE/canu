@@ -12,6 +12,9 @@ interface vlan {{ cabinet.VlanID }}
     ip address {{ cabinet.IP }}/{{ cabinet.PREFIX_LENGTH }}
     active-gateway ip mac 12:00:00:00:73:00
     active-gateway ip {{ cabinet.Gateway }}
+{%- if variables.RVR_NMN_DHCP  %}
+    ip helper-address {{ variables.NMNLB_DHCP }}
+{%- endif %}
     ip ospf 2 area 0.0.0.0
     ip ospf passive
 
