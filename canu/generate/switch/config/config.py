@@ -620,6 +620,19 @@ def vlan_check(dictionary):
     return dupe_vlan, range_vlan
 
 
+def node_name_normalize(node):
+    """Normalize the node name by removing leading zeros from the numeric part."""
+    match = re.match(r"^(\D+)-?(\d+)", node)
+    if match:
+        node_name = match.group(1)
+        numeric_node = match.group(2)
+        numeric_node_stripped = str(int(numeric_node))
+        result = node_name + numeric_node_stripped
+        return result
+    else:
+        return node
+
+
 def generate_switch_config(
     csm,
     architecture,
@@ -1312,6 +1325,7 @@ def get_switch_nodes(
         source_port = port["port"]
         destination_port = port["destination_port"]
         destination_slot = port["destination_slot"]
+        destination_node_name_normalized = node_name_normalize(destination_node_name)
 
         shasta_name = get_shasta_name(destination_node_name, factory.lookup_mapper())
         primary_port = get_primary_port(nodes_by_name, switch_name, destination_node_id)
@@ -1472,7 +1486,7 @@ def get_switch_nodes(
                 "subtype": "uan",
                 "slot": destination_slot,
                 "destination_port": destination_port,
-                "node_name": destination_node_name,
+                "node_name": destination_node_name_normalized,
                 "config": {
                     "DESCRIPTION": get_description(
                         switch_name,
@@ -1515,7 +1529,7 @@ def get_switch_nodes(
                 "subtype": "river_ncn_node_4_port_1g_ocp",
                 "slot": destination_slot,
                 "destination_port": destination_port,
-                "node_name": destination_node_name,
+                "node_name": destination_node_name_normalized,
                 "config": {
                     "DESCRIPTION": get_description(
                         switch_name,
@@ -1558,7 +1572,7 @@ def get_switch_nodes(
                 "subtype": "compute",
                 "slot": destination_slot,
                 "destination_port": destination_port,
-                "node_name": destination_node_name,
+                "node_name": destination_node_name_normalized,
                 "config": {
                     "DESCRIPTION": get_description(
                         switch_name,
