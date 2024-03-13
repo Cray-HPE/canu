@@ -40,4 +40,5 @@ router bgp {{ variables.SWITCH_ASN }}
             neighbor {{ ip }} activate
             neighbor {{ ip }} route-map {{ name }} in
             {%- endfor %}
+        exit-address-family
 {#- end bgp #}

@@ -697,11 +697,14 @@ Additional configuration parameters can be added to the custom config file.
 
 ```yaml
 river_nmn:
-  - storage001-3
-  - storage10-11
-  - cn926
-black_hole_vlan_1: 4010
-black_hole_vlan_2: 4022
+  nodes:
+    - storage1-25
+    - storage10-11
+    - cn926
+    - cn954
+  dhcp: false
+black_hole_vlan_1: 4000
+black_hole_vlan_2: 4001
 sw-spine-001:  |
     ip route 0.0.0.0/0 10.103.15.185
     interface 1/1/36
