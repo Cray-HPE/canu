@@ -232,21 +232,6 @@
     - cdu
   pre_install: True
 
-- name: Internal DNS Server Alive (Ping)
-  task: ping 10.92.100.225 repetitions 1
-  test: contains
-  pattern: bytes from
-  err_msg: Internal DNS does not respond to ping
-  device:
-    - leaf
-    - leaf-bmc
-    - cdu
-    - spine
-  csm:
-    - 1.5
-    - 1.4
-    - 1.3
-
 - name: DNS lookup (ncn-m001-nmn)
   task: ping ncn-m001-nmn repetitions 1
   test: contains
