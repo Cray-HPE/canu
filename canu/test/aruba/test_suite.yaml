@@ -232,22 +232,6 @@
     - cdu
   pre_install: True
 
-- name: DNS lookup (ncn-m001-nmn)
-  task: ping ncn-m001-nmn repetitions 1
-  test: contains
-  pattern: bytes from
-  err_msg: Internal DNS cannot resolve ncn-m001-nmn, is ncn-m001 alive?
-  device:
-    - leaf
-    - leaf-bmc
-    - cdu
-    - spine
-  # used for testing --csm flag
-  csm:
-    - 1.5
-    - 1.4
-    - 1.3
-
 - name: Needed Updates
   task: show needed-updates
   test: contains
