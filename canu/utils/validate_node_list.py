@@ -25,9 +25,9 @@ import re
 
 
 def validate_node_list(value):
-    """Takes a list of node ranges and returns a formatted list.
+    """Format a list of node ranges and return a formatted list.
 
-    Example: storage1-3, returns a list of [storage001, storage002, storage003]
+    Example: storage1-3 returns a list of [storage001, storage002, storage003]
 
     Args:
         value: node list
