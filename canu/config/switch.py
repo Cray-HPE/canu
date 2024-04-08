@@ -14,7 +14,7 @@ requests.packages.urllib3.disable_warnings(
 
 def login(session, ip):
     url = f"https://{ip}/rest/v10.11/login"
-    credentials = {"username": "admin", "password": "***REMOVED***"}
+    credentials = {"username": "admin", "password": "xxxxxx"}
     try:
         response = session.post(url, data=credentials, verify=False)
         response.raise_for_status()
@@ -133,7 +133,7 @@ def main():
     session = requests.Session()
     ip = "10.102.193.4"
     username = "admin"
-    password = "***REMOVED***"
+    password = "!nitial0"
     input_file = "/Users/lucasbates/canu-container/canu/canu/config/sw-leaf-bmc-001.cfg"
     checkpoint_name = f"ac_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}"
     validated_config_json = (
