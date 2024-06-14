@@ -27,7 +27,7 @@ import logging
 import re
 import sys
 from urllib.parse import unquote
-
+import pprint
 import click
 import natsort
 from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
@@ -261,16 +261,18 @@ def get_lldp(ip, credentials, return_error=False):
 
     if arp or arp is not None:
         log.debug("Adding ARP metadata to switch LLDP data")
-        for _, port in switch_dict.items():
-            for index, _ in enumerate(port):
+        for port, data in switch_dict.items():
+
+            if "mac_addr" in data:
+
+                mac_addr = data["mac_addr"]
                 arp_list = [
                     f"{arp[mac]['ip_address']}:{list(arp[mac]['port'])[0]}"
                     for mac in arp
-                    if arp[mac]["mac"] == port[index]["mac_addr"]
+                    if arp[mac]["mac"] == mac_addr
                 ]
                 arp_list = ", ".join(arp_list)
-                port[index]["arp_data"] = arp_list
-
+                data["arp_data"] = arp_list
     return switch_info, switch_dict, arp
 
 
@@ -346,13 +348,37 @@ def get_lldp_aruba(ip, credentials, return_error=False):
         neighbors.raise_for_status()
         neighbors_dict = neighbors.json()
 
+        # # GET LACP interfaces
+        interfaces = session.get(
+            f"https://{ip}/rest/v10.04/system/interfaces?attributes=other_config&depth=2",
+            verify=False,
+        )
+        interfaces.raise_for_status()
+        interfaces_dict = interfaces.json()
+
+        # # GET interface status
+        interface_status = session.get(
+            f"https://{ip}/rest/v10.04/system/interfaces?attributes=link_state&depth=2&selector=status",
+            verify=False,
+        )
+        interface_status.raise_for_status()
+        interface_status_json = interface_status.json()
+
+        # # GET MAC
+        mac_addr = session.get(
+            f"https://{ip}/rest/v10.04/system/vlans/%2A/macs?attributes=port&depth=2",
+            verify=False,
+        )
+        mac_addr.raise_for_status()
+        mac_addr_json = mac_addr.json()
+
+        # # GET ARP table
         arp_response = session.get(
             f"https://{ip}/rest/v10.04/system/vrfs/default/neighbors?depth=2",
             verify=False,
         )
         arp_response.raise_for_status()
         arp = arp_response.json()
-
         lldp_dict = defaultdict(list)
         for port_number, port in neighbors_dict.items():
             interface = unquote(port_number)
@@ -376,44 +402,56 @@ def get_lldp_aruba(ip, credentials, return_error=False):
 
                 lldp_dict[interface].append(lldp_neighbor)
 
+        port_dict = defaultdict(dict)
+        for interface, config in interfaces_dict.items():
+            lag_id = config["other_config"].get("lacp-aggregation-key")
+            port_dict[interface]
+            for port_number, port in neighbors_dict.items():
+                interface_lldp = unquote(port_number)
+                if interface_lldp == interface:
+                    for _mac, lldp_info in port.items():
+                        neighbor_info = lldp_info["neighbor_info"]
+                        if neighbor_info["chassis_description"] == "":
+                            description = find_mac(lldp_info["mac_addr"])
+                        else:
+                            description = neighbor_info["chassis_description"]
+                        lldp_neighbor = {
+                            "chassis_id": lldp_info["chassis_id"],
+                            "mac_addr": lldp_info["mac_addr"],
+                            "chassis_description": description,
+                            "chassis_name": neighbor_info["chassis_name"],
+                            "port_description": neighbor_info["port_description"],
+                            "port_id_subtype": neighbor_info["port_id_subtype"],
+                            "port_id": lldp_info["port_id"],
+                            "data_sources": "LLDP",
+                        }
+                        port_dict[interface].update(lldp_neighbor)
+                if lag_id is not None:
+                    port_dict[interface]["lag_id"] = lag_id
+            link_state = interface_status_json.get(interface, {}).get("link_state")
+            port_dict[interface]["link_state"] = link_state
+
         # Logout
         session.post(f"https://{ip}/rest/v10.04/logout", verify=False)
 
-        # Get the mac-address-table to help fill in port data if not reported over LLDP
-        command = "show mac-address-table"
-        command_output = netmiko_command(ip, credentials, command)
-        mac_address_table = defaultdict()
-
-        # Start parsing after the header
-        for line in command_output.splitlines()[5:]:
-            line = line.split()
-            table_mac = line[0]
-            table_port = line[3]
-            if "lag" not in table_port:
-                mac_address_table[table_port] = table_mac
-
         # Add the mac-address-table data to the lldp_dict
-        for device_port, mac in mac_address_table.items():
-            if device_port not in lldp_dict.keys():
-                lldp_dict[device_port] = [
-                    {
-                        "chassis_id": "",
-                        "mac_addr": mac,
-                        "chassis_description": find_mac(mac),
-                        "port_description": "",
-                        "chassis_name": "",
-                        "port_id": mac,
-                        "port_id_subtype": "link_local_addr",
-                        "data_sources": "LLDP",
-                    },
-                ]
+        mac_addr_table = defaultdict()
+        for vlan, mac_addresses in mac_addr_json.items():
+            for mac_address, attributes in mac_addresses.items():
+                port = attributes.get("port", {}).keys()
+                mac_address_format = mac_address.split(",")[-1]
+                port = list(port)[0]
+                if "lag" not in port:
+                    mac_addr_table[port] = mac_address_format
+        for device_port, mac in mac_addr_table.items():
+            port_dict[device_port]["mac_addr"] = find_mac(mac)
 
         # Order the ports in natural order
-        lldp_dict = OrderedDict(natsort.natsorted(lldp_dict.items()))
-
         cache_lldp(switch_info, lldp_dict, arp)
 
-        return switch_info, lldp_dict, arp
+        port_dict = OrderedDict(natsort.natsorted(port_dict.items()))
+
+        return switch_info, port_dict, arp
 
     except requests.exceptions.RequestException as error:  # pragma: no cover
         if return_error:
@@ -1057,7 +1095,9 @@ def add_heuristic_metadata_to_lldp(switch_info, switch_dict):
         if heuristic_record is None:
             continue
         v[0]["data_sources"] = f'{v[0]["data_sources"]}, Heuristic'
-        v[0]["chassis_description"] = f'{v[0]["chassis_description"]} {heuristic_record}'
+        v[0][
+            "chassis_description"
+        ] = f'{v[0]["chassis_description"]} {heuristic_record}'
         log.debug(f"MAC {lldp_mac} often a {heuristic_record}")
 
 
@@ -1159,7 +1199,7 @@ def print_lldp(switch_info, lldp_dict, arp, heuristic_lookups, out="-"):
             neighbor_mac = port[index]["mac_addr"]
             lag_mac = ""
             if neighbor_port != neighbor_mac:
-                lag_mac = f'LAG_MAC({neighbor_mac})'
+                lag_mac = f"LAG_MAC({neighbor_mac})"
                 if neighbor_port.find(":") != -1:  # Cheap MAC find
                     neighbor_mac = neighbor_port
             if heuristic_lookups:
@@ -1167,14 +1207,18 @@ def print_lldp(switch_info, lldp_dict, arp, heuristic_lookups, out="-"):
                     if h_mac not in neighbor_port:
                         continue
                     for switch_type, heuristic in switch_data.items():
-                        if switch_type not in switch_info['hostname']:
+                        if switch_type not in switch_info["hostname"]:
                             continue
                         neighbor_port = heuristic["port"]
                         if "Heuristic" not in port[index]["data_sources"]:
-                            port[index]["data_sources"] = f'{port[index]["data_sources"]}, Heuristic'
+                            port[index][
+                                "data_sources"
+                            ] = f'{port[index]["data_sources"]}, Heuristic'
                         break
 
-            neighbor_info = f'{port[index]["chassis_description"][:54]} {lag_mac} {str(arp_list)}'
+            neighbor_info = (
+                f'{port[index]["chassis_description"][:54]} {lag_mac} {str(arp_list)}'
+            )
             if neighbor_description:
                 neighbor_info = neighbor_description
             duplicate = False
@@ -1224,7 +1268,12 @@ def print_lldp(switch_info, lldp_dict, arp, heuristic_lookups, out="-"):
         text_color = ""
         if row[5] == "if_name":
             text_color = "green"
-        elif "Kea" in row[5] or "SLS" in row[5] or "SMD" in row[5] or "Heuristic" in row[5]:
+        elif (
+            "Kea" in row[5]
+            or "SLS" in row[5]
+            or "SMD" in row[5]
+            or "Heuristic" in row[5]
+        ):
             text_color = "blue"
         if row[6] is True:
             text_color = "bright_white"
