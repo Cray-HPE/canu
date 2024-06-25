@@ -79,13 +79,18 @@ mkdir -p %{buildroot}%{_bindir}
 install -m 755 ./canuctl %{buildroot}%{_bindir}/canuctl
 
 %pre
-getent passwd canu >/dev/null || \
-    useradd -U -m -s /bin/bash -c "CANU user" canu
+# remove the canu user as it is no longer needed post v1.9.1
+if getent passwd canu; then 
+  userdel -r canu
+fi
+if getent group canu; then 
+  groupdel canu
+fi
 
 %files
-%attr(755, canu, canu) %{_bindir}/canuctl
-%attr(755, canu, canu) %{_bindir}/canu
-%attr(755, canu, canu) %{_bindir}/canu-inventory
+%attr(0755, -, -) %{_bindir}/canuctl
+%attr(0755, -, -) %{_bindir}/canu
+%attr(0755, -, -) %{_bindir}/canu-inventory
 %license LICENSE
 
 %changelog
