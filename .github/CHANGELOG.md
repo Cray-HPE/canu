@@ -2,6 +2,9 @@
 
 ## [UNRELEASED]
 
+## [1.9.1]
+
+- remove canu user going forward. permissions are now default (root) 
 - Ensure that the variable designating a switch as primary is always initialized.
 
 ## [1.9.0]
