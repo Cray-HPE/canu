@@ -298,6 +298,33 @@ def validate_cabling_port_data(lldp_info, warnings):
     return None
 
 
+class FormatSwitchDestinationNameError(Exception):
+    def __init__(self, message="Unable to parse and format switch destination name. Should follow the format: 'sw-NAME-NNN'"):
+        self.message = message
+        super().__init__(self.message)
+
+def format_switch_dst_name(dst_name):
+    """
+    Format the destination name.
+    If this name starts with "sw-", it modifies the name by adding an extra '-' 
+    before the number part of the name and ensures that the number is 
+    represented with at least three digits
+    """
+    # TODO: the naming requirement is fairly arbitrary and should be documented or improved
+    pattern_digits = r"(\d+)"
+    pattern_middle = r"(?:sw-)([a-z-]+)"
+    if dst_name.startswith("sw-"):
+        dst_digits = re.findall(pattern_digits, dst_name)
+        dst_middle = re.findall(pattern_middle, dst_name)
+        if dst_digits:
+            dst_digits = dst_digits[0]
+        if dst_middle:
+            dst_middle = dst_middle[0]
+        dst_name = f"sw-{dst_middle.rstrip('-')}-{int(dst_digits):03d}"
+    else:
+        raise FormatSwitchDestinationNameError
+    return dst_name
+
 def node_model_from_canu(factory, canu_cache, ips):
     """Create a list of nodes from CANU cache.
 
@@ -407,12 +434,7 @@ def node_model_from_canu(factory, canu_cache, ips):
 
                 # If starts with 'sw-' then add an extra '-' before the number, and convert to 3 digit
                 if dst_name.startswith("sw-"):
-                    dst_start = "sw-"
-                    dst_middle = re.findall(r"(?:sw-)([a-z-]+)", dst_name)[0]
-                    dst_digits = re.findall(r"(\d+)", dst_name)[0]
-                    dst_name = (
-                        f"{dst_start}{dst_middle.rstrip('-')}-{int(dst_digits) :03d}"
-                    )
+                    dst_name =format_switch_dst_name(dst_name)
 
                 log.debug(f"Destination Data: {dst_name} {dst_slot} {dst_port}")
                 dst_node_name = dst_name

@@ -26,6 +26,8 @@ from click import testing
 from openpyxl import Workbook
 import requests
 import responses
+import pytest
+import canu.validate.network.cabling.cabling as cabling
 
 from canu.cli import cli
 from canu.utils.cache import remove_switch_from_cache
@@ -2034,3 +2036,59 @@ mac_address_table = (
     + "--------------------------------------------------------------\n"
     + "00:40:a6:00:00:00    2        dynamic                   1/1/3\n"
 )
+
+def test_format_switch_dst_name():
+    # Test case 1: Name starts with "sw-"
+    dst_name = "sw-spine01"
+    expected_result = "sw-spine-001"
+    assert cabling.cabling.format_switch_dst_name(dst_name) == expected_result
+
+    # Test case 2: Name starts with "sw-" and has multiple digits
+    dst_name = "sw-spine-002"
+    expected_result = "sw-spine-002"
+    assert cabling.format_switch_dst_name(dst_name) == expected_result
+
+    # Test case 3: Name does not start with "sw-"
+    dst_name = "leaf-bmc99"
+    expected_result = "leaf-bmc99"
+    assert cabling.format_switch_dst_name(dst_name) == expected_result
+
+    # Test case 4: Name does not start with "sw-" and has multiple digits
+    dst_name = "leaf-bmc-098"
+    expected_result = "leaf-bmc-098"
+    assert cabling.format_switch_dst_name(dst_name) == expected_result
+
+    # Test case 5: Name does not start with "sw-" and has multiple digits
+    dst_name = "sw-smn04"
+    expected_result = "sw-smn-004"
+    assert cabling.format_switch_dst_name(dst_name) == expected_result
+
+    # Test case 6: Name starts with "sw-" and has multiple digits
+    dst_name = "sw-25g06"
+    expected_result = "sw-25g-006"
+    assert cabling.format_switch_dst_name(dst_name) == expected_result
+
+    # Test case 7: Name starts with "sw-" and has multiple digits
+    dst_name = "sw-100g01"
+    expected_result = "sw-100g-001"
+    assert cabling.format_switch_dst_name(dst_name) == expected_result
+
+    # Test case 8: Name does not start with "sw-" and has multiple digits
+    dst_name = "wn06"
+    expected_result = "wn06"
+    assert cabling.format_switch_dst_name(dst_name) == expected_result
+
+    # Test case 9: Name does not start with "sw-" and has multiple digits
+    dst_name = "sn19"
+    expected_result = "sn19"
+    assert cabling.format_switch_dst_name(dst_name) == expected_result
+
+    # Test case 10: Name does not start with "sw-" and has multiple digits
+    dst_name = "mn02"
+    expected_result = "mn02"
+    assert cabling.format_switch_dst_name(dst_name) == expected_result
+
+    # Test case 11: Name starts with "sw-" but has no digits
+    dst_name = "sw-leaf"
+    with pytest.raises(cabling.FormatSwitchDestinationNameError):
+        cabling.format_switch_dst_name(dst_name)
