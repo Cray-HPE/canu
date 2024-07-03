@@ -34,8 +34,8 @@ CANU_IMAGE="artifactory.algol60.net/csm-docker/stable/canu"
 CANU_TAG="latest"
 # Use the publicly available alpine image so users do not need to log in
 ALPINE_IMAGE="alpine"
-ALPINE_VERSION="3.17"
-PYTHON_VERSION="3.10"
+ALPINE_VERSION="3.20"
+PYTHON_VERSION="3.12"
 
 # die prints the line number and command that failed
 die() {

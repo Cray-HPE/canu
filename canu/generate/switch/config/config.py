@@ -1685,11 +1685,11 @@ def switch_is_primary(switch):
 
     if int(digits) % 2 == 0:  # Switch is Secondary
         is_primary = False
-        primary = f"sw-{middle.rstrip('-')}-{int(digits)-1 :03d}"
+        primary = f"sw-{middle.rstrip('-')}-{int(digits) - 1 :03d}"
         secondary = switch
     else:  # Switch is Primary
         is_primary = True
-        secondary = f"sw-{middle.rstrip('-')}-{int(digits)+1 :03d}"
+        secondary = f"sw-{middle.rstrip('-')}-{int(digits) + 1 :03d}"
         primary = switch
 
     return is_primary, primary, secondary
