@@ -2,6 +2,12 @@
 
 ## [UNRELEASED]
 
+
+## [1.9.2]
+
+- fixed a bug, which fails to parse an SHCD because of a poorly-named cell
+- this release halts the changelog file in favor of the github release notes associated with each tag.  manually keeping this log up-to-date is a chore and with csm entering EOL, we should focus on the fixes, not painful manual release notes
+
 ## [1.9.1]
 
 - remove canu user going forward. permissions are now default (root) 

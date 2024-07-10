@@ -298,6 +298,60 @@ def validate_cabling_port_data(lldp_info, warnings):
     return None
 
 
+class FormatSwitchDestinationNameError(Exception):
+    """Exception raised when the switch destination name cannot be formatted."""
+
+    def __init__(self, message="Unable to parse and format switch destination name. Should follow the format: 'sw-NAME-NNN'"):
+        # noqa: DAR101
+        """Initialize the exception."""
+        self.message = message
+        super().__init__(self.message)
+
+
+def format_switch_dst_name(dst_name):
+    # noqa: DAR101, DAR201, DAR401
+    """
+    Format the destination name.
+
+    Parameters:
+    - dst_name (str): The destination name to format.
+
+    Raises:
+    - FormatSwitchDestinationNameError (Exception): If the destination name cannot be formatted according to the expected pattern.
+
+      Returns:
+    - formatted_dst_name (str): The formatted destination name.
+    """
+    # TODO: the naming requirement is fairly arbitrary and should be documented or improved
+    # regex match for the following patterns:
+    #   1. a prefix ending with a letter (excluding g/G) followed by digits
+    #   2. a prefix that may include 'g' or 'G' as part of the middle section followed by digits
+    pattern = re.compile(r'(sw-)((?:.*[^gG\d]|.*[gG])?)(\d+)')
+    match = pattern.match(dst_name)
+    # if the name is close to what we need, try to format it
+    if match:
+        prefix = match.group(1).rstrip('-')
+        middle = match.group(2).rstrip('-').replace('-', '')
+        # some other commands like 'report switch firmware|cabling' and even
+        # certain variants of 'validate network cabling', where this code gets
+        # called there is some weird interdependencies here that are in the
+        # existing integration tests.  since I broke this out into its own
+        # function in an effort to start a better testing pattern, it has some
+        # unintended consequences.  that said, this could potentially go away
+        # once the other monolithinc functions are decomposed and the tests in
+        # general are more robust
+        if middle == "leafbmc":
+            middle = "leaf-bmc"
+        number = match.group(3)
+        # format the number to have three digits, padding with zeros if necessary
+        formatted_number = f"{int(number):03d}"
+        # combine the parts into the desired format
+        return f"{prefix}-{middle}-{formatted_number}"
+    # otherwise, return an error
+    else:
+        raise FormatSwitchDestinationNameError
+
+
 def node_model_from_canu(factory, canu_cache, ips):
     """Create a list of nodes from CANU cache.
 
@@ -407,12 +461,7 @@ def node_model_from_canu(factory, canu_cache, ips):
 
                 # If starts with 'sw-' then add an extra '-' before the number, and convert to 3 digit
                 if dst_name.startswith("sw-"):
-                    dst_start = "sw-"
-                    dst_middle = re.findall(r"(?:sw-)([a-z-]+)", dst_name)[0]
-                    dst_digits = re.findall(r"(\d+)", dst_name)[0]
-                    dst_name = (
-                        f"{dst_start}{dst_middle.rstrip('-')}-{int(dst_digits) :03d}"
-                    )
+                    dst_name = format_switch_dst_name(dst_name)
 
                 log.debug(f"Destination Data: {dst_name} {dst_slot} {dst_port}")
                 dst_node_name = dst_name
