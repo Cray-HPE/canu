@@ -427,7 +427,7 @@ class NetworkNode:
             if index > len(self.__ports) - 1 or index < 0:
                 raise Exception(
                     f"{__name__} Port {src_port.port()} was requested from {self.__id}:{self.__common_name} "
-                    f"but only {len(self.__ports)-1} Ports are available on the Node.",
+                    f"but only {len(self.__ports) - 1} Ports are available on the Node.",
                 )
 
             if self.__ports[index] is not None:

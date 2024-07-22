@@ -35,7 +35,7 @@ export ARCH := x86_64
 endif
 
 ifeq ($(PYTHON_VERSION),)
-export PYTHON_VERSION := 3.10
+export PYTHON_VERSION := 3.12
 endif
 
 ifeq ($(ALPINE_IMAGE),)
@@ -43,7 +43,7 @@ export ALPINE_IMAGE := artifactory.algol60.net/docker.io/library/alpine
 endif
 
 ifeq ($(ALPINE_VERSION),)
-export ALPINE_VERSION := 3.17
+export ALPINE_VERSION := 3.20
 endif
 
 export PYTHON_BIN := python$(PYTHON_VERSION)

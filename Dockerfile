@@ -25,9 +25,9 @@
 #
 ##########################
 ARG         ALPINE_IMAGE="artifactory.algol60.net/docker.io/library/alpine"
-ARG         ALPINE_VERSION="3.17"
+ARG         ALPINE_VERSION="3.20"
 FROM        ${ALPINE_IMAGE}:${ALPINE_VERSION} AS deps
-ARG         PYTHON_VERSION='3.10'
+ARG         PYTHON_VERSION='3.12'
 # hadolint ignore=DL3002
 USER        root
 WORKDIR     /root
@@ -40,18 +40,19 @@ ENV         PYTHON_VERSION=${PYTHON_VERSION} \
 # Must be set by itself or it won't stick around when the container runs.
 ENV         PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN         apk add --no-cache \
-              bash~=5.2.15 \
-              cmake~=3.24 \
-              g++~=12.2 \
-              gcc~=12.2 \
-              git~=2.38 \
-              libffi-dev~=3.4 \
-              make~=4.3 \
-              musl-dev~=1.2 \
-              openssl~=3.0 \
-              py3-pip~=22.3 \
-              py3-virtualenv~=20.16 \
-              py3-wheel~=0.38 \
+              bash \
+              cmake \
+              g++ \
+              gcc \
+              git \
+              libffi-dev \
+              libssh-dev \
+              make \
+              musl-dev \
+              openssl-dev \
+              py3-pip \
+              py3-virtualenv \
+              py3-wheel \
               python3~=${PYTHON_VERSION} \
               python3-dev~=${PYTHON_VERSION}
 
@@ -95,11 +96,13 @@ ENV         PATH="$VIRTUAL_ENV/bin:$PATH"
 # Create the virtualenv and install ansible
 RUN         python -m venv $VIRTUAL_ENV
 # hadolint ignore=DL3059
-RUN         python -m pip install --no-cache-dir ansible~=7.3.0
+RUN         python -m pip install --no-cache-dir ansible
 # hadolint ignore=DL3059
-RUN         python -m pip install --no-cache-dir -r https://raw.githubusercontent.com/aruba/aoscx-ansible-collection/a2ee40a937d8d6da1740adca434cbb59b04011d0/requirements.txt
+RUN         python -m pip install --no-cache-dir --no-binary ansible-pylibssh ansible
 # hadolint ignore=DL3059
-RUN         ansible-galaxy collection install --no-cache --no-deps arubanetworks.aoscx
+RUN         python -m pip install --no-cache-dir -r https://raw.githubusercontent.com/aruba/aoscx-ansible-collection/master/requirements.txt
+# hadolint ignore=DL3059
+RUN         ansible-galaxy collection install arubanetworks.aoscx
 
 ##########################
 #
@@ -120,7 +123,7 @@ ENV         VIRTUAL_ENV=/opt/venv \
 ENV         PATH="$VIRTUAL_ENV/bin:$PATH"
 COPY        --from=ansible $VIRTUAL_ENV $VIRTUAL_ENV
 RUN         apk --no-cache add \
-              openssh-client~=9.1
+              openssh-client
 RUN         python -m pip install --no-cache-dir --editable '.[docs]'
 # hadolint ignore=DL3059
 RUN         sphinx-build -M markdown docs/templates docs/_build -a
@@ -131,9 +134,9 @@ RUN         sphinx-build -M markdown docs/templates docs/_build -a
 #
 ##########################
 ARG         ALPINE_IMAGE="artifactory.algol60.net/docker.io/library/alpine"
-ARG         ALPINE_VERSION="3.17"
+ARG         ALPINE_VERSION="3.20"
 FROM        ${ALPINE_IMAGE}:${ALPINE_VERSION} AS docs
-ARG         PYTHON_VERSION='3.10'
+ARG         PYTHON_VERSION='3.12'
 USER        root
 WORKDIR     /root
 ENV         VIRTUAL_ENV=/opt/venv
@@ -143,8 +146,8 @@ ENV          PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # hadolint ignore=SC2086
 RUN         apk add --no-cache \
-              py3-pip~=22.3 \
-              py3-virtualenv~=20.16 \
+              py3-pip \
+              py3-virtualenv \
               python3~=${PYTHON_VERSION} \
               python3-dev~=${PYTHON_VERSION}
 
@@ -193,20 +196,20 @@ RUN         pip install --no-cache-dir .
 #
 ##########################
 ARG         ALPINE_IMAGE="artifactory.algol60.net/docker.io/library/alpine"
-ARG         ALPINE_VERSION="3.17"
+ARG         ALPINE_VERSION="3.20"
 FROM        ${ALPINE_IMAGE}:${ALPINE_VERSION} AS prod
-ARG         PYTHON_VERSION='3.10'
+ARG         PYTHON_VERSION='3.12'
 USER        root
 WORKDIR     /root
 
 #           must mount ${SSH_AUTH_SOCK} to /ssh-agent to use host ssh
 RUN         apk --no-cache add \
-              bash~=5.2.15 \
-              py3-pip~=22.3 \
-              py3-virtualenv~=20.16 \
+              bash \
+              py3-pip \
+              py3-virtualenv \
               python3~=${PYTHON_VERSION} \
               python3-dev~=${PYTHON_VERSION} \
-              openssh-client~=9.1
+              openssh-client
 
 RUN         addgroup -S canu \
             && adduser \
