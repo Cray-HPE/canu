@@ -95,7 +95,7 @@ docs = [
     'sphinx-markdown-builder~=0.5.5',
     'mike~=1.1.2',
     'mkdocs~=1.4.2',
-    'mkdocs-material~=9.1.4',
+    'mkdocs-material~=9.5.30',
     'mkdocs-material-extensions~=1.1.1',
 ]
 lint = [
