@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Jfrog setup
-        uses: jfrog/setup-jfrog-cli@v3
+        uses: jfrog/setup-jfrog-cli@v4
         env:
           JF_URL: https://artifactory.algol60.net
           JF_USER: ${{ secrets.ARTIFACTORY_ALGOL60_USERNAME }}
