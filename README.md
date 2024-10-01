@@ -24,4 +24,3 @@ There are several ways to view the CANU documentation:
 - [https://cray-hpe.github.io/canu](https://cray-hpe.github.io/canu)
 - from a virtualenv in the root of this repo: `nox -e docs && mkdocs serve --config mkdocs.yml` (local web server via `mkdocs`)
 - from a virtualenv in the root of this repo: `nox -e docs && make docs` (local web server via `mkdocs`)
-- `make docs_image && make cdocs` (containerized docs image)

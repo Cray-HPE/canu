@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2024 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -74,10 +74,6 @@ install -m 755 dist/linux/canu %{buildroot}%{_bindir}/canu
 
 install -m 755 dist/linux/canu-inventory %{buildroot}%{_bindir}/canu-inventory
 
-# install the 'canu' wrapper script to the bindir
-mkdir -p %{buildroot}%{_bindir}
-install -m 755 ./canuctl %{buildroot}%{_bindir}/canuctl
-
 %pre
 # remove the canu user as it is no longer needed post v1.9.1
 if getent passwd canu; then 
@@ -88,7 +84,6 @@ if getent group canu; then
 fi
 
 %files
-%attr(0755, -, -) %{_bindir}/canuctl
 %attr(0755, -, -) %{_bindir}/canu
 %attr(0755, -, -) %{_bindir}/canu-inventory
 %license LICENSE
