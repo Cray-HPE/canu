@@ -88,7 +88,7 @@ pipeline {
                             }
                         }
                     }
-                    stage('Prepare') {
+                    stage('Prepare: RPMs') {
                         agent {
                             docker {
                                 label "${PRIMARY_NODE}"
@@ -115,7 +115,7 @@ pipeline {
                             }
                         }
                     }
-                    stage('Build') {
+                    stage('Build: RPMs') {
                         agent {
                             docker {
                                 label "${PRIMARY_NODE}"
@@ -131,7 +131,7 @@ pipeline {
                             }
                         }
                     }
-                    stage('Publish') {
+                    stage('Publish: RPMs') {
                         agent {
                             docker {
                                 label "${PRIMARY_NODE}"
