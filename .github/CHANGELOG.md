@@ -2,6 +2,7 @@
 
 ## [UNRELEASED]
 
+- CASMNET-2254 Removed canu container
 
 ## [1.9.2]
 
