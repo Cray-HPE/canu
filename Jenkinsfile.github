@@ -45,7 +45,7 @@ def stableToken = ~/v?\d+\.\d+\.\d+(\.post\d+)?/
 def isStable = (env.TAG_NAME != null & env.TAG_NAME ==~ stableToken) ? true : false
 pipeline {
     agent {
-        label "metal-gcp-builder-large"
+        label "metal-gcp-builder"
     }
 
     options {
@@ -57,27 +57,14 @@ pipeline {
 
     environment {
         NAME = getRepoName()
+        VERSION = ''
+        PRIMARY_NODE = "${env.NODE_NAME}"
     }
 
     stages {
 
-        stage('Prepare') {
-            steps {
-                script {
-                    sh "python3 -m pip install setuptools_scm[toml]"
-                    sh "chmod -R a-w .git"
-                }
-            }
-        }
         stage('RPM') {
             matrix {
-                agent {
-                    docker {
-                        args '-v /home/jenkins/.ssh:/home/jenkins/.ssh'
-                        reuseNode true
-                        image "${pythonImage}:${PYTHON_VERSION}"
-                    }
-                }
                 axes {
                     axis {
                         name 'ARCH'
@@ -89,11 +76,27 @@ pipeline {
                     }
                 }
                 environment {
+                    DOCKER_ARCH = sh(returnStdout: true, script: "[ ${ARCH} == 'x86_64' ] && echo -n 'amd64' || echo -n 'arm64'")
                     BUILD_DIR = "${env.WORKSPACE}/dist/rpmbuild/${ARCH}/${PYTHON_VERSION}"
-                    VERSION = ""
                 }
                 stages {
+                    stage('Build: setup') {
+                        steps {
+                            lock('docker-image-pull') {
+                                sh "docker pull --platform linux/${DOCKER_ARCH} ${pythonImage}:${PYTHON_VERSION}"
+                                sh "docker tag ${pythonImage}:${PYTHON_VERSION} ${pythonImage}:${PYTHON_VERSION}-${DOCKER_ARCH}"
+                            }
+                        }
+                    }
                     stage('Prepare') {
+                        agent {
+                            docker {
+                                label "${PRIMARY_NODE}"
+                                reuseNode true
+                                args "-v /home/jenkins/.ssh:/home/jenkins/.ssh --platform linux/${DOCKER_ARCH}"
+                                image "${pythonImage}:${PYTHON_VERSION}-${DOCKER_ARCH}"
+                            }
+                        }
                         steps {
                             script {
                                 // Use setuptools_scm to resolve the version(s) to use for the build.
@@ -113,6 +116,14 @@ pipeline {
                         }
                     }
                     stage('Build') {
+                        agent {
+                            docker {
+                                label "${PRIMARY_NODE}"
+                                reuseNode true
+                                args "-v /home/jenkins/.ssh:/home/jenkins/.ssh --platform linux/${DOCKER_ARCH}"
+                                image "${pythonImage}:${PYTHON_VERSION}-${DOCKER_ARCH}"
+                            }
+                        }
                         steps {
                             script {
                                 // Use setuptools_scm to resolve the version(s) to use for the build.
@@ -121,6 +132,14 @@ pipeline {
                         }
                     }
                     stage('Publish') {
+                        agent {
+                            docker {
+                                label "${PRIMARY_NODE}"
+                                reuseNode true
+                                args "-v /home/jenkins/.ssh:/home/jenkins/.ssh --platform linux/${DOCKER_ARCH}"
+                                image "${pythonImage}:${PYTHON_VERSION}-${DOCKER_ARCH}"
+                            }
+                        }
                         steps {
                             script {
                                 publishCsmRpms(
@@ -142,11 +161,6 @@ pipeline {
                     }
                 }
             }
-        }
-    }
-    post {
-        always {
-            postChownFiles()
         }
     }
 }
