@@ -51,6 +51,7 @@ import urllib3
 
 from canu.style import Style
 from canu.utils.cache import cache_directory
+from canu.utils.validate_node_list import validate_node_list
 from canu.utils.yaml_load import load_yaml
 from canu.validate.paddle.paddle import node_model_from_paddle
 from canu.validate.shcd.shcd import (
@@ -576,6 +577,62 @@ def add_custom_config(custom_config, switch_config, host, switch_os, custom_file
     return custom_config_merge
 
 
+def vlan_check(dictionary):
+    """Check VLANs in a nested dictionary for correct range and duplicates."""
+    vlan_list = []
+
+    def search_keys(current_dict):
+        for key, value in current_dict.items():
+            if isinstance(value, dict):
+                search_keys(value)
+            elif isinstance(value, list):
+                for item in value:
+                    if isinstance(item, dict):
+                        search_keys(item)
+            elif isinstance(key, str) and "vlan" in key.lower() and value is not None:
+                vlan_list.append(value)
+
+    search_keys(dictionary)
+
+    def has_duplicates(lst):
+        seen = set()
+        duplicates = set()
+        for item in lst:
+            if item in seen:
+                duplicates.add(item)
+            else:
+                seen.add(item)
+        return list(duplicates)
+
+    def range_check(lst):
+        vlan_range = []
+        for vlan in lst:
+            if (
+                vlan is not None and 1 <= vlan <= 4040
+            ):  # 4040 is max VLAN aruba allows to be configured
+                continue
+            else:
+                vlan_range.append(vlan)
+        return vlan_range
+
+    dupe_vlan = has_duplicates(vlan_list)
+    range_vlan = range_check(vlan_list)
+    return dupe_vlan, range_vlan
+
+
+def node_name_normalize(node):
+    """Normalize the node name by removing leading zeros from the numeric part."""
+    match = re.match(r"^(\D+)-?(\d+)", node)
+    if match:
+        node_name = match.group(1)
+        numeric_node = match.group(2)
+        numeric_node_stripped = str(int(numeric_node))
+        result = node_name + numeric_node_stripped
+        return result
+    else:
+        return node
+
+
 def generate_switch_config(
     csm,
     architecture,
@@ -690,9 +747,19 @@ def generate_switch_config(
                 fg="red",
             )
             exit(1)
+    black_hole_vlan_1 = 4001
+    black_hole_vlan_2 = 4002
+    river_nmn_dhcp = False
+    river_nmn = None
     if custom_config:
         custom_config_file = os.path.basename(custom_config)
         custom_config = load_yaml(custom_config)
+        river_nmn = validate_node_list(
+            custom_config.get("river_nmn", {}).get("nodes", []),
+        )
+        river_nmn_dhcp = custom_config.get("river_nmn", {}).get("dhcp", [])
+        black_hole_vlan_1 = custom_config.get("black_hole_vlan_1", black_hole_vlan_1)
+        black_hole_vlan_2 = custom_config.get("black_hole_vlan_2", black_hole_vlan_2)
 
     is_primary, primary, secondary = switch_is_primary(switch_name)
 
@@ -721,7 +788,6 @@ def generate_switch_config(
     template.globals.update(jinja_func)
 
     native_vlan = 1
-
     leaf_bmc_vlan = [
         native_vlan,
         sls_variables["NMN_VLAN"],
@@ -751,11 +817,6 @@ def generate_switch_config(
             fg="red",
         )
         sys.exit(1)
-    spine_leaf_vlan = groupby_vlan_range(spine_leaf_vlan)
-    leaf_bmc_vlan = groupby_vlan_range(leaf_bmc_vlan)
-
-    black_hole_vlan_1 = 2701
-    black_hole_vlan_2 = 2707
 
     variables = {
         "HOSTNAME": switch_name,
@@ -804,6 +865,14 @@ def generate_switch_config(
         "NMN_MTN_NETMASK": sls_variables["NMN_MTN_NETMASK"],
         "NMN_MTN_NETWORK_IP": sls_variables["NMN_MTN_NETWORK_IP"],
         "NMN_MTN_PREFIX_LEN": sls_variables["NMN_MTN_PREFIX_LEN"],
+        "HMN_RVR": sls_variables["HMN_RVR"],
+        "HMN_RVR_NETMASK": sls_variables["HMN_RVR_NETMASK"],
+        "HMN_RVR_NETWORK_IP": sls_variables["HMN_RVR_NETWORK_IP"],
+        "HMN_RVR_PREFIX_LEN": sls_variables["HMN_RVR_PREFIX_LEN"],
+        "NMN_RVR": sls_variables["NMN_RVR"],
+        "NMN_RVR_NETMASK": sls_variables["NMN_RVR_NETMASK"],
+        "NMN_RVR_NETWORK_IP": sls_variables["NMN_RVR_NETWORK_IP"],
+        "NMN_RVR_PREFIX_LEN": sls_variables["NMN_RVR_PREFIX_LEN"],
         "HMNLB": sls_variables["HMNLB"],
         "HMNLB_TFTP": sls_variables["HMNLB_TFTP"],
         "HMNLB_DHCP": "10.94.100.222",
@@ -830,8 +899,6 @@ def generate_switch_config(
         "CMN_IP_GATEWAY": sls_variables["CMN_IP_GATEWAY"],
         "CMN_IP_PRIMARY": sls_variables["CMN_IP_PRIMARY"],
         "CMN_IP_SECONDARY": sls_variables["CMN_IP_SECONDARY"],
-        "NMN_MTN_CABINETS": sls_variables["NMN_MTN_CABINETS"],
-        "HMN_MTN_CABINETS": sls_variables["HMN_MTN_CABINETS"],
         "LEAF_BMC_VLANS": leaf_bmc_vlan,
         "SPINE_LEAF_VLANS": spine_leaf_vlan,
         "NATIVE_VLAN": native_vlan,
@@ -844,6 +911,8 @@ def generate_switch_config(
         "BGP_CONTROL_PLANE": bgp_control_plane,
         "VRF": vrf,
         "BOND_APP_NODES": bond_app_nodes,
+        "RVR_NMN_NODES": river_nmn,
+        "RVR_NMN_DHCP": river_nmn_dhcp,
         "BLACK_HOLE_VLAN_1": black_hole_vlan_1,
         "BLACK_HOLE_VLAN_2": black_hole_vlan_2,
     }
@@ -908,6 +977,58 @@ def generate_switch_config(
             variables["VSX_ISL_PORT1"] = pair_connections[0]
             variables["VSX_ISL_PORT2"] = pair_connections[1]
 
+    variables["NMN_RVR_VLANS"] = []
+    variables["HMN_RVR_VLANS"] = []
+    variables["NMN_RVR_VLAN_LIST"] = []
+    variables["HMN_RVR_VLAN_LIST"] = []
+
+    # Get NMN RVR VLANs for spine and leaf switches
+    # This is ALL the RVR VLANS and IP addresses
+    if node_shasta_name in ["sw-spine", "sw-leaf"]:
+        nodes_by_name = {}
+        nodes_by_id = {}
+        for cabinets in sls_variables["NMN_RVR_CABINETS"]:
+            ip_address = netaddr.IPNetwork(cabinets["CIDR"])
+            is_primary = switch_is_primary(switch_name)
+            sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
+            variables["NMN_RVR_VLANS"].append(cabinets)
+            variables["NMN_RVR_VLANS"][-1]["PREFIX_LENGTH"] = ip_address.prefixlen
+            if is_primary[0]:
+                ip = str(ip_address[2])
+                variables["NMN_RVR_VLANS"][-1]["IP"] = ip
+            else:
+                ip = str(ip_address[3])
+                variables["NMN_RVR_VLANS"][-1]["IP"] = ip
+
+        for vlan in variables["NMN_RVR_VLANS"]:
+            variables["NMN_RVR_VLAN_LIST"].append(vlan["VlanID"])
+
+    # Get NMN RVR VLAN for a leaf-bmc switch
+    if "sw-leaf-bmc" in node_shasta_name:
+        nodes_by_name = {}
+        nodes_by_id = {}
+        for node in network_node_list:
+            node_tmp = node.serialize()
+            name = node_tmp["common_name"]
+            nodes_by_name[name] = node_tmp
+            nodes_by_id[node_tmp["id"]] = node_tmp
+        switch_rack = nodes_by_name[switch_name]["location"]["rack"]
+        switch_rack_int = int(switch_rack[1:])
+        for cabinets in (
+            sls_variables["NMN_RVR_CABINETS"] + sls_variables["HMN_RVR_CABINETS"]
+        ):
+            ip_address = netaddr.IPNetwork(cabinets["CIDR"])
+            is_primary = switch_is_primary(switch_name)
+            sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
+            if sls_rack_int == switch_rack_int:
+                if cabinets in sls_variables["NMN_RVR_CABINETS"]:
+                    variables["NMN_RVR_VLANS"].append(cabinets)
+                    variables["NMN_RVR_VLANS"][-1][
+                        "PREFIX_LENGTH"
+                    ] = ip_address.prefixlen
+        for vlan in variables["NMN_RVR_VLANS"]:
+            variables["NMN_RVR_VLAN_LIST"].append(vlan["VlanID"])
+
     # get VLANs and IPs for CDU switches
     if "sw-cdu" in node_shasta_name:
         nodes_by_name = {}
@@ -957,6 +1078,22 @@ def generate_switch_config(
                     else:
                         ip = str(ip_address[3])
                         variables["HMN_MTN_VLANS"][-1]["IP"] = ip
+
+    dupe_vlans, vlan_range = vlan_check(variables)
+    if len(dupe_vlans) > 0:
+        click.secho(
+            f"Error: Duplicate VLANs detected: {', '.join(map(str, dupe_vlans))}."
+            + "\nValidate that there are no duplicate VLANs in SLS or the custom_switch config file.",
+            fg="red",
+        )
+        sys.exit(1)
+
+    if len(vlan_range) > 0:
+        click.secho(
+            f"Error: VLANs out of range: {', '.join(map(str, vlan_range))}. VLANs must be within the range 1-4040.",
+            fg="red",
+        )
+        sys.exit(1)
 
     switch_config = template.render(
         variables=variables,
@@ -1129,6 +1266,21 @@ def preserve_port(
             return port["lag"]
 
 
+def get_vlan_id_by_cabinet(destination_rack_int, sls_variables, cabinet_key):
+    """Get the VLAN based on the cabinet."""
+    if cabinet_key not in sls_variables:
+        raise KeyError(
+            f"The cabinet_key '{cabinet_key}' is not found in sls_variables.",
+        )
+
+    for cabinet in sls_variables[cabinet_key]:
+        cabinet_name = cabinet.get("Name", "")
+        sls_rack_int = int(re.search(r"\d+", cabinet_name).group())
+        if destination_rack_int == sls_rack_int:
+            return cabinet.get("VlanID")
+    return None  # Return None if VLAN ID is not found
+
+
 def get_switch_nodes(
     architecture,
     switch_name,
@@ -1178,6 +1330,7 @@ def get_switch_nodes(
         source_port = port["port"]
         destination_port = port["destination_port"]
         destination_slot = port["destination_slot"]
+        destination_node_name_normalized = node_name_normalize(destination_node_name)
 
         shasta_name = get_shasta_name(destination_node_name, factory.lookup_mapper())
         primary_port = get_primary_port(nodes_by_name, switch_name, destination_node_id)
@@ -1266,10 +1419,12 @@ def get_switch_nodes(
             nodes.append(new_node)
         elif shasta_name == "cec":
             destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
-            for cabinets in sls_variables["HMN_MTN_CABINETS"]:
-                sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
-                if destination_rack_int == sls_rack_int:
-                    hmn_mtn_vlan = cabinets["VlanID"]
+            vlan_key = "HMN_MTN_CABINETS"
+            hmn_mtn_vlan = get_vlan_id_by_cabinet(
+                destination_rack_int,
+                sls_variables,
+                vlan_key,
+            )
             new_node = {
                 "subtype": "cec",
                 "slot": None,
@@ -1286,15 +1441,19 @@ def get_switch_nodes(
             }
             nodes.append(new_node)
         elif shasta_name == "cmm":
+            vlan_key_hmn = "HMN_MTN_CABINETS"
+            vlan_key_nmn = "NMN_MTN_CABINETS"
             destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
-            for cabinets in sls_variables["NMN_MTN_CABINETS"]:
-                sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
-                if destination_rack_int == sls_rack_int:
-                    nmn_mtn_vlan = cabinets["VlanID"]
-            for cabinets in sls_variables["HMN_MTN_CABINETS"]:
-                sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
-                if destination_rack_int == sls_rack_int:
-                    hmn_mtn_vlan = cabinets["VlanID"]
+            hmn_mtn_vlan = get_vlan_id_by_cabinet(
+                destination_rack_int,
+                sls_variables,
+                vlan_key_hmn,
+            )
+            nmn_mtn_vlan = get_vlan_id_by_cabinet(
+                destination_rack_int,
+                sls_variables,
+                vlan_key_nmn,
+            )
             new_node = {
                 "subtype": "cmm",
                 "slot": None,
@@ -1315,6 +1474,13 @@ def get_switch_nodes(
                 new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name in {"uan", "login", "viz", "lmem"}:
+            vlan_key = "NMN_RVR_CABINETS"
+            destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
+            nmn_rvr_vlan = get_vlan_id_by_cabinet(
+                destination_rack_int,
+                sls_variables,
+                vlan_key,
+            )
             primary_port_uan = get_primary_port(
                 nodes_by_name,
                 switch_name,
@@ -1325,6 +1491,7 @@ def get_switch_nodes(
                 "subtype": "uan",
                 "slot": destination_slot,
                 "destination_port": destination_port,
+                "node_name": destination_node_name_normalized,
                 "config": {
                     "DESCRIPTION": get_description(
                         switch_name,
@@ -1335,6 +1502,7 @@ def get_switch_nodes(
                     "PORT": f"{source_port}",
                     "LAG_NUMBER": primary_port_uan,
                     "LAG_NUMBER_V1": primary_port,
+                    "VLAN": nmn_rvr_vlan,
                 },
             }
             if preserve and architecture == "network_v1":
@@ -1355,10 +1523,18 @@ def get_switch_nodes(
             "datamover",
             "storage",
         }:
+            vlan_key = "NMN_RVR_CABINETS"
+            destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
+            nmn_rvr_vlan = get_vlan_id_by_cabinet(
+                destination_rack_int,
+                sls_variables,
+                vlan_key,
+            )
             new_node = {
                 "subtype": "river_ncn_node_4_port_1g_ocp",
                 "slot": destination_slot,
                 "destination_port": destination_port,
+                "node_name": destination_node_name_normalized,
                 "config": {
                     "DESCRIPTION": get_description(
                         switch_name,
@@ -1368,6 +1544,7 @@ def get_switch_nodes(
                     ),
                     "PORT": f"{source_port}",
                     "INTERFACE_NUMBER": f"{source_port}",
+                    "VLAN": nmn_rvr_vlan,
                 },
             }
             nodes.append(new_node)
@@ -1389,10 +1566,18 @@ def get_switch_nodes(
             }
             nodes.append(new_node)
         elif shasta_name == "cn":
+            vlan_key = "NMN_RVR_CABINETS"
+            destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
+            nmn_rvr_vlan = get_vlan_id_by_cabinet(
+                destination_rack_int,
+                sls_variables,
+                vlan_key,
+            )
             new_node = {
                 "subtype": "compute",
                 "slot": destination_slot,
                 "destination_port": destination_port,
+                "node_name": destination_node_name_normalized,
                 "config": {
                     "DESCRIPTION": get_description(
                         switch_name,
@@ -1402,6 +1587,7 @@ def get_switch_nodes(
                     ),
                     "PORT": f"{source_port}",
                     "INTERFACE_NUMBER": f"{source_port}",
+                    "VLAN": nmn_rvr_vlan,
                 },
             }
             nodes.append(new_node)
@@ -1785,6 +1971,14 @@ def parse_sls_for_config(input_json):
         "NMN_MTN_NETMASK": None,
         "NMN_MTN_NETWORK_IP": None,
         "NMN_MTN_PREFIX_LEN": None,
+        "HMN_RVR": None,
+        "HMN_RVR_NETMASK": None,
+        "HMN_RVR_NETWORK_IP": None,
+        "HMN_RVR_PREFIX_LEN": None,
+        "NMN_RVR": None,
+        "NMN_RVR_NETMASK": None,
+        "NMN_RVR_NETWORK_IP": None,
+        "NMN_RVR_PREFIX_LEN": None,
         "HMNLB": None,
         "HMNLB_NETMASK": None,
         "HMNLB_NETWORK_IP": None,
@@ -1822,6 +2016,8 @@ def parse_sls_for_config(input_json):
         "NMN_IPs": defaultdict(),
         "NMN_MTN_CABINETS": [],
         "HMN_MTN_CABINETS": [],
+        "NMN_RVR_CABINETS": [],
+        "HMN_RVR_CABINETS": [],
     }
 
     for sls_network in input_json:
@@ -2007,6 +2203,35 @@ def parse_sls_for_config(input_json):
             sls_variables["HMN_MTN_CABINETS"] = list(
                 sls_network.get("ExtraProperties", {}).get("Subnets", {}),
             )
+
+        elif name == "NMN_RVR":
+            sls_variables["NMN_RVR"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
+            )
+            sls_variables["NMN_RVR_NETMASK"] = sls_variables["NMN_RVR"].netmask
+            sls_variables["NMN_RVR_PREFIX_LEN"] = sls_variables["NMN_RVR"].prefixlen
+            sls_variables["NMN_RVR_NETWORK_IP"] = sls_variables["NMN_RVR"].ip
+            sls_variables["NMN_RVR_CABINETS"] = list(
+                sls_network.get("ExtraProperties", {}).get("Subnets", {}),
+            )
+
+        elif name == "HMN_RVR":
+            sls_variables["HMN_RVR"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
+            )
+            sls_variables["HMN_RVR_NETMASK"] = sls_variables["HMN_RVR"].netmask
+            sls_variables["HMN_RVR_PREFIX_LEN"] = sls_variables["HMN_RVR"].prefixlen
+            sls_variables["HMN_RVR_NETWORK_IP"] = sls_variables["HMN_RVR"].ip
+            sls_variables["HMN_RVR_CABINETS"] = list(
+                sls_network.get("ExtraProperties", {}).get("Subnets", {}),
+            )
+
         elif name == "HMNLB":
             sls_variables["HMNLB"] = netaddr.IPNetwork(
                 sls_network.get("ExtraProperties", {}).get(

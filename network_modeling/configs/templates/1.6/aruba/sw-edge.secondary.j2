@@ -36,7 +36,7 @@ interface 1/1/30
     no shutdown
     vrf attach keepalive
     description VSX keepalive
-    ip address 192.168.255.0/31
+    ip address 192.168.255.1/31
 interface 1/1/31
     no shutdown
     mtu 9198
@@ -80,10 +80,12 @@ router ospf 1
 
 {# note: hard coded IPs until we get them added to IPAM/SLS #}
 
+ip prefix-list HSN seq 10 permit {{ variables.CHN }} ge {{ variables.CHN_PREFIX_LEN }}
+
 {%- if variables.BGP_CONTROL_PLANE == 'CMN' %}
 {%- for name, ip in variables.NMN_IPs.items() if "ncn-w" in name %}
 {% set sequence = namespace(value=10) %}
-route-map {{ name }}-CHN permit {{ sequence.value }}
+route-map {{ name }}-CHN permit seq {{ sequence.value }}
      match ip address prefix-list HSN
      {%- for CHN_name, CHN_ip in variables.CHN_IPs.items() if name == CHN_name %}
      set ip next-hop {{ CHN_ip }}
@@ -91,7 +93,7 @@ route-map {{ name }}-CHN permit {{ sequence.value }}
 {%- endfor %}
 
 router bgp {{ variables.SWITCH_ASN }}
-   router-id 10.2.1.195
+   bgp router-id 10.2.1.195
    maximum-paths 8
    timers bgp 1 3
    distance bgp 20 70
@@ -101,7 +103,7 @@ router bgp {{ variables.SWITCH_ASN }}
    neighbor {{ ip }} remote-as {{ variables.CHN_ASN }}
    neighbor {{ ip }} passive
    {%- endfor %}
-   address-family ipv4
+   address-family ipv4 unicast
       neighbor 10.2.1.194 activate
       neighbor 10.2.1.194 next-hop-self
    {%- for name, ip in variables.CMN_IPs.items() if "ncn-w" in name %}
@@ -115,7 +117,7 @@ route-map HSN permit 5
    match ip address prefix-list HSN
 
 router bgp {{ variables.SWITCH_ASN }}
-   router-id 10.2.1.195
+   bgp router-id 10.2.1.195
    maximum-paths 8
    timers bgp 1 3
    distance bgp 20 70

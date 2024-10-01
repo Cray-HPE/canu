@@ -8,7 +8,7 @@ interface lag {{ node.config.LAG_NUMBER }}
     description leaf_bmc_to_spine_lag
     no routing
     vlan trunk native {{ variables.NATIVE_VLAN }}
-    vlan trunk allowed {{ variables.LEAF_BMC_VLANS }}
+    vlan trunk allowed {{ groupby_vlan_range(variables.LEAF_BMC_VLANS) }}
     lacp mode active
 {%- endif %}
 {%- endfor %}

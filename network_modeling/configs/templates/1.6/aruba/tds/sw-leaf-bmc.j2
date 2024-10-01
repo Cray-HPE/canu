@@ -37,6 +37,10 @@ vlan {{ variables.BLACK_HOLE_VLAN_2 }}
     name NULL{{ variables.BLACK_HOLE_VLAN_2 }}
     description Black hole VLAN {{ variables.BLACK_HOLE_VLAN_2 }}
 
+{%- if variables.RVR_NMN_NODES  %}
+{% include variables.CSM_VERSION+'/aruba/common/rvr_nmn_vlan.j2' %}
+{%- endif %}
+
 spanning-tree
 {#- forward delay added to help with pxe boots. CASMNET-1099 + CASMTRIAGE-2793 #}
 spanning-tree forward-delay 4
