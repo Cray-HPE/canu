@@ -2,7 +2,7 @@
  *
  *  MIT License
  *
- *  (C) Copyright 2021-2023 Hewlett Packard Enterprise Development LP
+ *  (C) Copyright 2021-2024 Hewlett Packard Enterprise Development LP
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a
  *  copy of this software and associated documentation files (the "Software"),
@@ -57,8 +57,6 @@ pipeline {
 
     environment {
         NAME = getRepoName()
-        DOCKER_ARGS = getDockerBuildArgs(name: getRepoName(), description: 'canu sandbox environment.')
-        MUTLI_ARCH = 1
     }
 
     stages {
@@ -71,47 +69,6 @@ pipeline {
                 }
             }
         }
-
-        stage('Container Image') {
-
-            environment {
-                VERSION = sh(returnStdout: true, script: "make version_image").trim()
-            }
-
-            stages {
-                stage('Build: Base Image') {
-                    steps {
-                        // All targets require the ansible and deps target, so build those first so parallel builds
-                        // don't duplicate effort.
-                        sh "make image_ansible"
-                    }
-                }
-                stage('Build: Development and Production Images') {
-                    parallel {
-                        stage('Develop image') {
-                            steps {
-                                sh "make image_dev"
-                            }
-                        }
-                        stage('Production image') {
-                            steps {
-                                sh "make image_prod"
-                            }
-                        }
-                    }
-                }
-                stage('Publish') {
-                    steps {
-                        script {
-                            // Use setuptools_scm to resolve the version(s) to use for the build.
-                            publishCsmDockerImage(image: "${env.NAME}", multiArch: env.MULTI_ARCH, tag: "${env.VERSION}-dev", isStable: isStable)
-                            publishCsmDockerImage(image: "${env.NAME}", multiArch: env.MULTI_ARCH, tag: "${env.VERSION}", isStable: isStable)
-                        }
-                    }
-                }
-            }
-        }
-
         stage('RPM') {
             matrix {
                 agent {

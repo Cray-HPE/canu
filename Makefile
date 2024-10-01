@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2024 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -38,27 +38,7 @@ ifeq ($(PYTHON_VERSION),)
 export PYTHON_VERSION := 3.10
 endif
 
-ifeq ($(ALPINE_IMAGE),)
-export ALPINE_IMAGE := artifactory.algol60.net/docker.io/library/alpine
-endif
-
-ifeq ($(ALPINE_VERSION),)
-export ALPINE_VERSION := 3.17
-endif
-
 export PYTHON_BIN := python$(PYTHON_VERSION)
-
-ifeq ($(DOCKER_BUILDKIT),)
-export DOCKER_BUILDKIT := 1
-endif
-
-ifeq ($(BUILD_ARGS),)
-export BUILD_ARGS ?= --build-arg 'PYTHON_VERSION=${PYTHON_VERSION}' --build-arg 'ALPINE_IMAGE=${ALPINE_IMAGE}' --build-arg 'ALPINE_VERSION=${ALPINE_VERSION}'
-endif
-
-ifeq ($(PLATFORMS),)
-PLATFORMS := linux/amd64,linux/arm64
-endif
 
 ifeq ($(VERSION),)
 export VERSION := $(shell python3 -m setuptools_scm 2>/dev/null | tr -s '-' '~' | sed 's/^v//')
@@ -108,21 +88,8 @@ else
 	export RELEASE=1
 endif
 
-# After the VERSION has been normalized, make the image version.
-# Image versions should never have the Python post version included if they're stable, it's confusing to image users.
-# Image users simply pull the image and fetch the new layers, whereas RPM users have to pragmatically know when an RPM
-# is newer (e.g. YUM/Zypper/apt needs a way to convey the repackaging).
-# - Undo the RPM tilde, sanitize the version; image tags do not like tildes and are okay with dashes, unlike RPMs
-# - Replace any '+' with '_' because image tags don't like the '+' character
-ifeq ($(IMAGE_VERSION),)
-export IMAGE_VERSION := $(shell echo $(VERSION) | tr -s '~' '-' | tr -s '+' '_' | sed 's/^v//')
-endif
-
 version:
 	@echo "$(VERSION)"
-
-version_image:
-	@echo "$(IMAGE_VERSION)"
 
 #############################################################################
 # General targets
@@ -145,7 +112,7 @@ version_image:
 	version \
 	version_package
 
-all: image prepare rpm
+all: prepare rpm
 
 help:
 	@echo 'Usage: make <OPTIONS> ... <TARGETS>'
@@ -155,14 +122,6 @@ help:
 	@echo '    help               	Show this help screen.'
 	@echo '    clean               	Remove build files.'
 	@echo
-	@echo '    image_deps           Build the base/dependency environment image.'
-	@echo '    image_ansible        Build the Ansible equipped image.'
-	@echo '    image_dev            Build the development \(editable\) image.'
-	@echo '    image_docs           Build the docs image.'
-	@echo '    image_prod_build     Build the build environment used for the production image.'
-	@echo '    image_prod			Build the production image.'
-	@echo
-	@echo '    image     			Build the canu \(production\) image.'
 	@echo '    rpm                	Build a YUM/SUSE RPM.'
 	@echo '    all 					Build all production artifacts.'
 	@echo
@@ -180,7 +139,6 @@ help:
 	@echo '    rpm_package_source   Creates the RPM source tarball.'
 	@echo
 	@echo '    version              Prints the version.'
-	@echo '    version_image        Prints the version the image will use.'
 	@echo ''
 
 clean:
@@ -210,32 +168,6 @@ integration:
 # with deploy and set-default and using a specfic branch so as not to overwrite gh-pages
 docs:
 	mkdocs serve --config-file mkdocs.yml
-
-cdocs: image_docs
-	docker run -it --rm -p 8000:8000 '${NAME}:${VERSION}-docs'
-
-#############################################################################
-# Docker image targets
-#############################################################################
-
-BUILDER ?= canu_builder
-
-image: image_prod
-
-image_%:
-	@echo Building $@ ...
-
-	# Build multi_arch image.
-	docker buildx use $(BUILDER) 2>/dev/null || docker buildx create --platform ${PLATFORMS} --use --name $(BUILDER)
-	docker buildx build --platform=${PLATFORMS} --pull --progress plain --builder $(BUILDER) ${BUILD_ARGS} ${DOCKER_ARGS} --target $(@:image_%=%) .
-
-	# Load only supports one arch at a time, but our tags for one platform will apply to all platforms so just refer to the amd64 platform to work around it.
-	docker buildx build --platform linux/amd64 --pull --load --builder $(BUILDER) ${BUILD_ARGS} ${DOCKER_ARGS} -t '${NAME}:${VERSION}-$(@:image_%=%)' --target $(@:image_%=%) .
-
-	if [ $@ = "image_prod" ]; then \
-		docker buildx build --platform linux/amd64 --pull --progress plain --load --builder $(BUILDER) ${BUILD_ARGS} ${DOCKER_ARGS} -t '${NAME}:${VERSION}' --target $(@:image_%=%) . ;\
-		docker buildx build --platform linux/amd64 --pull --progress plain --load --builder $(BUILDER) ${BUILD_ARGS} ${DOCKER_ARGS} -t '${NAME}:${VERSION}-p${PYTHON_VERSION}' --target $(@:image_%=%) . ;\
-	fi
 
 #############################################################################
 # RPM targets
@@ -269,12 +201,6 @@ rpm_build:
 #############################################################################
 # Run targets
 #############################################################################
-
-dev:
-	./canuctl -d
-
-prod:
-	./canuctl -p
 
 snyk:
 	snyk container test --severity-threshold=high --file=Dockerfile --fail-on=all --docker ${NAME}:${VERSION}
