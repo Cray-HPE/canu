@@ -4,6 +4,10 @@
 
 - CASMNET-2254 Removed canu container
 
+## [1.9.3]
+
+- CASMNET-2233 Update Aruba device firmware
+
 ## [1.9.2]
 
 - fixed a bug, which fails to parse an SHCD because of a poorly-named cell
