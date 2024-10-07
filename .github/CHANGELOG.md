@@ -2,8 +2,11 @@
 
 ## [UNRELEASED]
 
-- Updated numerous dependencies
+## [1.9.4]
+
+- Updated numerous dependencies (CVE and more)
 - CASMNET-2254 Removed canu container
+- CASMNET-2253 Fixed RPM build
 
 ## [1.9.3]
 
