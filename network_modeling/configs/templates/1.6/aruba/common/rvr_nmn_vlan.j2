@@ -1,0 +1,6 @@
+{#- rvr_nmn_vlan #}
+{%- for cabinet in variables.NMN_RVR_VLANS %}
+vlan {{ cabinet.VlanID }}
+    name {{ cabinet.Name }}_nmn
+{%- endfor %}
+{#- end rvr_nmn_vlan #}

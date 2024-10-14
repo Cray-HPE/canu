@@ -6,7 +6,11 @@ interface lag {{ node.config.LAG_NUMBER }} multi-chassis
     description {{ node.config.DESCRIPTION }}
     no shutdown
     no routing
+{%- if node.node_name in variables.RVR_NMN_NODES %}
+    vlan access {{ node.config.VLAN }}
+{%- else %}
     vlan access {{ variables.NMN_VLAN }}
+{%- endif %}
     lacp mode active
 {%- if node.slot == 'ocp' %}
     lacp fallback

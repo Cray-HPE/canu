@@ -5,9 +5,12 @@ interface 1/1/{{ node.config.PORT }}
     mtu 9198
     description {{ node.config.DESCRIPTION }}
     no routing
+{%- if node.node_name in variables.RVR_NMN_NODES %}
+    vlan access {{ node.config.VLAN }}
+{%- else %}
     vlan access {{ variables.NMN_VLAN }}
+{%- endif %}
     spanning-tree bpdu-guard
     spanning-tree port-type admin-edge
 
 {%- endfor %}
-{#- end compute #}
