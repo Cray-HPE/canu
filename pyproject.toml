@@ -86,7 +86,7 @@ license = { file = 'LICENSE' }
 
 [project.optional-dependencies]
 ci = [
-    'nox~=2023.4.22',
+    'nox~=2024.10.9',
 ]
 docs = [
     'myst-parser~=1.0.0',
