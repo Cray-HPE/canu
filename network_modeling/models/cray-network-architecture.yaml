@@ -165,8 +165,6 @@ network_v2:
       connections:
         - name: "mountain_compute_leaf"
           speed: 10
-        - name: "spine"
-          speed: 10
     - name: "pdu"
       model: "pdu"
       connections:
@@ -380,8 +378,6 @@ network_v2_tds:
       model: "cmm"
       connections:
         - name: "mountain_compute_leaf"
-          speed: 10
-        - name: "spine"
           speed: 10
     - name: "pdu"
       model: "pdu"
