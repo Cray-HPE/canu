@@ -2,13 +2,10 @@
 
 ## [UNRELEASED]
 
-## [1.9.5]
+## [1.9.4]
 
 - Add the ability to attach EX2500 to spines in validate.
 - EX2500 configuration remain as custom configurations.
-
-## [1.9.4]
-
 - Updated numerous dependencies (CVE and more)
 - CASMNET-2254 Removed canu container
 - CASMNET-2253 Fixed RPM build
