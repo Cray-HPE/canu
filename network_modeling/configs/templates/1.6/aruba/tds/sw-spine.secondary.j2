@@ -45,6 +45,8 @@ vlan {{ variables.CAN_VLAN }}
 {%- endif %}
 vlan 10
     name SUN
+{%- include variables.CSM_VERSION+'/aruba/common/mtn_hmn_vlan.j2' %}
+{%- include variables.CSM_VERSION+'/aruba/common/mtn_nmn_vlan.j2' %}
 spanning-tree
 {#- forward delay added to help with pxe boots. CASMNET-1099 + CASMTRIAGE-2793 #}
 spanning-tree forward-delay 4
@@ -62,6 +64,9 @@ interface mgmt
 {% include variables.CSM_VERSION+'/aruba/common/bonded_nmn.j2' %}
 {% include variables.CSM_VERSION+'/aruba/tds/spine-to-leaf-bmc.lag.j2' %}
 {% include variables.CSM_VERSION+'/aruba/common/spine-to-cdu.lag.j2' %}
+{%- include variables.CSM_VERSION+'/aruba/common/mtn_hmn_vlan.j2' %}
+{%- include variables.CSM_VERSION+'/aruba/common/mtn_nmn_vlan.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/cmm.j2' %}
 {% include variables.CSM_VERSION+'/aruba/common/vsx_isl.secondary.j2' %}
 
 interface loopback 0
