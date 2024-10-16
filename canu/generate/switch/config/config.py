@@ -908,8 +908,8 @@ def generate_switch_config(
             variables["VSX_ISL_PORT1"] = pair_connections[0]
             variables["VSX_ISL_PORT2"] = pair_connections[1]
 
-    # get VLANs and IPs for CDU and Spine (for EX2500) switches
-    if "sw-cdu" or "sw-spine" in node_shasta_name:
+    # get VLANs and IPs for CDU switches
+    if "sw-cdu" in node_shasta_name:
         nodes_by_name = {}
         nodes_by_id = {}
         destination_rack_list = []
