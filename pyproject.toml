@@ -50,7 +50,7 @@ dependencies = [
     'ipython==8.14.0',
     'jinja2==3.1.4',
     'jsonschema==4.17.3',
-    'kubernetes==26.1.0',
+    'kubernetes==31.0.0',
     'mac-vendor-lookup==0.1.12',
     'natsort==8.3.1',
     'netaddr==0.8.0',
@@ -67,11 +67,11 @@ dependencies = [
     'responses==0.23.1',
     'ruamel.yaml<0.17.33',
     'tabulate==0.9.0',
-    'tokenize-rt==5.1.0',
+    'tokenize-rt==6.1.0',
     'tomli==2.0.1',
     'ttp==0.9.4',
     'urllib3==2.2.3',
-    'yamale<=4.0.4',
+    'yamale<=5.2.1',
 ]
 dynamic = ['entry-points', 'scripts', 'version']
 maintainers = [
@@ -94,7 +94,7 @@ docs = [
     'sphinx-click~=4.4.0',
     'sphinx-markdown-builder~=0.5.5',
     'mike~=1.1.2',
-    'mkdocs~=1.4.2',
+    'mkdocs~=1.6.1',
     'mkdocs-material~=9.5.36',
     'mkdocs-material-extensions~=1.1.1',
 ]
@@ -117,7 +117,7 @@ lint = [
 ]
 network_modeling = [
     'jsonschema==4.17.3',
-    'yamale<=4.0.4',
+    'yamale<=5.2.1',
 ]
 test = [
     'coverage~=7.2.2',
