@@ -25,6 +25,11 @@
  */
 @Library('csm-shared-library') _
 
+/* TODO:
+    While we use pyinstaller and build for noos, continue using 3.10 or older in order for canu to work on RPM-based
+    distros with older glibc.
+*/
+def pythonVersion = '3.10'
 def pythonImage = 'artifactory.algol60.net/csm-docker/stable/csm-docker-sle-python'
 
 // Disable pr-merge builds; not used.
@@ -59,6 +64,7 @@ pipeline {
         NAME = getRepoName()
         VERSION = ''
         PRIMARY_NODE = "${env.NODE_NAME}"
+        PYTHON_VERSION = "${pythonVersion}"
     }
 
     stages {
@@ -70,21 +76,17 @@ pipeline {
                         name 'ARCH'
                         values 'x86_64'
                     }
-                    axis {
-                        name 'PYTHON_VERSION'
-                        values '3.10', '3.9'
-                    }
                 }
                 environment {
                     DOCKER_ARCH = sh(returnStdout: true, script: "[ ${ARCH} == 'x86_64' ] && echo -n 'amd64' || echo -n 'arm64'")
-                    BUILD_DIR = "${env.WORKSPACE}/dist/rpmbuild/${ARCH}/${PYTHON_VERSION}"
+                    BUILD_DIR = "${env.WORKSPACE}/dist/rpmbuild/${ARCH}/${pythonVersion}"
                 }
                 stages {
                     stage('Build: setup') {
                         steps {
                             lock('docker-image-pull') {
-                                sh "docker pull --platform linux/${DOCKER_ARCH} ${pythonImage}:${PYTHON_VERSION}"
-                                sh "docker tag ${pythonImage}:${PYTHON_VERSION} ${pythonImage}:${PYTHON_VERSION}-${DOCKER_ARCH}"
+                                sh "docker pull --platform linux/${DOCKER_ARCH} ${pythonImage}:${pythonVersion}"
+                                sh "docker tag ${pythonImage}:${pythonVersion} ${pythonImage}:${pythonVersion}-${DOCKER_ARCH}"
                             }
                         }
                     }
@@ -94,7 +96,7 @@ pipeline {
                                 label "${PRIMARY_NODE}"
                                 reuseNode true
                                 args "-v /home/jenkins/.ssh:/home/jenkins/.ssh --platform linux/${DOCKER_ARCH}"
-                                image "${pythonImage}:${PYTHON_VERSION}-${DOCKER_ARCH}"
+                                image "${pythonImage}:${pythonVersion}-${DOCKER_ARCH}"
                             }
                         }
                         steps {
@@ -121,7 +123,7 @@ pipeline {
                                 label "${PRIMARY_NODE}"
                                 reuseNode true
                                 args "-v /home/jenkins/.ssh:/home/jenkins/.ssh --platform linux/${DOCKER_ARCH}"
-                                image "${pythonImage}:${PYTHON_VERSION}-${DOCKER_ARCH}"
+                                image "${pythonImage}:${pythonVersion}-${DOCKER_ARCH}"
                             }
                         }
                         steps {
@@ -137,7 +139,7 @@ pipeline {
                                 label "${PRIMARY_NODE}"
                                 reuseNode true
                                 args "-v /home/jenkins/.ssh:/home/jenkins/.ssh --platform linux/${DOCKER_ARCH}"
-                                image "${pythonImage}:${PYTHON_VERSION}-${DOCKER_ARCH}"
+                                image "${pythonImage}:${pythonVersion}-${DOCKER_ARCH}"
                             }
                         }
                         steps {
@@ -147,14 +149,14 @@ pipeline {
                                         component: env.NAME,
                                         isStable: isStable,
                                         os: "noos",
-                                        pattern: "dist/rpmbuild/${ARCH}/${PYTHON_VERSION}/RPMS/${ARCH}/*.rpm",
+                                        pattern: "dist/rpmbuild/${ARCH}/${pythonVersion}/RPMS/${ARCH}/*.rpm",
                                 )
                                 publishCsmRpms(
                                         arch: "src",
                                         component: env.NAME,
                                         isStable: isStable,
                                         os: "noos",
-                                        pattern: "dist/rpmbuild/${ARCH}/${PYTHON_VERSION}/SRPMS/*.rpm",
+                                        pattern: "dist/rpmbuild/${ARCH}/${pythonVersion}/SRPMS/*.rpm",
                                 )
                             }
                         }
