@@ -89,18 +89,17 @@ ci = [
     'nox~=2024.10.9',
 ]
 docs = [
+    'mike~=1.1.2',
+    'mkdocs-material-extensions~=1.3.1',
+    'mkdocs-material~=9.5.36',
+    'mkdocs~=1.6.1',
     'myst-parser~=1.0.0',
-    'sphinx~=6.1.3',
     'sphinx-click~=4.4.0',
     'sphinx-markdown-builder~=0.6.7',
-    'mike~=1.1.2',
-    'mkdocs~=1.6.1',
-    'mkdocs-material~=9.5.36',
-    'mkdocs-material-extensions~=1.3.1',
+    'sphinx~=6.1.3',
 ]
 lint = [
     'darglint~=1.8.1',
-    'flake8~=7.1.1',
     'flake8-black~=0.3.6',
     'flake8-bugbear~=23.3.12',
     'flake8-commas~=4.0.0',
@@ -111,8 +110,9 @@ lint = [
     'flake8-import-order~=0.18.2',
     'flake8-quotes~=3.4.0',
     'flake8-string-format==0.3.0',
-    'pep8~=1.7.1',
+    'flake8~=7.1.1',
     'pep8-naming~=0.13.2',
+    'pep8~=1.7.1',
     'toml~=0.10.2',
 ]
 network_modeling = [
@@ -122,10 +122,10 @@ network_modeling = [
 test = [
     'coverage~=7.2.2',
     'mock~=5.0.1',
-    'py~=1.11.0',
-    'pytest~=7.3.1',
     'pytest-cov~=4.1.0',
     'pytest-sugar~=0.9.6',
+    'pytest~=7.3.1',
+    'py~=1.11.0',
     'testfixtures~=8.3.0',
 ]
 
