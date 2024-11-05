@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2024 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -1685,11 +1685,11 @@ def switch_is_primary(switch):
 
     if int(digits) % 2 == 0:  # Switch is Secondary
         is_primary = False
-        primary = f"sw-{middle.rstrip('-')}-{int(digits)-1 :03d}"
+        primary = f"sw-{middle.rstrip('-')}-{int(digits) - 1 :03d}"
         secondary = switch
     else:  # Switch is Primary
         is_primary = True
-        secondary = f"sw-{middle.rstrip('-')}-{int(digits)+1 :03d}"
+        secondary = f"sw-{middle.rstrip('-')}-{int(digits) + 1 :03d}"
         primary = switch
 
     return is_primary, primary, secondary

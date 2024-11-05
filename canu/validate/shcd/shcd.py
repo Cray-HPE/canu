@@ -1206,7 +1206,7 @@ def print_node_list(node_list, title, out="-"):
                 if len(unused_block) == 1:
                     port_string = f"{unused_block[0]:02}==>UNUSED"
                 else:
-                    port_string = f"{unused_block[0]:02}-{unused_block[len(unused_block)-1]:02}==>UNUSED"
+                    port_string = f"{unused_block[0]:02}-{unused_block[len(unused_block) - 1]:02}==>UNUSED"
                 unused_block = []  # reset
                 click.secho(f"        {port_string}", fg="green", file=out)
 
