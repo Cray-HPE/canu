@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 env:
   STREAM: stable
+  LATEST: false
 jobs:
   Promote:
     runs-on: ubuntu-latest
@@ -24,13 +25,26 @@ jobs:
         with:
           STREAM: ${{ env.STREAM }}
 
+      - name: Get Branch
+        run: |
+          mapfile -t branches < <(git branch -r --contains ${{ github.ref }} | awk '{print $1}')
+          echo "${branches[@]}"
+          for branch in "${branches[@]}"; do
+            branch_name="${branch/origin\/}"
+            echo "${branch_name}"
+            if [ "${branch_name}" = 'main' ]; then
+              echo LATEST=true >> $GITHUB_ENV
+              break
+            fi
+          done
+
       - uses: ncipollo/release-action@v1
         with:
           allowUpdates: true # if the job is re-ran to catch missed artifacts, allow updates
           generateReleaseNotes: true
           artifacts: ${{ env.DIR_UPLOAD }}/*
           prerelease: false
-          makeLatest: true
+          makeLatest: ${{ fromJSON(env.LATEST) }}
 
   generate_publish_docs:
     name: generate docs with nox/sphinx and publish with mike
