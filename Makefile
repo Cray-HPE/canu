@@ -35,7 +35,7 @@ export ARCH := x86_64
 endif
 
 ifeq ($(PYTHON_VERSION),)
-export PYTHON_VERSION := 3.10
+export PYTHON_VERSION := 3.12
 endif
 
 export PYTHON_BIN := python$(PYTHON_VERSION)

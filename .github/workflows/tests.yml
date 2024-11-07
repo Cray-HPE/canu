@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2023-2024 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the 'Software'),
@@ -32,7 +32,7 @@ jobs:
     name: Tests and Coverage
     strategy:
       matrix:
-        version: ['3.10', '3.9']
+        version: ['3.12', '3.11', '3.10', '3.9']
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -52,7 +52,7 @@ jobs:
   integration_tests:
     strategy:
       matrix:
-        version: ['3.10', '3.9']
+        version: ['3.12', '3.11', '3.10', '3.9']
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
