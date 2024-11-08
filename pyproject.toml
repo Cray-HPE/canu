@@ -96,7 +96,7 @@ docs = [
     'mkdocs-material~=9.5.36',
     'mkdocs~=1.6.1',
     'myst-parser~=4.0.0',
-    'sphinx-click~=4.4.0',
+    'sphinx-click~=6.0.0',
     'sphinx-markdown-builder~=0.6.7',
     'sphinx~=6.1.3',
 ]
