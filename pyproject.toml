@@ -64,7 +64,7 @@ dependencies = [
     'nornir-utils==0.2.0',
     'nornir==3.3.0',
     'openpyxl==3.1.5',
-    'pyyaml==6.0.1',
+    'pyyaml==6.0.2',
     'requests==2.32.3',
     'responses==0.25.3',
     'ruamel.yaml<0.18.7',
