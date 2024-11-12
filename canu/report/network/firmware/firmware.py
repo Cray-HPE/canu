@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2024 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -20,7 +20,7 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that report the firmware of the entire Shasta network."""
-from collections import defaultdict
+from collections import Counter
 import datetime
 import ipaddress
 import json
@@ -353,8 +353,8 @@ def summary_table(data, out="-"):
     click.echo("\nSummary", file=out)
     click.echo(dash, file=out)
 
-    firmware_versions = defaultdict(int)
-    network_summary = defaultdict(int)
+    firmware_versions = Counter()
+    network_summary = Counter()
     for firmware in data:
         network_summary[firmware[1]] += 1
 
