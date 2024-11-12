@@ -64,7 +64,7 @@ dependencies = [
     'nornir-utils==0.2.0',
     'nornir==3.3.0',
     'openpyxl==3.1.5',
-    'pyyaml==6.0.1',
+    'pyyaml==6.0.2',
     'requests==2.32.3',
     'responses==0.25.3',
     'ruamel.yaml<0.18.7',
@@ -96,7 +96,7 @@ docs = [
     'mkdocs-material~=9.5.36',
     'mkdocs~=1.6.1',
     'myst-parser~=4.0.0',
-    'sphinx-click~=4.4.0',
+    'sphinx-click~=6.0.0',
     'sphinx-markdown-builder~=0.6.7',
     'sphinx~=6.1.3',
 ]
@@ -122,10 +122,10 @@ network_modeling = [
     'yamale<=5.2.1',
 ]
 test = [
-    'coverage~=7.2.2',
-    'mock~=5.0.1',
+    'coverage~=7.6.4',
+    'mock~=5.1.0',
     'pytest-cov~=4.1.0',
-    'pytest-sugar~=0.9.6',
+    'pytest-sugar~=1.0.0',
     'pytest~=8.3.3',
     'py~=1.11.0',
     'testfixtures~=8.3.0',
