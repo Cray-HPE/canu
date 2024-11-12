@@ -61,7 +61,7 @@ dependencies = [
     'nornir-netmiko==1.0.1',
     'nornir-salt==0.19.2',
     'nornir-scrapli==2023.1.30.post1',
-    'nornir==3.3.0',
+    'nornir==3.4.1',
     'openpyxl==3.1.5',
     'pyyaml==6.0.2',
     'requests==2.32.3',
