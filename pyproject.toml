@@ -147,7 +147,7 @@ build-backend = 'setuptools.build_meta'
 requires = [
     'setuptools ~= 66.0',
     'setuptools_scm[toml] ~= 7.1.0',
-    'wheel ~= 0.38.4',
+    'wheel ~= 0.45.0',
 ]
 
 [tool.distutils.bdist_wheel]
