@@ -146,7 +146,7 @@ readme = { file = ['README.md'], content-type = 'text/markdown' }
 build-backend = 'setuptools.build_meta'
 requires = [
     'setuptools ~= 75.4',
-    'setuptools_scm[toml] ~= 7.1.0',
+    'setuptools_scm[toml] ~= 8.1.0',
     'wheel ~= 0.45.0',
 ]
 
