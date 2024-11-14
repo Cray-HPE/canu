@@ -46,6 +46,9 @@ vlan {{ variables.CAN_VLAN }}
 {%- endif %}
 vlan 10
     name SUN
+{%- if variables.RVR_NMN_NODES  %}
+{% include variables.CSM_VERSION+'/aruba/common/rvr_nmn_vlan.j2' %}
+{%- endif %}
 spanning-tree
 {#- forward delay added to help with pxe boots. CASMNET-1099 + CASMTRIAGE-2793 #}
 spanning-tree forward-delay 4
