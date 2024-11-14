@@ -22,6 +22,12 @@ vlan {{ variables.NMN_VLAN }}
     name NMN
     apply access-list ip nmn-hmn in
     apply access-list ip nmn-hmn out
+{%- if variables.NMN_ISOLATED_VLAN %}
+    private-vlan primary
+vlan {{ variables.NMN_ISOLATED_VLAN }}
+    name NMN_RVR_ISOLATED
+    private-vlan isolated primary-vlan {{ variables.NMN_VLAN }}
+{%- endif %}
 vlan {{ variables.HMN_VLAN }}
     name HMN
     apply access-list ip nmn-hmn in
