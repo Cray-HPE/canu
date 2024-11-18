@@ -22,6 +22,7 @@
 """Utilities to help CANU cache switch information to YAML."""
 
 import datetime
+from importlib import metadata
 from operator import itemgetter
 from os import path
 from pathlib import Path
@@ -29,7 +30,6 @@ import sys
 import tempfile
 
 import click
-import pkg_resources
 from ruamel.yaml import YAML
 
 yaml = YAML()
@@ -67,7 +67,7 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent
 
 canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
-version = pkg_resources.get_distribution("canu").version
+version = metadata.version("canu")
 file_exists = path.isfile(canu_cache_file)
 
 # Open the Cache file, and generate it if it does not exist

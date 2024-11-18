@@ -24,6 +24,7 @@
 """CANU commands that validate the shcd."""
 from collections import defaultdict
 import datetime
+from importlib import metadata
 import json
 import logging
 from os import path
@@ -37,7 +38,6 @@ from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 from network_modeling.NetworkPort import NetworkPort
 from network_modeling.NodeLocation import NodeLocation
 from openpyxl import load_workbook
-import pkg_resources
 
 from canu.style import Style
 
@@ -48,7 +48,7 @@ else:
     prog = __file__
     project_root = Path(__file__).resolve().parent.parent.parent.parent
 
-version = pkg_resources.get_distribution("canu").version
+version = metadata.version("canu")
 
 log = logging.getLogger("validate_shcd")
 
