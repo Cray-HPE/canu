@@ -225,7 +225,7 @@ dash = "-" * 60
     "--vrf",
     help="Named VRF used for CSM networks",
     required=False,
-    default="csm",
+    default="CSM",
 )
 @click.option(
     "--bond-app-nodes",

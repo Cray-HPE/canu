@@ -75,4 +75,5 @@ access-list ip cmn-can
 {%- endif %}
 {% set sequence = sequence+10 %}    {{ sequence }} permit any any any
 apply access-list ip mgmt control-plane vrf default
+apply access-list ip mgmt control-plane vrf {{ variables.VRF }}
 {#- end acl #}

@@ -28,6 +28,7 @@
 - Add CSM 1.6 templates
 - Fix case sensitivity when reading nodes from SHCD
 - Add Storage node support
+- Update ACLs to apply to default vrf
 
 ## [1.8.0]
 
