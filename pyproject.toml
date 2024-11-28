@@ -40,7 +40,7 @@ classifiers = [
 ]
 description = 'CSM Automatic Network Utility'
 dependencies = [
-    'aiohttp==3.11.7',
+    'aiohttp==3.11.8',
     'click-help-colors==0.9.4',
     'click-option-group==0.5.6',
     'click-params==0.5.0',
