@@ -21,6 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU generate switch config commands."""
 from collections import defaultdict
+from importlib import metadata
 from itertools import groupby
 import json
 import logging
@@ -43,7 +44,6 @@ import natsort
 import netaddr
 from netutils.mac import is_valid_mac
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
-import pkg_resources
 import requests
 from ruamel.yaml import YAML
 from ttp import ttp
@@ -119,7 +119,7 @@ with open(canu_config_file, "r") as file:
 
 csm_options = canu_config["csm_versions"]
 
-canu_version = pkg_resources.get_distribution("canu").version
+canu_version = metadata.version("canu")
 
 log = logging.getLogger("generate_switch_config")
 

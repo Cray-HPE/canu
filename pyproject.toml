@@ -40,18 +40,18 @@ classifiers = [
 ]
 description = 'CSM Automatic Network Utility'
 dependencies = [
-    'aiohttp==3.10.10',
+    'aiohttp==3.11.11',
     'click-help-colors==0.9.4',
     'click-option-group==0.5.6',
     'click-params==0.5.0',
     'click-spinner==0.1.10',
-    'click==8.1.7',
+    'click==8.1.8',
     'colorama==0.4.6',
     'emoji==2.5.0',
     'hier-config==2.2.3',
-    'ipython==8.29.0; python_version>"3.9"',
+    'ipython==8.31.0; python_version>"3.9"',
     'ipython~=8.18.1; python_version<"3.10"',
-    'jinja2==3.1.4',
+    'jinja2==3.1.5',
     'jsonschema==4.23.0',
     'kubernetes==31.0.0',
     'mac-vendor-lookup==0.1.12',
@@ -67,11 +67,11 @@ dependencies = [
     'pyyaml==6.0.2',
     'requests==2.32.3',
     'responses==0.25.3',
-    'ruamel.yaml<0.18.7',
+    'ruamel.yaml<0.18.10',
     'tabulate==0.9.0',
-    'tomli==2.1.0',
+    'tomli==2.2.1',
     'ttp==0.9.5',
-    'urllib3==2.2.3',
+    'urllib3==2.3.0',
     'yamale<=5.2.1',
 ]
 dynamic = ['entry-points', 'scripts', 'version']
@@ -102,7 +102,7 @@ docs = [
 lint = [
     'darglint~=1.8.1',
     'flake8-black~=0.3.6',
-    'flake8-bugbear~=24.10.31',
+    'flake8-bugbear~=24.12.12',
     'flake8-commas~=4.0.0',
     'flake8-comprehensions~=3.16.0',
     'flake8-debugger~=4.1.2',
