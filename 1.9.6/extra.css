@@ -1,0 +1,39 @@
+.logo {
+  background-image: "img/hpe_pri_wht_rev_rgb.png";
+}
+.wy-side-nav-search, .wy-nav-top {
+  background: #01A982;
+}
+.wy-nav-side {
+  background: #000000;
+}
+.rst-versions{
+  border-top:solid 10px #01A982;
+}
+
+.caption-text {
+ color: #32DAC8;
+}
+
+.rst-content code {
+  color: #7630EA;
+}
+
+a.visisted {
+  color: #C140FF;
+}
+
+a.hover {
+  color: #7630EA
+  /* color: #7FF9E2 */
+}
+a {
+  text-decoration: none;
+  color:#01A982
+}
+
+:root > * {
+  --md-primary-fg-color:        #01A982;
+  --md-primary-fg-color--light: #ECB7B7;
+  --md-primary-fg-color--dark:  #7630EA;
+}
