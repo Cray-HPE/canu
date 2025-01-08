@@ -2,6 +2,10 @@
 
 ## [UNRELEASED]
 
+## [1.9.5]
+
+- CASMNET-2273 Add the CMN to the mgmt access list to permit SSH, HTTPS, and SNMP over the CMN
+
 ## [1.9.4]
 
 - Add the ability to attach EX2500 to spines in validate.
