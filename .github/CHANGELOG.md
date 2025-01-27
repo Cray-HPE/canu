@@ -2,6 +2,30 @@
 
 ## [UNRELEASED]
 
+## [1.9.7]
+
+- One dep pr to rule them all10 by @rustydb in https://github.com/Cray-HPE/canu/pull/606
+
+## [1.9.6]
+
+- One dep pr to rule them all part4 by @rustydb in https://github.com/Cray-HPE/canu/pull/532
+- Support Python 3.11 and 3.12 by @rustydb in https://github.com/Cray-HPE/canu/pull/533
+- Speed up dependabot by @rustydb in https://github.com/Cray-HPE/canu/pull/535
+- One dep pr to rule them all part5 by @rustydb in https://github.com/Cray-HPE/canu/pull/546
+- One dep pr to rule them all part6 by @rustydb in https://github.com/Cray-HPE/canu/pull/554
+- Mark stable tags from default branch as latest by @rustydb in https://github.com/Cray-HPE/canu/pull/534
+- Remove unused packages by @rustydb in https://github.com/Cray-HPE/canu/pull/556
+- One dep pr to rule them all part7 by @rustydb in https://github.com/Cray-HPE/canu/pull/557
+- Daily dependabot update 1 by @rustydb in https://github.com/Cray-HPE/canu/pull/565
+- Update setuptools-scm[toml] requirement from ~=7.1.0 to ~=8.1.0 by @dependabot in https://github.com/Cray-HPE/canu/pull/559
+- Bump aiohttp from 3.10.10 to 3.11.7 by @dependabot in https://github.com/Cray-HPE/canu/pull/573
+- CASMNET-2260 Mountain HMN and HMN should use ospf area 2 by @dtcray in https://github.com/Cray-HPE/canu/pull/555
+- Resolve `pkg_resources` deprecation warning by @rustydb in https://github.com/Cray-HPE/canu/pull/570
+- One dep pr to rule them all part8 by @rustydb in https://github.com/Cray-HPE/canu/pull/579
+- One dep pr to rule them all part9 by @rustydb in https://github.com/Cray-HPE/canu/pull/595
+- CASMNET-2240 update ACLs to apply to default vrf by @lukebates123 in https://github.com/Cray-HPE/canu/pull/471
+- CASMNET-2273 - CMN missing from mgmt access control list by @spillerc-hpe in https://github.com/Cray-HPE/canu/pull/594
+
 ## [1.9.5]
 
 - CASMNET-2273 Add the CMN to the mgmt access list to permit SSH, HTTPS, and SNMP over the CMN
