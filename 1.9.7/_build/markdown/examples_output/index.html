@@ -1,0 +1,2047 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="canu documenation">
+      
+      
+        <meta name="author" content="Cray-HPE">
+      
+      
+      
+      
+      
+      <link rel="icon" href="../../../custom_theme/img/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.50">
+    
+    
+<title>CANU</title>
+
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.a40c8224.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#initialization" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../../../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="canu" class="md-header__button md-logo" aria-label="canu" data-md-component="logo">
+      
+  <img src="../../../custom_theme/img/hpe_pri_wht_rev_rgb.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            canu
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Initialization
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6m0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4M7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Cray-HPE/canu" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="canu" class="md-nav__button md-logo" aria-label="canu" data-md-component="logo">
+      
+  <img src="../../../custom_theme/img/hpe_pri_wht_rev_rgb.png" alt="logo">
+
+    </a>
+    canu
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Cray-HPE/canu" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Installation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../container_install.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Container
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../rpm_install/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    RPM
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../venv/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Virtualenv
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../quickstart/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Upgrade
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Upgrade
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../network_configuration_and_upgrade/collect_data/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Collect Data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../network_configuration_and_upgrade/validate_shcd/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Validate SHCD
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../network_configuration_and_upgrade/checks_and_validations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Checks and Validations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../network_configuration_and_upgrade/logging_and_updates/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Logging and Updates
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../network_configuration_and_upgrade/generate_config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Generate Switch Config
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../network_configuration_and_upgrade/compare_config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Compare Switch Configs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../network_configuration_and_upgrade/custom_config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Custom Config Injection
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../network_configuration_and_upgrade/analyze_config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Analyze Configuration Upgrade
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../network_configuration_and_upgrade/validation_errors/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CANU Validation Errors
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Command Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Command Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    backup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cache/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    cache
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../generate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    generate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../init/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    init
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../report/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    report
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../send_command/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    send
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../test_network/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    test
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../validate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    validate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Use With Ansible
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Use With Ansible
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../canu_inventory/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Inventory Script
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Development
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Development
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../nox_testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../releasing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Releasing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../versioning/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Versioning
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Appendix
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Appendix
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../paddle/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Paddle / CCJ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples_output/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Examples / Output
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#csi-input" class="md-nav__link">
+    <span class="md-ellipsis">
+      CSI Input
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sls-api-input" class="md-nav__link">
+    <span class="md-ellipsis">
+      SLS API Input
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="initialization">Initialization</h1>
+<p>To help make switch setup a breeze. CANU can automatically parse SLS JSON data - including CSI sls_input_file.json output or the Shasta SLS API for switch IPv4 addresses.</p>
+<h2 id="csi-input">CSI Input</h2>
+<ul>
+<li>In order to parse CSI output, use the <code>--sls-file FILE</code> flag to pass in the folder where an SLS JSON file is located.</li>
+</ul>
+<p>The CSI <code>sls_input_file.json</code> file is generally stored in one of two places depending on how far the system is in the install process.</p>
+<ul>
+<li>Early in the install process, when running off of the LiveCD the CSI <code>sls_input_file.json</code> file is normally found in the the directory <code>/var/www/ephemeral/prep/SYSTEMNAME/</code></li>
+<li>Later in the install process, the CSI <code>sls_input_file.json</code> file is generally in <code>/mnt/pitdata/prep/SYSTEMNAME/</code></li>
+<li>The SLS file can also be obtained from an NCN that’s in the k8s cluster by running <code>cray sls dumpstate list  --format json</code></li>
+<li>The switch IPs will be read from the ‘NMN’ network, if a different network is desired, use the <code>--network</code> flag to choose a different one e.g. (CAN, MTL, NMN).</li>
+</ul>
+<p>To get the switch IP addresses from CSI output, run the command:</p>
+<pre><code class="language-bash">canu init --sls-file SLS_FILE --out output.txt
+</code></pre>
+<p>Potential output:</p>
+<pre><code class="language-text">8 IP addresses saved to output.txt
+</code></pre>
+<h2 id="sls-api-input">SLS API Input</h2>
+<ul>
+<li>To parse the Shasta SLS API for IP addresses, ensure that you have a valid token. The token file can either be passed in with the <code>--auth-token TOKEN_FILE</code> flag, or it can be automatically read if the environmental variable <strong><code>SLS_TOKEN</code></strong> is set. The SLS address is default set to <code>api-gw-service-nmn.local</code>, if you are operating on a system with a different address, you can set it with the <code>--sls-address SLS_ADDRESS</code> flag.</li>
+</ul>
+<p>To get the switch IP addresses from the Shasta SLS API, run the command:</p>
+<pre><code class="language-bash">canu init --auth-token ~./config/cray/tokens/ --sls-address 1.2.3.4 --out output.txt
+</code></pre>
+<p>Potential output:</p>
+<pre><code class="language-text">8 IP addresses saved to output.txt
+</code></pre>
+<p>The output file for the <code>canu init</code> command is set with the <code>--out FILENAME</code> flag.</p>
+<h1 id="report-switch-firmware">Report Switch Firmware</h1>
+<p>CANU checks the switch firmware version against the standard in the <code>canu.yaml</code> file found in the root directory.</p>
+<p>The CSM version is required to determine the firmware to validate against, you can pass it in with <code>--csm</code> like <code>--csm 1.2</code>.</p>
+<p>To check the firmware of a single switch run: <code>canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD</code></p>
+<pre><code class="language-bash">$ canu report switch firmware --csm 1.2 --ip 192.168.1.1 --username USERNAME --password PASSWORD
+🛶 - Pass - IP: 192.168.1.1 Hostname:sw-spine-001 Firmware: GL.10.06.0010
+</code></pre>
+<h1 id="report-network-firmware">Report Network Firmware</h1>
+<p>Multiple switches on a network (Aruba, Dell, or Mellanox) can be checked for their firmware versions. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the <code>---ips</code> flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like <code>--ips-file FILENAME</code> to input the file.</p>
+<p>The CSM version is required to determine the firmware to validate against, you can pass it in with <code>--csm</code> like <code>--csm 1.2</code>.</p>
+<p>An example of checking the firmware of multiple switches: <code>canu report network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD</code></p>
+<pre><code class="language-bash">canu report network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2,192.168.1.3,192.168.1.4 --username USERNAME --password PASSWORD
+</code></pre>
+<p>Potential output:</p>
+<pre><code class="language-text">------------------------------------------------------------------
+    STATUS  IP              HOSTNAME            FIRMWARE
+------------------------------------------------------------------
+ 🛶 Pass    192.168.1.1     test-switch-spine01 GL.10.06.0010
+ 🛶 Pass    192.168.1.2     test-switch-leaf01  FL.10.06.0010
+ ❌ Fail    192.168.1.3     test-wrong-version  FL.10.05.0001   Firmware should be in range ['FL.10.06.0001']
+ 🔺 Error   192.168.1.4
+
+
+Errors
+------------------------------------------------------------------
+192.168.1.4     - HTTP Error. Check that this IP is an Aruba switch, or check the username and password
+
+Summary
+------------------------------------------------------------------
+🛶 Pass - 2 switches
+❌ Fail - 1 switches
+🔺 Error - 1 switches
+GL.10.06.0010 - 1 switches
+FL.10.06.0010 - 1 switches
+FL.10.05.0010 - 1 switches
+</code></pre>
+<p>When using the <em>network firmware</em> commands, the table will show either: 🛶 Pass, ❌ Fail, or 🔺 Error. The switch will <strong>pass</strong> or <strong>fail</strong> based on if the switch firmware matches the <code>canu.yaml</code>.</p>
+<h2 id="output-to-a-file">Output to a File</h2>
+<p>To output the results of the switch firmware or network firmware commands to a file, append the <code>--out FILENAME</code> flag</p>
+<h2 id="output-to-json">Output to JSON</h2>
+<p>To get the JSON output from a single switch, or from multiple switches, make sure to use the <code>--json</code> flag. An example json output is below.</p>
+<pre><code class="language-bash">canu network firmware --csm 1.2 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --json
+</code></pre>
+<p>Potential output:</p>
+<pre><code class="language-json">{
+    &quot;192.168.1.1&quot;: {
+        &quot;status&quot;: &quot;Pass&quot;,
+        &quot;hostname&quot;: &quot;test-switch-spine01&quot;,
+        &quot;platform_name&quot;: &quot;8325&quot;,
+        &quot;firmware&quot;: {
+            &quot;current_version&quot;: &quot;GL.10.06.0010&quot;,
+            &quot;primary_version&quot;: &quot;GL.10.06.0010&quot;,
+            &quot;secondary_version&quot;: &quot;GL.10.05.0020&quot;,
+            &quot;default_image&quot;: &quot;primary&quot;,
+            &quot;booted_image&quot;: &quot;primary&quot;,
+        },
+    },
+    &quot;192.168.1.2&quot;: {
+        &quot;status&quot;: &quot;Pass&quot;,
+        &quot;hostname&quot;: &quot;test-switch-leaf01&quot;,
+        &quot;platform_name&quot;: &quot;6300&quot;,
+        &quot;firmware&quot;: {
+            &quot;current_version&quot;: &quot;FL.10.06.0010&quot;,
+            &quot;primary_version&quot;: &quot;FL.10.06.0010&quot;,
+            &quot;secondary_version&quot;: &quot;FL.10.05.0020&quot;,
+            &quot;default_image&quot;: &quot;primary&quot;,
+            &quot;booted_image&quot;: &quot;primary&quot;,
+        },
+    },
+}
+</code></pre>
+<h1 id="report-switch-cabling">Report Switch Cabling</h1>
+<p>CANU can also use LLDP to check the cabling status of a switch. To check the cabling of a single switch run: <code>canu report switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD</code></p>
+<pre><code class="language-bash">canu report switch cabling --ip 192.168.1.1 --username USERNAME --password PASSWORD
+</code></pre>
+<p>Potential output:</p>
+<pre><code class="language-text">Switch: test-switch-spine01 (192.168.1.1)
+Aruba 8325
+------------------------------------------------------------------------------------------------------------------------------------------
+PORT        NEIGHBOR       NEIGHBOR PORT      PORT DESCRIPTION                                      DESCRIPTION
+------------------------------------------------------------------------------------------------------------------------------------------
+1/1/1   ==&gt;                00:00:00:00:00:01  No LLDP data, check ARP vlan info.                    192.168.1.20:vlan1, 192.168.2.12:vlan2
+1/1/3   ==&gt; ncn-test2      00:00:00:00:00:02  mgmt0                                                 Linux ncn-test2
+1/1/5   ==&gt; ncn-test3      00:00:00:00:00:03  mgmt0                                                 Linux ncn-test3
+1/1/7   ==&gt;                00:00:00:00:00:04  No LLDP data, check ARP vlan info.                    192.168.1.10:vlan1, 192.168.2.9:vlan2
+1/1/51  ==&gt; test-spine02   1/1/51                                                                   Aruba JL635A  GL.10.06.0010
+1/1/52  ==&gt; test-spine02   1/1/52                                                                   Aruba JL635A  GL.10.06.0010
+</code></pre>
+<p>Sometimes when checking cabling using LLDP, the neighbor does not return any information except a MAC address. When that is the case, CANU looks up the MAC in the ARP table and displays the IP addresses and vlan information associated with the MAC.</p>
+<p>Entries in the table will be colored based on what they are. Neighbors that have <em>ncn</em> in their name will be colored blue. Neighbors that have a port labeled (not a MAC address), are generally switches and are labeled green. Ports that are duplicated, will be bright white.</p>
+<h1 id="report-network-cabling">Report Network Cabling</h1>
+<p>The cabling of multiple switches (Aruba, Dell, or Mellanox) on a network can be checked at the same time using LLDP. The IPv4 addresses of the switches can either be entered comma separated, or be read from a file. To enter a comma separated list of IP addresses to the <code>---ips</code> flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like <code>--ips-file FILENAME</code> to input the file.</p>
+<p>An example of checking the cabling of multiple switches: <code>canu report network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD</code></p>
+<p>There are two different <code>--view</code> options, <strong>switch</strong> and <strong>equipment</strong>.</p>
+<ol>
+<li>The <code>--view switch</code> option displays a table for every switch IP address passed in showing connections. This is the same view as shown in the above example of checking single switch cabling.</li>
+<li>The <code>--view equipment</code> option displays a table for each mac address connection. This means that servers and switches will both display incoming and outgoing connections.</li>
+</ol>
+<p>An example of checking the cabling of multiple switches and displaying with the equipment view: <code>canu network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --view equipment</code></p>
+<pre><code class="language-bash">canu report network cabling --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD --view equipment
+</code></pre>
+<p>Potential output:</p>
+<pre><code class="language-text">sw-spine01 Aruba JL635A  GL.10.06.0010
+aa:aa:aa:aa:aa:aa
+----------------------------------------------------------------------------------------------------
+1/1/1                     &lt;==&gt; sw-spine02      1/1/1  Aruba JL635A  GL.10.06.0010
+1/1/3                     ===&gt;                 00:00:00:00:00:00 mgmt1
+1/1/4                     ===&gt; ncn-test        bb:bb:bb:bb:bb:bb mgmt1 Linux ncn-test
+
+
+sw-spine02 Aruba JL635A  GL.10.06.0010
+bb:bb:bb:bb:bb:bb
+----------------------------------------------------------------------------------------------------
+1/1/1                     &lt;==&gt; sw-spine01      1/1/1  Aruba JL635A  GL.10.06.0010
+
+
+00:00:00:00:00:00
+192.168.2.2:vlan3, 192.168.1.2:vlan1
+----------------------------------------------------------------------------------------------------
+00:00:00:00:00:00 mgmt1   &lt;=== sw-spine01      1/1/3
+
+
+ncn-test Linux ncn-test2
+bb:bb:bb:bb:bb:bb
+----------------------------------------------------------------------------------------------------
+bb:bb:bb:bb:bb:bb mgmt1   &lt;=== sw-spine01      1/1/4
+</code></pre>
+<h1 id="validate-shcd">Validate SHCD</h1>
+<p>CANU can be used to validate that an SHCD (SHasta Cabling Diagram) passes basic validation checks.</p>
+<ul>
+<li>The <code>--architecture / -a</code> flag is used to set the architecture of the system, either <strong>TDS</strong>, <strong>Full</strong>, or <strong>V1</strong>..</li>
+<li>Use the <code>--tabs</code> flag to select which tabs on the spreadsheet will be included.</li>
+<li>The <code>--corners</code> flag is used to input the upper left and lower right corners of the table on each tab of the worksheet. The table should contain the 11 headers: <strong>Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port</strong>. If the corners are not specified, you will be prompted to enter them for each tab.</li>
+</ul>
+<p>To check an SHCD run: <code>canu validate shcd -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN,HMN --corners I14,S25,I16,S22,J20,T39</code></p>
+<pre><code class="language-bash">canu validate shcd -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN,HMN --corners I14,S25,I16,S22,J20,T39
+</code></pre>
+<p>Potential output:</p>
+<pre><code class="language-text">SHCD Node Connections
+------------------------------------------------------------
+0: sw-spine-001 connects to 6 nodes: [1, 2, 3, 4, 5, 6]
+1: sw-spine-002 connects to 6 nodes: [0, 2, 3, 4, 5, 6]
+2: sw-leaf-bmc-001 connects to 2 nodes: [0, 1]
+3: uan001 connects to 2 nodes: [0, 1]
+4: ncn-s001 connects to 2 nodes: [0, 1]
+5: ncn-w001 connects to 2 nodes: [0, 1]
+6: ncn-m001 connects to 2 nodes: [0, 1]
+
+Warnings
+
+Node type could not be determined for the following
+------------------------------------------------------------
+CAN switch
+</code></pre>
+<p>The SHCD can easily be converted into CCJ by using by using the <code>--json</code> flag and outputting to a file by <code>canu validate shcd --shcd SHCD.xlsx --json --out paddle.json</code></p>
+<h1 id="validate-paddle">Validate Paddle</h1>
+<p>CANU can be used to validate that a CCJ (CSM Cabling JSON) passes basic validation checks.</p>
+<p>To validate a paddle CCJ run: <code>canu validate paddle --ccj paddle.json</code></p>
+<pre><code class="language-bash">canu validate paddle --ccj paddle.json
+</code></pre>
+<p>Potential output:</p>
+<pre><code class="language-text">CCJ Node Connections
+------------------------------------------------------------
+0: sw-spine-001 connects to 6 nodes: [1, 2, 3, 4, 5, 6]
+1: sw-spine-002 connects to 6 nodes: [0, 2, 3, 4, 5, 6]
+2: sw-leaf-bmc-001 connects to 2 nodes: [0, 1]
+3: uan001 connects to 2 nodes: [0, 1]
+4: ncn-s001 connects to 2 nodes: [0, 1]
+5: ncn-w001 connects to 2 nodes: [0, 1]
+6: ncn-m001 connects to 2 nodes: [0, 1]
+</code></pre>
+<h1 id="validate-network-cabling">Validate Network Cabling</h1>
+<p>CANU can be used to validate that network cabling passes basic validation checks.</p>
+<ul>
+<li>The <code>--architecture / -a</code> flag is used to set the architecture of the system, either <strong>TDS</strong>, <strong>Full</strong>, or <strong>V1</strong>.</li>
+<li>To enter a comma separated list of IP addresses to the <code>---ips</code> flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like <code>--ips-file FILENAME</code> to input the file.</li>
+</ul>
+<p>To validate the cabling run: <code>canu validate network cabling -a tds --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD</code></p>
+<pre><code class="language-bash">canu validate network cabling -a tds --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
+</code></pre>
+<p>Potential output:</p>
+<pre><code class="language-text">Cabling Node Connections
+------------------------------------------------------------
+0: sw-spine-001 connects to 10 nodes: [1, 2, 3, 4]
+1: ncn-m001 connects to 2 nodes: [0, 4]
+2: ncn-w001 connects to 2 nodes: [0, 4]
+3: ncn-s001 connects to 2 nodes: [0, 4]
+4: sw-spine-002 connects to 10 nodes: [0, 1, 2, 3 ]
+
+Warnings
+
+Node type could not be determined for the following
+------------------------------------------------------------
+sw-leaf-001
+sw-spine-001     1/1/1     ===&gt; aa:aa:aa:aa:aa:aa
+sw-spine-001     1/1/2     ===&gt; 1/1/1 CFCANB4S1 Aruba JL479A  TL.10.03.0081
+sw-spine-001     1/1/3     ===&gt; 1/1/3 sw-leaf-001 Aruba JL663A  FL.10.06.0010
+sw-spine-002     1/1/4     ===&gt; bb:bb:bb:bb:bb:bb
+sw-spine-002     1/1/5     ===&gt; 1/1/2 CFCANB4S1 Aruba JL479A  TL.10.03.0081
+sw-spine-002     1/1/6     ===&gt; 1/1/6 sw-leaf-001 Aruba JL663A  FL.10.06.0010
+Nodes that show up as MAC addresses might need to have LLDP enabled.
+
+The following nodes should be renamed
+------------------------------------------------------------
+sw-leaf01 should be renamed (could not identify node)
+sw-spine01 should be renamed sw-spine-001
+sw-spine02 should be renamed sw-spine-002
+</code></pre>
+<p>If there are any nodes that cannot be determined or should be renamed, there will be warning tables that show the details.</p>
+<h1 id="validate-shcd-and-cabling">Validate SHCD and Cabling</h1>
+<p>CANU can be used to validate an SHCD against the current network cabling.</p>
+<ul>
+<li>The <code>--csm</code> flag is used to set the CSM version of the system.</li>
+<li>The <code>--architecture / -a</code> flag is used to set the architecture of the system, either <strong>TDS</strong>, <strong>Full</strong>, or <strong>V1</strong>.</li>
+<li>Use the <code>--tabs</code> flag to select which tabs on the spreadsheet will be included.</li>
+<li>The <code>--corners</code> flag is used to input the upper left and lower right corners of the table on each tab of the worksheet. The table should contain the 11 headers: <strong>Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port</strong>. If the corners are not specified, you will be prompted to enter them for each tab.</li>
+<li>To enter a comma separated list of IP addresses to the <code>---ips</code> flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like <code>--ips-file FILENAME</code> to input the file.</li>
+</ul>
+<p>To validate an SHCD against the cabling run: <code>canu validate shcd-cabling --csm 1.2 -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN --corners I14,S49,I16,S22 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD</code></p>
+<pre><code class="language-bash">canu validate shcd-cabling --csm 1.2 -a tds --shcd FILENAME.xlsx --tabs 25G_10G,NMN --corners I14,S49,I16,S22 --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
+</code></pre>
+<p>Potential output:</p>
+<pre><code class="language-text">====================================================================================================
+SHCD vs Cabling
+====================================================================================================
+
+ncn-m001
+Rack: x3000    Elevation: u14
+--------------------------------------------------------------------------------
+Port   SHCD                     Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-001:5           sw-spine-001:5
+2      sw-spine-002:5           sw-spine-002:5
+
+ncn-s001
+Rack: x3000    Elevation: u15
+--------------------------------------------------------------------------------
+Port   SHCD                     Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-001:6           None
+2      sw-spine-002:6           None
+
+ncn-w001
+Rack: x3000    Elevation: u16
+--------------------------------------------------------------------------------
+Port   SHCD                     Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-001:7           sw-spine-001:7
+2      sw-spine-002:7           sw-spine-002:7
+
+sw-spine-001
+Rack: x3000    Elevation: u17
+--------------------------------------------------------------------------------
+Port   SHCD                     Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-002:1           sw-spine-002:1
+2      sw-spine-002:2           sw-spine-002:2
+3      uan001:pcie-slot1:1      aa:aa:aa:aa:aa:aa Cray, Inc.
+5      ncn-m001:pcie-slot1:1    ncn-m001:pcie-slot1:1
+6      ncn-s001:pcie-slot1:1    b4:2e:99:aa:bb:cc GIGA-BYTE TECHNOLOGY CO.,LTD.
+7      ncn-w001:pcie-slot1:1    ncn-w001:pcie-slot1:1
+
+sw-spine-002
+Rack: x3000    Elevation: u18
+--------------------------------------------------------------------------------
+Port   SHCD                     Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-001:1           sw-spine-001:1
+2      sw-spine-001:2           sw-spine-001:2
+3      uan001:pcie-slot1:2      bb:bb:bb:bb:bb:bb Cray, Inc.
+5      ncn-m001:pcie-slot1:2    ncn-m001:pcie-slot1:2
+6      ncn-s001:pcie-slot1:2    b8:59:9f:aa:bb:cc Mellanox Technologies, Inc.
+7      ncn-w001:pcie-slot1:2    ncn-w001:pcie-slot1:2
+
+uan001
+Rack: x3000    Elevation: u19
+--------------------------------------------------------------------------------
+Port   SHCD                     Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-001:3           None
+2      sw-spine-002:3           None
+
+
+====================================================================================================
+SHCD Warnings
+====================================================================================================
+
+Warnings
+
+Node type could not be determined for the following
+------------------------------------------------------------
+Sheet: HMN
+Cell: R21      Name: SITE
+
+
+====================================================================================================
+Cabling Warnings
+====================================================================================================
+
+Node type could not be determined for the following
+------------------------------------------------------------
+sw-spine-001     1/1/3     ===&gt; aa:aa:aa:aa:aa:aa Cray, Inc.
+sw-spine-002     1/1/3     ===&gt; bb:bb:bb:bb:bb:bb Cray, Inc.
+Nodes that show up as MAC addresses might need to have LLDP enabled.
+</code></pre>
+<p>The output of the <code>validate shcd-cabling</code> command will show a port by port comparison between the devices found in the SHCD and devices found on the network. If there is a difference in what is found connected to a devices port in SHCD and Cabling, the line will be highlighted in red.</p>
+<h1 id="validate-paddle-and-cabling">Validate Paddle and Cabling</h1>
+<p>CANU can be used to validate aCCJ paddle against the current network cabling.</p>
+<ul>
+<li>The <code>--csm</code> flag is used to set the CSM version of the system.</li>
+<li>The <code>--ccj</code> flag is used to input the CCJ file.</li>
+<li>To enter a comma separated list of IP addresses to the <code>---ips</code> flag. To read the IP addresses from a file, make sure the file has one IP address per line, and use the flag like <code>--ips-file FILENAME</code> to input the file.</li>
+</ul>
+<p>To validate an SHCD against the cabling run: <code>canu validate paddle-cabling --csm 1.2 --ccj paddle.json --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD</code></p>
+<pre><code class="language-bash">canu validate paddle-cabling --csm 1.2 --ccj paddle.json --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD
+</code></pre>
+<p>Potential output:</p>
+<pre><code class="language-text">====================================================================================================
+CCJ vs Cabling
+====================================================================================================
+
+ncn-m001
+Rack: x3000    Elevation: u14
+--------------------------------------------------------------------------------
+Port   CCJ                      Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-001:5           sw-spine-001:5
+2      sw-spine-002:5           sw-spine-002:5
+
+ncn-s001
+Rack: x3000    Elevation: u15
+--------------------------------------------------------------------------------
+Port   CCJ                      Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-001:6           None
+2      sw-spine-002:6           None
+
+ncn-w001
+Rack: x3000    Elevation: u16
+--------------------------------------------------------------------------------
+Port   CCJ                      Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-001:7           sw-spine-001:7
+2      sw-spine-002:7           sw-spine-002:7
+
+sw-spine-001
+Rack: x3000    Elevation: u17
+--------------------------------------------------------------------------------
+Port   CCJ                      Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-002:1           sw-spine-002:1
+2      sw-spine-002:2           sw-spine-002:2
+3      uan001:pcie-slot1:1      aa:aa:aa:aa:aa:aa Cray, Inc.
+5      ncn-m001:pcie-slot1:1    ncn-m001:pcie-slot1:1
+6      ncn-s001:pcie-slot1:1    b4:2e:99:aa:bb:cc GIGA-BYTE TECHNOLOGY CO.,LTD.
+7      ncn-w001:pcie-slot1:1    ncn-w001:pcie-slot1:1
+
+sw-spine-002
+Rack: x3000    Elevation: u18
+--------------------------------------------------------------------------------
+Port   CCJ                      Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-001:1           sw-spine-001:1
+2      sw-spine-001:2           sw-spine-001:2
+3      uan001:pcie-slot1:2      bb:bb:bb:bb:bb:bb Cray, Inc.
+5      ncn-m001:pcie-slot1:2    ncn-m001:pcie-slot1:2
+6      ncn-s001:pcie-slot1:2    b8:59:9f:aa:bb:cc Mellanox Technologies, Inc.
+7      ncn-w001:pcie-slot1:2    ncn-w001:pcie-slot1:2
+
+uan001
+Rack: x3000    Elevation: u19
+--------------------------------------------------------------------------------
+Port   CCJ                      Cabling
+--------------------------------------------------------------------------------
+1      sw-spine-001:3           None
+2      sw-spine-002:3           None
+
+
+====================================================================================================
+CCJ  Warnings
+====================================================================================================
+
+====================================================================================================
+Cabling Warnings
+====================================================================================================
+
+Node type could not be determined for the following
+------------------------------------------------------------
+sw-spine-001     1/1/3     ===&gt; aa:aa:aa:aa:aa:aa Cray, Inc.
+sw-spine-002     1/1/3     ===&gt; bb:bb:bb:bb:bb:bb Cray, Inc.
+Nodes that show up as MAC addresses might need to have LLDP enabled.
+</code></pre>
+<p>The output of the <code>validate paddle-cabling</code> command will show a port by port comparison between the devices found in the CCJ and devices found on the network. If there is a difference in what is found connected to a devices port in CCJ and Cabling, the line will be highlighted in red.</p>
+<h1 id="validate-network-bgp">Validate Network BGP</h1>
+<p>CANU can be used to validate BGP neighbors. All neighbors of a switch must return status <strong>Established</strong> or the verification will fail.</p>
+<ul>
+<li>The default <strong>asn</strong> is set to <em>65533</em> if it needs to be changed, use the flag <code>--asn NEW_ASN_NUMBER</code> to set the new number</li>
+</ul>
+<p>If you want to see the individual status of all the neighbors of a switch, use the <code>--verbose</code> flag.</p>
+<p>To validate BGP run: <code>canu validate network bgp --ips 192.168.1.1,192.168.1.2 --username USERNAME --password PASSWORD</code></p>
+<pre><code class="language-bash">canu validate network bgp --username USERNAME --password PASSWORD
+</code></pre>
+<p>Potential output:</p>
+<pre><code class="language-text">BGP Neighbors Established
+--------------------------------------------------
+PASS - IP: 192.168.1.1 Hostname: sw-spine01
+PASS - IP: 192.168.1.2 Hostname: sw-spine01
+</code></pre>
+<p>If any of the spine switch neighbors for a connection other than <strong>Established</strong>, the switch will <strong>FAIL</strong> validation.</p>
+<h1 id="generate-switch-config">Generate Switch Config</h1>
+<p>To see all the lags that are generated, see <a href="../lags/">lags</a></p>
+<p>CANU can be used to generate switch config.</p>
+<p>In order to generate switch config, a valid SHCD or CCJ must be passed in and system variables must be read in from any SLS data, including CSI output or the SLS API.</p>
+<h2 id="csi-input_1">CSI Input</h2>
+<ul>
+<li>In order to parse CSI output, use the <code>--sls-file FILE</code> flag to pass in the folder where the <code>sls_file.json</code> file is located.</li>
+</ul>
+<p>The sls_input_file.json file is generally stored in one of two places depending on how far the system is in the install process.</p>
+<ul>
+<li>Early in the install process, when running off of the LiveCD the sls_input_file.json file is normally found in the the directory <code>/var/www/ephemeral/prep/SYSTEMNAME/</code></li>
+<li>Later in the install process, the sls_input_file.json file is generally in <code>/mnt/pitdata/prep/SYSTEMNAME/</code></li>
+</ul>
+<h2 id="sls-api-input_1">SLS API Input</h2>
+<ul>
+<li>To parse the Shasta SLS API for IP addresses, ensure that you have a valid token. The token file can either be passed in with the <code>--auth-token TOKEN_FILE</code> flag, or it can be automatically read if the environmental variable <strong>SLS_TOKEN</strong> is set. The SLS address is default set to <em>api-gw-service-nmn.local</em>, if you are operating on a system with a different address, you can set it with the <code>--sls-address SLS_ADDRESS</code> flag.</li>
+</ul>
+<h2 id="paddle-ccj-input">Paddle / CCJ Input</h2>
+<ul>
+<li>The <code>--csm</code> flag is used to set the CSM version of the system.</li>
+<li>The <code>--ccj</code> flag is used to input the CCJ file.</li>
+</ul>
+<p>To generate switch config run: <code>canu generate switch config --csm 1.2 --ccj paddle.json --sls-file SLS_FILE --name SWITCH_HOSTNAME --out FILENAME</code></p>
+<h2 id="shcd-input">SHCD Input</h2>
+<ul>
+<li>The <code>--csm</code> flag is used to set the CSM version of the system.</li>
+<li>The <code>--architecture / -a</code> flag is used to set the architecture of the system, either <strong>TDS</strong>, <strong>Full</strong>, or <strong>V1</strong>..</li>
+<li>Use the <code>--tabs</code> flag to select which tabs on the spreadsheet will be included.</li>
+<li>The <code>--corners</code> flag is used to input the upper left and lower right corners of the table on each tab of the worksheet. The table should contain the 11 headers: <strong>Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port</strong>. If the corners are not specified, you will be prompted to enter them for each tab.</li>
+</ul>
+<p>To generate config for a specific switch, a hostname must also be passed in using the <code>--name HOSTNAME</code> flag. To output the config to a file, append the <code>--out FILENAME</code> flag.</p>
+<p>To generate switch config run: <code>canu generate switch config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --sls-file SLS_FILE --name SWITCH_HOSTNAME --out FILENAME</code></p>
+<pre><code class="language-bash">canu generate switch config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --name sw-spine-001
+</code></pre>
+<p>Potential output:</p>
+<pre><code class="language-text">hostname sw-spine-001
+user admin group administrators password plaintext
+bfd
+no ip icmp redirect
+vrf CAN
+vrf keepalive
+...
+</code></pre>
+<h2 id="generate-switch-configs-including-custom-configurations">Generate Switch Configs Including Custom Configurations</h2>
+<p>Pass in a switch config file that CANU will inject into the generated config. A use case would be to add custom site connections.
+This config file will overwrite previously generate config.</p>
+<p>The <code>custom-config</code> file type is YAML and a single file can be used for multiple switches. You will need to specify the switch name and what config inject.  The <code>custom-config</code> feature is using the hierarchical configuration library, documentation can be found here <a href="https://netdevops.io/hier_config/">https://netdevops.io/hier_config/</a>.</p>
+<p>custom config file examples</p>
+<p>Aruba</p>
+<pre><code class="language-yaml">sw-spine-001:  |
+    ip route 0.0.0.0/0 10.103.15.185
+    interface 1/1/36
+        no shutdown
+        ip address 10.103.15.186/30
+        exit
+    system interface-group 3 speed 10g
+    interface 1/1/2
+        no shutdown
+        mtu 9198
+        description sw-spine-001:16==&gt;ion-node
+        no routing
+        vlan access 7
+        spanning-tree bpdu-guard
+        spanning-tree port-type admin-edge
+sw-spine-002:  |
+    ip route 0.0.0.0/0 10.103.15.189
+    interface 1/1/36
+        no shutdown
+        ip address 10.103.15.190/30
+        exit
+    system interface-group 3 speed 10g
+sw-leaf-bmc-001:  |
+    interface 1/1/20
+        no routing
+        vlan access 4
+        spanning-tree bpdu-guard
+        spanning-tree port-type admin-edge
+</code></pre>
+<p>Mellanox/Dell</p>
+<pre><code class="language-yaml">sw-spine-001:  |
+    interface ethernet 1/1 speed 10G force
+    interface ethernet 1/1 description &quot;sw-spine02-1/16&quot;
+    interface ethernet 1/1 no switchport force
+    interface ethernet 1/1 ip address 10.102.255.14/30 primary
+    interface ethernet 1/1 dcb priority-flow-control mode on force
+    ip route vrf default 0.0.0.0/0 10.102.255.13
+sw-spine-002:  |
+    interface ethernet 1/16 speed 10G force
+    interface ethernet 1/16 description &quot;sw-spine01-1/16&quot;
+    interface ethernet 1/16 no switchport force
+    interface ethernet 1/16 ip address 10.102.255.34/30 primary
+    interface ethernet 1/16 dcb priority-flow-control mode on force
+    ip route vrf default 0.0.0.0/0 10.102.255.33
+sw-leaf-bmc-001:  |
+    interface ethernet1/1/12
+      description sw-leaf-bmc-001:12==&gt;cn003:2
+      no shutdown
+      switchport access vlan 4
+      mtu 9216
+      flowcontrol receive off
+      flowcontrol transmit off
+      spanning-tree bpduguard enable
+      spanning-tree port type edge
+    interface vlan7
+        description CMN
+        no shutdown
+        ip vrf forwarding Customer
+        mtu 9216
+        ip address 10.102.4.100/25
+        ip access-group cmn-can in
+        ip access-group cmn-can out
+        ip ospf 2 area 0.0.0.0
+</code></pre>
+<p>To generate switch configuration with custom config injection.</p>
+<pre><code class="language-bash">canu generate switch config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --name sw-spine-001 --custom-config CUSTOM_CONFIG_FILE.yaml
+</code></pre>
+<h2 id="generate-switch-config-while-preserving-lag-s">Generate Switch Config while preserving LAG #s</h2>
+<p>This option allows you to generate swtich configs while preserving the lag #s of the previous running config.</p>
+<p>The use case for this is if you have a running system and you don’t want to take an outage to renumber the LAGs.</p>
+<p>It requires a folder with the config/s backed up.</p>
+<p>The recommended way to back these configs up is with <code>canu backup</code></p>
+<pre><code class="language-default">canu generate switch config -a v1 --csm 1.0 --ccj ccj.json --sls-file sls_input_file.json --name sw-spine-001 --preserve ../backup_configs/
+</code></pre>
+<h1 id="generate-network-config">Generate Network Config</h1>
+<p>To see all the lags that are generated, see <a href="../lags/">lags</a></p>
+<p>CANU can also generate switch config for all the switches on a network.</p>
+<p>In order to generate network config, a valid SHCD or CCJ must be passed in and system variables must be read in from either CSI output or the SLS API. The instructions are exactly the same as the above except there will not be a hostname and a folder must be specified for config output using the <code>--folder FOLDERNAME</code> flag.</p>
+<p>To generate switch config from a CCJ paddle run: <code>canu generate network config --csm 1.2 --ccj paddle.json --sls-file SLS_FILE --folder FOLDERNAME</code></p>
+<p>To generate switch config from SHCD run: <code>canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs 'INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES' --corners 'J14,T44,J14,T48,J14,T24,J14,T23' --sls-file SLS_FILE --folder FOLDERNAME</code></p>
+<pre><code class="language-bash">canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config
+</code></pre>
+<p>Potential output:</p>
+<pre><code class="language-text">sw-spine-001 Config Generated
+sw-spine-002 Config Generated
+sw-leaf-001 Config Generated
+sw-leaf-002 Config Generated
+sw-leaf-003 Config Generated
+sw-leaf-004 Config Generated
+sw-cdu-001 Config Generated
+sw-cdu-002 Config Generated
+sw-leaf-bmc-001 Config Generated
+
+</code></pre>
+<h2 id="generate-network-config-with-custom-config-injection">Generate Network Config With Custom Config Injection</h2>
+<p>This option allows extension and maintenance of switch configurations beyond plan-of-record. A YAML file expresses custom configurations across the network and these configurations are merged with the plan-of-record configurations.</p>
+<p>WARNING: Extreme diligence should be used applying custom configurations which override plan-of-record generated configurations. Custom configurations will overwrite generated configurations! Override/overwrite is by design to support and document cases where site-interconnects demand “nonstandard” configurations or a bug must be worked around.</p>
+<p>To generate network configuration with custom config injection run</p>
+<pre><code class="language-bash">canu generate network config --csm 1.2 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config --custom-config CUSTOM_CONFIG_FILE.yaml
+</code></pre>
+<h2 id="generate-network-config-while-preserving-lag-s">Generate Network Config while preserving LAG #s</h2>
+<p>This option allows you to generate swtich configs while preserving the lag #s of the previous running config.</p>
+<p>The use case for this is if you have a running system and you don’t want to take an outage to renumber the LAGs.</p>
+<p>It requires a folder with the config/s backed up.</p>
+<p>The recommended way to back these configs up is with <code>backup network</code></p>
+<pre><code class="language-bash">canu generate network config --csm 1.0 -a full --shcd FILENAME.xlsx --tabs INTER_SWITCH_LINKS,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES --corners J14,T44,J14,T48,J14,T24,J14,T23 --sls-file SLS_FILE --folder switch_config --preserve FOLDER_WITH_SWITCH_CONFIGS
+</code></pre>
+<h1 id="validate-switch-config">Validate Switch Config</h1>
+<p>After config has been generated, CANU can validate the generated config against running switch config. The running config can be from either an IP address, or a config file.</p>
+<ul>
+<li>To get running config from an IP address, use the flags <code>--ip 192.168.1.1 --username USERNAME --password PASSWORD</code>.</li>
+<li>To get running config from a file, use the flag <code>--running RUNNING_CONFIG.cfg</code> instead.</li>
+</ul>
+<p>After running the <code>validate switch config</code> command, you will be shown a line by line comparison of the currently running switch config against the config file that was passed in. You will also be given a list of remediation commands that can be typed into the switch to get the running config to match the config file. There will be a summary table at the end highlighting the most important differences between the configs.</p>
+<ul>
+<li>Lines that are red and start with a <code>-</code> are in the running config, but not in the config file</li>
+<li>Lines that are green and start with a <code>+</code> are not in the running config, but are in the config file</li>
+<li>Lines that are blue and start with a <code>?</code> are attempting to point out specific line differences</li>
+</ul>
+<p>To validate switch config run: <code>canu validate switch config --ip 192.168.1.1 --username USERNAME --password PASSWORD --generated SWITCH_CONFIG.cfg</code></p>
+<pre><code class="language-bash">canu validate switch config --ip 192.168.1.1 --generated sw-spine-001.cfg
+</code></pre>
+<p>Potential output:</p>
+<pre><code class="language-text">hostname sw-spine-001
+- ntp server 192.168.1.10
+?                       ^
++ ntp server 192.168.1.16
+?                       ^
+  vlan 1
+  vlan 2
+-     name RVR_NMN
+?          ----
++     name NMN
+      apply access-list ip nmn-hmn in
+      apply access-list ip nmn-hmn out
+...
+
+Switch: sw-leaf-001 (192.168.1.1)
+Differences
+-------------------------------------------------------------------------
+In Generated Not In Running (+)     |  In Running Not In Generated (-)
+-------------------------------------------------------------------------
+Total Additions:                 7  |  Total Deletions:                 7
+Hostname:                        1  |  Hostname:                        1
+Interface:                       2  |  Interface:                       1
+Interface Lag:                   1  |  Interface Lag:                   2
+Spanning Tree:                   2  |  Spanning Tree:                   3
+Router:                          1  |
+</code></pre>
+<h1 id="validate-network-config">Validate Network Config</h1>
+<p>Aruba support only.</p>
+<p>The <code>validate network config</code> command works almost the same as the above <code>validate switch config</code> command. There are three options for passing in the running config:</p>
+<ul>
+<li>A comma separated list of ips using <code>--ips 192.168.1.1,192.168.1.</code></li>
+<li>A file of ip addresses, one per line using the flag <code>--ips-file ips.txt</code></li>
+<li>A directory containing the running configuration <code>--running RUNNING/CONFIG/DIRECTORY</code></li>
+</ul>
+<p>A directory of generated config files will also need to be passed in using <code>--generated GENERATED/CONFIG/DIRECTORY</code>. There will be a summary table for each switch highlighting the most important differences between the running switch config and the generated config files.</p>
+<p>To validate switch config run: <code>canu validate network config --ips-file ips.txt --username USERNAME --password PASSWORD --generated /CONFIG/FOLDER</code></p>
+<pre><code class="language-bash">canu validate network config --csm 1.2 --ips-file ips.txt --generated /CONFIG/FOLDER
+</code></pre>
+<p>Potential output:</p>
+<pre><code class="language-text">Switch: sw-leaf-001 (192.168.1.1)
+Differences
+-------------------------------------------------------------------------
+In Generated Not In Running (+)     |  In Running Not In Generated (-)
+-------------------------------------------------------------------------
+Total Additions:                 7  |  Total Deletions:                 7
+Hostname:                        1  |  Hostname:                        1
+Interface:                       2  |  Interface:                       1
+Interface Lag:                   1  |  Interface Lag:                   2
+Spanning Tree:                   2  |  Spanning Tree:                   3
+Router:                          1  |
+
+Switch: sw-spine-001 (192.168.1.2)
+Differences
+-------------------------------------------------------------------------
+In Generated Not In Running (+)     |  In Running Not In Generated (-)
+-------------------------------------------------------------------------
+Total Additions:                 3  |  Total Deletions:                 2
+Interface:                       2  |  Interface:                       1
+Interface Lag:                   1  |
+
+...
+
+Errors
+----------------------------------------------------------------------------------------------------
+192.168.1.3      - Timeout error connecting to switch 192.168.1.3, check the entered username, IP address and password.
+</code></pre>
+<h2 id="file-output-and-json">File Output and JSON</h2>
+<p>To output the results of the config validation command to a file, append the <code>--out FILENAME</code> flag. To get the results as JSON, use the <code>--json</code> flag.</p>
+<h1 id="cache">Cache</h1>
+<p>There are several commands to help with the canu cache:</p>
+<ul>
+<li><code>canu cache location</code> will tell you the folder where your cache is located</li>
+<li><code>canu cache print</code> will print a colored version of your cache to the screen</li>
+<li><code>canu cache delete</code> will delete your cache file, the file will be created again on the next canu command</li>
+</ul>
+<h1 id="test-the-network">Test The Network</h1>
+<p>CANU has the ability to run a set of tests against all of the switches in the management network.
+It is utilizing the nornir automation framework and additional nornir plugins to do this.</p>
+<p>More info can be found at</p>
+<ul>
+<li><a href="https://nornir.tech/2021/08/06/testing-your-network-with-nornir-testsprocessor/">https://nornir.tech/2021/08/06/testing-your-network-with-nornir-testsprocessor/</a></li>
+<li><a href="https://github.com/nornir-automation/nornir">https://github.com/nornir-automation/nornir</a></li>
+<li><a href="https://github.com/dmulyalin/salt-nornir">https://github.com/dmulyalin/salt-nornir</a></li>
+</ul>
+<p>Required Input
+You can either use an SLS file or pull the SLS file from the API-Gateway using a token.</p>
+<ul>
+<li><code>--sls-file</code></li>
+<li><code>--auth-token</code></li>
+</ul>
+<p>Options</p>
+<ul>
+<li><code>--log</code> outputs the nornir debug logs</li>
+<li><code>--network [HMN|CMN]</code> This gives the user the ability to connect to the switches over the CMN.  This allows the use of this tool from outside the Mgmt Network.  The default network used is the HMN.</li>
+<li><code>--json</code> outputs the results in json format.</li>
+<li><code>--password</code> prompts if password is not entered</li>
+<li><code>--username</code> defaults to admin</li>
+</ul>
+<h2 id="adding-tests">Adding tests</h2>
+<p>Additional tests can be easily added by updating the .yaml file at <code>canu/test/*/test_suite.yaml</code>
+More information on tests and how to write them can be found at <a href="https://nornir.tech/2021/08/06/testing-your-network-with-nornir-testsprocessor/">https://nornir.tech/2021/08/06/testing-your-network-with-nornir-testsprocessor/</a></p>
+<p>Example test</p>
+<pre><code class="language-yaml">- name: Software version test
+  task: show version
+  test: contains
+  pattern: &quot;10.08.1021&quot;
+  err_msg: Software version is wrong
+  device:
+    - cdu
+    - leaf
+    - leaf-bmc
+    - spine
+</code></pre>
+<p>This test logs into the cdu, leaf, leaf-bmc, and spine switches and runs the command <code>show version</code> and checks that <code>10.09.0010</code> is in the output.  If it’s not the test fails.</p>
+<h1 id="backup-network">Backup Network</h1>
+<p>Canu can backup the running configurations for switches in the management network.
+It backs up the entire switch inventory from SLS by defualt, if you want to backup just one switch use the <code>--name</code> flag.</p>
+<p>Required Input
+You can either use an SLS file or pull the SLS file from the API-Gateway using a token.</p>
+<ul>
+<li><code>--sls-file</code></li>
+<li><code>--folder</code> “Folder to store running config files”</li>
+</ul>
+<p>Options</p>
+<ul>
+<li><code>--log</code> outputs the nornir debug logs</li>
+<li><code>--network [HMN|CMN]</code> This gives the user the ability to connect to the switches over the CMN.  This allows the use of this tool from outside the Mgmt Network.  The default network used is the HMN.</li>
+<li><code>--password</code> prompts if password is not entered</li>
+<li><code>--username</code> defaults to admin</li>
+<li><code>--unsanitized</code> Retains sensitive data such as passwords and SNMP credentials.  The default is to sanitize the config.</li>
+<li><code>--name</code> The name of the switch that you want to back up. e.g. ‘sw-spine-001’</li>
+</ul>
+<p>Example</p>
+<pre><code class="language-bash">canu backup network --sls-file ./sls_input_file.json --network CMN --folder ./ --unsanitized
+</code></pre>
+<p>Potential output:</p>
+<pre><code class="language-text">Running Configs Saved
+---------------------
+sw-spine-001.cfg
+sw-spine-002.cfg
+sw-leaf-001.cfg
+sw-leaf-002.cfg
+sw-leaf-003.cfg
+sw-leaf-004.cfg
+sw-leaf-bmc-001.cfg
+sw-leaf-bmc-002.cfg
+sw-cdu-001.cfg
+sw-cdu-002.cfg
+</code></pre>
+<h1 id="send-command">Send Command</h1>
+<p>Canu can send commands to the switches via the CLI.
+This is primarily used for <code>show</code> commands since we do not elevate to configuration mode.</p>
+<p>You can either use an SLS file or pull the SLS file from the API-Gateway using a token.</p>
+<ul>
+<li><code>--sls-file</code></li>
+<li><code>--log</code> outputs the nornir debug logs</li>
+<li><code>--network [HMN|CMN]</code> This gives the user the ability to connect to the switches over the CMN.  This allows the use of this tool from outside the Mgmt Network.  The default network used is the HMN.</li>
+<li><code>--command</code> command to send to the switch/switches.</li>
+<li><code>--password</code> prompts if password is not entered</li>
+<li><code>--username</code> defaults to admin</li>
+<li><code>--name</code> The name of the switch that you want to back up. e.g. ‘sw-spine-001’</li>
+</ul>
+<p>Examples</p>
+<pre><code class="language-bash">canu send command --sls-file ./sls_input_file.json --network cmn --command &quot;show banner exec&quot; --name sw-spine-001
+-netmiko_send_command************************************************************
+* sw-spine-001 ** changed : False **********************************************
+vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+###############################################################################
+# CSM version:  1.2
+# CANU version: 1.3.2
+###############################################################################
+
+^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+</code></pre>
+<pre><code class="language-bash">canu send command --command 'show version | include &quot;Version      :&quot;'
+\netmiko_send_command************************************************************
+* sw-leaf-bmc-001 ** changed : False *******************************************
+vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+Version      : FL.10.09.0010                                                 
+^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* sw-spine-001 ** changed : False **********************************************
+vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+Version      : GL.10.09.0010                                                 
+^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* sw-spine-002 ** changed : False **********************************************
+vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+Version      : GL.10.09.0010                                                 
+^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+</code></pre>
+<h1 id="report-network-version">Report Network Version</h1>
+<p>Canu reports the version of configuration on the switch.  It reads the exec baner of all the switches and outputs to the screen.</p>
+<p>Options</p>
+<ul>
+<li><code>--sls-file</code></li>
+<li><code>--network [HMN|CMN]</code> This gives the user the ability to connect to the switches over the CMN.  This allows the use of this tool from outside the Mgmt Network.  The default network used is the HMN.</li>
+<li><code>--password</code> prompts if password is not entered</li>
+<li><code>--username</code> defaults to admin</li>
+</ul>
+<p>Example</p>
+<pre><code class="language-console">canu report network version --sls-file ../sls_input_file.json --network cmn
+Password: 
+SWITCH            CANU VERSION      CSM VERSION
+sw-spine-001      1.5.12            1.2  
+sw-spine-002      1.5.12            1.2  
+sw-leaf-bmc-001   1.5.12            1.2
+</code></pre>
+<pre><code class="language-bash">canu send command --command 'show version | include &quot;Version      :&quot;'
+\netmiko_send_command************************************************************
+* sw-leaf-bmc-001 ** changed : False *******************************************
+vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+Version      : FL.10.09.0010
+^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* sw-spine-001 ** changed : False **********************************************
+vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+Version      : GL.10.09.0010
+^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* sw-spine-002 ** changed : False **********************************************
+vvvv netmiko_send_command ** changed : False vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv INFO
+Version      : GL.10.09.0010
+^^^^ END netmiko_send_command ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.60a45f97.min.js"></script>
+      
+    
+  </body>
+</html>
