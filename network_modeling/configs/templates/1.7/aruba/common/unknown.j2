@@ -1,0 +1,14 @@
+{%- set ns = namespace(displayed=false) %}
+{%- for node in cabling.nodes if node.subtype == "unknown" %}
+{%- if ns.displayed == false %}
+{%- set ns.displayed = true %}
+# WARNING:  The following devices were discovered in the input data,
+#           but the CANU model cannot determine the type and generate
+#           a configuration.  Applying this configuration without
+#           considering these devices will likely result in loss of
+#           contact with these devices.  Ensure valid input, submit
+#           a bug to CANU and manually add these devices to the configuration.
+{%- endif %}
+# Unknown destination node not included in config
+# {{ node.config.DESCRIPTION }}
+{%- endfor %}

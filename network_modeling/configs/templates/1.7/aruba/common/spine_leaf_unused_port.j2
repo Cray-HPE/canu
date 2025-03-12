@@ -1,0 +1,7 @@
+{#- unused #}
+{%- for port in variables.UNUSED_PORTS %}
+interface 1/1/{{ port }}
+    description UNUSED
+
+{%- endfor %}
+{#- end unused #}
