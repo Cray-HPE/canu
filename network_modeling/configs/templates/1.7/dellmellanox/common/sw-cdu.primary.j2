@@ -1,0 +1,112 @@
+{#- sw-cdu.primary #}
+{%- include variables.CSM_VERSION+'/dellmellanox/common/unknown.j2' %}
+ip vrf default
+ip vrf Customer
+ip name-server {{ variables.NMNLB_DNS }}
+hostname {{ variables.HOSTNAME }}
+{%- include variables.CSM_VERSION+'/dellmellanox/common/banner-motd-dell.j2' %}
+rest api restconf
+spanning-tree mode mst
+
+{%- include variables.CSM_VERSION+'/dellmellanox/common/mtn_hmn_vlan.j2' %}
+{%- include variables.CSM_VERSION+'/dellmellanox/common/mtn_nmn_vlan.j2' %}
+
+ntp server {{ variables.NCN_W001 }}
+ntp server {{ variables.NCN_W002 }}
+ntp server {{ variables.NCN_W003 }}
+
+{%- include variables.CSM_VERSION+'/dellmellanox/common/acl-dell.j2' %}
+{%- include variables.CSM_VERSION+'/dellmellanox/common/load-balancing.j2' %}
+
+interface vlan{{ variables.NATIVE_VLAN }}
+ description MTL
+ no shutdown
+ mtu 9216
+ ip address {{ variables.MTL_IP }}/{{variables.MTL_PREFIX_LEN}}
+ ip ospf 1 area 0.0.0.0
+ ip ospf passive
+
+interface vlan{{ variables.NMN_VLAN }}
+ description RIVER_NMN
+ no shutdown
+ mtu 9216
+ ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}}
+ ip access-group nmn-hmn in
+ ip access-group nmn-hmn out
+ ip ospf 1 area 0.0.0.0
+
+interface vlan{{ variables.HMN_VLAN }}
+ description RIVER_HMN
+ no shutdown
+ mtu 9216
+ ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
+ ip access-group nmn-hmn in
+ ip access-group nmn-hmn out
+ ip ospf 1 area 0.0.0.0
+ ip ospf passive
+
+interface vlan{{ variables.CMN_VLAN }}
+ description CMN
+ no shutdown
+ ip vrf forwarding Customer
+ mtu 9216
+ ip address {{ variables.CMN_IP }}/{{variables.CMN_PREFIX_LEN}}
+ ip access-group cmn-can in
+ ip access-group cmn-can out
+ ip ospf 2 area 0.0.0.0
+
+{%- include variables.CSM_VERSION+'/dellmellanox/common/mtn_hmn_vlan.j2' %}
+{%- include variables.CSM_VERSION+'/dellmellanox/common/mtn_nmn_vlan.j2' %}
+
+interface loopback0
+ no shutdown
+ mtu 9216
+ ip address {{ variables.LOOPBACK_IP }}/32
+ ip ospf 1 area 0.0.0.0
+
+spanning-tree mst configuration
+ name cray
+ revision 2
+
+line vty
+ ip access-class ssh
+
+{% include variables.CSM_VERSION+'/dellmellanox/common/cmm.j2' %}
+
+{% include variables.CSM_VERSION+'/dellmellanox/common/cec.j2' %}
+
+{% include variables.CSM_VERSION+'/dellmellanox/common/cdu-to-spine.lag.j2' %}
+
+{% include variables.CSM_VERSION+'/dellmellanox/common/dell-unused.j2' %}
+
+interface mgmt1/1/1
+ no shutdown
+ no ip address dhcp
+ ip address 192.168.255.242/29
+ ipv6 address autoconfig
+
+router ospf 1
+ router-id {{ variables.LOOPBACK_IP }}
+
+router ospf 2 vrf Customer
+ router-id {{ variables.LOOPBACK_IP }}
+
+interface ethernet1/1/{{ variables.VSX_ISL_PORT1 }}
+ no shutdown
+ no switchport
+ flowcontrol receive off
+ flowcontrol transmit off
+!
+interface ethernet1/1/{{ variables.VSX_ISL_PORT2 }}
+ no shutdown
+ no switchport
+ flowcontrol receive off
+ flowcontrol transmit off
+
+vlt-domain 1
+ backup destination 192.168.255.243
+ discovery-interface ethernet1/1/{{ variables.VSX_ISL_PORT1 }}-1/1/{{ variables.VSX_ISL_PORT2 }}
+ peer-routing
+ primary-priority 4096
+ vlt-mac 00:11:22:aa:bb:cc
+{# end sw-cdu.primary #}
