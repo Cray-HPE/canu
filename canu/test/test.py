@@ -25,6 +25,7 @@ import logging
 from os import path
 from pathlib import Path
 import sys
+
 import click
 from jinja2 import Environment
 from nornir import InitNornir
