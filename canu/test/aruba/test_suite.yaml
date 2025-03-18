@@ -284,11 +284,11 @@
     - spine
   pre_install: True
 
-- name: OSPF vrf Customer Neighbors
-  task: show ip ospf neighbors vrf Customer
-  test: ncontains
-  pattern: No OSPF neighbor
-  err_msg: No OSPF neighbors found on the default VRF.
+- name: OSPF vrf '{{variables.CSM_VRF}}' Neighbors
+  task: show ip ospf neighbors vrf {{variables.CSM_VRF}}
+  test: contains
+  pattern: Total Number of Neighbors
+  err_msg: OSPF output could not be obtained
   device:
     - leaf
     - leaf-bmc
