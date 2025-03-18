@@ -1,0 +1,494 @@
+{
+    "1%2F1%2F1": {
+        "b8:d4:e7:d3:2d:00,1/1/54": {
+            "chassis_id": "b8:d4:e7:d3:2d:00",
+            "dcbx_application_priorities": {},
+            "mac_addr": "b8:d4:e7:d3:2d:8d",
+            "med_network_policy": {},
+            "neighbor_info": {
+                "chassis_capability_available": "Bridge, Router",
+                "chassis_capability_enabled": "Bridge, Router",
+                "chassis_description": "Aruba JL635A  GL.10.09.0010",
+                "chassis_id_len": "6",
+                "chassis_id_subtype": "link_local_addr",
+                "chassis_index": "5",
+                "chassis_name": "sw-leaf-002",
+                "chassis_protocol": "LLDP",
+                "chassis_refcount": "1",
+                "chassis_ttl": "120",
+                "eee_wake_time_fallback": 0,
+                "eee_wake_time_rx": 0,
+                "eee_wake_time_rx_echo": 0,
+                "eee_wake_time_tx": 0,
+                "eee_wake_time_tx_echo": 0,
+                "mgmt_iface_list": "33554432",
+                "mgmt_iface_oid_list": "1.3.6.1.2.1.31.1.1.1.1.33554432",
+                "mgmt_ip_list": "10.2.0.5",
+                "port_description": "sw-spine-002:1<==sw-leaf-002",
+                "port_hidden_in": "0",
+                "port_hidden_out": "0",
+                "port_id_len": "6",
+                "port_id_subtype": "if_name",
+                "port_lastchange": "631cbfa7",
+                "port_lastupdate": "642b0a19",
+                "port_mfs": "0",
+                "port_protocol": "LLDP",
+                "port_pvid": "1",
+                "remote_index": 7
+            },
+            "neighbor_info_organizational": {
+                "1": {
+                    "oui": "0080c2",
+                    "oui_data": "0001",
+                    "oui_subtype": 1
+                }
+            },
+            "port_id": "1/1/54"
+        }
+    },
+    "1%2F1%2F15": {
+        "44:5b:ed:83:f0:80,1/1/50": {
+            "chassis_id": "44:5b:ed:83:f0:80",
+            "dcbx_application_priorities": {},
+            "mac_addr": "44:5b:ed:83:f0:f0",
+            "med_network_policy": {},
+            "neighbor_info": {
+                "chassis_capability_available": "Bridge, Router",
+                "chassis_capability_enabled": "Bridge, Router",
+                "chassis_description": "Aruba JL720C  LL.10.09.1000AT",
+                "chassis_id_len": "6",
+                "chassis_id_subtype": "link_local_addr",
+                "chassis_index": "8",
+                "chassis_name": "sw-cdu-002",
+                "chassis_protocol": "LLDP",
+                "chassis_refcount": "1",
+                "chassis_ttl": "120",
+                "eee_wake_time_fallback": 0,
+                "eee_wake_time_rx": 0,
+                "eee_wake_time_rx_echo": 0,
+                "eee_wake_time_tx": 0,
+                "eee_wake_time_tx_echo": 0,
+                "mgmt_iface_list": "33554432",
+                "mgmt_iface_oid_list": "1.3.6.1.2.1.31.1.1.1.1.33554432",
+                "mgmt_ip_list": "10.2.0.11",
+                "port_description": "sw-spine-002:16<==sw-cdu-002",
+                "port_hidden_in": "0",
+                "port_hidden_out": "0",
+                "port_id_len": "6",
+                "port_id_subtype": "if_name",
+                "port_lastchange": "631d0c50",
+                "port_lastupdate": "642b0a19",
+                "port_mfs": "0",
+                "port_protocol": "LLDP",
+                "port_pvid": "1",
+                "remote_index": 10
+            },
+            "neighbor_info_organizational": {
+                "1": {
+                    "oui": "0080c2",
+                    "oui_data": "0001",
+                    "oui_subtype": 1
+                },
+                "2": {
+                    "oui": "00120f",
+                    "oui_data": "0100",
+                    "oui_subtype": 1
+                }
+            },
+            "port_id": "1/1/50"
+        }
+    },
+    "1%2F1%2F2": {
+        "b8:d4:e7:43:62:00,1/1/54": {
+            "chassis_id": "b8:d4:e7:43:62:00",
+            "dcbx_application_priorities": {},
+            "mac_addr": "b8:d4:e7:43:62:8d",
+            "med_network_policy": {},
+            "neighbor_info": {
+                "chassis_capability_available": "Bridge, Router",
+                "chassis_capability_enabled": "Bridge, Router",
+                "chassis_description": "Aruba JL635A  GL.10.09.0010",
+                "chassis_id_len": "6",
+                "chassis_id_subtype": "link_local_addr",
+                "chassis_index": "2",
+                "chassis_name": "sw-leaf-001",
+                "chassis_protocol": "LLDP",
+                "chassis_refcount": "1",
+                "chassis_ttl": "120",
+                "eee_wake_time_fallback": 0,
+                "eee_wake_time_rx": 0,
+                "eee_wake_time_rx_echo": 0,
+                "eee_wake_time_tx": 0,
+                "eee_wake_time_tx_echo": 0,
+                "mgmt_iface_list": "33554432",
+                "mgmt_iface_oid_list": "1.3.6.1.2.1.31.1.1.1.1.33554432",
+                "mgmt_ip_list": "10.2.0.4",
+                "port_description": "sw-spine-002:2<==sw-leaf-001",
+                "port_hidden_in": "0",
+                "port_hidden_out": "0",
+                "port_id_len": "6",
+                "port_id_subtype": "if_name",
+                "port_lastchange": "631cbfa7",
+                "port_lastupdate": "642b0a19",
+                "port_mfs": "0",
+                "port_protocol": "LLDP",
+                "port_pvid": "1",
+                "remote_index": 4
+            },
+            "neighbor_info_organizational": {
+                "1": {
+                    "oui": "0080c2",
+                    "oui_data": "0001",
+                    "oui_subtype": 1
+                }
+            },
+            "port_id": "1/1/54"
+        }
+    },
+    "1%2F1%2F28": {
+        "94:8e:d3:95:b3:79,Ethernet2/1": {
+            "chassis_id": "94:8e:d3:95:b3:79",
+            "dcbx_application_priorities": {},
+            "mac_addr": "94:8e:d3:95:b3:c8",
+            "med_network_policy": {},
+            "neighbor_info": {
+                "chassis_capability_available": "Bridge, Router",
+                "chassis_capability_enabled": "Bridge, Router",
+                "chassis_description": "Arista Networks EOS version 4.23.0F running on an Arista Networks DCS-7060CX2-32S",
+                "chassis_id_len": "6",
+                "chassis_id_subtype": "link_local_addr",
+                "chassis_index": "7",
+                "chassis_name": "sw-edge-002",
+                "chassis_protocol": "LLDP",
+                "chassis_refcount": "1",
+                "chassis_ttl": "120",
+                "eee_wake_time_fallback": 0,
+                "eee_wake_time_rx": 0,
+                "eee_wake_time_rx_echo": 0,
+                "eee_wake_time_tx": 0,
+                "eee_wake_time_tx_echo": 0,
+                "mgmt_iface_list": "5000000",
+                "mgmt_iface_oid_list": "0",
+                "mgmt_ip_list": "10.2.1.3",
+                "port_description": "",
+                "port_hidden_in": "0",
+                "port_hidden_out": "0",
+                "port_id_len": "11",
+                "port_id_subtype": "if_name",
+                "port_lastchange": "631cc02c",
+                "port_lastupdate": "642b0a11",
+                "port_mfs": "0",
+                "port_protocol": "LLDP",
+                "remote_index": 9
+            },
+            "neighbor_info_organizational": {
+                "1": {
+                    "oui": "0080c2",
+                    "oui_data": "0000",
+                    "oui_subtype": 1
+                },
+                "2": {
+                    "oui": "00120f",
+                    "oui_data": "0100",
+                    "oui_subtype": 3
+                },
+                "3": {
+                    "oui": "00120f",
+                    "oui_data": "2414",
+                    "oui_subtype": 4
+                }
+            },
+            "port_id": "Ethernet2/1"
+        }
+    },
+    "1%2F1%2F29": {
+        "94:8e:d3:95:af:59,Ethernet2/1": {
+            "chassis_id": "94:8e:d3:95:af:59",
+            "dcbx_application_priorities": {},
+            "mac_addr": "94:8e:d3:95:af:a8",
+            "med_network_policy": {},
+            "neighbor_info": {
+                "chassis_capability_available": "Bridge, Router",
+                "chassis_capability_enabled": "Bridge, Router",
+                "chassis_description": "Arista Networks EOS version 4.23.0F running on an Arista Networks DCS-7060CX2-32S",
+                "chassis_id_len": "6",
+                "chassis_id_subtype": "link_local_addr",
+                "chassis_index": "6",
+                "chassis_name": "sw-edge-001",
+                "chassis_protocol": "LLDP",
+                "chassis_refcount": "1",
+                "chassis_ttl": "120",
+                "eee_wake_time_fallback": 0,
+                "eee_wake_time_rx": 0,
+                "eee_wake_time_rx_echo": 0,
+                "eee_wake_time_tx": 0,
+                "eee_wake_time_tx_echo": 0,
+                "mgmt_iface_list": "5000000",
+                "mgmt_iface_oid_list": "0",
+                "mgmt_ip_list": "10.2.1.2",
+                "port_description": "",
+                "port_hidden_in": "0",
+                "port_hidden_out": "0",
+                "port_id_len": "11",
+                "port_id_subtype": "if_name",
+                "port_lastchange": "631cc02c",
+                "port_lastupdate": "642b0a0e",
+                "port_mfs": "0",
+                "port_protocol": "LLDP",
+                "remote_index": 8
+            },
+            "neighbor_info_organizational": {
+                "1": {
+                    "oui": "0080c2",
+                    "oui_data": "0000",
+                    "oui_subtype": 1
+                },
+                "2": {
+                    "oui": "00120f",
+                    "oui_data": "0100",
+                    "oui_subtype": 3
+                },
+                "3": {
+                    "oui": "00120f",
+                    "oui_data": "2414",
+                    "oui_subtype": 4
+                }
+            },
+            "port_id": "Ethernet2/1"
+        }
+    },
+    "1%2F1%2F3": {
+        "b8:d4:e7:40:56:00,1/1/54": {
+            "chassis_id": "b8:d4:e7:40:56:00",
+            "dcbx_application_priorities": {},
+            "mac_addr": "b8:d4:e7:40:56:8d",
+            "med_network_policy": {},
+            "neighbor_info": {
+                "chassis_capability_available": "Bridge, Router",
+                "chassis_capability_enabled": "Bridge, Router",
+                "chassis_description": "Aruba JL635A  GL.10.09.0010",
+                "chassis_id_len": "6",
+                "chassis_id_subtype": "link_local_addr",
+                "chassis_index": "3",
+                "chassis_name": "sw-leaf-004",
+                "chassis_protocol": "LLDP",
+                "chassis_refcount": "1",
+                "chassis_ttl": "120",
+                "eee_wake_time_fallback": 0,
+                "eee_wake_time_rx": 0,
+                "eee_wake_time_rx_echo": 0,
+                "eee_wake_time_tx": 0,
+                "eee_wake_time_tx_echo": 0,
+                "mgmt_iface_list": "33554432",
+                "mgmt_iface_oid_list": "1.3.6.1.2.1.31.1.1.1.1.33554432",
+                "mgmt_ip_list": "10.2.0.7",
+                "port_description": "sw-spine-002:3<==sw-leaf-004",
+                "port_hidden_in": "0",
+                "port_hidden_out": "0",
+                "port_id_len": "6",
+                "port_id_subtype": "if_name",
+                "port_lastchange": "631cbfa7",
+                "port_lastupdate": "642b0a06",
+                "port_mfs": "0",
+                "port_protocol": "LLDP",
+                "port_pvid": "1",
+                "remote_index": 5
+            },
+            "neighbor_info_organizational": {
+                "1": {
+                    "oui": "0080c2",
+                    "oui_data": "0001",
+                    "oui_subtype": 1
+                }
+            },
+            "port_id": "1/1/54"
+        }
+    },
+    "1%2F1%2F30": {
+        "54:80:28:ff:a8:00,1/1/30": {
+            "chassis_id": "54:80:28:ff:a8:00",
+            "dcbx_application_priorities": {},
+            "mac_addr": "54:80:28:ff:a8:00",
+            "med_network_policy": {},
+            "neighbor_info": {
+                "chassis_capability_available": "Bridge, Router",
+                "chassis_capability_enabled": "Bridge, Router",
+                "chassis_description": "Aruba JL636A  GL.10.09.0010",
+                "chassis_id_len": "6",
+                "chassis_id_subtype": "link_local_addr",
+                "chassis_index": "1",
+                "chassis_name": "sw-spine-001",
+                "chassis_protocol": "LLDP",
+                "chassis_refcount": "3",
+                "chassis_ttl": "120",
+                "eee_wake_time_fallback": 0,
+                "eee_wake_time_rx": 0,
+                "eee_wake_time_rx_echo": 0,
+                "eee_wake_time_tx": 0,
+                "eee_wake_time_tx_echo": 0,
+                "mgmt_iface_list": "33554432",
+                "mgmt_iface_oid_list": "1.3.6.1.2.1.31.1.1.1.1.33554432",
+                "mgmt_ip_list": "10.2.0.2",
+                "port_description": "VSX keepalive",
+                "port_hidden_in": "0",
+                "port_hidden_out": "0",
+                "port_id_len": "6",
+                "port_id_subtype": "if_name",
+                "port_lastchange": "631cc1f1",
+                "port_lastupdate": "642b0a19",
+                "port_mfs": "0",
+                "port_protocol": "LLDP",
+                "remote_index": 1
+            },
+            "neighbor_info_organizational": {
+                "1": {
+                    "oui": "0080c2",
+                    "oui_data": "0000",
+                    "oui_subtype": 1
+                }
+            },
+            "port_id": "1/1/30"
+        }
+    },
+    "1%2F1%2F31": {
+        "54:80:28:ff:a8:00,1/1/31": {
+            "chassis_id": "54:80:28:ff:a8:00",
+            "dcbx_application_priorities": {},
+            "mac_addr": "54:80:28:ff:a8:85",
+            "med_network_policy": {},
+            "neighbor_info": {
+                "chassis_capability_available": "Bridge, Router",
+                "chassis_capability_enabled": "Bridge, Router",
+                "chassis_description": "Aruba JL636A  GL.10.09.0010",
+                "chassis_id_len": "6",
+                "chassis_id_subtype": "link_local_addr",
+                "chassis_index": "1",
+                "chassis_name": "sw-spine-001",
+                "chassis_protocol": "LLDP",
+                "chassis_refcount": "3",
+                "chassis_ttl": "120",
+                "eee_wake_time_fallback": 0,
+                "eee_wake_time_rx": 0,
+                "eee_wake_time_rx_echo": 0,
+                "eee_wake_time_tx": 0,
+                "eee_wake_time_tx_echo": 0,
+                "mgmt_iface_list": "33554432",
+                "mgmt_iface_oid_list": "1.3.6.1.2.1.31.1.1.1.1.33554432",
+                "mgmt_ip_list": "10.2.0.2",
+                "port_description": "vsx isl",
+                "port_hidden_in": "0",
+                "port_hidden_out": "0",
+                "port_id_len": "6",
+                "port_id_subtype": "if_name",
+                "port_lastchange": "631cc1f1",
+                "port_lastupdate": "642b0a19",
+                "port_mfs": "0",
+                "port_protocol": "LLDP",
+                "port_pvid": "1",
+                "remote_index": 1
+            },
+            "neighbor_info_organizational": {
+                "1": {
+                    "oui": "0080c2",
+                    "oui_data": "0001",
+                    "oui_subtype": 1
+                }
+            },
+            "port_id": "1/1/31"
+        }
+    },
+    "1%2F1%2F32": {
+        "54:80:28:ff:a8:00,1/1/32": {
+            "chassis_id": "54:80:28:ff:a8:00",
+            "dcbx_application_priorities": {},
+            "mac_addr": "54:80:28:ff:a8:81",
+            "med_network_policy": {},
+            "neighbor_info": {
+                "chassis_capability_available": "Bridge, Router",
+                "chassis_capability_enabled": "Bridge, Router",
+                "chassis_description": "Aruba JL636A  GL.10.09.0010",
+                "chassis_id_len": "6",
+                "chassis_id_subtype": "link_local_addr",
+                "chassis_index": "1",
+                "chassis_name": "sw-spine-001",
+                "chassis_protocol": "LLDP",
+                "chassis_refcount": "3",
+                "chassis_ttl": "120",
+                "eee_wake_time_fallback": 0,
+                "eee_wake_time_rx": 0,
+                "eee_wake_time_rx_echo": 0,
+                "eee_wake_time_tx": 0,
+                "eee_wake_time_tx_echo": 0,
+                "mgmt_iface_list": "33554432",
+                "mgmt_iface_oid_list": "1.3.6.1.2.1.31.1.1.1.1.33554432",
+                "mgmt_ip_list": "10.2.0.2",
+                "port_description": "vsx isl",
+                "port_hidden_in": "0",
+                "port_hidden_out": "0",
+                "port_id_len": "6",
+                "port_id_subtype": "if_name",
+                "port_lastchange": "631cc1f1",
+                "port_lastupdate": "642b0a19",
+                "port_mfs": "0",
+                "port_protocol": "LLDP",
+                "port_pvid": "1",
+                "remote_index": 1
+            },
+            "neighbor_info_organizational": {
+                "1": {
+                    "oui": "0080c2",
+                    "oui_data": "0001",
+                    "oui_subtype": 1
+                }
+            },
+            "port_id": "1/1/32"
+        }
+    },
+    "1%2F1%2F4": {
+        "b8:d4:e7:43:d3:00,1/1/54": {
+            "chassis_id": "b8:d4:e7:43:d3:00",
+            "dcbx_application_priorities": {},
+            "mac_addr": "b8:d4:e7:43:d3:8d",
+            "med_network_policy": {},
+            "neighbor_info": {
+                "chassis_capability_available": "Bridge, Router",
+                "chassis_capability_enabled": "Bridge, Router",
+                "chassis_description": "Aruba JL635A  GL.10.09.0010",
+                "chassis_id_len": "6",
+                "chassis_id_subtype": "link_local_addr",
+                "chassis_index": "4",
+                "chassis_name": "sw-leaf-003",
+                "chassis_protocol": "LLDP",
+                "chassis_refcount": "1",
+                "chassis_ttl": "120",
+                "eee_wake_time_fallback": 0,
+                "eee_wake_time_rx": 0,
+                "eee_wake_time_rx_echo": 0,
+                "eee_wake_time_tx": 0,
+                "eee_wake_time_tx_echo": 0,
+                "mgmt_iface_list": "33554432",
+                "mgmt_iface_oid_list": "1.3.6.1.2.1.31.1.1.1.1.33554432",
+                "mgmt_ip_list": "10.2.0.6",
+                "port_description": "sw-spine-002:4<==sw-leaf-003",
+                "port_hidden_in": "0",
+                "port_hidden_out": "0",
+                "port_id_len": "6",
+                "port_id_subtype": "if_name",
+                "port_lastchange": "631cbfa7",
+                "port_lastupdate": "642b0a05",
+                "port_mfs": "0",
+                "port_protocol": "LLDP",
+                "port_pvid": "1",
+                "remote_index": 6
+            },
+            "neighbor_info_organizational": {
+                "1": {
+                    "oui": "0080c2",
+                    "oui_data": "0001",
+                    "oui_subtype": 1
+                }
+            },
+            "port_id": "1/1/54"
+        }
+    }
+}
