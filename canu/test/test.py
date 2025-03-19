@@ -115,6 +115,13 @@ csm_options = canu_config["csm_versions"]
     help="Tests to run before installing CSM",
     required=False,
 )
+@click.option(
+    "--vrf",
+    "vrf",
+    help="Named VRF used for CSM networks",
+    required=False,
+    default="CSM",
+)
 @click.option("--sls-address", default="api-gw-service-nmn.local", show_default=True)
 @click.pass_context
 def test(
@@ -129,6 +136,7 @@ def test(
     json_,
     ping,
     pre_install_,
+    vrf,
 ):
     """Run tests against the network.
 
@@ -144,6 +152,7 @@ def test(
         json_: output test results in JSON format
         ping: run the ping test suite
         pre_install_: Tests to run before CSM installation
+        vrf: Named VRF used for CSM networks
     """
     if not password:
         password = click.prompt(
@@ -208,7 +217,7 @@ def test(
         sls_file,
         sls_inventory=True,
     )
-
+    sls_variables["CSM_VRF"] = vrf
     nr = InitNornir(
         runner={
             "plugin": "threaded",
@@ -302,6 +311,7 @@ def test(
                 csm_test_version = test_command.get("csm")
                 test_type = test_command.get("test")
                 pre_install = test_command.get("pre_install")
+                error_msg = test_command.get("err_msg", None)
 
                 if pre_install_ and pre_install is None:
                     continue
@@ -311,6 +321,16 @@ def test(
 
                 if switch in devices:
                     switch_test_suite[switch].append(test_command)
+
+                if switch in devices and isinstance(test_command["name"], str):
+                    template = environment.from_string(test_command["name"])
+                    test_name = template.render(variables=sls_variables)
+                    test_command["name"] = test_name
+
+                if switch in devices and isinstance(error_msg, str):
+                    template = environment.from_string(error_msg)
+                    error_name = template.render(variables=sls_variables)
+                    test_command["err_msg"] = error_name
 
                 if switch in devices and isinstance(test_command["task"], str):
                     template = environment.from_string(test_command["task"])
@@ -344,7 +364,6 @@ def test(
             )
 
             commands = switch_commands[switch]
-
             results = send_ssh_commands(vendor, commands, test_nr)
             dict_results.update(
                 ResultSerializer(results, add_details=False, to_dict=True),
