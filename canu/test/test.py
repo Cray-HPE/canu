@@ -311,6 +311,7 @@ def test(
                 csm_test_version = test_command.get("csm")
                 test_type = test_command.get("test")
                 pre_install = test_command.get("pre_install")
+                error_msg = test_command.get("err_msg", None)
 
                 if pre_install_ and pre_install is None:
                     continue
@@ -325,6 +326,11 @@ def test(
                     template = environment.from_string(test_command["name"])
                     test_name = template.render(variables=sls_variables)
                     test_command["name"] = test_name
+
+                if switch in devices and isinstance(error_msg, str):
+                    template = environment.from_string(error_msg)
+                    error_name = template.render(variables=sls_variables)
+                    test_command["err_msg"] = error_name
 
                 if switch in devices and isinstance(test_command["task"], str):
                     template = environment.from_string(test_command["task"])

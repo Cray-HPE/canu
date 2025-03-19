@@ -288,7 +288,7 @@
   task: show ip ospf neighbors vrf {{variables.CSM_VRF}}
   test: contains
   pattern: Total Number of Neighbors
-  err_msg: OSPF output could not be obtained
+  err_msg: OSPF neighbors not found on VRF '{{variables.CSM_VRF}}' or there is a configuration error
   device:
     - leaf
     - leaf-bmc
