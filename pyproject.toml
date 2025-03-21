@@ -40,7 +40,7 @@ classifiers = [
 ]
 description = 'CSM Automatic Network Utility'
 dependencies = [
-    'aiohttp==3.11.13',
+    'aiohttp==3.11.14',
     'click-help-colors==0.9.4',
     'click-option-group==0.5.6',
     'click-params==0.5.0',
@@ -51,7 +51,7 @@ dependencies = [
     'hier-config==2.2.3',
     'ipython==8.31.0; python_version>"3.9"',
     'ipython~=8.18.1; python_version<"3.10"',
-    'jinja2==3.1.5',
+    'jinja2==3.1.6',
     'jsonschema==4.23.0',
     'kubernetes==32.0.1',
     'mac-vendor-lookup==0.1.12',
@@ -66,7 +66,7 @@ dependencies = [
     'openpyxl==3.1.5',
     'pyyaml==6.0.2',
     'requests==2.32.3',
-    'responses==0.25.6',
+    'responses==0.25.7',
     'ruamel.yaml<0.18.11',
     'tabulate==0.9.0',
     'tomli==2.2.1',
@@ -122,7 +122,7 @@ network_modeling = [
 ]
 test = [
     'coverage~=7.6.4',
-    'mock~=5.1.0',
+    'mock~=5.2.0',
     'pytest-cov~=6.0.0',
     'pytest-sugar~=1.0.0',
     'pytest~=8.3.3',
@@ -145,7 +145,7 @@ readme = { file = ['README.md'], content-type = 'text/markdown' }
 [build-system]
 build-backend = 'setuptools.build_meta'
 requires = [
-    'setuptools ~= 75.4',
+    'setuptools ~= 77.0',
     'setuptools_scm[toml] ~= 8.2.0',
     'wheel ~= 0.45.0',
 ]
