@@ -311,8 +311,8 @@
     - spine
   pre_install: True
 
-- name: OSPF vrf Customer EXSTART Neighbors
-  task: show ip ospf neighbors vrf Customer
+- name: OSPF vrf '{{variables.CSM_VRF}}' EXSTART Neighbors
+  task: show ip ospf neighbors vrf {{variables.CSM_VRF}}
   test: ncontains
   pattern: EXSTART
   err_msg: |
