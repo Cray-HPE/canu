@@ -1,16 +1,28 @@
 ## Changelog
 
-## [UNRELEASED]
+### [UNRELEASED]
 
-- Add SHCD corner and tab metadata to CCJ files.
-- Fix canu test to allow configurable customer VRF.
-- Fix a logic bug in canu test for BGP which reported success despite having an underlying error.
+### [1.9.11]
 
-## [1.9.7]
+- CASMNET-2317 Add SHCD corner and tab metadata to CCJ files in https://github.com/Cray-HPE/canu/pull/649 
+
+### [1.9.10]
+
+- CASMNET-2301 Fix VRF test in https://github.com/Cray-HPE/canu/pull/633
+
+### [1.9.9]
+
+- CASMNET-2300 Update firmware versions for CSM 1.7 in https://github.com/Cray-HPE/canu/pull/637
+
+### [1.9.8]
+
+- One dep pr to rule them all11 in https://github.com/Cray-HPE/canu/pull/629
+
+### [1.9.7]
 
 - One dep pr to rule them all10 by @rustydb in https://github.com/Cray-HPE/canu/pull/606
 
-## [1.9.6]
+### [1.9.6]
 
 - One dep pr to rule them all part4 by @rustydb in https://github.com/Cray-HPE/canu/pull/532
 - Support Python 3.11 and 3.12 by @rustydb in https://github.com/Cray-HPE/canu/pull/533
@@ -30,11 +42,11 @@
 - CASMNET-2240 update ACLs to apply to default vrf by @lukebates123 in https://github.com/Cray-HPE/canu/pull/471
 - CASMNET-2273 - CMN missing from mgmt access control list by @spillerc-hpe in https://github.com/Cray-HPE/canu/pull/594
 
-## [1.9.5]
+### [1.9.5]
 
 - CASMNET-2273 Add the CMN to the mgmt access list to permit SSH, HTTPS, and SNMP over the CMN
 
-## [1.9.4]
+### [1.9.4]
 
 - Add the ability to attach EX2500 to spines in validate.
 - EX2500 configuration remain as custom configurations.
@@ -42,38 +54,38 @@
 - CASMNET-2254 Removed canu container
 - CASMNET-2253 Fixed RPM build
 
-## [1.9.3]
+### [1.9.3]
 
 - CASMNET-2233 Update Aruba device firmware
 
-## [1.9.2]
+### [1.9.2]
 
 - fixed a bug, which fails to parse an SHCD because of a poorly-named cell
 - this release halts the changelog file in favor of the github release notes associated with each tag.  manually keeping this log up-to-date is a chore and with csm entering EOL, we should focus on the fixes, not painful manual release notes
 
-## [1.9.1]
+### [1.9.1]
 
 - remove canu user going forward. permissions are now default (root) 
 - Ensure that the variable designating a switch as primary is always initialized.
 
-## [1.9.0]
+### [1.9.0]
 - Add CSM 1.6 templates
 - Fix case sensitivity when reading nodes from SHCD
 - Add Storage node support
 - Update ACLs to apply to default vrf
 
-## [1.8.0]
+### [1.8.0]
 
 - Move NMN/HMN/MTL to new vrf, move CMN/CHN/CAN to default vrf.
 - Added support for bonded application nodes.
 - Fixed exception when bad credentials provided when running `canu validate shcd-cabling`
 
-## [1.7.6]
+### [1.7.6]
 
 - Add ACL for DHCP
 - Fix CANU exit code on BGP validation
 
-## [1.7.5]
+### [1.7.5]
 
 - Disable Aruba Central in templates
 - Fix CSM 1.5 templates
@@ -81,7 +93,7 @@
 - Fix cmn ACL template
 - Bump Pyyaml
 
-## [1.7.4]
+### [1.7.4]
 
 - Updated `canu test`
 - Add CSM 1.5 dell/mellanox configs
@@ -91,21 +103,21 @@
 - added very basic integration tests via shellspec for local and github actions
 - Fix storage node lag configuration in Aruba templates to prevent loop
 
-## [1.7.3]
+### [1.7.3]
 
 - Add `force` option to generated Mellanox web and ntp configuration.
 
-## [1.7.2]
+### [1.7.2]
 
 - Bump Yamale and add pyinstaller hook file
 - Add significant testing to network_modeling and sls_utils modules and fix a couple bugs.
 - Adjust docs workflow to run during promote-release
 
-## [1.7.1]
+### [1.7.1]
 
 - rollback yamale version
 
-## [1.7.0]
+### [1.7.0]
 
 - Create baseline CSM 1.4 configuration
 - Fix error handling of the parent column for cmm/cec
@@ -649,6 +661,28 @@
 - Standardized the canu.yaml file to show currently supported switch firmware versions.
 
 [unreleased]: https://github.com/Cray-HPE/canu/tree/main 
+[1.9.10]: https://github.com/Cray-HPE/canu/tree/1.9.10
+[1.9.9]: https://github.com/Cray-HPE/canu/tree/1.9.9
+[1.9.8]: https://github.com/Cray-HPE/canu/tree/1.9.8
+[1.9.7]: https://github.com/Cray-HPE/canu/tree/1.9.7
+[1.9.6]: https://github.com/Cray-HPE/canu/tree/1.9.6
+[1.9.5]: https://github.com/Cray-HPE/canu/tree/1.9.5
+[1.9.4]: https://github.com/Cray-HPE/canu/tree/1.9.4
+[1.9.3]: https://github.com/Cray-HPE/canu/tree/1.9.3
+[1.9.2]: https://github.com/Cray-HPE/canu/tree/1.9.2
+[1.9.1]: https://github.com/Cray-HPE/canu/tree/1.9.1
+[1.9.0]: https://github.com/Cray-HPE/canu/tree/1.9.0
+[1.8.0]: https://github.com/Cray-HPE/canu/tree/1.8.0
+[1.7.6]: https://github.com/Cray-HPE/canu/tree/1.7.6
+[1.7.5]: https://github.com/Cray-HPE/canu/tree/1.7.5
+[1.7.4]: https://github.com/Cray-HPE/canu/tree/1.7.4
+[1.7.3]: https://github.com/Cray-HPE/canu/tree/1.7.3
+[1.7.2]: https://github.com/Cray-HPE/canu/tree/1.7.2
+[1.7.1]: https://github.com/Cray-HPE/canu/tree/1.7.1
+[1.7.0]: https://github.com/Cray-HPE/canu/tree/1.7.0
+[1.6.35]: https://github.com/Cray-HPE/canu/tree/1.6.35
+[1.6.34]: https://github.com/Cray-HPE/canu/tree/1.6.34
+[1.6.33]: https://github.com/Cray-HPE/canu/tree/1.6.33
 [1.6.32]: https://github.com/Cray-HPE/canu/tree/1.6.32
 [1.6.31]: https://github.com/Cray-HPE/canu/tree/1.6.31
 [1.6.30]: https://github.com/Cray-HPE/canu/tree/1.6.30
@@ -726,12 +760,6 @@
 [1.1.3]: https://github.com/Cray-HPE/canu/tree/1.1.3
 [1.1.2]: https://github.com/Cray-HPE/canu/tree/1.1.2
 [1.1.1]: https://github.com/Cray-HPE/canu/tree/1.1.1
-[0.0.6]: https://github.com/Cray-HPE/canu/tree/0.0.6
-[0.0.5]: https://github.com/Cray-HPE/canu/tree/0.0.5
-[0.0.4]: https://github.com/Cray-HPE/canu/tree/0.0.4
-[0.0.3]: https://github.com/Cray-HPE/canu/tree/0.0.3
-[0.0.2]: https://github.com/Cray-HPE/canu/tree/0.0.2
-[0.0.1]: https://github.com/Cray-HPE/canu/tree/0.0.1
 [0.0.6]: https://github.com/Cray-HPE/canu/tree/0.0.6
 [0.0.5]: https://github.com/Cray-HPE/canu/tree/0.0.5
 [0.0.4]: https://github.com/Cray-HPE/canu/tree/0.0.4
