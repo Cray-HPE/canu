@@ -128,6 +128,7 @@ def shcd(ctx, architecture, shcd, tabs, corners, edge, out, json_, log_):
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
+    # This should really be a lookup table in cray-network-architecture.yaml
     if architecture.lower() == "full":
         architecture = "network_v2"
     elif architecture.lower() == "tds":
@@ -153,7 +154,7 @@ def shcd(ctx, architecture, shcd, tabs, corners, edge, out, json_, log_):
     )
 
     if json_:
-        json_output(node_list, factory, architecture, shcd, out)
+        json_output(node_list, factory, architecture, ctx, out)
     else:
         print_node_list(node_list, "SHCD", out)
 
@@ -1231,7 +1232,7 @@ def print_node_list(node_list, title, out="-"):
             logical_index += 1
 
 
-def json_output(node_list, factory, architecture, shcd, out):
+def json_output(node_list, factory, architecture, ctx, out):
     """Create a schema-validated JSON Topology file from the model."""
     topology = []
     for node in node_list:
@@ -1240,7 +1241,10 @@ def json_output(node_list, factory, architecture, shcd, out):
     paddle = {
         "canu_version": version,
         "architecture": architecture,
-        "shcd_file": path.basename(shcd.name),
+        "shcd_file": path.basename(ctx.params["shcd"].name),
+        "tabs": ctx.params["tabs"],
+        "corners": ctx.params["corners"],
+        "edge": ctx.params["edge"],
         "updated_at": datetime.datetime.now().strftime(
             "%Y-%m-%d %H:%M:%S",
         ),

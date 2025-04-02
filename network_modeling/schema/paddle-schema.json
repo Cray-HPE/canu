@@ -11,6 +11,15 @@
         "shcd_file": {
             "type": "string"
         },
+        "tabs": {
+            "type": "string"
+        },
+        "corners": {
+            "type": "string"
+        },
+        "edge": {
+            "type": "string"
+        },
         "updated_at": {
             "type": "string"
         },
