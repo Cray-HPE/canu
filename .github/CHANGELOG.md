@@ -2,6 +2,10 @@
 
 ## [UNRELEASED]
 
+- Add SHCD corner and tab metadata to CCJ files.
+- Fix canu test to allow configurable customer VRF.
+- Fix a logic bug in canu test for BGP which reported success despite having an underlying error.
+
 ## [1.9.7]
 
 - One dep pr to rule them all10 by @rustydb in https://github.com/Cray-HPE/canu/pull/606
