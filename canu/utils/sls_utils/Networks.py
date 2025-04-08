@@ -252,7 +252,7 @@ class BicanNetwork(Network):
         self.mtu(network_mtu=9000)
 
     def system_default_route(self, default_route=None):
-        """Default Route for the System.
+        """Retrieve and set the default route for the system.
 
         Args:
             default_route (str): CHN, CAN, or CMN
