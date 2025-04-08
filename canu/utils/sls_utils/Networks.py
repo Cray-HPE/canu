@@ -236,6 +236,8 @@ class Network:
 class BicanNetwork(Network):
     """A customized BICAN Network."""
 
+    _default_route_network = None
+
     def __init__(self, default_route_network_name="CMN"):
         """Create a new BICAN network.
 
@@ -248,21 +250,26 @@ class BicanNetwork(Network):
             ipv4_address="0.0.0.0/0",
         )
         self._full_name = "System Default Route Network Name for Bifurcated CAN"
-        self.__system_default_route = default_route_network_name
+        self._default_route_network = default_route_network_name
         self.mtu(network_mtu=9000)
 
-    def system_default_route(self, default_route=None):
-        """Retrieve and set the default route for the system.
-
-        Args:
-            default_route (str): CHN, CAN, or CMN
+    @property
+    def default_route_network(self) -> str:
+        """Returns the currently set default route, if any.
 
         Returns:
-            name (str): Short name of the network for the getter
+            self._default_route (str): The currently set default route.
         """
-        if default_route is not None:
-            self.__system_default_route = default_route
-        return self.__system_default_route
+        return self._default_route_network
+
+    @default_route_network.setter
+    def default_route_network(self, default_route_network: str) -> None:
+        """Sets the default route for this Network object.
+
+        Args:
+            default_route_network: The network to use for the default route.
+        """
+        self._default_route_network = default_route_network
 
     def to_sls(self):
         """Serialize the Network to SLS Networks format.
@@ -271,7 +278,7 @@ class BicanNetwork(Network):
             sls: BICAN SLS Network structure
         """
         sls = super().to_sls()
-        sls["ExtraProperties"]["SystemDefaultRoute"] = self.__system_default_route
+        sls["ExtraProperties"]["SystemDefaultRoute"] = self._default_route_network
         return sls
 
 

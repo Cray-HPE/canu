@@ -189,7 +189,7 @@ def test_bican_network_init():
     assert bican.mtu() == 9000
     bican_sls = bican.to_sls()
     assert bican_sls["ExtraProperties"]["SystemDefaultRoute"] == "CMN"
-    assert bican.system_default_route() == "CMN"
+    assert bican.default_route == "CMN"
 
 
 def test_subnet_init(subnet_data):
