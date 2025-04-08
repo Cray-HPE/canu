@@ -32,13 +32,13 @@ from canu.utils.sls_utils.Networks import Network, Subnet
 @pytest.fixture
 def network_dict():
     """Construct networks to pass SLS schema checks."""
-    nmn = Network("NMN", "ethernet", "10.1.0.0/24")
-    nmn.mtu(9000)
-    hmn = Network("HMN", "ethernet", "10.2.0.0/24")
-    hmn.mtu(9000)
+    nmn = Network("NMN", "10.1.0.0/24", network_type="ethernet")
+    nmn.mtu = 9000
+    hmn = Network("HMN", "10.2.0.0/24", network_type="ethernet")
+    hmn.mtu = 9000
     return {
-        nmn.name(): nmn.to_sls(),
-        hmn.name(): hmn.to_sls(),
+        nmn.name: nmn.to_sls(),
+        hmn.name: hmn.to_sls(),
     }
 
 
@@ -62,12 +62,12 @@ def test_networkmanager_init_from_sls_data(network_dict):
 
 def test_networkmanager_update_existing(network_dict):
     """Test adding a new network to existing NetworkManager."""
-    can = Network("CAN", "ethernet", "10.3.0.0/24")
-    can.mtu(9000)
+    can = Network("CAN", "10.3.0.0/24", network_type="ethernet")
+    can.mtu = 9000
     nm = NetworkManager(network_dict)
-    nm.update({can.name(): can})
+    nm.update({can.name: can})
     assert isinstance(nm.data['CAN'], Network)
-    assert nm.get("CAN").ipv4_network() == ipaddress.IPv4Network("10.3.0.0/24")
+    assert nm.get("CAN").ipv4_network == ipaddress.IPv4Network("10.3.0.0/24")
 
 
 def test_networkmanager_get(network_dict):
@@ -97,9 +97,9 @@ def test_subnetmanager_update_existing(subnet_dict):
     """Test adding a new subnet to existing NetworkManager."""
     subnet3 = Subnet("subnet3", "10.3.0.0/25", "10.3.0.1", 3)
     sm = SubnetManager(subnet_dict)
-    sm.update({subnet3.name(): subnet3})
+    sm.update({subnet3.name: subnet3})
     assert isinstance(sm.data["subnet3"], Subnet)
-    assert sm.get("subnet3").ipv4_network() == ipaddress.IPv4Network("10.3.0.0/25")
+    assert sm.get("subnet3").ipv4_network == ipaddress.IPv4Network("10.3.0.0/25")
 
 
 def test_subnetmanager_get(subnet_dict):

@@ -97,7 +97,7 @@ class NetworkManager(UserDict):
             return value
 
         for network in self.data.values():
-            if network.ipv4_address() == ipv4_key:
+            if network.ipv4_address == ipv4_key:
                 value = network
                 break
         return value
@@ -189,7 +189,7 @@ class SubnetManager(UserDict):
             return value
 
         for subnet in self.data.values():
-            if subnet.ipv4_address() == ipv4_key:
+            if subnet.ipv4_address == ipv4_key:
                 value = subnet
                 break
         return value

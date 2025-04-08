@@ -46,20 +46,20 @@ def test_raises_value_error_if_input_not_network():
 
 def test_returns_no_subnets_if_no_subnets_used():
     """Test that entire Network is available if no Subnets are used."""
-    network = Network("test", "ethernet", "192.168.0.0/24")
-    assert isinstance(network.subnets(), defaultdict)
+    network = Network("test", "192.168.0.0/24", network_type="ethernet")
+    assert isinstance(network.subnets, defaultdict)
     assert ipaddress.IPv4Network("192.168.0.0/24") in free_ipv4_subnets(network)
 
 
 def test_finds_available_subnets():
     """Test that remaining available Subnets are reported."""
-    network = Network("test", "ethernet", "192.168.0.0/24")
+    network = Network("test", "192.168.0.0/24", network_type="ethernet")
     subnets = {
         "subnet1": Subnet("subnet1", "192.168.0.0/27", "192.168.0.1", 1),
         "subnet2": Subnet("subnet2", "192.168.0.32/27", "192.168.0.33", 2),
         "subnet3": Subnet("subnet3", "192.168.0.64/27", "192.168.0.65", 3),
     }
-    network.subnets(subnets)
+    network.subnets = subnets
     available_subnets = free_ipv4_subnets(network)
     expected_subnets = [
         ipaddress.IPv4Network("192.168.0.96/27"),
@@ -70,25 +70,25 @@ def test_finds_available_subnets():
 
 def test_returns_empty_list_if_no_available_subnets_found():
     """Test returning empty list if the entire Network has been used."""
-    network = Network("test", "ethernet", "192.168.0.0/24")
+    network = Network("test", "192.168.0.0/24", network_type="ethernet")
     subnets = {
         "subnet1": Subnet("subnet1", "192.168.0.0/26", "192.168.0.1", 1),
         "subnet2": Subnet("subnet2", "192.168.0.64/26", "192.168.0.65", 2),
         "subnet3": Subnet("subnet3", "192.168.0.128/25", "192.168.0.129", 3),
     }
-    network.subnets(subnets)
+    network.subnets = subnets
     assert not free_ipv4_subnets(network)
 
 
 def test_raises_exception_if_subnets_overlap():
     """Test that an exception is raised if a Network's Subnets overlap."""
-    network = Network("test", "ethernet", "192.168.0.0/24")
+    network = Network("test", "192.168.0.0/24", network_type="ethernet")
     subnets = {
         "subnet1": Subnet("subnet1", "192.168.0.0/25", "192.168.0.1", 1),
         "subnet2": Subnet("subnet2", "192.168.0.64/26", "192.168.0.65", 2),
         "subnet3": Subnet("subnet3", "192.168.0.128/25", "192.168.0.129", 3),
     }
-    network.subnets(subnets)
+    network.subnets = subnets
     with pytest.raises(Exception) as e:
         free_ipv4_subnets(network)
     assert e.type == Exception
@@ -147,7 +147,7 @@ def test_prefixlength():
     """Test that the appropriate CIDR/prefix is returned."""
     network_address = ipaddress.IPv4Network("192.168.0.0/24")
     assert prefixlength(network_address) == 24
-    network = Network("test", "ethernet", "192.168.0.0/24")
+    network = Network("test", "192.168.0.0/24", network_type="ethernet")
     assert prefixlength(network) == 24
 
 
@@ -155,7 +155,7 @@ def test_temp_is_subnet_of():
     """Test bugfix hack of ipaddress function to see if one address is a subnet of other."""
     network_address = ipaddress.IPv4Network("192.168.0.0/24")
     subnet = Subnet("test1", "192.168.0.128/25", "192.168.0.129", 1)
-    assert temp_is_subnet_of(subnet.ipv4_network(), network_address)
+    assert temp_is_subnet_of(subnet.ipv4_network, network_address)
 
 
 def test_prefixlength_from_hosts():

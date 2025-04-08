@@ -47,33 +47,33 @@ def free_ipv4_subnets(network):
     if not isinstance(network, Network):
         raise ValueError(f"{free_ipv4_subnets.__name__} argument must be a Network")
 
-    subnets = network.subnets()
+    subnets = network.subnets
     if subnets is None:
         return None
 
     if DEBUG:
-        print("NETWORK: ", network.name(), network.ipv4_network())
-    available_subnets = [ipaddress.IPv4Network(network.ipv4_network())]
+        print("NETWORK: ", network.name, network.ipv4_network)
+    available_subnets = [ipaddress.IPv4Network(network.ipv4_network)]
 
     # Ensure smallest sized subnets are first (and thus first matched)
     subnets = sorted(subnets.values(), key=prefixlength, reverse=True)
     if DEBUG:
-        print("SORTED SUBNETS: ", [x.ipv4_network() for x in subnets])
+        print("SORTED SUBNETS: ", [x.ipv4_network for x in subnets])
 
     for subnet in subnets:
-        used_subnet = subnet.ipv4_network()
+        used_subnet = subnet.ipv4_network
 
-        temp_subnet = is_supernet_hacked(network.ipv4_network(), subnet)
+        temp_subnet = is_supernet_hacked(network.ipv4_network, subnet)
         if temp_subnet is not None:
             used_subnet = temp_subnet
         if DEBUG:
             print(
                 "Subnet:  ",
-                subnet.name(),
+                subnet.name,
                 used_subnet,
                 "orig:",
-                subnet.ipv4_address(),
-                subnet.ipv4_network(),
+                subnet.ipv4_address,
+                subnet.ipv4_network,
             )
 
         found = False
@@ -132,16 +132,16 @@ def free_ipv4_addresses(subnet):
     if not isinstance(subnet, Subnet):
         raise ValueError(f"{__name__} argument must be a Subnet")
 
-    subnet_ipv4_network = subnet.ipv4_network()
+    subnet_ipv4_network = subnet.ipv4_network
 
     # Every available IPv4 address in the subnet
     all_hosts_in_subnet = list(subnet_ipv4_network.hosts())
     all_hosts_in_subnet = set(all_hosts_in_subnet)
 
     # All the IPv4 addresses used in the subnet by Reservations
-    reservations = subnet.reservations().values()
+    reservations = subnet.reservations.values()
     all_used_hosts_in_subnet = set({r.ipv4_address() for r in reservations})
-    all_used_hosts_in_subnet.add(subnet.ipv4_gateway())
+    all_used_hosts_in_subnet.add(subnet.ipv4_gateway)
 
     # Available IPv4 addresses in the subnet
     unused_hosts_in_subnet = all_hosts_in_subnet.difference(all_used_hosts_in_subnet)
@@ -242,15 +242,15 @@ def is_supernet_hacked(network_address, subnet):
     """
     # A clear clue as to the application of the supernet hack is where the subnet
     # mask is the same as the network mask.
-    if subnet.ipv4_network().prefixlen != network_address.prefixlen:
+    if subnet.ipv4_network.prefixlen != network_address.prefixlen:
         return None
 
-    used_addrs = [r.ipv4_address() for r in subnet.reservations().values()]
+    used_addrs = [r.ipv4_address for r in subnet.reservations.values()]
 
-    if subnet.dhcp_start_address() is not None:
-        used_addrs.append(subnet.dhcp_start_address())
-    if subnet.dhcp_end_address() is not None:
-        used_addrs.append(subnet.dhcp_end_address())
+    if subnet.dhcp_start_address is not None:
+        used_addrs.append(subnet.dhcp_start_address)
+    if subnet.dhcp_end_address is not None:
+        used_addrs.append(subnet.dhcp_end_address)
 
     if not used_addrs:
         return None
@@ -270,17 +270,17 @@ def is_supernet_hacked(network_address, subnet):
     supernet_hacked_pools = core_subnets + static_pool_subnets + dynamic_pool_subnets
 
     # Do not apply the reverse hackology for subnets in CSI it is not applied
-    if subnet.name() not in supernet_hacked_pools:
+    if subnet.name not in supernet_hacked_pools:
         return None
 
     # Subnet masks found in CSI for different subnets. This prevents reverse
     # engineering very small subnets based on number of hosts and dhcp ranges alone.
     prefix_diff = 30
-    if subnet.name() in core_subnets:
+    if subnet.name in core_subnets:
         prefix_diff = 24
-    elif subnet.name() in static_pool_subnets:
+    elif subnet.name in static_pool_subnets:
         prefix_diff = 28
-    elif subnet.name() in dynamic_pool_subnets:
+    elif subnet.name in dynamic_pool_subnets:
         prefix_diff = 27
     print("PREFIXLEN: ", prefix_diff)
     prefix_diff -= network_address.prefixlen
@@ -317,7 +317,7 @@ def prefixlength(network):
     if isinstance(network, ipaddress.IPv4Network):
         return network.prefixlen
     if isinstance(network, Network):
-        return network.ipv4_network().prefixlen
+        return network.ipv4_network.prefixlen
 
 
 def temp_is_subnet_of(a, b):
@@ -337,7 +337,7 @@ def temp_is_subnet_of(a, b):
     """
     try:
         # Always false if one is v4 and the other is v6.
-        if a._version != b._version:
+        if a.version != b.version:
             raise TypeError(f"{a} and {b} are not of the same version")
         return (
             b.network_address <= a.network_address

@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2023, 2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -22,8 +22,10 @@
 """Classes for management of SLS Networks and Subnets."""
 from collections import defaultdict
 import ipaddress
+from ipaddress import IPv4Address
+from ipaddress import IPv4Network
 
-from .Reservations import Reservation
+from canu.utils.sls_utils.Reservations import Reservation
 
 # A Subnet is a Network inside a Network CIDR range.
 # A Subnet has IP reservations, a network does not
@@ -33,22 +35,29 @@ from .Reservations import Reservation
 class Network:
     """Represent a Network from and SLS data structure."""
 
-    def __init__(self, name, network_type, ipv4_address):
+    _name = None
+    _full_name = ''
+    _ipv4_address = None
+    _mtu = None
+    __type = None
+    _subnets = None
+    _bgp = None
+
+    def __init__(self, name: str, ipv4_address: (str, ipaddress.IPv4Interface), **kwargs) -> None:
         """Create a Network.
 
         Args:
             name (str): Short name of the network
-            network_type (str): Type of the network: ethernet, etc.
-            ipv4_address: (str): IPv4 CIDR of the network
+            ipv4_address: (str|IPv4Address): IPv4 CIDR of the network
         """
-        self._name = name
-        self._full_name = ""
-        self._ipv4_address = ipaddress.IPv4Interface(ipv4_address)  # IPRanges
+        self.name = name
+        self.ipv4_address = ipv4_address
 
-        self.__type = network_type
-        self.__mtu = None
-        self.__subnets = defaultdict()
-        self.__bgp_asns = [None, None]  # [MyASN, PeerASN]
+        self.type = kwargs.get('network_type', None)
+        self.full_name = kwargs.get('full_name', '')
+        self.mtu = kwargs.get('mtu', None)
+        self.subnets = kwargs.get('subnets', defaultdict())
+        self.bgp = kwargs.get('bgp', (None, None))  # [MyASN, PeerASN]
 
     @classmethod
     def network_from_sls_data(cls, sls_data):
@@ -80,127 +89,162 @@ class Network:
                 ipv4_address=sls_data.get("CIDR"),
             )
 
-        sls_network.full_name(sls_data.get("FullName"))
+        sls_network.full_name = sls_data.get("FullName")
 
         # Check that the CIDR is in the IPRange, if IPRange exists.
         ipv4_range = sls_data.get("IPRanges")
         if ipv4_range and len(ipv4_range) > 0:
             temp_address = ipaddress.IPv4Interface(ipv4_range[0])
-            if temp_address != sls_network.ipv4_address():
-                print(f"WARNING: CIDR not in IPRanges from input {sls_network.name()}.")
+            if temp_address != sls_network.ipv4_address:
+                print(f"WARNING: CIDR not in IPRanges from input {sls_network.name}.")
 
-        sls_network.mtu(sls_data.get("MTU"))
+        sls_network.mtu = sls_data.get("MTU")
 
         subnets = sls_data.get("Subnets", defaultdict())
         for subnet in subnets:
             new_subnet = Subnet.subnet_from_sls_data(subnet)
-            sls_network.subnets().update({new_subnet.name(): new_subnet})
+            sls_network.subnets.update({new_subnet.name: new_subnet})
 
-        sls_network.bgp(sls_data.get("MyASN", None), sls_data.get("PeerASN"))
+        sls_network.bgp = (sls_data.get("MyASN", None), sls_data.get("PeerASN"))
 
         return sls_network
 
-    def name(self, network_name=None):
+    @property
+    def name(self) -> str:
         """Short name of the network.
-
-        Args:
-            network_name (str): Short name of the network for the setter
 
         Returns:
             name (str): Short name of the network for the getter
         """
-        if network_name is not None:
-            self._name = network_name
         return self._name
 
-    def full_name(self, network_name=None):
-        """Long, descriptive name of the network.
+    @name.setter
+    def name(self, name: str) -> None:
+        """Short name of the network.
 
         Args:
-            network_name (str): Full Name of the network for the setter
+            name (str): Short name of the network for the setter
+        """
+        self._name = name
+
+    @property
+    def full_name(self) -> str:
+        """Long, descriptive name of the network.
 
         Returns:
             full_name (str): Full name of the network for the getter
         """
-        if network_name is not None:
-            self._full_name = network_name
         return self._full_name
 
-    def ipv4_address(self, network_address=None):
-        """IPv4 network addressing.
+    @full_name.setter
+    def full_name(self, full_name: str) -> None:
+        """Long, descriptive name of the network.
 
         Args:
-            network_address: IPv4 address of the network for the setter
+            full_name (str): Full Name of the network for the setter
+        """
+        self._full_name = full_name
+
+    @property
+    def ipv4_address(self) -> ipaddress.IPv4Interface:
+        """IPv4 network addressing.
 
         Returns:
             ipv4_address: IPv4 address of the network for the getter
         """
-        if network_address is not None:
-            self._ipv4_address = ipaddress.IPv4Interface(network_address)
         return self._ipv4_address
 
-    def ipv4_network(self):
+    @ipv4_address.setter
+    def ipv4_address(self, ipv4_address: (str, ipaddress.IPv4Interface)) -> None:
+        """IPv4 network addressing.
+
+        Args:
+            ipv4_address: IPv4 address of the network for the setter
+        """
+        if isinstance(ipv4_address, str):
+            ipv4_address = ipaddress.IPv4Interface(ipv4_address)
+        self._ipv4_address = ipv4_address
+
+    @property
+    def ipv4_network(self) -> IPv4Network:
         """IPv4 network of the CIDR, Ranges, etc.
 
         Returns:
             ipv4_address.network: IPv4 network address of the Network.
         """
-        return self._ipv4_address.network
+        return self.ipv4_address.network
 
-    def mtu(self, network_mtu=None):
+    @property
+    def mtu(self) -> int:
         """MTU of the network.
-
-        Args:
-            network_mtu (int): MTU of the network for the setter
 
         Returns:
             mtu (int): MTU of the network for the getter
         """
-        if network_mtu is not None:
-            self.__mtu = network_mtu
-        return self.__mtu
+        return self._mtu
 
-    def type(self, network_type=None):
-        """Ethernet or specialty type of the network.
+    @mtu.setter
+    def mtu(self, mtu: int) -> None:
+        """MTU of the network.
 
         Args:
-            network_type (str): Type of the network (ethernet or otherwise) for the setter
+            mtu (int): MTU of the network for the setter
+        """
+        self._mtu = mtu
+
+    @property
+    def type(self) -> str:
+        """Ethernet or specialty type of the network.
 
         Returns:
             type (str): Type of the network for the getter
         """
-        if network_type is not None:
-            self.__type = network_type
         return self.__type
 
-    def subnets(self, network_subnets=None):
-        """List of subnet objects in the network.
+    @type.setter
+    def type(self, network_type: str) -> None:
+        """Ethernet or specialty type of the network.
 
         Args:
-            network_subnets: A dict of subnets in the network for the setter
+            network_type (str): Type of the network (ethernet or otherwise) for the setter
+        """
+        self.__type = network_type
+
+    @property
+    def subnets(self) -> dict:
+        """List of subnet objects in the network.
 
         Returns:
             subnets: A dict of subnets in the network for the getter
         """
-        if network_subnets is not None:
-            self.__subnets = network_subnets
-        return self.__subnets
+        return self._subnets
 
-    def bgp(self, my_bgp_asn=None, peer_bgp_asn=None):
+    @subnets.setter
+    def subnets(self, network_subnets: dict) -> None:
+        """List of subnet objects in the network.
+
+        Args:
+            network_subnets: A dict of subnets in the network for the setter
+        """
+        self._subnets = network_subnets
+
+    @property
+    def bgp(self) -> tuple[int, int]:
+        """Network BGP peering properties (optional).
+
+        Returns:
+            self._bgp (tuple): A tuple containing BGP ASNs (MyASN, PeerASN)
+        """
+        return self._bgp
+
+    @bgp.setter
+    def bgp(self, bgp: tuple[int, int]) -> None:
         """Network BGP peering properties (optional).
 
         Args:
-            my_bgp_asn (int): Local BGP ASN for setter
-            peer_bgp_asn (int): Remote BGP ASN for setter
-
-        Returns:
-            bgp_asns (list): List containing local and peer BGP ASNs [MyASN, PeerASN]
+            bgp (tuple): A tuple containing "my ASN" and the "Peer ASN"
         """
-        if my_bgp_asn is not None:
-            self.__bgp_asns[0] = my_bgp_asn
-        if peer_bgp_asn is not None:
-            self.__bgp_asns[1] = peer_bgp_asn
-        return self.__bgp_asns
+        self._bgp = bgp
 
     def to_sls(self):
         """Serialize the Network to SLS Networks format.
@@ -208,27 +252,27 @@ class Network:
         Returns:
             sls: SLS data structure for the network
         """
-        subnets = [x.to_sls() for x in self.__subnets.values()]
+        subnets = [x.to_sls() for x in self._subnets.values()]
         # TODO:  Is the VlanRange a list of used or a min/max?
         # x vlans = [min(vlans_list), max(vlans_list)]
-        vlans_list = list(dict.fromkeys([x.vlan() for x in self.__subnets.values()]))
+        vlans_list = list(dict.fromkeys([x.vlan() for x in self._subnets.values()]))
         vlans = vlans_list
         sls = {
-            "Name": self._name,
-            "FullName": self._full_name,
-            "Type": self.__type,
-            "IPRanges": [str(self._ipv4_address)],
+            "Name": self.name,
+            "FullName": self.full_name,
+            "Type": self.type,
+            "IPRanges": [str(self.ipv4_address)],
             "ExtraProperties": {
-                "CIDR": str(self._ipv4_address),
-                "MTU": self.__mtu,
+                "CIDR": str(self.ipv4_address),
+                "MTU": self.mtu,
                 "VlanRange": vlans,
                 "Subnets": subnets,
             },
         }
 
-        if self.__bgp_asns[0] and self.__bgp_asns[1]:
-            sls["ExtraProperties"]["MyASN"] = self.__bgp_asns[0]
-            sls["ExtraProperties"]["PeerASN"] = self.__bgp_asns[1]
+        if self.bgp[0] and self.bgp[1]:
+            sls["ExtraProperties"]["MyASN"] = self.bgp[0]
+            sls["ExtraProperties"]["PeerASN"] = self.bgp[1]
 
         return sls
 
@@ -236,7 +280,9 @@ class Network:
 class BicanNetwork(Network):
     """A customized BICAN Network."""
 
-    def __init__(self, default_route_network_name="CMN"):
+    _default_route_network = None
+
+    def __init__(self, default_route_network_name: str = "CMN") -> None:
         """Create a new BICAN network.
 
         Args:
@@ -246,23 +292,28 @@ class BicanNetwork(Network):
             name="BICAN",
             network_type="ethernet",
             ipv4_address="0.0.0.0/0",
+            full_name = "System Default Route Network Name for Bifurcated CAN",
+            mtu =9000,
         )
-        self._full_name = "System Default Route Network Name for Bifurcated CAN"
-        self.__system_default_route = default_route_network_name
-        self.mtu(network_mtu=9000)
+        self._default_route_network = default_route_network_name
 
-    def system_default_route(self, default_route=None):
-        """Retrieve and set the default route for the system.
-
-        Args:
-            default_route (str): CHN, CAN, or CMN
+    @property
+    def default_route_network(self) -> str:
+        """Returns the currently set default route, if any.
 
         Returns:
-            name (str): Short name of the network for the getter
+            self._default_route (str): The currently set default route.
         """
-        if default_route is not None:
-            self.__system_default_route = default_route
-        return self.__system_default_route
+        return self._default_route_network
+
+    @default_route_network.setter
+    def default_route_network(self, default_route_network: str) -> None:
+        """Sets the default route for this Network object.
+
+        Args:
+            default_route_network: The network to use for the default route.
+        """
+        self._default_route_network = default_route_network
 
     def to_sls(self):
         """Serialize the Network to SLS Networks format.
@@ -271,31 +322,32 @@ class BicanNetwork(Network):
             sls: BICAN SLS Network structure
         """
         sls = super().to_sls()
-        sls["ExtraProperties"]["SystemDefaultRoute"] = self.__system_default_route
+        sls["ExtraProperties"]["SystemDefaultRoute"] = self._default_route_network
         return sls
 
 
 class Subnet(Network):
     """Subnets are Networks with extra metadata: DHCP info, IP reservations, etc..."""
 
-    def __init__(self, name, ipv4_address, ipv4_gateway, vlan):
+    _ipv4_dhcp_end_address = None
+    _ipv4_dhcp_start_address = None
+    _ipv4_gateway = None
+    _ipv4_reservation_end_address = None
+    _ipv4_reservation_start_address = None
+    _pool_name = None
+    _reservations = {}
+    _vlan = None
+
+    def __init__(self, name: str, ipv4_address: (str, ipaddress.IPv4Network), ipv4_gateway: (str, IPv4Address), vlan: int, **kwargs):
         """Create a new Subnet.
 
         Args:
-            name (str): Name of the subnet
-            ipv4_address (str): IPv4 CIDR of the subnet
             ipv4_gateway (str): IPv4 address of the network gateway
             vlan (int): VLAN ID of the subnet
         """
-        super().__init__(name=name, network_type=None, ipv4_address=ipv4_address)
-        self.__ipv4_gateway = ipaddress.IPv4Address(ipv4_gateway)
-        self.__vlan = int(vlan)
-        self.__ipv4_dhcp_start_address = None
-        self.__ipv4_dhcp_end_address = None
-        self.__ipv4_reservation_start_address = None
-        self.__ipv4_reservation_end_address = None
-        self.__pool_name = None
-        self.__reservations = {}
+        super().__init__(name, ipv4_address, **kwargs)
+        self.ipv4_gateway = ipv4_gateway
+        self.vlan = vlan
 
     @classmethod
     def subnet_from_sls_data(cls, sls_data):
@@ -314,42 +366,42 @@ class Subnet(Network):
             vlan=sls_data.get("VlanID"),
         )
 
-        sls_subnet.ipv4_gateway(ipaddress.IPv4Address(sls_data.get("Gateway")))
+        sls_subnet.ipv4_gateway = ipaddress.IPv4Address(sls_data.get("Gateway"))
 
-        sls_subnet.full_name(sls_data.get("FullName"))
-        sls_subnet.vlan(sls_data.get("VlanID"))
+        sls_subnet.full_name = sls_data.get("FullName")
+        sls_subnet.vlan = sls_data.get("VlanID")
 
         dhcp_start = sls_data.get("DHCPStart")
         if dhcp_start:
             dhcp_start = ipaddress.IPv4Address(dhcp_start)
-            if dhcp_start not in sls_subnet.ipv4_network():
-                print("ERROR: DHCP start not in Subnet.")
-            sls_subnet.dhcp_start_address(dhcp_start)
+            if dhcp_start not in sls_subnet.ipv4_network:
+                print(f"ERROR: DHCP start [{dhcp_start}] not in Subnet [{sls_subnet.ipv4_network}].")
+            sls_subnet.dhcp_start_address = dhcp_start
 
         dhcp_end = sls_data.get("DHCPEnd")
         if dhcp_end:
             dhcp_end = ipaddress.IPv4Address(dhcp_end)
-            if dhcp_end not in sls_subnet.ipv4_network():
-                print("ERROR: DHCP end not in Subnet.")
-            sls_subnet.dhcp_end_address(dhcp_end)
+            if dhcp_end not in sls_subnet.ipv4_network:
+                print(f"ERROR: DHCP end [{dhcp_end}] not in Subnet [{sls_subnet.ipv4_network}].")
+            sls_subnet.dhcp_end_address = dhcp_end
 
         reservation_start = sls_data.get("ReservationStart")
         if reservation_start is not None:
             reservation_start = ipaddress.IPv4Address(reservation_start)
-            sls_subnet.reservation_start_address(reservation_start)
+            sls_subnet.reservation_start_address = reservation_start
 
         reservation_end = sls_data.get("ReservationEnd")
         if reservation_end is not None:
             reservation_end = ipaddress.IPv4Address(reservation_end)
-            sls_subnet.reservation_end_address(reservation_end)
+            sls_subnet.reservation_end_address = reservation_end
 
         pool_name = sls_data.get("MetalLBPoolName")
         if pool_name is not None:
-            sls_subnet.metallb_pool_name(pool_name)
+            sls_subnet.metallb_pool_name = pool_name
 
         reservations = sls_data.get("IPReservations", {})
         for reservation in reservations:
-            sls_subnet.reservations().update(
+            sls_subnet.reservations.update(
                 {
                     reservation.get("Name"): Reservation(
                         name=reservation.get("Name"),
@@ -362,115 +414,162 @@ class Subnet(Network):
 
         return sls_subnet
 
-    def vlan(self, subnet_vlan=None):
+    @property
+    def vlan(self) -> None:
         """VLAN of the subnet.
-
-        Args:
-            subnet_vlan (int): Subnet VLAN ID for the setter
 
         Returns:
             vlan (int): Subnet VLAN ID for the getter
         """
-        if subnet_vlan is not None:
-            self.__vlan = subnet_vlan
-        return self.__vlan
+        return self._vlan
 
-    def ipv4_gateway(self, subnet_ipv4_gateway=None):
+    @vlan.setter
+    def vlan(self, vlan: (int, str)) -> None:
+        """VLAN of the subnet.
+
+        Args:
+            vlan (int, str): Subnet VLAN ID for the setter
+        """
+        if isinstance(vlan, str):
+            vlan = int(vlan)
+        if 1 <= vlan <= 4094:
+            self._vlan = vlan
+
+    @property
+    def ipv4_gateway(self) -> IPv4Address:
+        """IPv4 Gateway of the subnet.
+
+        Returns:
+            ipv4_gateway (IPv4Address): IPv4 gateway of the subnet for the getter
+        """
+        return self._ipv4_gateway
+
+    @ipv4_gateway.setter
+    def ipv4_gateway(self, ipv4_gateway: (str, IPv4Address)) -> None:
         """IPv4 Gateway of the subnet.
 
         Args:
-            subnet_ipv4_gateway (str): IPv4 gateway of the subnet for the setter
-
-        Returns:
-            ipv4_gateway (xxx): IPv4 gateway of the subnet for the getter
+            ipv4_gateway (str|IPv4Address): IPv4 gateway of the subnet for the setter
         """
-        if subnet_ipv4_gateway is not None:
-            self.__ipv4_gateway = ipaddress.IPv4Address(subnet_ipv4_gateway)
-        return self.__ipv4_gateway
+        if isinstance(ipv4_gateway, str):
+            ipv4_gateway = ipaddress.IPv4Address(ipv4_gateway)
+        self._ipv4_gateway = ipv4_gateway
 
-    def dhcp_start_address(self, subnet_dhcp_start_address=None):
+    @property
+    def dhcp_start_address(self) -> IPv4Address:
         """IPv4 starting address if DHCP is used in the subnet.
-
-        Args:
-            subnet_dhcp_start_address (str): IPv4 start of the DHCP range for setter
 
         Returns:
             ipv4_dhcp_start_address (ipaddress.IPv4Address): Start DHCP address for getter
         """
-        if subnet_dhcp_start_address is not None:
-            self.__ipv4_dhcp_start_address = ipaddress.IPv4Address(
-                subnet_dhcp_start_address,
-            )
-        return self.__ipv4_dhcp_start_address
+        return self._ipv4_dhcp_start_address
 
-    def dhcp_end_address(self, subnet_dhcp_end_address=None):
-        """IPv4 ending address if DHCP is used in the subnet.
+    @dhcp_start_address.setter
+    def dhcp_start_address(self, dhcp_start_address: (str, IPv4Address)) -> None:
+        """IPv4 starting address if DHCP is used in the subnet.
 
         Args:
-            subnet_dhcp_end_address (str): IPv4 end of the DHCP range for setter
+            dhcp_start_address (str|IPv4Address): IPv4 start of the DHCP range for setter
+        """
+        if isinstance(dhcp_start_address, str):
+            dhcp_start_address = ipaddress.IPv4Address(dhcp_start_address)
+        self._ipv4_dhcp_start_address = dhcp_start_address
+
+    @property
+    def dhcp_end_address(self) -> IPv4Address:
+        """IPv4 ending address if DHCP is used in the subnet.
 
         Returns:
             ipv4_dhcp_end_address (ipaddress.IPv4Address): End DHCP address for getter
         """
-        if subnet_dhcp_end_address is not None:
-            self.__ipv4_dhcp_end_address = ipaddress.IPv4Address(
-                subnet_dhcp_end_address,
-            )
-        return self.__ipv4_dhcp_end_address
+        return self._ipv4_dhcp_end_address
 
-    def reservation_start_address(self, reservation_start=None):
-        """IPv4 starting address used in uai_macvlan subnet.
+    @dhcp_end_address.setter
+    def dhcp_end_address(self, dhcp_end_address: (str, IPv4Address)) -> None:
+        """IPv4 ending address if DHCP is used in the subnet.
 
         Args:
-            reservation_start (ipaddress.IPv4Address): Start address of the reservations
+            dhcp_end_address (str|IPv4Address): IPv4 end of the DHCP range for setter
+        """
+        if isinstance(dhcp_end_address, str):
+            dhcp_end_address = ipaddress.IPv4Address(dhcp_end_address)
+        self._ipv4_dhcp_end_address = dhcp_end_address
+
+    @property
+    def reservation_start_address(self) -> IPv4Address:
+        """IPv4 starting address used in uai_macvlan subnet.
 
         Returns:
             ipv4_reservation_start_address (ipaddress.IPv4Address): Start address of the reservation
         """
-        if reservation_start is not None:
-            self.__ipv4_reservation_start_address = ipaddress.IPv4Address(
-                reservation_start,
-            )
-        return self.__ipv4_reservation_start_address
+        return self._ipv4_reservation_start_address
 
-    def reservation_end_address(self, reservation_end=None):
-        """IPv4 ending address used in uai_macvlan subnet.
+    @reservation_start_address.setter
+    def reservation_start_address(self, reservation_start: (str, IPv4Address)) -> None:
+        """IPv4 starting address used in uai_macvlan subnet.
 
         Args:
-            reservation_end (ipaddress.IPv4Address): Start address of the reservations
+            reservation_start (str|ipaddress.IPv4Address): Start address of the reservations
+        """
+        if isinstance(reservation_start, str):
+            reservation_start = ipaddress.IPv4Address(reservation_start)
+        self._ipv4_reservation_start_address = reservation_start
+
+    @property
+    def reservation_end_address(self) -> IPv4Address:
+        """IPv4 ending address used in uai_macvlan subnet.
 
         Returns:
             ipv4_reservation_end_address (ipaddress.IPv4Address): Start address of the reservation
         """
-        if reservation_end is not None:
-            self.__ipv4_reservation_end_address = ipaddress.IPv4Address(reservation_end)
-        return self.__ipv4_reservation_end_address
+        return self._ipv4_reservation_end_address
 
-    def metallb_pool_name(self, pool_name=None):
-        """Retrieve or set the MetalLBPool name for the network (optional).
+    @reservation_end_address.setter
+    def reservation_end_address(self, reservation_end: (str, IPv4Address)) -> None:
+        """IPv4 ending address used in uai_macvlan subnet.
 
         Args:
-            pool_name (str): Name of the MetalLBPool (optional)
+            reservation_end (ipaddress.IPv4Address): Start address of the reservations
+        """
+        if isinstance(reservation_end, str):
+            reservation_end = ipaddress.IPv4Address(reservation_end)
+        self._ipv4_reservation_end_address = reservation_end
+
+    @property
+    def metallb_pool_name(self) -> (str, None):
+        """Retrieve or set the MetalLBPool name for the network (optional).
 
         Returns:
             pool_name (str|None): Name of the MetalLBPool (or None)
         """
-        if pool_name is not None:
-            self.__pool_name = pool_name
-        return self.__pool_name
+        return self._pool_name
 
-    def reservations(self, subnet_reservations=None):
+    @metallb_pool_name.setter
+    def metallb_pool_name(self, pool_name: (str, None)) -> None:
+        """Retrieve or set the MetalLBPool name for the network (optional).
+
+        Args:
+            pool_name (str): Name of the MetalLBPool (optional)
+        """
+        self._pool_name = pool_name
+
+    @property
+    def reservations(self) -> dict:
+        """List of reservations for the subnet.
+
+        Returns:
+            reservations (dict): Lit of reservations for getter
+        """
+        return self._reservations
+
+    @reservations.setter
+    def reservations(self, reservations: dict) -> None:
         """List of reservations for the subnet.
 
         Args:
-            subnet_reservations (list): List of reservations for setter
-
-        Returns:
-            reservations (list): Lit of reservations for getter
+            reservations (dict): List of reservations for setter
         """
-        if subnet_reservations is not None:
-            self.__reservations = subnet_reservations
-        return self.__reservations
+        self._reservations = reservations
 
     def to_sls(self):
         """Return SLS JSON for each Subnet.
@@ -479,36 +578,36 @@ class Subnet(Network):
             sls: SLS subnet data structure
         """
         sls = {
-            "Name": self._name,
-            "FullName": self._full_name,
-            "CIDR": str(self._ipv4_address),
-            "Gateway": str(self.__ipv4_gateway),
-            "VlanID": self.__vlan,
+            "Name": self.name,
+            "FullName": self.full_name,
+            "CIDR": str(self.ipv4_address),
+            "Gateway": str(self.ipv4_gateway),
+            "VlanID": self.vlan,
         }
 
-        if self.__ipv4_dhcp_start_address and self.__ipv4_dhcp_end_address:
+        if self.dhcp_start_address and self.dhcp_end_address:
             dhcp = {
-                "DHCPStart": str(self.__ipv4_dhcp_start_address),
-                "DHCPEnd": str(self.__ipv4_dhcp_end_address),
+                "DHCPStart": str(self.dhcp_start_address),
+                "DHCPEnd": str(self.dhcp_end_address),
             }
             sls.update(dhcp)
 
         if (
-            self.__ipv4_reservation_start_address is not None
-            and self.__ipv4_reservation_end_address is not None  # noqa W503
+            self.reservation_start_address is not None
+            and self.reservation_end_address is not None  # noqa W503
         ):
             resrange = {
-                "ReservationStart": str(self.__ipv4_reservation_start_address),
-                "ReservationEnd": str(self.__ipv4_reservation_end_address),
+                "ReservationStart": str(self.reservation_start_address),
+                "ReservationEnd": str(self.reservation_end_address),
             }
             sls.update(resrange)
 
-        if self.__pool_name is not None:
-            sls.update({"MetalLBPoolName": self.__pool_name})
+        if self.metallb_pool_name is not None:
+            sls.update({"MetalLBPoolName": self.metallb_pool_name})
 
-        if self.__reservations:
+        if self.reservations:
             reservations = {
-                "IPReservations": [x.to_sls() for x in self.__reservations.values()],
+                "IPReservations": [x.to_sls() for x in self.reservations.values()],
             }
             sls.update(reservations)
         return sls
