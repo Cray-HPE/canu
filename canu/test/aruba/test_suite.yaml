@@ -201,11 +201,11 @@
   device:
     - spine
 
-- name: BGP vrf Customer Routing Table
-  task: show ip route bgp vrf Customer
-  test: ncontains
-  pattern: No ipv4 routes configured
-  err_msg: There are no BGP routes in the Customer VRF routing table.
+- name: BGP vrf '{{variables.CSM_VRF}}' Routing Table
+  task: show ip route bgp vrf {{variables.CSM_VRF}}
+  test: contains
+  pattern: Displaying ipv4 routes selected for forwarding
+  err_msg: There are no BGP routes in the '{{variables.CSM_VRF}}' VRF routing table or there is a configuration error
   device:
     - spine
 
