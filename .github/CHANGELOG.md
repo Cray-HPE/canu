@@ -4,6 +4,7 @@
 
 ### [1.9.11]
 
+- CASMNET-2309 Fixed BGP tests in https://github.com/Cray-HPE/canu/pull/654
 - CASMNET-2317 Add SHCD corner and tab metadata to CCJ files in https://github.com/Cray-HPE/canu/pull/649 
 
 ### [1.9.10]
