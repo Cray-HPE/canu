@@ -348,7 +348,7 @@ def test(
                         )
                         # Update the dictionary entry
                         test_command["function_file"] = test_path
-                        test_command["function_kwargs"] = {"vlan_ips": vlan_ips}
+                        test_command["function_kwargs"] = {"vlan_ips": vlan_ips, "vrf": vrf}
 
                 elif switch in devices and isinstance(test_command["task"], list):
                     switch_commands.extend(test_command["task"])
