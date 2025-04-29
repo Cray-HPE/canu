@@ -122,7 +122,7 @@ network_modeling = [
 ]
 test = [
     'coverage~=7.6.4',
-    'mock~=5.1.0',
+    'mock~=5.2.0',
     'pytest-cov~=6.0.0',
     'pytest-sugar~=1.0.0',
     'pytest~=8.3.3',
