@@ -35,6 +35,7 @@ from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import requests
 from ruamel.yaml import YAML
+import pprint
 
 from canu.report.switch.cabling.cabling import get_lldp
 from canu.style import Style
@@ -121,6 +122,11 @@ log = logging.getLogger("validate_paddle_cabling")
     type=click.File("w"),
     default="-",
 )
+@click.option(
+    "--all-nodes",
+    help="Use the --all-nodes flag to print cabling for all nodes. By default, only the cabling for the management switches will be printed.",
+    is_flag=True,
+)
 @click.pass_context
 def paddle_cabling(
     ctx,
@@ -132,6 +138,7 @@ def paddle_cabling(
     password,
     log_,
     out,
+    all_nodes,
 ):
     """Validate a CCJ file against the current network cabling.
 
@@ -156,6 +163,7 @@ def paddle_cabling(
         password: Switch password
         log_: Level of logging
         out: Name of the output file
+        all_nodes: Print cabling for all nodes
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
@@ -199,7 +207,7 @@ def paddle_cabling(
                 )
                 try:
                     # Get LLDP info (stored in cache)
-                    get_lldp(str(ip), credentials, return_error=True)
+                    lldp_dict = get_lldp(str(ip), credentials, return_error=True)
 
                 except (
                     requests.exceptions.HTTPError,
@@ -226,13 +234,15 @@ def paddle_cabling(
     # Open the updated cache to model nodes
     with open(canu_cache_file, "r+") as file:
         canu_cache = yaml.load(file)
+    pprint.pprint(lldp_dict)
+    pprint.pprint(canu_cache)
 
     # Create Cabling Node factory and model
     log.debug("Creating model from switch LLDP data")
     cabling_factory = NetworkNodeFactory(architecture_version=architecture)
     cabling_node_list, cabling_warnings = node_model_from_canu(
         cabling_factory,
-        canu_cache,
+        lldp_dict,
         ips,
     )
 
@@ -256,7 +266,7 @@ def paddle_cabling(
         csm,
     )
 
-    print_combined_nodes(combined_nodes, out, input_type="CCJ")
+    print_combined_nodes(combined_nodes, out, all_nodes, input_type="CCJ")
 
     click.echo("\n", file=out)
     click.echo(double_dash, file=out)
