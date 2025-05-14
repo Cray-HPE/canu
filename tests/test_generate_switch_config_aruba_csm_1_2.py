@@ -120,7 +120,7 @@ def test_switch_config_spine_primary():
             + "    30 permit tcp 192.168.0.0/255.255.128.0 any eq https\n"
             + "    40 permit udp 192.168.0.0/255.255.128.0 any eq snmp\n"
             + "    50 permit udp 192.168.0.0/255.255.128.0 any eq snmp-trap\n"
-            + "    60 permit tcp any 192.168.12.0/255.255.255.0 eq ssh\n"
+            + "    60 permit tcp 192.168.12.0/255.255.255.0 any eq ssh\n"
             + "    70 permit tcp 192.168.12.0/255.255.255.0 any eq https\n"
             + "    80 permit udp 192.168.12.0/255.255.255.0 any eq snmp\n"
             + "    90 permit udp 192.168.12.0/255.255.255.0 any eq snmp-trap\n"
