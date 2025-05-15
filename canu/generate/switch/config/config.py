@@ -804,6 +804,14 @@ def generate_switch_config(
         "NMN_MTN_NETMASK": sls_variables["NMN_MTN_NETMASK"],
         "NMN_MTN_NETWORK_IP": sls_variables["NMN_MTN_NETWORK_IP"],
         "NMN_MTN_PREFIX_LEN": sls_variables["NMN_MTN_PREFIX_LEN"],
+        "HMN_RVR": sls_variables["HMN_RVR"],
+        "HMN_RVR_NETMASK": sls_variables["HMN_RVR_NETMASK"],
+        "HMN_RVR_NETWORK_IP": sls_variables["HMN_RVR_NETWORK_IP"],
+        "HMN_RVR_PREFIX_LEN": sls_variables["HMN_RVR_PREFIX_LEN"],
+        "NMN_RVR": sls_variables["NMN_RVR"],
+        "NMN_RVR_NETMASK": sls_variables["NMN_RVR_NETMASK"],
+        "NMN_RVR_NETWORK_IP": sls_variables["NMN_RVR_NETWORK_IP"],
+        "NMN_RVR_PREFIX_LEN": sls_variables["NMN_RVR_PREFIX_LEN"],
         "HMNLB": sls_variables["HMNLB"],
         "HMNLB_TFTP": sls_variables["HMNLB_TFTP"],
         "HMNLB_DHCP": "10.94.100.222",
@@ -832,6 +840,8 @@ def generate_switch_config(
         "CMN_IP_SECONDARY": sls_variables["CMN_IP_SECONDARY"],
         "NMN_MTN_CABINETS": sls_variables["NMN_MTN_CABINETS"],
         "HMN_MTN_CABINETS": sls_variables["HMN_MTN_CABINETS"],
+        "NMN_RVR_CABINETS": sls_variables["NMN_RVR_CABINETS"],
+        "HMN_RVR_CABINETS": sls_variables["HMN_RVR_CABINETS"],
         "LEAF_BMC_VLANS": leaf_bmc_vlan,
         "SPINE_LEAF_VLANS": spine_leaf_vlan,
         "NATIVE_VLAN": native_vlan,
@@ -1785,6 +1795,14 @@ def parse_sls_for_config(input_json):
         "NMN_MTN_NETMASK": None,
         "NMN_MTN_NETWORK_IP": None,
         "NMN_MTN_PREFIX_LEN": None,
+        "HMN_RVR": None,
+        "HMN_RVR_NETMASK": None,
+        "HMN_RVR_NETWORK_IP": None,
+        "HMN_RVR_PREFIX_LEN": None,
+        "NMN_RVR": None,
+        "NMN_RVR_NETMASK": None,
+        "NMN_RVR_NETWORK_IP": None,
+        "NMN_RVR_PREFIX_LEN": None,
         "HMNLB": None,
         "HMNLB_NETMASK": None,
         "HMNLB_NETWORK_IP": None,
@@ -1822,6 +1840,8 @@ def parse_sls_for_config(input_json):
         "NMN_IPs": defaultdict(),
         "NMN_MTN_CABINETS": [],
         "HMN_MTN_CABINETS": [],
+        "NMN_RVR_CABINETS": [],
+        "HMN_RVR_CABINETS": [],
     }
 
     for sls_network in input_json:
@@ -2005,6 +2025,33 @@ def parse_sls_for_config(input_json):
             sls_variables["HMN_MTN_PREFIX_LEN"] = sls_variables["HMN_MTN"].prefixlen
             sls_variables["HMN_MTN_NETWORK_IP"] = sls_variables["HMN_MTN"].ip
             sls_variables["HMN_MTN_CABINETS"] = list(
+                sls_network.get("ExtraProperties", {}).get("Subnets", {}),
+            )
+        elif name == "NMN_RVR":
+            sls_variables["NMN_RVR"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
+            )
+            sls_variables["NMN_RVR_NETMASK"] = sls_variables["NMN_RVR"].netmask
+            sls_variables["NMN_RVR_PREFIX_LEN"] = sls_variables["NMN_RVR"].prefixlen
+            sls_variables["NMN_RVR_NETWORK_IP"] = sls_variables["NMN_RVR"].ip
+            sls_variables["NMN_RVR_CABINETS"] = list(
+                sls_network.get("ExtraProperties", {}).get("Subnets", {}),
+            )
+
+        elif name == "HMN_RVR":
+            sls_variables["HMN_RVR"] = netaddr.IPNetwork(
+                sls_network.get("ExtraProperties", {}).get(
+                    "CIDR",
+                    "",
+                ),
+            )
+            sls_variables["HMN_RVR_NETMASK"] = sls_variables["HMN_RVR"].netmask
+            sls_variables["HMN_RVR_PREFIX_LEN"] = sls_variables["HMN_RVR"].prefixlen
+            sls_variables["HMN_RVR_NETWORK_IP"] = sls_variables["HMN_RVR"].ip
+            sls_variables["HMN_RVR_CABINETS"] = list(
                 sls_network.get("ExtraProperties", {}).get("Subnets", {}),
             )
         elif name == "HMNLB":
