@@ -195,6 +195,8 @@ def pull_sls_networks(sls_file=None):
         "NMN_VLAN": None,
         "HMN_MTN": None,
         "NMN_MTN": None,
+        "HMN_RVR": None,
+        "NMN_RVR": None,
         "CAN_IP_GATEWAY": None,
         "CMN_IP_GATEWAY": None,
         "HSN_IP_GATEWAY": None,
@@ -215,6 +217,8 @@ def pull_sls_networks(sls_file=None):
         "NMN_IPs": defaultdict(),
         "NMN_MTN_CABINETS": [],
         "HMN_MTN_CABINETS": [],
+        "NMN_RVR_CABINETS": [],
+        "HMN_RVR_CABINETS": [],
     }
     for sls_network in sls_networks:
         name = sls_network.get("Name", "")
@@ -324,6 +328,23 @@ def pull_sls_networks(sls_file=None):
                 "",
             )
             sls_variables["HMN_MTN_CABINETS"] = [
+                list(sls_network.get("ExtraProperties", {}).get("Subnets", {})),
+            ]
+
+        elif name == "NMN_RVR":
+            sls_variables["NMN_RVR"] = sls_network.get("ExtraProperties", {}).get(
+                "CIDR",
+                "",
+            )
+            sls_variables["NMN_RVR_CABINETS"] = [
+                list(sls_network.get("ExtraProperties", {}).get("Subnets", {})),
+            ]
+        elif name == "HMN_RVR":
+            sls_variables["HMN_RVR"] = sls_network.get("ExtraProperties", {}).get(
+                "CIDR",
+                "",
+            )
+            sls_variables["HMN_RVR_CABINETS"] = [
                 list(sls_network.get("ExtraProperties", {}).get("Subnets", {})),
             ]
 
