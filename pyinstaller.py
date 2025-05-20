@@ -193,6 +193,34 @@ added_files += [
         "network_modeling/configs/templates/1.6/dellmellanox/full/*.j2",
         "network_modeling/configs/templates/1.6/dellmellanox/full",
     ),
+    (
+        "network_modeling/configs/templates/1.7/arista/*.j2",
+        "network_modeling/configs/templates/1.7/arista",
+    ),
+    (
+        "network_modeling/configs/templates/1.7/aruba/common/*.j2",
+        "network_modeling/configs/templates/1.7/aruba/common",
+    ),
+    (
+        "network_modeling/configs/templates/1.7/aruba/*.j2",
+        "network_modeling/configs/templates/1.7/aruba/",
+    ),
+    (
+        "network_modeling/configs/templates/1.7/aruba/full/*.j2",
+        "network_modeling/configs/templates/1.7/aruba/full",
+    ),
+    (
+        "network_modeling/configs/templates/1.7/aruba/tds/*.j2",
+        "network_modeling/configs/templates/1.7/aruba/tds",
+    ),
+    (
+        "network_modeling/configs/templates/1.7/dellmellanox/common/*.j2",
+        "network_modeling/configs/templates/1.7/dellmellanox/common",
+    ),
+    (
+        "network_modeling/configs/templates/1.7/dellmellanox/full/*.j2",
+        "network_modeling/configs/templates/1.7/dellmellanox/full",
+    ),
 ]
 a = Analysis(
     ["canu/cli.py"],
