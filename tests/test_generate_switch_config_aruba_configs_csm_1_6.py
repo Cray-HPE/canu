@@ -32,7 +32,7 @@ from canu.cli import cli
 test_file_directory = Path(__file__).resolve().parent
 data_directory = path.join(test_file_directory, "data")
 
-csm = "1.5"
+csm = "1.6"
 cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
 
@@ -95,7 +95,7 @@ def test_switch_config_spine_primary():
     """Test that the `canu generate switch config` command runs and returns valid primary spine config."""
     switch_name = "sw-spine-001"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -132,7 +132,7 @@ def test_switch_config_spine_primary_custom():
     """Test that the `canu generate switch config custom` command runs and returns valid primary spine config."""
     switch_name = "sw-spine-001"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -172,7 +172,7 @@ def test_switch_config_spine_secondary():
     """Test that the `canu generate switch config` command runs and returns valid secondary spine config."""
     switch_name = "sw-spine-002"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -210,7 +210,7 @@ def test_switch_config_spine_secondary_custom():
     """Test that the `canu generate switch config custom` command runs and returns valid primary spine config."""
     switch_name = "sw-spine-002"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -250,7 +250,7 @@ def test_switch_config_leaf_primary():
     """Test that the `canu generate switch config` command runs and returns valid primary leaf config."""
     switch_name = "sw-leaf-001"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -287,7 +287,7 @@ def test_switch_config_leaf_primary_custom():
     """Test that the `canu generate switch config` command runs and returns valid custom primary leaf config."""
     switch_name = "sw-leaf-001"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -326,7 +326,7 @@ def test_switch_config_leaf_secondary():
     """Test that the `canu generate switch config` command runs and returns valid secondary leaf config."""
     switch_name = "sw-leaf-002"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -363,7 +363,7 @@ def test_switch_config_leaf_secondary_custom():
     """Test that the `canu generate switch config` command runs and returns valid secondary leaf custom config."""
     switch_name = "sw-leaf-002"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -402,7 +402,7 @@ def test_switch_config_leaf_bmc():
     """Test that the `canu generate switch config` command runs and returns valid leaf bmc."""
     switch_name = "sw-leaf-bmc-001"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -439,7 +439,7 @@ def test_switch_config_leaf_bmc_custom():
     """Test that the `canu generate switch config` command runs and returns valid leaf bmc custom config."""
     switch_name = "sw-leaf-bmc-001"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -478,7 +478,7 @@ def test_switch_config_cdu_primary():
     """Test that the `canu generate switch config` command runs and returns valid primary cdu config."""
     switch_name = "sw-cdu-001"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -515,7 +515,7 @@ def test_switch_config_cdu_primary_custom():
     """Test that the `canu generate switch config` command runs and returns valid custom primary cdu config."""
     switch_name = "sw-cdu-001"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -554,7 +554,7 @@ def test_switch_config_cdu_secondary():
     """Test that the `canu generate switch config` command runs and returns valid secondary cdu config."""
     switch_name = "sw-cdu-002"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -591,7 +591,7 @@ def test_switch_config_cdu_secondary_custom():
     """Test that the `canu generate switch config` command runs and returns valid secondary cdu custom config."""
     switch_name = "sw-cdu-002"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -630,7 +630,7 @@ def test_switch_config_edge_primary():
     """Test that the `canu generate switch config` command runs and returns valid primary edge config."""
     switch_name = "sw-edge-001"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -667,7 +667,7 @@ def test_switch_config_edge_primary_custom():
     """Test that the `canu generate switch config` command runs and returns valid custom primary edge config."""
     switch_name = "sw-edge-001"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -706,7 +706,7 @@ def test_switch_config_edge_secondary():
     """Test that the `canu generate switch config` command runs and returns valid secondary edge config."""
     switch_name = "sw-edge-002"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -743,7 +743,7 @@ def test_switch_config_edge_secondary_custom():
     """Test that the `canu generate switch config` command runs and returns valid secondary edge custom config."""
     switch_name = "sw-edge-002"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -782,7 +782,7 @@ def test_switch_config_spine_primary_tds():
     """Test that the `canu generate switch config` command runs and returns valid tds primary spine config."""
     switch_name = "sw-spine-001"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/tds_configs_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/tds_configs_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -819,7 +819,7 @@ def test_switch_config_spine_secondary_tds():
     """Test that the `canu generate switch config` command runs and returns valid tds secondary spine config."""
     switch_name = "sw-spine-002"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/tds_configs_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/tds_configs_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -856,7 +856,7 @@ def test_switch_config_leaf_bmc_tds():
     """Test that the `canu generate switch config` command runs and returns valid tds leaf-bmc config."""
     switch_name = "sw-leaf-bmc-001"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/tds_configs_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/tds_configs_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -893,7 +893,7 @@ def test_switch_config_cdu_primary_tds():
     """Test that the `canu generate switch config` command runs and returns valid tds primary cdu config."""
     switch_name = "sw-cdu-001"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/tds_configs_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/tds_configs_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -930,7 +930,7 @@ def test_switch_config_cdu_secondary_tds():
     """Test that the `canu generate switch config` command runs and returns valid tds secondary cdu config."""
     switch_name = "sw-cdu-002"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/tds_configs_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/tds_configs_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -967,7 +967,7 @@ def test_switch_config_edge_primary_tds():
     """Test that the `canu generate switch config` command runs and returns valid tds primary edge config."""
     switch_name = "sw-edge-001"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/tds_configs_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/tds_configs_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -1004,7 +1004,7 @@ def test_switch_config_edge_secondary_tds():
     """Test that the `canu generate switch config` command runs and returns valid tds secondary edge config."""
     switch_name = "sw-edge-002"
     config_file = f"{switch_name}.cfg"
-    golden_config_file = path.join(data_directory, f"golden_configs/tds_configs_{csm}/{config_file}")
+    golden_config_file = path.join(data_directory, f"golden_configs/tds_configs_1.6/{config_file}")
 
     with runner.isolated_filesystem():
         result = runner.invoke(
