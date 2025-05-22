@@ -134,7 +134,7 @@ def test_switch_config_spine_primary_custom():
     config_file = f"{switch_name}.cfg"
     golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_1.5/{config_file}")
 
-    with runner.isolated_filesystem("/Users/lynns/blah"):
+    with runner.isolated_filesystem():
         result = runner.invoke(
             cli,
             [
