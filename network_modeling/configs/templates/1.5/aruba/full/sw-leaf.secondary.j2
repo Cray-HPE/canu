@@ -5,11 +5,7 @@ hostname {{ variables.HOSTNAME }}
 no ip icmp redirect
 vrf {{ variables.VRF }}
 vrf keepalive
-ntp server {{ variables.NCN_W001 }}
-ntp server {{ variables.NCN_W002 }}
-ntp server {{ variables.NCN_W003 }}
-ntp enable
-
+{%- include variables.CSM_VERSION+'/aruba/common/ntp.j2' %}
 
 aruba-central
     disable
