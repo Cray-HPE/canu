@@ -23,7 +23,7 @@
 - name: Software Version
   task: show version
   test: contains
-  pattern: "10.13.1040"
+  pattern: "10.13.1080"
   err_msg: Software version is wrong
   device:
     - cdu
@@ -201,11 +201,11 @@
   device:
     - spine
 
-- name: BGP vrf Customer Routing Table
-  task: show ip route bgp vrf Customer
-  test: ncontains
-  pattern: No ipv4 routes configured
-  err_msg: There are no BGP routes in the Customer VRF routing table.
+- name: BGP vrf '{{variables.CSM_VRF}}' Routing Table
+  task: show ip route bgp vrf {{variables.CSM_VRF}}
+  test: contains
+  pattern: Displaying ipv4 routes selected for forwarding
+  err_msg: There are no BGP routes in the '{{variables.CSM_VRF}}' VRF routing table or there is a configuration error
   device:
     - spine
 
@@ -252,6 +252,7 @@
     - spine
   # used for testing --csm flag
   csm:
+    - 1.7
     - 1.6
     - 1.5
     - 1.4
@@ -283,11 +284,11 @@
     - spine
   pre_install: True
 
-- name: OSPF vrf Customer Neighbors
-  task: show ip ospf neighbors vrf Customer
-  test: ncontains
-  pattern: No OSPF neighbor
-  err_msg: No OSPF neighbors found on the default VRF.
+- name: OSPF vrf '{{variables.CSM_VRF}}' Neighbors
+  task: show ip ospf neighbors vrf {{variables.CSM_VRF}}
+  test: contains
+  pattern: Total Number of Neighbors
+  err_msg: OSPF neighbors not found on VRF '{{variables.CSM_VRF}}' or there is a configuration error
   device:
     - leaf
     - leaf-bmc
@@ -310,8 +311,8 @@
     - spine
   pre_install: True
 
-- name: OSPF vrf Customer EXSTART Neighbors
-  task: show ip ospf neighbors vrf Customer
+- name: OSPF vrf '{{variables.CSM_VRF}}' EXSTART Neighbors
+  task: show ip ospf neighbors vrf {{variables.CSM_VRF}}
   test: ncontains
   pattern: EXSTART
   err_msg: |

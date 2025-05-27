@@ -21,13 +21,13 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU (CSM Automatic Network Utility) floats through a Shasta network and makes setup and config breeze."""
 from collections import defaultdict
+from importlib import metadata
 import json
 from os import environ, getenv, path
 import sys
 
 import certifi
 import click
-import pkg_resources
 import requests
 from ruamel.yaml import YAML
 import urllib3
@@ -53,7 +53,7 @@ if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cov
 else:
     parent_directory = path.abspath(path.dirname(path.dirname(__file__)))
 
-version = pkg_resources.get_distribution("canu").version
+version = metadata.version("canu")
 
 canu_config_file = path.join(parent_directory, "canu", "canu.yaml")
 with open(canu_config_file, "r") as canu_f:

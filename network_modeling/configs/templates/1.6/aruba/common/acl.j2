@@ -5,6 +5,10 @@ access-list ip mgmt
 {% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq https
 {% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq snmp
 {% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq snmp-trap
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} any eq ssh
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} any eq https
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} any eq snmp
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} any eq snmp-trap
 {% set sequence = sequence+10 %}    {{ sequence }} comment ALLOW SNMP FROM HMN METALLB SUBNET
 {% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMNLB_NETWORK_IP }}/{{ variables.HMNLB_NETMASK }} any eq snmp
 {% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMNLB_NETWORK_IP }}/{{ variables.HMNLB_NETMASK }} any eq snmp-trap
@@ -75,4 +79,5 @@ access-list ip cmn-can
 {%- endif %}
 {% set sequence = sequence+10 %}    {{ sequence }} permit any any any
 apply access-list ip mgmt control-plane vrf default
+apply access-list ip mgmt control-plane vrf {{ variables.VRF }}
 {#- end acl #}
