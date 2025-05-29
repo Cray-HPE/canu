@@ -9,6 +9,9 @@ ntp server {{ variables.NCN_W002 }}
 ntp server {{ variables.NCN_W003 }}
 ntp enable
 
+{% for key, value in variables.items() %}{{ key }} - {{ value }}
+{% endfor %}
+
 
 aruba-central
     disable
@@ -16,6 +19,8 @@ ssh server vrf default
 ssh server vrf mgmt
 ssh server vrf {{ variables.VRF }}
 {%- include variables.CSM_VERSION+'/aruba/common/acl.j2' %}
+
+{%- include variables.CSM_VERSION+'/aruba/common/rvr_nmn_vlan.j2' %}
 
 vlan {{ variables.NATIVE_VLAN }}
 vlan {{ variables.NMN_VLAN }}

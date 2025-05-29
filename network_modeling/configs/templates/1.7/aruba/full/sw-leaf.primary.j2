@@ -19,6 +19,8 @@ ssh server vrf mgmt
 ssh server vrf {{ variables.VRF }}
 {%- include variables.CSM_VERSION+'/aruba/common/acl.j2' %}
 
+{%- include variables.CSM_VERSION+'/aruba/common/rvr_nmn_vlan.j2' %}
+
 vlan {{ variables.NATIVE_VLAN }}
 vlan {{ variables.NMN_VLAN }}
     name NMN

@@ -3,6 +3,7 @@
 hostname {{ variables.HOSTNAME }}
 {%- include variables.CSM_VERSION+'/aruba/common/banner-motd.j2' %}
 no ip icmp redirect
+test {{ variables.NMN_RVR_CABINETS }}
 vrf {{ variables.VRF }}
 vrf keepalive
 ntp server {{ variables.NCN_W001 }}
