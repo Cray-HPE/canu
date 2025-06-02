@@ -435,7 +435,7 @@ network_v2_tds:
         - "gn"
         - "gateway"
       shasta_name: "gateway"
-      architecture_type: "river_ncn_node_4_port_1g_ocp"
+      architecture_type: "river_ncn_node_4_port"
     - lookup_name:
         - "gpu"
       shasta_name: "gpu"
