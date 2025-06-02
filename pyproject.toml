@@ -51,7 +51,7 @@ dependencies = [
     'hier-config==2.2.3',
     'ipython==8.31.0; python_version>"3.9"',
     'ipython~=8.18.1; python_version<"3.10"',
-    'jinja2==3.1.5',
+    'jinja2==3.1.6',
     'jsonschema==4.23.0',
     'kubernetes==32.0.1',
     'mac-vendor-lookup==0.1.12',
