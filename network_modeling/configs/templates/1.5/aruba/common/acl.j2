@@ -5,7 +5,8 @@ access-list ip mgmt
 {% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq https
 {% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq snmp
 {% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq snmp-trap
-{% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} any eq ssh
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp any {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} eq ssh
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp any eq ntp {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }}
 {% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} any eq https
 {% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} any eq snmp
 {% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} any eq snmp-trap
