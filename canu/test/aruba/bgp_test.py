@@ -23,12 +23,13 @@
 from ttp import ttp
 
 
-def bgp_config(result, vlan_ips):
+def bgp_config(result, vlan_ips, vrf):
     """Verify NCN-W IPs in SLS are BGP neighbors on the switch.
 
     Args:
         result: show run bgp
         vlan_ips: list of NCN and Switch IPs
+        vrf: Named VRF used for CSM networks
 
     Returns:
         Pass or fail
@@ -83,7 +84,7 @@ router bgp {{ asn }}
 
     # Get BGP peers from switch config
     bgp_peers = {}
-    bgp_peers.update(output[0][0]["bgp_cfg"]["vrfs"]["Customer"]["peers"])
+    bgp_peers.update(output[0][0]["bgp_cfg"]["vrfs"][vrf]["peers"])
     bgp_peers.update(output[0][0]["bgp_cfg"]["vrfs"]["default"]["peers"])
 
     # Get the worker nodes CMN and NMN IPs
