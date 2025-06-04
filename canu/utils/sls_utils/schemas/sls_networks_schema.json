@@ -135,7 +135,7 @@
                             "items": {
                                 "type": "integer",
                                 "minimum": 0,
-                                "maximum": 4094
+                                "maximum": 4095
                             }
                         },
                         "SystemDefaultRoute": {
