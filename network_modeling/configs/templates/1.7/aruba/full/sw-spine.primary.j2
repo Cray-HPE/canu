@@ -18,16 +18,20 @@ ssh server vrf mgmt
 vlan {{ variables.NATIVE_VLAN }}
 vlan {{ variables.NMN_VLAN }}
     name NMN
-    apply access-list ip nmn-hmn in
-    apply access-list ip nmn-hmn out
+{%- if variables.NMN_ISOLATED_VLAN %}
+    private-vlan primary
+{%- endif %}
+    apply access-list ip NMN_ISOLATION in
+    apply access-list ip NMN_ISOLATION out
+{%- if variables.NMN_ISOLATED_VLAN %}
+vlan {{ variables.NMN_ISOLATED_VLAN }}
+    name NMN_RVR_ISOLATED
+    private-vlan isolated primary-vlan {{ variables.NMN_VLAN }}
+{%- endif %}
 vlan {{ variables.HMN_VLAN }}
     name HMN
-    apply access-list ip nmn-hmn in
-    apply access-list ip nmn-hmn out
 vlan {{ variables.CMN_VLAN }}
     name CMN
-    apply access-list ip cmn-can in
-    apply access-list ip cmn-can out
 vlan {{ variables.BLACK_HOLE_VLAN_1 }}
     name NULL{{ variables.BLACK_HOLE_VLAN_1 }}
     description Black hole VLAN {{ variables.BLACK_HOLE_VLAN_1 }}
@@ -37,8 +41,6 @@ vlan {{ variables.BLACK_HOLE_VLAN_2 }}
 {%- if variables.CAN != None %}
 vlan {{ variables.CAN_VLAN }}
     name CAN
-    apply access-list ip cmn-can in
-    apply access-list ip cmn-can out
 {%- endif %}
 vlan 10
     name SUN
@@ -71,6 +73,8 @@ interface vlan {{ variables.NATIVE_VLAN }}
 interface vlan {{ variables.NMN_VLAN }}
     vrf attach {{ variables.VRF }}
     description NMN
+    apply access-list ip nmn-hmn routed-in
+    apply access-list ip nmn-hmn routed-out
     ip mtu 9198
     ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}}
     active-gateway ip mac 12:00:00:00:6b:00
@@ -80,6 +84,8 @@ interface vlan {{ variables.NMN_VLAN }}
 interface vlan {{ variables.HMN_VLAN }}
     vrf attach {{ variables.VRF }}
     description HMN
+    apply access-list ip nmn-hmn routed-in
+    apply access-list ip nmn-hmn routed-out
     ip mtu 9198
     ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
     active-gateway ip mac 12:00:00:00:6b:00
@@ -90,6 +96,8 @@ interface vlan {{ variables.HMN_VLAN }}
 {%- if variables.CMN != None %}
 interface vlan {{ variables.CMN_VLAN }}
     description CMN
+    apply access-list ip cmn-can routed-in
+    apply access-list ip cmn-can routed-out
     ip mtu 9198
     ip address {{ variables.CMN_IP }}/{{ variables.CMN_PREFIX_LEN }}
     active-gateway ip mac 12:00:00:00:6b:00
@@ -99,6 +107,8 @@ interface vlan {{ variables.CMN_VLAN }}
 {%- if variables.CAN != None %}
 interface vlan {{ variables.CAN_VLAN }}
     description CAN
+    apply access-list ip cmn-can routed-in
+    apply access-list ip cmn-can routed-out
     ip mtu 9198
     ip address {{ variables.CAN_IP_PRIMARY }}/{{ variables.CAN_PREFIX_LEN }}
     active-gateway ip mac 12:00:00:00:6b:00

@@ -16,16 +16,20 @@ ssh server vrf {{ variables.VRF }}
 vlan {{ variables.NATIVE_VLAN }}
 vlan {{ variables.NMN_VLAN }}
     name NMN
-    apply access-list ip nmn-hmn in
-    apply access-list ip nmn-hmn out
+{%- if variables.NMN_ISOLATED_VLAN %}
+    private-vlan primary
+{%- endif %}
+    apply access-list ip NMN_ISOLATION in
+    apply access-list ip NMN_ISOLATION out
+{%- if variables.NMN_ISOLATED_VLAN %}
+vlan {{ variables.NMN_ISOLATED_VLAN }}
+    name NMN_RVR_ISOLATED
+    private-vlan isolated primary-vlan {{ variables.NMN_VLAN }}
+{%- endif %}
 vlan {{ variables.HMN_VLAN }}
     name HMN
-    apply access-list ip nmn-hmn in
-    apply access-list ip nmn-hmn out
 vlan {{ variables.CMN_VLAN }}
     name CMN
-    apply access-list ip cmn-can in
-    apply access-list ip cmn-can out
 vlan {{ variables.BLACK_HOLE_VLAN_1 }}
     name NULL{{ variables.BLACK_HOLE_VLAN_1 }}
     description Black hole VLAN {{ variables.BLACK_HOLE_VLAN_1 }}
@@ -60,18 +64,24 @@ interface vlan {{ variables.NATIVE_VLAN }}
 interface vlan {{ variables.NMN_VLAN }}
     vrf attach {{ variables.VRF }}
     description NMN
+    apply access-list ip nmn-hmn routed-in
+    apply access-list ip nmn-hmn routed-out
     ip mtu 9198
     ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}}
     ip ospf 2 area 0.0.0.0
 interface vlan {{ variables.HMN_VLAN }}
     vrf attach {{ variables.VRF }}
     description HMN
+    apply access-list ip nmn-hmn routed-in
+    apply access-list ip nmn-hmn routed-out
     ip mtu 9198
     ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
     ip ospf 2 area 0.0.0.0
     ip ospf passive
 interface vlan {{ variables.CMN_VLAN }}
     description CMN
+    apply access-list ip cmn-can routed-in
+    apply access-list ip cmn-can routed-out
     ip mtu 9198
     ip address {{ variables.CMN_IP }}/{{variables.CMN_PREFIX_LEN}}
     ip ospf 1 area 0.0.0.0
