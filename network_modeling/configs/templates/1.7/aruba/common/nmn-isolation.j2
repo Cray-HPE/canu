@@ -1,0 +1,12 @@
+{#- nmn-isolation #}
+object-group ip address NMN_NCN
+{%- for name, ip in variables.NMN_IPs.items() if name.startswith('ncn-') %}
+    {{ loop.index * 10 }} {{ ip }}
+{%- endfor %}
+
+access-list ip NMN_ISOLATION
+    10 permit any NMN_NCN NMN_NCN count
+    14 permit tcp NMN_NCN eq ssh any
+    15 permit tcp any eq ssh NMN_NCN
+    20 permit any any any
+{#- end nmn-isolation #}

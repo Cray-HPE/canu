@@ -20,3 +20,6 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU config commands."""
+
+from canu.config.pvlan import pvlan
+from canu.config.nmn_isolation import nmn_isolation

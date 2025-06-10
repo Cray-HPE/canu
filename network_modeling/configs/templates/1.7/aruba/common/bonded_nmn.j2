@@ -5,7 +5,12 @@ interface lag {{ node.config.LAG_NUMBER }} multi-chassis
     description {{ node.config.DESCRIPTION }}
     no shutdown
     no routing
+{%- if variables.NMN_ISOLATED_VLAN %}
+    vlan access {{ variables.NMN_ISOLATED_VLAN }}
+    private-vlan port-type secondary
+{%- else %}
     vlan access {{ variables.NMN_VLAN }}
+{%- endif %}
     lacp mode active
 {%- if node.destination_port == 1 %}
     lacp fallback

@@ -23,6 +23,8 @@
 import click
 
 from canu.style import Style
+from canu.config.pvlan import pvlan
+from canu.config.nmn_isolation import nmn_isolation
 
 
 @click.group(
@@ -31,3 +33,7 @@ from canu.style import Style
 @click.pass_context
 def config(ctx):
     """Commands that configure switches on the network."""
+
+
+config.add_command(pvlan)
+config.add_command(nmn_isolation)
