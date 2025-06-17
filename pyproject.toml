@@ -125,7 +125,7 @@ test = [
     'mock~=5.2.0',
     'pytest-cov~=6.2.1',
     'pytest-sugar~=1.0.0',
-    'pytest~=8.3.3',
+    'pytest~=8.4.0',
     'py~=1.11.0',
     'testfixtures~=8.3.0',
 ]
