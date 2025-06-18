@@ -241,6 +241,14 @@ dash = "-" * 60
     type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
     default="ERROR",
 )
+@click.option(
+    "--nmn-pvlan",
+    help="VLAN ID used for Isolated NMN PVLAN (must be an integer between 1 and 4094)",
+    is_flag=False,
+    required=False,
+    flag_value=502,
+    type=click.IntRange(1, 4094),
+)
 @click.pass_context
 def config(
     ctx,
@@ -263,6 +271,7 @@ def config(
     vrf,
     bond_app_nodes,
     log_,
+    nmn_pvlan,
 ):
     """Generate switch config using the SHCD.
 
@@ -468,6 +477,7 @@ def config(
         bgp_control_plane,
         vrf,
         bond_app_nodes,
+        nmn_pvlan,
     )
 
     click.echo("\n")
@@ -592,6 +602,7 @@ def generate_switch_config(
     bgp_control_plane,
     vrf,
     bond_app_nodes,
+    nmn_pvlan,
 ):
     """Generate switch config.
 
@@ -611,8 +622,7 @@ def generate_switch_config(
         bgp_control_plane: Network used for BGP control plane
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
-
-
+        nmn_pvlan: VLAN ID used for Isolated NMN PVLAN
 
     Returns:
         switch_config: The generated switch configuration
@@ -727,12 +737,20 @@ def generate_switch_config(
         sls_variables["NMN_VLAN"],
         sls_variables["HMN_VLAN"],
     ]
+    
+    # Add isolated VLAN to trunk allowed lists when private VLAN is enabled
+    if nmn_pvlan:
+        leaf_bmc_vlan.append(nmn_pvlan)
     spine_leaf_vlan = [
         native_vlan,
         sls_variables["NMN_VLAN"],
         sls_variables["HMN_VLAN"],
         sls_variables["CAN_VLAN"],
     ]
+    
+    # Add isolated VLAN to trunk allowed lists when private VLAN is enabled
+    if nmn_pvlan:
+        spine_leaf_vlan.append(nmn_pvlan)
     if sls_variables["CMN_VLAN"] and float(csm) >= 1.2:
         spine_leaf_vlan.append(sls_variables["CMN_VLAN"])
         leaf_bmc_vlan.append(sls_variables["CMN_VLAN"])
@@ -751,8 +769,19 @@ def generate_switch_config(
             fg="red",
         )
         sys.exit(1)
+    # Create separate VLAN list for NCN ports (excludes isolated VLAN)
+    ncn_vlan = [
+        native_vlan,
+        sls_variables["NMN_VLAN"],
+        sls_variables["HMN_VLAN"],
+        sls_variables["CAN_VLAN"],
+    ]
+    if sls_variables["CMN_VLAN"] and float(csm) >= 1.2:
+        ncn_vlan.append(sls_variables["CMN_VLAN"])
+    
     spine_leaf_vlan = groupby_vlan_range(spine_leaf_vlan)
     leaf_bmc_vlan = groupby_vlan_range(leaf_bmc_vlan)
+    ncn_vlan = groupby_vlan_range(ncn_vlan)
 
     black_hole_vlan_1 = 2701
     black_hole_vlan_2 = 2707
@@ -787,6 +816,7 @@ def generate_switch_config(
         "MTL_PREFIX_LEN": sls_variables["MTL_PREFIX_LEN"],
         "NMN": sls_variables["NMN"],
         "NMN_VLAN": sls_variables["NMN_VLAN"],
+        "NMN_ISOLATED_VLAN": nmn_pvlan,
         "NMN_NETMASK": sls_variables["NMN_NETMASK"],
         "NMN_NETWORK_IP": sls_variables["NMN_NETWORK_IP"],
         "NMN_PREFIX_LEN": sls_variables["NMN_PREFIX_LEN"],
@@ -834,6 +864,7 @@ def generate_switch_config(
         "HMN_MTN_CABINETS": sls_variables["HMN_MTN_CABINETS"],
         "LEAF_BMC_VLANS": leaf_bmc_vlan,
         "SPINE_LEAF_VLANS": spine_leaf_vlan,
+        "NCN_VLANS": ncn_vlan,
         "NATIVE_VLAN": native_vlan,
         "CAN_IPs": sls_variables["CAN_IPs"],
         "CHN_IPs": sls_variables["CHN_IPs"],
@@ -1973,7 +2004,7 @@ def parse_sls_for_config(input_json):
                             sls_variables["ncn_m001_nmn"] = ip["IPAddress"]
                 if subnets["Name"] == "bootstrap_dhcp":
                     for ip in subnets["IPReservations"]:
-                        if "ncn-w" in ip["Name"]:
+                        if ip["Name"].startswith("ncn-"):
                             sls_variables["NMN_IPs"][ip["Name"]] = ip["IPAddress"]
                 elif subnets["Name"] == "network_hardware":
                     sls_variables["NMN_IP_GATEWAY"] = subnets["Gateway"]
