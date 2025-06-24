@@ -831,6 +831,7 @@ def generate_switch_config(
         "CMN_IP_PRIMARY": sls_variables["CMN_IP_PRIMARY"],
         "CMN_IP_SECONDARY": sls_variables["CMN_IP_SECONDARY"],
         "NMN_MTN_CABINETS": sls_variables["NMN_MTN_CABINETS"],
+        "NMN_MTN_CABINETS_NETMASK": sls_variables["NMN_MTN_CABINETS_NETMASK"],
         "HMN_MTN_CABINETS": sls_variables["HMN_MTN_CABINETS"],
         "LEAF_BMC_VLANS": leaf_bmc_vlan,
         "SPINE_LEAF_VLANS": spine_leaf_vlan,
@@ -893,7 +894,6 @@ def generate_switch_config(
         variables["NMN_IP"] = sls_variables.get("NMN_IPs", {}).get(switch_name)
         last_octet = variables["HMN_IP"].split(".")[3]
         variables["LOOPBACK_IP"] = "10.2.0." + last_octet
-
     if node_shasta_name in ["sw-spine", "sw-leaf", "sw-cdu"]:
         # Get connections to switch pair
         pair_connections = get_pair_connections(cabling["nodes"], switch_name)
@@ -927,6 +927,7 @@ def generate_switch_config(
             ]
 
             destination_rack_list.append(int(re.search(r"\d+", destination_rack)[0]))
+
         for cabinets in (
             sls_variables["NMN_MTN_CABINETS"] + sls_variables["HMN_MTN_CABINETS"]
         ):
@@ -1821,6 +1822,7 @@ def parse_sls_for_config(input_json):
         "MTL_IPs": defaultdict(),
         "NMN_IPs": defaultdict(),
         "NMN_MTN_CABINETS": [],
+        "NMN_MTN_CABINETS_NETMASK": [],
         "HMN_MTN_CABINETS": [],
     }
 
@@ -1993,6 +1995,11 @@ def parse_sls_for_config(input_json):
             sls_variables["NMN_MTN_CABINETS"] = list(
                 sls_network.get("ExtraProperties", {}).get("Subnets", {}),
             )
+            for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", []):
+                cidr = netaddr.IPNetwork(subnets.get("CIDR"))
+                sls_variables["NMN_MTN_CABINETS_NETMASK"].append({
+		        "Netmask": str(cidr.netmask)
+               })
 
         elif name == "HMN_MTN":
             sls_variables["HMN_MTN"] = netaddr.IPNetwork(

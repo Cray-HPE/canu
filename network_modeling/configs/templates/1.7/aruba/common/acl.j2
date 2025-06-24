@@ -57,6 +57,26 @@ access-list ip nmn-hmn
 {%- if variables.NMN and variables.HMNLB %}
 {% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }} {{ variables.HMNLB_NETWORK_IP }}/{{ variables.HMNLB_NETMASK }}
 {%- endif %}
+{% set sequence = sequence+10 %}    {{ sequence }} comment ALLOW traffic between NMN and NMN_MTN
+{%- if variables.NMN and variables.NMN_MTN %}
+{% set sequence = sequence+10 %}    {{ sequence }} permit any {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }} {{ variables.NMN_MTN_NETWORK_IP }}/{{ variables.NMN_MTN_NETMASK }}
+{% set sequence = sequence+10 %}    {{ sequence }} permit any {{ variables.NMN_MTN_NETWORK_IP }}/{{ variables.NMN_MTN_NETMASK }} {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }}
+{%- endif %}
+{%- if variables.NMN_MTN_CABINETS | length > 1 %}
+{% set sequence = sequence+10 %}    {{ sequence }} comment BLOCK traffic between NMN_MTN_CABINETS
+{%- set seq = namespace(val=sequence) -%}
+{%- for src in variables.NMN_MTN_CABINETS %}
+  {%- set src_index = loop.index0 %}
+  {%- for dst in variables.NMN_MTN_CABINETS %}
+    {%- set dst_index = loop.index0 %}
+    {%- if src.Name != dst.Name %}
+    {%- set seq.val = seq.val + 10 %}
+    {{ seq.val }} deny any {{ src.CIDR.split('/')[0] }}/{{ variables.NMN_MTN_CABINETS_NETMASK[src_index]['Netmask'] }} {{ dst.CIDR.split('/')[0] }}/{{ variables.NMN_MTN_CABINETS_NETMASK[dst_index]['Netmask'] }}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endfor -%}
+{% set sequence = seq.val %}
+{%- endif %}
 {% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.NMNLB_DHCP }} range 67 68 any
 {% set sequence = sequence+10 %}    {{ sequence }} permit udp any range 67 68 {{ variables.NMNLB_DHCP }}
 {% set sequence = sequence+10 %}    {{ sequence }} deny any any {{ variables.NMNLB_DHCP }}
