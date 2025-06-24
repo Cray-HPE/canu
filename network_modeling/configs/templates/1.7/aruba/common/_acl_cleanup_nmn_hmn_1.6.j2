@@ -1,0 +1,4 @@
+{#- Removes the legacy (CSM 1.6) nmn-hmn ACL from the NMN L2 VLAN -#}
+vlan {{ variables.NMN_VLAN }}
+    no apply access-list ip nmn-hmn in
+    no apply access-list ip nmn-hmn out

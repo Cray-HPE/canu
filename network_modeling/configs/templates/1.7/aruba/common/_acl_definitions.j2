@@ -1,0 +1,83 @@
+{#- ACL Definitions for NMN Isolation -#}
+object-group ip address NMN_NCN
+{%- set ns = namespace(last_sequence=0) %}
+{%- for name, ip in variables.NMN_IPs.items() if name.startswith('ncn-') %}
+    {{ loop.index * 10 }} {{ ip }}
+{%- set ns.last_sequence = loop.index * 10 %}
+{%- endfor %}
+    {{ ns.last_sequence + 10 }} {{ variables.RGW_VIP }}
+    {{ ns.last_sequence + 20 }} {{ variables.KUBEAPI_VIP }}
+object-group ip address SPINE_SWITCHES
+{%- for ip in variables.SPINE_SWITCH_IPs %}
+    {{ loop.index * 10 }} {{ ip }}
+{%- endfor %}
+object-group ip address ALL_SWITCHES
+{%- for ip in variables.ALL_SWITCH_IPs %}
+    {{ loop.index * 10 }} {{ ip }}
+{%- endfor %}
+object-group ip address MANAGED_NODES
+    10 {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }}
+object-group ip address NMN_K8S_SERVICE
+    10 {{ variables.NMNLB_NETWORK_IP }}/{{ variables.NMNLB_NETMASK }}
+    20 {{ variables.RGW_VIP }}
+object-group ip address TFTP_SERVERS
+    10 {{ variables.NMNLB_TFTP }}
+object-group port NMN_TCP_SERVICES
+    10 eq dns
+    20 eq dhcp-server
+    30 eq http
+    40 eq https
+    50 eq syslog
+    60 eq 2020
+    70 eq 8080
+    80 eq 8081
+    90 eq 8883
+    100 eq 8888
+    110 eq 8514
+    120 eq 6817
+    130 eq 6818
+    140 eq 6819
+object-group port NMN_UDP_SERVICES
+    10 eq dns
+    20 eq dhcp-server
+    30 eq tftp
+    40 eq syslog
+    50 eq 8514
+    60 eq ntp
+access-list ip MANAGED_NODE_ISOLATION
+    10 comment Permit Unrestricted NCN to NCN Communication
+    20 permit any NMN_NCN NMN_NCN count
+    25 permit tcp any any established count
+    30 comment Permit DHCP traffic
+    40 permit udp any range 67 68 any count
+    50 comment Permit node to request TFTP file
+    60 permit udp TFTP_SERVERS MANAGED_NODES count
+    70 permit udp MANAGED_NODES TFTP_SERVERS count
+    80 comment Permit node to perform DNS lookups
+    90 permit udp any eq dns any count
+    100 permit tcp any eq dns any count
+    105 permit udp MANAGED_NODES NMN_K8S_SERVICE eq dns count
+    110 permit udp MANAGED_NODES NMN_NCN group NMN_UDP_SERVICES count
+    120 comment Permit NTP replies from NCNs
+    130 permit udp NMN_NCN eq ntp MANAGED_NODES count
+    140 comment Permit access to NMN_TCP_SERVICES
+    150 permit tcp MANAGED_NODES NMN_K8S_SERVICE group NMN_TCP_SERVICES count
+    160 permit tcp NMN_K8S_SERVICE MANAGED_NODES group NMN_TCP_SERVICES count
+    170 permit tcp MANAGED_NODES NMN_NCN group NMN_TCP_SERVICES count
+    180 permit tcp NMN_NCN MANAGED_NODES group NMN_TCP_SERVICES count
+    190 comment Allow SSH from NCNs to Managed Nodes
+    200 permit tcp NMN_NCN MANAGED_NODES eq ssh count
+    210 comment Allow ping
+    220 permit icmp any any count
+    230 comment Permit OSPF from switches
+    240 permit ospf ALL_SWITCHES any count
+    250 comment Permit BGP (port 179) between spines and NCNs
+    260 permit tcp SPINE_SWITCHES NMN_NCN eq bgp count
+    270 permit tcp NMN_NCN SPINE_SWITCHES eq bgp count
+    280 permit any NMN_K8S_SERVICE NMN_K8S_SERVICE count
+    290 permit any NMN_K8S_SERVICE NMN_NCN count
+    300 permit any NMN_NCN NMN_K8S_SERVICE count
+    310 comment Permit VRRP from NCNs
+    320 permit 112 NMN_NCN 224.0.0.18 count
+    330 comment --- FINAL CATCH-ALL DENY ---
+    340 deny any any any count 

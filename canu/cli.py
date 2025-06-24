@@ -88,7 +88,7 @@ def cli(ctx, cache_minutes):
 
 cli.add_command(backup.backup)
 cli.add_command(cache.cache)
-cli.add_command(config.config)
+cli.add_command(config)
 cli.add_command(generate.generate)
 cli.add_command(report.report)
 cli.add_command(validate.validate)

@@ -877,6 +877,11 @@ def generate_switch_config(
         "BOND_APP_NODES": bond_app_nodes,
         "BLACK_HOLE_VLAN_1": black_hole_vlan_1,
         "BLACK_HOLE_VLAN_2": black_hole_vlan_2,
+        "RGW_VIP": sls_variables["RGW_VIP"],
+        "KUBEAPI_VIP": sls_variables["KUBEAPI_VIP"],
+        "SPINE_SWITCH_IPs": sls_variables["SPINE_SWITCH_IPs"],
+        "NMN_NCN": sls_variables["NMN_NCN"],
+        "ALL_SWITCH_IPs": sls_variables["ALL_SWITCH_IPs"],
     }
 
     cabling = {}
@@ -1834,6 +1839,8 @@ def parse_sls_for_config(input_json):
         "HMN_IP_GATEWAY": None,
         "MTL_IP_GATEWAY": None,
         "NMN_IP_GATEWAY": None,
+        "RGW_VIP": None,
+        "KUBEAPI_VIP": None,
         "ncn_w001": None,
         "ncn_w002": None,
         "ncn_w003": None,
@@ -1853,6 +1860,9 @@ def parse_sls_for_config(input_json):
         "NMN_IPs": defaultdict(),
         "NMN_MTN_CABINETS": [],
         "HMN_MTN_CABINETS": [],
+        "SPINE_SWITCH_IPs": [],
+        "NMN_NCN": [],
+        "ALL_SWITCH_IPs": [],
     }
 
     for sls_network in input_json:
@@ -2002,6 +2012,10 @@ def parse_sls_for_config(input_json):
                             sls_variables["ncn_w003"] = ip["IPAddress"]
                         elif ip["Name"] == "ncn-m001":
                             sls_variables["ncn_m001_nmn"] = ip["IPAddress"]
+                        elif ip["Name"] == "rgw-vip":
+                            sls_variables["RGW_VIP"] = ip["IPAddress"]
+                        elif ip["Name"] == "kubeapi-vip":
+                            sls_variables["KUBEAPI_VIP"] = ip["IPAddress"]
                 if subnets["Name"] == "bootstrap_dhcp":
                     for ip in subnets["IPReservations"]:
                         if ip["Name"].startswith("ncn-"):
@@ -2083,6 +2097,15 @@ def parse_sls_for_config(input_json):
             networks_list.append([name, vlan])
 
     networks_list = {tuple(x) for x in networks_list}
+
+    for name, ip in sls_variables["NMN_IPs"].items():
+        if name.startswith("sw-spine"):
+            sls_variables["SPINE_SWITCH_IPs"].append(ip)
+        if name.startswith("ncn-"):
+            sls_variables["NMN_NCN"].append(ip)
+        if name.startswith("sw-"):
+            sls_variables["ALL_SWITCH_IPs"].append(ip)
+
     return sls_variables
 
 

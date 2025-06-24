@@ -79,7 +79,7 @@ access-list ip cmn-can
 {% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.CHN_NETWORK_IP }}/{{ variables.CHN_NETMASK }} {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }}
 {%- endif %}
 {% set sequence = sequence+10 %}    {{ sequence }} permit any any any
-{% include variables.CSM_VERSION+'/aruba/common/nmn-isolation.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/_acl_definitions.j2' %}
 apply access-list ip mgmt control-plane vrf default
 apply access-list ip mgmt control-plane vrf {{ variables.VRF }}
 {#- end acl #}

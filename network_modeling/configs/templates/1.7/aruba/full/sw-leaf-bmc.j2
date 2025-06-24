@@ -19,11 +19,10 @@ vlan {{ variables.NMN_VLAN }}
 {%- if variables.NMN_ISOLATED_VLAN %}
     private-vlan primary
 {%- endif %}
-    apply access-list ip NMN_ISOLATION in
-    apply access-list ip NMN_ISOLATION out
+    apply access-list ip MANAGED_NODE_ISOLATION in
 {%- if variables.NMN_ISOLATED_VLAN %}
 vlan {{ variables.NMN_ISOLATED_VLAN }}
-    name NMN_RVR_ISOLATED
+    name MANAGED_NODE_ISOLATED
     private-vlan isolated primary-vlan {{ variables.NMN_VLAN }}
 {%- endif %}
 vlan {{ variables.HMN_VLAN }}

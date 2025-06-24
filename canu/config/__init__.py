@@ -20,6 +20,19 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU config commands."""
+import click
 
+from canu.config.config import config as config_cmd
+from canu.config.network import network
 from canu.config.pvlan import pvlan
-from canu.config.nmn_isolation import nmn_isolation
+
+
+@click.group()
+def config():
+    """Network switch configuration commands."""
+    pass
+
+
+config.add_command(config_cmd)
+config.add_command(network)
+config.add_command(pvlan)
