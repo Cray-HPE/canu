@@ -50,7 +50,6 @@ from ttp import ttp
 import urllib3
 
 from canu.style import Style
-from canu.utils.cache import cache_directory
 from canu.utils.yaml_load import load_yaml
 from canu.validate.paddle.paddle import node_model_from_paddle
 from canu.validate.shcd.shcd import (
@@ -439,11 +438,6 @@ def config(
                 bg="red",
             )
     sls_variables = parse_sls_for_config(sls_json)
-
-    # For versions of csm < 1.2, the SLS Hostnames need to be renamed
-    if csm:
-        if float(csm) < 1.2:
-            sls_variables = rename_sls_hostnames(sls_variables)
 
     switch_config, devices, unknown = generate_switch_config(
         csm,
@@ -1907,52 +1901,6 @@ def parse_sls_for_config(input_json):
             sls_variables["NMN_NCN"].append(ip)
         if name.startswith("sw-"):
             sls_variables["ALL_SWITCH_IPs"].append(ip)
-
-    return sls_variables
-
-
-def rename_sls_hostnames(sls_variables):
-    """Parse and rename SLS switch names.
-
-    The operation needs to be done in two passes to prevent naming conflicts.
-
-    Args:
-        sls_variables: Dictionary containing SLS variables.
-
-    Returns:
-        sls_variables: Dictionary containing renamed SLS variables.
-    """
-    # First pass rename leaf ==> leaf-bmc
-    for key, value in sls_variables["HMN_IPs"].copy().items():
-        new_name = key.replace("-leaf-", "-leaf-bmc-")
-        sls_variables["HMN_IPs"].pop(key)
-        sls_variables["HMN_IPs"][new_name] = value
-
-    for key, value in sls_variables["MTL_IPs"].copy().items():
-        new_name = key.replace("-leaf-", "-leaf-bmc-")
-        sls_variables["MTL_IPs"].pop(key)
-        sls_variables["MTL_IPs"][new_name] = value
-
-    for key, value in sls_variables["NMN_IPs"].copy().items():
-        new_name = key.replace("-leaf-", "-leaf-bmc-")
-        sls_variables["NMN_IPs"].pop(key)
-        sls_variables["NMN_IPs"][new_name] = value
-
-    # Second pass rename agg ==> leaf
-    for key, value in sls_variables["HMN_IPs"].copy().items():
-        new_name = key.replace("-agg-", "-leaf-")
-        sls_variables["HMN_IPs"].pop(key)
-        sls_variables["HMN_IPs"][new_name] = value
-
-    for key, value in sls_variables["MTL_IPs"].copy().items():
-        new_name = key.replace("-agg-", "-leaf-")
-        sls_variables["MTL_IPs"].pop(key)
-        sls_variables["MTL_IPs"][new_name] = value
-
-    for key, value in sls_variables["NMN_IPs"].copy().items():
-        new_name = key.replace("-agg-", "-leaf-")
-        sls_variables["NMN_IPs"].pop(key)
-        sls_variables["NMN_IPs"][new_name] = value
 
     return sls_variables
 

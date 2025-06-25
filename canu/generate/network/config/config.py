@@ -38,10 +38,8 @@ from canu.generate.switch.config.config import (
     generate_switch_config,
     get_shasta_name,
     parse_sls_for_config,
-    rename_sls_hostnames,
 )
 from canu.style import Style
-from canu.utils.cache import cache_directory
 from canu.validate.paddle.paddle import node_model_from_paddle
 from canu.validate.shcd.shcd import node_model_from_shcd, shcd_to_sheets
 
@@ -59,7 +57,6 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
 # Schema and Data files
-canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
 log = logging.getLogger("generate_network_config")
@@ -388,11 +385,6 @@ def config(
                 bg="red",
             )
     sls_variables = parse_sls_for_config(sls_json)
-
-    # For versions of csm < 1.2, the SLS Hostnames need to be renamed
-    if csm:
-        if float(csm) < 1.2:
-            sls_variables = rename_sls_hostnames(sls_variables)
 
     # make folder
     if not path.exists(folder):
