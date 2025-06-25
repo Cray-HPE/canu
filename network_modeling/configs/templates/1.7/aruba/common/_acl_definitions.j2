@@ -67,6 +67,7 @@ access-list ip MANAGED_NODE_ISOLATION
     180 permit tcp NMN_NCN MANAGED_NODES group NMN_TCP_SERVICES count
     190 comment Allow SSH from NCNs to Managed Nodes
     200 permit tcp NMN_NCN MANAGED_NODES eq ssh count
+    205 permit tcp MANAGED_NODES eq ssh NMN_NCN count
     210 comment Allow ping
     220 permit icmp any any count
     230 comment Permit OSPF from switches

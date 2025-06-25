@@ -34,6 +34,14 @@ PROFILES = {
             "1.7/aruba/common/_acl_apply_nmn_isolation_1.7.j2",
         ],
     },
+
+    "migrate-nmn-1.7-to-1.6": {
+        "description": "Migrates switch ACLs from CSM 1.7 to CSM 1.6.",
+        "templates": [
+            "1.7/aruba/common/_acl_revert.j2",
+        ],
+    },
+
     "nmn-private-vlan": {
         "description": "Configures NMN private VLAN (isolated VLAN) for CSM 1.7+ environments.",
         "templates": [
