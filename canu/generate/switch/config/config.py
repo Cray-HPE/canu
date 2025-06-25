@@ -73,7 +73,6 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
 # Schema and Data files
-canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
 # ttp preserve templates
@@ -204,17 +203,6 @@ dash = "-" * 60
     default="Arista",
 )
 @click.option(
-    "--preserve",
-    help="Path to current running configs.",
-    type=click.Path(),
-)
-@click.option(
-    "--reorder",
-    is_flag=True,
-    help="reorder config to heir config order",
-    required=False,
-)
-@click.option(
     "--bgp-control-plane",
     type=click.Choice(["CMN", "CHN"], case_sensitive=False),
     help="Network used for BGP control plane",
@@ -263,10 +251,8 @@ def config(
     auth_token,
     sls_address,
     out,
-    preserve,
     custom_config,
     edge,
-    reorder,
     bgp_control_plane,
     vrf,
     bond_app_nodes,
@@ -328,10 +314,8 @@ def config(
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         out: Name of the output file
-        preserve: Folder where switch running configs exist.
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
         edge: Vendor of the edge router
-        reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
         bgp_control_plane: Network used for BGP control plane
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
@@ -470,10 +454,8 @@ def config(
         sls_variables,
         template_folder,
         vendor_folder,
-        preserve,
         custom_config,
         edge,
-        reorder,
         bgp_control_plane,
         vrf,
         bond_app_nodes,
@@ -595,10 +577,8 @@ def generate_switch_config(
     sls_variables,
     template_folder,
     vendor_folder,
-    preserve,
     custom_config,
     edge,
-    reorder,
     bgp_control_plane,
     vrf,
     bond_app_nodes,
@@ -615,10 +595,8 @@ def generate_switch_config(
         sls_variables: Dictionary containing SLS variables
         template_folder: Architecture folder contaning the switch templates
         vendor_folder: Vendor folder contaning the template_folder
-        preserve: Folder where switch running configs exist.  This folder should be populated from the "canu backup network"
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
         edge: edge: Vendor of the edge router
-        reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
         bgp_control_plane: Network used for BGP control plane
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
@@ -671,35 +649,6 @@ def generate_switch_config(
         )
         return Exception()
 
-    if preserve:
-        try:
-            with open(os.path.join(f"{preserve}/{switch_name}.cfg"), "r") as f:
-                device_running = f.read()
-                # Get mellanox Switches
-                if architecture == "network_v1" and "spine" in switch_name:
-                    template = ttp_templates["mellanox"]
-                    switch_config_list = []
-                    for line in device_running.splitlines():
-                        if line.startswith("   "):
-                            switch_config_list.append(line.strip())
-                        else:
-                            switch_config_list.append(line)
-                    device_running = ("\n").join(switch_config_list)
-                # get Dell Switches
-                elif architecture == "network_v1":
-                    template = ttp_templates["dell"]
-                # get Aruba switches
-                else:
-                    template = ttp_templates["aruba"]
-                parser = ttp(device_running, template)
-                parser.parse()
-                preserve = parser.result()
-        except FileNotFoundError:
-            click.secho(
-                "The running config was not found, check that you entered the right file name and path.",
-                fg="red",
-            )
-            exit(1)
     if custom_config:
         custom_config_file = os.path.basename(custom_config)
         custom_config = load_yaml(custom_config)
@@ -891,7 +840,6 @@ def generate_switch_config(
         network_node_list,
         factory,
         sls_variables,
-        preserve,
     )
     unused_ports = switch_unused_ports(network_node_list)
     variables["UNUSED_PORTS"] = unused_ports[switch_name]
@@ -1013,17 +961,6 @@ def generate_switch_config(
         )
         return options_file
 
-    def add_preserve_config(switch_config):
-        preserve_lag_config = "# The interface to LAG mappings below have been preserved in the generated config\n"
-        for port in preserve[0][0]:
-            interface = port.get("interface")
-            lag = port.get("lag")
-            if lag is not None:
-                preserve_lag_config += f"# interface {interface} LAG id {lag}\n"
-        preserve_lag_config += "\n"
-        preserve_lag_config += switch_config
-        return preserve_lag_config
-
     def error_check_preserve_config(switch_config):
         if (
             "mlag-channel-group None" in switch_config
@@ -1062,11 +999,6 @@ def generate_switch_config(
             for line in hier_v1.all_children_sorted():
                 switch_config_v1 += line.cisco_style_text() + "\n"
 
-        if preserve:
-            preserve_lag_config = add_preserve_config(switch_config_v1)
-            error_check_preserve_config(preserve_lag_config)
-            return (preserve_lag_config, devices, unknown)
-
         return switch_config_v1, devices, unknown
 
     # defaults to aruba options file
@@ -1085,33 +1017,6 @@ def generate_switch_config(
                     switch_os,
                     custom_config_file,
                 )
-
-    if preserve:
-        preserve_lag_config = add_preserve_config(switch_config)
-        error_check_preserve_config(preserve_lag_config)
-        return (preserve_lag_config, devices, unknown)
-
-    if reorder:
-        switch_os = "aoscx"
-        options = yaml.load(open(hier_options(switch_os)))
-        host = Host(switch_name, switch_os, options)
-        switch_config_hier = HConfig(host=host)
-        switch_config_hier.load_from_string(switch_config)
-        switch_config_hier.set_order_weight()
-        # add ! to the end of the aruba banner.
-        banner = switch_config_hier.get_child("contains", "banner")
-        banner.add_child("!")
-        config = ""
-        for line in switch_config_hier.all_children_sorted():
-            # add two spaces to indented config to match aruba formatting.
-            if (
-                line.cisco_style_text().startswith("  ")
-                and "!" not in line.cisco_style_text()
-            ):
-                config += "\n" + "  " + line.cisco_style_text()
-            else:
-                config += "\n" + line.cisco_style_text().lstrip()
-        switch_config = config
 
     return switch_config, devices, unknown
 
@@ -1142,36 +1047,12 @@ def get_pair_connections(nodes, switch_name):
     return connections
 
 
-def preserve_port(
-    preserve,
-    source_port,
-    mellanox=None,
-):
-    """Get the nodes connected to the switch ports.
-
-    Args:
-        preserve: parsed running config
-        source_port: port that is going to be assigned a LAG
-        mellanox: if switch is mellanox parse the interface differently. (mellanox = 1/1, aruba/dell = 1/1/1)
-
-    Returns:
-        The LAG Number of the old running config.
-    """
-    for port in preserve[0][0]:
-        if "lag" in port.keys() and (
-            (str(source_port) == port["interface"][2:] and mellanox)
-            or (str(source_port) == port["interface"][4:])
-        ):
-            return port["lag"]
-
-
 def get_switch_nodes(
     architecture,
     switch_name,
     network_node_list,
     factory,
     sls_variables,
-    preserve,
 ):
     """Get the nodes connected to the switch ports.
 
@@ -1181,7 +1062,6 @@ def get_switch_nodes(
         network_node_list: List of nodes from the SHCD / Paddle
         factory: Node factory object
         sls_variables: Dictionary containing SLS variables.
-        preserve: Parsed running config.
 
     Returns:
         List of nodes connected to the switch
@@ -1233,14 +1113,6 @@ def get_switch_nodes(
                     "LAG_NUMBER": primary_port,
                 },
             }
-            if preserve and architecture == "network_v1":
-                new_node["config"]["LAG_NUMBER"] = preserve_port(
-                    preserve,
-                    source_port,
-                    mellanox=True,
-                )
-            elif preserve:
-                new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name == "ncn-s":
             # ncn-s also needs destination_port to find the match
@@ -1266,14 +1138,6 @@ def get_switch_nodes(
                     "LAG_NUMBER_V1": primary_port,
                 },
             }
-            if preserve and architecture == "network_v1":
-                new_node["config"]["LAG_NUMBER_V1"] = preserve_port(
-                    preserve,
-                    source_port,
-                    mellanox=True,
-                )
-            elif preserve:
-                new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name == "ncn-w":
             new_node = {
@@ -1291,14 +1155,6 @@ def get_switch_nodes(
                     "LAG_NUMBER": primary_port,
                 },
             }
-            if preserve and architecture == "network_v1":
-                new_node["config"]["LAG_NUMBER"] = preserve_port(
-                    preserve,
-                    source_port,
-                    mellanox=True,
-                )
-            elif preserve:
-                new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name == "cec":
             destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
@@ -1347,8 +1203,6 @@ def get_switch_nodes(
                     "TAGGED_VLAN": hmn_mtn_vlan,
                 },
             }
-            if preserve:
-                new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name in {"uan", "login", "viz", "lmem"}:
             primary_port_uan = get_primary_port(
@@ -1373,14 +1227,6 @@ def get_switch_nodes(
                     "LAG_NUMBER_V1": primary_port,
                 },
             }
-            if preserve and architecture == "network_v1":
-                new_node["config"]["LAG_NUMBER_V1"] = preserve_port(
-                    preserve,
-                    source_port,
-                    mellanox=True,
-                )
-            elif preserve:
-                new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name in {
             "gateway",
@@ -1549,14 +1395,6 @@ def get_switch_nodes(
                     "PORT": f"{source_port}",
                 },
             }
-            if preserve and architecture == "network_v1":
-                new_node["config"]["LAG_NUMBER"] = preserve_port(
-                    preserve,
-                    source_port,
-                    mellanox=True,
-                )
-            elif preserve:
-                new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name == "sw-cdu":
             is_primary, primary, secondary = switch_is_primary(destination_node_name)
@@ -1583,14 +1421,6 @@ def get_switch_nodes(
                     "PORT": f"{source_port}",
                 },
             }
-            if preserve and architecture == "network_v1":
-                new_node["config"]["LAG_NUMBER"] = preserve_port(
-                    preserve,
-                    source_port,
-                    mellanox=True,
-                )
-            elif preserve:
-                new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name == "sw-leaf":
             # sw-spine ==> sw-leaf
@@ -1621,14 +1451,6 @@ def get_switch_nodes(
                     "PORT": f"{source_port}",
                 },
             }
-            if preserve and architecture == "network_v1":
-                new_node["config"]["LAG_NUMBER"] = preserve_port(
-                    preserve,
-                    source_port,
-                    mellanox=True,
-                )
-            elif preserve:
-                new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name == "sw-leaf-bmc":
             # sw-leaf ==> sw-leaf-bmc
@@ -1654,14 +1476,6 @@ def get_switch_nodes(
                     "PORT": f"{source_port}",
                 },
             }
-            if preserve and architecture == "network_v1":
-                new_node["config"]["LAG_NUMBER"] = preserve_port(
-                    preserve,
-                    source_port,
-                    mellanox=True,
-                )
-            elif preserve:
-                new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name == "sw-edge":
             new_node = {

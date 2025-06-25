@@ -1,9 +1,0 @@
-{#- Private VLAN definitions for CSM 1.7 #}
-{%- if variables.NMN_ISOLATED_VLAN %}
-vlan {{ variables.NMN_VLAN }}
-    name NMN
-    private-vlan primary
-vlan {{ variables.NMN_ISOLATED_VLAN }}
-    name MANAGED_NODE_ISOLATED
-    private-vlan isolated primary-vlan {{ variables.NMN_VLAN }}
-{%- endif %} 

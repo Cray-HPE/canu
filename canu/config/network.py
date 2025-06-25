@@ -34,24 +34,10 @@ PROFILES = {
             "1.7/aruba/common/_acl_apply_nmn_isolation_1.7.j2",
         ],
     },
-
     "migrate-nmn-1.7-to-1.6": {
         "description": "Migrates switch ACLs from CSM 1.7 to CSM 1.6.",
         "templates": [
             "1.7/aruba/common/_acl_revert.j2",
-        ],
-    },
-
-    "nmn-private-vlan": {
-        "description": "Configures NMN private VLAN (isolated VLAN) for CSM 1.7+ environments.",
-        "templates": [
-            "1.7/aruba/common/_pvlan_definitions.j2",
-        ],
-    },
-    "remove-private-vlan": {
-        "description": "Removes NMN private VLAN configuration from CSM 1.7+ environments.",
-        "templates": [
-            "1.7/aruba/common/_pvlan_remove.j2",
         ],
     },
 }
@@ -122,11 +108,6 @@ PROFILES = {
     required=True,
     help="The network configuration profile to apply.",
 )
-@click.option(
-    "--private-vlan-id",
-    type=int,
-    help="Private VLAN ID to use (required for private VLAN profiles)",
-)
 @click.pass_context
 def network(
     ctx,
@@ -141,7 +122,6 @@ def network(
     switch,
     backup_folder,
     profile,
-    private_vlan_id,
 ):
     """Configure network features on switches using configuration profiles.
 
@@ -156,14 +136,8 @@ def network(
     Migrate a single switch's ACLs from CSM 1.6 to 1.7:
         canu config network --csm 1.7 --architecture full --sls-file sls.json --profile migrate-nmn-1.6-to-1.7 --switch sw-leaf-001
 
-    Configure private VLAN 502 on all switches:
-        canu config network --csm 1.7 --architecture full --sls-file sls.json --profile nmn-private-vlan --private-vlan-id 502
-
-    Remove private VLAN configuration:
-        canu config network --csm 1.7 --architecture full --sls-file sls.json --profile remove-private-vlan --private-vlan-id 502
-
     Perform a dry run to see the configuration that would be generated:
-        canu config network --csm 1.7 --architecture full --sls-file sls.json --profile nmn-private-vlan --private-vlan-id 502 --dry-run
+        canu config network --csm 1.7 --architecture full --sls-file sls.json --profile nmn-isolation-1.7 --dry-run
     """
     if not password and not dry_run:
         password = click.prompt(
@@ -181,17 +155,12 @@ def network(
 
     # Validate profile-specific requirements
     selected_profile = PROFILES[profile]
-    if "private-vlan" in profile and not private_vlan_id:
-        click.secho(f"Error: --private-vlan-id is required for profile '{profile}'", fg="red")
-        return
     
     # Display operation summary
     click.echo(f"Applying network configuration profile '{profile}':")
     click.echo(f"  Description: {selected_profile['description']}")
     click.echo(f"  CSM version: {csm}")
     click.echo(f"  Architecture: {architecture}")
-    if private_vlan_id:
-        click.echo(f"  Private VLAN ID: {private_vlan_id}")
 
     # Build Nornir inventory
     click.echo("Building switch inventory...")
@@ -263,10 +232,6 @@ def network(
             "NMNLB_TFTP": sls_variables["NMNLB_TFTP"],
         }
         
-        # Add profile-specific variables
-        if private_vlan_id:
-            variables["NMN_ISOLATED_VLAN"] = private_vlan_id
-
         # Initialize Jinja2 environment
         project_root = "."
         network_templates_folder = f"{project_root}/network_modeling/configs/templates"

@@ -1,7 +1,0 @@
-{#- Remove private VLAN configuration for CSM 1.7 #}
-{%- if variables.NMN_ISOLATED_VLAN %}
-no vlan {{ variables.NMN_ISOLATED_VLAN }}
-vlan {{ variables.NMN_VLAN }}
-    name NMN
-    no private-vlan primary
-{%- endif %} 
