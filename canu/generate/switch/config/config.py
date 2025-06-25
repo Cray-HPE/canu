@@ -961,18 +961,6 @@ def generate_switch_config(
         )
         return options_file
 
-    def error_check_preserve_config(switch_config):
-        if (
-            "mlag-channel-group None" in switch_config
-            or "lag None" in switch_config
-            or "channel-group None" in switch_config
-        ):
-            click.secho(
-                "Incorrect port > MLAG mapping, please verify that all the ports have a correct MLAG mapping.",
-                fg="red",
-            )
-            sys.exit(1)
-
     if architecture == "network_v1" and node_shasta_name != "sw-edge":
         switch_config_v1 = ""
         if "sw-cdu" in switch_name or "sw-leaf-bmc" in switch_name:
