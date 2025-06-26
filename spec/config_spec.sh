@@ -23,6 +23,6 @@
 
 It 'cache config --help'
   When call canu config --help
-  The lines of stdout should equal 6
+  The lines of stdout should equal 11
   The line 1 of stdout should equal 'Usage: canu config [OPTIONS] COMMAND [ARGS]...'
 End
