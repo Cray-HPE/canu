@@ -1,6 +1,6 @@
 {#- Applies the MANAGED_NODE_ISOLATION ACL to the NMN VLAN and nmn-hmn to the interface -#}
-vlan {{ NMN_VLAN }}
+vlan {{ variables.NMN_VLAN }}
     apply access-list ip MANAGED_NODE_ISOLATION in
-interface vlan {{ NMN_VLAN }}
+interface vlan {{ variables.NMN_VLAN }}
     apply access-list ip nmn-hmn routed-in
     apply access-list ip nmn-hmn routed-out

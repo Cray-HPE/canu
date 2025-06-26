@@ -1,27 +1,27 @@
 {#- ACL Definitions for NMN Isolation -#}
 object-group ip address NMN_NCN
 {%- set ns = namespace(last_sequence=0) %}
-{%- for name, ip in NMN_IPs.items() if name.startswith('ncn-') %}
+{%- for name, ip in variables.NMN_IPs.items() if name.startswith('ncn-') %}
     {{ loop.index * 10 }} {{ ip }}
 {%- set ns.last_sequence = loop.index * 10 %}
 {%- endfor %}
-    {{ ns.last_sequence + 10 }} {{ RGW_VIP }}
-    {{ ns.last_sequence + 20 }} {{ KUBEAPI_VIP }}
+    {{ ns.last_sequence + 10 }} {{ variables.RGW_VIP }}
+    {{ ns.last_sequence + 20 }} {{ variables.KUBEAPI_VIP }}
 object-group ip address SPINE_SWITCHES
-{%- for ip in SPINE_SWITCH_IPs %}
+{%- for ip in variables.SPINE_SWITCH_IPs %}
     {{ loop.index * 10 }} {{ ip }}
 {%- endfor %}
 object-group ip address ALL_SWITCHES
-{%- for ip in ALL_SWITCH_IPs %}
+{%- for ip in variables.ALL_SWITCH_IPs %}
     {{ loop.index * 10 }} {{ ip }}
 {%- endfor %}
 object-group ip address MANAGED_NODES
-    10 {{ NMN_NETWORK_IP }}/{{ NMN_NETMASK }}
+    10 {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }}
 object-group ip address NMN_K8S_SERVICE
-    10 {{ NMNLB_NETWORK_IP }}/{{ NMNLB_NETMASK }}
-    20 {{ RGW_VIP }}
+    10 {{ variables.NMNLB_NETWORK_IP }}/{{ variables.NMNLB_NETMASK }}
+    20 {{ variables.RGW_VIP }}
 object-group ip address TFTP_SERVERS
-    10 {{ NMNLB_TFTP }}
+    10 {{ variables.NMNLB_TFTP }}
 object-group port NMN_TCP_SERVICES
     10 eq dns
     20 eq dhcp-server

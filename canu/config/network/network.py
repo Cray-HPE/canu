@@ -245,6 +245,7 @@ def network(
         )
 
         # Generate configuration for each host
+        configs_to_apply = {}
         for host in online_hosts.inventory.hosts.values():
             # Setup variables for templates
             variables = {
@@ -263,7 +264,12 @@ def network(
             config_to_apply = ""
             for template_file in selected_profile["templates"]:
                 template = env.get_template(template_file)
-                config_to_apply += template.render(**variables)
+                rendered_template = template.render(variables=variables)
+                if config_to_apply and not config_to_apply.endswith('\n'):
+                    config_to_apply += '\n'
+                config_to_apply += rendered_template
+
+            configs_to_apply[host.name] = config_to_apply
 
             if dry_run:
                 click.secho(
@@ -271,28 +277,52 @@ def network(
                     fg="green",
                 )
                 click.echo(config_to_apply)
+
+        if dry_run:
+            return
+
+        # Backup switch configurations before making changes (once for all switches)
+        backup_folder_path = f"{backup_folder}/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+        click.echo(f"Creating backup in {backup_folder_path}/...")
+        try:
+            backup_switches(online_hosts, backup_folder_path)
+            click.secho("✓ Switch configurations backed up successfully", fg="green")
+        except Exception as e:
+            click.secho(f"Warning: Backup failed: {str(e)}", fg="yellow")
+            if not click.confirm("Continue without backup?"):
+                click.echo("Configuration cancelled.")
+                return
+
+        # Apply configuration to each host individually
+        for host in online_hosts.inventory.hosts.values():
+            if host.name not in configs_to_apply:
                 continue
 
-            # Backup switch configuration before making changes
-            backup_folder_path = f"{backup_folder}/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
-            backup_switches(online_hosts, backup_folder_path)
-
-            # Apply the configuration
             click.echo(f"Applying configuration to {host.name}...")
-            result = online_hosts.run(
+
+            # Create a single-host nornir object for this specific host
+            def create_host_filter(target_name):
+                return lambda h: h.name == target_name
+            single_host = online_hosts.filter(create_host_filter(host.name))
+            result = single_host.run(
                 task=send_config,
-                config=config_to_apply,
+                config=configs_to_apply[host.name],
             )
 
-            if result[host.name].failed:
+            if host.name in result and result[host.name].failed:
                 click.secho(
                     f"Failed to apply configuration to {host.name}: {result[host.name].exception}",
                     fg="red",
                 )
-            else:
+            elif host.name in result:
                 click.secho(
                     f"Successfully applied configuration to {host.name}",
                     fg="green",
+                )
+            else:
+                click.secho(
+                    f"Failed to apply configuration to {host.name}: No result returned",
+                    fg="red",
                 )
 
     finally:

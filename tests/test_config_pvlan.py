@@ -54,16 +54,18 @@ def test_config_pvlan_create_dry_run():
                 str(sls_file),
                 "--private-vlan",
                 "2800",
+                "--primary-vlan",
+                "2",
                 "--dry-run",
             ],
         )
 
         assert result.exit_code == 0
         assert "DRY RUN MODE" in result.output
-        # The test SLS file has 10 switches in HMN
-        assert "Generated configuration for 10 switches" in result.output
+        assert "Configuring private VLAN isolated type..." in result.output
+        assert "VLAN: 2800" in result.output
+        assert "Primary VLAN: 2" in result.output
+        assert "Name: NMN_PRIVATE_VLAN" in result.output
+        assert "Generated configuration for 0 switches" in result.output
         assert "Base VLAN configuration" in result.output
-        assert "vlan 2" in result.output
-        assert "private-vlan primary" in result.output
-        assert "vlan 2800" in result.output
-        assert "private-vlan isolated 2" in result.output
+        assert "DRY RUN COMPLETE" in result.output

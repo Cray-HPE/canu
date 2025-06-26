@@ -32,11 +32,12 @@ from nornir_salt.plugins.functions import ResultSerializer
 from nornir_salt.plugins.tasks import tcp_ping
 from nornir_scrapli.tasks import send_command, send_config
 
-from canu.backup.network.network import backup_switches
 from canu.generate.switch.config.config import generate_switch_config, parse_sls_for_config
-from canu.utils.inventory import inventory
 from canu.validate.paddle.paddle import node_model_from_paddle
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
+from canu.utils.inventory import inventory
+from canu.backup.network.network import backup_switches
+
 
 # Backup function is now imported from canu.backup.network.network
 
@@ -118,8 +119,7 @@ from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 )
 @click.option(
     "--switch",
-    help="Target specific switch(es) by hostname or IP address. "
-    "Can be used multiple times (e.g., --switch sw-spine-001 --switch 10.254.0.4)",
+    help="Target specific switch(es) by hostname or IP address. Can be used multiple times",
     type=str,
     multiple=True,
 )
@@ -189,8 +189,8 @@ def pvlan(
         sls_address: The address of SLS
         network: The network that is used to connect to the switches
         log_: Enable logging
+        private_vlan: Private VLAN ID to create
         name: Name for the VLAN
-        private_vlan: Configure as private VLAN isolated type (applies to spine, leaf, leaf-bmc)
         primary_vlan: Primary VLAN ID for private VLAN
         reconfigure_ports: Reconfigure switch ports for private VLAN
         ccj: Paddle CCJ file for port reconfiguration
@@ -215,10 +215,7 @@ def pvlan(
 
     # Validate mutually exclusive options
     if remove_private_vlan and reconfigure_ports:
-        click.secho(
-            "--remove-private-vlan and --reconfigure-ports cannot be used together",
-            fg="red",
-        )
+        click.secho("--remove-private-vlan and --reconfigure-ports cannot be used together", fg="red")
         return
 
     # Validate port reconfiguration options
@@ -244,12 +241,12 @@ def pvlan(
     logging.basicConfig(level="ERROR")
 
     if remove_private_vlan:
-        click.echo("Removing private VLAN configuration...")
+        click.echo(f"Removing private VLAN configuration...")
         click.echo(f"  Isolated VLAN: {private_vlan}")
         click.echo(f"  Primary VLAN: {primary_vlan}")
-        click.echo("  This will remove private VLAN settings and restore standard VLAN configuration")
+        click.echo(f"  This will remove private VLAN settings and restore standard VLAN configuration")
     else:
-        click.echo("Configuring private VLAN isolated type...")
+        click.echo(f"Configuring private VLAN isolated type...")
         click.echo(f"  VLAN: {private_vlan}")
         click.echo(f"  Primary VLAN: {primary_vlan}")
         click.echo(f"  Name: {name}")
@@ -260,7 +257,6 @@ def pvlan(
         (not dry_run)
         or (dry_run and reconfigure_ports and not remove_private_vlan)
         or (dry_run and remove_private_vlan and sls_file)
-        or (dry_run and sls_file and not remove_private_vlan)  # Basic dry-run with SLS file
     ):
         switch_inventory = inventory(username, password, network, sls_file)
         nr = InitNornir(
@@ -289,20 +285,14 @@ def pvlan(
             found_ips = [str(host.hostname) for host in target_hosts.inventory.hosts.values()]
             missing_switches = [s for s in switch if s not in found_switches and s not in found_ips]
             if missing_switches:
-                click.secho(
-                    f"Warning: Switch(es) not found: {', '.join(missing_switches)}",
-                    fg="yellow",
-                )
+                click.secho(f"Warning: Switch(es) not found: {', '.join(missing_switches)}", fg="yellow")
 
             nr = target_hosts
         else:
             # For private VLAN, apply to all switches except edge and CDU switches
             filtered_hosts = nr.filter(lambda host: not any(x in host.name.lower() for x in ["edge", "cdu"]))
             if not filtered_hosts.inventory.hosts:
-                click.secho(
-                    "No compatible switches found in inventory (excluding edge and CDU switches)",
-                    fg="red",
-                )
+                click.secho("No compatible switches found in inventory (excluding edge and CDU switches)", fg="red")
                 return
             nr = filtered_hosts
 
@@ -391,7 +381,7 @@ def pvlan(
             commands = []
 
             # Parse configuration to find private VLAN settings
-            lines = config.split("\n")
+            lines = config.split('\n')
             current_interface = None
             private_vlan_secondary_ports = []  # Ports with secondary port-type (compute nodes)
             private_vlan_promiscuous_ports = []  # Ports with promiscuous port-type (NCN nodes)
@@ -401,16 +391,16 @@ def pvlan(
                 line = lines[i].strip()
 
                 # Track current interface
-                if line.startswith("interface "):
-                    current_interface = line.replace("interface ", "")
+                if line.startswith('interface '):
+                    current_interface = line.replace('interface ', '')
                     i += 1
                     continue
 
                 # Look for any private-vlan port-type configuration
-                if current_interface and "private-vlan port-type" in line:
-                    if "secondary" in line:
+                if current_interface and 'private-vlan port-type' in line:
+                    if 'secondary' in line:
                         private_vlan_secondary_ports.append(current_interface)
-                    elif "promiscuous" in line:
+                    elif 'promiscuous' in line:
                         private_vlan_promiscuous_ports.append(current_interface)
 
                 i += 1
@@ -488,11 +478,12 @@ def pvlan(
         for hostname, result in removal_results.items():
             if result.failed:
                 click.secho(f"✗ {hostname}: FAILED", fg="red")
-                if hasattr(result[0], "result") and result[0].result:
+                if hasattr(result[0], 'result') and result[0].result:
                     click.secho(f"  Error: {result[0].result}", fg="red")
             else:
                 click.secho(f"✓ {hostname}: SUCCESS", fg="green")
                 if hostname in removal_commands:
+
                     secondary_ports = len(
                         [cmd for cmd in removal_commands[hostname] if "no private-vlan port-type secondary" in cmd],
                     )
@@ -546,7 +537,7 @@ def pvlan(
             sls_json = [network[x] for network in [input_json.get("Networks", {})] for x in network]
             sls_variables = parse_sls_for_config(sls_json)
         except (json.JSONDecodeError, UnicodeDecodeError):
-            click.secho("Invalid SLS JSON format", fg="red")
+            click.secho(f"Invalid SLS JSON format", fg="red")
             return
 
         # Generate port configurations for each switch
@@ -587,10 +578,8 @@ def pvlan(
                     sls_variables=sls_variables,
                     template_folder=template_folder,
                     vendor_folder=vendor_folder,
-                    preserve=None,
                     custom_config=None,
                     edge="Arista",
-                    reorder=False,
                     bgp_control_plane="CHN",
                     vrf="CSM",
                     bond_app_nodes=False,
@@ -599,57 +588,57 @@ def pvlan(
 
                 # Extract only private VLAN related configuration from the generated config
                 switch_config = []
-                lines = full_config.split("\n")
+                lines = full_config.split('\n')
                 i = 0
                 while i < len(lines):
                     line = lines[i].strip()
 
                     # Look for VLAN configurations (including primary VLAN setup)
-                    if line.startswith("vlan "):
+                    if line.startswith('vlan '):
                         vlan_config = [line]
                         i += 1
 
                         # Collect all lines for this VLAN
-                        while i < len(lines) and (lines[i].startswith("    ") or lines[i].strip() == ""):
+                        while i < len(lines) and (lines[i].startswith('    ') or lines[i].strip() == ''):
                             if lines[i].strip():
                                 vlan_config.append(lines[i])
                             i += 1
 
                         # Check if this VLAN has private VLAN configuration
-                        has_pvlan_primary = any("private-vlan primary" in config_line for config_line in vlan_config)
-                        has_pvlan_isolated = any("private-vlan isolated" in config_line for config_line in vlan_config)
+                        has_pvlan_primary = any('private-vlan primary' in config_line for config_line in vlan_config)
+                        has_pvlan_isolated = any('private-vlan isolated' in config_line for config_line in vlan_config)
 
                         if has_pvlan_primary or has_pvlan_isolated:
                             # Only include private VLAN specific lines, not ACLs or other configuration
                             filtered_vlan_config = [vlan_config[0]]  # Keep the "vlan X" line
                             for config_line in vlan_config[1:]:
-                                if "private-vlan primary" in config_line or "private-vlan isolated" in config_line:
+                                if 'private-vlan primary' in config_line or 'private-vlan isolated' in config_line:
                                     filtered_vlan_config.append(config_line)
 
                             # Store filtered VLAN configuration for base config (will be deduplicated by set)
-                            vlan_config_str = "\n".join(filtered_vlan_config)
+                            vlan_config_str = '\n'.join(filtered_vlan_config)
                             base_vlan_configs.add(vlan_config_str)
                         continue
 
                     # Look for interface configurations
-                    elif line.startswith("interface "):
-                        interface_name = line.replace("interface ", "")
+                    elif line.startswith('interface '):
+                        interface_name = line.replace('interface ', '')
                         interface_config = [line]
                         i += 1
 
                         # Collect all lines for this interface
-                        while i < len(lines) and (lines[i].startswith("    ") or lines[i].strip() == ""):
+                        while i < len(lines) and (lines[i].startswith('    ') or lines[i].strip() == ''):
                             if lines[i].strip():
                                 interface_config.append(lines[i])
                             i += 1
 
                         # Check if this interface has private VLAN configuration
-                        has_pvlan_config = any("private-vlan" in config_line for config_line in interface_config)
+                        has_pvlan_config = any('private-vlan' in config_line for config_line in interface_config)
                         has_vlan_access = any(
-                            f"vlan access {private_vlan}" in config_line for config_line in interface_config
+                            f'vlan access {private_vlan}' in config_line for config_line in interface_config
                         )
                         has_trunk_allowed = any(
-                            f"vlan trunk allowed" in config_line and str(private_vlan) in config_line
+                            f'vlan trunk allowed' in config_line and str(private_vlan) in config_line
                             for config_line in interface_config
                         )
 
@@ -658,18 +647,11 @@ def pvlan(
                             switch_config.append(f"interface {interface_name}")
                             for config_line in interface_config[1:]:  # Skip the interface line itself
                                 if (
-                                    "private-vlan" in config_line
-                                    or f"vlan access {private_vlan}" in config_line
-                                    or ("vlan trunk allowed" in config_line and str(private_vlan) in config_line)
+                                    'private-vlan' in config_line
+                                    or f'vlan access {private_vlan}' in config_line
+                                    or ('vlan trunk allowed' in config_line and str(private_vlan) in config_line)
                                 ):
-                                    # Remove existing VLAN access commands, we will add the correct one
-                                    interface_config = [
-                                        line for line in interface_config if not line.strip().startswith("vlan access")
-                                    ]
-
-                                    # Add the private VLAN access command
-                                    interface_config.append(f"    vlan access {private_vlan}")
-                                    switch_config.extend(interface_config)
+                                    switch_config.append(config_line)
                         continue
 
                     i += 1
@@ -678,20 +660,11 @@ def pvlan(
                     port_configs[switch_name] = switch_config
 
             except Exception as e:
-                if log_:
-                    click.secho(f"Error generating config for {switch_name}: {e}", fg="yellow")
+                click.secho(f"Warning: Could not generate config for {switch_name}: {str(e)}", fg="yellow")
                 continue
 
-    # Build base configuration from template-generated VLAN configs or basic private VLAN config
-    if base_vlan_configs:
-        config_string = "\n".join(sorted(base_vlan_configs))
-    else:
-        # Generate basic private VLAN configuration when not using port reconfiguration
-        config_string = f"""vlan {primary_vlan}
-    private-vlan primary
-vlan {private_vlan}
-    private-vlan isolated {primary_vlan}
-    name {name}"""
+    # Build base configuration from template-generated VLAN configs
+    config_string = '\n'.join(sorted(base_vlan_configs)) if base_vlan_configs else ""
 
     if dry_run:
         click.echo("DRY RUN MODE - Configuration will NOT be applied to switches")
@@ -717,11 +690,11 @@ vlan {private_vlan}
         click.echo(f"Applying configuration to {switch_desc}...")
 
     if private_vlan and reconfigure_ports:
-        click.echo("\nPrivate VLAN and port reconfiguration:")
+        click.echo(f"\nPrivate VLAN and port reconfiguration:")
     elif private_vlan:
-        click.echo("\nPrivate VLAN isolated configuration:")
+        click.echo(f"\nPrivate VLAN isolated configuration:")
     else:
-        click.echo("\nVLAN configuration:")
+        click.echo(f"\nVLAN configuration:")
     click.echo("=" * 50)
     click.echo("Base VLAN configuration (applied to all switches):")
     click.echo(config_string)
@@ -799,7 +772,7 @@ vlan {private_vlan}
             for hostname, result in config_results.items():
                 if result.failed:
                     click.secho(f"✗ {hostname}: FAILED", fg="red")
-                    if hasattr(result[0], "result") and result[0].result:
+                    if hasattr(result[0], 'result') and result[0].result:
                         click.secho(f"  Error: {result[0].result}", fg="red")
                 else:
                     click.secho(f"✓ {hostname}: SUCCESS", fg="green")
@@ -820,17 +793,11 @@ vlan {private_vlan}
         # Handle non-Aruba switches
         non_aruba_hosts = online_hosts.filter(~F(platform="aruba_aoscx"))
         if non_aruba_hosts.inventory.hosts:
-            click.secho(
-                f"\nSkipped {len(non_aruba_hosts.inventory.hosts)} non-Aruba switches:",
-                fg="yellow",
-            )
+            click.secho(f"\nSkipped {len(non_aruba_hosts.inventory.hosts)} non-Aruba switches:", fg="yellow")
             for hostname in non_aruba_hosts.inventory.hosts:
                 platform = non_aruba_hosts.inventory.hosts[hostname].platform
                 click.secho(f"  - {hostname} ({platform})", fg="yellow")
-            click.secho(
-                "Note: This command currently only supports Aruba AOS-CX switches.",
-                fg="yellow",
-            )
+            click.secho("Note: This command currently only supports Aruba AOS-CX switches.", fg="yellow")
 
     if private_vlan and reconfigure_ports:
         click.echo(f"\nPrivate VLAN {private_vlan} configuration and port reconfiguration completed.")
