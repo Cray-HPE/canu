@@ -22,28 +22,22 @@
 """CANU commands that generate the config of the entire Shasta network."""
 import json
 import logging
+import sys
 from os import environ, makedirs, path
 from pathlib import Path
-import sys
 
 import click
-from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
-from jinja2 import Environment, FileSystemLoader, StrictUndefined
-from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import requests
-from ruamel.yaml import YAML
 import urllib3
+from click_option_group import RequiredMutuallyExclusiveOptionGroup, optgroup
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from ruamel.yaml import YAML
 
-from canu.generate.switch.config.config import (
-    generate_switch_config,
-    get_shasta_name,
-    parse_sls_for_config,
-    rename_sls_hostnames,
-)
+from canu.generate.switch.config.config import generate_switch_config, get_shasta_name, parse_sls_for_config
 from canu.style import Style
-from canu.utils.cache import cache_directory
 from canu.validate.paddle.paddle import node_model_from_paddle
 from canu.validate.shcd.shcd import node_model_from_shcd, shcd_to_sheets
+from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 
 yaml = YAML()
 
@@ -59,7 +53,6 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
 # Schema and Data files
-canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
 log = logging.getLogger("generate_network_config")
@@ -153,17 +146,6 @@ csm_options = canu_config["csm_versions"]
     default="Arista",
 )
 @click.option(
-    "--preserve",
-    help="Path to current running configs.",
-    type=click.Path(),
-)
-@click.option(
-    "--reorder",
-    is_flag=True,
-    help="reorder config to heir config order",
-    required=False,
-)
-@click.option(
     "--bgp-control-plane",
     type=click.Choice(["CMN", "CHN"], case_sensitive=False),
     help="Network used for BGP control plane",
@@ -190,6 +172,14 @@ csm_options = canu_config["csm_versions"]
     type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
     default="ERROR",
 )
+@click.option(
+    "--nmn-pvlan",
+    help="VLAN ID used for Isolated NMN PVLAN (must be an integer between 1 and 4094)",
+    is_flag=False,
+    required=False,
+    flag_value=502,
+    type=click.IntRange(1, 4094),
+)
 @click.pass_context
 def config(
     ctx,
@@ -203,14 +193,13 @@ def config(
     auth_token,
     sls_address,
     folder,
-    preserve,
     custom_config,
     edge,
-    reorder,
     bgp_control_plane,
     vrf,
     bond_app_nodes,
     log_,
+    nmn_pvlan,
 ):
     """Generate the config of all switches (Aruba, Dell, or Mellanox) on the network using the SHCD.
 
@@ -256,7 +245,7 @@ def config(
 
     Args:
         ctx: CANU context settings
-        csm: CSM version
+        csm: CSM network version
         architecture: CSM architecture
         ccj: Paddle CCJ file
         shcd: SHCD file
@@ -266,14 +255,13 @@ def config(
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
         folder: Folder to store config files
-        preserve: Folder where switch running configs exist.  This folder should be populated from the "canu backup network" command.
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
         edge: Vendor of the edge router
-        reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
         bgp_control_plane: Network used for BGP control plane
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
         log_: Level of logging.
+        nmn_pvlan: VLAN ID used for Isolated NMN PVLAN
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
@@ -338,9 +326,7 @@ def config(
             return
 
         # Format the input to be like the SLS JSON
-        sls_json = [
-            network[x] for network in [input_json.get("Networks", {})] for x in network
-        ]
+        sls_json = [network[x] for network in [input_json.get("Networks", {})] for x in network]
 
     else:
         # Get SLS config
@@ -395,11 +381,6 @@ def config(
             )
     sls_variables = parse_sls_for_config(sls_json)
 
-    # For versions of csm < 1.2, the SLS Hostnames need to be renamed
-    if csm:
-        if float(csm) < 1.2:
-            sls_variables = rename_sls_hostnames(sls_variables)
-
     # make folder
     if not path.exists(folder):
         makedirs(folder)
@@ -442,13 +423,12 @@ def config(
                 sls_variables,
                 template_folder,
                 vendor_folder,
-                preserve,
                 custom_config,
                 edge,
-                reorder,
                 bgp_control_plane,
                 vrf,
                 bond_app_nodes,
+                nmn_pvlan,
             )
             all_unknown.extend(unknown)
             config_devices.update(devices)

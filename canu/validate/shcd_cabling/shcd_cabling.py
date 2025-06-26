@@ -20,33 +20,29 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate the shcd against the current network cabling."""
-from collections import defaultdict, OrderedDict
+import datetime
 import ipaddress
 import logging
-from os import path
-from pathlib import Path
 import re
 import sys
+from collections import OrderedDict, defaultdict
+from os import path
+from pathlib import Path
 
 import click
-from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
-from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
 import natsort
-from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
-from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import requests
+from click_option_group import RequiredMutuallyExclusiveOptionGroup, optgroup
+from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 from ruamel.yaml import YAML
 
 from canu.report.switch.cabling.cabling import get_lldp
 from canu.style import Style
-from canu.utils.cache import cache_directory
 from canu.validate.network.cabling.cabling import node_model_from_canu
-from canu.validate.shcd.shcd import (
-    node_list_warnings,
-    node_model_from_shcd,
-    shcd_to_sheets,
-)
+from canu.validate.shcd.shcd import node_list_warnings, node_model_from_shcd, shcd_to_sheets
+from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 
 yaml = YAML()
 
@@ -58,7 +54,6 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent.parent
 
 # Schema and Data files
-canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
 # Get CSM versions from canu.yaml
@@ -68,6 +63,55 @@ with open(canu_config_file, "r") as canu_f:
 csm_options = canu_config["csm_versions"]
 
 log = logging.getLogger("validate_shcd_cabling")
+
+
+def create_cache_structure_from_lldp(switch_info, lldp_dict, arp):
+    """Create a cache structure from LLDP data that matches the expected format.
+
+    Args:
+        switch_info: Dictionary with switch platform_name, hostname and IP address
+        lldp_dict: Dictionary with LLDP information
+        arp: ARP dictionary
+
+    Returns:
+        Dictionary representing switch in cache format
+    """
+    switch = {
+        "ip_address": switch_info["ip"],
+        "cabling": defaultdict(list),
+        "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "hostname": switch_info["hostname"],
+        "platform_name": switch_info["platform_name"],
+        "vendor": switch_info["vendor"],
+    }
+
+    for port_number, port in lldp_dict.items():
+        for index, _entry in enumerate(port):
+            arp_list = []
+            if port[index]["chassis_name"] == "":
+                arp_list = [
+                    f"{arp[mac]['ip_address']}:{list(arp[mac]['port'])[0]}"
+                    for mac in arp
+                    if arp[mac]["mac"] == port[index]["mac_addr"]
+                ]
+            arp_list = ", ".join(arp_list)
+            neighbor_description = f"{port[index]['chassis_description'][:54]} {str(arp_list)}"
+            port_info = {
+                "neighbor": port[index]["chassis_name"],
+                "neighbor_description": neighbor_description,
+                "neighbor_port": port[index]["port_id"],
+                "neighbor_port_description": re.sub(
+                    r"(Interface\s+\d+ as )",
+                    "",
+                    port[index]["port_description"],
+                ),
+                "neighbor_chassis_id": port[index]["chassis_id"],
+            }
+
+            switch["cabling"][port_number].append(port_info)
+
+    switch["cabling"] = dict(switch["cabling"])
+    return switch
 
 
 @click.command(
@@ -220,6 +264,9 @@ def shcd_cabling(
     errors = []
     ips_length = len(ips)
 
+    # Create in-memory cache structure from live LLDP data
+    switches_list = []
+
     if ips:
         with click_spinner.spinner(
             beep=False,
@@ -233,8 +280,13 @@ def shcd_cabling(
                     end="\r",
                 )
                 try:
-                    # Get LLDP info (stored in cache)
-                    get_lldp(str(ip), credentials, return_error=True)
+                    # Get LLDP info directly (without caching to file)
+                    switch_info, lldp_dict, arp = get_lldp(str(ip), credentials, return_error=True)
+
+                    if switch_info and lldp_dict:
+                        # Create network data structure from live LLDP data
+                        switch_data_entry = create_cache_structure_from_lldp(switch_info, lldp_dict, arp)
+                        switches_list.append(switch_data_entry)
 
                 except (
                     requests.exceptions.HTTPError,
@@ -248,52 +300,42 @@ def shcd_cabling(
                     if exception_type == "HTTPError":
                         error_message = f"Error connecting to switch {ip}, check the IP, username, or password."
                     elif exception_type == "ConnectionError":
-                        error_message = f"Error connecting to switch {ip}, check the entered username, IP address and password."
+                        error_message = (
+                            f"Error connecting to switch {ip}, check the entered username, IP address and password."
+                        )
                     elif exception_type == "NetmikoTimeoutException":
-                        error_message = f"Timeout error connecting to {ip}. Check the IP address or credentials and try again."
+                        error_message = (
+                            f"Timeout error connecting to {ip}. Check the IP address or credentials and try again."
+                        )
                     elif exception_type == "NetmikoAuthenticationException":
-                        error_message = f"Auth error connecting to {ip}. Check the credentials or IP address and try again"
+                        error_message = (
+                            f"Auth error connecting to {ip}. Check the credentials or IP address and try again"
+                        )
                     else:
                         error_message = f"Error connecting to switch {ip}."
 
                     errors.append([str(ip), error_message])
 
-    # Open the updated cache to model nodes
-    with open(canu_cache_file, "r+") as file:
-        canu_cache = yaml.load(file)
+    # Create in-memory network data structure that matches expected format
+    network_data = {
+        "version": "1.0",  # Using a default version
+        "switches": switches_list,
+    }
 
-    double_dash = "=" * 100
-    # if there are errors and no switches exist or we able to be connected to, error and exit
-    if len(errors) > 0 and canu_cache["switches"] is None:
-        click.echo("\n", file=out)
-        click.echo(double_dash, file=out)
-        click.secho(
-            "Errors",
-            fg="red",
-            file=out,
-        )
-        click.echo(double_dash, file=out)
-        for error in errors:
-            click.echo(
-                "{:<15s} - {}".format(error[0], error[1]),
-                file=out,
-            )
-        sys.exit(1)
-
-    # Create Cabling Node factory and model
-    log.debug("Creating model from switch LLDP data")
+    # Create cabling Node factory and model from network data
+    log.debug("Creating model from network data")
     cabling_factory = NetworkNodeFactory(architecture_version=architecture)
     cabling_node_list, cabling_warnings = node_model_from_canu(
         cabling_factory,
-        canu_cache,
+        network_data,
         ips,
     )
 
-    # Combine the SHCD and Cabling nodes
+    # Combine the SHCD and cabling data
     combined_nodes = combine_shcd_cabling(
         shcd_node_list,
         cabling_node_list,
-        canu_cache,
+        network_data,
         ips,
         csm,
     )
@@ -336,6 +378,8 @@ def shcd_cabling(
             host_mac_string = ",".join([str(i) for i in m])
             click.secho(f"{host_mac_string}")
         sys.exit(0)
+
+    double_dash = "=" * 100
 
     click.echo("\n", file=out)
     click.echo(double_dash, file=out)
@@ -411,13 +455,13 @@ def node_list_to_dict(node_list):
     return node_dict
 
 
-def combine_shcd_cabling(shcd_node_list, cabling_node_list, canu_cache, ips, csm):
+def combine_shcd_cabling(shcd_node_list, cabling_node_list, network_data, ips, csm):
     """Print comparison of the SHCD and network.
 
     Args:
         shcd_node_list: A list of shcd nodes
         cabling_node_list: A list of nodes found on the network
-        canu_cache: CANU cache file
+        network_data: Network data structure with switch information
         ips: Comma separated list of IPv4 addresses of switches
         csm: csm version
 
@@ -506,27 +550,31 @@ def combine_shcd_cabling(shcd_node_list, cabling_node_list, canu_cache, ips, csm
             }
             combined_nodes[cabling_hostname] = cabling_node_dict
 
-    # Add in MAC addresses from canu_cache
-    for switch in canu_cache["switches"]:
-        if ipaddress.ip_address(switch["ip_address"]) in ips:
-            cache_hostname = switch["hostname"]
-            if float(csm) < 1.2:
-                cache_hostname = cache_hostname.replace("-leaf-", "-leaf-bmc-")
-                cache_hostname = cache_hostname.replace("-agg-", "-leaf-")
+    # Add in MAC addresses from network data
+    # Handle case where network data is empty or None
+    if network_data and "switches" in network_data and network_data["switches"]:
+        for switch in network_data["switches"]:
+            if ipaddress.ip_address(switch["ip_address"]) in ips:
+                switch_hostname = switch["hostname"]
+                if float(csm) < 1.2:
+                    switch_hostname = switch_hostname.replace("-leaf-", "-leaf-bmc-")
+                    switch_hostname = switch_hostname.replace("-agg-", "-leaf-")
 
-            # Need the hostname is not in the cache, skip it
-            if cache_hostname in combined_nodes.keys():
-                combined_ports = combined_nodes[cache_hostname]["ports"].items()
-                for port_number, port_info in combined_ports:
+                # If the hostname is not in the network data, skip it
+                if switch_hostname in combined_nodes.keys():
+                    combined_ports = combined_nodes[switch_hostname]["ports"].items()
+                    for port_number, port_info in combined_ports:
 
-                    if port_info["cabling"] is None:
-                        cache_port = switch["cabling"].get(
-                            f"1/1/{port_number}",
-                            [{"neighbor_port": None, "neighbor_description": ""}],
-                        )
+                        if port_info["cabling"] is None:
+                            switch_port = switch["cabling"].get(
+                                f"1/1/{port_number}",
+                                [{"neighbor_port": None, "neighbor_description": ""}],
+                            )
 
-                        cache_description = f"{cache_port[0]['neighbor_port']} {cache_port[0]['neighbor_description']}"
-                        port_info["cabling"] = cache_description
+                            switch_description = (
+                                f"{switch_port[0]['neighbor_port']} {switch_port[0]['neighbor_description']}"
+                            )
+                            port_info["cabling"] = switch_description
 
     # Order the ports in natural order
     combined_nodes = OrderedDict(natsort.natsorted(combined_nodes.items()))

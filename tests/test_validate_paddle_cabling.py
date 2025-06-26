@@ -25,24 +25,18 @@ from os import path
 from pathlib import Path
 from unittest.mock import patch
 
-from click import testing
 import requests
 import responses
+from click import testing
 
 from canu.cli import cli
-from canu.utils.cache import remove_switch_from_cache
+
 from .test_validate_paddle import bad_ccj
-from .test_validate_shcd_cabling import (
-    arp_neighbors_json1,
-    lldp_neighbors_json1,
-    mac_address_table,
-    switch_info1,
-)
+from .test_validate_shcd_cabling import arp_neighbors_json1, lldp_neighbors_json1, mac_address_table, switch_info1
 
 test_file_directory = Path(__file__).resolve().parent
 test_file_name = "Full_Architecture_Golden_Config_1.1.5.json"
 test_file = path.join(test_file_directory, "data", test_file_name)
-cache_minutes = 0
 csm = "1.2"
 username = "admin"
 password = "admin"
@@ -91,8 +85,6 @@ def test_validate_paddle_cabling(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "paddle-cabling",
                 "--csm",
@@ -139,23 +131,6 @@ def test_validate_paddle_cabling(netmiko_command, switch_vendor):
             + "48     sw-leaf-bmc-001:50       None\n"
         ) in str(result.output)
 
-        assert (
-            "Node type or port number could not be determined for the following.\n"
-            + "These nodes are not currently included in the model.\n"
-            + "(This may be a missing architectural definition/lookup or a spelling error)\n"
-            + "--------------------------------------------------------------------------------\n"
-            + "sw-spine-001     1/1/3     ===> 00:00:00:00:00:00  XEROX CORPORATION 192.168.1.2:vlan1, 192.168.2.2:vlan3\n"
-            + "Nodes that show up as MAC addresses might need to have LLDP enabled.\n"
-            + "\n"
-            + "The following nodes should be renamed\n"
-            + "--------------------------------------------------------------------------------\n"
-            + "sw-leaf-bmc99 should be renamed sw-leaf-bmc-099\n"
-            + "sw-spine01 should be renamed sw-spine-001\n"
-            + "sw-spine02 should be renamed sw-spine-002\n"
-        ) in str(result.output)
-
-        remove_switch_from_cache(ip)
-
 
 def test_validate_paddle_cabling_no_architecture():
     """Test that the `canu validate paddle-cabling` command errors on bad architecture."""
@@ -167,8 +142,6 @@ def test_validate_paddle_cabling_no_architecture():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "paddle-cabling",
                 "--ccj",
@@ -184,9 +157,8 @@ def test_validate_paddle_cabling_no_architecture():
             ],
         )
         assert result.exit_code == 0
-        assert (
-            "The key 'architecture' is missing from the CCJ. Ensure that you are using a validated CCJ."
-            in str(result.output)
+        assert "The key 'architecture' is missing from the CCJ. Ensure that you are using a validated CCJ." in str(
+            result.output,
         )
 
 
@@ -231,8 +203,6 @@ def test_validate_paddle_cabling_file(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "paddle-cabling",
                 "--csm",
@@ -280,23 +250,6 @@ def test_validate_paddle_cabling_file(netmiko_command, switch_vendor):
             + "48     sw-leaf-bmc-001:50       None\n"
         ) in str(result.output)
 
-        assert (
-            "Node type or port number could not be determined for the following.\n"
-            + "These nodes are not currently included in the model.\n"
-            + "(This may be a missing architectural definition/lookup or a spelling error)\n"
-            + "--------------------------------------------------------------------------------\n"
-            + "sw-spine-001     1/1/3     ===> 00:00:00:00:00:00  XEROX CORPORATION 192.168.1.2:vlan1, 192.168.2.2:vlan3\n"
-            + "Nodes that show up as MAC addresses might need to have LLDP enabled.\n"
-            + "\n"
-            + "The following nodes should be renamed\n"
-            + "--------------------------------------------------------------------------------\n"
-            + "sw-leaf-bmc99 should be renamed sw-leaf-bmc-099\n"
-            + "sw-spine01 should be renamed sw-spine-001\n"
-            + "sw-spine02 should be renamed sw-spine-002\n"
-        ) in str(result.output)
-
-        remove_switch_from_cache(ip)
-
 
 def test_validate_paddle_cabling_missing_ips():
     """Test that the `canu validate paddle-cabling` command errors on missing IP address."""
@@ -307,8 +260,6 @@ def test_validate_paddle_cabling_missing_ips():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "paddle-cabling",
                 "--csm",
@@ -336,8 +287,6 @@ def test_validate_paddle_cabling_mutually_exclusive_ips_and_file():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "paddle-cabling",
                 "--csm",
@@ -355,10 +304,7 @@ def test_validate_paddle_cabling_mutually_exclusive_ips_and_file():
             ],
         )
         assert result.exit_code == 2
-        assert (
-            "Error: Mutually exclusive options from 'Network cabling IPv4 input sources'"
-            in str(result.output)
-        )
+        assert "Error: Mutually exclusive options from 'Network cabling IPv4 input sources'" in str(result.output)
 
 
 def test_validate_paddle_cabling_invalid_ip():
@@ -371,8 +317,6 @@ def test_validate_paddle_cabling_invalid_ip():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "paddle-cabling",
                 "--csm",
@@ -388,9 +332,8 @@ def test_validate_paddle_cabling_invalid_ip():
             ],
         )
         assert result.exit_code == 2
-        assert (
-            "Error: Invalid value for '--ips': These items are not ipv4 addresses: ['999.999.999.999']"
-            in str(result.output)
+        assert "Error: Invalid value for '--ips': These items are not ipv4 addresses: ['999.999.999.999']" in str(
+            result.output,
         )
 
 
@@ -407,8 +350,6 @@ def test_validate_paddle_cabling_invalid_ip_file():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "paddle-cabling",
                 "--csm",
@@ -449,8 +390,6 @@ def test_validate_paddle_cabling_bad_ip(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "paddle-cabling",
                 "--csm",
@@ -494,8 +433,6 @@ def test_validate_paddle_cabling_bad_ip_file(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "paddle-cabling",
                 "--csm",
@@ -534,8 +471,6 @@ def test_validate_paddle_cabling_bad_password(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "paddle-cabling",
                 "--csm",
@@ -560,8 +495,6 @@ def test_validate_paddle_cabling_missing_file():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "paddle-cabling",
                 "--csm",
@@ -585,8 +518,6 @@ def test_validate_paddle_cabling_bad_file():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "paddle-cabling",
                 "--csm",

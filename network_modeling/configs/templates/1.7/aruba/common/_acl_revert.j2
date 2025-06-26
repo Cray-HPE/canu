@@ -1,0 +1,16 @@
+no access-list ip MANAGED_NODE_ISOLATION
+no object-group ip address ALL_SWITCHES
+no object-group ip address MANAGED_NODES
+no object-group ip address NMN_NCN
+no object-group ip address SPINE_SWITCHES
+no object-group ip address TFTP_SERVERS
+no object-group port NMN_TCP_SERVICES
+no object-group port NMN_UDP_SERVICES
+no object-group ip address NMN_K8S_SERVICE
+vlan {{ variables.NMN_VLAN }}
+ apply access-list ip nmn-hmn in
+ apply access-list ip nmn-hmn out
+
+int vlan {{ variables.NMN_VLAN }}
+no apply access-list ip nmn-hmn routed-in
+no apply access-list ip nmn-hmn routed-out

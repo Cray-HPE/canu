@@ -19,9 +19,11 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-"""CANU Commands that configure switches on the network."""
+"""CANU config commands."""
 import click
 
+from canu.config.network import network
+from canu.config.pvlan import pvlan
 from canu.style import Style
 
 
@@ -30,4 +32,8 @@ from canu.style import Style
 )
 @click.pass_context
 def config(ctx):
-    """Commands that configure switches on the network."""
+    """Canu config commands."""
+
+
+config.add_command(network.network)
+config.add_command(pvlan.pvlan)

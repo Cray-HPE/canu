@@ -21,14 +21,14 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """Retrieve SLS token."""
 import base64
-from collections import defaultdict
 import json
 import os
 import sys
+from collections import defaultdict
 
-from kubernetes import client, config
 import requests
 import urllib3
+from kubernetes import client, config
 
 
 def sls_dump(path):
@@ -175,9 +175,7 @@ def pull_sls_networks(sls_file=None):
         API token.
     """
     if sls_file:
-        sls_networks = [
-            network[x] for network in [sls_file.get("Networks", {})] for x in network
-        ]
+        sls_networks = [network[x] for network in [sls_file.get("Networks", {})] for x in network]
     if not sls_file:
         sls_networks = sls_dump("networks")
 
@@ -340,9 +338,7 @@ def pull_sls_hardware(sls_file=None):
         API token.
     """
     if sls_file:
-        sls_hardware = [
-            hardware[x] for hardware in [sls_file.get("Hardware", {})] for x in hardware
-        ]
+        sls_hardware = [hardware[x] for hardware in [sls_file.get("Hardware", {})] for x in hardware]
         return sls_hardware
     if not sls_file:
         sls_hardware = sls_dump("hardware")

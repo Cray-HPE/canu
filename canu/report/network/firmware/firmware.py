@@ -20,33 +20,26 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that report the firmware of the entire Shasta network."""
-from collections import Counter
 import datetime
 import ipaddress
 import json
+import sys
+from collections import Counter
 from os import path
 from pathlib import Path
-import sys
 
 import click
-from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
-from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
 import emoji
-from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
+from click_option_group import RequiredMutuallyExclusiveOptionGroup, optgroup
+from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 from ruamel.yaml import YAML
 
-
-from canu.report.switch.firmware.firmware import (
-    get_firmware_aruba,
-    get_firmware_dell,
-    get_firmware_mellanox,
-)
+from canu.report.switch.firmware.firmware import get_firmware_aruba, get_firmware_dell, get_firmware_mellanox
 from canu.style import Style
-from canu.utils.cache import cache_switch
 from canu.utils.vendor import switch_vendor
-
 
 yaml = YAML()
 
@@ -145,7 +138,6 @@ def firmware(ctx, csm, ips, ips_file, username, password, json_, out):
         json_formatted: If JSON is selected, returns output
     """
     config = ctx.obj["config"]
-    cache_minutes = ctx.obj["cache_minutes"]
 
     if ips_file:
         ips = []
@@ -178,7 +170,6 @@ def firmware(ctx, csm, ips, ips_file, username, password, json_, out):
                             str(ip),
                             credentials,
                             True,
-                            cache_minutes=cache_minutes,
                         )
                     elif vendor == "dell":
                         switch_firmware, switch_info = get_firmware_dell(
@@ -193,9 +184,7 @@ def firmware(ctx, csm, ips, ips_file, username, password, json_, out):
                             True,
                         )
 
-                    firmware_range = config["csm"][csm][vendor][
-                        switch_info["platform_name"]
-                    ]
+                    firmware_range = config["csm"][csm][vendor][switch_info["platform_name"]]
                     if switch_firmware["current_version"] in firmware_range:
                         match_emoji = emoji.emojize(":canoe:")
                         firmware_match = "Pass"
@@ -210,8 +199,10 @@ def firmware(ctx, csm, ips, ips_file, username, password, json_, out):
                         "hostname": switch_info["hostname"],
                         "platform_name": switch_info["platform_name"],
                         "firmware": switch_firmware,
-                        "updated_at": datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S",
+                        "updated_at": (
+                            datetime.datetime.now().strftime(
+                                "%Y-%m-%d %H:%M:%S",
+                            )
                         ),
                     }
                     data.append(
@@ -224,7 +215,6 @@ def firmware(ctx, csm, ips, ips_file, username, password, json_, out):
                             firmware_error,
                         ],
                     )
-                    cache_switch(switch_json[str(ip)])
 
                 except (
                     requests.exceptions.HTTPError,
@@ -237,21 +227,13 @@ def firmware(ctx, csm, ips, ips_file, username, password, json_, out):
                     exception_type = type(err).__name__
 
                     if exception_type == "HTTPError":
-                        error_message = (
-                            "HTTP Error. Check the IP, username, or password"
-                        )
+                        error_message = "HTTP Error. Check the IP, username, or password"
                     elif exception_type == "ConnectionError":
-                        error_message = (
-                            "Connection Error. Check that the IP address is valid"
-                        )
+                        error_message = "Connection Error. Check that the IP address is valid"
                     elif exception_type == "RequestException":  # pragma: no cover
-                        error_message = (
-                            "RequestException Error. Error connecting to switch."
-                        )
+                        error_message = "RequestException Error. Error connecting to switch."
                     elif exception_type == "NetmikoTimeoutException":
-                        error_message = (
-                            "Timeout error. Check the IP address and try again."
-                        )
+                        error_message = "Timeout error. Check the IP address and try again."
                     elif exception_type == "NetmikoAuthenticationException":
                         error_message = "Authentication error. Check the credentials or IP address and try again"
                     elif exception_type == "KeyError":
@@ -262,8 +244,10 @@ def firmware(ctx, csm, ips, ips_file, username, password, json_, out):
                     switch_json[str(ip)] = {
                         "ip_address": str(ip),
                         "status": "Error",
-                        "updated_at": datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S",
+                        "updated_at": (
+                            datetime.datetime.now().strftime(
+                                "%Y-%m-%d %H:%M:%S",
+                            )
                         ),
                     }
                     data.append([error_emoji, "Error", str(ip), "", "", ""])
@@ -278,8 +262,10 @@ def firmware(ctx, csm, ips, ips_file, username, password, json_, out):
                     switch_json[str(ip)] = {
                         "ip_address": str(ip),
                         "status": "Error",
-                        "updated_at": datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S",
+                        "updated_at": (
+                            datetime.datetime.now().strftime(
+                                "%Y-%m-%d %H:%M:%S",
+                            )
                         ),
                     }
                     data.append([error_emoji, "Error", str(ip), "", "", ""])

@@ -23,8 +23,8 @@
 from os import path
 from pathlib import Path
 
-from click import testing
 import pkg_resources
+from click import testing
 
 from canu.cli import cli
 
@@ -41,7 +41,6 @@ sls_file_name = "sls_input_file_csm_1.2.json"
 sls_file = path.join(test_file_directory, "data", sls_file_name)
 csm = "1.2"
 switch_name = "sw-spine-001"
-cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
 
 canu_version = pkg_resources.get_distribution("canu").version
@@ -64,8 +63,6 @@ def test_switch_config_spine_primary():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -491,8 +488,6 @@ def test_switch_config_spine_primary_custom():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -936,8 +931,6 @@ def test_switch_config_spine_secondary():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -1344,8 +1337,6 @@ def test_switch_config_leaf_bmc():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -1586,8 +1577,6 @@ def test_switch_config_leaf_bmc_custom():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -2067,8 +2056,6 @@ def test_switch_config_cdu_primary():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -2091,10 +2078,7 @@ def test_switch_config_cdu_primary():
         assert result.exit_code == 0
 
         assert (
-            "ip vrf Customer\n"
-            + "ip name-server 10.92.100.225\n"
-            + "hostname sw-cdu-001\n"
-            + "rest api restconf\n"
+            "ip vrf Customer\n" + "ip name-server 10.92.100.225\n" + "hostname sw-cdu-001\n" + "rest api restconf\n"
         ) in str(result.output)
 
         assert (
@@ -2567,8 +2551,6 @@ def test_switch_config_cdu_secondary():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -2590,10 +2572,7 @@ def test_switch_config_cdu_secondary():
         )
         assert result.exit_code == 0
         assert (
-            "ip vrf Customer\n"
-            + "ip name-server 10.92.100.225\n"
-            + "hostname sw-cdu-002\n"
-            + "rest api restconf\n"
+            "ip vrf Customer\n" + "ip name-server 10.92.100.225\n" + "hostname sw-cdu-002\n" + "rest api restconf\n"
         ) in str(result.output)
 
         assert (

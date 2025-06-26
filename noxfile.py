@@ -20,10 +20,10 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Nox definitions for tests, docs, and linting."""
-from os import listdir, path
-from pathlib import Path
 import shutil
 import sys
+from os import listdir, path
+from pathlib import Path
 
 import nox
 

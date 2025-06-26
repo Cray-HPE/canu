@@ -20,9 +20,9 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Test NetworkNode in the model."""
-from network_modeling.NetworkNode import NetworkNode, NetworkPort
 import pytest
 
+from network_modeling.NetworkNode import NetworkNode, NetworkPort
 
 hardware_a = {
     "name": "Node A",

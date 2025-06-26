@@ -111,15 +111,9 @@ def version(ctx, username, password, sls_file, sls_address, network, log_):
             )
 
     # ttp template to get CSM version and CANU version
-    banner_ttp_aruba = (
-        "# CSM version:  {{ csm_version }}\n# CANU version: {{ canu_version }}"
-    )
-    banner_ttp_dell = (
-        " # CSM version:  {{ csm_version }}\n # CANU version: {{ canu_version }}"
-    )
-    banner_ttp_mellanox = (
-        "    # CSM version:  {{ csm_version }}\n    # CANU version: {{ canu_version }}"
-    )
+    banner_ttp_aruba = "# CSM version:  {{ csm_version }}\n# CANU version: {{ canu_version }}"
+    banner_ttp_dell = " # CSM version:  {{ csm_version }}\n # CANU version: {{ canu_version }}"
+    banner_ttp_mellanox = "    # CSM version:  {{ csm_version }}\n    # CANU version: {{ canu_version }}"
 
     version = {}
     aruba_hosts = online_hosts.filter(F(platform="aruba_aoscx"))
