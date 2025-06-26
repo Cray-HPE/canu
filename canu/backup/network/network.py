@@ -22,8 +22,8 @@
 """CANU backup network config."""
 import logging
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import click
 import click_spinner
@@ -41,12 +41,12 @@ from canu.utils.inventory import inventory
 
 def backup_switches(online_hosts, folder, unsanitized=False):
     """Backup switch configurations to specified folder.
-    
+
     Args:
         online_hosts: Nornir inventory with online switches
         folder: Directory to save backup files
         unsanitized: Whether to retain sensitive data
-    
+
     Returns:
         List of saved filenames
     """
@@ -69,7 +69,7 @@ def backup_switches(online_hosts, folder, unsanitized=False):
             "replace": r"\1 <removed>",
         },
     ]
-    
+
     def save_config_to_file(hostname, config):
         if not unsanitized:
             config = sanitize_config(config, sanitize_filters)
@@ -78,13 +78,13 @@ def backup_switches(online_hosts, folder, unsanitized=False):
         with open(filepath, "w") as f:
             f.write(config)
         return filename
-    
+
     # Create backup folder if it doesn't exist
     os.makedirs(folder, exist_ok=True)
-    
+
     # Get configs from all switch types
     backup_results = {}
-    
+
     # Mellanox switches
     mellanox_backup = online_hosts.filter(platform="mellanox").run(
         task=netmiko_send_command,
@@ -92,14 +92,14 @@ def backup_switches(online_hosts, folder, unsanitized=False):
         command_string="show running-config expanded",
     )
     backup_results.update(mellanox_backup)
-    
+
     # Aruba switches
     aruba_backup = online_hosts.filter(platform="aruba_aoscx").run(
         task=send_command,
         command="show running-config",
     )
     backup_results.update(aruba_backup)
-    
+
     # Dell switches
     dell_backup = online_hosts.filter(platform="dell_os10").run(
         task=netmiko_send_command,
@@ -117,8 +117,9 @@ def backup_switches(online_hosts, folder, unsanitized=False):
                 config=backup_results[hostname][0].result,
             )
             saved_files.append(filename)
-    
+
     return saved_files
+
 
 # Get project root directory
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover

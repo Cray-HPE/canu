@@ -20,8 +20,8 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Test SLS utilities ipam functions."""
-from collections import defaultdict
 import ipaddress
+from collections import defaultdict
 
 import pytest
 

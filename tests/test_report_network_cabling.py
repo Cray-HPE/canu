@@ -22,13 +22,13 @@
 """Test CANU report network cabling commands."""
 from unittest.mock import patch
 
-from click import testing
-from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
 import responses
+from click import testing
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 
 from canu.cli import cli
-from canu.utils.cache import remove_switch_from_cache
+
 from .test_report_switch_cabling import (
     arp_neighbors_mellanox,
     lldp_json_mellanox,
@@ -37,7 +37,6 @@ from .test_report_switch_cabling import (
     netmiko_commands_dell,
 )
 
-
 username = "admin"
 password = "admin"
 ip = "192.168.1.1"
@@ -45,7 +44,6 @@ ips = "192.168.1.1"
 ip_dell = "192.168.1.2"
 ip_mellanox = "192.168.1.3"
 credentials = {"username": username, "password": password}
-cache_minutes = 0
 runner = testing.CliRunner()
 
 
@@ -85,8 +83,6 @@ def test_network_cabling(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "cabling",
@@ -100,7 +96,6 @@ def test_network_cabling(netmiko_command, switch_vendor):
         )
         assert result.exit_code == 0
         assert "1/1/1      ==> sw-test02       1/1/1" in str(result.output)
-        remove_switch_from_cache(ip)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -142,8 +137,6 @@ def test_network_cabling_file(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "cabling",
@@ -157,7 +150,6 @@ def test_network_cabling_file(netmiko_command, switch_vendor):
         )
         assert result.exit_code == 0
         assert "1/1/1      ==> sw-test02       1/1/1" in str(result.output)
-        remove_switch_from_cache(ip)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -228,8 +220,6 @@ def test_network_cabling_file_bidirectional(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "cabling",
@@ -243,7 +233,6 @@ def test_network_cabling_file_bidirectional(netmiko_command, switch_vendor):
         )
         assert result.exit_code == 0
         assert "1/1/1      ==> sw-test02       1/1/1" in str(result.output)
-        remove_switch_from_cache(ip)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -282,8 +271,6 @@ def test_network_cabling_equipment_view(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "cabling",
@@ -301,7 +288,6 @@ def test_network_cabling_equipment_view(netmiko_command, switch_vendor):
         assert "11:11:11:11:11:11         <=== sw-test01       1/1/3" in str(
             result.output,
         )
-        remove_switch_from_cache(ip)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -374,8 +360,6 @@ def test_network_cabling_file_equipment_view_bidirectional(
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "cabling",
@@ -393,7 +377,6 @@ def test_network_cabling_file_equipment_view_bidirectional(
         assert "11:11:11:11:11:11         <=== sw-test01       1/1/3" in str(
             result.output,
         )
-        remove_switch_from_cache(ip)
 
 
 def test_network_cabling_missing_ips():
@@ -402,8 +385,6 @@ def test_network_cabling_missing_ips():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "cabling",
@@ -426,8 +407,6 @@ def test_network_cabling_mutually_exclusive_ips_and_file():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "cabling",
@@ -442,10 +421,7 @@ def test_network_cabling_mutually_exclusive_ips_and_file():
             ],
         )
         assert result.exit_code == 2
-        assert (
-            "Error: Mutually exclusive options from 'Network cabling IPv4 input sources'"
-            in str(result.output)
-        )
+        assert "Error: Mutually exclusive options from 'Network cabling IPv4 input sources'" in str(result.output)
 
 
 def test_network_cabling_invalid_ip():
@@ -456,8 +432,6 @@ def test_network_cabling_invalid_ip():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "cabling",
@@ -470,9 +444,8 @@ def test_network_cabling_invalid_ip():
             ],
         )
         assert result.exit_code == 2
-        assert (
-            "Error: Invalid value for '--ips': These items are not ipv4 addresses: ['999.999.999.999']"
-            in str(result.output)
+        assert "Error: Invalid value for '--ips': These items are not ipv4 addresses: ['999.999.999.999']" in str(
+            result.output,
         )
 
 
@@ -487,8 +460,6 @@ def test_network_cabling_invalid_ip_file():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "cabling",
@@ -525,8 +496,6 @@ def test_network_cabling_bad_ip(get_lldp, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "cabling",
@@ -566,8 +535,6 @@ def test_network_cabling_bad_ip_file(get_lldp, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "cabling",
@@ -600,8 +567,6 @@ def test_network_cabling_bad_password(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "cabling",
@@ -614,9 +579,8 @@ def test_network_cabling_bad_password(switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert (
-            "Error connecting to switch 192.168.1.1, check the entered username, IP address and password."
-            in str(result.output)
+        assert "Error connecting to switch 192.168.1.1, check the entered username, IP address and password." in str(
+            result.output,
         )
 
 
@@ -634,8 +598,6 @@ def test_network_cabling_dell(netmiko_commands, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "cabling",
@@ -649,13 +611,8 @@ def test_network_cabling_dell(netmiko_commands, switch_vendor):
         )
         print(result.output)
         assert result.exit_code == 0
-        assert (
-            "1/1/1      ==> sw-test01       1/1/15             00:40:a6:00:44:55  sw-test01"
-        ) in str(result.output)
-        assert (
-            "1/1/2      ==> sw-test02       1/1/15             00:40:a6:00:00:00  sw-test02"
-        ) in str(result.output)
-        remove_switch_from_cache(ip_dell)
+        assert ("1/1/1      ==> sw-test01       1/1/15             00:40:a6:00:44:55  sw-test01") in str(result.output)
+        assert ("1/1/2      ==> sw-test02       1/1/15             00:40:a6:00:00:00  sw-test02") in str(result.output)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -669,8 +626,6 @@ def test_network_cabling_dell_timeout(netmiko_commands, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "cabling",
@@ -700,8 +655,6 @@ def test_network_cabling_dell_auth(netmiko_commands, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "cabling",
@@ -771,8 +724,6 @@ def test_network_cabling_mellanox(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "cabling",
@@ -785,13 +736,8 @@ def test_network_cabling_mellanox(switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert (
-            "1/1/1      ==> sw-test03       1/1/11             00:40:a6:00:44:55  sw-test03"
-        ) in str(result.output)
-        assert (
-            "1/1/2      ==> sw-test04       1/1/12             00:40:a6:00:00:33  sw-test04"
-        ) in str(result.output)
-        remove_switch_from_cache(ip_mellanox)
+        assert ("1/1/1      ==> sw-test03       1/1/11             00:40:a6:00:44:55  sw-test03") in str(result.output)
+        assert ("1/1/2      ==> sw-test04       1/1/12             00:40:a6:00:00:33  sw-test04") in str(result.output)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -809,8 +755,6 @@ def test_network_cabling_mellanox_connection_error(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "cabling",
@@ -823,9 +767,8 @@ def test_network_cabling_mellanox_connection_error(switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert (
-            "Error connecting to switch 192.168.1.3, check the entered username, IP address and password."
-            in str(result.output)
+        assert "Error connecting to switch 192.168.1.3, check the entered username, IP address and password." in str(
+            result.output,
         )
 
 
@@ -849,8 +792,6 @@ def test_network_cabling_mellanox_exception(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "cabling",
@@ -863,9 +804,8 @@ def test_network_cabling_mellanox_exception(switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert (
-            "Error connecting to switch 192.168.1.3, check the entered username, IP address and password."
-            in str(result.output)
+        assert "Error connecting to switch 192.168.1.3, check the entered username, IP address and password." in str(
+            result.output,
         )
 
 
@@ -884,8 +824,6 @@ def test_network_cabling_mellanox_bad_login(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "cabling",
@@ -898,9 +836,8 @@ def test_network_cabling_mellanox_bad_login(switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert (
-            "Error connecting to switch 192.168.1.3, check the entered username, IP address and password."
-            in str(result.output)
+        assert "Error connecting to switch 192.168.1.3, check the entered username, IP address and password." in str(
+            result.output,
         )
 
 

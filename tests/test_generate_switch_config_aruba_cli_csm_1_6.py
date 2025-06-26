@@ -24,10 +24,10 @@ import json
 from os import path
 from pathlib import Path
 
-from click import testing
 import pkg_resources
 import requests
 import responses
+from click import testing
 
 from canu.cli import cli
 
@@ -46,7 +46,6 @@ sls_file_name = "sls_input_file_csm_1.2.json"
 sls_file = path.join(test_file_directory, "data", sls_file_name)
 
 switch_name = "sw-spine-001"
-cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
 
 test_file_name_tds = "TDS_Architecture_Golden_Config_1.1.5.xlsx"
@@ -75,8 +74,6 @@ def test_switch_config_csi_file_missing():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -107,8 +104,6 @@ def test_switch_config_missing_file():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -143,8 +138,6 @@ def test_switch_config_bad_file():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -175,8 +168,6 @@ def test_switch_config_missing_tabs():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -212,8 +203,6 @@ def test_switch_config_bad_tab():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -244,8 +233,6 @@ def test_switch_config_switch_name_prompt():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -284,8 +271,6 @@ def test_switch_config_corner_prompt():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -324,8 +309,6 @@ def test_switch_config_not_enough_corners():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -359,8 +342,6 @@ def test_switch_config_bad_switch_name_1():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -396,8 +377,6 @@ def test_switch_config_bad_switch_name_2():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -433,8 +412,6 @@ def test_switch_config_non_switch():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -456,10 +433,7 @@ def test_switch_config_non_switch():
         )
         assert result.exit_code == 1
 
-        assert (
-            f"{non_switch} is not a switch. Only switch config can be generated."
-            in str(result.output)
-        )
+        assert f"{non_switch} is not a switch. Only switch config can be generated." in str(result.output)
 
 
 @responses.activate
@@ -470,9 +444,7 @@ def test_switch_config_sls():
         with open(sls_file, "r") as read_file:
             sls_data = json.load(read_file)
 
-        sls_networks = [
-            network[x] for network in [sls_data.get("Networks", {})] for x in network
-        ]
+        sls_networks = [network[x] for network in [sls_data.get("Networks", {})] for x in network]
 
         responses.add(
             responses.GET,
@@ -483,8 +455,6 @@ def test_switch_config_sls():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -534,8 +504,6 @@ def test_switch_config_sls_token_bad():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -571,8 +539,6 @@ def test_switch_config_sls_token_missing():
     result = runner.invoke(
         cli,
         [
-            "--cache",
-            cache_minutes,
             "generate",
             "switch",
             "config",
@@ -614,8 +580,6 @@ def test_switch_config_sls_address_bad():
     result = runner.invoke(
         cli,
         [
-            "--cache",
-            cache_minutes,
             "generate",
             "switch",
             "config",

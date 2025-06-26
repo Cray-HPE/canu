@@ -36,7 +36,6 @@ test_file = path.join(test_file_directory, "data", test_file_name)
 architecture = "tds"
 tabs = "25G_10G"
 corners = "I14,S48"
-cache_minutes = 0
 runner = testing.CliRunner()
 
 
@@ -47,8 +46,6 @@ def test_validate_shcd():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "shcd",
                 "--architecture",
@@ -72,8 +69,6 @@ def test_validate_shcd_full():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "shcd",
                 "--architecture",
@@ -97,8 +92,6 @@ def test_validate_shcd_missing_file():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "shcd",
                 "--architecture",
@@ -121,8 +114,6 @@ def test_validate_shcd_bad_file():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "shcd",
                 "--architecture",
@@ -145,8 +136,6 @@ def test_validate_shcd_missing_tabs():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "shcd",
                 "--architecture",
@@ -169,8 +158,6 @@ def test_validate_shcd_bad_tab():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "shcd",
                 "--architecture",
@@ -193,8 +180,6 @@ def test_validate_shcd_corner_prompt():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "shcd",
                 "--architecture",
@@ -217,8 +202,6 @@ def test_validate_shcd_corners_too_narrow():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "shcd",
                 "--architecture",
@@ -242,8 +225,6 @@ def test_validate_shcd_corners_too_high():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "shcd",
                 "--architecture",
@@ -270,8 +251,6 @@ def test_validate_shcd_corners_bad_cell():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "shcd",
                 "--architecture",
@@ -295,8 +274,6 @@ def test_validate_shcd_not_enough_corners():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "shcd",
                 "--architecture",
@@ -322,8 +299,6 @@ def test_validate_shcd_bad_headers():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "shcd",
                 "--architecture",
@@ -347,8 +322,6 @@ def test_validate_shcd_bad_architectural_definition():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "shcd",
                 "--architecture",
@@ -362,11 +335,8 @@ def test_validate_shcd_bad_architectural_definition():
             ],
         )
         assert result.exit_code == 1
-        assert (
-            "The plan-of-record architectural definition does not allow connections"
-            in str(
-                result.output,
-            )
+        assert "The plan-of-record architectural definition does not allow connections" in str(
+            result.output,
         )
 
 
@@ -378,8 +348,6 @@ def test_validate_shcd_port_reuse():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "shcd",
                 "--architecture",
@@ -406,8 +374,6 @@ def test_validate_shcd_json():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "shcd",
                 "--architecture",
@@ -443,8 +409,6 @@ def test_validate_shcd_vi():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "shcd",
                 "--architecture",
@@ -470,8 +434,6 @@ def test_validate_shcd_subrack():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "shcd",
                 "--architecture",

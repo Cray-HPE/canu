@@ -20,11 +20,11 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Wrapper Classes to manage SLS Networks and Subnets as dictionaries."""
-from collections import UserDict
 import ipaddress
+import sys
+from collections import UserDict
 from os import path
 from pathlib import Path
-import sys
 
 from canu.utils.sls_utils.json_utils import validate as validate_sls_json
 from canu.utils.sls_utils.Networks import Network, Subnet
@@ -59,11 +59,7 @@ class NetworkManager(UserDict):
         self.__validate(network_dict)
         # TODO: if instance is network do a deep copy!
         self.data = {
-            name: (
-                network
-                if isinstance(network, Network)
-                else Network.network_from_sls_data(network)
-            )
+            name: (network if isinstance(network, Network) else Network.network_from_sls_data(network))
             for name, network in network_dict.items()
         }
 
@@ -151,11 +147,7 @@ class SubnetManager(UserDict):
 
         self.__validate(subnet_dict)
         self.data = {
-            name: (
-                subnet
-                if isinstance(subnet, Subnet)
-                else Subnet.subnet_from_sls_data(subnet)
-            )
+            name: (subnet if isinstance(subnet, Subnet) else Subnet.subnet_from_sls_data(subnet))
             for (name, subnet) in subnet_dict.items()
         }
 

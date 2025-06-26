@@ -20,8 +20,8 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Test SLS utilities Network class."""
-from collections import defaultdict
 import ipaddress
+from collections import defaultdict
 
 import pytest
 
@@ -240,9 +240,9 @@ def test_subnet_vlan(subnet):
 
 def test_subnet_ipv4_gateway(subnet):
     """Test resetting Subnet gateway."""
-    assert subnet.ipv4_gateway() == ipaddress.IPv4Address('10.0.0.1')
+    assert subnet.ipv4_gateway() == ipaddress.IPv4Address("10.0.0.1")
     subnet.ipv4_gateway("10.0.0.2")
-    assert subnet.ipv4_gateway() == ipaddress.IPv4Address('10.0.0.2')
+    assert subnet.ipv4_gateway() == ipaddress.IPv4Address("10.0.0.2")
 
 
 def test_subnet_dhcp_start_address(subnet):

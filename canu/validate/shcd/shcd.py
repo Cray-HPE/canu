@@ -22,24 +22,24 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 """CANU commands that validate the shcd."""
-from collections import defaultdict
 import datetime
-from importlib import metadata
 import json
 import logging
-from os import path
-from pathlib import Path
 import re
 import sys
+from collections import defaultdict
+from importlib import metadata
+from os import path
+from pathlib import Path
 
 import click
 import natsort
-from network_modeling.NetworkNodeFactory import NetworkNodeFactory
-from network_modeling.NetworkPort import NetworkPort
-from network_modeling.NodeLocation import NodeLocation
 from openpyxl import load_workbook
 
 from canu.style import Style
+from network_modeling.NetworkNodeFactory import NetworkNodeFactory
+from network_modeling.NetworkPort import NetworkPort
+from network_modeling.NodeLocation import NodeLocation
 
 # Get project root directory
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
@@ -1211,19 +1211,13 @@ def print_node_list(node_list, title, out="-"):
                 unused_block = []  # reset
                 click.secho(f"        {port_string}", fg="green", file=out)
 
-            destination_node_name = [
-                x.common_name()
-                for x in node_list
-                if x.id() == port["destination_node_id"]
-            ]
+            destination_node_name = [x.common_name() for x in node_list if x.id() == port["destination_node_id"]]
             destination_node_name = destination_node_name[0]
             destination_port_slot = None
             if port["destination_slot"] is None:
                 destination_port_slot = f'{port["destination_port"]}'
             else:
-                destination_port_slot = (
-                    f'{port["destination_slot"]}:{port["destination_port"]}'
-                )
+                destination_port_slot = f'{port["destination_slot"]}:{port["destination_port"]}'
             if port["slot"] is None:
                 port_string = f'{port["port"]:>02}==>{destination_node_name}:{destination_port_slot}'
             else:
@@ -1245,8 +1239,10 @@ def json_output(node_list, factory, architecture, ctx, out):
         "tabs": ctx.params["tabs"],
         "corners": ctx.params["corners"],
         "edge": ctx.params["edge"],
-        "updated_at": datetime.datetime.now().strftime(
-            "%Y-%m-%d %H:%M:%S",
+        "updated_at": (
+            datetime.datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S",
+            )
         ),
         "topology": topology,
     }

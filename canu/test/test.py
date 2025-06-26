@@ -22,18 +22,18 @@
 """CANU commands that test the network."""
 import json
 import logging
+import sys
 from os import path
 from pathlib import Path
-import sys
 
 import click
+import yaml
 from jinja2 import Environment
 from nornir import InitNornir
 from nornir.core.filter import F
 from nornir_salt.plugins.functions import ResultSerializer, TabulateFormatter
 from nornir_salt.plugins.processors import TestsProcessor
 from nornir_salt.plugins.tasks import netmiko_send_commands, scrapli_send_commands
-import yaml
 
 from canu.style import Style
 from canu.utils.host_alive import host_alive
@@ -348,7 +348,10 @@ def test(
                         )
                         # Update the dictionary entry
                         test_command["function_file"] = test_path
-                        test_command["function_kwargs"] = {"vlan_ips": vlan_ips, "vrf": vrf}
+                        test_command["function_kwargs"] = {
+                            "vlan_ips": vlan_ips,
+                            "vrf": vrf,
+                        }
 
                 elif switch in devices and isinstance(test_command["task"], list):
                     switch_commands.extend(test_command["task"])

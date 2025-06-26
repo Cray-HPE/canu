@@ -22,10 +22,10 @@
 """Generates a dynamic Ansible inventory from SLS data."""
 import json
 import os
-from pathlib import Path
 import re
 import socket
 import sys
+from pathlib import Path
 
 import certifi
 import click

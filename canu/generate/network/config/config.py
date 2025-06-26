@@ -22,26 +22,22 @@
 """CANU commands that generate the config of the entire Shasta network."""
 import json
 import logging
+import sys
 from os import environ, makedirs, path
 from pathlib import Path
-import sys
 
 import click
-from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
-from jinja2 import Environment, FileSystemLoader, StrictUndefined
-from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import requests
-from ruamel.yaml import YAML
 import urllib3
+from click_option_group import RequiredMutuallyExclusiveOptionGroup, optgroup
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from ruamel.yaml import YAML
 
-from canu.generate.switch.config.config import (
-    generate_switch_config,
-    get_shasta_name,
-    parse_sls_for_config,
-)
+from canu.generate.switch.config.config import generate_switch_config, get_shasta_name, parse_sls_for_config
 from canu.style import Style
 from canu.validate.paddle.paddle import node_model_from_paddle
 from canu.validate.shcd.shcd import node_model_from_shcd, shcd_to_sheets
+from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 
 yaml = YAML()
 
@@ -249,7 +245,7 @@ def config(
 
     Args:
         ctx: CANU context settings
-        csm: CSM version
+        csm: CSM network version
         architecture: CSM architecture
         ccj: Paddle CCJ file
         shcd: SHCD file
@@ -265,6 +261,7 @@ def config(
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
         log_: Level of logging.
+        nmn_pvlan: VLAN ID used for Isolated NMN PVLAN
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
@@ -329,9 +326,7 @@ def config(
             return
 
         # Format the input to be like the SLS JSON
-        sls_json = [
-            network[x] for network in [input_json.get("Networks", {})] for x in network
-        ]
+        sls_json = [network[x] for network in [input_json.get("Networks", {})] for x in network]
 
     else:
         # Get SLS config

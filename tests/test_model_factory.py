@@ -20,8 +20,9 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Test NetworkFactory in the model."""
-from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import pytest
+
+from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 
 
 def mock_yaml_validate(self, schema_file, data_file):
@@ -33,7 +34,7 @@ def test_node_factory_no_hardware_schema():
     with pytest.raises(Exception) as e:
         NetworkNodeFactory(architecture_version="network_v2", hardware_schema="bad_hardware_schema")
     assert e.type == Exception
-    assert "No such file or directory: \'bad_hardware_schema\'" in str(e)
+    assert "No such file or directory: 'bad_hardware_schema'" in str(e)
 
 
 def test_node_factory_no_hardware_data():
@@ -41,15 +42,18 @@ def test_node_factory_no_hardware_data():
     with pytest.raises(Exception) as e:
         NetworkNodeFactory(architecture_version="network_v2", hardware_data="bad_hardware_data")
     assert e.type == Exception
-    assert "No such file or directory: \'bad_hardware_data\'" in str(e)
+    assert "No such file or directory: 'bad_hardware_data'" in str(e)
 
 
 def test_node_factory_no_architecture_schema():
     """Test exception handling when the architecture schema file is not found."""
     with pytest.raises(Exception) as e:
-        NetworkNodeFactory(architecture_version="network_v2", architecture_schema="bad_architecture_schema")
+        NetworkNodeFactory(
+            architecture_version="network_v2",
+            architecture_schema="bad_architecture_schema",
+        )
     assert e.type == Exception
-    assert "No such file or directory: \'bad_architecture_schema\'" in str(e)
+    assert "No such file or directory: 'bad_architecture_schema'" in str(e)
 
 
 def test_node_factory_no_architecture_data():
@@ -57,7 +61,7 @@ def test_node_factory_no_architecture_data():
     with pytest.raises(Exception) as e:
         NetworkNodeFactory(architecture_version="network_v2", architecture_data="bad_architecture_data")
     assert e.type == Exception
-    assert "No such file or directory: \'bad_architecture_data\'" in str(e)
+    assert "No such file or directory: 'bad_architecture_data'" in str(e)
 
 
 def test_node_factory_bad_architecture_version():

@@ -20,15 +20,14 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Test CANU validate network cabling commands."""
+
 from unittest.mock import patch
 
-from click import testing
 import requests
 import responses
+from click import testing
 
 from canu.cli import cli
-from canu.utils.cache import remove_switch_from_cache
-
 
 architecture = "tds"
 username = "admin"
@@ -38,7 +37,6 @@ ips = "192.168.1.1"
 ip_dell = "192.168.1.2"
 ip_mellanox = "192.168.1.3"
 credentials = {"username": username, "password": password}
-cache_minutes = 0
 runner = testing.CliRunner()
 
 
@@ -50,6 +48,7 @@ def test_validate_cabling(netmiko_command, switch_vendor):
     with runner.isolated_filesystem():
         switch_vendor.return_value = "aruba"
         netmiko_command.return_value = mac_address_table
+
         responses.add(
             responses.POST,
             f"https://{ip}/rest/v10.04/login",
@@ -78,8 +77,6 @@ def test_validate_cabling(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "network",
                 "cabling",
@@ -97,7 +94,6 @@ def test_validate_cabling(netmiko_command, switch_vendor):
         )
         assert result.exit_code == 0
         assert "sw-spine-001 connects to 4 nodes:" in str(result.output)
-        remove_switch_from_cache(ip)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -137,8 +133,6 @@ def test_validate_cabling_full_architecture(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "network",
                 "cabling",
@@ -154,7 +148,6 @@ def test_validate_cabling_full_architecture(netmiko_command, switch_vendor):
         )
         assert result.exit_code == 0
         assert "sw-spine-001 connects to 1 nodes:" in str(result.output)
-        remove_switch_from_cache(ip)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -194,8 +187,6 @@ def test_validate_cabling_v1_architecture(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "network",
                 "cabling",
@@ -211,7 +202,6 @@ def test_validate_cabling_v1_architecture(netmiko_command, switch_vendor):
         )
         assert result.exit_code == 0
         assert "sw-spine-001 connects to 1 nodes:" in str(result.output)
-        remove_switch_from_cache(ip)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -253,8 +243,6 @@ def test_validate_cabling_file(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "network",
                 "cabling",
@@ -270,7 +258,6 @@ def test_validate_cabling_file(netmiko_command, switch_vendor):
         )
         assert result.exit_code == 0
         assert "sw-spine-001 connects to 4 nodes:" in str(result.output)
-        remove_switch_from_cache(ip)
 
 
 def test_validate_cabling_missing_ips():
@@ -279,8 +266,6 @@ def test_validate_cabling_missing_ips():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "network",
                 "cabling",
@@ -305,8 +290,6 @@ def test_validate_cabling_mutually_exclusive_ips_and_file():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "network",
                 "cabling",
@@ -323,10 +306,7 @@ def test_validate_cabling_mutually_exclusive_ips_and_file():
             ],
         )
         assert result.exit_code == 2
-        assert (
-            "Error: Mutually exclusive options from 'Network cabling IPv4 input sources'"
-            in str(result.output)
-        )
+        assert "Error: Mutually exclusive options from 'Network cabling IPv4 input sources'" in str(result.output)
 
 
 def test_validate_cabling_invalid_ip():
@@ -337,8 +317,6 @@ def test_validate_cabling_invalid_ip():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "network",
                 "cabling",
@@ -353,9 +331,8 @@ def test_validate_cabling_invalid_ip():
             ],
         )
         assert result.exit_code == 2
-        assert (
-            "Error: Invalid value for '--ips': These items are not ipv4 addresses: ['999.999.999.999']"
-            in str(result.output)
+        assert "Error: Invalid value for '--ips': These items are not ipv4 addresses: ['999.999.999.999']" in str(
+            result.output,
         )
 
 
@@ -370,8 +347,6 @@ def test_validate_cabling_invalid_ip_file():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "network",
                 "cabling",
@@ -408,8 +383,6 @@ def test_validate_cabling_bad_ip(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "network",
                 "cabling",
@@ -449,8 +422,6 @@ def test_validate_cabling_bad_ip_file(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "network",
                 "cabling",
@@ -485,8 +456,6 @@ def test_validate_cabling_bad_password(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "network",
                 "cabling",
@@ -540,8 +509,6 @@ def test_validate_cabling_rename(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "network",
                 "cabling",
@@ -558,7 +525,6 @@ def test_validate_cabling_rename(netmiko_command, switch_vendor):
         assert result.exit_code == 0
         assert "sw-leaf-bmc99 should be renamed sw-leaf-bmc-099" in str(result.output)
         assert "sw-spine01 should be renamed sw-spine-001" in str(result.output)
-        remove_switch_from_cache(ip)
 
 
 # Dell
@@ -575,8 +541,6 @@ def test_switch_cabling_dell(netmiko_commands, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "network",
                 "cabling",
@@ -598,7 +562,6 @@ def test_switch_cabling_dell(netmiko_commands, switch_vendor):
             + "1: sw-leaf-001 connects to 1 nodes: [0]\n"
             + "2: sw-leaf-002 connects to 1 nodes: [0]\n"
         ) in str(result.output)
-        remove_switch_from_cache(ip_dell)
 
 
 # Mellanox
@@ -653,8 +616,6 @@ def test_switch_cabling_mellanox(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "network",
                 "cabling",
@@ -689,7 +650,6 @@ def test_switch_cabling_mellanox(switch_vendor):
             + "        01-11==>UNUSED\n"
             + "        12==>sw-spine-004:2\n"
         ) in str(result.output)
-        remove_switch_from_cache(ip_mellanox)
 
 
 # Switch 1
@@ -850,7 +810,6 @@ arp_neighbors_json2 = {
     },
 }
 
-
 netmiko_commands_dell = [
     "",
     " \n"
@@ -885,10 +844,8 @@ netmiko_commands_dell = [
     + "------------------------------------------------------------------------------------------\n"
     + "192.168.1.1    aa:bb:cc:dd:ee:ff   vlan2                         port-channel100     \n"
     + "192.168.1.2    11:22:33:44:55:66   vlan7                         port-channel100     \n",
-    "VlanId Mac Address      Type      Interface\n"
-    + "1   00:40:a6:00:00:00    dynamic    ethernet1/1/3\n",
+    "VlanId Mac Address      Type      Interface\n" + "1   00:40:a6:00:00:00    dynamic    ethernet1/1/3\n",
 ]
-
 
 lldp_json_mellanox = {
     "status": "OK",

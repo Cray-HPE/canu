@@ -20,43 +20,34 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU generate switch config commands."""
-from collections import defaultdict
-from importlib import metadata
-from itertools import groupby
 import json
 import logging
 import os
-from os import environ, path
-from pathlib import Path
 import re
 import sys
+from collections import defaultdict
+from importlib import metadata
+from itertools import groupby
+from os import environ, path
+from pathlib import Path
 
 import click
-from click_option_group import optgroup
-from click_option_group import RequiredMutuallyExclusiveOptionGroup
-from hier_config import HConfig
-from hier_config import Host
-from jinja2 import Environment
-from jinja2 import FileSystemLoader
-from jinja2 import select_autoescape
-from jinja2 import StrictUndefined
 import natsort
 import netaddr
-from netutils.mac import is_valid_mac
-from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import requests
+import urllib3
+from click_option_group import RequiredMutuallyExclusiveOptionGroup, optgroup
+from hier_config import HConfig, Host
+from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
+from netutils.mac import is_valid_mac
 from ruamel.yaml import YAML
 from ttp import ttp
-import urllib3
 
 from canu.style import Style
 from canu.utils.yaml_load import load_yaml
 from canu.validate.paddle.paddle import node_model_from_paddle
-from canu.validate.shcd.shcd import (
-    node_model_from_shcd,
-    shcd_to_sheets,
-    switch_unused_ports,
-)
+from canu.validate.shcd.shcd import node_model_from_shcd, shcd_to_sheets, switch_unused_ports
+from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 
 yaml = YAML()
 
@@ -258,12 +249,12 @@ def config(
     log_,
     nmn_pvlan,
 ):
-    """Generate switch config using the SHCD.
+    """Generate the config of a single switch on the network using the SHCD.
 
-    In order to generate switch config, a valid SHCD must be passed in and system variables must be read in from either
+    In order to generate a network switch config, a valid SHCD must be passed in and system variables must be read in from either
     an SLS output file or the SLS API.
 
-    ## CSI Input
+    ## SLS Input
 
     - In order to parse network data using SLS, pass in the file containing SLS JSON data (normally sls_file.json) using the '--sls-file' flag
 
@@ -293,32 +284,32 @@ def config(
 
     - The table should contain the 11 headers: Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port.
 
-
-    Use the '--folder FOLDERNAME' flag to output all the switch configs to a folder.
+    Use the '--out' flag to either output the config to the screen (default) or to a file.
 
     ----------
     \f
     # noqa: D301, B950
 
     Args:
-        ctx: CANU context settings
+        ctx: CANU context
         csm: CSM version
         architecture: CSM architecture
         ccj: Paddle CCJ file
         shcd: SHCD file
-        tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
-        corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
-        switch_name: Switch name
-        sls_file: JSON file containing SLS data
+        tabs: The tabs on the SHCD file to check
+        corners: The corners on each tab
+        switch_name: The name of the switch to generate config
+        sls_file: File containing system SLS JSON data
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
-        out: Name of the output file
-        custom_config: yaml file containing customized switch configurations which is merged with the generated config.
-        edge: Vendor of the edge router
+        out: Output results to a file
+        custom_config: Custom switch configuration
+        edge: Vendor of Edge router
         bgp_control_plane: Network used for BGP control plane
         vrf: Named VRF used for CSM networks
-        bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
-        log_: Level of Logging
+        bond_app_nodes: Bond application nodes on the NMN network
+        log_: Level of logging
+        nmn_pvlan: VLAN ID used for Isolated NMN PVLAN
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
@@ -382,9 +373,7 @@ def config(
             return
 
         # Format the input to be like the SLS JSON
-        sls_json = [
-            network[x] for network in [input_json.get("Networks", {})] for x in network
-        ]
+        sls_json = [network[x] for network in [input_json.get("Networks", {})] for x in network]
 
     else:
         # Get SLS config
@@ -549,11 +538,7 @@ def add_custom_config(custom_config, switch_config, host, switch_os, custom_file
         banner.add_child("!")
     for line in switch_config_hier.all_children_sorted():
         # add two spaces to indented config to match aruba formatting.
-        if (
-            line.cisco_style_text().startswith("  ")
-            and "!" not in line.cisco_style_text()
-            and switch_os == "aoscx"
-        ):
+        if line.cisco_style_text().startswith("  ") and "!" not in line.cisco_style_text() and switch_os == "aoscx":
             custom_config_merge += "\n" + "  " + line.cisco_style_text()
         elif switch_os == "dellOS10":
             custom_config_merge += "\n" + line.cisco_style_text()
@@ -604,7 +589,7 @@ def generate_switch_config(
     templates = {
         "sw-spine": {
             "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-spine.primary.j2",
-            "secondary": f"{csm}/{vendor_folder}/{template_folder}/sw-spine.secondary.j2",
+            "secondary": (f"{csm}/{vendor_folder}/{template_folder}/sw-spine.secondary.j2"),
         },
         "sw-cdu": {
             "primary": f"{csm}/{vendor_folder}/common/sw-cdu.primary.j2",
@@ -612,7 +597,7 @@ def generate_switch_config(
         },
         "sw-leaf": {
             "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf.primary.j2",
-            "secondary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf.secondary.j2",
+            "secondary": (f"{csm}/{vendor_folder}/{template_folder}/sw-leaf.secondary.j2"),
         },
         "sw-leaf-bmc": {
             "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf-bmc.j2",
@@ -649,9 +634,7 @@ def generate_switch_config(
 
     is_primary, primary, secondary = switch_is_primary(switch_name)
 
-    template_name = templates[node_shasta_name][
-        "primary" if is_primary else "secondary"
-    ]
+    template_name = templates[node_shasta_name]["primary" if is_primary else "secondary"]
 
     def vsx_mac(switch_name):
         is_primary, primary, secondary = switch_is_primary(switch_name)
@@ -680,7 +663,7 @@ def generate_switch_config(
         sls_variables["NMN_VLAN"],
         sls_variables["HMN_VLAN"],
     ]
-    
+
     # Add isolated VLAN to trunk allowed lists when private VLAN is enabled
     if nmn_pvlan:
         leaf_bmc_vlan.append(nmn_pvlan)
@@ -690,7 +673,7 @@ def generate_switch_config(
         sls_variables["HMN_VLAN"],
         sls_variables["CAN_VLAN"],
     ]
-    
+
     # Add isolated VLAN to trunk allowed lists when private VLAN is enabled
     if nmn_pvlan:
         spine_leaf_vlan.append(nmn_pvlan)
@@ -721,7 +704,7 @@ def generate_switch_config(
     ]
     if sls_variables["CMN_VLAN"] and float(csm) >= 1.2:
         ncn_vlan.append(sls_variables["CMN_VLAN"])
-    
+
     spine_leaf_vlan = groupby_vlan_range(spine_leaf_vlan)
     leaf_bmc_vlan = groupby_vlan_range(leaf_bmc_vlan)
     ncn_vlan = groupby_vlan_range(ncn_vlan)
@@ -838,10 +821,7 @@ def generate_switch_config(
     unused_ports = switch_unused_ports(network_node_list)
     variables["UNUSED_PORTS"] = unused_ports[switch_name]
 
-    if (
-        switch_name not in sls_variables["HMN_IPs"].keys()
-        and "sw-edge" not in switch_name
-    ):
+    if switch_name not in sls_variables["HMN_IPs"].keys() and "sw-edge" not in switch_name:
         click.secho(f"Cannot find {switch_name} in CSI / SLS nodes.", fg="red")
         sys.exit(1)
 
@@ -900,23 +880,17 @@ def generate_switch_config(
             nodes_by_name[name] = node_tmp
             nodes_by_id[node_tmp["id"]] = node_tmp
         for port in nodes_by_name[switch_name]["ports"]:
-            destination_rack = nodes_by_id[port["destination_node_id"]]["location"][
-                "rack"
-            ]
+            destination_rack = nodes_by_id[port["destination_node_id"]]["location"]["rack"]
 
             destination_rack_list.append(int(re.search(r"\d+", destination_rack)[0]))
-        for cabinets in (
-            sls_variables["NMN_MTN_CABINETS"] + sls_variables["HMN_MTN_CABINETS"]
-        ):
+        for cabinets in sls_variables["NMN_MTN_CABINETS"] + sls_variables["HMN_MTN_CABINETS"]:
             ip_address = netaddr.IPNetwork(cabinets["CIDR"])
             is_primary = switch_is_primary(switch_name)
             sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
             if sls_rack_int in destination_rack_list:
                 if cabinets in sls_variables["NMN_MTN_CABINETS"]:
                     variables["NMN_MTN_VLANS"].append(cabinets)
-                    variables["NMN_MTN_VLANS"][-1][
-                        "PREFIX_LENGTH"
-                    ] = ip_address.prefixlen
+                    variables["NMN_MTN_VLANS"][-1]["PREFIX_LENGTH"] = ip_address.prefixlen
                     if is_primary[0]:
                         ip = str(ip_address[2])
                         variables["NMN_MTN_VLANS"][-1]["IP"] = ip
@@ -926,9 +900,7 @@ def generate_switch_config(
 
                 if cabinets in sls_variables["HMN_MTN_CABINETS"]:
                     variables["HMN_MTN_VLANS"].append(cabinets)
-                    variables["HMN_MTN_VLANS"][-1][
-                        "PREFIX_LENGTH"
-                    ] = ip_address.prefixlen
+                    variables["HMN_MTN_VLANS"][-1]["PREFIX_LENGTH"] = ip_address.prefixlen
                     if is_primary[0]:
                         ip = str(ip_address[2])
                         variables["HMN_MTN_VLANS"][-1]["IP"] = ip

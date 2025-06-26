@@ -22,10 +22,11 @@
 """Test CANU backup network."""
 
 from pathlib import Path
+from unittest.mock import patch
 
-from click import testing
 import requests
 import responses
+from click import testing
 
 from canu.cli import cli
 
@@ -38,13 +39,30 @@ password = "password"
 folder = "./"
 
 
+@patch("canu.utils.sls.config.load_kube_config")
+@patch("canu.utils.sls.client.CoreV1Api")
 @responses.activate
-def test_backup_network_sls_address_bad():
+def test_backup_network_sls_address_bad(mock_core_v1, mock_load_kube_config):
     """Test that the `canu backup network config` command errors with bad SLS address."""
     bad_sls_address = "192.168.254.254"
+
+    # Mock Kubernetes client
+    mock_secret_obj = mock_core_v1.return_value.list_namespaced_secret.return_value
+    mock_secret_obj.to_dict.return_value = {
+        "items": [{"data": {"client-secret": "dGVzdC1zZWNyZXQ="}}],  # base64 encoded "test-secret"
+    }
+
+    # Mock keycloak token request
+    responses.add(
+        responses.POST,
+        "https://api-gw-service-nmn.local/keycloak/realms/shasta/protocol/openid-connect/token",
+        json={"access_token": "test-token"},
+    )
+
+    # Mock SLS networks request - this should fail
     responses.add(
         responses.GET,
-        f"https://{bad_sls_address}/apis/sls/v1/networks",
+        f"https://api-gw-service-nmn.local/apis/sls/v1/networks",
         body=requests.exceptions.ConnectionError(
             "Failed to establish a new connection: [Errno 51] Network is unreachable",
         ),
@@ -65,7 +83,7 @@ def test_backup_network_sls_address_bad():
     )
     assert result.exit_code == 1
     print(result.output)
-    assert "Error collecting secret from Kubernetes:" in str(result.output)
+    assert "Error calling https://api-gw-service-nmn.local/apis/sls/v1/networks:" in str(result.output)
 
 
 def test_backup_network_sls_file_missing():

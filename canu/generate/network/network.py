@@ -23,6 +23,7 @@
 import click
 
 from canu.style import Style
+
 from .config import config
 
 

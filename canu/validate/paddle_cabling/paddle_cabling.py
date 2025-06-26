@@ -20,35 +20,31 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate the shcd against the current network cabling."""
+import datetime
 import ipaddress
 import json
 import logging
+import re
+import sys
+from collections import defaultdict
 from os import path
 from pathlib import Path
-import sys
-import datetime
-import re
-from collections import defaultdict
 
 import click
-from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
-from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
-from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
-from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import requests
+from click_option_group import RequiredMutuallyExclusiveOptionGroup, optgroup
+from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 from ruamel.yaml import YAML
 
 from canu.report.switch.cabling.cabling import get_lldp
 from canu.style import Style
-from canu.utils.cache import cache_directory
 from canu.validate.network.cabling.cabling import node_model_from_canu
 from canu.validate.paddle.paddle import node_model_from_paddle
 from canu.validate.shcd.shcd import node_list_warnings
-from canu.validate.shcd_cabling.shcd_cabling import (
-    combine_shcd_cabling,
-    print_combined_nodes,
-)
+from canu.validate.shcd_cabling.shcd_cabling import combine_shcd_cabling, print_combined_nodes
+from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 
 yaml = YAML()
 
@@ -60,7 +56,6 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent.parent
 
 # Schema and Data files
-canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
 # Get CSM versions from canu.yaml
@@ -74,12 +69,12 @@ log = logging.getLogger("validate_paddle_cabling")
 
 def create_cache_structure_from_lldp(switch_info, lldp_dict, arp):
     """Create a cache structure from LLDP data that matches the expected format.
-    
+
     Args:
         switch_info: Dictionary with switch platform_name, hostname and IP address
         lldp_dict: Dictionary with LLDP information
         arp: ARP dictionary
-        
+
     Returns:
         Dictionary representing switch in cache format
     """
@@ -102,9 +97,7 @@ def create_cache_structure_from_lldp(switch_info, lldp_dict, arp):
                     if arp[mac]["mac"] == port[index]["mac_addr"]
                 ]
             arp_list = ", ".join(arp_list)
-            neighbor_description = (
-                f"{port[index]['chassis_description'][:54]} {str(arp_list)}"
-            )
+            neighbor_description = f"{port[index]['chassis_description'][:54]} {str(arp_list)}"
             port_info = {
                 "neighbor": port[index]["chassis_name"],
                 "neighbor_description": neighbor_description,
@@ -118,7 +111,7 @@ def create_cache_structure_from_lldp(switch_info, lldp_dict, arp):
             }
 
             switch["cabling"][port_number].append(port_info)
-    
+
     switch["cabling"] = dict(switch["cabling"])
     return switch
 
@@ -238,7 +231,7 @@ def paddle_cabling(
 
     errors = []
     ips_length = len(ips)
-    
+
     # Create in-memory cache structure from live LLDP data
     switches_list = []
 
@@ -257,7 +250,7 @@ def paddle_cabling(
                 try:
                     # Get LLDP info directly (without caching to file)
                     switch_info, lldp_dict, arp = get_lldp(str(ip), credentials, return_error=True)
-                    
+
                     if switch_info and lldp_dict:
                         # Create cache structure from live LLDP data
                         switch_cache_entry = create_cache_structure_from_lldp(switch_info, lldp_dict, arp)
@@ -275,20 +268,24 @@ def paddle_cabling(
                     if exception_type == "HTTPError":
                         error_message = f"Error connecting to switch {ip}, check the IP, username, or password."
                     elif exception_type == "ConnectionError":
-                        error_message = f"Error connecting to switch {ip}, check the entered username, IP address and password."
+                        error_message = (
+                            f"Error connecting to switch {ip}, check the entered username, IP address and password."
+                        )
                     elif exception_type == "NetmikoTimeoutException":
                         error_message = f"Timeout error connecting to {ip}. Check the IP address and try again."
                     elif exception_type == "NetmikoAuthenticationException":
-                        error_message = f"Auth error connecting to {ip}. Check the credentials or IP address and try again"
+                        error_message = (
+                            f"Auth error connecting to {ip}. Check the credentials or IP address and try again"
+                        )
                     else:
                         error_message = f"Error connecting to switch {ip}."
 
                     errors.append([str(ip), error_message])
 
-    # Create in-memory cache structure that matches expected format
-    canu_cache = {
+    # Create in-memory network data structure that matches expected format
+    network_data = {
         "version": "1.0",  # Using a default version
-        "switches": switches_list
+        "switches": switches_list,
     }
 
     # Create Cabling Node factory and model
@@ -296,7 +293,7 @@ def paddle_cabling(
     cabling_factory = NetworkNodeFactory(architecture_version=architecture)
     cabling_node_list, cabling_warnings = node_model_from_canu(
         cabling_factory,
-        canu_cache,
+        network_data,
         ips,
     )
 
@@ -315,7 +312,7 @@ def paddle_cabling(
     combined_nodes = combine_shcd_cabling(
         paddle_node_list,
         cabling_node_list,
-        canu_cache,
+        network_data,
         ips,
         csm,
     )
