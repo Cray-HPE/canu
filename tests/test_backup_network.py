@@ -37,6 +37,7 @@ runner = testing.CliRunner()
 username = "user"
 password = "password"
 folder = "./"
+test_secret = "dGVzdC1zZWNyZXQ="  # base64 encoded "test-secret"
 
 
 @patch("canu.utils.sls.config.load_kube_config")
@@ -49,7 +50,7 @@ def test_backup_network_sls_address_bad(mock_core_v1, mock_load_kube_config):
     # Mock Kubernetes client
     mock_secret_obj = mock_core_v1.return_value.list_namespaced_secret.return_value
     mock_secret_obj.to_dict.return_value = {
-        "items": [{"data": {"client-secret": "dGVzdC1zZWNyZXQ="}}],  # base64 encoded "test-secret"
+        "items": [{"data": {"client-secret": test_secret}}],
     }
 
     # Mock keycloak token request
