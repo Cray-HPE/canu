@@ -26,6 +26,9 @@ import logging
 from os import path
 from pathlib import Path
 import sys
+import datetime
+import re
+from collections import defaultdict
 
 import click
 from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
@@ -67,6 +70,57 @@ with open(canu_config_file, "r") as canu_f:
 csm_options = canu_config["csm_versions"]
 
 log = logging.getLogger("validate_paddle_cabling")
+
+
+def create_cache_structure_from_lldp(switch_info, lldp_dict, arp):
+    """Create a cache structure from LLDP data that matches the expected format.
+    
+    Args:
+        switch_info: Dictionary with switch platform_name, hostname and IP address
+        lldp_dict: Dictionary with LLDP information
+        arp: ARP dictionary
+        
+    Returns:
+        Dictionary representing switch in cache format
+    """
+    switch = {
+        "ip_address": switch_info["ip"],
+        "cabling": defaultdict(list),
+        "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "hostname": switch_info["hostname"],
+        "platform_name": switch_info["platform_name"],
+        "vendor": switch_info["vendor"],
+    }
+
+    for port_number, port in lldp_dict.items():
+        for index, _entry in enumerate(port):
+            arp_list = []
+            if port[index]["chassis_name"] == "":
+                arp_list = [
+                    f"{arp[mac]['ip_address']}:{list(arp[mac]['port'])[0]}"
+                    for mac in arp
+                    if arp[mac]["mac"] == port[index]["mac_addr"]
+                ]
+            arp_list = ", ".join(arp_list)
+            neighbor_description = (
+                f"{port[index]['chassis_description'][:54]} {str(arp_list)}"
+            )
+            port_info = {
+                "neighbor": port[index]["chassis_name"],
+                "neighbor_description": neighbor_description,
+                "neighbor_port": port[index]["port_id"],
+                "neighbor_port_description": re.sub(
+                    r"(Interface\s+\d+ as )",
+                    "",
+                    port[index]["port_description"],
+                ),
+                "neighbor_chassis_id": port[index]["chassis_id"],
+            }
+
+            switch["cabling"][port_number].append(port_info)
+    
+    switch["cabling"] = dict(switch["cabling"])
+    return switch
 
 
 @click.command(
@@ -184,6 +238,9 @@ def paddle_cabling(
 
     errors = []
     ips_length = len(ips)
+    
+    # Create in-memory cache structure from live LLDP data
+    switches_list = []
 
     if ips:
         with click_spinner.spinner(
@@ -198,8 +255,13 @@ def paddle_cabling(
                     end="\r",
                 )
                 try:
-                    # Get LLDP info (stored in cache)
-                    get_lldp(str(ip), credentials, return_error=True)
+                    # Get LLDP info directly (without caching to file)
+                    switch_info, lldp_dict, arp = get_lldp(str(ip), credentials, return_error=True)
+                    
+                    if switch_info and lldp_dict:
+                        # Create cache structure from live LLDP data
+                        switch_cache_entry = create_cache_structure_from_lldp(switch_info, lldp_dict, arp)
+                        switches_list.append(switch_cache_entry)
 
                 except (
                     requests.exceptions.HTTPError,
@@ -223,9 +285,11 @@ def paddle_cabling(
 
                     errors.append([str(ip), error_message])
 
-    # Open the updated cache to model nodes
-    with open(canu_cache_file, "r+") as file:
-        canu_cache = yaml.load(file)
+    # Create in-memory cache structure that matches expected format
+    canu_cache = {
+        "version": "1.0",  # Using a default version
+        "switches": switches_list
+    }
 
     # Create Cabling Node factory and model
     log.debug("Creating model from switch LLDP data")
