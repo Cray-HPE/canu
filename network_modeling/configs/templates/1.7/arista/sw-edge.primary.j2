@@ -42,7 +42,6 @@ interface Vlan{{ variables.CHN_VLAN }}
    ipv6 virtual-router address {{ variables.CHN_IP_GATEWAY6 }}
    ipv6 address {{ variables.CHN_IP6 }}/{{variables.CHN_PREFIX_LEN6}}
 {%- endif %}
-
 ip routing
 {%- if variables.IPV6_ENABLED %}
 ipv6 unicast-routing
