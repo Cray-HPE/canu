@@ -1851,10 +1851,19 @@ def parse_sls_for_config(input_json):
 
     # Figure out up front if IPv6 support should be enabled or not.
     cmn_network = list(filter(lambda network: network.get("Name") == "CMN", input_json))
-    if cmn_network:
-        sls_variables["IPV6_ENABLED"] = bool(cmn_network[0].get("ExtraProperties", {}).get("CIDR6"))
-    else:
-        sls_variables["IPV6_ENABLED"] = False
+    chn_network = list(filter(lambda network: network.get("Name") == "CHN", input_json))
+
+    if cmn_network and chn_network:
+        cmn_has_ipv6 = bool(cmn_network[0].get("ExtraProperties", {}).get("CIDR6"))
+        chn_has_ipv6 = bool(chn_network[0].get("ExtraProperties", {}).get("CIDR6"))
+
+        if cmn_has_ipv6 and chn_has_ipv6:
+            sls_variables["IPV6_ENABLED"] = True
+        else:
+            sls_variables["IPV6_ENABLED"] = False
+            log.debug(
+                f"Missing IPv6 data. cmn_has_ipv6: {cmn_has_ipv6}, chn_has_ipv6: {chn_has_ipv6}",
+            )
 
     for sls_network in input_json:
         name = sls_network.get("Name", "")
