@@ -37,7 +37,15 @@ interface Vlan{{ variables.CHN_VLAN }}
    mtu 9214
    ip address {{ variables.CHN_IP }}/{{variables.CHN_PREFIX_LEN}}
    ip virtual-router address {{ variables.CHN_IP_GATEWAY }}
+{%- if variables.IPV6_ENABLED %}
+   ipv6 nd ra disabled all
+   ipv6 virtual-router address {{ variables.CHN_IP_GATEWAY6 }}
+   ipv6 address {{ variables.CHN_IP6 }}/{{variables.CHN_PREFIX_LEN6}}
+{%- endif %}
 ip routing
+{%- if variables.IPV6_ENABLED %}
+ipv6 unicast-routing
+{%- endif %}
 
 ip virtual-router mac-address 06:00:00:20:20:20
 
