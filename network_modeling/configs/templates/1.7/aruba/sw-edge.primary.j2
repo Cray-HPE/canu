@@ -57,6 +57,12 @@ interface vlan {{ variables.CHN_VLAN }}
     active-gateway ip {{ variables.CHN_IP_GATEWAY }}
     ip helper-address 10.92.100.222
     ip ospf 1 area 0.0.0.0
+{%- if variables.IPV6_ENABLED %}
+    ipv6 address {{ variables.CHN_IP6 }}/{{ variables.CHN_PREFIX_LEN6 }}
+    active-gateway ipv6 mac 12:00:00:00:6b:00
+    active-gateway ipv6 {{ variables.CHN_IP_GATEWAY6 }}
+    ipv6 ospfv3 1 area 0.0.0.0
+{%- endif %}
 ip dns server-address {{ variables.NMNLB_DNS }} vrf {{ variables.VRF }}
 
 vsx
