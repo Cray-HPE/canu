@@ -900,7 +900,8 @@ def generate_switch_config(
             sys.exit(1)
     else:
         variables["CMN_IP"] = sls_variables.get("CMN_IPs", {}).get(switch_name)
-        variables["CMN_IP6"] = sls_variables.get("CMN_IPs6", {}).get(switch_name)
+        if variables["IPV6_ENABLED"]:
+            variables["CMN_IP6"] = sls_variables.get("CMN_IPs6", {}).get(switch_name)
         variables["HMN_IP"] = sls_variables.get("HMN_IPs", {}).get(switch_name)
         variables["MTL_IP"] = sls_variables.get("MTL_IPs", {}).get(switch_name)
         variables["NMN_IP"] = sls_variables.get("NMN_IPs", {}).get(switch_name)
