@@ -99,6 +99,13 @@ access-list ip cmn-can
 {% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.CHN_NETWORK_IP }}/{{ variables.CHN_NETMASK }} {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }}
 {%- endif %}
 {% set sequence = sequence+10 %}    {{ sequence }} permit any any any
+{%- if variables.IPV6_ENABLED %}
+access-list ipv6 cmn-chn-ipv6
+{%- set sequence = 0 %}
+{% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.CMN6 }} {{ variables.CHN6 }}
+{% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.CHN6 }} {{ variables.CMN6 }}
+{% set sequence = sequence+10 %}    {{ sequence }} permit any any any
+{%- endif  %}
 apply access-list ip mgmt control-plane vrf default
 apply access-list ip mgmt control-plane vrf {{ variables.VRF }}
 {#- end acl #}
