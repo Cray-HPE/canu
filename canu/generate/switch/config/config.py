@@ -113,6 +113,8 @@ env = Environment(
     undefined=StrictUndefined,
 )
 
+TEMPLATES = {}
+
 # Get CSM versions from canu.yaml
 with open(canu_config_file, "r") as file:
     canu_config = yaml.load(file)
@@ -603,7 +605,7 @@ def generate_switch_config(
         switch_name: Switch hostname
         sls_variables: Dictionary containing SLS variables
         template_folder: Architecture folder contaning the switch templates
-        vendor_folder: Vendor folder contaning the template_folder
+        vendor_folder: Vendor folder containing the template_folder
         preserve: Folder where switch running configs exist.  This folder should be populated from the "canu backup network"
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
         edge: edge: Vendor of the edge router
@@ -619,7 +621,7 @@ def generate_switch_config(
     """
     node_shasta_name = get_shasta_name(switch_name, factory.lookup_mapper())
 
-    templates = {
+    templates = TEMPLATES or {
         "sw-spine": {
             "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-spine.primary.j2",
             "secondary": f"{csm}/{vendor_folder}/{template_folder}/sw-spine.secondary.j2",
