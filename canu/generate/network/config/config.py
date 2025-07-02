@@ -282,6 +282,7 @@ def config(
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
         log_: Level of logging.
+        enable_nmn_isolation: Enable/disable NMN isolation.
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 

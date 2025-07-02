@@ -337,6 +337,7 @@ def config(
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
         log_: Level of Logging
+        enable_nmn_isolation: Enable/disable NMN isolation.
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
@@ -2080,10 +2081,7 @@ def parse_sls_for_config(input_json):
             )
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", []):
                 cidr = netaddr.IPNetwork(subnets.get("CIDR"))
-                sls_variables["NMN_MTN_CABINETS_NETMASK"].append({
-		        "Netmask": str(cidr.netmask)
-               })
-
+                sls_variables["NMN_MTN_CABINETS_NETMASK"].append({"Netmask": str(cidr.netmask)})
         elif name == "HMN_MTN":
             sls_variables["HMN_MTN"] = netaddr.IPNetwork(
                 sls_network.get("ExtraProperties", {}).get(
