@@ -237,6 +237,13 @@ dash = "-" * 60
     is_flag=True,
 )
 @click.option(
+    "--enable-nmn-isolation",
+    help="Enable NMN isolation",
+    required=False,
+    default=False,
+    is_flag=True,
+)
+@click.option(
     "--log",
     "log_",
     help="Level of logging.",
@@ -264,6 +271,7 @@ def config(
     bgp_control_plane,
     vrf,
     bond_app_nodes,
+    enable_nmn_isolation,
     log_,
 ):
     """Generate switch config using the SHCD.
@@ -470,6 +478,7 @@ def config(
         bgp_control_plane,
         vrf,
         bond_app_nodes,
+        enable_nmn_isolation,
     )
 
     click.echo("\n")
@@ -594,6 +603,7 @@ def generate_switch_config(
     bgp_control_plane,
     vrf,
     bond_app_nodes,
+    enable_nmn_isolation,
 ):
     """Generate switch config.
 
@@ -613,6 +623,7 @@ def generate_switch_config(
         bgp_control_plane: Network used for BGP control plane
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
+        enable_nmn_isolation: Enable/disable NMN isolation.
 
 
 
@@ -858,6 +869,7 @@ def generate_switch_config(
         "BOND_APP_NODES": bond_app_nodes,
         "BLACK_HOLE_VLAN_1": black_hole_vlan_1,
         "BLACK_HOLE_VLAN_2": black_hole_vlan_2,
+        "ENABLE_NMN_ISOLATION": enable_nmn_isolation,
         "IPV6_ENABLED": sls_variables["IPV6_ENABLED"],
     }
 
