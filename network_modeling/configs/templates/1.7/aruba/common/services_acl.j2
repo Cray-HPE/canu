@@ -1,0 +1,19 @@
+{#- ACL Definitions for NMN Services Isolation #}
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp any eq dns any count
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp any eq dns any count
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp NMN_NCN eq ntp MANAGED_NODES count
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp MANAGED_NODES eq ntp NMN_NCN count
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp TFTP_SERVERS MANAGED_NODES count
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp MANAGED_NODES TFTP_SERVERS count
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp CRAY-SPIRE MANAGED_NODES count
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp MANAGED_NODES CRAY-SPIRE count
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp MANAGED_NODES FLUENTBIT-AGGREGATOR group NMN_TCP_SERVICES count
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp FLUENTBIT-AGGREGATOR group NMN_TCP_SERVICES MANAGED_NODES count
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp MANAGED_NODES FLUENTBIT-AGGREGATOR eq syslog count
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp FLUENTBIT-AGGREGATOR eq syslog MANAGED_NODES count
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp MANAGED_NODES ISTIO group NMN_TCP_SERVICES count
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp ISTIO group NMN_TCP_SERVICES MANAGED_NODES count
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp MANAGED_NODES NMN_K8S_SERVICE group NMN_TCP_SERVICES count
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp NMN_K8S_SERVICE group NMN_TCP_SERVICES MANAGED_NODES count
+{% set sequence = sequence+10 %}    {{ sequence }} permit any any any
+{#- end ACL Definitions for NMN Services Isolation #}
