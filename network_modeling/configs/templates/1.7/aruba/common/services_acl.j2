@@ -43,7 +43,7 @@ access-list ip MANAGED_NODE_ISOLATION
     380 deny any any any count 
 =======
 {%- if variables.ENABLE_NMN_ISOLATION  %}
-{% set sequence = sequence+10 %}    {{ sequence }} comment ALLOW services access from Managed Nodes
+{% set sequence = sequence+10 %}    {{ sequence }} comment ALLOW services between Management and Managed Nodes
 {% set sequence = sequence+10 %}    {{ sequence }} permit udp any eq dns any count
 {% set sequence = sequence+10 %}    {{ sequence }} permit tcp any eq dns any count
 {% set sequence = sequence+10 %}    {{ sequence }} permit udp NMN_NCN eq ntp MANAGED_NODES count
