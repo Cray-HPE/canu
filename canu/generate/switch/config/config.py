@@ -237,6 +237,13 @@ dash = "-" * 60
     is_flag=True,
 )
 @click.option(
+    "--enable-nmn-isolation",
+    help="Enable NMN isolation",
+    required=False,
+    default=False,
+    is_flag=True,
+)
+@click.option(
     "--log",
     "log_",
     help="Level of logging.",
@@ -264,6 +271,7 @@ def config(
     bgp_control_plane,
     vrf,
     bond_app_nodes,
+    enable_nmn_isolation,
     log_,
 ):
     """Generate switch config using the SHCD.
@@ -329,6 +337,7 @@ def config(
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
         log_: Level of Logging
+        enable_nmn_isolation: Enable/disable NMN isolation.
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
@@ -470,6 +479,7 @@ def config(
         bgp_control_plane,
         vrf,
         bond_app_nodes,
+        enable_nmn_isolation,
     )
 
     click.echo("\n")
@@ -594,6 +604,7 @@ def generate_switch_config(
     bgp_control_plane,
     vrf,
     bond_app_nodes,
+    enable_nmn_isolation,
 ):
     """Generate switch config.
 
@@ -613,6 +624,7 @@ def generate_switch_config(
         bgp_control_plane: Network used for BGP control plane
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
+        enable_nmn_isolation: Enable/disable NMN isolation.
 
 
 
@@ -841,6 +853,7 @@ def generate_switch_config(
         "CMN_IP_PRIMARY": sls_variables["CMN_IP_PRIMARY"],
         "CMN_IP_SECONDARY": sls_variables["CMN_IP_SECONDARY"],
         "NMN_MTN_CABINETS": sls_variables["NMN_MTN_CABINETS"],
+        "NMN_MTN_CABINETS_NETMASK": sls_variables["NMN_MTN_CABINETS_NETMASK"],
         "HMN_MTN_CABINETS": sls_variables["HMN_MTN_CABINETS"],
         "LEAF_BMC_VLANS": leaf_bmc_vlan,
         "SPINE_LEAF_VLANS": spine_leaf_vlan,
@@ -857,6 +870,7 @@ def generate_switch_config(
         "BOND_APP_NODES": bond_app_nodes,
         "BLACK_HOLE_VLAN_1": black_hole_vlan_1,
         "BLACK_HOLE_VLAN_2": black_hole_vlan_2,
+        "ENABLE_NMN_ISOLATION": enable_nmn_isolation,
         "IPV6_ENABLED": sls_variables["IPV6_ENABLED"],
     }
 
@@ -909,7 +923,6 @@ def generate_switch_config(
         variables["NMN_IP"] = sls_variables.get("NMN_IPs", {}).get(switch_name)
         last_octet = variables["HMN_IP"].split(".")[3]
         variables["LOOPBACK_IP"] = "10.2.0." + last_octet
-
     if node_shasta_name in ["sw-spine", "sw-leaf", "sw-cdu"]:
         # Get connections to switch pair
         pair_connections = get_pair_connections(cabling["nodes"], switch_name)
@@ -943,6 +956,7 @@ def generate_switch_config(
             ]
 
             destination_rack_list.append(int(re.search(r"\d+", destination_rack)[0]))
+
         for cabinets in (
             sls_variables["NMN_MTN_CABINETS"] + sls_variables["HMN_MTN_CABINETS"]
         ):
@@ -1847,6 +1861,7 @@ def parse_sls_for_config(input_json):
         "MTL_IPs": defaultdict(),
         "NMN_IPs": defaultdict(),
         "NMN_MTN_CABINETS": [],
+        "NMN_MTN_CABINETS_NETMASK": [],
         "HMN_MTN_CABINETS": [],
         "IPV6_ENABLED": None,
     }
@@ -2064,7 +2079,9 @@ def parse_sls_for_config(input_json):
             sls_variables["NMN_MTN_CABINETS"] = list(
                 sls_network.get("ExtraProperties", {}).get("Subnets", {}),
             )
-
+            for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", []):
+                cidr = netaddr.IPNetwork(subnets.get("CIDR"))
+                sls_variables["NMN_MTN_CABINETS_NETMASK"].append({"Netmask": str(cidr.netmask)})
         elif name == "HMN_MTN":
             sls_variables["HMN_MTN"] = netaddr.IPNetwork(
                 sls_network.get("ExtraProperties", {}).get(

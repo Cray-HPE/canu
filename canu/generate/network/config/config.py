@@ -184,6 +184,13 @@ csm_options = canu_config["csm_versions"]
     is_flag=True,
 )
 @click.option(
+    "--enable-nmn-isolation",
+    help="Enable NMN isolation",
+    required=False,
+    default=False,
+    is_flag=True,
+)
+@click.option(
     "--log",
     "log_",
     help="Level of logging.",
@@ -210,6 +217,7 @@ def config(
     bgp_control_plane,
     vrf,
     bond_app_nodes,
+    enable_nmn_isolation,
     log_,
 ):
     """Generate the config of all switches (Aruba, Dell, or Mellanox) on the network using the SHCD.
@@ -274,6 +282,7 @@ def config(
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
         log_: Level of logging.
+        enable_nmn_isolation: Enable/disable NMN isolation.
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
@@ -449,6 +458,7 @@ def config(
                 bgp_control_plane,
                 vrf,
                 bond_app_nodes,
+                enable_nmn_isolation,
             )
             all_unknown.extend(unknown)
             config_devices.update(devices)
