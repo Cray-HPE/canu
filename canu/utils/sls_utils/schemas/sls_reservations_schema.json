@@ -14,6 +14,10 @@
                     "type": "string",
                     "format": "ipv4"
                 },
+                "IPAddress6": {
+                    "type": "string",
+                    "format": "ipv6"
+                },
                 "Aliases": {
                     "type": "array",
                     "items": {
