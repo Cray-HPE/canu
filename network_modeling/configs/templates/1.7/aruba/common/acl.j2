@@ -65,8 +65,8 @@ access-list ip nmn-hmn
 {% set sequence = sequence+10 %}    {{ sequence }} permit udp any range 67 68 {{ variables.HMNLB_DHCP }}
 {% set sequence = sequence+10 %}    {{ sequence }} deny any any {{ variables.HMNLB_DHCP }}
 {%- include variables.CSM_VERSION+'/aruba/common/mtn_acl.j2' %}
-{% set sequence = sequence+10 %}    {{ sequence }} permit any any any
 {%- include variables.CSM_VERSION+'/aruba/common/services_acl.j2' %}
+{% set sequence = sequence+10 %}    {{ sequence }} permit any any any
 access-list ip cmn-can
 {%- set sequence = 0 %}
 {%- if variables.CMN and variables.CAN %}

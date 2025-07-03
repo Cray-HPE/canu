@@ -1,4 +1,5 @@
 {#- ACL Object groups for services ACL #}
+{%- if variables.ENABLE_NMN_ISOLATION  %}
 object-group ip address NMN_NCN
 {%- set ns = namespace(last_sequence=0) %}
 {%- for name, ip in variables.NMN_IPs.items() if name.startswith('ncn-') %}
@@ -42,4 +43,5 @@ object-group port NMN_UDP_SERVICES
     50 eq syslog
     60 eq 8514
     70 eq ntp
+{%- endif  %}
 {#- end ACL Object groups for services ACL #}
