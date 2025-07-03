@@ -1,0 +1,22 @@
+{%- if variables.ENABLE_NMN_ISOLATION  %}
+{% set sequence = sequence+10 %}    {{ sequence }} comment ALLOW traffic between NMN and NMN_MTN
+{%- if variables.NMN and variables.NMN_MTN %}
+{% set sequence = sequence+10 %}    {{ sequence }} permit any {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }} {{ variables.NMN_MTN_NETWORK_IP }}/{{ variables.NMN_MTN_NETMASK }}
+{% set sequence = sequence+10 %}    {{ sequence }} permit any {{ variables.NMN_MTN_NETWORK_IP }}/{{ variables.NMN_MTN_NETMASK }} {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }}
+{%- endif %}
+{%- if variables.NMN_MTN_CABINETS | length > 1 %}
+{% set sequence = sequence+10 %}    {{ sequence }} comment BLOCK traffic between NMN_MTN_CABINETS
+{%- set seq = namespace(val=sequence) -%}
+{%- for src in variables.NMN_MTN_CABINETS %}
+  {%- set src_index = loop.index0 %}
+  {%- for dst in variables.NMN_MTN_CABINETS %}
+    {%- set dst_index = loop.index0 %}
+    {%- if src.Name != dst.Name %}
+    {%- set seq.val = seq.val + 10 %}
+    {{ seq.val }} deny any {{ src.CIDR.split('/')[0] }}/{{ variables.NMN_MTN_CABINETS_NETMASK[src_index]['Netmask'] }} {{ dst.CIDR.split('/')[0] }}/{{ variables.NMN_MTN_CABINETS_NETMASK[dst_index]['Netmask'] }}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endfor -%}
+{% set sequence = seq.val %}
+{%- endif  %}
+{%- endif  %}

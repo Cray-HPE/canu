@@ -166,6 +166,13 @@ csm_options = canu_config["csm_versions"]
     is_flag=True,
 )
 @click.option(
+    "--enable-nmn-isolation",
+    help="Enable NMN isolation",
+    required=False,
+    default=False,
+    is_flag=True,
+)
+@click.option(
     "--log",
     "log_",
     help="Level of logging.",
@@ -198,6 +205,7 @@ def config(
     bgp_control_plane,
     vrf,
     bond_app_nodes,
+    enable_nmn_isolation,
     log_,
     nmn_pvlan,
 ):
@@ -262,6 +270,7 @@ def config(
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
         log_: Level of logging.
         nmn_pvlan: VLAN ID used for Isolated NMN PVLAN
+        enable_nmn_isolation: Enable/disable NMN isolation.
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
 
@@ -429,6 +438,7 @@ def config(
                 vrf,
                 bond_app_nodes,
                 nmn_pvlan,
+                enable_nmn_isolation,
             )
             all_unknown.extend(unknown)
             config_devices.update(devices)

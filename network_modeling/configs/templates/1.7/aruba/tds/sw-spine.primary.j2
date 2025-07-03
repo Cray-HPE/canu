@@ -31,6 +31,12 @@ vlan {{ variables.HMN_VLAN }}
     name HMN
 vlan {{ variables.CMN_VLAN }}
     name CMN
+    apply access-list ip cmn-can in
+    apply access-list ip cmn-can out
+{%- if variables.IPV6_ENABLED %}
+    apply access-list ipv6 cmn-chn-ipv6 in
+    apply access-list ipv6 cmn-chn-ipv6 out
+{%- endif %}
 vlan {{ variables.BLACK_HOLE_VLAN_1 }}
     name NULL{{ variables.BLACK_HOLE_VLAN_1 }}
     description Black hole VLAN {{ variables.BLACK_HOLE_VLAN_1 }}
@@ -107,6 +113,12 @@ interface vlan {{ variables.CMN_VLAN }}
     active-gateway ip mac 12:00:00:00:6b:00
     active-gateway ip {{ variables.CMN_IP_GATEWAY }}
     ip ospf 1 area 0.0.0.0
+{%- if variables.IPV6_ENABLED %}
+    ipv6 address {{ variables.CMN_IP6 }}/{{ variables.CMN_PREFIX_LEN6 }}
+    active-gateway ipv6 mac 12:00:00:00:6b:00
+    active-gateway ipv6 {{ variables.CMN_IP_GATEWAY6 }}
+    ipv6 ospfv3 1 area 0.0.0.0
+{%- endif %}
 {%- endif %}
 {%- if variables.CAN != None %}
 interface vlan {{ variables.CAN_VLAN }}
@@ -130,6 +142,11 @@ router ospf 1
     router-id {{ variables.LOOPBACK_IP }}
     redistribute bgp
     area 0.0.0.0
+{%- if variables.IPV6_ENABLED %}
+router ospfv3 1
+   router-id {{ variables.LOOPBACK_IP }}
+   area 0.0.0.0
+{%- endif %}
 {% include variables.CSM_VERSION+'/aruba/common/bgp.primary.j2' %}
 https-server vrf default
 https-server vrf mgmt

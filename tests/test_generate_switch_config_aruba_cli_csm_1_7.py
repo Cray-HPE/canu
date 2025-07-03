@@ -33,7 +33,8 @@ from canu.cli import cli
 
 test_file_directory = Path(__file__).resolve().parent
 
-csm = "1.6"
+# Set CSM version to test
+csm = "1.7"
 
 test_file_name = "Full_Architecture_Golden_Config_1.1.5.xlsx"
 test_file = path.join(test_file_directory, "data", test_file_name)

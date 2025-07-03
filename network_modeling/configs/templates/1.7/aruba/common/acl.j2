@@ -63,6 +63,7 @@ access-list ip nmn-hmn
 {% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMNLB_DHCP }} range 67 68 any
 {% set sequence = sequence+10 %}    {{ sequence }} permit udp any range 67 68 {{ variables.HMNLB_DHCP }}
 {% set sequence = sequence+10 %}    {{ sequence }} deny any any {{ variables.HMNLB_DHCP }}
+{%- include variables.CSM_VERSION+'/aruba/common/mtn_acl.j2' %}
 {% set sequence = sequence+10 %}    {{ sequence }} permit any any any
 access-list ip cmn-can
 {%- set sequence = 0 %}
@@ -80,6 +81,13 @@ access-list ip cmn-can
 {%- endif %}
 {% set sequence = sequence+10 %}    {{ sequence }} permit any any any
 {% include variables.CSM_VERSION+'/aruba/common/_acl_definitions.j2' %}
+{%- if variables.IPV6_ENABLED %}
+access-list ipv6 cmn-chn-ipv6
+{%- set sequence = 0 %}
+{% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.CMN6 }} {{ variables.CHN6 }}
+{% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.CHN6 }} {{ variables.CMN6 }}
+{% set sequence = sequence+10 %}    {{ sequence }} permit any any any
+{%- endif  %}
 apply access-list ip mgmt control-plane vrf default
 apply access-list ip mgmt control-plane vrf {{ variables.VRF }}
 {#- end acl #}

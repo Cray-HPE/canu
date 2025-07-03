@@ -20,7 +20,6 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Test CANU generate switch config commands."""
-import difflib
 from os import path
 from pathlib import Path
 
@@ -28,6 +27,7 @@ import pkg_resources
 from click import testing
 
 from canu.cli import cli
+from tests.lib.diff import diff_config_files
 
 test_file_directory = Path(__file__).resolve().parent
 data_directory = path.join(test_file_directory, "data")
@@ -59,30 +59,6 @@ canu_version = pkg_resources.get_distribution("canu").version
 banner_version = f"# CANU version: {canu_version}\n"
 
 runner = testing.CliRunner()
-
-
-def diff_config_files(golden_file_name, test_file_name):
-    """Compare a test config file with a golden config file."""
-    with open(golden_file_name, "r") as file:
-        golden_config = file.readlines()
-    with open(test_file_name, "r") as file:
-        test_config = file.readlines()
-
-    d = difflib.Differ()
-    full_diff = list(d.compare(golden_config, test_config))
-    # Clean up - remove same lines " ", diff description lines "?", and CANU version
-    # lines (tested elsewhere) so that a real diff size can be obtained. The CANU version
-    # banner actual number will often be different between golden and testing so we don't
-    # test this.
-    real_diff = [x for x in full_diff if x[0] != " " if x[0] != "?" if banner_version[:14] not in x]
-
-    # If there's a real diff then print out the verbose diff (in stdout)
-    # for debugging.
-    if len(real_diff) != 0:
-        for myline in full_diff:
-            print(myline, end="")
-
-    return len(real_diff)
 
 
 def test_switch_config_spine_primary():
