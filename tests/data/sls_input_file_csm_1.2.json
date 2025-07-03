@@ -207,7 +207,9 @@
                         "IPReservations": [
                             {"Name": "ncn-w001", "IPAddress": "192.168.4.4"},
                             {"Name": "ncn-w002", "IPAddress": "192.168.4.5"},
-                            {"Name": "ncn-w003", "IPAddress": "192.168.4.6"}
+                            {"Name": "ncn-w003", "IPAddress": "192.168.4.6"},
+                            {"Name": "rgw-vip", "IPAddress": "192.168.4.2"},
+                            {"Name": "kubeapi-vip", "IPAddress": "192.168.4.3"}
                         ],
                         "Name": "bootstrap_dhcp",
                         "VlanID": 2,
@@ -256,7 +258,7 @@
                 "CIDR": "10.94.100.0/24",
                 "Subnets": [
                     {
-                        "FullName": "NMN MetalLB",
+                        "FullName": "HMN MetalLB",
                         "CIDR": "10.94.100.0/24",
                         "IPReservations": [
                             {"Name": "cray-tftp", "IPAddress": "10.94.100.60"},
@@ -274,11 +276,16 @@
                 "CIDR": "10.92.100.0/24",
                 "Subnets": [
                     {
-                        "FullName": "HMN MetalLB",
+                        "FullName": "NMN MetalLB",
                         "CIDR": "10.92.100.0/24",
                         "IPReservations": [
                             {"Name": "cray-tftp", "IPAddress": "10.92.100.60"},
-                            {"Name": "unbound", "IPAddress": "10.92.100.225"}
+                            {"Name": "unbound", "IPAddress": "10.92.100.225"},
+                            {"Name": "istio-ingressgateway", "IPAddress": "0.92.100.71"},
+                            {"Name": "istio-ingressgateway-local", "IPAddress": "10.92.100.81"},
+                            {"Name": "rsyslog-agg-service", "IPAddress": "10.92.100.72"},
+                            {"Name": "spire-local", "IPAddress": "10.92.100.83"},
+                             {"Name": "spire", "IPAddress": "10.92.100.84"}
                         ],
                         "Name": "nmn_metallb_address_pool",
                         "Gateway": "10.92.100.1"
