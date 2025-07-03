@@ -39,6 +39,9 @@
                             "type": "string",
                             "pattern": "((^|\\.)((25[0-5])|(2[0-4]\\d)|(1\\d\\d)|([1-9]?\\d))){4}\\/(?:\\d|[12]\\d|3[01])$"
                         },
+                        "CIDR6": {
+                            "type": "string"
+                        },
                         "MTU": {
                             "type": "integer",
                             "minimum": 1400,
@@ -59,9 +62,16 @@
                                         "type": "string",
                                         "pattern": "((^|\\.)((25[0-5])|(2[0-4]\\d)|(1\\d\\d)|([1-9]?\\d))){4}\\/(?:\\d|[12]\\d|3[01])$"
                                     },
+                                    "CIDR6": {
+                                        "type": "string"
+                                    },
                                     "Gateway": {
                                         "type": "string",
                                         "format": "ipv4"
+                                    },
+                                    "Gateway6": {
+                                        "type": "string",
+                                        "format": "ipv6"
                                     },
                                     "VlanID": {
                                         "type": "integer",
@@ -98,6 +108,10 @@
                                                 "IPAddress": {
                                                     "type": "string",
                                                     "format": "ipv4"
+                                                },
+                                                "IPAddress6": {
+                                                    "type": "string",
+                                                    "format": "ipv6"
                                                 },
                                                 "Aliases": {
                                                     "type": "array",
