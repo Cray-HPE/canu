@@ -7,10 +7,13 @@ interface lag {{ node.config.LAG_NUMBER }} multi-chassis
     description {{ node.config.DESCRIPTION }}
     no routing
     vlan trunk native {{ variables.NATIVE_VLAN }}
-    vlan trunk allowed {{ variables.SPINE_LEAF_VLANS }}
+    vlan trunk allowed {{ variables.NCN_VLANS }}
     lacp mode active
     lacp fallback
     spanning-tree port-type admin-edge
+{%- if variables.NMN_ISOLATED_VLAN %}
+    private-vlan port-type promiscuous
+{%- endif %}
 
 interface 1/1/{{ node.config.PORT }}
     no shutdown

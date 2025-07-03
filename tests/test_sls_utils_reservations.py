@@ -70,8 +70,10 @@ def test_to_sls(reservation):
     reservation.comment("test comment")
     reservation.aliases(["alias1", "alias2"])
 
-    expected_sls.update({
-        "Comment": "test comment",
-        "Aliases": ["alias1", "alias2"],
-    })
+    expected_sls.update(
+        {
+            "Comment": "test comment",
+            "Aliases": ["alias1", "alias2"],
+        },
+    )
     assert reservation.to_sls() == expected_sls
