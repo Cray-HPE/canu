@@ -1,3 +1,6 @@
+{%- if sequence is not defined -%}
+{%- set sequence = 180 -%}
+{%- endif -%}
 {%- if variables.ENABLE_NMN_ISOLATION  %}
 {% set sequence = sequence+10 %}    {{ sequence }} comment ALLOW traffic between NMN and NMN_MTN
 {%- if variables.NMN and variables.NMN_MTN %}
