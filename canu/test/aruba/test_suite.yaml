@@ -32,6 +32,15 @@
     - spine
   pre_install: True
 
+- name: MTN ACL Test
+  task: show access-list ip nmn-hmn command
+  test: custom
+  function_file: mtn_acl_test.py
+  function_name: mtn_acl
+  device:
+    - cdu
+  pre_install: True
+
 - name: BGP Config
   task: show run bgp
   test: custom

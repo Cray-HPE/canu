@@ -23,7 +23,7 @@
 from ttp import ttp
 
 
-def bgp_config(result, vlan_ips, vrf):
+def bgp_config(result, vlan_ips, vrf, mtn_acls=None):
     """Verify NCN-W IPs in SLS are BGP neighbors on the switch.
 
     Args:

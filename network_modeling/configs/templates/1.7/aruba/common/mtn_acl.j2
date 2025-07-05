@@ -1,4 +1,7 @@
 {%- if variables.ENABLE_NMN_ISOLATION  %}
+{% if sequence is none or sequence is undefined %}
+  {% set sequence = 10 %}
+{% endif %}
 {% set sequence = sequence+10 %}    {{ sequence }} comment ALLOW traffic between NMN and NMN_MTN
 {%- if variables.NMN and variables.NMN_MTN %}
 {% set sequence = sequence+10 %}    {{ sequence }} permit any {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }} {{ variables.NMN_MTN_NETWORK_IP }}/{{ variables.NMN_MTN_NETMASK }}

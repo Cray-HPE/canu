@@ -23,7 +23,7 @@
 from ttp import ttp
 
 
-def vlan_interface_config(result, vlan_ips, vrf=None):
+def vlan_interface_config(result, vlan_ips, vrf=None, mtn_acls=None):
     """Verify the switch VLAN IPs match SLS.
 
     Args:
