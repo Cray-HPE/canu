@@ -98,3 +98,92 @@ def test_switch_config_acls(monkeypatch):
         )
         assert result.exit_code == 0
         assert diff_config_files(golden_config_file, config_file) == 0
+
+
+def test_services_acls(monkeypatch):
+    """Test CANU generation of ACLs for full systems."""
+    # Use sw-spine-001 as the switch even though we test only the ACL
+    switch_name = "sw-spine-001"
+
+    template_to_test = "services_acl.j2"
+    config_file = f"{template_to_test}.cfg"
+    golden_config_file = path.join(data_directory, f"golden_configs/individual_templates_1.7/{config_file}")
+
+    templates = {
+        "sw-spine": {
+            "primary": f"1.7/aruba/common/{template_to_test}",
+        },
+    }
+    monkeypatch.setattr(config, "TEMPLATES", templates)
+
+    with runner.isolated_filesystem():
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "generate",
+                "switch",
+                "config",
+                "--csm",
+                csm,
+                "--architecture",
+                architecture,
+                "--ccj",
+                test_ccj_file,
+                "--sls-file",
+                sls_file,
+                "--name",
+                switch_name,
+                "--out",
+                config_file,
+                "--enable-nmn-isolation",
+            ],
+        )
+        assert result.exit_code == 0
+        assert diff_config_files(golden_config_file, config_file) == 0
+
+
+def test_services_objects(monkeypatch):
+    """Test CANU generation of ACLs for full systems."""
+    # Use sw-spine-001 as the switch even though we test only the ACL
+    switch_name = "sw-spine-001"
+
+    template_to_test = "services_objects.j2"
+    config_file = f"{template_to_test}.cfg"
+    golden_config_file = path.join(data_directory, f"golden_configs/individual_templates_1.7/{config_file}")
+
+    templates = {
+        "sw-spine": {
+            "primary": f"1.7/aruba/common/{template_to_test}",
+        },
+    }
+    monkeypatch.setattr(config, "TEMPLATES", templates)
+
+    with runner.isolated_filesystem():
+        result = runner.invoke(
+            cli,
+            [
+                "--cache",
+                cache_minutes,
+                "generate",
+                "switch",
+                "config",
+                "--csm",
+                csm,
+                "--architecture",
+                architecture,
+                "--ccj",
+                test_ccj_file,
+                "--sls-file",
+                sls_file,
+                "--name",
+                switch_name,
+                "--out",
+                config_file,
+                "--enable-nmn-isolation",
+            ],
+        )
+        assert result.exit_code == 0
+        assert diff_config_files(golden_config_file, config_file) == 0
+
