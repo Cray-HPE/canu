@@ -1,40 +1,56 @@
 {#- ACL Object groups for services ACL #}
-{%- if variables.ENABLE_NMN_ISOLATION  %}
 object-group ip address NMN_NCN
 {%- set ns = namespace(last_sequence=0) %}
 {%- for name, ip in variables.NMN_IPs.items() if name.startswith('ncn-') %}
     {{ loop.index * 10 }} {{ ip }}
 {%- set ns.last_sequence = loop.index * 10 %}
 {%- endfor %}
+    {{ ns.last_sequence + 10 }} {{ variables.RGW_VIP }}
+    {{ ns.last_sequence + 20 }} {{ variables.KUBEAPI_VIP }}
+object-group ip address SPINE_SWITCHES
+{%- for ip in variables.SPINE_SWITCH_IPs %}
+    {{ loop.index * 10 }} {{ ip }}
+{%- endfor %}
+object-group ip address ALL_SWITCHES
+{%- for ip in variables.ALL_SWITCH_IPs %}
+    {{ loop.index * 10 }} {{ ip }}
+{%- endfor %}
+object-group ip address MTN_NETWORKS
+{%- if variables.NMN_MTN_NETWORK_IP and variables.NMN_MTN_NETMASK %}
+    10 {{ variables.NMN_MTN_NETWORK_IP }}/{{ variables.NMN_MTN_NETMASK }}
+{%- endif %}
+{%- if variables.NMN_MTN_CABINETS %}
+{%- set ns = namespace(sequence=20) %}
+{%- for cabinet in variables.NMN_MTN_CABINETS %}
+    {{ ns.sequence }} {{ cabinet.CIDR }}
+{%- set ns.sequence = ns.sequence + 10 %}
+{%- endfor %}
+{%- endif %}
 object-group ip address MANAGED_NODES
     10 {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }}
-object-group ip address NMN_K8S_API
-    10 {{ variables.RGW_VIP }}
-    20 {{ variables.KUBEAPI_VIP }}
-    30 {{ variables.NMNLB_NETWORK_IP }}/{{ variables.NMNLB_NETMASK }}
-object-group ip address TFTP_SERVER
+{%- if variables.NMN_MTN_NETWORK_IP and variables.NMN_MTN_NETMASK %}
+    20 {{ variables.NMN_MTN_NETWORK_IP }}/{{ variables.NMN_MTN_NETMASK }}
+{%- endif %}
+object-group ip address NMN_K8S_SERVICE
+    10 {{ variables.NMNLB_NETWORK_IP }}/{{ variables.NMNLB_NETMASK }}
+    20 {{ variables.RGW_VIP }}
+object-group ip address TFTP_SERVERS
     10 {{ variables.NMNLB_TFTP }}
-object-group ip address ISTIO
-    10 {{ variables.ISTIO }}
-    20 {{ variables.ISTIO_LOCAL }}
-object-group ip address CRAY-SPIRE
-    10 {{ variables.SPIRE_CLUSTER }}
-    20 {{ variables.SPIRE_LOCAL }}
-object-group ip address FLUENTBIT_AGGREGATOR
-     10 {{ variables.FLUENTBIT_AGGREGATOR }}
 object-group port NMN_TCP_SERVICES
     10 eq dns
     20 eq dhcp-server
-    30 eq dhcp-client
-    40 eq http
-    50 eq https
-    60 eq syslog
-    70 eq 2020
-    80 eq 8080
-    90 eq 8081
-    100 eq 8883
-    110 eq 8888
-    120 eq 8514
+    30 eq http
+    40 eq https
+    50 eq syslog
+    60 eq 2020
+    70 eq 8080
+    80 eq 8081
+    90 eq 8883
+    100 eq 8888
+    110 eq 8514
+    120 eq 6817
+    130 eq 6818
+    140 eq 6819
 object-group port NMN_UDP_SERVICES
     10 eq dns
     20 eq dhcp-server
@@ -43,5 +59,4 @@ object-group port NMN_UDP_SERVICES
     50 eq syslog
     60 eq 8514
     70 eq ntp
-{%- endif  %}
 {#- end ACL Object groups for services ACL #}

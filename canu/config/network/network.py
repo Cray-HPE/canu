@@ -23,7 +23,8 @@ PROFILES = {
     "nmn-isolation-1.7": {
         "description": ("Applies the MANAGED_NODE_ISOLATION ACL to a CSM 1.7+ environment."),
         "templates": [
-            "1.7/aruba/common/_acl_definitions.j2",
+            "1.7/aruba/common/services_objects.j2",
+            "1.7/aruba/common/services_acl.j2",
             "1.7/aruba/common/_acl_apply_nmn_isolation_1.7.j2",
         ],
     },
@@ -31,7 +32,8 @@ PROFILES = {
         "description": ("Migrates switch ACLs from CSM 1.6 (nmn-hmn) to CSM 1.7 (MANAGED_NODE_ISOLATION)."),
         "templates": [
             "1.7/aruba/common/_acl_cleanup_nmn_hmn_1.6.j2",
-            "1.7/aruba/common/_acl_definitions.j2",
+            "1.7/aruba/common/services_objects.j2",
+            "1.7/aruba/common/services_acl.j2",
             "1.7/aruba/common/_acl_apply_nmn_isolation_1.7.j2",
         ],
     },
@@ -257,9 +259,14 @@ def network(
                 "KUBEAPI_VIP": sls_variables["KUBEAPI_VIP"],
                 "NMN_NETWORK_IP": sls_variables["NMN_NETWORK_IP"],
                 "NMN_NETMASK": sls_variables["NMN_NETMASK"],
+                "NMN_MTN_NETWORK_IP": sls_variables["NMN_MTN_NETWORK_IP"],
+                "NMN_MTN_NETMASK": sls_variables["NMN_MTN_NETMASK"],
                 "NMNLB_NETWORK_IP": sls_variables["NMNLB_NETWORK_IP"],
                 "NMNLB_NETMASK": sls_variables["NMNLB_NETMASK"],
                 "NMNLB_TFTP": sls_variables["NMNLB_TFTP"],
+                "NMN_MTN_CABINETS": sls_variables["NMN_MTN_CABINETS"],
+                "NMN_MTN_CABINETS_NETMASK": sls_variables["NMN_MTN_CABINETS_NETMASK"],
+                "HMN_MTN_CABINETS": sls_variables["HMN_MTN_CABINETS"],
             }
             config_to_apply = ""
             for template_file in selected_profile["templates"]:
