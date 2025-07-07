@@ -785,6 +785,13 @@ def generate_switch_config(
         "HMNLB": sls_variables["HMNLB"],
         "HMNLB_TFTP": sls_variables["HMNLB_TFTP"],
         "HMNLB_DHCP": "10.94.100.222",
+        "ISTIO": sls_variables["ISTIO"],
+        "ISTIO_LOCAL": sls_variables["ISTIO_LOCAL"],
+        "SPIRE_CLUSTER": sls_variables["SPIRE_CLUSTER"],
+        "SPIRE_LOCAL": sls_variables["SPIRE_LOCAL"],
+        "FLUENTBIT_AGGREGATOR": sls_variables["FLUENTBIT_AGGREGATOR"],
+        "RGW_VIP": sls_variables["RGW_VIP"],
+        "KUBEAPI_VIP": sls_variables["KUBEAPI_VIP"],
         "HMNLB_DNS": sls_variables["HMNLB_DNS"],
         "HMNLB_NETMASK": sls_variables["HMNLB_NETMASK"],
         "HMNLB_NETWORK_IP": sls_variables["HMNLB_NETWORK_IP"],
@@ -1638,6 +1645,13 @@ def parse_sls_for_config(input_json):
         "NMNLB_PREFIX_LEN": None,
         "NMNLB_TFTP": None,
         "NMNLB_DNS": None,
+        "ISTIO": None,
+        "ISTIO_LOCAL": None,
+        "SPIRE_CLUSTER": None,
+        "SPIRE_LOCAL": None,
+        "FLUENTBIT_AGGREGATOR": None,
+        "RGW_VIP": None,
+        "KUBEAPI_VIP": None,
         "CAN_IP_GATEWAY": None,
         "CHN_IP_GATEWAY": None,
         "CHN_IP_GATEWAY6": None,
@@ -1945,6 +1959,17 @@ def parse_sls_for_config(input_json):
                             sls_variables["NMNLB_TFTP"] = ip["IPAddress"]
                         elif ip["Name"] == "unbound":
                             sls_variables["NMNLB_DNS"] = ip["IPAddress"]
+                        elif ip["Name"] == "istio-ingressgateway":
+                            sls_variables["ISTIO"] = ip["IPAddress"]
+                        elif ip["Name"] == "istio-ingressgateway-local":
+                            sls_variables["ISTIO_LOCAL"] = ip["IPAddress"]
+                        elif ip["Name"] == "rsyslog-agg-service":
+                            sls_variables["FLUENTBIT_AGGREGATOR"] = ip["IPAddress"]
+                        elif ip["Name"] == "spire-local":
+                            sls_variables["SPIRE_LOCAL"] = ip["IPAddress"]
+                        elif ip["Name"] == "spire":
+                            sls_variables["SPIRE_CLUSTER"] = ip["IPAddress"]
+
             sls_variables["NMNLB_NETMASK"] = sls_variables["NMNLB"].netmask
             sls_variables["NMNLB_PREFIX_LEN"] = sls_variables["NMNLB"].prefixlen
             sls_variables["NMNLB_NETWORK_IP"] = sls_variables["NMNLB"].ip
