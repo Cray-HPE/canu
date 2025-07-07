@@ -1,4 +1,5 @@
 {#- ACL Definitions for NMN Services Isolation #}
+<<<<<<< HEAD
 access-list ip MANAGED_NODE_ISOLATION
 {%- if variables.NMN_MTN_NETWORK_IP and variables.NMN_MTN_NETMASK %}
     10 comment DENY MTN NETWORKS FROM TALKING TO EACH OTHER
@@ -40,4 +41,25 @@ access-list ip MANAGED_NODE_ISOLATION
     360 permit 112 NMN_NCN 224.0.0.18 count
     370 comment --- FINAL CATCH-ALL DENY ---
     380 deny any any any count 
+=======
+{%- if variables.ENABLE_NMN_ISOLATION  %}
+{% set sequence = sequence+10 %}    {{ sequence }} comment ALLOW services access from Managed Nodes
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp any eq dns any count
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp any eq dns any count
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp NMN_NCN eq ntp MANAGED_NODES count
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp MANAGED_NODES eq ntp NMN_NCN count
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp TFTP_SERVERS MANAGED_NODES count
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp MANAGED_NODES TFTP_SERVERS count
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp CRAY-SPIRE MANAGED_NODES count
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp MANAGED_NODES CRAY-SPIRE count
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp MANAGED_NODES FLUENTBIT-AGGREGATOR group NMN_TCP_SERVICES count
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp FLUENTBIT-AGGREGATOR group NMN_TCP_SERVICES MANAGED_NODES count
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp MANAGED_NODES FLUENTBIT-AGGREGATOR eq syslog count
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp FLUENTBIT-AGGREGATOR eq syslog MANAGED_NODES count
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp MANAGED_NODES ISTIO group NMN_TCP_SERVICES count
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp ISTIO group NMN_TCP_SERVICES MANAGED_NODES count
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp MANAGED_NODES NMN_K8S_SERVICE group NMN_TCP_SERVICES count
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp NMN_K8S_SERVICE group NMN_TCP_SERVICES MANAGED_NODES count
+{%- endif  %}
+>>>>>>> 3836cfe (added feature flag)
 {#- end ACL Definitions for NMN Services Isolation #}
