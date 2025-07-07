@@ -26,7 +26,7 @@ def mtn_acl(result, vlan_ips=None, vrf=None, mtn_acls=None):
     """Verify NCN-W IPs in SLS are BGP neighbors on the switch.
 
     Args:
-        result: show run bgp
+        result: show access-list ip nmn-hmn command
         vlan_ips: None
         vrf: None
         mtn_acls: rendered ACLs for MTN cabinets
