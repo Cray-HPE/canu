@@ -1,4 +1,5 @@
 {#- acl #}
+{%- include variables.CSM_VERSION+'/aruba/common/services_objects.j2' %}
 access-list ip mgmt
 {% set sequence = 10 %}    {{ sequence }} comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET and CMN
 {% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq ssh
@@ -64,6 +65,7 @@ access-list ip nmn-hmn
 {% set sequence = sequence+10 %}    {{ sequence }} permit udp any range 67 68 {{ variables.HMNLB_DHCP }}
 {% set sequence = sequence+10 %}    {{ sequence }} deny any any {{ variables.HMNLB_DHCP }}
 {%- include variables.CSM_VERSION+'/aruba/common/mtn_acl.j2' %}
+{%- include variables.CSM_VERSION+'/aruba/common/services_acl.j2' %}
 {% set sequence = sequence+10 %}    {{ sequence }} permit any any any
 access-list ip cmn-can
 {%- set sequence = 0 %}
