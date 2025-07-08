@@ -186,4 +186,3 @@ def test_services_objects(monkeypatch):
         )
         assert result.exit_code == 0
         assert diff_config_files(golden_config_file, config_file) == 0
-
