@@ -1,9 +1,9 @@
 {#- ACL Definitions for NMN Services Isolation #}
-{%- if variables.ENABLE_NMN_ISOLATION  %}
-{%- if sequence is none or sequence is undefined %}
+{%- if variables.ENABLE_NMN_ISOLATION  -%}
+{%- if sequence is none or sequence is undefined -%}
   {#- Resets sequence number to 0 for templates tests #}
-  {% set sequence = 0 %}
-  {%- set seqns = namespace(seq=sequence) %}
+  {%- set sequence = 0 -%}
+  {%- set seqns = namespace(seq=sequence) -%}
 {%- endif %}
 {%- set sequence = seqns.seq %}
 {% set sequence = sequence+10 %}    {{ sequence }} comment ALLOW services between Management and Managed Nodes
@@ -23,6 +23,6 @@
 {% set sequence = sequence+10 %}    {{ sequence }} permit tcp ISTIO group NMN_TCP_SERVICES MANAGED_NODES count
 {% set sequence = sequence+10 %}    {{ sequence }} permit tcp MANAGED_NODES NMN_K8S_SERVICE group NMN_TCP_SERVICES count
 {% set sequence = sequence+10 %}    {{ sequence }} permit tcp NMN_K8S_SERVICE group NMN_TCP_SERVICES MANAGED_NODES count
-{%- set seqns.seq = sequence %}
-{%- endif  %}
-{#- end ACL Definitions for NMN Services Isolation #}
+{%- set seqns.seq = sequence -%}
+{%- endif  -%}
+{#- end ACL Definitions for NMN Services Isolation -#}
