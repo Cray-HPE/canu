@@ -31,6 +31,8 @@ vlan {{ variables.NMN_ISOLATED_VLAN }}
 {%- endif %}
 vlan {{ variables.HMN_VLAN }}
     name HMN
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
 vlan {{ variables.CMN_VLAN }}
     name CMN
     apply access-list ip cmn-can in
@@ -96,8 +98,6 @@ interface vlan {{ variables.NMN_VLAN }}
 interface vlan {{ variables.HMN_VLAN }}
     vrf attach {{ variables.VRF }}
     description HMN
-    apply access-list ip nmn-hmn routed-in
-    apply access-list ip nmn-hmn routed-out
     ip mtu 9198
     ip address {{ variables.HMN_IP }}/{{variables.HMN_PREFIX_LEN}}
     active-gateway ip mac 12:00:00:00:6b:00

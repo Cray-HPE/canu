@@ -27,6 +27,8 @@ vlan {{ variables.NMN_VLAN }}
 {%- endif %}
 vlan {{ variables.HMN_VLAN }}
     name HMN
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
 vlan {{ variables.CMN_VLAN }}
     name CMN
     apply access-list ip cmn-can in
