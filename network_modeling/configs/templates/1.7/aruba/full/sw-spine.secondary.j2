@@ -23,6 +23,9 @@ vlan {{ variables.NMN_VLAN }}
 {%- endif %}
 {%- if variables.ENABLE_NMN_ISOLATION %}
     apply access-list ip MANAGED_NODE_ISOLATION in
+{%- else %}
+    apply access-list ip nmn-hmn in
+    apply access-list ip nmn-hmn out
 {%- endif %}
 {%- if variables.NMN_ISOLATED_VLAN %}
 vlan {{ variables.NMN_ISOLATED_VLAN }}
@@ -84,8 +87,10 @@ interface vlan {{ variables.NATIVE_VLAN }}
 interface vlan {{ variables.NMN_VLAN }}
     vrf attach {{ variables.VRF }}
     description NMN
+{%- if variables.ENABLE_NMN_ISOLATION %}
     apply access-list ip nmn-hmn routed-in
     apply access-list ip nmn-hmn routed-out
+{%- endif %}
     ip mtu 9198
     ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}}
     active-gateway ip mac 12:00:00:00:6b:00
