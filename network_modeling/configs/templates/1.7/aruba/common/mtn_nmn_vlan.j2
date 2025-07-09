@@ -12,8 +12,10 @@ vlan {{ cabinet.VlanID }}
 interface vlan {{ cabinet.VlanID }}
     vrf attach {{ variables.VRF }}
     description {{ cabinet.Name }}_nmn
+{%- if variables.ENABLE_NMN_ISOLATION %}
     apply access-list ip nmn-hmn routed-in
     apply access-list ip nmn-hmn routed-out
+{%- endif %}
     ip mtu 9198
     ip address {{ cabinet.IP }}/{{ cabinet.PREFIX_LENGTH }}
     active-gateway ip mac 12:00:00:00:73:00
