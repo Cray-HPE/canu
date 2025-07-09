@@ -23,13 +23,14 @@
 from ttp import ttp
 
 
-def bgp_config(result, vlan_ips, vrf):
+def bgp_config(result, vlan_ips, vrf, mtn_acls=None):
     """Verify NCN-W IPs in SLS are BGP neighbors on the switch.
 
     Args:
         result: show run bgp
         vlan_ips: list of NCN and Switch IPs
         vrf: Named VRF used for CSM networks
+        mtn_acls: Mountain Cabinet ACLs
 
     Returns:
         Pass or fail
