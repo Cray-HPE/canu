@@ -28,6 +28,9 @@ import sys
 
 import click
 from jinja2 import Environment
+from jinja2 import FileSystemLoader
+from jinja2 import select_autoescape
+from jinja2 import StrictUndefined
 from nornir import InitNornir
 from nornir.core.filter import F
 from nornir_salt.plugins.functions import ResultSerializer, TabulateFormatter
@@ -35,6 +38,7 @@ from nornir_salt.plugins.processors import TestsProcessor
 from nornir_salt.plugins.tasks import netmiko_send_commands, scrapli_send_commands
 import yaml
 
+from canu.generate.switch.config.config import parse_sls_for_config
 from canu.style import Style
 from canu.utils.host_alive import host_alive
 from canu.utils.inventory import inventory
@@ -190,6 +194,120 @@ def test(
                         )
         return network_dict
 
+    def render_template(sls_json, template_path):
+        """Hack to grab `canu generate switch config` variables."""
+        sls_variables = parse_sls_for_config(
+            [network[x] for network in [sls_json.get("Networks", {})] for x in network],
+        )
+        variables = {
+            "NCN_W001": sls_variables["ncn_w001"],
+            "NCN_W002": sls_variables["ncn_w002"],
+            "NCN_W003": sls_variables["ncn_w003"],
+            "NCN_M001_HMN": sls_variables["ncn_m001_hmn"],
+            "NCN_M001_NMN": sls_variables["ncn_m001_nmn"],
+            "CAN": sls_variables["CAN"],
+            "CAN_VLAN": sls_variables["CAN_VLAN"],
+            "CAN_NETMASK": sls_variables["CAN_NETMASK"],
+            "CAN_NETWORK_IP": sls_variables["CAN_NETWORK_IP"],
+            "CAN_PREFIX_LEN": sls_variables["CAN_PREFIX_LEN"],
+            "CHN": sls_variables["CHN"],
+            "CHN6": sls_variables["CHN6"],
+            "CHN_VLAN": sls_variables["CHN_VLAN"],
+            "CHN_NETMASK": sls_variables["CHN_NETMASK"],
+            "CHN_NETWORK_IP": sls_variables["CHN_NETWORK_IP"],
+            "CHN_PREFIX_LEN": sls_variables["CHN_PREFIX_LEN"],
+            "CHN_PREFIX_LEN6": sls_variables["CHN_PREFIX_LEN6"],
+            "CHN_ASN": sls_variables["CHN_ASN"],
+            "CMN": sls_variables["CMN"],
+            "CMN6": sls_variables["CMN6"],
+            "CMN_VLAN": sls_variables["CMN_VLAN"],
+            "CMN_NETMASK": sls_variables["CMN_NETMASK"],
+            "CMN_NETWORK_IP": sls_variables["CMN_NETWORK_IP"],
+            "CMN_PREFIX_LEN": sls_variables["CMN_PREFIX_LEN"],
+            "CMN_PREFIX_LEN6": sls_variables["CMN_PREFIX_LEN6"],
+            "CMN_ASN": sls_variables["CMN_ASN"],
+            "MTL_NETMASK": sls_variables["MTL_NETMASK"],
+            "MTL_PREFIX_LEN": sls_variables["MTL_PREFIX_LEN"],
+            "NMN": sls_variables["NMN"],
+            "NMN_VLAN": sls_variables["NMN_VLAN"],
+            "NMN_NETMASK": sls_variables["NMN_NETMASK"],
+            "NMN_NETWORK_IP": sls_variables["NMN_NETWORK_IP"],
+            "NMN_PREFIX_LEN": sls_variables["NMN_PREFIX_LEN"],
+            "NMN_ASN": sls_variables["NMN_ASN"],
+            "HMN": sls_variables["HMN"],
+            "HMN_VLAN": sls_variables["HMN_VLAN"],
+            "HMN_NETMASK": sls_variables["HMN_NETMASK"],
+            "HMN_NETWORK_IP": sls_variables["HMN_NETWORK_IP"],
+            "HMN_PREFIX_LEN": sls_variables["HMN_PREFIX_LEN"],
+            "HMN_MTN": sls_variables["HMN_MTN"],
+            "HMN_MTN_NETMASK": sls_variables["HMN_MTN_NETMASK"],
+            "HMN_MTN_NETWORK_IP": sls_variables["HMN_MTN_NETWORK_IP"],
+            "HMN_MTN_PREFIX_LEN": sls_variables["HMN_MTN_PREFIX_LEN"],
+            "NMN_MTN": sls_variables["NMN_MTN"],
+            "NMN_MTN_NETMASK": sls_variables["NMN_MTN_NETMASK"],
+            "NMN_MTN_NETWORK_IP": sls_variables["NMN_MTN_NETWORK_IP"],
+            "NMN_MTN_PREFIX_LEN": sls_variables["NMN_MTN_PREFIX_LEN"],
+            "HMNLB": sls_variables["HMNLB"],
+            "HMNLB_TFTP": sls_variables["HMNLB_TFTP"],
+            "HMNLB_DHCP": "10.94.100.222",
+            "HMNLB_DNS": sls_variables["HMNLB_DNS"],
+            "HMNLB_NETMASK": sls_variables["HMNLB_NETMASK"],
+            "HMNLB_NETWORK_IP": sls_variables["HMNLB_NETWORK_IP"],
+            "HMNLB_PREFIX_LEN": sls_variables["HMNLB_PREFIX_LEN"],
+            "NMNLB": sls_variables["NMNLB"],
+            "NMNLB_TFTP": sls_variables["NMNLB_TFTP"],
+            "NMNLB_DHCP": "10.92.100.222",
+            "NMNLB_DNS": sls_variables["NMNLB_DNS"],
+            "NMNLB_NETMASK": sls_variables["NMNLB_NETMASK"],
+            "NMNLB_NETWORK_IP": sls_variables["NMNLB_NETWORK_IP"],
+            "NMNLB_PREFIX_LEN": sls_variables["NMNLB_PREFIX_LEN"],
+            "HMN_IP_GATEWAY": sls_variables["HMN_IP_GATEWAY"],
+            "MTL_IP_GATEWAY": sls_variables["MTL_IP_GATEWAY"],
+            "NMN_IP_GATEWAY": sls_variables["NMN_IP_GATEWAY"],
+            "CAN_IP_GATEWAY": sls_variables["CAN_IP_GATEWAY"],
+            "CAN_IP_PRIMARY": sls_variables["CAN_IP_PRIMARY"],
+            "CAN_IP_SECONDARY": sls_variables["CAN_IP_SECONDARY"],
+            "CHN_IP_GATEWAY": sls_variables["CHN_IP_GATEWAY"],
+            "CHN_IP_GATEWAY6": sls_variables["CHN_IP_GATEWAY6"],
+            "CHN_IP_PRIMARY": sls_variables["CHN_IP_PRIMARY"],
+            "CHN_IP_SECONDARY": sls_variables["CHN_IP_SECONDARY"],
+            "CHN_IP_PRIMARY6": sls_variables["CHN_IP_PRIMARY6"],
+            "CHN_IP_SECONDARY6": sls_variables["CHN_IP_SECONDARY6"],
+            "CMN_IP_GATEWAY": sls_variables["CMN_IP_GATEWAY"],
+            "CMN_IP_GATEWAY6": sls_variables["CMN_IP_GATEWAY6"],
+            "CMN_IP_PRIMARY": sls_variables["CMN_IP_PRIMARY"],
+            "CMN_IP_SECONDARY": sls_variables["CMN_IP_SECONDARY"],
+            "NMN_MTN_CABINETS": sls_variables["NMN_MTN_CABINETS"],
+            "NMN_MTN_CABINETS_NETMASK": sls_variables["NMN_MTN_CABINETS_NETMASK"],
+            "HMN_MTN_CABINETS": sls_variables["HMN_MTN_CABINETS"],
+            "CAN_IPs": sls_variables["CAN_IPs"],
+            "CHN_IPs": sls_variables["CHN_IPs"],
+            "CMN_IPs": sls_variables["CMN_IPs"],
+            "CMN_IPs6": sls_variables["CMN_IPs6"],
+            "NMN_IPs": sls_variables["NMN_IPs"],
+            "HMN_IPs": sls_variables["HMN_IPs"],
+            "SWITCH_ASN": sls_variables["SWITCH_ASN"],
+            "ENABLE_NMN_ISOLATION": True,
+            "IPV6_ENABLED": sls_variables["IPV6_ENABLED"],
+        }
+
+        # Import templates
+        network_templates_folder = path.join(
+            project_root,
+            "network_modeling",
+            "configs",
+            "templates",
+        )
+        env = Environment(
+            autoescape=select_autoescape(),
+            loader=FileSystemLoader(network_templates_folder),
+            undefined=StrictUndefined,
+        )
+        template = env.get_template(path.join(template_path))
+        rendered_template = template.render(variables=variables)
+
+        return rendered_template
+
     def send_ssh_commands(vendor, commands, nornir_object):
         if vendor == "aruba":
             results = nornir_object.run(task=scrapli_send_commands, commands=commands)
@@ -205,6 +323,10 @@ def test(
         sls_json = load_json(file=sls_file)
     else:
         sls_json = sls_dump(path="dumpstate")
+
+    # Rendering any templates needs to be done before  NetworkManager munges sls_json.
+    # There's a bug in NeworkManager where the ExtraProperties in json is lost.
+    mtn_acls = render_template(sls_json, "1.7/aruba/common/mtn_acl.j2")
 
     networks = NetworkManager(sls_json["Networks"])
 
@@ -348,7 +470,11 @@ def test(
                         )
                         # Update the dictionary entry
                         test_command["function_file"] = test_path
-                        test_command["function_kwargs"] = {"vlan_ips": vlan_ips, "vrf": vrf}
+                        test_command["function_kwargs"] = {
+                            "vlan_ips": vlan_ips,
+                            "vrf": vrf,
+                            "mtn_acls": mtn_acls,
+                        }
 
                 elif switch in devices and isinstance(test_command["task"], list):
                     switch_commands.extend(test_command["task"])

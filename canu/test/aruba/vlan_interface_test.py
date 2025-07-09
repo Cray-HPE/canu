@@ -23,13 +23,14 @@
 from ttp import ttp
 
 
-def vlan_interface_config(result, vlan_ips, vrf=None):
+def vlan_interface_config(result, vlan_ips, vrf=None, mtn_acls=None):
     """Verify the switch VLAN IPs match SLS.
 
     Args:
         result: show run
         vlan_ips: list of NCN and Switch IPs
         vrf: Named VRF used for CSM networks
+        mtn_acls: Mountain Cabinet ACLs
 
     Returns:
         Pass or fail
