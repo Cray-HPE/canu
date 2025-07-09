@@ -108,8 +108,6 @@ interface vlan {{ variables.HMN_VLAN }}
 {%- if variables.CMN != None %}
 interface vlan {{ variables.CMN_VLAN }}
     description CMN
-    apply access-list ip cmn-can routed-in
-    apply access-list ip cmn-can routed-out
     ip mtu 9198
     ip address {{ variables.CMN_IP }}/{{ variables.CMN_PREFIX_LEN }}
     active-gateway ip mac 12:00:00:00:6b:00

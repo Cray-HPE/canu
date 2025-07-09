@@ -87,8 +87,6 @@ interface vlan {{ variables.HMN_VLAN }}
     ip ospf passive
 interface vlan {{ variables.CMN_VLAN }}
     description CMN
-    apply access-list ip cmn-can routed-in
-    apply access-list ip cmn-can routed-out
     ip mtu 9198
     ip address {{ variables.CMN_IP }}/{{variables.CMN_PREFIX_LEN}}
     ip ospf 1 area 0.0.0.0
