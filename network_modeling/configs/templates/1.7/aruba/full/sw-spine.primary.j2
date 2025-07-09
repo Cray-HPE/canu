@@ -50,6 +50,8 @@ vlan {{ variables.BLACK_HOLE_VLAN_2 }}
 {%- if variables.CAN != None %}
 vlan {{ variables.CAN_VLAN }}
     name CAN
+    apply access-list ip cmn-can in
+    apply access-list ip cmn-can out
 {%- endif %}
 vlan 10
     name SUN
