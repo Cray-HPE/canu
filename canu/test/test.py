@@ -473,10 +473,7 @@ def test(
                         test_command["function_kwargs"] = {
                             "vlan_ips": vlan_ips,
                             "vrf": vrf,
-<<<<<<< HEAD
-=======
                             "mtn_acls": mtn_acls,
->>>>>>> main
                         }
 
                 elif switch in devices and isinstance(test_command["task"], list):
