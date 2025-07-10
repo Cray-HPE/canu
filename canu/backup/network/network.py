@@ -39,13 +39,13 @@ from canu.style import Style
 from canu.utils.inventory import inventory
 
 
-def backup_switches(online_hosts, folder, unsanitized=False):
+def backup_switches(online_hosts, folder, sanitized=True):
     """Backup switch configurations to specified folder.
 
     Args:
         online_hosts: Nornir inventory with online switches
         folder: Directory to save backup files
-        unsanitized: Whether to retain sensitive data
+        sanitized: Whether to remove sensitive data
 
     Returns:
         List of saved filenames
@@ -71,7 +71,7 @@ def backup_switches(online_hosts, folder, unsanitized=False):
     ]
 
     def save_config_to_file(hostname, config):
-        if not unsanitized:
+        if sanitized:
             config = sanitize_config(config, sanitize_filters)
         filename = f"{hostname}.cfg"
         filepath = os.path.join(folder, filename)
@@ -165,8 +165,8 @@ else:
     prompt="Folder for configs",
 )
 @click.option(
-    "--unsanitized",
-    help="Retain sensitive data",
+    "--no-sanitize",
+    help="Retain sensitive data (skip sanitization)",
     is_flag=True,
     required=False,
 )
@@ -181,7 +181,7 @@ def network(
     network,
     log_,
     folder,
-    unsanitized,
+    no_sanitize,
 ):
     """Canu backup network config."""
     if not password:
@@ -231,7 +231,7 @@ def network(
             "  Connecting",
             end="\r",
         )
-        saved_files = backup_switches(online_hosts, folder, unsanitized)
+        saved_files = backup_switches(online_hosts, folder, sanitized=not no_sanitize)
 
     click.secho("\nRunning Configs Saved\n---------------------", fg="green")
     for filename in saved_files:
