@@ -256,6 +256,13 @@ def test(
             "HMNLB_PREFIX_LEN": sls_variables["HMNLB_PREFIX_LEN"],
             "NMNLB": sls_variables["NMNLB"],
             "NMNLB_TFTP": sls_variables["NMNLB_TFTP"],
+            "ISTIO": sls_variables["ISTIO"],
+            "ISTIO_LOCAL": sls_variables["ISTIO_LOCAL"],
+            "SPIRE_CLUSTER": sls_variables["SPIRE_CLUSTER"],
+            "SPIRE_LOCAL": sls_variables["SPIRE_LOCAL"],
+            "FLUENTBIT_AGGREGATOR": sls_variables["FLUENTBIT_AGGREGATOR"],
+            "RGW_VIP": sls_variables["RGW_VIP"],
+            "KUBEAPI_VIP": sls_variables["KUBEAPI_VIP"],
             "NMNLB_DHCP": "10.92.100.222",
             "NMNLB_DNS": sls_variables["NMNLB_DNS"],
             "NMNLB_NETMASK": sls_variables["NMNLB_NETMASK"],
@@ -327,6 +334,7 @@ def test(
     # Rendering any templates needs to be done before  NetworkManager munges sls_json.
     # There's a bug in NeworkManager where the ExtraProperties in json is lost.
     mtn_acls = render_template(sls_json, "1.7/aruba/common/mtn_acl.j2")
+    services_acl = render_template(sls_json, "1.7/aruba/common/services_acl.j2")
 
     networks = NetworkManager(sls_json["Networks"])
 
@@ -474,6 +482,7 @@ def test(
                             "vlan_ips": vlan_ips,
                             "vrf": vrf,
                             "mtn_acls": mtn_acls,
+                            "services_acl": services_acl
                         }
 
                 elif switch in devices and isinstance(test_command["task"], list):
