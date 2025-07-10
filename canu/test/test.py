@@ -482,7 +482,7 @@ def test(
                             "vlan_ips": vlan_ips,
                             "vrf": vrf,
                             "mtn_acls": mtn_acls,
-                            "services_acl": services_acl
+                            "services_acl": services_acl,
                         }
 
                 elif switch in devices and isinstance(test_command["task"], list):
