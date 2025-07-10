@@ -35,7 +35,7 @@ End
 
 It 'cache generate network config --help'
   When call canu generate network config --help
-  The lines of stdout should equal 82
+  The lines of stdout should equal 85
   The line 1 of stdout should equal 'Usage: canu generate network config [OPTIONS]'
 End
 
@@ -47,6 +47,6 @@ End
 
 It 'cache generate switch config --help'
   When call canu generate switch config --help
-  The lines of stdout should equal 85
+  The lines of stdout should equal 88
   The line 1 of stdout should equal 'Usage: canu generate switch config [OPTIONS]'
 End
