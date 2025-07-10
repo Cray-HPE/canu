@@ -583,6 +583,7 @@ def pvlan(
                     bgp_control_plane="CHN",
                     vrf="CSM",
                     bond_app_nodes=False,
+                    enable_nmn_isolation=True,
                     nmn_pvlan=private_vlan,  # This enables private VLAN in templates
                 )
 

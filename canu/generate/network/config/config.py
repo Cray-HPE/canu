@@ -165,12 +165,24 @@ csm_options = canu_config["csm_versions"]
     default=False,
     is_flag=True,
 )
-@click.option(
+@optgroup.group(
+    "NMN Isolation Settings",
+    help="Options for configuring NMN isolation",
+)
+@optgroup.option(
     "--enable-nmn-isolation",
-    help="Enable NMN isolation",
+    help="Enable NMN isolation (must be used together with --nmn-pvlan)",
     required=False,
     default=False,
     is_flag=True,
+)
+@optgroup.option(
+    "--nmn-pvlan",
+    help="VLAN ID used for Isolated NMN PVLAN (must be used together with --enable-nmn-isolation)",
+    is_flag=False,
+    required=False,
+    flag_value=502,
+    type=click.IntRange(1, 4094),
 )
 @click.option(
     "--log",
@@ -178,14 +190,6 @@ csm_options = canu_config["csm_versions"]
     help="Level of logging.",
     type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
     default="ERROR",
-)
-@click.option(
-    "--nmn-pvlan",
-    help="VLAN ID used for Isolated NMN PVLAN (must be an integer between 1 and 4094)",
-    is_flag=False,
-    required=False,
-    flag_value=502,
-    type=click.IntRange(1, 4094),
 )
 @click.pass_context
 def config(
@@ -271,8 +275,21 @@ def config(
         log_: Level of logging.
         nmn_pvlan: VLAN ID used for Isolated NMN PVLAN
         enable_nmn_isolation: Enable/disable NMN isolation.
+
+    Raises:
+        ClickException: If --enable-nmn-isolation is used without --nmn-pvlan, or if --nmn-pvlan is used without --enable-nmn-isolation.
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
+
+    # Validate NMN isolation settings
+    if enable_nmn_isolation and nmn_pvlan is None:
+        raise click.ClickException(
+            "The --nmn-pvlan flag is required when --enable-nmn-isolation is used.",
+        )
+    if nmn_pvlan is not None and not enable_nmn_isolation:
+        raise click.ClickException(
+            "The --enable-nmn-isolation flag is required when --nmn-pvlan is used.",
+        )
 
     # SHCD Parsing
     if shcd:

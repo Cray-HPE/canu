@@ -133,6 +133,8 @@ def test_services_acls(monkeypatch):
                 "--out",
                 config_file,
                 "--enable-nmn-isolation",
+                "--nmn-pvlan",
+                502,
             ],
         )
         assert result.exit_code == 0
@@ -175,6 +177,8 @@ def test_services_objects(monkeypatch):
                 "--out",
                 config_file,
                 "--enable-nmn-isolation",
+                "--nmn-pvlan",
+                502,
             ],
         )
         assert result.exit_code == 0
@@ -217,6 +221,8 @@ def test_mtn_acls(monkeypatch):
                 "--out",
                 config_file,
                 "--enable-nmn-isolation",
+                "--nmn-pvlan",
+                502,
             ],
         )
         assert result.exit_code == 0
