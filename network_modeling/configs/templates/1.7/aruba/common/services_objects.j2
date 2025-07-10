@@ -22,7 +22,7 @@ object-group ip address MTN_NETWORKS
 {%- if variables.NMN_MTN_CABINETS %}
 {%- set ns = namespace(sequence=20) %}
 {%- for cabinet in variables.NMN_MTN_CABINETS %}
-    {{ ns.sequence }} {{ cabinet.CIDR }}
+    {{ ns.sequence }} {{ cabinet.CIDR.split('/')[0] }}/{{ '255.255.252.0' if cabinet.CIDR.split('/')[1] == '22' else '255.255.248.0' }}
 {%- set ns.sequence = ns.sequence + 10 %}
 {%- endfor %}
 {%- endif %}

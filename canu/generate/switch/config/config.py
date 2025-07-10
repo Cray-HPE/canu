@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2024 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -1908,6 +1908,7 @@ def parse_sls_for_config(input_json):
             for subnets in sls_network.get("ExtraProperties", {}).get("Subnets", []):
                 cidr = netaddr.IPNetwork(subnets.get("CIDR"))
                 sls_variables["NMN_MTN_CABINETS_NETMASK"].append({"Netmask": str(cidr.netmask)})
+                print(sls_variables["NMN_MTN_CABINETS_NETMASK"])
         elif name == "HMN_MTN":
             sls_variables["HMN_MTN"] = netaddr.IPNetwork(
                 sls_network.get("ExtraProperties", {}).get(
