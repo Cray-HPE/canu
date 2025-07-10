@@ -266,7 +266,6 @@ def network(
         if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
             project_root = sys._MEIPASS
         else:
-            prog = __file__
             project_root = Path(__file__).resolve().parent.parent.parent.parent
 
         network_templates_folder = f"{project_root}/network_modeling/configs/templates"
