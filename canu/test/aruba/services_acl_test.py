@@ -19,11 +19,11 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-"""parse aruba mgmt ACL config for MTN cabinet ACLs."""
+"""parse aruba mgmt ACL config for Services ACLs."""
 
 
-def mtn_acl(result, vlan_ips=None, vrf=None, mtn_acls=None, services_acl=None):
-    """Verify NCN-W IPs in SLS are BGP neighbors on the switch.
+def services_acl(result, vlan_ips=None, vrf=None, mtn_acls=None, services_acl=None):
+    """Verify services ACLs on the switch.
 
     Args:
         result: show access-list ip nmn-hmn command
@@ -41,26 +41,25 @@ def mtn_acl(result, vlan_ips=None, vrf=None, mtn_acls=None, services_acl=None):
     result = "PASS"
     success = True
 
-    # Clean up the rendered MTN ACLs
-    required_mtn_acls = []
-    for required_acl in mtn_acls.splitlines():
+    # Comparing the rendered Services ACLs
+    required_services_acls = []
+    for required_acl in services_acl.splitlines():
         if required_acl == "":
             continue
         for string in ["comment", "permit", "deny"]:
             index = required_acl.find(string)
             if index != -1:
-                required_mtn_acls.append(required_acl[index:])
+                required_services_acls.append(required_acl[index:])
 
-    total_required_mtn_acls = len(required_mtn_acls)
+    total_required_services_acls = len(required_services_acls)
 
     found_acls = 0
-    for required_acl in required_mtn_acls:
+    for required_acl in required_services_acls:
         if running_acls.find(required_acl) != -1:
             found_acls += 1
 
-    if found_acls < total_required_mtn_acls:
-        exception = f"Only {found_acls} of the required {total_required_mtn_acls} ACLs found to " \
-                    f"isolate Mountain cabinets"
+    if found_acls < total_required_services_acls:
+        exception = f"Only {found_acls} of the required {total_required_services_acls} ACLs found to isolate services"
         result = "FAIL"
         success = False
 
