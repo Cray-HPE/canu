@@ -1,43 +1,55 @@
 {#- ACL Definitions for NMN Services Isolation #}
+
+{%- set acl_rules = [] -%}
+{#- Define ACL rules in order #}
+{%- if variables.NMN_MTN_NETWORK_IP and variables.NMN_MTN_NETMASK -%}
+{%- set _ = acl_rules.append({'type': 'comment', 'text': 'DENY MTN NETWORKS FROM TALKING TO EACH OTHER'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'deny any MTN_NETWORKS MTN_NETWORKS count'}) -%}
+{%- endif -%}
+
+{%- set _ = acl_rules.append({'type': 'comment', 'text': 'Permit Unrestricted NCN to NCN Communication'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit any NMN_NCN NMN_NCN count'}) -%}
+{%- set _ = acl_rules.append({'type': 'comment', 'text': 'Permit DHCP traffic'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit udp any range 67 68 any count'}) -%}
+{%- set _ = acl_rules.append({'type': 'comment', 'text': 'Permit node to request TFTP file'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit udp TFTP_SERVERS MANAGED_NODES count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit udp MANAGED_NODES TFTP_SERVERS count'}) -%}
+{%- set _ = acl_rules.append({'type': 'comment', 'text': 'Permit node to perform DNS lookups'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit udp any eq dns any count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp any eq dns any count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit udp MANAGED_NODES NMN_K8S_SERVICE eq dns count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit udp MANAGED_NODES NMN_NCN group NMN_UDP_SERVICES count'}) -%}
+{%- set _ = acl_rules.append({'type': 'comment', 'text': 'Permit NTP replies from NCNs'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit udp NMN_NCN eq ntp MANAGED_NODES count'}) -%}
+{%- set _ = acl_rules.append({'type': 'comment', 'text': 'Permit access to NMN_TCP_SERVICES'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp MANAGED_NODES NMN_K8S_SERVICE group NMN_TCP_SERVICES count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp NMN_K8S_SERVICE MANAGED_NODES group NMN_TCP_SERVICES count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp MANAGED_NODES NMN_NCN group NMN_TCP_SERVICES count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp NMN_NCN MANAGED_NODES group NMN_TCP_SERVICES count'}) -%}
+{%- set _ = acl_rules.append({'type': 'comment', 'text': 'Allow SSH from NCNs to Managed Nodes'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp NMN_NCN MANAGED_NODES eq ssh count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp MANAGED_NODES eq ssh NMN_NCN count'}) -%}
+{%- set _ = acl_rules.append({'type': 'comment', 'text': 'Allow ping'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit icmp any any count'}) -%}
+{%- set _ = acl_rules.append({'type': 'comment', 'text': 'Permit OSPF from switches'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit ospf ALL_SWITCHES any count'}) -%}
+{%- set _ = acl_rules.append({'type': 'comment', 'text': 'Permit BGP (port 179) between spines and NCNs'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp SPINE_SWITCHES NMN_NCN eq bgp count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp NMN_NCN SPINE_SWITCHES eq bgp count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit any NMN_K8S_SERVICE NMN_K8S_SERVICE count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit any NMN_K8S_SERVICE NMN_NCN count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit any NMN_NCN NMN_K8S_SERVICE count'}) -%}
+{%- set _ = acl_rules.append({'type': 'comment', 'text': 'Permit VRRP from NCNs'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit 112 NMN_NCN 224.0.0.18 count'}) -%}
+{%- set _ = acl_rules.append({'type': 'comment', 'text': '--- FINAL CATCH-ALL DENY ---'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'deny any any any count'}) -%}
+
 access-list ip MANAGED_NODE_ISOLATION
-{%- if variables.NMN_MTN_NETWORK_IP and variables.NMN_MTN_NETMASK %}
-    10 comment DENY MTN NETWORKS FROM TALKING TO EACH OTHER
-    20 deny any MTN_NETWORKS MTN_NETWORKS count
+{%- for rule in acl_rules %}
+{%- if rule.type == 'comment' %}
+    {{ loop.index * 10 }} comment {{ rule.text }}
+{%- else %}
+    {{ loop.index * 10 }} {{ rule.text }}
 {%- endif %}
-    30 comment Permit Unrestricted NCN to NCN Communication
-    40 permit any NMN_NCN NMN_NCN count
-    50 comment Permit DHCP traffic
-    60 permit udp any range 67 68 any count
-    70 comment Permit node to request TFTP file
-    80 permit udp TFTP_SERVERS MANAGED_NODES count
-    90 permit udp MANAGED_NODES TFTP_SERVERS count
-    100 comment Permit node to perform DNS lookups
-    110 permit udp any eq dns any count
-    120 permit tcp any eq dns any count
-    130 permit udp MANAGED_NODES NMN_K8S_SERVICE eq dns count
-    140 permit udp MANAGED_NODES NMN_NCN group NMN_UDP_SERVICES count
-    150 comment Permit NTP replies from NCNs
-    160 permit udp NMN_NCN eq ntp MANAGED_NODES count
-    170 comment Permit access to NMN_TCP_SERVICES
-    180 permit tcp MANAGED_NODES NMN_K8S_SERVICE group NMN_TCP_SERVICES count
-    190 permit tcp NMN_K8S_SERVICE MANAGED_NODES group NMN_TCP_SERVICES count
-    200 permit tcp MANAGED_NODES NMN_NCN group NMN_TCP_SERVICES count
-    210 permit tcp NMN_NCN MANAGED_NODES group NMN_TCP_SERVICES count
-    220 comment Allow SSH from NCNs to Managed Nodes
-    230 permit tcp NMN_NCN MANAGED_NODES eq ssh count
-    240 permit tcp MANAGED_NODES eq ssh NMN_NCN count
-    250 comment Allow ping
-    260 permit icmp any any count
-    270 comment Permit OSPF from switches
-    280 permit ospf ALL_SWITCHES any count
-    290 comment Permit BGP (port 179) between spines and NCNs
-    300 permit tcp SPINE_SWITCHES NMN_NCN eq bgp count
-    310 permit tcp NMN_NCN SPINE_SWITCHES eq bgp count
-    320 permit any NMN_K8S_SERVICE NMN_K8S_SERVICE count
-    330 permit any NMN_K8S_SERVICE NMN_NCN count
-    340 permit any NMN_NCN NMN_K8S_SERVICE count
-    350 comment Permit VRRP from NCNs
-    360 permit 112 NMN_NCN 224.0.0.18 count
-    370 comment --- FINAL CATCH-ALL DENY ---
-    380 deny any any any count 
+{%- endfor %}
 {#- end ACL Definitions for NMN Services Isolation #}

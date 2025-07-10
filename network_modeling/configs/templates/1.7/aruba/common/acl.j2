@@ -66,7 +66,7 @@ access-list ip nmn-hmn
 {% set sequence = sequence+10 %}    {{ sequence }} permit any any any
 {%- if variables.ENABLE_NMN_ISOLATION  %}
 {%- include variables.CSM_VERSION+'/aruba/common/services_objects.j2' %}
-{%- include variables.CSM_VERSION+'/aruba/common/services_acl.j2' %}
+{% include variables.CSM_VERSION+'/aruba/common/services_acl.j2' %}
 {%- endif %}
 access-list ip cmn-can
 {%- set sequence = 0 %}
