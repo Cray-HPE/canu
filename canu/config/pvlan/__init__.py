@@ -1,7 +1,6 @@
-#!/usr/bin/env sh
 # MIT License
 #
-# (C) Copyright 2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -20,27 +19,4 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-
-It 'cache --help'
-  When call canu cache --help
-  The lines of stdout should equal 11
-  The line 1 of stdout should equal 'Usage: canu cache [OPTIONS] COMMAND [ARGS]...'
-End
-
-It 'cache delete --help'
-  When call canu cache delete --help
-  The lines of stdout should equal 6
-  The line 1 of stdout should equal 'Usage: canu cache delete [OPTIONS]'
-End
-
-It 'cache location --help'
-  When call canu cache location --help
-  The lines of stdout should equal 6
-  The line 1 of stdout should equal 'Usage: canu cache location [OPTIONS]'
-End
-
-It 'cache print --help'
-  When call canu cache print --help
-  The lines of stdout should equal 6
-  The line 1 of stdout should equal 'Usage: canu cache print [OPTIONS]'
-End
+"""CANU config pvlan commands."""

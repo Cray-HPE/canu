@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -20,26 +20,24 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU (CSM Automatic Network Utility) floats through a Shasta network and makes setup and config breeze."""
+import json
+import sys
 from collections import defaultdict
 from importlib import metadata
-import json
 from os import environ, getenv, path
-import sys
 
 import certifi
 import click
 import requests
-from ruamel.yaml import YAML
 import urllib3
+from ruamel.yaml import YAML
 
 from canu.backup import backup
-from canu.cache import cache
 from canu.config import config
 from canu.generate import generate
 from canu.report import report
 from canu.style import Style
 from canu.test import test
-from canu.utils.cache import cache_switch
 from canu.validate import validate
 
 yaml = YAML()
@@ -70,24 +68,14 @@ CONTEXT_SETTING = {
     context_settings=CONTEXT_SETTING,
     cls=Style.CanuHelpColorsGroup,
 )
-@click.option(
-    "--cache",
-    "cache_minutes",
-    default=10,
-    show_default=True,
-    help="Max age in minutes of existing cache before making new API call.",
-)
 @click.version_option(version)
 @click.pass_context
-def cli(ctx, cache_minutes):
+def cli(ctx):
     """CANU (CSM Automatic Network Utility) floats through a Shasta network and makes setup and config breeze."""
     ctx.ensure_object(dict)
 
-    ctx.obj["cache_minutes"] = cache_minutes
-
 
 cli.add_command(backup.backup)
-cli.add_command(cache.cache)
 cli.add_command(config.config)
 cli.add_command(generate.generate)
 cli.add_command(report.report)
@@ -253,7 +241,7 @@ def init(ctx, sls_file, auth_token, sls_address, network, out):
 def parse_sls_json_for_ips(csm, network="HMN"):
     """Parse SLS JSON and return IPv4 addresses.
 
-    Defaults to the "HMN" network, but another network can be passed in. Cache the switch IP and hostname.
+    Defaults to the "HMN" network, but another network can be passed in.
 
     Args:
         csm: The SLS JSON to be parsed.
@@ -274,11 +262,6 @@ def parse_sls_json_for_ips(csm, network="HMN"):
                     if ip.get("Name", "").startswith("sw-"):
                         ip_address = ip.get("IPAddress", None)
                         hostname = ip.get("Name", "")
-                        switch_json = {
-                            "ip_address": ip_address,
-                            "hostname": hostname,
-                        }
-                        cache_switch(switch_json)
                         switch_addresses.append(ip_address)
                         if hostname:
                             switch_dict[hostname] = ip_address
@@ -287,7 +270,7 @@ def parse_sls_json_for_ips(csm, network="HMN"):
 
 
 def parse_sls_json_for_vendor(csm, switch_dict):
-    """Parse SLS JSON for switch vendor and cache the results.
+    """Parse SLS JSON for switch vendor information.
 
     Args:
         csm: The SLS JSON to be parsed.
@@ -299,15 +282,7 @@ def parse_sls_json_for_vendor(csm, switch_dict):
 
         for alias in alias_list:
             if alias.startswith("sw-"):
-                vendor = device["ExtraProperties"].get("Brand", "").lower()
-                hostname = alias
-
-                switch_json = {
-                    "ip_address": switch_dict[hostname],
-                    "hostname": hostname,
-                    "vendor": vendor,
-                }
-                cache_switch(switch_json)
+                pass
 
 
 if __name__ == "__main__":  # pragma: no cover

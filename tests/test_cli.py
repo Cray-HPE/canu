@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -22,13 +22,11 @@
 """Test CANU cli."""
 from os import urandom
 
-from click import testing
 import requests
 import responses
+from click import testing
 
 from canu.cli import cli
-from canu.utils.cache import remove_switch_from_cache
-
 
 fileout = "fileout.txt"
 sls_address = "api-gw-service-nmn.local"
@@ -70,8 +68,6 @@ def test_cli_init_csi_good():
         )
         assert result.exit_code == 0
         assert "2 IP addresses saved to fileout.txt" in str(result.output)
-        remove_switch_from_cache("192.168.1.2")
-        remove_switch_from_cache("192.168.1.3")
 
 
 def test_cli_init_sls_file_missing():
@@ -175,8 +171,6 @@ def test_cli_init_sls_good():
         )
         assert result.exit_code == 0
         assert "2 IP addresses saved to fileout.txt" in str(result.output)
-        remove_switch_from_cache("192.168.1.2")
-        remove_switch_from_cache("192.168.1.3")
 
 
 def test_cli_init_sls_token_flag_missing():

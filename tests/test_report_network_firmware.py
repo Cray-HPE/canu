@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -22,14 +22,12 @@
 """Test CANU report network firmware commands."""
 from unittest.mock import patch
 
-from click import testing
-from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
 import responses
+from click import testing
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 
 from canu.cli import cli
-from canu.utils.cache import remove_switch_from_cache
-
 
 csm = "1.0"
 username = "admin"
@@ -38,7 +36,6 @@ ip = "192.168.1.1"
 ips = "192.168.1.1"
 ip_dell = "192.168.1.2"
 ip_mellanox = "192.168.1.3"
-cache_minutes = 0
 runner = testing.CliRunner()
 
 
@@ -88,8 +85,6 @@ def test_network_firmware(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "firmware",
@@ -105,7 +100,6 @@ def test_network_firmware(switch_vendor):
         )
         assert result.exit_code == 0
         assert "Virtual.10.06.0001" in str(result.output)
-        remove_switch_from_cache(ip)
 
 
 @patch("canu.report.network.firmware.firmware.switch_vendor")
@@ -146,8 +140,6 @@ def test_network_firmware_file(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "firmware",
@@ -163,7 +155,6 @@ def test_network_firmware_file(switch_vendor):
         )
         assert result.exit_code == 0
         assert "Virtual.10.06.0001" in str(result.output)
-        remove_switch_from_cache(ip)
 
 
 @patch("canu.report.network.firmware.firmware.switch_vendor")
@@ -200,8 +191,6 @@ def test_network_firmware_json(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "firmware",
@@ -220,7 +209,6 @@ def test_network_firmware_json(switch_vendor):
         assert result.exit_code == 0
         assert '"current_version": "Virtual.10.06.0001"' in str(result.output)
         assert '"status": "Pass"' in str(result.output)
-        remove_switch_from_cache(ip)
 
 
 def test_network_firmware_missing_ips():
@@ -229,8 +217,6 @@ def test_network_firmware_missing_ips():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "firmware",
@@ -255,8 +241,6 @@ def test_network_firmware_mutually_exclusive_ips_and_file():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "firmware",
@@ -287,8 +271,6 @@ def test_network_firmware_invalid_ip():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "firmware",
@@ -317,8 +299,6 @@ def test_network_firmware_invalid_ip_file():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "firmware",
@@ -355,8 +335,6 @@ def test_network_firmware_bad_ip(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "firmware",
@@ -396,8 +374,6 @@ def test_network_firmware_bad_ip_file(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "firmware",
@@ -432,8 +408,6 @@ def test_network_firmware_bad_password(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "firmware",
@@ -485,8 +459,6 @@ def test_network_firmware_mismatch(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "firmware",
@@ -502,13 +474,11 @@ def test_network_firmware_mismatch(switch_vendor):
         )
         assert result.exit_code == 0
         assert "Fail - 1 switches" in str(result.output)
-        # Remove switch from cache file since it had incorrect information in it from this test
-        remove_switch_from_cache(ip)
 
 
 @patch("canu.report.network.firmware.firmware.switch_vendor")
 @patch("canu.report.network.firmware.firmware.get_firmware_dell")
-def test_network_firmware_timeout_exception(switch_vendor, get_firmware_dell):
+def test_network_firmware_timeout_exception(get_firmware_dell, switch_vendor):
     """Test that the `canu report network firmware` command catches timeout exception."""
     with runner.isolated_filesystem():
         switch_vendor.return_value = "dell"
@@ -516,8 +486,6 @@ def test_network_firmware_timeout_exception(switch_vendor, get_firmware_dell):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "firmware",
@@ -532,10 +500,7 @@ def test_network_firmware_timeout_exception(switch_vendor, get_firmware_dell):
             ],
         )
         assert result.exit_code == 0
-        assert (
-            "192.168.1.2     - Timeout error. Check the IP address and try again."
-            in str(result.output)
-        )
+        assert "192.168.1.2     - Timeout error. Check the IP address and try again." in str(result.output)
 
 
 @patch("canu.report.network.firmware.firmware.switch_vendor")
@@ -548,8 +513,6 @@ def test_network_firmware_auth_exception(switch_vendor, get_firmware_dell):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "firmware",
@@ -564,9 +527,8 @@ def test_network_firmware_auth_exception(switch_vendor, get_firmware_dell):
             ],
         )
         assert result.exit_code == 0
-        assert (
-            "192.168.1.2     - Authentication error. Check the credentials or IP address and try again"
-            in str(result.output)
+        assert "192.168.1.2     - Authentication error. Check the credentials or IP address and try again" in str(
+            result.output,
         )
 
 
@@ -587,8 +549,6 @@ def test_network_firmware_dell(get_firmware_dell, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "firmware",
@@ -606,7 +566,6 @@ def test_network_firmware_dell(get_firmware_dell, switch_vendor):
         assert "Pass    192.168.1.2     test-dell           10.5.1.4" in str(
             result.output,
         )
-        remove_switch_from_cache(ip_dell)
 
 
 @patch("canu.report.network.firmware.firmware.switch_vendor")
@@ -624,8 +583,6 @@ def test_network_firmware_dell_timeout(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "firmware",
@@ -640,10 +597,7 @@ def test_network_firmware_dell_timeout(switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert (
-            "192.168.1.2     - HTTP Error. Check the IP, username, or password"
-            in str(result.output)
-        )
+        assert "192.168.1.2     - HTTP Error. Check the IP, username, or password" in str(result.output)
 
 
 # Mellanox
@@ -663,8 +617,6 @@ def test_network_firmware_mellanox(get_firmware_mellanox, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "firmware",
@@ -682,7 +634,6 @@ def test_network_firmware_mellanox(get_firmware_mellanox, switch_vendor):
         assert "Pass    192.168.1.3     test-mellanox       3.9.1014" in str(
             result.output,
         )
-        remove_switch_from_cache(ip_mellanox)
 
 
 @patch("canu.report.network.firmware.firmware.switch_vendor")
@@ -696,8 +647,6 @@ def test_network_firmware_mellanox_timeout_error(netmiko_commands, switch_vendor
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "firmware",
@@ -712,10 +661,7 @@ def test_network_firmware_mellanox_timeout_error(netmiko_commands, switch_vendor
             ],
         )
         assert result.exit_code == 0
-        assert (
-            "192.168.1.3     - Timeout error. Check the IP address and try again."
-            in str(result.output)
-        )
+        assert "192.168.1.3     - Timeout error. Check the IP address and try again." in str(result.output)
 
 
 @patch("canu.report.network.firmware.firmware.switch_vendor")
@@ -729,8 +675,6 @@ def test_network_firmware_mellanox_auth_error(netmiko_commands, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "firmware",
@@ -745,9 +689,8 @@ def test_network_firmware_mellanox_auth_error(netmiko_commands, switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert (
-            "192.168.1.3     - Authentication error. Check the credentials or IP address and try again"
-            in str(result.output)
+        assert "192.168.1.3     - Authentication error. Check the credentials or IP address and try again" in str(
+            result.output,
         )
 
 
@@ -762,8 +705,6 @@ def test_network_firmware_no_vendor(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "network",
                 "firmware",

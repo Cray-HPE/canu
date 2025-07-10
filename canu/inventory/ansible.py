@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -22,10 +22,10 @@
 """Generates a dynamic Ansible inventory from SLS data."""
 import json
 import os
-from pathlib import Path
 import re
 import socket
 import sys
+from pathlib import Path
 
 import certifi
 import click

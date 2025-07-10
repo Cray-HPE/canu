@@ -34,7 +34,6 @@ data_directory = path.join(test_file_directory, "data")
 
 # Set CSM version to test
 csm = "1.7"
-cache_minutes = 0
 
 # SLS file to use
 sls_file_name = "sls_input_file_csm_1.2.json"
@@ -77,8 +76,6 @@ def test_switch_config_acls(monkeypatch):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -120,8 +117,6 @@ def test_services_acls(monkeypatch):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -138,6 +133,8 @@ def test_services_acls(monkeypatch):
                 "--out",
                 config_file,
                 "--enable-nmn-isolation",
+                "--nmn-pvlan",
+                502,
             ],
         )
         assert result.exit_code == 0
@@ -164,8 +161,6 @@ def test_services_objects(monkeypatch):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -182,6 +177,8 @@ def test_services_objects(monkeypatch):
                 "--out",
                 config_file,
                 "--enable-nmn-isolation",
+                "--nmn-pvlan",
+                502,
             ],
         )
         assert result.exit_code == 0
@@ -208,8 +205,6 @@ def test_mtn_acls(monkeypatch):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -226,6 +221,8 @@ def test_mtn_acls(monkeypatch):
                 "--out",
                 config_file,
                 "--enable-nmn-isolation",
+                "--nmn-pvlan",
+                502,
             ],
         )
         assert result.exit_code == 0

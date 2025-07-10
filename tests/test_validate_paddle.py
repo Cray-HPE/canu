@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -33,7 +33,7 @@ test_file_name = "Full_Architecture_Golden_Config_1.1.5.json"
 test_file = path.join(test_file_directory, "data", test_file_name)
 test_file_with_metadata_name = "Full_Architecture_Golden_Config_1.1.5.with_shcd_metadata.json"
 test_file_with_metadata = path.join(test_file_directory, "data", test_file_with_metadata_name)
-cache_minutes = 0
+
 runner = testing.CliRunner()
 
 
@@ -44,8 +44,6 @@ def test_validate_paddle():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "paddle",
                 "--ccj",
@@ -102,8 +100,6 @@ def test_validate_paddle_with_shcd_metadata():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "paddle",
                 "--ccj",
@@ -163,8 +159,6 @@ def test_validate_paddle_no_architecture():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "paddle",
                 "--ccj",
@@ -172,9 +166,8 @@ def test_validate_paddle_no_architecture():
             ],
         )
         assert result.exit_code == 0
-        assert (
-            "The key 'architecture' is missing from the CCJ. Ensure that you are using a validated CCJ."
-            in str(result.output)
+        assert "The key 'architecture' is missing from the CCJ. Ensure that you are using a validated CCJ." in str(
+            result.output,
         )
 
 

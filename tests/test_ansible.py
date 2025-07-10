@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -23,9 +23,9 @@
 import json
 import os
 
-from click import testing
 import mock
 import responses
+from click import testing
 
 import canu.inventory.ansible as ansible
 from canu.inventory.ansible import ansible_inventory
@@ -228,13 +228,18 @@ def mockenv(**envvars):
     return mock.patch.dict(os.environ, envvars)
 
 
-@mockenv(LANG="C.UTF-8", LC_ALL="C.UTF-8", SLS_API_GW=sls_address)
-@mock.patch("requests.get")
+@mockenv(LANG="C.UTF-8", LC_ALL="C.UTF-8", SLS_API_GW=sls_address, SLS_TOKEN="test-token")
 @responses.activate
-def test_mock_api_dumpstate(mock_get):
+def test_mock_api_dumpstate():
     """Run canu-inventory using the API."""
-    mock_get.return_value = mock.Mock(ok=True)
-    result = mock_get.return_value.json.return_value = dumpstate
+    # Mock the SLS dumpstate endpoint
+    responses.add(
+        responses.GET,
+        f"https://{sls_address}/apis/sls/v1/dumpstate",
+        json=dumpstate,
+        status=200,
+    )
+
     with runner.isolated_filesystem():
         result = runner.invoke(
             ansible_inventory,

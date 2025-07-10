@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -20,14 +20,14 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate switch running config against a config file."""
+import sys
 from os import path
 from pathlib import Path
-import sys
 
 import click
-from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
-from click_params import IPV4_ADDRESS
 import click_spinner
+from click_option_group import RequiredMutuallyExclusiveOptionGroup, optgroup
+from click_params import IPV4_ADDRESS
 from hier_config import HConfig, Host
 from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 from ruamel.yaml import YAML
@@ -391,9 +391,7 @@ def get_switch_config(ip, credentials, return_error=False):
         elif exception_type == "NetmikoAuthenticationException":
             error_message = "Authentication error. Check the credentials or IP address and try again"
         else:  # pragma: no cover
-            error_message = (
-                f"Error connecting to switch {ip}, {exception_type} {error}."
-            )
+            error_message = f"Error connecting to switch {ip}, {exception_type} {error}."
 
         click.secho(
             error_message,

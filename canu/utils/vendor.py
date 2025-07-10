@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -20,17 +20,12 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU vendor utils."""
-import datetime
 import re
 
 import click
-from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException, SSHDetect
 import requests
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException, SSHDetect
 
-from canu.utils.cache import (
-    cache_switch,
-    get_switch_from_cache,
-)
 from canu.utils.ssh import netmiko_command
 
 
@@ -39,7 +34,7 @@ def switch_vendor(
     credentials,
     return_error=False,
 ):
-    """Get a switch vendor. First try lookup from cache, then from the switch.
+    """Get a switch vendor by detecting it from the switch.
 
     Args:
         ip: Switch ip
@@ -54,18 +49,6 @@ def switch_vendor(
         NetmikoTimeoutException: Timeout error connecting to switch
         NetmikoAuthenticationException: Authentication error connecting to switch
     """
-    # Check if switch in cache
-    try:
-        cached_switch = get_switch_from_cache(str(ip))
-        vendor = cached_switch["vendor"]
-
-        if vendor is not None:
-            return vendor
-
-    # Switch not in cache
-    except Exception:
-        vendor = None
-
     # First try APIs (fast)
     is_aruba = check_aruba(ip, credentials)
     if is_aruba:
@@ -120,14 +103,7 @@ def switch_vendor(
                     raise NetmikoTimeoutException
                 return None
 
-        # Put vendor in cache
-        switch_cache = {
-            "ip_address": ip,
-            "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "vendor": vendor,
-        }
-
-        cache_switch(switch_cache)
+        # Vendor detected successfully
 
     except (
         NetmikoTimeoutException,
@@ -140,9 +116,13 @@ def switch_vendor(
         exception_type = type(err).__name__
 
         if exception_type == "NetmikoTimeoutException":
-            error_message = f"Timeout error connecting to switch {ip}, check the entered username, IP address and password."
+            error_message = (
+                f"Timeout error connecting to switch {ip}, check the entered username, IP address and password."
+            )
         elif exception_type == "NetmikoAuthenticationException":
-            error_message = f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again."
+            error_message = (
+                f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again."
+            )
         else:
             error_message = f"{exception_type}, {err}."
 
@@ -156,7 +136,7 @@ def switch_vendor(
 
 
 def check_aruba(ip, credentials):
-    """Check if a switch is an Aruba and cache the vendor if it is.
+    """Check if a switch is an Aruba.
 
     Args:
         ip: IPv4 address of the switch
@@ -184,20 +164,11 @@ def check_aruba(ip, credentials):
     ):
         return False
 
-    # Put vendor in cache
-    switch_cache = {
-        "ip_address": str(ip),
-        "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "vendor": "aruba",
-    }
-
-    cache_switch(switch_cache)
-
     return True
 
 
 def check_dell(ip, credentials):
-    """Check if a switch is a Dell and cache the vendor if it is.
+    """Check if a switch is a Dell.
 
     Args:
         ip: IPv4 address of the switch
@@ -220,20 +191,11 @@ def check_dell(ip, credentials):
     ):
         return False
 
-    # Put vendor in cache
-    switch_cache = {
-        "ip_address": str(ip),
-        "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "vendor": "dell",
-    }
-
-    cache_switch(switch_cache)
-
     return True
 
 
 def check_mellanox(ip, credentials):
-    """Check if a switch is a Mellanox and cache the vendor if it is.
+    """Check if a switch is a Mellanox.
 
     Args:
         ip: IPv4 address of the switch
@@ -254,14 +216,5 @@ def check_mellanox(ip, credentials):
         requests.exceptions.RequestException,
     ):
         return False
-
-    # Put vendor in cache
-    switch_cache = {
-        "ip_address": str(ip),
-        "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "vendor": "mellanox",
-    }
-
-    cache_switch(switch_cache)
 
     return True

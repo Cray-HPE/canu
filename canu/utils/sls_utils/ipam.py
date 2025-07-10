@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -339,10 +339,7 @@ def temp_is_subnet_of(a, b):
         # Always false if one is v4 and the other is v6.
         if a._version != b._version:
             raise TypeError(f"{a} and {b} are not of the same version")
-        return (
-            b.network_address <= a.network_address
-            and b.broadcast_address >= a.broadcast_address  # noqa W503
-        )
+        return b.network_address <= a.network_address and b.broadcast_address >= a.broadcast_address  # noqa W503
     except AttributeError as err:  # noqa
         raise TypeError(
             f"Unable to test subnet containment between {a} and {b}",

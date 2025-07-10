@@ -24,9 +24,9 @@ import json
 from os import path
 from pathlib import Path
 
-from click import testing
 import requests
 import responses
+from click import testing
 
 from canu.cli import cli
 
@@ -43,7 +43,6 @@ sls_file_name = "sls_input_file_csm_1.2.json"
 sls_file = path.join(test_file_directory, "data", sls_file_name)
 csm = "1.2"
 folder_name = "test_config"
-cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
 runner = testing.CliRunner()
 
@@ -55,8 +54,6 @@ def test_network_config():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "network",
                 "config",
@@ -93,8 +90,6 @@ def test_network_config_custom():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "network",
                 "config",
@@ -140,8 +135,6 @@ def test_network_config_folder_prompt():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "network",
                 "config",
@@ -177,8 +170,6 @@ def test_network_config_csi_file_missing():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "network",
                 "config",
@@ -209,8 +200,6 @@ def test_network_config_missing_file():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "network",
                 "config",
@@ -244,8 +233,6 @@ def test_network_config_bad_file():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "network",
                 "config",
@@ -276,8 +263,6 @@ def test_network_config_missing_tabs():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "network",
                 "config",
@@ -315,8 +300,6 @@ def test_network_config_bad_tab():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "network",
                 "config",
@@ -347,8 +330,6 @@ def test_network_config_corner_prompt():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "network",
                 "config",
@@ -385,8 +366,6 @@ def test_network_config_not_enough_corners():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "network",
                 "config",
@@ -420,9 +399,7 @@ def test_network_config_sls():
         with open(sls_file, "r") as read_file:
             sls_data = json.load(read_file)
 
-        sls_networks = [
-            network[x] for network in [sls_data.get("Networks", {})] for x in network
-        ]
+        sls_networks = [network[x] for network in [sls_data.get("Networks", {})] for x in network]
 
         responses.add(
             responses.GET,
@@ -433,8 +410,6 @@ def test_network_config_sls():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "network",
                 "config",
@@ -481,8 +456,6 @@ def test_network_config_sls_token_bad():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "network",
                 "config",
@@ -517,8 +490,6 @@ def test_network_config_sls_token_missing():
     result = runner.invoke(
         cli,
         [
-            "--cache",
-            cache_minutes,
             "generate",
             "network",
             "config",
@@ -560,8 +531,6 @@ def test_network_config_sls_address_bad():
     result = runner.invoke(
         cli,
         [
-            "--cache",
-            cache_minutes,
             "generate",
             "network",
             "config",

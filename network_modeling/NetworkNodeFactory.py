@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -22,18 +22,17 @@
 """NetworkNodeFactory to create a new network."""
 import json
 import logging
-from os import path
-from pathlib import Path
 import re
 import sys
+from os import path
+from pathlib import Path
 
 import click
 import jsonschema
-from ruamel.yaml import YAML
 import yamale
+from ruamel.yaml import YAML
 
 from .NetworkNode import NetworkNode
-
 
 yaml = YAML()
 
@@ -387,9 +386,7 @@ class NetworkNodeFactory:
     # there is a map required.  Convert architecture yaml data to tuple.
     def lookup_mapper(self):
         """Convert architecture yaml data to tuple."""
-        lookup_mapper = self.__architecture_data[self.__architecture_version][
-            "lookup_mapper"
-        ]
+        lookup_mapper = self.__architecture_data[self.__architecture_version]["lookup_mapper"]
         lookup_mapper_as_tuple = []
         for lookup in lookup_mapper:
             lookup_mapper_as_tuple.append(

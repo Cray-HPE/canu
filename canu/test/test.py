@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -22,11 +22,12 @@
 """CANU commands that test the network."""
 import json
 import logging
+import sys
 from os import path
 from pathlib import Path
-import sys
 
 import click
+import yaml
 from jinja2 import Environment
 from jinja2 import FileSystemLoader
 from jinja2 import select_autoescape
@@ -36,7 +37,6 @@ from nornir.core.filter import F
 from nornir_salt.plugins.functions import ResultSerializer, TabulateFormatter
 from nornir_salt.plugins.processors import TestsProcessor
 from nornir_salt.plugins.tasks import netmiko_send_commands, scrapli_send_commands
-import yaml
 
 from canu.generate.switch.config.config import parse_sls_for_config
 from canu.style import Style

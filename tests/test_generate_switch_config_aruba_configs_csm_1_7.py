@@ -23,8 +23,8 @@
 from os import path
 from pathlib import Path
 
-from click import testing
 import pkg_resources
+from click import testing
 
 from canu.cli import cli
 from tests.lib.diff import diff_config_files
@@ -34,7 +34,6 @@ data_directory = path.join(test_file_directory, "data")
 
 # Set CSM version to test
 csm = "1.7"
-cache_minutes = 0
 sls_address = "api-gw-service-nmn.local"
 
 sls_file_name = "sls_input_file_csm_1.2.json"
@@ -73,8 +72,6 @@ def test_switch_config_spine_primary():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -110,8 +107,6 @@ def test_switch_config_spine_primary_custom():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -150,8 +145,6 @@ def test_switch_config_spine_secondary():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -188,8 +181,6 @@ def test_switch_config_spine_secondary_custom():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -228,8 +219,6 @@ def test_switch_config_leaf_primary():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -265,8 +254,6 @@ def test_switch_config_leaf_primary_custom():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -304,8 +291,6 @@ def test_switch_config_leaf_secondary():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -341,8 +326,6 @@ def test_switch_config_leaf_secondary_custom():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -380,8 +363,6 @@ def test_switch_config_leaf_bmc():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -417,8 +398,6 @@ def test_switch_config_leaf_bmc_custom():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -456,8 +435,6 @@ def test_switch_config_cdu_primary():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -493,8 +470,6 @@ def test_switch_config_cdu_primary_custom():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -532,8 +507,6 @@ def test_switch_config_cdu_secondary():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -569,8 +542,6 @@ def test_switch_config_cdu_secondary_custom():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -608,8 +579,6 @@ def test_switch_config_edge_primary():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -645,8 +614,6 @@ def test_switch_config_edge_primary_custom():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -684,8 +651,6 @@ def test_switch_config_edge_secondary():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -721,8 +686,6 @@ def test_switch_config_edge_secondary_custom():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -760,8 +723,6 @@ def test_switch_config_spine_primary_tds():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -797,8 +758,6 @@ def test_switch_config_spine_secondary_tds():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -834,8 +793,6 @@ def test_switch_config_leaf_bmc_tds():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -871,8 +828,6 @@ def test_switch_config_cdu_primary_tds():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -908,8 +863,6 @@ def test_switch_config_cdu_secondary_tds():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -945,8 +898,6 @@ def test_switch_config_edge_primary_tds():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",
@@ -982,8 +933,6 @@ def test_switch_config_edge_secondary_tds():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "generate",
                 "switch",
                 "config",

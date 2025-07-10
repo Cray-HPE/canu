@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -20,22 +20,21 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that report the cabling of an individual switch."""
-from collections import defaultdict, OrderedDict
 import datetime
 import json
 import logging
 import re
 import sys
+from collections import OrderedDict, defaultdict
 from urllib.parse import unquote
 
 import click
 import natsort
-from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
 import urllib3
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 
 from canu.style import Style
-from canu.utils.cache import cache_switch
 from canu.utils.heuristics import heuristic_lookup
 from canu.utils.mac import find_mac
 from canu.utils.sls_utils import Managers
@@ -311,9 +310,7 @@ def get_lldp_aruba(ip, credentials, return_error=False):
         exception_type = type(err).__name__
 
         if exception_type == "HTTPError":
-            error_message = (
-                f"Error connecting to switch {ip}, check the username or password."
-            )
+            error_message = f"Error connecting to switch {ip}, check the username or password."
         elif exception_type == "ConnectionError":
             error_message = f"Error connecting to switch {ip}, check the entered username, IP address and password."
         else:
@@ -410,8 +407,6 @@ def get_lldp_aruba(ip, credentials, return_error=False):
 
         # Order the ports in natural order
         lldp_dict = OrderedDict(natsort.natsorted(lldp_dict.items()))
-
-        cache_lldp(switch_info, lldp_dict, arp)
 
         return switch_info, lldp_dict, arp
 
@@ -604,8 +599,6 @@ def get_lldp_dell(ip, credentials, return_error):
 
             arp[arp_mac] = arp_dict
 
-        cache_lldp(switch_json, lldp_dict, arp)
-
     except (
         NetmikoTimeoutException,
         NetmikoAuthenticationException,
@@ -617,9 +610,13 @@ def get_lldp_dell(ip, credentials, return_error):
         exception_type = type(err).__name__
 
         if exception_type == "NetmikoTimeoutException":
-            error_message = f"Timeout error connecting to switch {ip}, check the entered username, IP address and password."
+            error_message = (
+                f"Timeout error connecting to switch {ip}, check the entered username, IP address and password."
+            )
         elif exception_type == "NetmikoAuthenticationException":
-            error_message = f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again."
+            error_message = (
+                f"Authentication error connecting to switch {ip}, check the credentials or IP address and try again."
+            )
         else:
             error_message = f"{exception_type}, {err}."
 
@@ -880,8 +877,6 @@ def get_lldp_mellanox(ip, credentials, return_error):
         )
         logout.raise_for_status()
 
-        cache_lldp(switch_json, lldp_dict, arp)
-
     except (
         requests.exceptions.HTTPError,
         requests.exceptions.ConnectionError,
@@ -1061,53 +1056,6 @@ def add_heuristic_metadata_to_lldp(switch_info, switch_dict):
         log.debug(f"MAC {lldp_mac} often a {heuristic_record}")
 
 
-def cache_lldp(switch_info, lldp_dict, arp):
-    """Format LLDP info and cache it.
-
-    Args:
-        switch_info: Dictionary with switch platform_name, hostname and IP address
-        lldp_dict: Dictionary with LLDP information
-        arp: ARP dictionary
-    """
-    switch = {
-        "ip_address": switch_info["ip"],
-        "cabling": defaultdict(list),
-        "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "hostname": switch_info["hostname"],
-        "platform_name": switch_info["platform_name"],
-        "vendor": switch_info["vendor"],
-    }
-
-    for port_number, port in lldp_dict.items():
-        for index, _entry in enumerate(port):
-            arp_list = []
-            if port[index]["chassis_name"] == "":
-                arp_list = [
-                    f"{arp[mac]['ip_address']}:{list(arp[mac]['port'])[0]}"
-                    for mac in arp
-                    if arp[mac]["mac"] == port[index]["mac_addr"]
-                ]
-            arp_list = ", ".join(arp_list)
-            neighbor_description = (
-                f"{port[index]['chassis_description'][:54]} {str(arp_list)}"
-            )
-            port_info = {
-                "neighbor": port[index]["chassis_name"],
-                "neighbor_description": neighbor_description,
-                "neighbor_port": port[index]["port_id"],
-                "neighbor_port_description": re.sub(
-                    r"(Interface\s+\d+ as )",
-                    "",
-                    port[index]["port_description"],
-                ),
-                "neighbor_chassis_id": port[index]["chassis_id"],
-            }
-
-            switch["cabling"][port_number].append(port_info)
-    switch["cabling"] = dict(switch["cabling"])
-    cache_switch(switch)
-
-
 def print_lldp(switch_info, lldp_dict, arp, heuristic_lookups, out="-"):
     """Print summary of the switch LLDP data.
 
@@ -1159,7 +1107,7 @@ def print_lldp(switch_info, lldp_dict, arp, heuristic_lookups, out="-"):
             neighbor_mac = port[index]["mac_addr"]
             lag_mac = ""
             if neighbor_port != neighbor_mac:
-                lag_mac = f'LAG_MAC({neighbor_mac})'
+                lag_mac = f"LAG_MAC({neighbor_mac})"
                 if neighbor_port.find(":") != -1:  # Cheap MAC find
                     neighbor_mac = neighbor_port
             if heuristic_lookups:
@@ -1167,7 +1115,7 @@ def print_lldp(switch_info, lldp_dict, arp, heuristic_lookups, out="-"):
                     if h_mac not in neighbor_port:
                         continue
                     for switch_type, heuristic in switch_data.items():
-                        if switch_type not in switch_info['hostname']:
+                        if switch_type not in switch_info["hostname"]:
                             continue
                         neighbor_port = heuristic["port"]
                         if "Heuristic" not in port[index]["data_sources"]:

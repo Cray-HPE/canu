@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -22,12 +22,11 @@
 """Test CANU validate network bgp commands."""
 from unittest.mock import patch
 
-from click import testing
 import requests
 import responses
+from click import testing
 
 from canu.cli import cli
-
 
 username = "admin"
 password = "admin"
@@ -40,7 +39,6 @@ sls_cache = {
     },
     "SWITCH_ASN": asn,
 }
-cache_minutes = 0
 
 sls_address = "api-gw-service-nmn.local"
 runner = testing.CliRunner()
@@ -301,10 +299,7 @@ def test_validate_bgp_bad_password(pull_sls_networks, switch_vendor):
             ],
         )
         assert result.exit_code == 1
-        assert (
-            "Error connecting to switch 192.168.1.1, check the username or password"
-            in str(result.output)
-        )
+        assert "Error connecting to switch 192.168.1.1, check the username or password" in str(result.output)
 
 
 @patch("canu.validate.network.bgp.bgp.switch_vendor")

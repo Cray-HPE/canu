@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -130,9 +130,7 @@ class NetworkNode:
         """Find a block of ports that match a given speed, slot or port."""
         # Find blocks matching required speed, slot and remaining ports
         port_block = [
-            x
-            for x in self.__ports_block_metadata
-            if speed in x["speed"] and slot == x["slot"] and x["count"] > 0
+            x for x in self.__ports_block_metadata if speed in x["speed"] and slot == x["slot"] and x["count"] > 0
         ]
 
         if port_block:
@@ -191,16 +189,8 @@ class NetworkNode:
     def __new_connection_allowed(self, node):
         connection_speeds = list(
             dict.fromkeys(
-                [
-                    x["speed"]
-                    for x in self.device_connections()
-                    if x["name"] == node.arch_type()
-                ]
-                + [
-                    x["speed"]
-                    for x in node.device_connections()
-                    if x["name"] == self.arch_type()
-                ],
+                [x["speed"] for x in self.device_connections() if x["name"] == node.arch_type()]
+                + [x["speed"] for x in node.device_connections() if x["name"] == self.arch_type()],
             ),
         )
 
@@ -503,9 +493,7 @@ class NetworkNode:
 
     def serialize(self):
         """Resolve this node as a JSON object."""
-        serialized_ports = [
-            port.serialize() for port in self.__ports if port is not None
-        ]
+        serialized_ports = [port.serialize() for port in self.__ports if port is not None]
 
         serialized_location = None
         if self.__location is not None:

@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the 'Software'),
@@ -94,7 +94,7 @@ docs = [
     'mkdocs-material-extensions~=1.3.1',
     'mkdocs-material~=9.6.8',
     'mkdocs~=1.6.1',
-    'myst-parser~=3.0.1',
+    'myst-parser~=4.0.1',
     'sphinx-click~=6.0.0',
     'sphinx-markdown-builder~=0.6.7',
     'sphinx~=8.2.3',
@@ -108,7 +108,6 @@ lint = [
     'flake8-debugger~=4.1.2',
     'flake8-docstrings~=1.7.0',
     'flake8-eradicate~=1.5.0',
-    'flake8-import-order~=0.18.2',
     'flake8-quotes~=3.4.0',
     'flake8-string-format==0.3.0',
     'flake8~=7.2.0',
@@ -141,6 +140,20 @@ readme = { file = ['README.md'], content-type = 'text/markdown' }
 
 # Allows for dynamic versioning via git-tag.
 [tool.setuptools_scm]
+
+[tool.black]
+line-length = 120
+skip-string-normalization = true
+
+[tool.isort]
+profile = "black"
+line_length = 120
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+known_first_party = "canu,tests,network_modeling"
 
 [build-system]
 build-backend = 'setuptools.build_meta'

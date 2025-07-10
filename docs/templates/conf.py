@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -20,8 +20,8 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Sphinx configuration."""
-from os import path
 import sys
+from os import path
 
 sys.path.insert(0, path.abspath("."))
 
@@ -33,4 +33,4 @@ extensions = [
     "sphinx_click",
     "sphinx_markdown_builder",
 ]
-templates_path = ['templates']
+templates_path = ["templates"]

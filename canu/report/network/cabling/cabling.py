@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -20,19 +20,19 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that report the cabling of the entire Shasta network."""
-from collections import defaultdict
 import ipaddress
 import json
 import logging
 import re
 import sys
+from collections import defaultdict
 
 import click
-from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
-from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
-from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
+from click_option_group import RequiredMutuallyExclusiveOptionGroup, optgroup
+from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 
 from canu.report.switch.cabling.cabling import (
     add_heuristic_metadata_to_lldp,
@@ -274,9 +274,13 @@ def cabling(
                     exception_type = type(err).__name__
                     error_message = "Unchecked"
                     if exception_type == "HTTPError":
-                        error_message = f"Error connecting to switch {ip}, check the entered username, IP address and password."
+                        error_message = (
+                            f"Error connecting to switch {ip}, check the entered username, IP address and password."
+                        )
                     if exception_type == "ConnectionError":
-                        error_message = f"Error connecting to switch {ip}, check the entered username, IP address and password."
+                        error_message = (
+                            f"Error connecting to switch {ip}, check the entered username, IP address and password."
+                        )
                     if exception_type == "RequestException":
                         error_message = f"Error connecting to switch {ip}."
                     if exception_type == "NetmikoTimeoutException":
@@ -341,25 +345,19 @@ def equipment_table(switch_data):
                 }
                 port_entries.append(connection)
 
-            equipment_json[switch_data[i][0]["system_mac"]]["connections_to"][
-                port
-            ] = port_entries
+            equipment_json[switch_data[i][0]["system_mac"]]["connections_to"][port] = port_entries
 
     # Go through a second time and make the "FROM" connections
     for equipment in equipment_json.copy():
         for port in equipment_json[equipment]["connections_to"]:
             for entry in range(len(equipment_json[equipment]["connections_to"][port])):
-                equipment_entry = equipment_json[equipment]["connections_to"][port][
-                    entry
-                ]
+                equipment_entry = equipment_json[equipment]["connections_to"][port][entry]
 
                 neighbor_mac = equipment_entry["neighbor_chassis_mac"]
                 neighbor_port = equipment_entry["neighbor_port"]
 
                 equipment_json[neighbor_mac]["hostname"] = equipment_entry["neighbor"]
-                equipment_json[neighbor_mac]["description"] = equipment_entry[
-                    "neighbor_description"
-                ]
+                equipment_json[neighbor_mac]["description"] = equipment_entry["neighbor_description"]
 
                 connection_dict = {
                     "hostname": equipment_json[equipment]["hostname"],
@@ -412,33 +410,19 @@ def print_equipment(equipment_json, out="-"):
 
         for port in equipment_json[equipment]["connections_to"]:
             for entry in range(len(equipment_json[equipment]["connections_to"][port])):
-                neighbor_port = equipment_json[equipment]["connections_to"][port][
-                    entry
-                ]["neighbor_port"]
+                neighbor_port = equipment_json[equipment]["connections_to"][port][entry]["neighbor_port"]
                 neighbor_port_description = re.sub(
                     r"(Interface\s+\d+ as )",
                     "",
-                    equipment_json[equipment]["connections_to"][port][entry][
-                        "neighbor_port_description"
-                    ],
+                    equipment_json[equipment]["connections_to"][port][entry]["neighbor_port_description"],
                 )
 
                 if neighbor_port_description == neighbor_port:
                     neighbor_port_description = ""
                 text_color = ""
-                if (
-                    "ncn"
-                    in equipment_json[equipment]["connections_to"][port][entry][
-                        "neighbor"
-                    ]
-                ):
+                if "ncn" in equipment_json[equipment]["connections_to"][port][entry]["neighbor"]:
                     text_color = "blue"
-                elif (
-                    "sw-"
-                    in equipment_json[equipment]["connections_to"][port][entry][
-                        "neighbor"
-                    ]
-                ):
+                elif "sw-" in equipment_json[equipment]["connections_to"][port][entry]["neighbor"]:
                     text_color = "green"
 
                 if port not in equipment_json[equipment]["connections_from"]:
@@ -452,14 +436,10 @@ def print_equipment(equipment_json, out="-"):
                     "{:<25s}{:^6s}{:<15s} {} {} {}".format(
                         port,
                         arrow,
-                        equipment_json[equipment]["connections_to"][port][entry][
-                            "neighbor"
-                        ],
+                        equipment_json[equipment]["connections_to"][port][entry]["neighbor"],
                         neighbor_port,
                         neighbor_port_description,
-                        equipment_json[equipment]["connections_to"][port][entry][
-                            "neighbor_description"
-                        ][:54],
+                        equipment_json[equipment]["connections_to"][port][entry]["neighbor_description"][:54],
                     ),
                     fg=text_color,
                     file=out,
@@ -467,15 +447,11 @@ def print_equipment(equipment_json, out="-"):
 
         for port in equipment_json[equipment]["connections_from"]:
             if port not in equipment_json[equipment]["connections_to"]:
-                description = equipment_json[equipment]["connections_from"][port][
-                    "description"
-                ]
+                description = equipment_json[equipment]["connections_from"][port]["description"]
                 port_description = re.sub(
                     r"(Interface\s+\d+ as )",
                     "",
-                    equipment_json[equipment]["connections_from"][port][
-                        "port_description"
-                    ],
+                    equipment_json[equipment]["connections_from"][port]["port_description"],
                 )
                 if port_description == port:
                     port_description = ""
@@ -497,9 +473,7 @@ def print_equipment(equipment_json, out="-"):
                         port + " " + port_description,
                         arrow,
                         str(
-                            equipment_json[equipment]["connections_from"][port][
-                                "hostname"
-                            ],
+                            equipment_json[equipment]["connections_from"][port]["hostname"],
                         ),
                         equipment_json[equipment]["connections_from"][port]["port"],
                         description,
@@ -522,4 +496,10 @@ def switch_table(switch_data, heuristic_lookups, out="-"):
         out: Defaults to stdout, but will print to the file name passed in
     """
     for i in range(len(switch_data)):
-        print_lldp(switch_data[i][0], switch_data[i][1], switch_data[i][2], heuristic_lookups, out)
+        print_lldp(
+            switch_data[i][0],
+            switch_data[i][1],
+            switch_data[i][2],
+            heuristic_lookups,
+            out,
+        )

@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -20,14 +20,14 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate the network bgp."""
-from collections import defaultdict
 import sys
+from collections import defaultdict
 
 import click
 import click_spinner
 import natsort
-from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import requests
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 
 from canu.style import Style
 from canu.utils.sls import pull_sls_networks
@@ -287,9 +287,7 @@ def get_bgp_neighbors_aruba(ip, credentials, asn, network):
         exception_type = type(err).__name__
 
         if exception_type == "HTTPError":
-            error_message = (
-                f"Error connecting to switch {ip}, check the username or password"
-            )
+            error_message = f"Error connecting to switch {ip}, check the username or password"
         elif exception_type == "ConnectionError":
             error_message = f"Error connecting to switch {ip}, check the entered username, IP address and password."
         else:

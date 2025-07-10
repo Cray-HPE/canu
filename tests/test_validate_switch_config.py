@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -28,14 +28,12 @@ from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 
 from canu.cli import cli
 
-
 username = "admin"
 password = "admin"
 ip = "192.168.1.1"
 ip_dell = "192.168.1.2"
 ip_mellanox = "192.168.1.3"
 credentials = {"username": username, "password": password}
-cache_minutes = 0
 generated_config_file = "switch.cfg"
 mellanox_generated_config_file = "mellanox_switch.cfg"
 running_config_file = "running_switch.cfg"
@@ -58,8 +56,6 @@ def test_validate_config(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "switch",
                 "config",
@@ -92,8 +88,6 @@ def test_validate_config_additions(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "switch",
                 "config",
@@ -178,8 +172,6 @@ def test_validate_config_running_file_aruba():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "switch",
                 "config",
@@ -266,8 +258,6 @@ def test_validate_config_running_file_dell():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "switch",
                 "config",
@@ -353,8 +343,6 @@ def test_validate_config_running_file_mellanox():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "switch",
                 "config",
@@ -397,8 +385,6 @@ def test_validate_config_password_prompt(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "switch",
                 "config",
@@ -428,8 +414,6 @@ def test_validate_config_vendor_prompt():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "switch",
                 "config",
@@ -518,8 +502,6 @@ def test_validate_config_timeout(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "switch",
                 "config",
@@ -554,8 +536,6 @@ def test_validate_config_auth_exception(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "switch",
                 "config",
@@ -571,9 +551,7 @@ def test_validate_config_auth_exception(netmiko_command, switch_vendor):
         )
         assert result.exit_code == 0
 
-        assert (
-            "Authentication error. Check the credentials or IP address and try again"
-        ) in str(result.output)
+        assert ("Authentication error. Check the credentials or IP address and try again") in str(result.output)
 
 
 def test_validate_config_bad_config_file():
@@ -591,8 +569,6 @@ def test_validate_config_bad_config_file():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "switch",
                 "config",
@@ -628,8 +604,6 @@ def test_validate_config_no_vendor(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "switch",
                 "config",
@@ -663,8 +637,6 @@ def test_validate_config_dell(netmiko_commands, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "switch",
                 "config",
@@ -699,8 +671,6 @@ def test_validate_config_mellanox(netmiko_commands, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "validate",
                 "switch",
                 "config",

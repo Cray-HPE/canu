@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -20,8 +20,8 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """Test SLS utilities Manager convenience classes."""
-from collections import UserDict
 import ipaddress
+from collections import UserDict
 
 import pytest
 
@@ -48,7 +48,6 @@ def subnet_dict():
     return {
         "subnet1": Subnet("subnet1", "10.1.0.0/25", "10.1.0.1", 1),
         "subnet2": Subnet("subnet2", "10.2.0.0/25", "10.2.0.1", 2),
-
     }
 
 
@@ -56,8 +55,8 @@ def test_networkmanager_init_from_sls_data(network_dict):
     """Test Network Manager creation from SLS JSON."""
     nm = NetworkManager(network_dict)
     assert isinstance(nm, UserDict)
-    assert isinstance(nm.data['NMN'], Network)
-    assert isinstance(nm.data['HMN'], Network)
+    assert isinstance(nm.data["NMN"], Network)
+    assert isinstance(nm.data["HMN"], Network)
 
 
 def test_networkmanager_update_existing(network_dict):
@@ -66,15 +65,15 @@ def test_networkmanager_update_existing(network_dict):
     can.mtu(9000)
     nm = NetworkManager(network_dict)
     nm.update({can.name(): can})
-    assert isinstance(nm.data['CAN'], Network)
+    assert isinstance(nm.data["CAN"], Network)
     assert nm.get("CAN").ipv4_network() == ipaddress.IPv4Network("10.3.0.0/24")
 
 
 def test_networkmanager_get(network_dict):
     """Test retrieval of a Network by Name and IPv4 Address."""
     nm = NetworkManager(network_dict)
-    assert nm.get('NMN') == nm.data['NMN']
-    assert nm.get('10.2.0.0/24') == nm.data['HMN']
+    assert nm.get("NMN") == nm.data["NMN"]
+    assert nm.get("10.2.0.0/24") == nm.data["HMN"]
 
 
 def test_networkmanager_to_sls(network_dict):
@@ -89,8 +88,8 @@ def test_subnetmanager_init(subnet_dict):
     """Test creation of Subnet Manager."""
     sm = SubnetManager(subnet_dict)
     assert isinstance(sm, UserDict)
-    assert isinstance(sm.data['subnet1'], Subnet)
-    assert isinstance(sm.data['subnet2'], Subnet)
+    assert isinstance(sm.data["subnet1"], Subnet)
+    assert isinstance(sm.data["subnet2"], Subnet)
 
 
 def test_subnetmanager_update_existing(subnet_dict):
@@ -105,8 +104,8 @@ def test_subnetmanager_update_existing(subnet_dict):
 def test_subnetmanager_get(subnet_dict):
     """Test Subnet Manager retrieval by name and IPv4 Address."""
     sm = SubnetManager(subnet_dict)
-    assert sm.get('subnet1') == sm.data['subnet1']
-    assert sm.get('10.1.0.0/25') == sm.data['subnet1']
+    assert sm.get("subnet1") == sm.data["subnet1"]
+    assert sm.get("10.1.0.0/25") == sm.data["subnet1"]
 
 
 def test_subnetmanager_to_sls(subnet_dict):

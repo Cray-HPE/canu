@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2024 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -20,44 +20,34 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU generate switch config commands."""
-from collections import defaultdict
-from importlib import metadata
-from itertools import groupby
 import json
 import logging
 import os
-from os import environ, path
-from pathlib import Path
 import re
 import sys
+from collections import defaultdict
+from importlib import metadata
+from itertools import groupby
+from os import environ, path
+from pathlib import Path
 
 import click
-from click_option_group import optgroup
-from click_option_group import RequiredMutuallyExclusiveOptionGroup
-from hier_config import HConfig
-from hier_config import Host
-from jinja2 import Environment
-from jinja2 import FileSystemLoader
-from jinja2 import select_autoescape
-from jinja2 import StrictUndefined
 import natsort
 import netaddr
-from netutils.mac import is_valid_mac
-from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 import requests
+import urllib3
+from click_option_group import RequiredMutuallyExclusiveOptionGroup, optgroup
+from hier_config import HConfig, Host
+from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
+from netutils.mac import is_valid_mac
 from ruamel.yaml import YAML
 from ttp import ttp
-import urllib3
 
 from canu.style import Style
-from canu.utils.cache import cache_directory
 from canu.utils.yaml_load import load_yaml
 from canu.validate.paddle.paddle import node_model_from_paddle
-from canu.validate.shcd.shcd import (
-    node_model_from_shcd,
-    shcd_to_sheets,
-    switch_unused_ports,
-)
+from canu.validate.shcd.shcd import node_model_from_shcd, shcd_to_sheets, switch_unused_ports
+from network_modeling.NetworkNodeFactory import NetworkNodeFactory
 
 yaml = YAML()
 
@@ -73,7 +63,6 @@ else:
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
 # Schema and Data files
-canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
 canu_config_file = path.join(project_root, "canu", "canu.yaml")
 
 # ttp preserve templates
@@ -206,17 +195,6 @@ dash = "-" * 60
     default="Arista",
 )
 @click.option(
-    "--preserve",
-    help="Path to current running configs.",
-    type=click.Path(),
-)
-@click.option(
-    "--reorder",
-    is_flag=True,
-    help="reorder config to heir config order",
-    required=False,
-)
-@click.option(
     "--bgp-control-plane",
     type=click.Choice(["CMN", "CHN"], case_sensitive=False),
     help="Network used for BGP control plane",
@@ -236,12 +214,24 @@ dash = "-" * 60
     default=False,
     is_flag=True,
 )
-@click.option(
+@optgroup.group(
+    "NMN Isolation Settings",
+    help="Options for configuring NMN isolation",
+)
+@optgroup.option(
     "--enable-nmn-isolation",
-    help="Enable NMN isolation",
+    help="Enable NMN isolation (must be used together with --nmn-pvlan)",
     required=False,
     default=False,
     is_flag=True,
+)
+@optgroup.option(
+    "--nmn-pvlan",
+    help="VLAN ID used for Isolated NMN PVLAN (must be used together with --enable-nmn-isolation)",
+    is_flag=False,
+    required=False,
+    flag_value=502,
+    type=click.IntRange(1, 4094),
 )
 @click.option(
     "--log",
@@ -264,22 +254,21 @@ def config(
     auth_token,
     sls_address,
     out,
-    preserve,
     custom_config,
     edge,
-    reorder,
     bgp_control_plane,
     vrf,
     bond_app_nodes,
     enable_nmn_isolation,
     log_,
+    nmn_pvlan,
 ):
-    """Generate switch config using the SHCD.
+    """Generate the config of a single switch on the network using the SHCD.
 
-    In order to generate switch config, a valid SHCD must be passed in and system variables must be read in from either
+    In order to generate a network switch config, a valid SHCD must be passed in and system variables must be read in from either
     an SLS output file or the SLS API.
 
-    ## CSI Input
+    ## SLS Input
 
     - In order to parse network data using SLS, pass in the file containing SLS JSON data (normally sls_file.json) using the '--sls-file' flag
 
@@ -309,37 +298,50 @@ def config(
 
     - The table should contain the 11 headers: Source, Rack, Location, Slot, (Blank), Port, Destination, Rack, Location, (Blank), Port.
 
-
-    Use the '--folder FOLDERNAME' flag to output all the switch configs to a folder.
+    Use the '--out' flag to either output the config to the screen (default) or to a file.
 
     ----------
     \f
     # noqa: D301, B950
 
     Args:
-        ctx: CANU context settings
+        ctx: CANU context
         csm: CSM version
         architecture: CSM architecture
         ccj: Paddle CCJ file
         shcd: SHCD file
-        tabs: The tabs on the SHCD file to check, e.g. 10G_25G_40G_100G,NMN,HMN.
-        corners: The corners on each tab, comma separated e.g. 'J37,U227,J15,T47,J20,U167'.
-        switch_name: Switch name
-        sls_file: JSON file containing SLS data
+        tabs: The tabs on the SHCD file to check
+        corners: The corners on each tab
+        switch_name: The name of the switch to generate config
+        sls_file: File containing system SLS JSON data
         auth_token: Token for SLS authentication
         sls_address: The address of SLS
-        out: Name of the output file
-        preserve: Folder where switch running configs exist.
-        custom_config: yaml file containing customized switch configurations which is merged with the generated config.
-        edge: Vendor of the edge router
-        reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
+        out: Output results to a file
+        custom_config: Custom switch configuration
+        edge: Vendor of Edge router
         bgp_control_plane: Network used for BGP control plane
         vrf: Named VRF used for CSM networks
+        bond_app_nodes: Bond application nodes on the NMN network
+        log_: Level of logging
+        nmn_pvlan: VLAN ID used for Isolated NMN PVLAN
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
         log_: Level of Logging
         enable_nmn_isolation: Enable/disable NMN isolation.
+
+    Raises:
+        ClickException: If --enable-nmn-isolation is used without --nmn-pvlan, or if --nmn-pvlan is used without --enable-nmn-isolation.
     """
     logging.basicConfig(format="%(name)s - %(levelname)s: %(message)s", level=log_)
+
+    # Validate NMN isolation settings
+    if enable_nmn_isolation and nmn_pvlan is None:
+        raise click.ClickException(
+            "The --nmn-pvlan flag is required when --enable-nmn-isolation is used.",
+        )
+    if nmn_pvlan is not None and not enable_nmn_isolation:
+        raise click.ClickException(
+            "The --enable-nmn-isolation flag is required when --nmn-pvlan is used.",
+        )
 
     # SHCD Parsing
     if shcd:
@@ -401,9 +403,7 @@ def config(
             return
 
         # Format the input to be like the SLS JSON
-        sls_json = [
-            network[x] for network in [input_json.get("Networks", {})] for x in network
-        ]
+        sls_json = [network[x] for network in [input_json.get("Networks", {})] for x in network]
 
     else:
         # Get SLS config
@@ -458,11 +458,6 @@ def config(
             )
     sls_variables = parse_sls_for_config(sls_json)
 
-    # For versions of csm < 1.2, the SLS Hostnames need to be renamed
-    if csm:
-        if float(csm) < 1.2:
-            sls_variables = rename_sls_hostnames(sls_variables)
-
     switch_config, devices, unknown = generate_switch_config(
         csm,
         architecture,
@@ -472,13 +467,12 @@ def config(
         sls_variables,
         template_folder,
         vendor_folder,
-        preserve,
         custom_config,
         edge,
-        reorder,
         bgp_control_plane,
         vrf,
         bond_app_nodes,
+        nmn_pvlan,
         enable_nmn_isolation,
     )
 
@@ -575,11 +569,7 @@ def add_custom_config(custom_config, switch_config, host, switch_os, custom_file
         banner.add_child("!")
     for line in switch_config_hier.all_children_sorted():
         # add two spaces to indented config to match aruba formatting.
-        if (
-            line.cisco_style_text().startswith("  ")
-            and "!" not in line.cisco_style_text()
-            and switch_os == "aoscx"
-        ):
+        if line.cisco_style_text().startswith("  ") and "!" not in line.cisco_style_text() and switch_os == "aoscx":
             custom_config_merge += "\n" + "  " + line.cisco_style_text()
         elif switch_os == "dellOS10":
             custom_config_merge += "\n" + line.cisco_style_text()
@@ -597,13 +587,12 @@ def generate_switch_config(
     sls_variables,
     template_folder,
     vendor_folder,
-    preserve,
     custom_config,
     edge,
-    reorder,
     bgp_control_plane,
     vrf,
     bond_app_nodes,
+    nmn_pvlan,
     enable_nmn_isolation,
 ):
     """Generate switch config.
@@ -616,14 +605,13 @@ def generate_switch_config(
         switch_name: Switch hostname
         sls_variables: Dictionary containing SLS variables
         template_folder: Architecture folder contaning the switch templates
-        vendor_folder: Vendor folder containing the template_folder
-        preserve: Folder where switch running configs exist.  This folder should be populated from the "canu backup network"
+        vendor_folder: Vendor folder contaning the template_folder
         custom_config: yaml file containing customized switch configurations which is merged with the generated config.
         edge: edge: Vendor of the edge router
-        reorder: Filters generated configurations through hier_config generate a more natural running-configuration order.
         bgp_control_plane: Network used for BGP control plane
         vrf: Named VRF used for CSM networks
         bond_app_nodes: Generates bonded configuration for application nodes connected the NMN.
+        nmn_pvlan: VLAN ID used for Isolated NMN PVLAN
         enable_nmn_isolation: Enable/disable NMN isolation.
 
 
@@ -636,7 +624,7 @@ def generate_switch_config(
     templates = TEMPLATES or {
         "sw-spine": {
             "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-spine.primary.j2",
-            "secondary": f"{csm}/{vendor_folder}/{template_folder}/sw-spine.secondary.j2",
+            "secondary": (f"{csm}/{vendor_folder}/{template_folder}/sw-spine.secondary.j2"),
         },
         "sw-cdu": {
             "primary": f"{csm}/{vendor_folder}/common/sw-cdu.primary.j2",
@@ -644,7 +632,7 @@ def generate_switch_config(
         },
         "sw-leaf": {
             "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf.primary.j2",
-            "secondary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf.secondary.j2",
+            "secondary": (f"{csm}/{vendor_folder}/{template_folder}/sw-leaf.secondary.j2"),
         },
         "sw-leaf-bmc": {
             "primary": f"{csm}/{vendor_folder}/{template_folder}/sw-leaf-bmc.j2",
@@ -675,44 +663,13 @@ def generate_switch_config(
         )
         return Exception()
 
-    if preserve:
-        try:
-            with open(os.path.join(f"{preserve}/{switch_name}.cfg"), "r") as f:
-                device_running = f.read()
-                # Get mellanox Switches
-                if architecture == "network_v1" and "spine" in switch_name:
-                    template = ttp_templates["mellanox"]
-                    switch_config_list = []
-                    for line in device_running.splitlines():
-                        if line.startswith("   "):
-                            switch_config_list.append(line.strip())
-                        else:
-                            switch_config_list.append(line)
-                    device_running = ("\n").join(switch_config_list)
-                # get Dell Switches
-                elif architecture == "network_v1":
-                    template = ttp_templates["dell"]
-                # get Aruba switches
-                else:
-                    template = ttp_templates["aruba"]
-                parser = ttp(device_running, template)
-                parser.parse()
-                preserve = parser.result()
-        except FileNotFoundError:
-            click.secho(
-                "The running config was not found, check that you entered the right file name and path.",
-                fg="red",
-            )
-            exit(1)
     if custom_config:
         custom_config_file = os.path.basename(custom_config)
         custom_config = load_yaml(custom_config)
 
     is_primary, primary, secondary = switch_is_primary(switch_name)
 
-    template_name = templates[node_shasta_name][
-        "primary" if is_primary else "secondary"
-    ]
+    template_name = templates[node_shasta_name]["primary" if is_primary else "secondary"]
 
     def vsx_mac(switch_name):
         is_primary, primary, secondary = switch_is_primary(switch_name)
@@ -741,12 +698,20 @@ def generate_switch_config(
         sls_variables["NMN_VLAN"],
         sls_variables["HMN_VLAN"],
     ]
+
+    # Add isolated VLAN to trunk allowed lists when private VLAN is enabled
+    if nmn_pvlan:
+        leaf_bmc_vlan.append(nmn_pvlan)
     spine_leaf_vlan = [
         native_vlan,
         sls_variables["NMN_VLAN"],
         sls_variables["HMN_VLAN"],
         sls_variables["CAN_VLAN"],
     ]
+
+    # Add isolated VLAN to trunk allowed lists when private VLAN is enabled
+    if nmn_pvlan:
+        spine_leaf_vlan.append(nmn_pvlan)
     if sls_variables["CMN_VLAN"] and float(csm) >= 1.2:
         spine_leaf_vlan.append(sls_variables["CMN_VLAN"])
         leaf_bmc_vlan.append(sls_variables["CMN_VLAN"])
@@ -765,8 +730,19 @@ def generate_switch_config(
             fg="red",
         )
         sys.exit(1)
+    # Create separate VLAN list for NCN ports (excludes isolated VLAN)
+    ncn_vlan = [
+        native_vlan,
+        sls_variables["NMN_VLAN"],
+        sls_variables["HMN_VLAN"],
+        sls_variables["CAN_VLAN"],
+    ]
+    if sls_variables["CMN_VLAN"] and float(csm) >= 1.2:
+        ncn_vlan.append(sls_variables["CMN_VLAN"])
+
     spine_leaf_vlan = groupby_vlan_range(spine_leaf_vlan)
     leaf_bmc_vlan = groupby_vlan_range(leaf_bmc_vlan)
+    ncn_vlan = groupby_vlan_range(ncn_vlan)
 
     black_hole_vlan_1 = 2701
     black_hole_vlan_2 = 2707
@@ -805,6 +781,7 @@ def generate_switch_config(
         "MTL_PREFIX_LEN": sls_variables["MTL_PREFIX_LEN"],
         "NMN": sls_variables["NMN"],
         "NMN_VLAN": sls_variables["NMN_VLAN"],
+        "NMN_ISOLATED_VLAN": nmn_pvlan,
         "NMN_NETMASK": sls_variables["NMN_NETMASK"],
         "NMN_NETWORK_IP": sls_variables["NMN_NETWORK_IP"],
         "NMN_PREFIX_LEN": sls_variables["NMN_PREFIX_LEN"],
@@ -830,8 +807,6 @@ def generate_switch_config(
         "SPIRE_CLUSTER": sls_variables["SPIRE_CLUSTER"],
         "SPIRE_LOCAL": sls_variables["SPIRE_LOCAL"],
         "FLUENTBIT_AGGREGATOR": sls_variables["FLUENTBIT_AGGREGATOR"],
-        "RGW_VIP": sls_variables["RGW_VIP"],
-        "KUBEAPI_VIP": sls_variables["KUBEAPI_VIP"],
         "HMNLB_DNS": sls_variables["HMNLB_DNS"],
         "HMNLB_NETMASK": sls_variables["HMNLB_NETMASK"],
         "HMNLB_NETWORK_IP": sls_variables["HMNLB_NETWORK_IP"],
@@ -864,6 +839,7 @@ def generate_switch_config(
         "HMN_MTN_CABINETS": sls_variables["HMN_MTN_CABINETS"],
         "LEAF_BMC_VLANS": leaf_bmc_vlan,
         "SPINE_LEAF_VLANS": spine_leaf_vlan,
+        "NCN_VLANS": ncn_vlan,
         "NATIVE_VLAN": native_vlan,
         "CAN_IPs": sls_variables["CAN_IPs"],
         "CHN_IPs": sls_variables["CHN_IPs"],
@@ -877,6 +853,11 @@ def generate_switch_config(
         "BOND_APP_NODES": bond_app_nodes,
         "BLACK_HOLE_VLAN_1": black_hole_vlan_1,
         "BLACK_HOLE_VLAN_2": black_hole_vlan_2,
+        "RGW_VIP": sls_variables["RGW_VIP"],
+        "KUBEAPI_VIP": sls_variables["KUBEAPI_VIP"],
+        "SPINE_SWITCH_IPs": sls_variables["SPINE_SWITCH_IPs"],
+        "NMN_NCN": sls_variables["NMN_NCN"],
+        "ALL_SWITCH_IPs": sls_variables["ALL_SWITCH_IPs"],
         "ENABLE_NMN_ISOLATION": enable_nmn_isolation,
         "IPV6_ENABLED": sls_variables["IPV6_ENABLED"],
     }
@@ -888,15 +869,11 @@ def generate_switch_config(
         network_node_list,
         factory,
         sls_variables,
-        preserve,
     )
     unused_ports = switch_unused_ports(network_node_list)
     variables["UNUSED_PORTS"] = unused_ports[switch_name]
 
-    if (
-        switch_name not in sls_variables["HMN_IPs"].keys()
-        and "sw-edge" not in switch_name
-    ):
+    if switch_name not in sls_variables["HMN_IPs"].keys() and "sw-edge" not in switch_name:
         click.secho(f"Cannot find {switch_name} in CSI / SLS nodes.", fg="red")
         sys.exit(1)
 
@@ -958,24 +935,17 @@ def generate_switch_config(
             nodes_by_name[name] = node_tmp
             nodes_by_id[node_tmp["id"]] = node_tmp
         for port in nodes_by_name[switch_name]["ports"]:
-            destination_rack = nodes_by_id[port["destination_node_id"]]["location"][
-                "rack"
-            ]
+            destination_rack = nodes_by_id[port["destination_node_id"]]["location"]["rack"]
 
             destination_rack_list.append(int(re.search(r"\d+", destination_rack)[0]))
-
-        for cabinets in (
-            sls_variables["NMN_MTN_CABINETS"] + sls_variables["HMN_MTN_CABINETS"]
-        ):
+        for cabinets in sls_variables["NMN_MTN_CABINETS"] + sls_variables["HMN_MTN_CABINETS"]:
             ip_address = netaddr.IPNetwork(cabinets["CIDR"])
             is_primary = switch_is_primary(switch_name)
             sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
             if sls_rack_int in destination_rack_list:
                 if cabinets in sls_variables["NMN_MTN_CABINETS"]:
                     variables["NMN_MTN_VLANS"].append(cabinets)
-                    variables["NMN_MTN_VLANS"][-1][
-                        "PREFIX_LENGTH"
-                    ] = ip_address.prefixlen
+                    variables["NMN_MTN_VLANS"][-1]["PREFIX_LENGTH"] = ip_address.prefixlen
                     if is_primary[0]:
                         ip = str(ip_address[2])
                         variables["NMN_MTN_VLANS"][-1]["IP"] = ip
@@ -985,9 +955,7 @@ def generate_switch_config(
 
                 if cabinets in sls_variables["HMN_MTN_CABINETS"]:
                     variables["HMN_MTN_VLANS"].append(cabinets)
-                    variables["HMN_MTN_VLANS"][-1][
-                        "PREFIX_LENGTH"
-                    ] = ip_address.prefixlen
+                    variables["HMN_MTN_VLANS"][-1]["PREFIX_LENGTH"] = ip_address.prefixlen
                     if is_primary[0]:
                         ip = str(ip_address[2])
                         variables["HMN_MTN_VLANS"][-1]["IP"] = ip
@@ -1013,29 +981,6 @@ def generate_switch_config(
             f"{switch_os}_options.yaml",
         )
         return options_file
-
-    def add_preserve_config(switch_config):
-        preserve_lag_config = "# The interface to LAG mappings below have been preserved in the generated config\n"
-        for port in preserve[0][0]:
-            interface = port.get("interface")
-            lag = port.get("lag")
-            if lag is not None:
-                preserve_lag_config += f"# interface {interface} LAG id {lag}\n"
-        preserve_lag_config += "\n"
-        preserve_lag_config += switch_config
-        return preserve_lag_config
-
-    def error_check_preserve_config(switch_config):
-        if (
-            "mlag-channel-group None" in switch_config
-            or "lag None" in switch_config
-            or "channel-group None" in switch_config
-        ):
-            click.secho(
-                "Incorrect port > MLAG mapping, please verify that all the ports have a correct MLAG mapping.",
-                fg="red",
-            )
-            sys.exit(1)
 
     if architecture == "network_v1" and node_shasta_name != "sw-edge":
         switch_config_v1 = ""
@@ -1063,11 +1008,6 @@ def generate_switch_config(
             for line in hier_v1.all_children_sorted():
                 switch_config_v1 += line.cisco_style_text() + "\n"
 
-        if preserve:
-            preserve_lag_config = add_preserve_config(switch_config_v1)
-            error_check_preserve_config(preserve_lag_config)
-            return (preserve_lag_config, devices, unknown)
-
         return switch_config_v1, devices, unknown
 
     # defaults to aruba options file
@@ -1086,33 +1026,6 @@ def generate_switch_config(
                     switch_os,
                     custom_config_file,
                 )
-
-    if preserve:
-        preserve_lag_config = add_preserve_config(switch_config)
-        error_check_preserve_config(preserve_lag_config)
-        return (preserve_lag_config, devices, unknown)
-
-    if reorder:
-        switch_os = "aoscx"
-        options = yaml.load(open(hier_options(switch_os)))
-        host = Host(switch_name, switch_os, options)
-        switch_config_hier = HConfig(host=host)
-        switch_config_hier.load_from_string(switch_config)
-        switch_config_hier.set_order_weight()
-        # add ! to the end of the aruba banner.
-        banner = switch_config_hier.get_child("contains", "banner")
-        banner.add_child("!")
-        config = ""
-        for line in switch_config_hier.all_children_sorted():
-            # add two spaces to indented config to match aruba formatting.
-            if (
-                line.cisco_style_text().startswith("  ")
-                and "!" not in line.cisco_style_text()
-            ):
-                config += "\n" + "  " + line.cisco_style_text()
-            else:
-                config += "\n" + line.cisco_style_text().lstrip()
-        switch_config = config
 
     return switch_config, devices, unknown
 
@@ -1143,36 +1056,12 @@ def get_pair_connections(nodes, switch_name):
     return connections
 
 
-def preserve_port(
-    preserve,
-    source_port,
-    mellanox=None,
-):
-    """Get the nodes connected to the switch ports.
-
-    Args:
-        preserve: parsed running config
-        source_port: port that is going to be assigned a LAG
-        mellanox: if switch is mellanox parse the interface differently. (mellanox = 1/1, aruba/dell = 1/1/1)
-
-    Returns:
-        The LAG Number of the old running config.
-    """
-    for port in preserve[0][0]:
-        if "lag" in port.keys() and (
-            (str(source_port) == port["interface"][2:] and mellanox)
-            or (str(source_port) == port["interface"][4:])
-        ):
-            return port["lag"]
-
-
 def get_switch_nodes(
     architecture,
     switch_name,
     network_node_list,
     factory,
     sls_variables,
-    preserve,
 ):
     """Get the nodes connected to the switch ports.
 
@@ -1182,7 +1071,6 @@ def get_switch_nodes(
         network_node_list: List of nodes from the SHCD / Paddle
         factory: Node factory object
         sls_variables: Dictionary containing SLS variables.
-        preserve: Parsed running config.
 
     Returns:
         List of nodes connected to the switch
@@ -1234,14 +1122,6 @@ def get_switch_nodes(
                     "LAG_NUMBER": primary_port,
                 },
             }
-            if preserve and architecture == "network_v1":
-                new_node["config"]["LAG_NUMBER"] = preserve_port(
-                    preserve,
-                    source_port,
-                    mellanox=True,
-                )
-            elif preserve:
-                new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name == "ncn-s":
             # ncn-s also needs destination_port to find the match
@@ -1267,14 +1147,6 @@ def get_switch_nodes(
                     "LAG_NUMBER_V1": primary_port,
                 },
             }
-            if preserve and architecture == "network_v1":
-                new_node["config"]["LAG_NUMBER_V1"] = preserve_port(
-                    preserve,
-                    source_port,
-                    mellanox=True,
-                )
-            elif preserve:
-                new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name == "ncn-w":
             new_node = {
@@ -1292,14 +1164,6 @@ def get_switch_nodes(
                     "LAG_NUMBER": primary_port,
                 },
             }
-            if preserve and architecture == "network_v1":
-                new_node["config"]["LAG_NUMBER"] = preserve_port(
-                    preserve,
-                    source_port,
-                    mellanox=True,
-                )
-            elif preserve:
-                new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name == "cec":
             destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
@@ -1348,8 +1212,6 @@ def get_switch_nodes(
                     "TAGGED_VLAN": hmn_mtn_vlan,
                 },
             }
-            if preserve:
-                new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name in {"uan", "login", "viz", "lmem"}:
             primary_port_uan = get_primary_port(
@@ -1374,14 +1236,6 @@ def get_switch_nodes(
                     "LAG_NUMBER_V1": primary_port,
                 },
             }
-            if preserve and architecture == "network_v1":
-                new_node["config"]["LAG_NUMBER_V1"] = preserve_port(
-                    preserve,
-                    source_port,
-                    mellanox=True,
-                )
-            elif preserve:
-                new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name in {
             "gateway",
@@ -1550,14 +1404,6 @@ def get_switch_nodes(
                     "PORT": f"{source_port}",
                 },
             }
-            if preserve and architecture == "network_v1":
-                new_node["config"]["LAG_NUMBER"] = preserve_port(
-                    preserve,
-                    source_port,
-                    mellanox=True,
-                )
-            elif preserve:
-                new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name == "sw-cdu":
             is_primary, primary, secondary = switch_is_primary(destination_node_name)
@@ -1584,14 +1430,6 @@ def get_switch_nodes(
                     "PORT": f"{source_port}",
                 },
             }
-            if preserve and architecture == "network_v1":
-                new_node["config"]["LAG_NUMBER"] = preserve_port(
-                    preserve,
-                    source_port,
-                    mellanox=True,
-                )
-            elif preserve:
-                new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name == "sw-leaf":
             # sw-spine ==> sw-leaf
@@ -1622,14 +1460,6 @@ def get_switch_nodes(
                     "PORT": f"{source_port}",
                 },
             }
-            if preserve and architecture == "network_v1":
-                new_node["config"]["LAG_NUMBER"] = preserve_port(
-                    preserve,
-                    source_port,
-                    mellanox=True,
-                )
-            elif preserve:
-                new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name == "sw-leaf-bmc":
             # sw-leaf ==> sw-leaf-bmc
@@ -1655,14 +1485,6 @@ def get_switch_nodes(
                     "PORT": f"{source_port}",
                 },
             }
-            if preserve and architecture == "network_v1":
-                new_node["config"]["LAG_NUMBER"] = preserve_port(
-                    preserve,
-                    source_port,
-                    mellanox=True,
-                )
-            elif preserve:
-                new_node["config"]["LAG_NUMBER"] = preserve_port(preserve, source_port)
             nodes.append(new_node)
         elif shasta_name == "sw-edge":
             new_node = {
@@ -1877,6 +1699,9 @@ def parse_sls_for_config(input_json):
         "NMN_MTN_CABINETS": [],
         "NMN_MTN_CABINETS_NETMASK": [],
         "HMN_MTN_CABINETS": [],
+        "SPINE_SWITCH_IPs": [],
+        "NMN_NCN": [],
+        "ALL_SWITCH_IPs": [],
         "IPV6_ENABLED": None,
     }
 
@@ -2077,7 +1902,7 @@ def parse_sls_for_config(input_json):
                             sls_variables["KUBEAPI_VIP"] = ip["IPAddress"]
                 if subnets["Name"] == "bootstrap_dhcp":
                     for ip in subnets["IPReservations"]:
-                        if "ncn-w" in ip["Name"]:
+                        if ip["Name"].startswith("ncn-"):
                             sls_variables["NMN_IPs"][ip["Name"]] = ip["IPAddress"]
                 elif subnets["Name"] == "network_hardware":
                     sls_variables["NMN_IP_GATEWAY"] = subnets["Gateway"]
@@ -2169,51 +1994,14 @@ def parse_sls_for_config(input_json):
             networks_list.append([name, vlan])
 
     networks_list = {tuple(x) for x in networks_list}
-    return sls_variables
 
-
-def rename_sls_hostnames(sls_variables):
-    """Parse and rename SLS switch names.
-
-    The operation needs to be done in two passes to prevent naming conflicts.
-
-    Args:
-        sls_variables: Dictionary containing SLS variables.
-
-    Returns:
-        sls_variables: Dictionary containing renamed SLS variables.
-    """
-    # First pass rename leaf ==> leaf-bmc
-    for key, value in sls_variables["HMN_IPs"].copy().items():
-        new_name = key.replace("-leaf-", "-leaf-bmc-")
-        sls_variables["HMN_IPs"].pop(key)
-        sls_variables["HMN_IPs"][new_name] = value
-
-    for key, value in sls_variables["MTL_IPs"].copy().items():
-        new_name = key.replace("-leaf-", "-leaf-bmc-")
-        sls_variables["MTL_IPs"].pop(key)
-        sls_variables["MTL_IPs"][new_name] = value
-
-    for key, value in sls_variables["NMN_IPs"].copy().items():
-        new_name = key.replace("-leaf-", "-leaf-bmc-")
-        sls_variables["NMN_IPs"].pop(key)
-        sls_variables["NMN_IPs"][new_name] = value
-
-    # Second pass rename agg ==> leaf
-    for key, value in sls_variables["HMN_IPs"].copy().items():
-        new_name = key.replace("-agg-", "-leaf-")
-        sls_variables["HMN_IPs"].pop(key)
-        sls_variables["HMN_IPs"][new_name] = value
-
-    for key, value in sls_variables["MTL_IPs"].copy().items():
-        new_name = key.replace("-agg-", "-leaf-")
-        sls_variables["MTL_IPs"].pop(key)
-        sls_variables["MTL_IPs"][new_name] = value
-
-    for key, value in sls_variables["NMN_IPs"].copy().items():
-        new_name = key.replace("-agg-", "-leaf-")
-        sls_variables["NMN_IPs"].pop(key)
-        sls_variables["NMN_IPs"][new_name] = value
+    for name, ip in sls_variables["NMN_IPs"].items():
+        if name.startswith("sw-spine"):
+            sls_variables["SPINE_SWITCH_IPs"].append(ip)
+        if name.startswith("ncn-"):
+            sls_variables["NMN_NCN"].append(ip)
+        if name.startswith("sw-"):
+            sls_variables["ALL_SWITCH_IPs"].append(ip)
 
     return sls_variables
 

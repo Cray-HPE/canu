@@ -22,8 +22,12 @@ ssh server vrf mgmt
 vlan {{ variables.NATIVE_VLAN }}
 vlan {{ variables.NMN_VLAN }}
     name NMN
+{%- if variables.ENABLE_NMN_ISOLATION %}
+    apply access-list ip MANAGED_NODE_ISOLATION in
+{%- else %}
     apply access-list ip nmn-hmn in
     apply access-list ip nmn-hmn out
+{%- endif %}
 vlan {{ variables.HMN_VLAN }}
     name HMN
     apply access-list ip nmn-hmn in
@@ -69,6 +73,10 @@ interface vlan 1
 interface vlan {{ variables.NMN_VLAN }}
     vrf attach {{ variables.VRF }}
     description NMN
+{%- if variables.ENABLE_NMN_ISOLATION %}
+    apply access-list ip nmn-hmn routed-in
+    apply access-list ip nmn-hmn routed-out
+{%- endif %}
     ip mtu 9198
     ip address {{ variables.NMN_IP }}/{{variables.NMN_PREFIX_LEN}}
     ip ospf 2 area 0.0.0.0

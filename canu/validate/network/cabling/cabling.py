@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -20,33 +20,79 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 """CANU commands that validate the network cabling."""
-from collections import defaultdict
+import datetime
 import ipaddress
 import logging
-from os import path
 import re
 import sys
+from collections import defaultdict
 
 import click
-from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
-from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
 import click_spinner
-from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
-from network_modeling.NetworkNodeFactory import NetworkNodeFactory
-from network_modeling.NetworkPort import NetworkPort
 import requests
+from click_option_group import RequiredMutuallyExclusiveOptionGroup, optgroup
+from click_params import IPV4_ADDRESS, Ipv4AddressListParamType
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 from ruamel.yaml import YAML
 
 from canu.report.switch.cabling.cabling import get_lldp
 from canu.style import Style
-from canu.utils.cache import cache_directory
 from canu.validate.shcd.shcd import node_list_warnings, print_node_list
+from network_modeling.NetworkNodeFactory import NetworkNodeFactory
+from network_modeling.NetworkPort import NetworkPort
 
 yaml = YAML()
 
-canu_cache_file = path.join(cache_directory(), "canu_cache.yaml")
-
 log = logging.getLogger("validate_cabling")
+
+
+def create_cache_structure_from_lldp(switch_info, lldp_dict, arp):
+    """Create a cache structure from LLDP data that matches the expected format.
+
+    Args:
+        switch_info: Dictionary with switch platform_name, hostname and IP address
+        lldp_dict: Dictionary with LLDP information
+        arp: ARP dictionary
+
+    Returns:
+        Dictionary representing switch in cache format
+    """
+    switch = {
+        "ip_address": switch_info["ip"],
+        "cabling": defaultdict(list),
+        "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "hostname": switch_info["hostname"],
+        "platform_name": switch_info["platform_name"],
+        "vendor": switch_info["vendor"],
+    }
+
+    for port_number, port in lldp_dict.items():
+        for index, _entry in enumerate(port):
+            arp_list = []
+            if port[index]["chassis_name"] == "":
+                arp_list = [
+                    f"{arp[mac]['ip_address']}:{list(arp[mac]['port'])[0]}"
+                    for mac in arp
+                    if arp[mac]["mac"] == port[index]["mac_addr"]
+                ]
+            arp_list = ", ".join(arp_list)
+            neighbor_description = f"{port[index]['chassis_description'][:54]} {str(arp_list)}"
+            port_info = {
+                "neighbor": port[index]["chassis_name"],
+                "neighbor_description": neighbor_description,
+                "neighbor_port": port[index]["port_id"],
+                "neighbor_port_description": re.sub(
+                    r"(Interface\s+\d+ as )",
+                    "",
+                    port[index]["port_description"],
+                ),
+                "neighbor_chassis_id": port[index]["chassis_id"],
+            }
+
+            switch["cabling"][port_number].append(port_info)
+
+    switch["cabling"] = dict(switch["cabling"])
+    return switch
 
 
 @click.command(
@@ -138,6 +184,9 @@ def cabling(ctx, architecture, ips, ips_file, username, password, log_, out):
     errors = []
     ips_length = len(ips)
 
+    # Create in-memory cache structure from live LLDP data
+    switches_list = []
+
     if ips:
         with click_spinner.spinner(
             beep=False,
@@ -151,8 +200,13 @@ def cabling(ctx, architecture, ips, ips_file, username, password, log_, out):
                     end="\r",
                 )
                 try:
-                    # Get LLDP info (stored in cache)
-                    get_lldp(str(ip), credentials, return_error=True)
+                    # Get LLDP info directly (without caching to file)
+                    switch_info, lldp_dict, arp = get_lldp(str(ip), credentials, return_error=True)
+
+                    if switch_info and lldp_dict:
+                        # Create cache structure from live LLDP data
+                        switch_cache_entry = create_cache_structure_from_lldp(switch_info, lldp_dict, arp)
+                        switches_list.append(switch_cache_entry)
 
                 except (
                     requests.exceptions.HTTPError,
@@ -166,24 +220,38 @@ def cabling(ctx, architecture, ips, ips_file, username, password, log_, out):
                     if exception_type == "HTTPError":
                         error_message = f"Error connecting to switch {ip}, check the IP, username, or password."
                     elif exception_type == "ConnectionError":
-                        error_message = f"Error connecting to switch {ip}, check the entered username, IP address and password."
+                        error_message = (
+                            f"Error connecting to switch {ip}, check the entered username, IP address and password."
+                        )
                     elif exception_type == "NetmikoTimeoutException":
                         error_message = f"Timeout error connecting to {ip}. Check the IP address and try again."
                     elif exception_type == "NetmikoAuthenticationException":
-                        error_message = f"Auth error connecting to {ip}. Check the credentials or IP address and try again"
+                        error_message = (
+                            f"Auth error connecting to {ip}. Check the credentials or IP address and try again"
+                        )
                     else:
                         error_message = f"Error connecting to switch {ip}."
 
                     errors.append([str(ip), error_message])
 
-    # Open the updated cache to model nodes
-    with open(canu_cache_file, "r+") as file:
-        canu_cache = yaml.load(file)
+    # Create in-memory network data structure that matches expected format
+    network_data = {
+        "version": "1.0",  # Using a default version
+        "switches": switches_list,
+    }
 
-    # Create Node factory and model from switch LLDP data
-    log.debug("Creating model from switch LLDP data")
-    factory = NetworkNodeFactory(architecture_version=architecture)
-    node_list, warnings = node_model_from_canu(factory, canu_cache, ips)
+    # Create cabling Node factory and model from network data
+    log.debug("Creating model from network data")
+    cabling_factory = NetworkNodeFactory(architecture_version=architecture)
+    cabling_node_list, cabling_warnings = node_model_from_canu(
+        cabling_factory,
+        network_data,
+        ips,
+    )
+
+    # Use the generated node list and warnings
+    node_list = cabling_node_list
+    warnings = cabling_warnings
 
     print_node_list(node_list, "Cabling", out)
 
@@ -301,7 +369,10 @@ def validate_cabling_port_data(lldp_info, warnings):
 class FormatSwitchDestinationNameError(Exception):
     """Exception raised when the switch destination name cannot be formatted."""
 
-    def __init__(self, message="Unable to parse and format switch destination name. Should follow the format: 'sw-NAME-NNN'"):
+    def __init__(
+        self,
+        message="Unable to parse and format switch destination name. Should follow the format: 'sw-NAME-NNN'",
+    ):
         # noqa: DAR101
         """Initialize the exception."""
         self.message = message
@@ -326,12 +397,12 @@ def format_switch_dst_name(dst_name):
     # regex match for the following patterns:
     #   1. a prefix ending with a letter (excluding g/G) followed by digits
     #   2. a prefix that may include 'g' or 'G' as part of the middle section followed by digits
-    pattern = re.compile(r'(sw-)((?:.*[^gG\d]|.*[gG])?)(\d+)')
+    pattern = re.compile(r"(sw-)((?:.*[^gG\d]|.*[gG])?)(\d+)")
     match = pattern.match(dst_name)
     # if the name is close to what we need, try to format it
     if match:
-        prefix = match.group(1).rstrip('-')
-        middle = match.group(2).rstrip('-').replace('-', '')
+        prefix = match.group(1).rstrip("-")
+        middle = match.group(2).rstrip("-").replace("-", "")
         # some other commands like 'report switch firmware|cabling' and even
         # certain variants of 'validate network cabling', where this code gets
         # called there is some weird interdependencies here that are in the
@@ -352,12 +423,12 @@ def format_switch_dst_name(dst_name):
         raise FormatSwitchDestinationNameError
 
 
-def node_model_from_canu(factory, canu_cache, ips):
-    """Create a list of nodes from CANU cache.
+def node_model_from_canu(factory, network_data, ips):
+    """Create a list of nodes from network data.
 
     Args:
         factory: Node factory object
-        canu_cache: CANU cache file
+        network_data: Network data structure with switch information
         ips: List of ips to check
 
     Returns:
@@ -369,7 +440,11 @@ def node_model_from_canu(factory, canu_cache, ips):
     node_name_list = []
     warnings = defaultdict(list)
 
-    for switch in canu_cache["switches"]:
+    # Handle case where network data is empty
+    if "switches" not in network_data:
+        return node_list, warnings
+
+    for switch in network_data["switches"]:
         if ipaddress.ip_address(switch["ip_address"]) in ips:
             src_name = switch["hostname"]
 
@@ -472,9 +547,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                 )
                 log.debug(f"Destination Node Type Lookup:  {node_type}")
 
-                if (
-                    dst_name != dst_lldp["neighbor"] or dst_rename is not None
-                ) and dst_name is not None:
+                if (dst_name != dst_lldp["neighbor"] or dst_rename is not None) and dst_name is not None:
                     dst_renamed = dst_name
 
                     if dst_rename is not None:
@@ -531,7 +604,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                 # The destination node has been created, but the port number cannot be determined so skip connecting
                 if dst_port is None:
                     log.warning(
-                        f'Physical port number for {dst_name} cannot be determined from LLDP data '
+                        f"Physical port number for {dst_name} cannot be determined from LLDP data "
                         f'"{dst_lldp["neighbor_port"]}" or "{dst_lldp["neighbor_port_description"]}"',
                     )
                     continue
@@ -557,14 +630,12 @@ def node_model_from_canu(factory, canu_cache, ips):
                         sys.exit(1)
                     if connected:
                         log.info(
-                            f"Connected {src_node.common_name()} to"
-                            + f" {dst_node.common_name()}",
+                            f"Connected {src_node.common_name()} to" + f" {dst_node.common_name()}",
                         )
                     else:
                         log.error("")
                         click.secho(
-                            f"Failed to connect {src_node.common_name()}"
-                            + f" to {dst_node.common_name()}",
+                            f"Failed to connect {src_node.common_name()}" + f" to {dst_node.common_name()}",
                             fg="red",
                         )
                         for node in node_list:
@@ -573,8 +644,7 @@ def node_model_from_canu(factory, canu_cache, ips):
                                 + f"to {len(node.edges())} ports on nodes: {node.edges()}",
                             )
                         log.fatal(
-                            f"Failed to connect {src_node.common_name()} "
-                            + f"to {dst_node.common_name()}",
+                            f"Failed to connect {src_node.common_name()} " + f"to {dst_node.common_name()}",
                         )
                         sys.exit(1)  # TODO: this should probably be an exception
     return node_list, warnings

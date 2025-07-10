@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -22,16 +22,14 @@
 """Test CANU report switch cabling commands."""
 from unittest.mock import patch
 
-from click import testing
-from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import pytest
 import requests
 import responses
+from click import testing
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 
 from canu.cli import cli
 from canu.report.switch.cabling.cabling import get_lldp
-from canu.utils.cache import remove_switch_from_cache
-
 
 username = "admin"
 password = "admin"
@@ -39,7 +37,6 @@ ip = "192.168.1.1"
 ip_dell = "192.168.1.2"
 ip_mellanox = "192.168.1.3"
 credentials = {"username": username, "password": password}
-cache_minutes = 0
 runner = testing.CliRunner()
 
 
@@ -104,7 +101,6 @@ def test_get_lldp_function(netmiko_command, switch_vendor):
 
         assert arp["192.168.1.2,vlan1"]["mac"] == "00:40:a6:00:00:00"
         assert list(arp["192.168.1.2,vlan1"]["port"])[0] == "vlan1"
-        remove_switch_from_cache(ip)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -146,7 +142,6 @@ def test_get_lldp_function_bad_credentials(switch_vendor):
         with pytest.raises(requests.exceptions.HTTPError) as http_error:
             get_lldp(ip, bad_credentials, return_error=True)
         assert "Unauthorized for url" in str(http_error.value)
-    remove_switch_from_cache(ip)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -189,8 +184,6 @@ def test_switch_cabling(netmiko_command, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "cabling",
@@ -204,7 +197,6 @@ def test_switch_cabling(netmiko_command, switch_vendor):
         )
         assert result.exit_code == 0
         assert "1/1/1      ==> sw-test01       1/1/1" in str(result.output)
-        remove_switch_from_cache(ip)
 
 
 def test_switch_cabling_missing_ip():
@@ -213,8 +205,6 @@ def test_switch_cabling_missing_ip():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "cabling",
@@ -236,8 +226,6 @@ def test_switch_cabling_invalid_ip():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "cabling",
@@ -272,8 +260,6 @@ def test_switch_cabling_bad_ip(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "cabling",
@@ -306,8 +292,6 @@ def test_switch_cabling_bad_password(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "cabling",
@@ -335,8 +319,6 @@ def test_switch_cabling_dell(netmiko_commands, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "cabling",
@@ -349,13 +331,9 @@ def test_switch_cabling_dell(netmiko_commands, switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert (
-            "Switch: sw-test-dell (192.168.1.2)                       \n"
-            + "Dell S3048-ON\n"
-        ) in str(result.output)
+        assert ("Switch: sw-test-dell (192.168.1.2)                       \n" + "Dell S3048-ON\n") in str(result.output)
         assert ("1/1/1      ==> sw-test01       1/1/15") in str(result.output)
         assert ("1/1/2      ==> sw-test02       1/1/15") in str(result.output)
-        remove_switch_from_cache(ip)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -369,8 +347,6 @@ def test_switch_cabling_dell_timeout(netmiko_commands, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "cabling",
@@ -400,8 +376,6 @@ def test_switch_cabling_dell_auth(netmiko_commands, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "cabling",
@@ -470,8 +444,6 @@ def test_switch_cabling_mellanox(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "cabling",
@@ -489,8 +461,6 @@ def test_switch_cabling_mellanox(switch_vendor):
         assert ("1/1/1      ==> sw-test03       1/1/11") in str(result.output)
         assert ("1/1/2      ==> sw-test04       1/1/12") in str(result.output)
 
-        remove_switch_from_cache(ip_mellanox)
-
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
 @responses.activate
@@ -507,8 +477,6 @@ def test_switch_cabling_mellanox_auth_error(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "cabling",
@@ -521,10 +489,7 @@ def test_switch_cabling_mellanox_auth_error(switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert (
-            "Error connecting to switch 192.168.1.3, check the username or password."
-            in str(result.output)
-        )
+        assert "Error connecting to switch 192.168.1.3, check the username or password." in str(result.output)
 
 
 @patch("canu.report.switch.cabling.cabling.switch_vendor")
@@ -542,8 +507,6 @@ def test_switch_cabling_mellanox_connection_error(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "cabling",
@@ -556,9 +519,8 @@ def test_switch_cabling_mellanox_connection_error(switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert (
-            "Error connecting to switch 192.168.1.3, check the entered username, IP address and password."
-            in str(result.output)
+        assert "Error connecting to switch 192.168.1.3, check the entered username, IP address and password." in str(
+            result.output,
         )
 
 
@@ -582,8 +544,6 @@ def test_switch_cabling_mellanox_exception(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "cabling",
@@ -608,8 +568,6 @@ def test_switch_cabling_vendor_error(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "cabling",
@@ -740,8 +698,7 @@ netmiko_commands_dell = [
     + "------------------------------------------------------------------------------------------\n"
     + "192.168.1.1    00:40:a6:00:44:55   vlan2                         port-channel100     \n"
     + "192.168.1.2    00:40:a6:00:00:33   vlan7                         port-channel100     \n",
-    "VlanId Mac Address      Type      Interface\n"
-    + "1   00:40:a6:00:00:00    dynamic    ethernet1/1/3\n",
+    "VlanId Mac Address      Type      Interface\n" + "1   00:40:a6:00:00:00    dynamic    ethernet1/1/3\n",
 ]
 
 lldp_json_mellanox = {

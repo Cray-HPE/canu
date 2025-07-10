@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -23,16 +23,14 @@
 import json
 from unittest.mock import patch
 
-from click import testing
-from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 import pytest
 import requests
 import responses
+from click import testing
+from netmiko import NetmikoAuthenticationException, NetmikoTimeoutException
 
 from canu.cli import cli
 from canu.report.switch.firmware.firmware import get_firmware_aruba
-from canu.utils.cache import get_switch_from_cache, remove_switch_from_cache
-
 
 username = "admin"
 password = "admin"
@@ -41,7 +39,6 @@ ip_dell = "192.168.1.2"
 ip_mellanox = "192.168.1.3"
 credentials = {"username": username, "password": password}
 csm = "1.0"
-cache_minutes = 0
 runner = testing.CliRunner()
 
 
@@ -92,7 +89,6 @@ def test_get_firmware_aruba_function(switch_vendor):
             ip,
             credentials,
             True,
-            cache_minutes,
         )
         assert switch_firmware["current_version"] == "Virtual.10.06.0001"
         assert switch_info["hostname"] == "test-switch"
@@ -116,7 +112,7 @@ def test_get_firmware_aruba_function_bad_ip(switch_vendor):
         )
 
         with pytest.raises(requests.exceptions.ConnectionError) as connection_error:
-            get_firmware_aruba(bad_ip, credentials, True, cache_minutes)
+            get_firmware_aruba(bad_ip, credentials, True)
 
         assert "Failed to establish a new connection" in str(connection_error.value)
 
@@ -136,7 +132,7 @@ def test_get_firmware_aruba_function_bad_credentials(switch_vendor):
         bad_credentials = {"username": "foo", "password": "foo"}
 
         with pytest.raises(requests.exceptions.HTTPError) as http_error:
-            get_firmware_aruba(ip, bad_credentials, True, cache_minutes)
+            get_firmware_aruba(ip, bad_credentials, True)
         assert "Unauthorized for url" in str(http_error.value)
 
 
@@ -174,8 +170,6 @@ def test_switch_firmware(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "firmware",
@@ -191,7 +185,6 @@ def test_switch_firmware(switch_vendor):
         )
         assert result.exit_code == 0
         assert "Virtual.10.06.0001" in str(result.output)
-        remove_switch_from_cache(ip)
 
 
 @patch("canu.report.switch.firmware.firmware.switch_vendor")
@@ -228,8 +221,6 @@ def test_switch_firmware_verbose(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "firmware",
@@ -247,7 +238,6 @@ def test_switch_firmware_verbose(switch_vendor):
         assert result.exit_code == 0
         assert "Virtual.10.06.0001" in str(result.output)
         assert ip in str(result.output)
-        remove_switch_from_cache(ip)
 
 
 def test_switch_firmware_missing_ip():
@@ -256,8 +246,6 @@ def test_switch_firmware_missing_ip():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "firmware",
@@ -281,8 +269,6 @@ def test_switch_firmware_invalid_ip():
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "firmware",
@@ -320,8 +306,6 @@ def test_switch_firmware_bad_ip(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "firmware",
@@ -357,8 +341,6 @@ def test_switch_firmware_bad_password(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "firmware",
@@ -411,8 +393,6 @@ def test_switch_firmware_json(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "firmware",
@@ -429,7 +409,6 @@ def test_switch_firmware_json(switch_vendor):
         )
         assert result.exit_code == 0
         assert "Virtual.10.06.0001" in str(result.output)
-        remove_switch_from_cache(ip)
 
 
 @patch("canu.report.switch.firmware.firmware.switch_vendor")
@@ -466,8 +445,6 @@ def test_switch_firmware_json_verbose(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "firmware",
@@ -488,7 +465,6 @@ def test_switch_firmware_json_verbose(switch_vendor):
         result_json = json.loads(result.output)
         assert result_json["firmware"]["current_version"] == "Virtual.10.06.0001"
         assert result_json["status"] == "Pass"
-        remove_switch_from_cache(ip)
 
 
 @patch("canu.report.switch.firmware.firmware.switch_vendor")
@@ -525,8 +501,6 @@ def test_switch_firmware_mismatch(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "firmware",
@@ -542,9 +516,6 @@ def test_switch_firmware_mismatch(switch_vendor):
         )
         assert result.exit_code == 0
         assert "Firmware should be in:" in str(result.output)
-
-        # Remove switch from cache file since it had incorrect information in it from this test
-        remove_switch_from_cache(ip)
 
 
 @patch("canu.report.switch.firmware.firmware.switch_vendor")
@@ -581,8 +552,6 @@ def test_switch_firmware_mismatch_verbose(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "firmware",
@@ -599,9 +568,6 @@ def test_switch_firmware_mismatch_verbose(switch_vendor):
         )
         assert result.exit_code == 0
         assert "Firmware should be in:" in str(result.output)
-
-        # Remove switch from cache file since it had incorrect information in it from this test
-        remove_switch_from_cache(ip)
 
 
 # Dell
@@ -625,8 +591,6 @@ def test_switch_firmware_dell(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "firmware",
@@ -644,80 +608,6 @@ def test_switch_firmware_dell(switch_vendor):
         assert "Pass - IP: 192.168.1.2 Hostname: test-dell Firmware: 10.5.1.4" in str(
             result.output,
         )
-        remove_switch_from_cache(ip_dell)
-
-
-@patch("canu.report.switch.firmware.firmware.switch_vendor")
-@responses.activate
-def test_switch_firmware_dell_cache(switch_vendor):
-    """Test that the `canu report switch firmware` command runs and returns valid dell firmware from cache."""
-    minutes = 10
-    with runner.isolated_filesystem():
-        switch_vendor.return_value = "dell"
-        responses.add(
-            responses.GET,
-            f"https://{ip_dell}/restconf/data/system-sw-state/sw-version",
-            json=dell_firmware_mock,
-        )
-        responses.add(
-            responses.GET,
-            f"https://{ip_dell}/restconf/data/dell-system:system/hostname",
-            json=dell_hostname_mock,
-        )
-        # Initial run, no cache
-        runner.invoke(
-            cli,
-            [
-                "--cache",
-                minutes,
-                "report",
-                "switch",
-                "firmware",
-                "--csm",
-                csm,
-                "--ip",
-                ip_dell,
-                "--username",
-                username,
-                "--password",
-                password,
-                "--json",
-                "--verbose",
-            ],
-        )
-        # Second run, pull from cache
-        result = runner.invoke(
-            cli,
-            [
-                "--cache",
-                minutes,
-                "report",
-                "switch",
-                "firmware",
-                "--csm",
-                csm,
-                "--ip",
-                ip_dell,
-                "--username",
-                username,
-                "--password",
-                password,
-                "--json",
-                "--verbose",
-            ],
-        )
-        result_json = json.loads(result.output)
-        cached_switch = get_switch_from_cache(ip_dell)
-
-        assert result.exit_code == 0
-        assert (
-            cached_switch["firmware"]["current_version"]
-            == result_json["firmware"]["current_version"]
-        )
-        assert cached_switch["platform_name"] == result_json["platform_name"]
-        assert cached_switch["hostname"] == result_json["hostname"]
-
-        remove_switch_from_cache(ip_dell)
 
 
 @patch("canu.report.switch.firmware.firmware.switch_vendor")
@@ -735,8 +625,6 @@ def test_switch_firmware_dell_exception(switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "firmware",
@@ -768,8 +656,6 @@ def test_switch_firmware_mellanox(netmiko_commands, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "firmware",
@@ -784,11 +670,7 @@ def test_switch_firmware_mellanox(netmiko_commands, switch_vendor):
             ],
         )
         assert result.exit_code == 0
-        assert (
-            "Pass - IP: 192.168.1.3 Hostname: test-mellanox Firmware: 3.9.1014"
-            in str(result.output)
-        )
-        remove_switch_from_cache(ip_mellanox)
+        assert "Pass - IP: 192.168.1.3 Hostname: test-mellanox Firmware: 3.9.1014" in str(result.output)
 
 
 @patch("canu.report.switch.firmware.firmware.switch_vendor")
@@ -803,8 +685,6 @@ def test_switch_firmware_mellanox_timeout(netmiko_commands, switch_vendor):
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "firmware",
@@ -837,8 +717,6 @@ def test_switch_firmware_mellanox_auth_exception(netmiko_commands, switch_vendor
         result = runner.invoke(
             cli,
             [
-                "--cache",
-                cache_minutes,
                 "report",
                 "switch",
                 "firmware",
@@ -857,71 +735,6 @@ def test_switch_firmware_mellanox_auth_exception(netmiko_commands, switch_vendor
             "Authentication error connecting to switch 192.168.1.3, check the credentials or IP address and try again."
             in str(result.output)
         )
-
-
-@patch("canu.report.switch.firmware.firmware.switch_vendor")
-@patch("canu.report.switch.firmware.firmware.netmiko_commands")
-@responses.activate
-def test_switch_firmware_mellanox_cache(netmiko_commands, switch_vendor):
-    """Test that the `canu report switch firmware` command runs and returns valid mellanox firmware from cache."""
-    minutes = 10
-    with runner.isolated_filesystem():
-        switch_vendor.return_value = "mellanox"
-        netmiko_commands.return_value = netmiko_commands_mellanox
-        # Initial run, no cache
-        runner.invoke(
-            cli,
-            [
-                "--cache",
-                minutes,
-                "report",
-                "switch",
-                "firmware",
-                "--csm",
-                csm,
-                "--ip",
-                ip_mellanox,
-                "--username",
-                username,
-                "--password",
-                password,
-                "--json",
-                "--verbose",
-            ],
-        )
-        # Second run, pull from cache
-        result = runner.invoke(
-            cli,
-            [
-                "--cache",
-                minutes,
-                "report",
-                "switch",
-                "firmware",
-                "--csm",
-                csm,
-                "--ip",
-                ip_mellanox,
-                "--username",
-                username,
-                "--password",
-                password,
-                "--json",
-                "--verbose",
-            ],
-        )
-        result_json = json.loads(result.output)
-        cached_switch = get_switch_from_cache(ip_mellanox)
-
-        assert result.exit_code == 0
-        assert (
-            cached_switch["firmware"]["current_version"]
-            == result_json["firmware"]["current_version"]
-        )
-        assert cached_switch["platform_name"] == result_json["platform_name"]
-        assert cached_switch["hostname"] == result_json["hostname"]
-
-        remove_switch_from_cache(ip_mellanox)
 
 
 dell_firmware_mock = {

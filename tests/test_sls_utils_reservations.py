@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2022-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -70,8 +70,10 @@ def test_to_sls(reservation):
     reservation.comment("test comment")
     reservation.aliases(["alias1", "alias2"])
 
-    expected_sls.update({
-        "Comment": "test comment",
-        "Aliases": ["alias1", "alias2"],
-    })
+    expected_sls.update(
+        {
+            "Comment": "test comment",
+            "Aliases": ["alias1", "alias2"],
+        },
+    )
     assert reservation.to_sls() == expected_sls

@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 # MIT License
 #
-# (C) Copyright 2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2022-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -35,7 +35,7 @@ End
 
 It 'cache generate network config --help'
   When call canu generate network config --help
-  The lines of stdout should equal 82
+  The lines of stdout should equal 85
   The line 1 of stdout should equal 'Usage: canu generate network config [OPTIONS]'
 End
 
@@ -47,6 +47,6 @@ End
 
 It 'cache generate switch config --help'
   When call canu generate switch config --help
-  The lines of stdout should equal 85
+  The lines of stdout should equal 88
   The line 1 of stdout should equal 'Usage: canu generate switch config [OPTIONS]'
 End
