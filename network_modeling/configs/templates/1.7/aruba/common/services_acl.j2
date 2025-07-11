@@ -8,7 +8,7 @@
 {%- endif -%}
 
 {%- set _ = acl_rules.append({'type': 'comment', 'text': 'Permit Unrestricted NCN to NCN Communication'}) -%}
-{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit any NMN_NCN NMN_NCN count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit any NCN NCN count'}) -%}
 {%- set _ = acl_rules.append({'type': 'comment', 'text': 'Permit DHCP traffic'}) -%}
 {%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit udp any range 67 68 any count'}) -%}
 {%- set _ = acl_rules.append({'type': 'comment', 'text': 'Permit node to request TFTP file'}) -%}
@@ -18,29 +18,29 @@
 {%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit udp any eq dns any count'}) -%}
 {%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp any eq dns any count'}) -%}
 {%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit udp MANAGED_NODES NMN_K8S_SERVICE eq dns count'}) -%}
-{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit udp MANAGED_NODES NMN_NCN group NMN_UDP_SERVICES count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit udp MANAGED_NODES NCN group NMN_UDP_SERVICES count'}) -%}
 {%- set _ = acl_rules.append({'type': 'comment', 'text': 'Permit NTP replies from NCNs'}) -%}
-{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit udp NMN_NCN eq ntp MANAGED_NODES count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit udp NCN eq ntp MANAGED_NODES count'}) -%}
 {%- set _ = acl_rules.append({'type': 'comment', 'text': 'Permit access to NMN_TCP_SERVICES'}) -%}
 {%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp MANAGED_NODES NMN_K8S_SERVICE group NMN_TCP_SERVICES count'}) -%}
 {%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp NMN_K8S_SERVICE MANAGED_NODES group NMN_TCP_SERVICES count'}) -%}
-{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp MANAGED_NODES NMN_NCN group NMN_TCP_SERVICES count'}) -%}
-{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp NMN_NCN MANAGED_NODES group NMN_TCP_SERVICES count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp MANAGED_NODES NCN group NMN_TCP_SERVICES count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp NCN MANAGED_NODES group NMN_TCP_SERVICES count'}) -%}
 {%- set _ = acl_rules.append({'type': 'comment', 'text': 'Allow SSH from NCNs to Managed Nodes'}) -%}
-{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp NMN_NCN MANAGED_NODES eq ssh count'}) -%}
-{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp MANAGED_NODES eq ssh NMN_NCN count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp NCN MANAGED_NODES eq ssh count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp MANAGED_NODES eq ssh NCN count'}) -%}
 {%- set _ = acl_rules.append({'type': 'comment', 'text': 'Allow ping'}) -%}
 {%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit icmp any any count'}) -%}
 {%- set _ = acl_rules.append({'type': 'comment', 'text': 'Permit OSPF from switches'}) -%}
 {%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit ospf ALL_SWITCHES any count'}) -%}
 {%- set _ = acl_rules.append({'type': 'comment', 'text': 'Permit BGP (port 179) between spines and NCNs'}) -%}
-{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp SPINE_SWITCHES NMN_NCN eq bgp count'}) -%}
-{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp NMN_NCN SPINE_SWITCHES eq bgp count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp SPINE_SWITCHES NCN eq bgp count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp NCN SPINE_SWITCHES eq bgp count'}) -%}
 {%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit any NMN_K8S_SERVICE NMN_K8S_SERVICE count'}) -%}
-{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit any NMN_K8S_SERVICE NMN_NCN count'}) -%}
-{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit any NMN_NCN NMN_K8S_SERVICE count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit any NMN_K8S_SERVICE NCN count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit any NCN NMN_K8S_SERVICE count'}) -%}
 {%- set _ = acl_rules.append({'type': 'comment', 'text': 'Permit VRRP from NCNs'}) -%}
-{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit 112 NMN_NCN 224.0.0.18 count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit 112 NCN 224.0.0.18 count'}) -%}
 {%- set _ = acl_rules.append({'type': 'comment', 'text': '--- FINAL CATCH-ALL DENY ---'}) -%}
 {%- set _ = acl_rules.append({'type': 'rule', 'text': 'deny any any any count'}) -%}
 

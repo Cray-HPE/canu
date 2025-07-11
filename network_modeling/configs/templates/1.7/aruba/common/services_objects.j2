@@ -1,12 +1,19 @@
 {#- ACL Object groups for services ACL #}
-object-group ip address NMN_NCN
+object-group ip address NCN
 {%- set ns = namespace(last_sequence=0) %}
+    10 {{ variables.RGW_VIP }}
+    20 {{ variables.KUBEAPI_VIP }}
+{%- set ns.last_sequence = 20 %}
 {%- for name, ip in variables.NMN_IPs.items() if name.startswith('ncn-') %}
-    {{ loop.index * 10 }} {{ ip }}
-{%- set ns.last_sequence = loop.index * 10 %}
+    {{ ns.last_sequence + 10 }} {{ ip }}
+{%- set ns.last_sequence = ns.last_sequence + 10 %}
 {%- endfor %}
-    {{ ns.last_sequence + 10 }} {{ variables.RGW_VIP }}
-    {{ ns.last_sequence + 20 }} {{ variables.KUBEAPI_VIP }}
+{%- if variables.MTL_IPs %}
+{%- for name, ip in variables.MTL_IPs.items() if name.startswith('ncn-') %}
+    {{ ns.last_sequence + 10 }} {{ ip }}
+{%- set ns.last_sequence = ns.last_sequence + 10 %}
+{%- endfor %}
+{%- endif %}
 object-group ip address SPINE_SWITCHES
 {%- for ip in variables.SPINE_SWITCH_IPs %}
     {{ loop.index * 10 }} {{ ip }}
