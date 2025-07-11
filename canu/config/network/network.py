@@ -283,6 +283,7 @@ def network(
             variables = {
                 "NMN_VLAN": sls_variables["NMN_VLAN"],
                 "NMN_IPs": sls_variables["NMN_IPs"],
+                "MTL_IPs": sls_variables["MTL_IPs"],
                 "SPINE_SWITCH_IPs": sls_variables["SPINE_SWITCH_IPs"],
                 "ALL_SWITCH_IPs": sls_variables["ALL_SWITCH_IPs"],
                 "RGW_VIP": sls_variables["RGW_VIP"],

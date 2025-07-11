@@ -846,6 +846,7 @@ def generate_switch_config(
         "CMN_IPs": sls_variables["CMN_IPs"],
         "CMN_IPs6": sls_variables["CMN_IPs6"],
         "NMN_IPs": sls_variables["NMN_IPs"],
+        "MTL_IPs": sls_variables["MTL_IPs"],
         "HMN_IPs": sls_variables["HMN_IPs"],
         "SWITCH_ASN": sls_variables["SWITCH_ASN"],
         "BGP_CONTROL_PLANE": bgp_control_plane,
@@ -1866,6 +1867,10 @@ def parse_sls_for_config(input_json):
                     sls_variables["MTL_IP_GATEWAY"] = subnets["Gateway"]
                     for ip in subnets["IPReservations"]:
                         sls_variables["MTL_IPs"][ip["Name"]] = ip["IPAddress"]
+                elif subnets["Name"] == "bootstrap_dhcp":
+                    for ip in subnets["IPReservations"]:
+                        if ip["Name"].startswith("ncn-"):
+                            sls_variables["MTL_IPs"][ip["Name"]] = ip["IPAddress"]
 
         elif name == "NMN":
             sls_variables["NMN"] = netaddr.IPNetwork(
