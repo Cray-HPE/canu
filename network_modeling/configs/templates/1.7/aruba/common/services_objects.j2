@@ -8,11 +8,9 @@ object-group ip address NCN
     {{ ns.last_sequence + 10 }} {{ ip }}
 {%- set ns.last_sequence = ns.last_sequence + 10 %}
 {%- endfor %}
-{%- if variables.MTL_IPs %}
-{%- for name, ip in variables.MTL_IPs.items() if name.startswith('ncn-') %}
-    {{ ns.last_sequence + 10 }} {{ ip }}
+{%- if variables.MTL_NETWORK_IP %}
+    {{ ns.last_sequence + 10 }} {{ variables.MTL_NETWORK_IP }}/{{ variables.MTL_NETMASK }}
 {%- set ns.last_sequence = ns.last_sequence + 10 %}
-{%- endfor %}
 {%- endif %}
 object-group ip address SPINE_SWITCHES
 {%- for ip in variables.SPINE_SWITCH_IPs %}
@@ -58,6 +56,7 @@ object-group port NMN_TCP_SERVICES
     120 eq 6817
     130 eq 6818
     140 eq 6819
+    150 eq 3260
 object-group port NMN_UDP_SERVICES
     10 eq dns
     20 eq dhcp-server

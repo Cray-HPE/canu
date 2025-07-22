@@ -284,6 +284,8 @@ def network(
                 "NMN_VLAN": sls_variables["NMN_VLAN"],
                 "NMN_IPs": sls_variables["NMN_IPs"],
                 "MTL_IPs": sls_variables["MTL_IPs"],
+                "MTL_NETWORK_IP": sls_variables["MTL_NETWORK_IP"],
+                "MTL_NETMASK": sls_variables["MTL_NETMASK"],
                 "SPINE_SWITCH_IPs": sls_variables["SPINE_SWITCH_IPs"],
                 "ALL_SWITCH_IPs": sls_variables["ALL_SWITCH_IPs"],
                 "RGW_VIP": sls_variables["RGW_VIP"],

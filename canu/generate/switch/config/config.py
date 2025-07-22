@@ -778,6 +778,7 @@ def generate_switch_config(
         "CMN_PREFIX_LEN6": sls_variables["CMN_PREFIX_LEN6"],
         "CMN_ASN": sls_variables["CMN_ASN"],
         "MTL_NETMASK": sls_variables["MTL_NETMASK"],
+        "MTL_NETWORK_IP": sls_variables["MTL_NETWORK_IP"],
         "MTL_PREFIX_LEN": sls_variables["MTL_PREFIX_LEN"],
         "NMN": sls_variables["NMN"],
         "NMN_VLAN": sls_variables["NMN_VLAN"],
