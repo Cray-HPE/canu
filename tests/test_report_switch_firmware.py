@@ -749,5 +749,5 @@ dell_hostname_mock = {"dell-system:hostname": "test-dell"}
 netmiko_commands_mellanox = [
     "X86_64 3.9.1014 2020-01-01 01:00:00 x86_64\n",
     "MSN2100\n",
-    "   hostname test-mellanox\n   ip dhcp send-hostname\n",
+    "Hostname        : test-mellanox\n",
 ]

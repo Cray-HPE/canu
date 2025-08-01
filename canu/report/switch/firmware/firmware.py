@@ -387,30 +387,22 @@ def get_firmware_mellanox(ip, credentials, return_error=False):
 
         device_type = "mellanox"
 
-        commands = ["show version", "show inventory"]
+        commands = [
+            "show version concise",
+            "show system type",
+            "show hosts | include Hostname",
+        ]
+
         firmware_list = netmiko_commands(ip, credentials, commands, device_type)
 
-        # Show version - extract version and platform
-        version_output = firmware_list[0]
-        version_parts = version_output.strip().split()
-        if len(version_parts) >= 2:
-            switch_firmware["current_version"] = version_parts[1]
+        # Show version concise - extract version
+        switch_firmware["current_version"] = firmware_list[0].split()[1]
 
-        # Show inventory - extract platform and hostname
-        inventory_output = firmware_list[1]
-        platform_name = inventory_output.strip()
+        # Show system type - extract platform
+        platform_name = firmware_list[1].strip()
 
-        # Show inventory - hostname (from third element or parse from inventory)
-        if len(firmware_list) > 2:
-            hostname_output = firmware_list[2]
-            hostname_lines = hostname_output.split("\n")
-            hostname = "unknown"
-            for line in hostname_lines:
-                if "hostname" in line:
-                    hostname = line.split()[-1]
-                    break
-        else:
-            hostname = "unknown"
+        # show hosts | include Hostname - extract hostname
+        hostname = firmware_list[2].split(':')[1].strip()
 
         switch_info = {
             "platform_name": platform_name,
