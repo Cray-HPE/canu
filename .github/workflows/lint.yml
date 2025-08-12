@@ -33,7 +33,7 @@ jobs:
         version: ['3.12', '3.11', '3.10', '3.9']
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 0 # Also fetch git-tags
     - name: Set up Python
