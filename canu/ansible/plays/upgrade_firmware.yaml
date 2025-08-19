@@ -1,0 +1,151 @@
+---
+- hosts: aruba
+  collections:
+    - arubanetworks.aoscx
+
+  gather_facts: true
+  vars:
+    #target_version: '10_09_0010'
+    target_version: "10.11.1010"
+
+  tasks:
+    - name: turn on https for mgmt vrf, needed for virtual switches
+      aoscx_config:
+        lines:
+          - https-server vrf mgmt
+      vars:
+        ansible_connection: network_cli
+
+    - name: Retrieve software_version and product_info
+      aoscx_facts:
+        gather_subset:
+          - software_version
+          - platform_name
+      register: result
+
+    - name: Store facts as variables
+      set_fact:
+        current_software_version: "{{ result.ansible_facts.ansible_net_software_version }}"
+        platform_name: "{{ result.ansible_facts.ansible_net_platform_name }}"
+
+    - name: Set the 6300 platform name to match f/w file
+      set_fact:
+        platform_name: "6400-6300"
+      when: platform_name == "6300"
+
+    - name: Munge target_version to match f/w file
+      set_fact:
+        target_version_mod: "{{ target_version.replace('.', '_') }}"
+
+    - name: Print software_version and product_info
+      debug:
+        msg:
+          - "Software version: {{ current_software_version }}"
+          - "Platform name: {{ platform_name }}"
+
+    - name: Copy Running Config to local (Ansible control node) as JSON file.
+      aoscx_backup_config:
+        config_name: "running-config"
+        output_file: "/root/lbates/canu/ansible/{{ inventory_hostname }}.json"
+
+- hosts: leaf_bmc
+  collections:
+    - arubanetworks.aoscx
+
+  tasks:
+    - name: Print software_version and product_info
+      debug:
+        msg:
+          - "Software version: {{ current_software_version }}"
+          - "Platform name: {{ platform_name }}"
+
+    # - name: Take a backup of running-config, upload FW to primary partition, then boot from new FW on primary partition, if an upgrade is required
+    #   block:
+    #     - name: Copy Running Config to local (Ansible control node) as JSON file.
+    #       aoscx_backup_config:
+    #         config_name: 'running-config'
+    #         output_file: '/root/lbates/canu/ansible/{{ inventory_hostname }}.json'
+
+    #     - name: Upload FW to primary partition through local.
+    #       aoscx_upload_firmware:
+    #         partition_name: 'primary'
+    #         firmware_file_path: '/root/lbates/canu/ansible/ArubaOS-CX_{{ platform_name }}_{{ target_version_mod }}.swi'
+
+    #     - name: Boot the switch with the new image uploaded to primary partition.
+    #       aoscx_boot_firmware:
+    #         partition_name: 'primary'
+
+    #     - name: Pause for 10 seconds to allow for boot command
+    #       pause:
+    #         seconds: 10
+
+    #     - name: Wait for the switch to come online after FW upgrade and reboot.
+    #       wait_for:
+    #         host: "{{ ansible_host }}"
+    #         port: 22
+    #         sleep: 10
+    #         timeout: 900
+
+    #     - name: check version
+    #       aoscx_command:
+    #         commands: ['show version']
+    #       register: vers
+    #       vars:
+    #         ansible_connection: network_cli
+
+    #     - debug:
+    #         msg: "{{ vers }}"
+
+    #   when: current_software_version.find(target_version) == -1
+
+- hosts: cdu,leaf,spine
+  collections:
+    - arubanetworks.aoscx
+
+  gather_facts: true
+  tasks:
+    - name: Show firmware version
+      aoscx_facts:
+        gather_subset:
+          - software_version
+
+    # - name: Print software_version and product_info
+    #   debug:
+    #     msg:
+    #       - "Software version: {{ current_software_version }}"
+    #       - "Platform name: {{ platform_name }}"
+
+    # - name: Take a backup of running-config, upload FW to primary partition, then boot from new FW on primary partition, if an upgrade is required
+    #   block:
+
+    #     - name: Upload FW to primary partition through local.
+    #       aoscx_upload_firmware:
+    #         partition_name: 'primary'
+    #         firmware_file_path: '/root/lbates/canu/ansible/ArubaOS-CX_{{ platform_name }}_{{ target_version_mod }}.swi'
+
+    #     - name: Boot the switch with the new image uploaded to primary partition.
+    #       aoscx_boot_firmware:
+    #         partition_name: 'primary'
+
+    #     - name: Pause for 10 seconds to allow for boot command
+    #       pause:
+    #         seconds: 10
+
+    #     - name: Wait for the switch to come online after FW upgrade and reboot.
+    #       wait_for:
+    #         host: "{{ ansible_host }}"
+    #         port: 22
+    #         sleep: 10
+    #         timeout: 900
+
+    #     - name: check version
+    #       aoscx_command:
+    #         commands: ['show version']
+    #       register: vers
+    #       vars:
+    #         ansible_connection: network_cli
+
+    #     - debug:
+    #         msg: "{{ vers }}"
+
+    #   when: current_software_version.find(target_version) == -1
