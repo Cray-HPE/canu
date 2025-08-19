@@ -1,0 +1,89 @@
+ip prefix-list pl-cmn seq 10 permit {{ cmn_subnet }} ge {{ cmn_subnet | ipaddress_network("prefixlen") }}
+{% if can_subnet != '' %}
+ip prefix-list pl-can seq 10 permit {{ can_subnet}} ge {{ can_subnet | ipaddress_network("prefixlen") }}
+{% endif %}
+ip prefix-list pl-hmn seq 10 permit {{ hmnlb_subnet }} ge {{ hmnlb_subnet | ipaddress_network("prefixlen") }}
+ip prefix-list pl-nmn seq 10 permit {{ nmnlb_subnet }} ge {{ nmnlb_subnet | ipaddress_network("prefixlen") }}
+{% set seq_num = 10 %}
+ip prefix-list tftp seq {{ seq_num }} permit {{ nmnlb_tftp_ip | ipaddress_address("exploded") }}/32 ge 32 le 32
+{% set seq_num = seq_num + 10 %}
+ip prefix-list tftp seq {{ seq_num }} permit {{  hmnlb_tftp_ip | ipaddress_address("exploded") }}/32 ge 32 le 32
+
+{% for host in nmn_ips if "ncn-w" in host.Name %}
+{% set sequence = namespace(value=10) %}
+{% set localpref = namespace(value=1000) %}
+{% for tftp_host in nmn_ips if tftp_host.Name in ["ncn-w001", "ncn-w002", "ncn-w003"] %}
+route-map {{ host.Name }} permit seq {{ sequence.value }}{% set sequence.value = sequence.value + 10 %}
+
+     match ip address prefix-list tftp
+     match ip next-hop {{ tftp_host.IPAddress | ipaddress_address("exploded") }}
+     set local-preference {{ localpref.value }}{% set localpref.value = localpref.value + 100 %}
+
+{% endfor %}
+
+route-map {{ host.Name }} permit seq {{ sequence.value }}
+     match ip address prefix-list pl-hmn
+     {% for hmn_entry in hmn_ips if host.Name == hmn_entry.Name %}
+     set ip next-hop {{ hmn_entry.IPAddress | ipaddress_address("exploded") }}
+     {% endfor %}
+
+{% set sequence.value = sequence.value + 10 %}route-map {{ host.Name }} permit seq {{ sequence.value }}
+     match ip address prefix-list pl-nmn
+     {% for nmn_entry in nmn_ips if host.Name == nmn_entry.Name %}
+     set ip next-hop {{ nmn_entry.IPAddress | ipaddress_address("exploded") }}
+     {% endfor %}
+{% set sequence = namespace(value=10) %}
+{% if can_subnet != '' %}
+route-map {{ host.Name }}-Customer permit seq {{ sequence.value }}
+     set local-preference 1100
+     {% for can_entry in can_ips if name == can_entry.Name %}
+     set ip next-hop {{ can_entry.IPAddress | ipaddress_address("exploded") }}
+{% endfor %}
+{% endif %}
+{% if can_subnet == '' %}
+    {% set sequence.value = sequence.value + 10 %}
+{% endif %}
+route-map {{ host.Name }}-Customer permit seq {{ sequence.value }}
+     match ip address prefix-list pl-cmn
+
+{% endfor %}
+router bgp {{ bgp_switch }}
+    bgp router-id {{ ansible_host }}
+    maximum-paths {{ bgp_max_paths }}
+    timers bgp {{ bgp_keepalive_timer }} {{ bgp_hold_timer }}
+    distance bgp {{ ebgp_admin_distance }} {{ ibgp_admin_distance }}
+    {% for host in nmn_ips if "spine" in host.Name and host.Name != hostname  %}
+    neighbor {{ host.IPAddress | ipaddress_address("exploded") }} remote-as {{ bgp_switch }}
+    {% endfor %}
+    {% for host in nmn_ips if "ncn-w" in host.Name %}
+    neighbor {{ host.IPAddress | ipaddress_address("exploded") }} remote-as {{ bgp_nmn }}
+    neighbor {{ host.IPAddress | ipaddress_address("exploded") }} passive
+    {% endfor %}
+    address-family ipv4 unicast
+        {% for host in nmn_ips if "spine" in host.Name and host.Name != hostname or "ncn-w" in host.Name  %}
+        neighbor {{ host.IPAddress | ipaddress_address("exploded") }} activate
+        {% if "ncn-w" in host.Name %}
+        neighbor {{ host.IPAddress | ipaddress_address("exploded") }} route-map {{ host.Name }} in
+        {% endif %}
+        {% endfor %}
+    exit-address-family
+    vrf Customer
+        bgp router-id {{ ansible_host }}
+        maximum-paths {{ bgp_max_paths }}
+        timers bgp {{ bgp_keepalive_timer }} {{ bgp_hold_timer }}
+        distance bgp {{ ebgp_admin_distance }} {{ ibgp_admin_distance }}
+        {% for host in cmn_ips if "spine" in host.Name and host.Name != hostname  %}
+        neighbor {{ host.IPAddress | ipaddress_address("exploded") }} remote-as {{ bgp_switch }}
+        {% endfor %}
+        {% for host in cmn_ips if "ncn-w" in host.Name %}
+        neighbor {{ host.IPAddress | ipaddress_address("exploded") }} remote-as {{ bgp_cmn }}
+        neighbor {{ host.IPAddress | ipaddress_address("exploded") }} passive
+        {% endfor %}
+        address-family ipv4 unicast
+            {% for host in cmn_ips if "spine" in host.Name and host.Name != hostname or "ncn-w" in host.Name  %}
+            neighbor {{ host.IPAddress | ipaddress_address("exploded") }} activate
+            {% if "ncn-w" in host.Name %}
+            neighbor {{ host.IPAddress | ipaddress_address("exploded") }} route-map {{ host.Name }}-Customer in
+            {% endif %}
+            {% endfor %}
+        exit-address-family
