@@ -491,7 +491,7 @@ def test_switch_firmware_mismatch(switch_vendor):
         responses.add(
             responses.GET,
             f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
-            json={"hostname": "test-switch", "platform_name": "8320"},
+            json={"hostname": "test-switch", "platform_name": "X86-64F"},
         )
         responses.add(
             responses.POST,
@@ -542,7 +542,7 @@ def test_switch_firmware_mismatch_verbose(switch_vendor):
         responses.add(
             responses.GET,
             f"https://{ip}/rest/v10.04/system?attributes=platform_name,hostname",
-            json={"hostname": "test-switch", "platform_name": "8320"},
+            json={"hostname": "test-switch", "platform_name": "X86-64F"},
         )
         responses.add(
             responses.POST,
