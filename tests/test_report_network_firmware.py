@@ -472,7 +472,6 @@ def test_network_firmware_mismatch(switch_vendor):
                 password,
             ],
         )
-        print(result.output)
         assert result.exit_code == 0
         assert "Fail - 1 switches" in str(result.output)
 
