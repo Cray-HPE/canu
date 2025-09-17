@@ -144,8 +144,7 @@ def firmware(ctx, csm, ip, username, password, json_, verbose, out):
 
     # Get the firmware range from the canu.yaml file and the switch info
     firmware_range = config["csm"][csm][vendor][switch_info["platform_name"]]
-
-    if switch_firmware["current_version"] in firmware_range:
+    if switch_firmware["current_version"] >= max(firmware_range):
         match_emoji = emoji.emojize(":canoe:")
         firmware_match = "Pass"
     else:
