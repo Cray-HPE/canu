@@ -42,7 +42,7 @@ custom_file_name = "aruba_custom.yaml"
 custom_file = path.join(test_file_directory, "data", custom_file_name)
 architecture = "full"
 tabs = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
-corners = "J14,T44,J14,T53,J14,T34,J14,T27"
+corners = "J14,T44,J14,T57,J14,T36,J14,T27"
 sls_file_name = "sls_input_file_csm_1.2.json"
 sls_file = path.join(test_file_directory, "data", sls_file_name)
 
@@ -53,7 +53,7 @@ test_file_name_tds = "TDS_Architecture_Golden_Config_1.1.5.xlsx"
 test_file_tds = path.join(test_file_directory, "data", test_file_name_tds)
 architecture_tds = "TDS"
 tabs_tds = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
-corners_tds = "J14,T30,J14,T53,J14,T32,J14,T27"
+corners_tds = "J14,T30,J14,T57,J14,T34,J14,T27"
 
 canu_version = pkg_resources.get_distribution("canu").version
 banner_motd = (

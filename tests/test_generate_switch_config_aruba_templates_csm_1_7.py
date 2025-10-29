@@ -51,7 +51,7 @@ test_shcd_name_tds = "TDS_Architecture_Golden_Config_1.1.5.xlsx"
 test_shcd_file_tds = path.join(test_file_directory, "data", test_shcd_name_tds)
 architecture_tds = "tds"
 tabs_tds = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
-corners_tds = "J14,T30,J14,T53,J14,T32,J14,T27"
+corners_tds = "J14,T30,J14,T57,J14,T34,J14,T27"
 
 runner = testing.CliRunner()
 

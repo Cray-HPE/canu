@@ -1167,6 +1167,23 @@ def get_switch_nodes(
                 },
             }
             nodes.append(new_node)
+        elif shasta_name == "fmn":
+            new_node = {
+                "subtype": "fabricmanager",
+                "slot": destination_slot,
+                "destination_port": destination_port,
+                "config": {
+                    "DESCRIPTION": get_description(
+                        switch_name,
+                        destination_node_name,
+                        destination_slot,
+                        destination_port,
+                    ),
+                    "PORT": f"{source_port}",
+                    "LAG_NUMBER": primary_port,
+                },
+            }
+            nodes.append(new_node)
         elif shasta_name == "cec":
             destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
             for cabinets in sls_variables["HMN_MTN_CABINETS"]:
@@ -1908,7 +1925,7 @@ def parse_sls_for_config(input_json):
                             sls_variables["KUBEAPI_VIP"] = ip["IPAddress"]
                 if subnets["Name"] == "bootstrap_dhcp":
                     for ip in subnets["IPReservations"]:
-                        if ip["Name"].startswith("ncn-"):
+                        if ip["Name"].startswith("ncn-") or ip["Name"].startswith("fmn"):
                             sls_variables["NMN_IPs"][ip["Name"]] = ip["IPAddress"]
                 elif subnets["Name"] == "network_hardware":
                     sls_variables["NMN_IP_GATEWAY"] = subnets["Gateway"]
@@ -2004,7 +2021,7 @@ def parse_sls_for_config(input_json):
     for name, ip in sls_variables["NMN_IPs"].items():
         if name.startswith("sw-spine"):
             sls_variables["SPINE_SWITCH_IPs"].append(ip)
-        if name.startswith("ncn-"):
+        if name.startswith("ncn-") or name.startswith("fmn"):
             sls_variables["NMN_NCN"].append(ip)
         if name.startswith("sw-"):
             sls_variables["ALL_SWITCH_IPs"].append(ip)
