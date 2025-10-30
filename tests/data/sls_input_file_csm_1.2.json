@@ -208,6 +208,8 @@
                             {"Name": "ncn-w001", "IPAddress": "192.168.4.4"},
                             {"Name": "ncn-w002", "IPAddress": "192.168.4.5"},
                             {"Name": "ncn-w003", "IPAddress": "192.168.4.6"},
+			    {"Name": "fmn001", "IPAddress": "192.168.4.7" },
+			    {"Name": "fmn002", "IPAddress": "192.168.4.8" },
                             {"Name": "rgw-vip", "IPAddress": "192.168.4.2"},
                             {"Name": "kubeapi-vip", "IPAddress": "192.168.4.3"}
                         ],
