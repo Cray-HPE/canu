@@ -120,7 +120,7 @@ def test_validate_paddle_with_shcd_metadata():
             "7: sw-cdu-002 connects to 9 nodes: [34, 35, 36, 37, 6, 1, 0, 6, 6]\n"
             "8: sw-edge-001 connects to 2 nodes: [0, 1]\n"
             "9: sw-edge-002 connects to 2 nodes: [0, 1]\n"
-            "10: sw-leaf-bmc-001 connects to 29 nodes: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 26, 27, 28, 29, 30, 31, 32, 22, 21, 23, 24, 25, 26, 27, 28, 22, 3, 2]\n" # noqa: B950
+            "10: sw-leaf-bmc-001 connects to 29 nodes: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 26, 27, 28, 29, 30, 31, 32, 22, 21, 23, 24, 25, 26, 27, 28, 22, 3, 2]\n"  # noqa: B950
             "11: ncn-m001 connects to 3 nodes: [10, 2, 3]\n"
             "12: ncn-m002 connects to 3 nodes: [10, 2, 3]\n"
             "13: ncn-m003 connects to 3 nodes: [10, 4, 5]\n"
