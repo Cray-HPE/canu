@@ -1,11 +1,11 @@
 {
-  "canu_version": "1.1.5~develop",
+  "canu_version": "2.0.5.dev2+g4fe2ef4.d20251030",
   "architecture": "network_v2",
   "shcd_file": "Full_Architecture_Golden_Config_1.1.5.xlsx",
-  "tabs": "25G_10G",
-  "corners": "I14,S48",
+  "tabs": "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES",
+  "corners": "J14,T44,J14,T57,J14,T36,J14,T27",
   "edge": "Arista",
-  "updated_at": "2022-01-27 18:26:37",
+  "updated_at": "2025-10-30 09:54:28",
   "topology": [
     {
       "common_name": "sw-spine-001",
@@ -221,7 +221,7 @@
       "ports": [
         {
           "port": 1,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 11,
           "destination_port": 1,
@@ -229,7 +229,7 @@
         },
         {
           "port": 3,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 12,
           "destination_port": 1,
@@ -245,7 +245,7 @@
         },
         {
           "port": 7,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 17,
           "destination_port": 1,
@@ -253,7 +253,7 @@
         },
         {
           "port": 8,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 17,
           "destination_port": 2,
@@ -261,7 +261,7 @@
         },
         {
           "port": 9,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 18,
           "destination_port": 1,
@@ -269,10 +269,18 @@
         },
         {
           "port": 10,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 18,
           "destination_port": 2,
+          "destination_slot": "ocp"
+        },
+        {
+          "port": 20,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 23,
+          "destination_port": 1,
           "destination_slot": "ocp"
         },
         {
@@ -339,7 +347,7 @@
       "ports": [
         {
           "port": 1,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 11,
           "destination_port": 1,
@@ -347,7 +355,7 @@
         },
         {
           "port": 3,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 12,
           "destination_port": 1,
@@ -363,7 +371,7 @@
         },
         {
           "port": 7,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 17,
           "destination_port": 1,
@@ -371,7 +379,7 @@
         },
         {
           "port": 8,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 17,
           "destination_port": 2,
@@ -379,7 +387,7 @@
         },
         {
           "port": 9,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 18,
           "destination_port": 1,
@@ -387,11 +395,19 @@
         },
         {
           "port": 10,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 18,
           "destination_port": 2,
           "destination_slot": "pcie-slot1"
+        },
+        {
+          "port": 20,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 23,
+          "destination_port": 2,
+          "destination_slot": "ocp"
         },
         {
           "port": 51,
@@ -457,7 +473,7 @@
       "ports": [
         {
           "port": 1,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 13,
           "destination_port": 1,
@@ -481,7 +497,7 @@
         },
         {
           "port": 5,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 19,
           "destination_port": 1,
@@ -489,7 +505,7 @@
         },
         {
           "port": 6,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 19,
           "destination_port": 2,
@@ -497,7 +513,7 @@
         },
         {
           "port": 7,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 20,
           "destination_port": 1,
@@ -505,7 +521,7 @@
         },
         {
           "port": 8,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 20,
           "destination_port": 2,
@@ -513,7 +529,7 @@
         },
         {
           "port": 9,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 21,
           "destination_port": 1,
@@ -521,10 +537,18 @@
         },
         {
           "port": 10,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 21,
           "destination_port": 2,
+          "destination_slot": "ocp"
+        },
+        {
+          "port": 20,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 24,
+          "destination_port": 1,
           "destination_slot": "ocp"
         },
         {
@@ -583,7 +607,7 @@
       "ports": [
         {
           "port": 1,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 13,
           "destination_port": 1,
@@ -607,7 +631,7 @@
         },
         {
           "port": 5,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 19,
           "destination_port": 1,
@@ -615,7 +639,7 @@
         },
         {
           "port": 6,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 19,
           "destination_port": 2,
@@ -623,7 +647,7 @@
         },
         {
           "port": 7,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 20,
           "destination_port": 1,
@@ -631,7 +655,7 @@
         },
         {
           "port": 8,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 20,
           "destination_port": 2,
@@ -639,7 +663,7 @@
         },
         {
           "port": 9,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 21,
           "destination_port": 1,
@@ -647,11 +671,19 @@
         },
         {
           "port": 10,
-          "speed": 25,
+          "speed": 1,
           "slot": null,
           "destination_node_id": 21,
           "destination_port": 2,
           "destination_slot": "pcie-slot1"
+        },
+        {
+          "port": 20,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 24,
+          "destination_port": 2,
+          "destination_slot": "ocp"
         },
         {
           "port": 52,
@@ -711,7 +743,7 @@
           "port": 1,
           "speed": 1,
           "slot": null,
-          "destination_node_id": 31,
+          "destination_node_id": 33,
           "destination_port": 1,
           "destination_slot": null
         },
@@ -719,7 +751,7 @@
           "port": 2,
           "speed": 10,
           "slot": null,
-          "destination_node_id": 32,
+          "destination_node_id": 34,
           "destination_port": 1,
           "destination_slot": null
         },
@@ -727,7 +759,7 @@
           "port": 3,
           "speed": 10,
           "slot": null,
-          "destination_node_id": 33,
+          "destination_node_id": 35,
           "destination_port": 1,
           "destination_slot": null
         },
@@ -735,7 +767,7 @@
           "port": 4,
           "speed": 10,
           "slot": null,
-          "destination_node_id": 34,
+          "destination_node_id": 36,
           "destination_port": 1,
           "destination_slot": null
         },
@@ -743,7 +775,7 @@
           "port": 5,
           "speed": 10,
           "slot": null,
-          "destination_node_id": 35,
+          "destination_node_id": 37,
           "destination_port": 1,
           "destination_slot": null
         },
@@ -805,7 +837,7 @@
           "port": 2,
           "speed": 10,
           "slot": null,
-          "destination_node_id": 32,
+          "destination_node_id": 34,
           "destination_port": 2,
           "destination_slot": null
         },
@@ -813,7 +845,7 @@
           "port": 3,
           "speed": 10,
           "slot": null,
-          "destination_node_id": 33,
+          "destination_node_id": 35,
           "destination_port": 2,
           "destination_slot": null
         },
@@ -821,7 +853,7 @@
           "port": 4,
           "speed": 10,
           "slot": null,
-          "destination_node_id": 34,
+          "destination_node_id": 36,
           "destination_port": 2,
           "destination_slot": null
         },
@@ -829,7 +861,7 @@
           "port": 5,
           "speed": 10,
           "slot": null,
-          "destination_node_id": 35,
+          "destination_node_id": 37,
           "destination_port": 2,
           "destination_slot": null
         },
@@ -885,7 +917,7 @@
       "architecture": "customer_edge_router",
       "model": "customer_edge_router",
       "type": "switch",
-      "vendor": "none",
+      "vendor": "arista",
       "ports": [
         {
           "port": 1,
@@ -915,7 +947,7 @@
       "architecture": "customer_edge_router",
       "model": "customer_edge_router",
       "type": "switch",
-      "vendor": "none",
+      "vendor": "arista",
       "ports": [
         {
           "port": 1,
@@ -1031,7 +1063,7 @@
           "port": 11,
           "speed": 1,
           "slot": null,
-          "destination_node_id": 23,
+          "destination_node_id": 25,
           "destination_port": 1,
           "destination_slot": "bmc"
         },
@@ -1039,7 +1071,7 @@
           "port": 12,
           "speed": 1,
           "slot": null,
-          "destination_node_id": 24,
+          "destination_node_id": 26,
           "destination_port": 1,
           "destination_slot": "bmc"
         },
@@ -1047,7 +1079,7 @@
           "port": 13,
           "speed": 1,
           "slot": null,
-          "destination_node_id": 25,
+          "destination_node_id": 27,
           "destination_port": 1,
           "destination_slot": "bmc"
         },
@@ -1055,7 +1087,7 @@
           "port": 14,
           "speed": 1,
           "slot": null,
-          "destination_node_id": 26,
+          "destination_node_id": 28,
           "destination_port": 1,
           "destination_slot": "bmc"
         },
@@ -1063,7 +1095,7 @@
           "port": 15,
           "speed": 1,
           "slot": null,
-          "destination_node_id": 27,
+          "destination_node_id": 29,
           "destination_port": 1,
           "destination_slot": "bmc"
         },
@@ -1071,7 +1103,7 @@
           "port": 16,
           "speed": 1,
           "slot": null,
-          "destination_node_id": 28,
+          "destination_node_id": 30,
           "destination_port": 1,
           "destination_slot": "bmc"
         },
@@ -1079,7 +1111,7 @@
           "port": 17,
           "speed": 1,
           "slot": null,
-          "destination_node_id": 29,
+          "destination_node_id": 31,
           "destination_port": 1,
           "destination_slot": "bmc"
         },
@@ -1087,7 +1119,7 @@
           "port": 18,
           "speed": 1,
           "slot": null,
-          "destination_node_id": 30,
+          "destination_node_id": 32,
           "destination_port": 1,
           "destination_slot": "bmc"
         },
@@ -1108,23 +1140,23 @@
           "destination_slot": "bmc"
         },
         {
-          "port": 24,
+          "port": 21,
           "speed": 1,
           "slot": null,
           "destination_node_id": 23,
           "destination_port": 1,
-          "destination_slot": "onboard"
+          "destination_slot": "bmc"
         },
         {
-          "port": 25,
+          "port": 22,
           "speed": 1,
           "slot": null,
           "destination_node_id": 24,
           "destination_port": 1,
-          "destination_slot": "onboard"
+          "destination_slot": "bmc"
         },
         {
-          "port": 26,
+          "port": 24,
           "speed": 1,
           "slot": null,
           "destination_node_id": 25,
@@ -1132,10 +1164,26 @@
           "destination_slot": "onboard"
         },
         {
-          "port": 27,
+          "port": 25,
           "speed": 1,
           "slot": null,
           "destination_node_id": 26,
+          "destination_port": 1,
+          "destination_slot": "onboard"
+        },
+        {
+          "port": 26,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 27,
+          "destination_port": 1,
+          "destination_slot": "onboard"
+        },
+        {
+          "port": 27,
+          "speed": 1,
+          "slot": null,
+          "destination_node_id": 28,
           "destination_port": 1,
           "destination_slot": "onboard"
         },
@@ -1187,7 +1235,7 @@
         },
         {
           "port": 1,
-          "speed": 25,
+          "speed": 1,
           "slot": "ocp",
           "destination_node_id": 2,
           "destination_port": 1,
@@ -1195,7 +1243,7 @@
         },
         {
           "port": 1,
-          "speed": 25,
+          "speed": 1,
           "slot": "pcie-slot1",
           "destination_node_id": 3,
           "destination_port": 1,
@@ -1225,7 +1273,7 @@
         },
         {
           "port": 1,
-          "speed": 25,
+          "speed": 1,
           "slot": "ocp",
           "destination_node_id": 2,
           "destination_port": 3,
@@ -1233,7 +1281,7 @@
         },
         {
           "port": 1,
-          "speed": 25,
+          "speed": 1,
           "slot": "pcie-slot1",
           "destination_node_id": 3,
           "destination_port": 3,
@@ -1263,7 +1311,7 @@
         },
         {
           "port": 1,
-          "speed": 25,
+          "speed": 1,
           "slot": "ocp",
           "destination_node_id": 4,
           "destination_port": 1,
@@ -1271,7 +1319,7 @@
         },
         {
           "port": 1,
-          "speed": 25,
+          "speed": 1,
           "slot": "pcie-slot1",
           "destination_node_id": 5,
           "destination_port": 1,
@@ -1415,7 +1463,7 @@
         },
         {
           "port": 1,
-          "speed": 25,
+          "speed": 1,
           "slot": "ocp",
           "destination_node_id": 2,
           "destination_port": 7,
@@ -1423,7 +1471,7 @@
         },
         {
           "port": 2,
-          "speed": 25,
+          "speed": 1,
           "slot": "ocp",
           "destination_node_id": 2,
           "destination_port": 8,
@@ -1431,7 +1479,7 @@
         },
         {
           "port": 1,
-          "speed": 25,
+          "speed": 1,
           "slot": "pcie-slot1",
           "destination_node_id": 3,
           "destination_port": 7,
@@ -1439,7 +1487,7 @@
         },
         {
           "port": 2,
-          "speed": 25,
+          "speed": 1,
           "slot": "pcie-slot1",
           "destination_node_id": 3,
           "destination_port": 8,
@@ -1469,7 +1517,7 @@
         },
         {
           "port": 1,
-          "speed": 25,
+          "speed": 1,
           "slot": "ocp",
           "destination_node_id": 2,
           "destination_port": 9,
@@ -1477,7 +1525,7 @@
         },
         {
           "port": 2,
-          "speed": 25,
+          "speed": 1,
           "slot": "ocp",
           "destination_node_id": 2,
           "destination_port": 10,
@@ -1485,7 +1533,7 @@
         },
         {
           "port": 1,
-          "speed": 25,
+          "speed": 1,
           "slot": "pcie-slot1",
           "destination_node_id": 3,
           "destination_port": 9,
@@ -1493,7 +1541,7 @@
         },
         {
           "port": 2,
-          "speed": 25,
+          "speed": 1,
           "slot": "pcie-slot1",
           "destination_node_id": 3,
           "destination_port": 10,
@@ -1523,7 +1571,7 @@
         },
         {
           "port": 1,
-          "speed": 25,
+          "speed": 1,
           "slot": "ocp",
           "destination_node_id": 4,
           "destination_port": 5,
@@ -1531,7 +1579,7 @@
         },
         {
           "port": 2,
-          "speed": 25,
+          "speed": 1,
           "slot": "ocp",
           "destination_node_id": 4,
           "destination_port": 6,
@@ -1539,7 +1587,7 @@
         },
         {
           "port": 1,
-          "speed": 25,
+          "speed": 1,
           "slot": "pcie-slot1",
           "destination_node_id": 5,
           "destination_port": 5,
@@ -1547,7 +1595,7 @@
         },
         {
           "port": 2,
-          "speed": 25,
+          "speed": 1,
           "slot": "pcie-slot1",
           "destination_node_id": 5,
           "destination_port": 6,
@@ -1577,7 +1625,7 @@
         },
         {
           "port": 1,
-          "speed": 25,
+          "speed": 1,
           "slot": "ocp",
           "destination_node_id": 4,
           "destination_port": 7,
@@ -1585,7 +1633,7 @@
         },
         {
           "port": 2,
-          "speed": 25,
+          "speed": 1,
           "slot": "ocp",
           "destination_node_id": 4,
           "destination_port": 8,
@@ -1593,7 +1641,7 @@
         },
         {
           "port": 1,
-          "speed": 25,
+          "speed": 1,
           "slot": "pcie-slot1",
           "destination_node_id": 5,
           "destination_port": 7,
@@ -1601,7 +1649,7 @@
         },
         {
           "port": 2,
-          "speed": 25,
+          "speed": 1,
           "slot": "pcie-slot1",
           "destination_node_id": 5,
           "destination_port": 8,
@@ -1614,7 +1662,7 @@
       }
     },
     {
-      "common_name": "lm001",
+      "common_name": "lmem001",
       "id": 21,
       "architecture": "river_ncn_node_4_port",
       "model": "river_ncn_node_4_port",
@@ -1631,7 +1679,7 @@
         },
         {
           "port": 1,
-          "speed": 25,
+          "speed": 1,
           "slot": "ocp",
           "destination_node_id": 4,
           "destination_port": 9,
@@ -1639,7 +1687,7 @@
         },
         {
           "port": 2,
-          "speed": 25,
+          "speed": 1,
           "slot": "ocp",
           "destination_node_id": 4,
           "destination_port": 10,
@@ -1647,7 +1695,7 @@
         },
         {
           "port": 1,
-          "speed": 25,
+          "speed": 1,
           "slot": "pcie-slot1",
           "destination_node_id": 5,
           "destination_port": 9,
@@ -1655,7 +1703,7 @@
         },
         {
           "port": 2,
-          "speed": 25,
+          "speed": 1,
           "slot": "pcie-slot1",
           "destination_node_id": 5,
           "destination_port": 10,
@@ -1670,25 +1718,25 @@
     {
       "common_name": "gateway001",
       "id": 22,
-      "architecture": "river_ncn_node_4_port_1g_ocp",
-      "model": "river_ncn_node_4_port_1g_ocp",
+      "architecture": "river_ncn_node_4_port",
+      "model": "river_ncn_node_4_port",
       "type": "server",
       "vendor": "hpe",
       "ports": [
         {
           "port": 1,
           "speed": 1,
-          "slot": "ocp",
+          "slot": "bmc",
           "destination_node_id": 10,
-          "destination_port": 28,
+          "destination_port": 19,
           "destination_slot": null
         },
         {
           "port": 1,
           "speed": 1,
-          "slot": "bmc",
+          "slot": "ocp",
           "destination_node_id": 10,
-          "destination_port": 19,
+          "destination_port": 28,
           "destination_slot": null
         }
       ],
@@ -1698,8 +1746,84 @@
       }
     },
     {
-      "common_name": "cn001",
+      "common_name": "fmn001",
       "id": 23,
+      "architecture": "river_ncn_node_4_port",
+      "model": "river_ncn_node_4_port",
+      "type": "server",
+      "vendor": "hpe",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": "bmc",
+          "destination_node_id": 10,
+          "destination_port": 21,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": "ocp",
+          "destination_node_id": 2,
+          "destination_port": 20,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 1,
+          "slot": "ocp",
+          "destination_node_id": 3,
+          "destination_port": 20,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3000",
+        "elevation": "u20"
+      }
+    },
+    {
+      "common_name": "fmn002",
+      "id": 24,
+      "architecture": "river_ncn_node_4_port",
+      "model": "river_ncn_node_4_port",
+      "type": "server",
+      "vendor": "hpe",
+      "ports": [
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": "bmc",
+          "destination_node_id": 10,
+          "destination_port": 22,
+          "destination_slot": null
+        },
+        {
+          "port": 1,
+          "speed": 1,
+          "slot": "ocp",
+          "destination_node_id": 4,
+          "destination_port": 20,
+          "destination_slot": null
+        },
+        {
+          "port": 2,
+          "speed": 1,
+          "slot": "ocp",
+          "destination_node_id": 5,
+          "destination_port": 20,
+          "destination_slot": null
+        }
+      ],
+      "location": {
+        "rack": "x3001",
+        "elevation": "u20"
+      }
+    },
+    {
+      "common_name": "cn001",
+      "id": 25,
       "architecture": "river_compute_node",
       "model": "river_compute_node",
       "type": "node",
@@ -1729,7 +1853,7 @@
     },
     {
       "common_name": "cn002",
-      "id": 24,
+      "id": 26,
       "architecture": "river_compute_node",
       "model": "river_compute_node",
       "type": "node",
@@ -1759,7 +1883,7 @@
     },
     {
       "common_name": "cn003",
-      "id": 25,
+      "id": 27,
       "architecture": "river_compute_node",
       "model": "river_compute_node",
       "type": "node",
@@ -1789,7 +1913,7 @@
     },
     {
       "common_name": "cn004",
-      "id": 26,
+      "id": 28,
       "architecture": "river_compute_node",
       "model": "river_compute_node",
       "type": "node",
@@ -1819,7 +1943,7 @@
     },
     {
       "common_name": "pdu-x3000-000",
-      "id": 27,
+      "id": 29,
       "architecture": "pdu",
       "model": "pdu",
       "type": "none",
@@ -1841,7 +1965,7 @@
     },
     {
       "common_name": "pdu-x3000-001",
-      "id": 28,
+      "id": 30,
       "architecture": "pdu",
       "model": "pdu",
       "type": "none",
@@ -1863,7 +1987,7 @@
     },
     {
       "common_name": "pdu-x3001-000",
-      "id": 29,
+      "id": 31,
       "architecture": "pdu",
       "model": "pdu",
       "type": "none",
@@ -1885,7 +2009,7 @@
     },
     {
       "common_name": "pdu-x3001-001",
-      "id": 30,
+      "id": 32,
       "architecture": "pdu",
       "model": "pdu",
       "type": "none",
@@ -1907,7 +2031,7 @@
     },
     {
       "common_name": "cec-x3002-000",
-      "id": 31,
+      "id": 33,
       "architecture": "cec",
       "model": "cec",
       "type": "none",
@@ -1929,7 +2053,7 @@
     },
     {
       "common_name": "cmm-x3002-000",
-      "id": 32,
+      "id": 34,
       "architecture": "cmm",
       "model": "cmm",
       "type": "none",
@@ -1959,7 +2083,7 @@
     },
     {
       "common_name": "cmm-x3002-001",
-      "id": 33,
+      "id": 35,
       "architecture": "cmm",
       "model": "cmm",
       "type": "none",
@@ -1989,7 +2113,7 @@
     },
     {
       "common_name": "cmm-x3002-002",
-      "id": 34,
+      "id": 36,
       "architecture": "cmm",
       "model": "cmm",
       "type": "none",
@@ -2019,7 +2143,7 @@
     },
     {
       "common_name": "cmm-x3002-003",
-      "id": 35,
+      "id": 37,
       "architecture": "cmm",
       "model": "cmm",
       "type": "none",
