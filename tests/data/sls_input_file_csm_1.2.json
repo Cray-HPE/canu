@@ -211,7 +211,8 @@
 			    {"Name": "fmn001", "IPAddress": "192.168.4.7" },
 			    {"Name": "fmn002", "IPAddress": "192.168.4.8" },
                             {"Name": "rgw-vip", "IPAddress": "192.168.4.2"},
-                            {"Name": "kubeapi-vip", "IPAddress": "192.168.4.3"}
+                            {"Name": "kubeapi-vip", "IPAddress": "192.168.4.3"},
+                            {"Name": "fmn-vip", "IPAddress": "192.168.4.9"}
                         ],
                         "Name": "bootstrap_dhcp",
                         "VlanID": 2,
