@@ -45,14 +45,14 @@ custom_file_name = "aruba_custom.yaml"
 custom_file = path.join(data_directory, custom_file_name)
 architecture = "full"
 tabs = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
-corners = "J14,T44,J14,T53,J14,T34,J14,T27"
+corners = "J14,T44,J14,T57,J14,T36,J14,T27"
 
 # TDS systems
 test_shcd_name_tds = "TDS_Architecture_Golden_Config_1.1.5.xlsx"
 test_shcd_file_tds = path.join(test_file_directory, "data", test_shcd_name_tds)
 architecture_tds = "tds"
 tabs_tds = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
-corners_tds = "J14,T30,J14,T53,J14,T32,J14,T27"
+corners_tds = "J14,T30,J14,T57,J14,T34,J14,T27"
 
 canu_version = pkg_resources.get_distribution("canu").version
 
@@ -347,6 +347,150 @@ def test_switch_config_leaf_secondary():
 def test_switch_config_leaf_secondary_custom():
     """Test that the `canu generate switch config` command runs and returns valid secondary leaf custom config."""
     switch_name = "sw-leaf-002"
+    config_file = f"{switch_name}-ipv6.cfg"
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_1.7/{config_file}")
+
+    with runner.isolated_filesystem():
+        result = runner.invoke(
+            cli,
+            [
+                "generate",
+                "switch",
+                "config",
+                "--csm",
+                csm,
+                "--architecture",
+                architecture,
+                "--shcd",
+                test_shcd_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--sls-file",
+                sls_file,
+                "--name",
+                switch_name,
+                "--custom-config",
+                custom_file,
+                "--out",
+                config_file,
+            ],
+        )
+        assert result.exit_code == 0
+        assert diff_config_files(golden_config_file, config_file) == 0
+
+
+def test_switch_config_leaf_tertiary():
+    """Test that the `canu generate switch config` command runs and returns valid tertiary leaf config."""
+    switch_name = "sw-leaf-003"
+    config_file = f"{switch_name}-ipv6.cfg"
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_1.7/{config_file}")
+
+    with runner.isolated_filesystem():
+        result = runner.invoke(
+            cli,
+            [
+                "generate",
+                "switch",
+                "config",
+                "--csm",
+                csm,
+                "--architecture",
+                architecture,
+                "--shcd",
+                test_shcd_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--sls-file",
+                sls_file,
+                "--name",
+                switch_name,
+                "--out",
+                config_file,
+            ],
+        )
+        assert result.exit_code == 0
+        assert diff_config_files(golden_config_file, config_file) == 0
+
+
+def test_switch_config_leaf_tertiary_custom():
+    """Test that the `canu generate switch config` command runs and returns valid custom tertiary leaf config."""
+    switch_name = "sw-leaf-003"
+    config_file = f"{switch_name}-ipv6.cfg"
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_1.7/{config_file}")
+
+    with runner.isolated_filesystem():
+        result = runner.invoke(
+            cli,
+            [
+                "generate",
+                "switch",
+                "config",
+                "--csm",
+                csm,
+                "--architecture",
+                architecture,
+                "--shcd",
+                test_shcd_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--sls-file",
+                sls_file,
+                "--name",
+                switch_name,
+                "--custom-config",
+                custom_file,
+                "--out",
+                config_file,
+            ],
+        )
+        assert result.exit_code == 0
+        assert diff_config_files(golden_config_file, config_file) == 0
+
+
+def test_switch_config_leaf_quaternary():
+    """Test that the `canu generate switch config` command runs and returns valid quaternary leaf config."""
+    switch_name = "sw-leaf-004"
+    config_file = f"{switch_name}-ipv6.cfg"
+    golden_config_file = path.join(data_directory, f"golden_configs/full_configs_1.7/{config_file}")
+
+    with runner.isolated_filesystem():
+        result = runner.invoke(
+            cli,
+            [
+                "generate",
+                "switch",
+                "config",
+                "--csm",
+                csm,
+                "--architecture",
+                architecture,
+                "--shcd",
+                test_shcd_file,
+                "--tabs",
+                tabs,
+                "--corners",
+                corners,
+                "--sls-file",
+                sls_file,
+                "--name",
+                switch_name,
+                "--out",
+                config_file,
+            ],
+        )
+        assert result.exit_code == 0
+        assert diff_config_files(golden_config_file, config_file) == 0
+
+
+def test_switch_config_leaf_quaternary_custom():
+    """Test that the `canu generate switch config` command runs and returns valid quaternary leaf custom config."""
+    switch_name = "sw-leaf-004"
     config_file = f"{switch_name}-ipv6.cfg"
     golden_config_file = path.join(data_directory, f"golden_configs/full_configs_custom_1.7/{config_file}")
 

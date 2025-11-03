@@ -4,7 +4,7 @@ object-group ip address NCN
     10 {{ variables.RGW_VIP }}
     20 {{ variables.KUBEAPI_VIP }}
 {%- set ns.last_sequence = 20 %}
-{%- for name, ip in variables.NMN_IPs.items() if name.startswith('ncn-') %}
+{%- for name, ip in variables.NMN_IPs.items() if name.startswith('ncn-') or name.startswith('fmn') %}
     {{ ns.last_sequence + 10 }} {{ ip }}
 {%- set ns.last_sequence = ns.last_sequence + 10 %}
 {%- endfor %}
