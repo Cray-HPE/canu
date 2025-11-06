@@ -173,6 +173,7 @@ def test_switch_config_leaf_primary():
         assert result.exit_code == 0
         assert diff_config_files(golden_config_file, config_file) == 0
 
+
 def test_switch_config_leaf_secondary():
     """Test that the `canu generate switch config` command runs and returns valid secondary leaf config."""
     switch_name = "sw-leaf-002"
