@@ -778,6 +778,7 @@ def generate_switch_config(
         "CMN_PREFIX_LEN6": sls_variables["CMN_PREFIX_LEN6"],
         "CMN_ASN": sls_variables["CMN_ASN"],
         "MTL_NETMASK": sls_variables["MTL_NETMASK"],
+        "MTL_NETWORK_IP": sls_variables["MTL_NETWORK_IP"],
         "MTL_PREFIX_LEN": sls_variables["MTL_PREFIX_LEN"],
         "NMN": sls_variables["NMN"],
         "NMN_VLAN": sls_variables["NMN_VLAN"],
@@ -846,6 +847,7 @@ def generate_switch_config(
         "CMN_IPs": sls_variables["CMN_IPs"],
         "CMN_IPs6": sls_variables["CMN_IPs6"],
         "NMN_IPs": sls_variables["NMN_IPs"],
+        "MTL_IPs": sls_variables["MTL_IPs"],
         "HMN_IPs": sls_variables["HMN_IPs"],
         "SWITCH_ASN": sls_variables["SWITCH_ASN"],
         "BGP_CONTROL_PLANE": bgp_control_plane,
@@ -1151,6 +1153,23 @@ def get_switch_nodes(
         elif shasta_name == "ncn-w":
             new_node = {
                 "subtype": "worker",
+                "slot": destination_slot,
+                "destination_port": destination_port,
+                "config": {
+                    "DESCRIPTION": get_description(
+                        switch_name,
+                        destination_node_name,
+                        destination_slot,
+                        destination_port,
+                    ),
+                    "PORT": f"{source_port}",
+                    "LAG_NUMBER": primary_port,
+                },
+            }
+            nodes.append(new_node)
+        elif shasta_name == "fmn":
+            new_node = {
+                "subtype": "fabricmanager",
                 "slot": destination_slot,
                 "destination_port": destination_port,
                 "config": {
@@ -1866,6 +1885,10 @@ def parse_sls_for_config(input_json):
                     sls_variables["MTL_IP_GATEWAY"] = subnets["Gateway"]
                     for ip in subnets["IPReservations"]:
                         sls_variables["MTL_IPs"][ip["Name"]] = ip["IPAddress"]
+                elif subnets["Name"] == "bootstrap_dhcp":
+                    for ip in subnets["IPReservations"]:
+                        if ip["Name"].startswith("ncn-"):
+                            sls_variables["MTL_IPs"][ip["Name"]] = ip["IPAddress"]
 
         elif name == "NMN":
             sls_variables["NMN"] = netaddr.IPNetwork(
@@ -1902,7 +1925,7 @@ def parse_sls_for_config(input_json):
                             sls_variables["KUBEAPI_VIP"] = ip["IPAddress"]
                 if subnets["Name"] == "bootstrap_dhcp":
                     for ip in subnets["IPReservations"]:
-                        if ip["Name"].startswith("ncn-"):
+                        if ip["Name"].startswith("ncn-") or ip["Name"].startswith("fmn"):
                             sls_variables["NMN_IPs"][ip["Name"]] = ip["IPAddress"]
                 elif subnets["Name"] == "network_hardware":
                     sls_variables["NMN_IP_GATEWAY"] = subnets["Gateway"]
@@ -1998,7 +2021,7 @@ def parse_sls_for_config(input_json):
     for name, ip in sls_variables["NMN_IPs"].items():
         if name.startswith("sw-spine"):
             sls_variables["SPINE_SWITCH_IPs"].append(ip)
-        if name.startswith("ncn-"):
+        if name.startswith("ncn-") or name.startswith("fmn"):
             sls_variables["NMN_NCN"].append(ip)
         if name.startswith("sw-"):
             sls_variables["ALL_SWITCH_IPs"].append(ip)

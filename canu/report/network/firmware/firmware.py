@@ -185,7 +185,7 @@ def firmware(ctx, csm, ips, ips_file, username, password, json_, out):
                         )
 
                     firmware_range = config["csm"][csm][vendor][switch_info["platform_name"]]
-                    if switch_firmware["current_version"] in firmware_range:
+                    if switch_firmware["current_version"] >= max(firmware_range):
                         match_emoji = emoji.emojize(":canoe:")
                         firmware_match = "Pass"
                         firmware_error = ""

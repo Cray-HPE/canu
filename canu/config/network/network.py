@@ -39,6 +39,9 @@ from canu.backup.network.network import backup_switches
 from canu.generate.switch.config.config import parse_sls_for_config
 from canu.utils.inventory import inventory
 
+import sys
+from pathlib import Path
+
 # Define the network configuration profiles and their corresponding templates
 PROFILES = {
     "nmn-isolation-1.7": {
@@ -259,9 +262,15 @@ def network(
         sls_json = [network[x] for network in [input_json.get("Networks", {})] for x in network]
         sls_variables = parse_sls_for_config(sls_json)
 
-        # Initialize Jinja2 environment
-        project_root = "."
+        # Get project root directory
+        if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
+            project_root = sys._MEIPASS
+        else:
+            project_root = Path(__file__).resolve().parent.parent.parent.parent
+
         network_templates_folder = f"{project_root}/network_modeling/configs/templates"
+
+        # Initialize Jinja2 environment
         env = Environment(
             loader=FileSystemLoader(network_templates_folder),
             undefined=StrictUndefined,
@@ -274,6 +283,9 @@ def network(
             variables = {
                 "NMN_VLAN": sls_variables["NMN_VLAN"],
                 "NMN_IPs": sls_variables["NMN_IPs"],
+                "MTL_IPs": sls_variables["MTL_IPs"],
+                "MTL_NETWORK_IP": sls_variables["MTL_NETWORK_IP"],
+                "MTL_NETMASK": sls_variables["MTL_NETMASK"],
                 "SPINE_SWITCH_IPs": sls_variables["SPINE_SWITCH_IPs"],
                 "ALL_SWITCH_IPs": sls_variables["ALL_SWITCH_IPs"],
                 "RGW_VIP": sls_variables["RGW_VIP"],

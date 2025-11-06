@@ -235,6 +235,9 @@ network_v2:
     - lookup_name: ["viz"]
       shasta_name: "viz"
       architecture_type: "river_ncn_node_4_port"
+    - lookup_name: ["fmn"]
+      shasta_name: "fmn"
+      architecture_type: "river_ncn_node_4_port"
     - lookup_name: ["cdu"]
       shasta_name: "sw-cdu"
       architecture_type: "mountain_compute_leaf"
@@ -463,6 +466,10 @@ network_v2_tds:
         - "lnet"
       shasta_name: "lnet"
       architecture_type: "river_ncn_node_4_port_1g_ocp"
+    - lookup_name:
+        - "fmn"
+      shasta_name: "fmn"
+      architecture_type: "river_ncn_node_4_port"
     - lookup_name:
         - "cdu"
       shasta_name: "sw-cdu"
