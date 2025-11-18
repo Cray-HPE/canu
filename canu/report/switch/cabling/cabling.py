@@ -385,7 +385,7 @@ def get_lldp_aruba(ip, credentials, return_error=False):
         for line in command_output.splitlines()[5:]:
             line = line.split()
             table_mac = line[0]
-            table_port = line[3]
+            table_port = line[-1]
             if "lag" not in table_port:
                 mac_address_table[table_port] = table_mac
 
