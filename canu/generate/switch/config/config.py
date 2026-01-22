@@ -48,11 +48,42 @@ from canu.utils.yaml_load import load_yaml
 from canu.validate.paddle.paddle import node_model_from_paddle
 from canu.validate.shcd.shcd import node_model_from_shcd, shcd_to_sheets, switch_unused_ports
 from network_modeling.NetworkNodeFactory import NetworkNodeFactory
+import ipaddress
 
 yaml = YAML()
 
 # To disable warnings about unsecured HTTPS requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+
+def is_subnet_of(subnet_cidr, network_cidr):
+    """
+    Check if subnet_cidr is completely contained within network_cidr.
+    
+    Args:
+        subnet_cidr: String in format "10.120.0.0/22" or "10.120.0.0/255.255.252.0"
+        network_cidr: String in format "10.120.0.0/17" or "10.120.0.0/255.255.128.0"
+    
+    Returns:
+        bool: True if subnet is contained within network, False otherwise
+    """
+    try:
+        # Convert dotted decimal masks to CIDR if needed
+        if '/' in subnet_cidr and not subnet_cidr.split('/')[1].isdigit():
+            ip, mask = subnet_cidr.split('/')
+            mask_int = sum([bin(int(x)).count('1') for x in mask.split('.')])
+            subnet_cidr = f"{ip}/{mask_int}"
+        
+        if '/' in network_cidr and not network_cidr.split('/')[1].isdigit():
+            ip, mask = network_cidr.split('/')
+            mask_int = sum([bin(int(x)).count('1') for x in mask.split('.')])
+            network_cidr = f"{ip}/{mask_int}"
+        
+        subnet = ipaddress.ip_network(subnet_cidr, strict=False)
+        network = ipaddress.ip_network(network_cidr, strict=False)
+        return subnet.subnet_of(network)
+    except (ValueError, AttributeError):
+        return False
 
 
 # Get project root directory
@@ -101,6 +132,9 @@ env = Environment(
     loader=FileSystemLoader(network_templates_folder),
     undefined=StrictUndefined,
 )
+
+# Add custom filter for subnet overlap detection
+env.filters['is_subnet_of'] = is_subnet_of
 
 TEMPLATES = {}
 

@@ -1,25 +1,14 @@
 {#- acl #}
 access-list ip mgmt
 {% set sequence = 10 %}    {{ sequence }} comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET and CMN
-{% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq ssh
-{% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq https
-{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq snmp
-{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} any eq snmp-trap
-{% set sequence = sequence+10 %}    {{ sequence }} permit tcp any {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} eq ssh
-{% set sequence = sequence+10 %}    {{ sequence }} permit udp any eq ntp {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }}
-{% set sequence = sequence+10 %}    {{ sequence }} permit tcp {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} any eq https
-{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} any eq snmp
-{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }} any eq snmp-trap
-{% set sequence = sequence+10 %}    {{ sequence }} comment ALLOW SNMP FROM HMN METALLB SUBNET
-{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMNLB_NETWORK_IP }}/{{ variables.HMNLB_NETMASK }} any eq snmp
-{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMNLB_NETWORK_IP }}/{{ variables.HMNLB_NETMASK }} any eq snmp-trap
+{% set sequence = sequence+10 %}    {{ sequence }} permit tcp MGMT_SOURCES any group MGMT_TCP_PORTS count
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp MGMT_SOURCES any group MGMT_UDP_PORTS count
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp any eq ntp {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }} count
 {% set sequence = sequence+10 %}    {{ sequence }} comment BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE
-{% set sequence = sequence+10 %}    {{ sequence }} deny tcp any any eq ssh
-{% set sequence = sequence+10 %}    {{ sequence }} deny tcp any any eq https
-{% set sequence = sequence+10 %}    {{ sequence }} deny udp any any eq snmp
-{% set sequence = sequence+10 %}    {{ sequence }} deny udp any any eq snmp-trap
+{% set sequence = sequence+10 %}    {{ sequence }} deny tcp any any group MGMT_TCP_PORTS count
+{% set sequence = sequence+10 %}    {{ sequence }} deny udp any any group MGMT_UDP_PORTS count
 {% set sequence = sequence+10 %}    {{ sequence }} comment ALLOW ANYTHING ELSE
-{% set sequence = sequence+10 %}    {{ sequence }} permit any any any
+{% set sequence = sequence+10 %}    {{ sequence }} permit any any any count
 access-list ip nmn-hmn
 {%- if variables.NMN and variables.HMN %}
 {% set sequence = 10 %}    {{ sequence }} deny any {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }} {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }}
@@ -57,13 +46,10 @@ access-list ip nmn-hmn
 {%- if variables.NMN and variables.HMNLB %}
 {% set sequence = sequence+10 %}    {{ sequence }} deny any {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }} {{ variables.HMNLB_NETWORK_IP }}/{{ variables.HMNLB_NETMASK }}
 {%- endif %}
-{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.NMNLB_DHCP }} range 67 68 any
-{% set sequence = sequence+10 %}    {{ sequence }} permit udp any range 67 68 {{ variables.NMNLB_DHCP }}
-{% set sequence = sequence+10 %}    {{ sequence }} deny any any {{ variables.NMNLB_DHCP }}
-{% set sequence = sequence+10 %}    {{ sequence }} permit udp {{ variables.HMNLB_DHCP }} range 67 68 any
-{% set sequence = sequence+10 %}    {{ sequence }} permit udp any range 67 68 {{ variables.HMNLB_DHCP }}
-{% set sequence = sequence+10 %}    {{ sequence }} deny any any {{ variables.HMNLB_DHCP }}
-{% set sequence = sequence+10 %}    {{ sequence }} permit any any any
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp DHCP_SERVERS range 67 68 any count
+{% set sequence = sequence+10 %}    {{ sequence }} permit udp any range 67 68 DHCP_SERVERS count
+{% set sequence = sequence+10 %}    {{ sequence }} deny any any DHCP_SERVERS count
+{% set sequence = sequence+10 %}    {{ sequence }} permit any any any count
 {%- if variables.ENABLE_NMN_ISOLATION  %}
 {%- include variables.CSM_VERSION+'/aruba/common/services_objects.j2' %}
 {% include variables.CSM_VERSION+'/aruba/common/services_acl.j2' %}

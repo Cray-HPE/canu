@@ -26,9 +26,15 @@ object-group ip address MTN_NETWORKS
 {%- endif %}
 {%- if variables.NMN_MTN_CABINETS %}
 {%- set ns = namespace(sequence=20) %}
+{%- set main_cidr = (variables.NMN_MTN_NETWORK_IP|string + '/' + variables.NMN_MTN_NETMASK|string) if (variables.NMN_MTN_NETWORK_IP and variables.NMN_MTN_NETMASK) else '' %}
 {%- for cabinet in variables.NMN_MTN_CABINETS %}
-    {{ ns.sequence }} {{ cabinet.CIDR.split('/')[0] }}/{{ '255.255.252.0' if cabinet.CIDR.split('/')[1] == '22' else '255.255.248.0' }}
+{%- set cabinet_mask = '255.255.252.0' if cabinet.CIDR.split('/')[1] == '22' else '255.255.248.0' %}
+{%- set cabinet_cidr = cabinet.CIDR.split('/')[0] + '/' + cabinet_mask %}
+{#- Skip cabinet subnet if it's already covered by the main MTN network #}
+{%- if not main_cidr or not (cabinet_cidr | is_subnet_of(main_cidr)) %}
+    {{ ns.sequence }} {{ cabinet_cidr }}
 {%- set ns.sequence = ns.sequence + 10 %}
+{%- endif %}
 {%- endfor %}
 {%- endif %}
 object-group ip address MANAGED_NODES
@@ -53,10 +59,8 @@ object-group port NMN_TCP_SERVICES
     90 eq 8883
     100 eq 8888
     110 eq 8514
-    120 eq 6817
-    130 eq 6818
-    140 eq 6819
-    150 eq 3260
+    120 range 6817 6819
+    130 eq 3260
 object-group port NMN_UDP_SERVICES
     10 eq dns
     20 eq dhcp-server
@@ -65,4 +69,34 @@ object-group port NMN_UDP_SERVICES
     50 eq syslog
     60 eq 8514
     70 eq ntp
+object-group port SSH_ALTERNATE
+    10 eq ssh
+    20 range 2022 2040
+object-group port MGMT_TCP_PORTS
+    10 eq ssh
+    20 eq https
+object-group port MGMT_UDP_PORTS
+    10 eq snmp
+    20 eq snmp-trap
+object-group ip address MGMT_SOURCES
+    10 {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }}
+    20 {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }}
+    30 {{ variables.HMNLB_NETWORK_IP }}/{{ variables.HMNLB_NETMASK }}
+object-group ip address DHCP_SERVERS
+    10 {{ variables.NMNLB_DHCP }}
+    20 {{ variables.HMNLB_DHCP }}
+object-group ip address CONTROL_PLANE
+{%- set ns = namespace(last_sequence=0) %}
+    10 {{ variables.RGW_VIP }}
+    20 {{ variables.KUBEAPI_VIP }}
+{%- set ns.last_sequence = 20 %}
+{%- for name, ip in variables.NMN_IPs.items() if name.startswith('ncn-') or name.startswith('fmn') %}
+    {{ ns.last_sequence + 10 }} {{ ip }}
+{%- set ns.last_sequence = ns.last_sequence + 10 %}
+{%- endfor %}
+{%- if variables.MTL_NETWORK_IP %}
+    {{ ns.last_sequence + 10 }} {{ variables.MTL_NETWORK_IP }}/{{ variables.MTL_NETMASK }}
+{%- set ns.last_sequence = ns.last_sequence + 10 %}
+{%- endif %}
+    {{ ns.last_sequence + 10 }} {{ variables.NMNLB_NETWORK_IP }}/{{ variables.NMNLB_NETMASK }}
 {#- end ACL Object groups for services ACL #}
