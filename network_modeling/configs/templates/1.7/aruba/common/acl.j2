@@ -1,4 +1,6 @@
-{#- acl #}
+{#- acl -#}
+{#- Include common object groups needed by mgmt and nmn-hmn ACLs -#}
+{%- include variables.CSM_VERSION+'/aruba/common/common_objects.j2' %}
 access-list ip mgmt
 {% set sequence = 10 %}    {{ sequence }} comment ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET and CMN
 {% set sequence = sequence+10 %}    {{ sequence }} permit tcp MGMT_SOURCES any group MGMT_TCP_PORTS count

@@ -24,6 +24,7 @@
 import json
 import logging
 from datetime import datetime
+import ipaddress
 
 import click
 import click_spinner
@@ -36,7 +37,7 @@ from nornir_salt.plugins.tasks import tcp_ping
 from nornir_scrapli.tasks import send_config
 
 from canu.backup.network.network import backup_switches
-from canu.generate.switch.config.config import parse_sls_for_config
+from canu.generate.switch.config.config import parse_sls_for_config, is_subnet_of
 from canu.utils.inventory import inventory
 
 import sys
@@ -275,6 +276,9 @@ def network(
             loader=FileSystemLoader(network_templates_folder),
             undefined=StrictUndefined,
         )
+        
+        # Add custom filter for subnet overlap detection
+        env.filters['is_subnet_of'] = is_subnet_of
 
         # Generate configuration for each host
         configs_to_apply = {}

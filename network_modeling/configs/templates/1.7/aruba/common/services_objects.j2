@@ -69,22 +69,10 @@ object-group port NMN_UDP_SERVICES
     50 eq syslog
     60 eq 8514
     70 eq ntp
+{#- CONTROL_PLANE and other isolation-specific object groups start here #}
 object-group port SSH_ALTERNATE
     10 eq ssh
     20 range 2022 2040
-object-group port MGMT_TCP_PORTS
-    10 eq ssh
-    20 eq https
-object-group port MGMT_UDP_PORTS
-    10 eq snmp
-    20 eq snmp-trap
-object-group ip address MGMT_SOURCES
-    10 {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }}
-    20 {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }}
-    30 {{ variables.HMNLB_NETWORK_IP }}/{{ variables.HMNLB_NETMASK }}
-object-group ip address DHCP_SERVERS
-    10 {{ variables.NMNLB_DHCP }}
-    20 {{ variables.HMNLB_DHCP }}
 object-group ip address CONTROL_PLANE
 {%- set ns = namespace(last_sequence=0) %}
     10 {{ variables.RGW_VIP }}

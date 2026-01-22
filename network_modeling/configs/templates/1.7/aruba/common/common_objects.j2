@@ -1,0 +1,20 @@
+{#- Common object groups used by standard ACLs (mgmt, nmn-hmn) -#}
+{#- These are needed even when NMN isolation is NOT enabled -#}
+object-group port MGMT_TCP_PORTS
+    10 eq ssh
+    20 eq https
+object-group port MGMT_UDP_PORTS
+    10 eq snmp
+    20 eq snmp-trap
+{% if variables.HMN_NETWORK_IP is defined and variables.CMN_NETWORK_IP is defined and variables.HMNLB_NETWORK_IP is defined %}
+object-group ip address MGMT_SOURCES
+    10 {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }}
+    20 {{ variables.CMN_NETWORK_IP }}/{{ variables.CMN_NETMASK }}
+    30 {{ variables.HMNLB_NETWORK_IP }}/{{ variables.HMNLB_NETMASK }}
+{% endif %}
+{% if variables.NMNLB_DHCP is defined and variables.HMNLB_DHCP is defined %}
+object-group ip address DHCP_SERVERS
+    10 {{ variables.NMNLB_DHCP }}
+    20 {{ variables.HMNLB_DHCP }}
+{% endif %}
+
