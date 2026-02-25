@@ -22,9 +22,9 @@
 """Functions for testing CANU commands."""
 import difflib
 
-import pkg_resources
+from importlib.metadata import version as _get_version
 
-canu_version = pkg_resources.get_distribution("canu").version
+canu_version = _get_version("canu")
 
 banner_version = f"# CANU version: {canu_version}\n"
 
