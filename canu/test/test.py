@@ -74,6 +74,7 @@ csm_options = canu_config["csm_versions"]
     "--password",
     hide_input=True,
     confirmation_prompt=False,
+    envvar="CANU_SWITCH_PASSWORD",
     help="Switch password",
 )
 @click.command(
