@@ -23,7 +23,7 @@
 from os import path
 from pathlib import Path
 
-import pkg_resources
+from importlib.metadata import version as _get_version
 from click import testing
 
 from canu.cli import cli
@@ -43,7 +43,7 @@ csm = "1.2"
 switch_name = "sw-spine-001"
 sls_address = "api-gw-service-nmn.local"
 
-canu_version = pkg_resources.get_distribution("canu").version
+canu_version = _get_version("canu")
 banner_motd = (
     'banner motd "\n'
     "###############################################################################\n"

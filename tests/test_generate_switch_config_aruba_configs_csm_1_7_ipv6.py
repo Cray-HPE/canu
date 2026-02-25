@@ -25,7 +25,7 @@ from os import path
 from pathlib import Path
 
 from click import testing
-import pkg_resources
+from importlib.metadata import version as _get_version
 
 from canu.cli import cli
 
@@ -54,7 +54,7 @@ architecture_tds = "tds"
 tabs_tds = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners_tds = "J14,T30,J14,T57,J14,T34,J14,T27"
 
-canu_version = pkg_resources.get_distribution("canu").version
+canu_version = _get_version("canu")
 
 banner_version = f"# CANU version: {canu_version}\n"
 

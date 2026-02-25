@@ -24,7 +24,7 @@ import json
 from os import path
 from pathlib import Path
 
-import pkg_resources
+from importlib.metadata import version as _get_version
 import requests
 import responses
 from click import testing
@@ -53,7 +53,7 @@ architecture_tds = "TDS"
 tabs_tds = "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
 corners_tds = "J14,T30,J14,T53,J14,T32,J14,T27"
 
-canu_version = pkg_resources.get_distribution("canu").version
+canu_version = _get_version("canu")
 banner_motd = (
     "banner exec !\n"
     "###############################################################################\n"
