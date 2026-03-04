@@ -37,7 +37,7 @@ echo "========================================"
 echo ""
 echo "This will regenerate 57 golden config files."
 echo "Press Ctrl+C to cancel, or Enter to continue..."
-read
+read -r _
 
 # Configuration
 DATA_DIR="tests/data"
@@ -52,14 +52,14 @@ GOLDEN_TDS="$DATA_DIR/golden_configs/tds_configs_1.7"
 GOLDEN_CUSTOM="$DATA_DIR/golden_configs/full_configs_custom_1.7"
 
 # Common arguments for full architecture
-FULL_ARGS="--csm 1.7 -a full --shcd $SHCD_FULL"
-FULL_TABS="--tabs SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
-FULL_CORNERS="--corners J14,T44,J14,T57,J14,T36,J14,T27"
+FULL_ARGS=(--csm 1.7 -a full --shcd "$SHCD_FULL")
+FULL_TABS=(--tabs "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES")
+FULL_CORNERS=(--corners "J14,T44,J14,T57,J14,T36,J14,T27")
 
 # Common arguments for TDS architecture
-TDS_ARGS="--csm 1.7 -a tds --shcd $SHCD_TDS"
-TDS_TABS="--tabs SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES"
-TDS_CORNERS="--corners J14,T30,J14,T57,J14,T34,J14,T27"
+TDS_ARGS=(--csm 1.7 -a tds --shcd "$SHCD_TDS")
+TDS_TABS=(--tabs "SWITCH_TO_SWITCH,NON_COMPUTE_NODES,HARDWARE_MANAGEMENT,COMPUTE_NODES")
+TDS_CORNERS=(--corners "J14,T30,J14,T57,J14,T34,J14,T27")
 
 # Counter for progress
 count=0
@@ -70,12 +70,12 @@ generate_config() {
     local name=$1
     local output=$2
     shift 2
-    local args="$@"
-    
+    local args=("$@")
+
     count=$((count + 1))
     echo "[$count/$total] Generating: $name"
-    
-    canu generate switch config $args \
+
+    canu generate switch config "${args[@]}" \
         --name "$name" \
         --out "$output" > /dev/null 2>&1
 }
@@ -87,7 +87,7 @@ echo "========================================="
 
 for switch in sw-spine-001 sw-spine-002 sw-leaf-001 sw-leaf-002 sw-leaf-003 sw-leaf-004 sw-leaf-bmc-001 sw-cdu-001 sw-cdu-002 sw-edge-001 sw-edge-002; do
     generate_config "$switch" "$GOLDEN_FULL/${switch}.cfg" \
-        $FULL_ARGS $FULL_TABS $FULL_CORNERS --sls-file "$SLS_FILE"
+        "${FULL_ARGS[@]}" "${FULL_TABS[@]}" "${FULL_CORNERS[@]}" --sls-file "$SLS_FILE"
 done
 
 echo ""
@@ -97,7 +97,7 @@ echo "========================================="
 
 for switch in sw-spine-001 sw-spine-002 sw-leaf-001 sw-leaf-002 sw-leaf-bmc-001 sw-cdu-001 sw-cdu-002; do
     generate_config "$switch" "$GOLDEN_FULL/${switch}-isolation.cfg" \
-        $FULL_ARGS $FULL_TABS $FULL_CORNERS --sls-file "$SLS_FILE" \
+        "${FULL_ARGS[@]}" "${FULL_TABS[@]}" "${FULL_CORNERS[@]}" --sls-file "$SLS_FILE" \
         --enable-nmn-isolation --nmn-pvlan 502
 done
 
@@ -108,7 +108,7 @@ echo "========================================="
 
 for switch in sw-spine-001 sw-spine-002 sw-leaf-001 sw-leaf-002 sw-leaf-003 sw-leaf-004 sw-leaf-bmc-001 sw-cdu-001 sw-cdu-002 sw-edge-001 sw-edge-002; do
     generate_config "$switch" "$GOLDEN_FULL/${switch}-ipv6.cfg" \
-        $FULL_ARGS $FULL_TABS $FULL_CORNERS --sls-file "$SLS_IPV6_FILE"
+        "${FULL_ARGS[@]}" "${FULL_TABS[@]}" "${FULL_CORNERS[@]}" --sls-file "$SLS_IPV6_FILE"
 done
 
 echo ""
@@ -119,13 +119,13 @@ echo "========================================="
 # TDS configs (standard)
 for switch in sw-spine-001 sw-spine-002 sw-leaf-bmc-001 sw-cdu-001 sw-cdu-002; do
     generate_config "$switch" "$GOLDEN_TDS/${switch}.cfg" \
-        $TDS_ARGS $TDS_TABS $TDS_CORNERS --sls-file "$SLS_FILE"
+        "${TDS_ARGS[@]}" "${TDS_TABS[@]}" "${TDS_CORNERS[@]}" --sls-file "$SLS_FILE"
 done
 
 # TDS configs (IPv6)
 for switch in sw-spine-001 sw-spine-002 sw-leaf-bmc-001 sw-cdu-001 sw-cdu-002; do
     generate_config "$switch" "$GOLDEN_TDS/${switch}-ipv6.cfg" \
-        $TDS_ARGS $TDS_TABS $TDS_CORNERS --sls-file "$SLS_IPV6_FILE"
+        "${TDS_ARGS[@]}" "${TDS_TABS[@]}" "${TDS_CORNERS[@]}" --sls-file "$SLS_IPV6_FILE"
 done
 
 echo ""
@@ -136,14 +136,14 @@ echo "========================================="
 # Custom configs (standard)
 for switch in sw-spine-001 sw-spine-002 sw-leaf-001 sw-leaf-002 sw-leaf-003 sw-leaf-004 sw-leaf-bmc-001 sw-cdu-001 sw-cdu-002; do
     generate_config "$switch" "$GOLDEN_CUSTOM/${switch}.cfg" \
-        $FULL_ARGS $FULL_TABS $FULL_CORNERS --sls-file "$SLS_FILE" \
+        "${FULL_ARGS[@]}" "${FULL_TABS[@]}" "${FULL_CORNERS[@]}" --sls-file "$SLS_FILE" \
         --custom-config "$CUSTOM_FILE"
 done
 
 # Custom configs (IPv6)
 for switch in sw-spine-001 sw-spine-002 sw-leaf-001 sw-leaf-002 sw-leaf-003 sw-leaf-004 sw-leaf-bmc-001 sw-cdu-001 sw-cdu-002; do
     generate_config "$switch" "$GOLDEN_CUSTOM/${switch}-ipv6.cfg" \
-        $FULL_ARGS $FULL_TABS $FULL_CORNERS --sls-file "$SLS_IPV6_FILE" \
+        "${FULL_ARGS[@]}" "${FULL_TABS[@]}" "${FULL_CORNERS[@]}" --sls-file "$SLS_IPV6_FILE" \
         --custom-config "$CUSTOM_FILE"
 done
 
