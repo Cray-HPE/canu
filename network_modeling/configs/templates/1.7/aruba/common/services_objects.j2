@@ -65,4 +65,10 @@ object-group port NMN_UDP_SERVICES
     50 eq syslog
     60 eq 8514
     70 eq ntp
+{#- SSH_ALTERNATE covers standard SSH (22) plus the port range used by IMS remote build nodes
+    (podman maps containerised SSH servers to host ports starting at 2022, incrementing per job).
+    See: CASMTRIAGE-8987 #}
+object-group port SSH_ALTERNATE
+    10 eq ssh
+    20 range 2022 2040
 {#- end ACL Object groups for services ACL #}
