@@ -13,8 +13,13 @@ interface vlan {{ cabinet.VlanID }}
     vrf attach {{ variables.VRF }}
     description {{ cabinet.Name }}_nmn
 {%- if variables.ENABLE_NMN_ISOLATION %}
+{%- if variables.HMN_MTN %}
+    apply access-list ip cdu-nmn-routed routed-in
+    apply access-list ip cdu-nmn-routed routed-out
+{%- else %}
     apply access-list ip nmn-hmn routed-in
     apply access-list ip nmn-hmn routed-out
+{%- endif %}
 {%- endif %}
     ip mtu 9198
     ip address {{ cabinet.IP }}/{{ cabinet.PREFIX_LENGTH }}

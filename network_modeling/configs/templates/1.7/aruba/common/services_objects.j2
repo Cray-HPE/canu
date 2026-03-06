@@ -32,9 +32,12 @@ object-group ip address MTN_NETWORKS
 {%- endfor %}
 {%- endif %}
 object-group ip address MANAGED_NODES
-    10 {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }}
+{%- set managed_nodes_seq = namespace(val=0) %}
+{%- set managed_nodes_seq.val = managed_nodes_seq.val + 10 %}
+    {{ managed_nodes_seq.val }} {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }}
 {%- if variables.NMN_MTN_NETWORK_IP and variables.NMN_MTN_NETMASK %}
-    20 {{ variables.NMN_MTN_NETWORK_IP }}/{{ variables.NMN_MTN_NETMASK }}
+{%- set managed_nodes_seq.val = managed_nodes_seq.val + 10 %}
+    {{ managed_nodes_seq.val }} {{ variables.NMN_MTN_NETWORK_IP }}/{{ variables.NMN_MTN_NETMASK }}
 {%- endif %}
 object-group ip address NMN_K8S_SERVICE
     10 {{ variables.NMNLB_NETWORK_IP }}/{{ variables.NMNLB_NETMASK }}

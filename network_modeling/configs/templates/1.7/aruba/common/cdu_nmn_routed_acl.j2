@@ -1,0 +1,85 @@
+{#- cdu-nmn-routed ACL: CDU-specific replacement for nmn-hmn on the L3 routed path.
+    Applied as routed-in/out on interface vlan NMN and interface vlan NMN_MTN cabinets.
+    Identical to nmn-hmn but with SSH exception rules prepended so that NCN SSH to
+    HMN cabinet nodes is permitted before the NMN<->HMN_MTN deny rules fire.
+    See: CASMTRIAGE-9035 #}
+{%- if variables.HMN_MTN %}
+{%- set cdu_routed_seq = namespace(val=0) %}
+access-list ip cdu-nmn-routed
+{#- SSH exceptions for NCN<->HMN_MTN must appear before the inter-zone deny rules.
+    Two variants: NCN-NMN-sourced (rules below) and NCN-HMN-sourced (rules after).
+    NCN SSH to BMC uses the NCN HMN interface as source; the NCN object-group
+    contains only NMN addresses, so both source address families must be covered. #}
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} permit tcp NCN {{ variables.HMN_MTN_NETWORK_IP }}/{{ variables.HMN_MTN_NETMASK }} eq ssh count
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} permit tcp {{ variables.HMN_MTN_NETWORK_IP }}/{{ variables.HMN_MTN_NETMASK }} NCN established count
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} permit any {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} {{ variables.HMN_MTN_NETWORK_IP }}/{{ variables.HMN_MTN_NETMASK }} count
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} permit any {{ variables.HMN_MTN_NETWORK_IP }}/{{ variables.HMN_MTN_NETMASK }} {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} count
+{#- Remainder is identical to nmn-hmn, preserving all inter-zone isolation policy #}
+{%- if variables.NMN and variables.HMN %}
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} deny any {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }} {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }}
+{%- endif %}
+{%- if variables.HMN and variables.NMN %}
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} deny any {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }}
+{%- endif %}
+{%- if variables.NMN and variables.HMN_MTN %}
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} deny any {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }} {{ variables.HMN_MTN_NETWORK_IP }}/{{ variables.HMN_MTN_NETMASK }}
+{%- endif %}
+{%- if variables.HMN and variables.NMN_MTN %}
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} deny any {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} {{ variables.NMN_MTN_NETWORK_IP }}/{{ variables.NMN_MTN_NETMASK }}
+{%- endif %}
+{%- if variables.NMN_MTN and variables.HMN %}
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} deny any {{ variables.NMN_MTN_NETWORK_IP }}/{{ variables.NMN_MTN_NETMASK }} {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }}
+{%- endif %}
+{%- if variables.NMN_MTN and variables.HMN_MTN %}
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} deny any {{ variables.NMN_MTN_NETWORK_IP }}/{{ variables.NMN_MTN_NETMASK }} {{ variables.HMN_MTN_NETWORK_IP }}/{{ variables.HMN_MTN_NETMASK }}
+{%- endif %}
+{%- if variables.HMN_MTN and variables.NMN %}
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} deny any {{ variables.HMN_MTN_NETWORK_IP }}/{{ variables.HMN_MTN_NETMASK }} {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }}
+{%- endif %}
+{%- if variables.HMN_MTN and variables.NMN_MTN %}
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} deny any {{ variables.HMN_MTN_NETWORK_IP }}/{{ variables.HMN_MTN_NETMASK }} {{ variables.NMN_MTN_NETWORK_IP }}/{{ variables.NMN_MTN_NETMASK }}
+{%- endif %}
+{%- if variables.NMNLB and variables.HMN %}
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} deny any {{ variables.NMNLB_NETWORK_IP }}/{{ variables.NMNLB_NETMASK }} {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }}
+{%- endif %}
+{%- if variables.HMNLB and variables.NMN %}
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} deny any {{ variables.HMNLB_NETWORK_IP }}/{{ variables.HMNLB_NETMASK }} {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }}
+{%- endif %}
+{%- if variables.HMN and variables.NMNLB %}
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} deny any {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} {{ variables.NMNLB_NETWORK_IP }}/{{ variables.NMNLB_NETMASK }}
+{%- endif %}
+{%- if variables.NMN and variables.HMNLB %}
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} deny any {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }} {{ variables.HMNLB_NETWORK_IP }}/{{ variables.HMNLB_NETMASK }}
+{%- endif %}
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} permit udp {{ variables.NMNLB_DHCP }} range 67 68 any
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} permit udp any range 67 68 {{ variables.NMNLB_DHCP }}
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} deny any any {{ variables.NMNLB_DHCP }}
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} permit udp {{ variables.HMNLB_DHCP }} range 67 68 any
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} permit udp any range 67 68 {{ variables.HMNLB_DHCP }}
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} deny any any {{ variables.HMNLB_DHCP }}
+{%- set cdu_routed_seq.val = cdu_routed_seq.val + 10 %}
+    {{ cdu_routed_seq.val }} permit any any any
+{%- endif %}
+{#- end cdu-nmn-routed ACL #}

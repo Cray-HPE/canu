@@ -31,6 +31,17 @@
 {%- set _ = acl_rules.append({'type': 'comment', 'text': 'Allow SSH from NCNs to Managed Nodes'}) -%}
 {%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp NCN MANAGED_NODES group SSH_ALTERNATE count'}) -%}
 {%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp MANAGED_NODES group SSH_ALTERNATE NCN count'}) -%}
+{%- if variables.HMN_MTN -%}
+{%- set _ = acl_rules.append({'type': 'comment', 'text': 'Allow NCN access to HMN cabinet nodes (BMCs on vlan3000/HMN_MTN)'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp NCN ' ~ variables.HMN_MTN_NETWORK_IP ~ '/' ~ variables.HMN_MTN_NETMASK ~ ' eq ssh count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit tcp ' ~ variables.HMN_MTN_NETWORK_IP ~ '/' ~ variables.HMN_MTN_NETMASK ~ ' NCN established count'}) -%}
+{#- NCN traffic to BMC uses the NCN HMN interface as source (NCN routes HMN_MTN via bond0.hmn0).
+    The NCN object-group contains only NMN addresses, so the rules above won't match.
+    Permit any protocol from/to the full HMN network — NCN HMN addresses need unrestricted
+    management access to BMCs (SSH, HTTPS, IPMI, traceroute UDP probes, etc.). #}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit any ' ~ variables.HMN_NETWORK_IP ~ '/' ~ variables.HMN_NETMASK ~ ' ' ~ variables.HMN_MTN_NETWORK_IP ~ '/' ~ variables.HMN_MTN_NETMASK ~ ' count'}) -%}
+{%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit any ' ~ variables.HMN_MTN_NETWORK_IP ~ '/' ~ variables.HMN_MTN_NETMASK ~ ' ' ~ variables.HMN_NETWORK_IP ~ '/' ~ variables.HMN_NETMASK ~ ' count'}) -%}
+{%- endif -%}
 {%- set _ = acl_rules.append({'type': 'comment', 'text': 'Allow ping'}) -%}
 {%- set _ = acl_rules.append({'type': 'rule', 'text': 'permit icmp any any count'}) -%}
 {%- set _ = acl_rules.append({'type': 'comment', 'text': 'Permit OSPF from switches'}) -%}
