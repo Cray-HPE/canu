@@ -300,6 +300,11 @@ def network(
                 "NMN_MTN_CABINETS": sls_variables["NMN_MTN_CABINETS"],
                 "NMN_MTN_CABINETS_NETMASK": sls_variables["NMN_MTN_CABINETS_NETMASK"],
                 "HMN_MTN_CABINETS": sls_variables["HMN_MTN_CABINETS"],
+                "HMN_MTN": sls_variables["HMN_MTN"],
+                "HMN_MTN_NETWORK_IP": sls_variables["HMN_MTN_NETWORK_IP"],
+                "HMN_MTN_NETMASK": sls_variables["HMN_MTN_NETMASK"],
+                "HMN_NETWORK_IP": sls_variables["HMN_NETWORK_IP"],
+                "HMN_NETMASK": sls_variables["HMN_NETMASK"],
             }
             config_to_apply = ""
             for template_file in selected_profile["templates"]:

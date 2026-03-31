@@ -1,0 +1,24 @@
+{#- cdu-hmn-cabinet ACL: applied to cabinet HMN VLANs (mtn_hmn_vlan) on CDU switches.
+    Permits NCN SSH to HMN cabinet nodes and allows established TCP replies back,
+    while preserving the NMN <-> HMN cabinet isolation for all other traffic.
+    See: CASMTRIAGE-9035 #}
+{%- if variables.HMN_MTN %}
+{%- set cdu_hmn_seq = namespace(val=0) %}
+access-list ip cdu-hmn-cabinet
+{%- set cdu_hmn_seq.val = cdu_hmn_seq.val + 10 %}
+    {{ cdu_hmn_seq.val }} permit tcp NCN {{ variables.HMN_MTN_NETWORK_IP }}/{{ variables.HMN_MTN_NETMASK }} eq ssh count
+{%- set cdu_hmn_seq.val = cdu_hmn_seq.val + 10 %}
+    {{ cdu_hmn_seq.val }} permit tcp {{ variables.HMN_MTN_NETWORK_IP }}/{{ variables.HMN_MTN_NETMASK }} NCN established count
+{#- NCN SSH to BMC uses the NCN HMN interface as source; permit HMN-sourced path too #}
+{%- set cdu_hmn_seq.val = cdu_hmn_seq.val + 10 %}
+    {{ cdu_hmn_seq.val }} permit any {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} {{ variables.HMN_MTN_NETWORK_IP }}/{{ variables.HMN_MTN_NETMASK }} count
+{%- set cdu_hmn_seq.val = cdu_hmn_seq.val + 10 %}
+    {{ cdu_hmn_seq.val }} permit any {{ variables.HMN_MTN_NETWORK_IP }}/{{ variables.HMN_MTN_NETMASK }} {{ variables.HMN_NETWORK_IP }}/{{ variables.HMN_NETMASK }} count
+{%- set cdu_hmn_seq.val = cdu_hmn_seq.val + 10 %}
+    {{ cdu_hmn_seq.val }} deny any {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }} {{ variables.HMN_MTN_NETWORK_IP }}/{{ variables.HMN_MTN_NETMASK }} count
+{%- set cdu_hmn_seq.val = cdu_hmn_seq.val + 10 %}
+    {{ cdu_hmn_seq.val }} deny any {{ variables.HMN_MTN_NETWORK_IP }}/{{ variables.HMN_MTN_NETMASK }} {{ variables.NMN_NETWORK_IP }}/{{ variables.NMN_NETMASK }} count
+{%- set cdu_hmn_seq.val = cdu_hmn_seq.val + 10 %}
+    {{ cdu_hmn_seq.val }} permit any any any count
+{%- endif %}
+{#- end cdu-hmn-cabinet ACL #}
