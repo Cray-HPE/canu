@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Jfrog setup
-        uses: jfrog/setup-jfrog-cli@v4
+        uses: jfrog/setup-jfrog-cli@v5
         env:
           JF_URL: https://artifactory.algol60.net
           JF_USER: ${{ secrets.ARTIFACTORY_ALGOL60_USERNAME }}
