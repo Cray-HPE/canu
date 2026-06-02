@@ -8,17 +8,76 @@ updates:
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "daily" # FIXME: Revert back to weekly after we catch-up on updates.
+      interval: "weekly"
     labels:
       - "pip"
       - "dependencies"
-    open-pull-requests-limit: 10
+    groups:
+      click-deps:
+        applies-to: version-updates
+        patterns: ["click*"]
+      nornir-deps:
+        applies-to: version-updates
+        patterns: ["nornir*"]
+      docs-deps:
+        applies-to: version-updates
+        patterns:
+          - "mike"
+          - "mkdocs*"
+          - "myst-parser"
+          - "sphinx*"
+      lint-deps:
+        applies-to: version-updates
+        patterns:
+          - "darglint"
+          - "flake8*"
+          - "pep8*"
+          - "toml"
+      test-deps:
+        applies-to: version-updates
+        patterns:
+          - "coverage"
+          - "mock"
+          - "py"
+          - "pytest*"
+          - "testfixtures"
+      build-deps:
+        applies-to: version-updates
+        patterns:
+          - "nox"
+          - "setuptools*"
+          - "wheel"
+      python-deps:
+        applies-to: version-updates
+        patterns: ["*"]
+        exclude-patterns:
+          - "click*"
+          - "nornir*"
+          - "mike"
+          - "mkdocs*"
+          - "myst-parser"
+          - "sphinx*"
+          - "darglint"
+          - "flake8*"
+          - "pep8*"
+          - "toml"
+          - "coverage"
+          - "mock"
+          - "py"
+          - "pytest*"
+          - "testfixtures"
+          - "nox"
+          - "setuptools*"
+          - "wheel"
   - package-ecosystem: "github-actions"
     # Look for `.github/workflows` in the `root` directory
     directory: "/"
-    # Check for updates once a week
     schedule:
-      interval: "daily" # FIXME: Revert back to weekly after we catch-up on updates.
+      interval: "weekly"
     labels:
       - "github_actions"
       - "dependencies"
+    groups:
+      actions:
+        applies-to: version-updates
+        patterns: ["*"]
