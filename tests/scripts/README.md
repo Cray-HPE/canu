@@ -44,10 +44,11 @@ git diff tests/data/golden_configs/individual_templates_1.7/
 - When adding new object groups or changing ACL structure
 
 **What it does:**
-- Regenerates 57 golden config files across 3 categories:
+- Regenerates 59 golden config files across 4 categories:
   - Full architecture configs (11 standard + 7 isolation + 11 IPv6)
   - TDS architecture configs (5 standard + 5 IPv6)
   - Custom configs (9 standard + 9 IPv6)
+  - Mountain/SLS-mismatch CDU configs (2 — CASMNET-2390 regression)
 
 **Usage:**
 ```bash
@@ -202,7 +203,8 @@ bash tests/scripts/regenerate_golden_configs_1.7.sh
 | Full | 11 | 7 | 11 | 29 |
 | TDS | 5 | - | 5 | 10 |
 | Custom | 9 | - | 9 | 18 |
-| **Total** | **25** | **7** | **25** | **57** |
+| Mtn SLS-mismatch | 2 | - | - | 2 |
+| **Total** | **27** | **7** | **25** | **59** |
 
 ### Switches by Architecture
 

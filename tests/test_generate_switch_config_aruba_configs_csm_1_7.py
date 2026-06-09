@@ -713,6 +713,103 @@ def test_switch_config_cdu_secondary_custom():
         assert diff_config_files(golden_config_file, config_file) == 0
 
 
+# CASMNET-2390: A Mountain/Olympus cabinet that exists in the CCJ/SHCD but not
+# in SLS (NMN_MTN_CABINETS / HMN_MTN_CABINETS) must NOT be rendered onto the
+# CDU switch with stale VLAN values from a previously-processed cabinet.
+# The fixture pair below contains two Mountain cabinets (x1000, x1001) in the
+# CCJ but only x1000 in SLS.
+mtn_mismatch_ccj_file = path.join(data_directory, "Full_Architecture_Mountain_2cab.json")
+mtn_mismatch_sls_file = path.join(data_directory, "sls_input_file_csm_1.7_mtn_mismatch.json")
+
+
+def _assert_mtn_mismatch_warnings(output, switch_name):
+    """Assert the expected per-port skip warnings appear for the missing Mountain cabinet."""
+    assert "WARNING: Skipping" in output
+    assert "x1001" in output
+    assert switch_name in output
+    # CMM ports skipped because both NMN_MTN and HMN_MTN entries are missing.
+    assert "NMN_MTN_CABINETS, HMN_MTN_CABINETS" in output
+    # The CEC port skip names only the HMN_MTN list.
+    assert "Skipping CEC port" in output
+
+
+def test_switch_config_cdu_primary_mtn_sls_mismatch():
+    """Test that primary CDU rendering skips CMM/CEC ports for cabinets missing from SLS (CASMNET-2390)."""
+    switch_name = "sw-cdu-001"
+    config_file = f"{switch_name}.cfg"
+    golden_config_file = path.join(
+        data_directory,
+        f"golden_configs/mtn_sls_mismatch_1.7/{config_file}",
+    )
+
+    with runner.isolated_filesystem():
+        result = runner.invoke(
+            cli,
+            [
+                "generate",
+                "switch",
+                "config",
+                "--csm",
+                csm,
+                "--architecture",
+                architecture,
+                "--ccj",
+                mtn_mismatch_ccj_file,
+                "--sls-file",
+                mtn_mismatch_sls_file,
+                "--name",
+                switch_name,
+                "--out",
+                config_file,
+            ],
+        )
+        assert result.exit_code == 0
+        assert diff_config_files(golden_config_file, config_file) == 0
+        _assert_mtn_mismatch_warnings(result.output, switch_name)
+        with open(config_file) as cfg:
+            rendered = cfg.read()
+        # No port stanza should reference the SLS-missing cabinet.
+        assert "x1001" not in rendered
+
+
+def test_switch_config_cdu_secondary_mtn_sls_mismatch():
+    """Test that secondary CDU rendering skips CMM/CEC ports for cabinets missing from SLS (CASMNET-2390)."""
+    switch_name = "sw-cdu-002"
+    config_file = f"{switch_name}.cfg"
+    golden_config_file = path.join(
+        data_directory,
+        f"golden_configs/mtn_sls_mismatch_1.7/{config_file}",
+    )
+
+    with runner.isolated_filesystem():
+        result = runner.invoke(
+            cli,
+            [
+                "generate",
+                "switch",
+                "config",
+                "--csm",
+                csm,
+                "--architecture",
+                architecture,
+                "--ccj",
+                mtn_mismatch_ccj_file,
+                "--sls-file",
+                mtn_mismatch_sls_file,
+                "--name",
+                switch_name,
+                "--out",
+                config_file,
+            ],
+        )
+        assert result.exit_code == 0
+        assert diff_config_files(golden_config_file, config_file) == 0
+        _assert_mtn_mismatch_warnings(result.output, switch_name)
+        with open(config_file) as cfg:
+            rendered = cfg.read()
+        assert "x1001" not in rendered
+
+
 def test_switch_config_edge_primary():
     """Test that the `canu generate switch config` command runs and returns valid primary edge config."""
     switch_name = "sw-edge-001"

@@ -14,7 +14,8 @@
 #   - Full architecture configs (standard, isolation, IPv6)
 #   - TDS architecture configs (standard, IPv6)
 #   - Custom configs (standard, IPv6)
-#   Total: 57 golden config files
+#   - Mountain/SLS-mismatch CDU configs (CASMNET-2390)
+#   Total: 59 golden config files
 #
 # After running:
 #   1. Review changes: git diff tests/data/golden_configs/
@@ -46,10 +47,13 @@ SHCD_TDS="$DATA_DIR/TDS_Architecture_Golden_Config_1.1.5.xlsx"
 SLS_FILE="$DATA_DIR/sls_input_file_csm_1.2.json"
 SLS_IPV6_FILE="$DATA_DIR/sls_input_file_csm_1.2_ipv6.json"
 CUSTOM_FILE="$DATA_DIR/aruba_custom.yaml"
+MTN_MISMATCH_CCJ="$DATA_DIR/Full_Architecture_Mountain_2cab.json"
+MTN_MISMATCH_SLS="$DATA_DIR/sls_input_file_csm_1.7_mtn_mismatch.json"
 
 GOLDEN_FULL="$DATA_DIR/golden_configs/full_configs_1.7"
 GOLDEN_TDS="$DATA_DIR/golden_configs/tds_configs_1.7"
 GOLDEN_CUSTOM="$DATA_DIR/golden_configs/full_configs_custom_1.7"
+GOLDEN_MTN_MISMATCH="$DATA_DIR/golden_configs/mtn_sls_mismatch_1.7"
 
 # Common arguments for full architecture
 FULL_ARGS=(--csm 1.7 -a full --shcd "$SHCD_FULL")
@@ -63,7 +67,7 @@ TDS_CORNERS=(--corners "J14,T30,J14,T57,J14,T34,J14,T27")
 
 # Counter for progress
 count=0
-total=57
+total=59
 
 # Helper function to generate config
 generate_config() {
@@ -82,7 +86,7 @@ generate_config() {
 
 echo ""
 echo "========================================="
-echo "Part 1/5: Full Configs (no flags)"
+echo "Part 1/6: Full Configs (no flags)"
 echo "========================================="
 
 for switch in sw-spine-001 sw-spine-002 sw-leaf-001 sw-leaf-002 sw-leaf-003 sw-leaf-004 sw-leaf-bmc-001 sw-cdu-001 sw-cdu-002 sw-edge-001 sw-edge-002; do
@@ -92,7 +96,7 @@ done
 
 echo ""
 echo "========================================="
-echo "Part 2/5: Full Configs (WITH isolation)"
+echo "Part 2/6: Full Configs (WITH isolation)"
 echo "========================================="
 
 for switch in sw-spine-001 sw-spine-002 sw-leaf-001 sw-leaf-002 sw-leaf-bmc-001 sw-cdu-001 sw-cdu-002; do
@@ -103,7 +107,7 @@ done
 
 echo ""
 echo "========================================="
-echo "Part 3/5: Full Configs (WITH IPv6)"
+echo "Part 3/6: Full Configs (WITH IPv6)"
 echo "========================================="
 
 for switch in sw-spine-001 sw-spine-002 sw-leaf-001 sw-leaf-002 sw-leaf-003 sw-leaf-004 sw-leaf-bmc-001 sw-cdu-001 sw-cdu-002 sw-edge-001 sw-edge-002; do
@@ -113,7 +117,7 @@ done
 
 echo ""
 echo "========================================="
-echo "Part 4/5: TDS Configs"
+echo "Part 4/6: TDS Configs"
 echo "========================================="
 
 # TDS configs (standard)
@@ -130,7 +134,7 @@ done
 
 echo ""
 echo "========================================="
-echo "Part 5/5: Custom Configs"
+echo "Part 5/6: Custom Configs"
 echo "========================================="
 
 # Custom configs (standard)
@@ -145,6 +149,19 @@ for switch in sw-spine-001 sw-spine-002 sw-leaf-001 sw-leaf-002 sw-leaf-003 sw-l
     generate_config "$switch" "$GOLDEN_CUSTOM/${switch}-ipv6.cfg" \
         "${FULL_ARGS[@]}" "${FULL_TABS[@]}" "${FULL_CORNERS[@]}" --sls-file "$SLS_IPV6_FILE" \
         --custom-config "$CUSTOM_FILE"
+done
+
+echo ""
+echo "========================================="
+echo "Part 6/6: Mountain/SLS-mismatch CDU Configs (CASMNET-2390)"
+echo "========================================="
+
+# Regression fixture for CASMNET-2390: CCJ contains two Mountain cabinets
+# (x1000, x1001) but SLS only contains x1000. The renderer must skip the
+# CMM/CEC ports for x1001 and emit warnings instead of stamping stale VLANs.
+for switch in sw-cdu-001 sw-cdu-002; do
+    generate_config "$switch" "$GOLDEN_MTN_MISMATCH/${switch}.cfg" \
+        --csm 1.7 -a full --ccj "$MTN_MISMATCH_CCJ" --sls-file "$MTN_MISMATCH_SLS"
 done
 
 echo ""
