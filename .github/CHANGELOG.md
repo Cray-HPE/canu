@@ -2,6 +2,8 @@
 
 ### [UNRELEASED]
 
+- CASMNET-2390 Fix wrong-VLAN rendering on CDU CMM/CEC ports when a Mountain cabinet is in the CCJ but missing from SLS
+
 ### [1.9.11]
 
 - CASMNET-2309 Fixed BGP tests in https://github.com/Cray-HPE/canu/pull/654
