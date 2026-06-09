@@ -1186,10 +1186,20 @@ def get_switch_nodes(
             nodes.append(new_node)
         elif shasta_name == "cec":
             destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
+            hmn_mtn_vlan = None
             for cabinets in sls_variables["HMN_MTN_CABINETS"]:
                 sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
                 if destination_rack_int == sls_rack_int:
                     hmn_mtn_vlan = cabinets["VlanID"]
+            if hmn_mtn_vlan is None:
+                click.secho(
+                    f"WARNING: Skipping CEC port {source_port} on {switch_name} for "
+                    f"cabinet {destination_rack}: cabinet is in the CCJ/SHCD but not "
+                    f"in SLS (HMN_MTN_CABINETS). The CCJ and SLS are out of sync; "
+                    f"reconcile them and regenerate the config.",
+                    fg="red",
+                )
+                continue
             new_node = {
                 "subtype": "cec",
                 "slot": None,
@@ -1207,6 +1217,8 @@ def get_switch_nodes(
             nodes.append(new_node)
         elif shasta_name == "cmm":
             destination_rack_int = int(re.search(r"\d+", destination_rack)[0])
+            nmn_mtn_vlan = None
+            hmn_mtn_vlan = None
             for cabinets in sls_variables["NMN_MTN_CABINETS"]:
                 sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
                 if destination_rack_int == sls_rack_int:
@@ -1215,6 +1227,21 @@ def get_switch_nodes(
                 sls_rack_int = int(re.search(r"\d+", (cabinets["Name"]))[0])
                 if destination_rack_int == sls_rack_int:
                     hmn_mtn_vlan = cabinets["VlanID"]
+            if nmn_mtn_vlan is None or hmn_mtn_vlan is None:
+                missing = []
+                if nmn_mtn_vlan is None:
+                    missing.append("NMN_MTN_CABINETS")
+                if hmn_mtn_vlan is None:
+                    missing.append("HMN_MTN_CABINETS")
+                click.secho(
+                    f"WARNING: Skipping CMM port {source_port} (lag {primary_port}) "
+                    f"on {switch_name} for cabinet {destination_rack}: cabinet is in "
+                    f"the CCJ/SHCD but missing from SLS ({', '.join(missing)}). "
+                    f"The CCJ and SLS are out of sync; reconcile them and regenerate "
+                    f"the config.",
+                    fg="red",
+                )
+                continue
             new_node = {
                 "subtype": "cmm",
                 "slot": None,
