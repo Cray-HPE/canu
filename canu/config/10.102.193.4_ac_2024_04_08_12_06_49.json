@@ -1,0 +1,1676 @@
+{
+    "ACL": {
+        "cmn-can/ipv4": {
+            "cfg_aces": {
+                "10": {
+                    "action": "deny",
+                    "dst_ip": "10.102.193.192/255.255.255.192",
+                    "src_ip": "10.102.193.0/255.255.255.128"
+                },
+                "20": {
+                    "action": "deny",
+                    "dst_ip": "10.102.193.0/255.255.255.128",
+                    "src_ip": "10.102.193.192/255.255.255.192"
+                },
+                "30": {
+                    "action": "permit"
+                }
+            },
+            "cfg_version": 8240063489093743,
+            "list_type": "ipv4",
+            "name": "cmn-can"
+        },
+        "mgmt/ipv4": {
+            "cfg_aces": {
+                "10": {
+                    "comment": "ALLOW SSH, HTTPS, AND SNMP ON HMN SUBNET and CMN"
+                },
+                "100": {
+                    "action": "deny",
+                    "dst_l4_port_max": 22,
+                    "dst_l4_port_min": 22,
+                    "protocol": 6
+                },
+                "110": {
+                    "action": "deny",
+                    "dst_l4_port_max": 443,
+                    "dst_l4_port_min": 443,
+                    "protocol": 6
+                },
+                "120": {
+                    "action": "deny",
+                    "dst_l4_port_max": 161,
+                    "dst_l4_port_min": 161,
+                    "protocol": 17
+                },
+                "130": {
+                    "action": "deny",
+                    "dst_l4_port_max": 162,
+                    "dst_l4_port_min": 162,
+                    "protocol": 17
+                },
+                "140": {
+                    "comment": "ALLOW ANYTHING ELSE"
+                },
+                "150": {
+                    "action": "permit"
+                },
+                "20": {
+                    "action": "permit",
+                    "dst_l4_port_max": 22,
+                    "dst_l4_port_min": 22,
+                    "protocol": 6,
+                    "src_ip": "10.254.0.0/255.255.128.0"
+                },
+                "30": {
+                    "action": "permit",
+                    "dst_l4_port_max": 443,
+                    "dst_l4_port_min": 443,
+                    "protocol": 6,
+                    "src_ip": "10.254.0.0/255.255.128.0"
+                },
+                "40": {
+                    "action": "permit",
+                    "dst_l4_port_max": 161,
+                    "dst_l4_port_min": 161,
+                    "protocol": 17,
+                    "src_ip": "10.254.0.0/255.255.128.0"
+                },
+                "50": {
+                    "action": "permit",
+                    "dst_l4_port_max": 162,
+                    "dst_l4_port_min": 162,
+                    "protocol": 17,
+                    "src_ip": "10.254.0.0/255.255.128.0"
+                },
+                "60": {
+                    "comment": "ALLOW SNMP FROM HMN METALLB SUBNET"
+                },
+                "70": {
+                    "action": "permit",
+                    "dst_l4_port_max": 161,
+                    "dst_l4_port_min": 161,
+                    "protocol": 17,
+                    "src_ip": "10.94.100.0/255.255.255.0"
+                },
+                "80": {
+                    "action": "permit",
+                    "dst_l4_port_max": 162,
+                    "dst_l4_port_min": 162,
+                    "protocol": 17,
+                    "src_ip": "10.94.100.0/255.255.255.0"
+                },
+                "90": {
+                    "comment": "BLOCK SSH, HTTPS, AND SNMP FROM EVERYWHERE ELSE"
+                }
+            },
+            "cfg_version": -4425225218032575,
+            "list_type": "ipv4",
+            "name": "mgmt"
+        },
+        "nmn-hmn/ipv4": {
+            "cfg_aces": {
+                "10": {
+                    "action": "deny",
+                    "dst_ip": "10.254.0.0/255.255.128.0",
+                    "src_ip": "10.252.0.0/255.255.128.0"
+                },
+                "100": {
+                    "action": "permit",
+                    "protocol": 17,
+                    "src_ip": "10.94.100.222/255.255.255.255",
+                    "src_l4_port_max": 68,
+                    "src_l4_port_min": 67
+                },
+                "110": {
+                    "action": "permit",
+                    "dst_ip": "10.94.100.222/255.255.255.255",
+                    "protocol": 17,
+                    "src_l4_port_max": 68,
+                    "src_l4_port_min": 67
+                },
+                "120": {
+                    "action": "deny",
+                    "dst_ip": "10.94.100.222/255.255.255.255"
+                },
+                "130": {
+                    "action": "permit"
+                },
+                "20": {
+                    "action": "deny",
+                    "dst_ip": "10.252.0.0/255.255.128.0",
+                    "src_ip": "10.254.0.0/255.255.128.0"
+                },
+                "30": {
+                    "action": "deny",
+                    "dst_ip": "10.254.0.0/255.255.128.0",
+                    "src_ip": "10.92.100.0/255.255.255.0"
+                },
+                "40": {
+                    "action": "deny",
+                    "dst_ip": "10.252.0.0/255.255.128.0",
+                    "src_ip": "10.94.100.0/255.255.255.0"
+                },
+                "50": {
+                    "action": "deny",
+                    "dst_ip": "10.92.100.0/255.255.255.0",
+                    "src_ip": "10.254.0.0/255.255.128.0"
+                },
+                "60": {
+                    "action": "deny",
+                    "dst_ip": "10.94.100.0/255.255.255.0",
+                    "src_ip": "10.252.0.0/255.255.128.0"
+                },
+                "70": {
+                    "action": "permit",
+                    "protocol": 17,
+                    "src_ip": "10.92.100.222/255.255.255.255",
+                    "src_l4_port_max": 68,
+                    "src_l4_port_min": 67
+                },
+                "80": {
+                    "action": "permit",
+                    "dst_ip": "10.92.100.222/255.255.255.255",
+                    "protocol": 17,
+                    "src_l4_port_max": 68,
+                    "src_l4_port_min": 67
+                },
+                "90": {
+                    "action": "deny",
+                    "dst_ip": "10.92.100.222/255.255.255.255"
+                }
+            },
+            "cfg_version": -6116056537275406,
+            "list_type": "ipv4",
+            "name": "nmn-hmn"
+        }
+    },
+    "GBP_Role_Name_Id_Map": {
+        "infra": {
+            "gbp_role_id": 2,
+            "gbp_role_name": "infra"
+        }
+    },
+    "ISSU": {
+        "ISSU1": {}
+    },
+    "Interface": {
+        "1%2F1%2F1": {
+            "description": "cn001:onboard:1<==sw-leaf-bmc-001",
+            "name": "1/1/1",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F10": {
+            "name": "1/1/10",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F11": {
+            "name": "1/1/11",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F12": {
+            "name": "1/1/12",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F13": {
+            "name": "1/1/13",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F14": {
+            "name": "1/1/14",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F15": {
+            "name": "1/1/15",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F16": {
+            "name": "1/1/16",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F17": {
+            "name": "1/1/17",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F18": {
+            "name": "1/1/18",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F19": {
+            "name": "1/1/19",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F2": {
+            "description": "cn002:onboard:1<==sw-leaf-bmc-001",
+            "name": "1/1/2",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F20": {
+            "name": "1/1/20",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F21": {
+            "name": "1/1/21",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F22": {
+            "name": "1/1/22",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F23": {
+            "name": "1/1/23",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F24": {
+            "name": "1/1/24",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F25": {
+            "description": "ncn-m002:bmc:1<==sw-leaf-bmc-001",
+            "name": "1/1/25",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F26": {
+            "description": "ncn-m003:bmc:1<==sw-leaf-bmc-001",
+            "name": "1/1/26",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F27": {
+            "description": "ncn-w002:bmc:1<==sw-leaf-bmc-001",
+            "name": "1/1/27",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F28": {
+            "description": "ncn-w003:bmc:1<==sw-leaf-bmc-001",
+            "name": "1/1/28",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F29": {
+            "description": "ncn-s001:bmc:1<==sw-leaf-bmc-001",
+            "name": "1/1/29",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F3": {
+            "description": "cn003:onboard:1<==sw-leaf-bmc-001",
+            "name": "1/1/3",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F30": {
+            "description": "ncn-s002:bmc:1<==sw-leaf-bmc-001",
+            "name": "1/1/30",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F31": {
+            "description": "ncn-s003:bmc:1<==sw-leaf-bmc-001",
+            "name": "1/1/31",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F32": {
+            "description": "SubRack001-cmc:bmc:1<==sw-leaf-bmc-001",
+            "name": "1/1/32",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F33": {
+            "description": "cn004:bmc:1<==sw-leaf-bmc-001",
+            "name": "1/1/33",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F34": {
+            "description": "cn003:bmc:1<==sw-leaf-bmc-001",
+            "name": "1/1/34",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F35": {
+            "description": "cn002:bmc:1<==sw-leaf-bmc-001",
+            "name": "1/1/35",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F36": {
+            "description": "cn001:bmc:1<==sw-leaf-bmc-001",
+            "name": "1/1/36",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F37": {
+            "description": "uan001:bmc:1<==sw-leaf-bmc-001",
+            "name": "1/1/37",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F38": {
+            "name": "1/1/38",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F39": {
+            "name": "1/1/39",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F4": {
+            "description": "cn004:onboard:1<==sw-leaf-bmc-001",
+            "name": "1/1/4",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F40": {
+            "description": "sw-hsn-x3000-001:mgmt:1<==sw-leaf-bmc-001",
+            "name": "1/1/40",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F41": {
+            "description": "pdu-x3000-001:bmc:1<==sw-leaf-bmc-001",
+            "name": "1/1/41",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F42": {
+            "description": "pdu-x3000-000:bmc:1<==sw-leaf-bmc-001",
+            "name": "1/1/42",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F43": {
+            "description": "ncn-w001:bmc:1<==sw-leaf-bmc-001",
+            "name": "1/1/43",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F44": {
+            "name": "1/1/44",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F45": {
+            "description": "ncn-w004:bmc:1<==sw-leaf-bmc-001",
+            "name": "1/1/45",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F46": {
+            "description": "ncn-w005:bmc:1<==sw-leaf-bmc-001",
+            "name": "1/1/46",
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F47": {
+            "name": "1/1/47",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F48": {
+            "name": "1/1/48",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F49": {
+            "description": "sw-spine-001:48<==sw-leaf-bmc-001",
+            "name": "1/1/49",
+            "other_config": {
+                "lacp-aggregation-key": "101"
+            },
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F5": {
+            "name": "1/1/5",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F50": {
+            "description": "sw-spine-002:48<==sw-leaf-bmc-001",
+            "name": "1/1/50",
+            "other_config": {
+                "lacp-aggregation-key": "101"
+            },
+            "user_config": {
+                "mtu": "9198"
+            }
+        },
+        "1%2F1%2F51": {
+            "name": "1/1/51",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F52": {
+            "name": "1/1/52",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F6": {
+            "name": "1/1/6",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F7": {
+            "name": "1/1/7",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F8": {
+            "name": "1/1/8",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "1%2F1%2F9": {
+            "name": "1/1/9",
+            "user_config": {
+                "admin": "down"
+            }
+        },
+        "loopback0": {
+            "name": "loopback0",
+            "type": "loopback"
+        },
+        "vlan2": {
+            "name": "vlan2",
+            "type": "vlan"
+        },
+        "vlan4": {
+            "name": "vlan4",
+            "type": "vlan"
+        },
+        "vlan7": {
+            "name": "vlan7",
+            "type": "vlan"
+        }
+    },
+    "Port": {
+        "1%2F1%2F1": {
+            "interfaces": [
+                "1%2F1%2F1"
+            ],
+            "name": "1/1/1",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "1770"
+        },
+        "1%2F1%2F10": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F10"
+            ],
+            "name": "1/1/10"
+        },
+        "1%2F1%2F11": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F11"
+            ],
+            "name": "1/1/11"
+        },
+        "1%2F1%2F12": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F12"
+            ],
+            "name": "1/1/12"
+        },
+        "1%2F1%2F13": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F13"
+            ],
+            "name": "1/1/13"
+        },
+        "1%2F1%2F14": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F14"
+            ],
+            "name": "1/1/14"
+        },
+        "1%2F1%2F15": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F15"
+            ],
+            "name": "1/1/15"
+        },
+        "1%2F1%2F16": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F16"
+            ],
+            "name": "1/1/16"
+        },
+        "1%2F1%2F17": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F17"
+            ],
+            "name": "1/1/17"
+        },
+        "1%2F1%2F18": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F18"
+            ],
+            "name": "1/1/18"
+        },
+        "1%2F1%2F19": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F19"
+            ],
+            "name": "1/1/19"
+        },
+        "1%2F1%2F2": {
+            "interfaces": [
+                "1%2F1%2F2"
+            ],
+            "name": "1/1/2",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "2"
+        },
+        "1%2F1%2F20": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F20"
+            ],
+            "name": "1/1/20"
+        },
+        "1%2F1%2F21": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F21"
+            ],
+            "name": "1/1/21"
+        },
+        "1%2F1%2F22": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F22"
+            ],
+            "name": "1/1/22"
+        },
+        "1%2F1%2F23": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F23"
+            ],
+            "name": "1/1/23"
+        },
+        "1%2F1%2F24": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F24"
+            ],
+            "name": "1/1/24"
+        },
+        "1%2F1%2F25": {
+            "interfaces": [
+                "1%2F1%2F25"
+            ],
+            "name": "1/1/25",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "4"
+        },
+        "1%2F1%2F26": {
+            "interfaces": [
+                "1%2F1%2F26"
+            ],
+            "name": "1/1/26",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "4"
+        },
+        "1%2F1%2F27": {
+            "interfaces": [
+                "1%2F1%2F27"
+            ],
+            "name": "1/1/27",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "4"
+        },
+        "1%2F1%2F28": {
+            "interfaces": [
+                "1%2F1%2F28"
+            ],
+            "name": "1/1/28",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "4"
+        },
+        "1%2F1%2F29": {
+            "interfaces": [
+                "1%2F1%2F29"
+            ],
+            "name": "1/1/29",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "4"
+        },
+        "1%2F1%2F3": {
+            "interfaces": [
+                "1%2F1%2F3"
+            ],
+            "name": "1/1/3",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "2"
+        },
+        "1%2F1%2F30": {
+            "interfaces": [
+                "1%2F1%2F30"
+            ],
+            "name": "1/1/30",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "4"
+        },
+        "1%2F1%2F31": {
+            "interfaces": [
+                "1%2F1%2F31"
+            ],
+            "name": "1/1/31",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "4"
+        },
+        "1%2F1%2F32": {
+            "interfaces": [
+                "1%2F1%2F32"
+            ],
+            "name": "1/1/32",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "4"
+        },
+        "1%2F1%2F33": {
+            "interfaces": [
+                "1%2F1%2F33"
+            ],
+            "name": "1/1/33",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "4"
+        },
+        "1%2F1%2F34": {
+            "interfaces": [
+                "1%2F1%2F34"
+            ],
+            "name": "1/1/34",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "4"
+        },
+        "1%2F1%2F35": {
+            "interfaces": [
+                "1%2F1%2F35"
+            ],
+            "name": "1/1/35",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "4"
+        },
+        "1%2F1%2F36": {
+            "interfaces": [
+                "1%2F1%2F36"
+            ],
+            "name": "1/1/36",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "4"
+        },
+        "1%2F1%2F37": {
+            "interfaces": [
+                "1%2F1%2F37"
+            ],
+            "name": "1/1/37",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "4"
+        },
+        "1%2F1%2F38": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F38"
+            ],
+            "name": "1/1/38"
+        },
+        "1%2F1%2F39": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F39"
+            ],
+            "name": "1/1/39"
+        },
+        "1%2F1%2F4": {
+            "interfaces": [
+                "1%2F1%2F4"
+            ],
+            "name": "1/1/4",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "1770"
+        },
+        "1%2F1%2F40": {
+            "interfaces": [
+                "1%2F1%2F40"
+            ],
+            "name": "1/1/40",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "4"
+        },
+        "1%2F1%2F41": {
+            "interfaces": [
+                "1%2F1%2F41"
+            ],
+            "name": "1/1/41",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "4"
+        },
+        "1%2F1%2F42": {
+            "interfaces": [
+                "1%2F1%2F42"
+            ],
+            "name": "1/1/42",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "4"
+        },
+        "1%2F1%2F43": {
+            "interfaces": [
+                "1%2F1%2F43"
+            ],
+            "name": "1/1/43",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "4"
+        },
+        "1%2F1%2F44": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F44"
+            ],
+            "name": "1/1/44"
+        },
+        "1%2F1%2F45": {
+            "interfaces": [
+                "1%2F1%2F45"
+            ],
+            "name": "1/1/45",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "4"
+        },
+        "1%2F1%2F46": {
+            "interfaces": [
+                "1%2F1%2F46"
+            ],
+            "name": "1/1/46",
+            "stp_config": {
+                "admin_edge_port_enable": "true",
+                "bpdu_guard_enable": "true"
+            },
+            "vlan_tag": "4"
+        },
+        "1%2F1%2F47": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F47"
+            ],
+            "name": "1/1/47"
+        },
+        "1%2F1%2F48": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F48"
+            ],
+            "name": "1/1/48"
+        },
+        "1%2F1%2F5": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F5"
+            ],
+            "name": "1/1/5"
+        },
+        "1%2F1%2F51": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F51"
+            ],
+            "name": "1/1/51"
+        },
+        "1%2F1%2F52": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F52"
+            ],
+            "name": "1/1/52"
+        },
+        "1%2F1%2F6": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F6"
+            ],
+            "name": "1/1/6"
+        },
+        "1%2F1%2F7": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F7"
+            ],
+            "name": "1/1/7"
+        },
+        "1%2F1%2F8": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F8"
+            ],
+            "name": "1/1/8"
+        },
+        "1%2F1%2F9": {
+            "admin": "down",
+            "interfaces": [
+                "1%2F1%2F9"
+            ],
+            "name": "1/1/9"
+        },
+        "lag101": {
+            "admin": "up",
+            "description": "sw-spine-001:48<==sw-leaf-bmc-001",
+            "interfaces": [
+                "1%2F1%2F50",
+                "1%2F1%2F49"
+            ],
+            "lacp": "active",
+            "name": "lag101",
+            "other_config": {
+                "mclag_enabled": "false"
+            },
+            "vlan_mode": "native-untagged",
+            "vlan_trunks": [
+                "2",
+                "1770",
+                "7",
+                "4",
+                "1"
+            ]
+        },
+        "loopback0": {
+            "interfaces": [
+                "loopback0"
+            ],
+            "ip4_address": "10.2.0.4/32",
+            "name": "loopback0"
+        },
+        "vlan1": {
+            "ip4_address": "10.1.0.4/16",
+            "ip_mtu": 9198,
+            "name": "vlan1",
+            "vrf": "CSM"
+        },
+        "vlan2": {
+            "description": "NMN",
+            "interfaces": [
+                "vlan2"
+            ],
+            "ip4_address": "10.252.0.4/17",
+            "ip_mtu": 9198,
+            "name": "vlan2",
+            "origin": "configuration",
+            "vrf": "CSM"
+        },
+        "vlan4": {
+            "description": "HMN",
+            "interfaces": [
+                "vlan4"
+            ],
+            "ip4_address": "10.254.0.4/17",
+            "ip_mtu": 9198,
+            "name": "vlan4",
+            "origin": "configuration",
+            "vrf": "CSM"
+        },
+        "vlan7": {
+            "description": "CMN",
+            "interfaces": [
+                "vlan7"
+            ],
+            "ip4_address": "10.102.193.4/25",
+            "ip_mtu": 9198,
+            "name": "vlan7"
+        }
+    },
+    "System": {
+        "aruba_central": {
+            "Aruba_Central1": {
+                "disable": true
+            }
+        },
+        "hostname": "sw-leaf-bmc-001",
+        "icmp_redirect_disable": true,
+        "mgmt_intf": {
+            "ip": "192.168.100.3",
+            "mode": "static",
+            "name": "eth0",
+            "subnet_mask": "24"
+        },
+        "ntp_config": {
+            "enable": "true"
+        },
+        "other_config": {
+            "banner_exec": "###############################################################################\n# CSM version:  1.6\n# CANU version: 1.7.6.dev7+g651b6ebd\n###############################################################################\n"
+        },
+        "qos_cos_map_entries": {
+            "0": {
+                "code_point": 0
+            },
+            "1": {
+                "code_point": 1
+            },
+            "2": {
+                "code_point": 2
+            },
+            "3": {
+                "code_point": 3
+            },
+            "4": {
+                "code_point": 4
+            },
+            "5": {
+                "code_point": 5
+            },
+            "6": {
+                "code_point": 6
+            },
+            "7": {
+                "code_point": 7
+            }
+        },
+        "qos_dscp_map_entries": {
+            "0": {
+                "code_point": 0
+            },
+            "1": {
+                "code_point": 1
+            },
+            "10": {
+                "code_point": 10
+            },
+            "11": {
+                "code_point": 11
+            },
+            "12": {
+                "code_point": 12
+            },
+            "13": {
+                "code_point": 13
+            },
+            "14": {
+                "code_point": 14
+            },
+            "15": {
+                "code_point": 15
+            },
+            "16": {
+                "code_point": 16
+            },
+            "17": {
+                "code_point": 17
+            },
+            "18": {
+                "code_point": 18
+            },
+            "19": {
+                "code_point": 19
+            },
+            "2": {
+                "code_point": 2
+            },
+            "20": {
+                "code_point": 20
+            },
+            "21": {
+                "code_point": 21
+            },
+            "22": {
+                "code_point": 22
+            },
+            "23": {
+                "code_point": 23
+            },
+            "24": {
+                "code_point": 24
+            },
+            "25": {
+                "code_point": 25
+            },
+            "26": {
+                "code_point": 26
+            },
+            "27": {
+                "code_point": 27
+            },
+            "28": {
+                "code_point": 28
+            },
+            "29": {
+                "code_point": 29
+            },
+            "3": {
+                "code_point": 3
+            },
+            "30": {
+                "code_point": 30
+            },
+            "31": {
+                "code_point": 31
+            },
+            "32": {
+                "code_point": 32
+            },
+            "33": {
+                "code_point": 33
+            },
+            "34": {
+                "code_point": 34
+            },
+            "35": {
+                "code_point": 35
+            },
+            "36": {
+                "code_point": 36
+            },
+            "37": {
+                "code_point": 37
+            },
+            "38": {
+                "code_point": 38
+            },
+            "39": {
+                "code_point": 39
+            },
+            "4": {
+                "code_point": 4
+            },
+            "40": {
+                "code_point": 40
+            },
+            "41": {
+                "code_point": 41
+            },
+            "42": {
+                "code_point": 42
+            },
+            "43": {
+                "code_point": 43
+            },
+            "44": {
+                "code_point": 44
+            },
+            "45": {
+                "code_point": 45
+            },
+            "46": {
+                "code_point": 46
+            },
+            "47": {
+                "code_point": 47
+            },
+            "48": {
+                "code_point": 48
+            },
+            "49": {
+                "code_point": 49
+            },
+            "5": {
+                "code_point": 5
+            },
+            "50": {
+                "code_point": 50
+            },
+            "51": {
+                "code_point": 51
+            },
+            "52": {
+                "code_point": 52
+            },
+            "53": {
+                "code_point": 53
+            },
+            "54": {
+                "code_point": 54
+            },
+            "55": {
+                "code_point": 55
+            },
+            "56": {
+                "code_point": 56
+            },
+            "57": {
+                "code_point": 57
+            },
+            "58": {
+                "code_point": 58
+            },
+            "59": {
+                "code_point": 59
+            },
+            "6": {
+                "code_point": 6
+            },
+            "60": {
+                "code_point": 60
+            },
+            "61": {
+                "code_point": 61
+            },
+            "62": {
+                "code_point": 62
+            },
+            "63": {
+                "code_point": 63
+            },
+            "7": {
+                "code_point": 7
+            },
+            "8": {
+                "code_point": 8
+            },
+            "9": {
+                "code_point": 9
+            }
+        },
+        "stp_config": {
+            "forward_delay": "4",
+            "mstp_config_name": "MST0",
+            "mstp_config_revision": "1",
+            "stp_enable": "true"
+        },
+        "subsystems": {
+            "chassis/1": {
+                "leds": {
+                    "1%2Flocator": {
+                        "id": "1/locator",
+                        "locator": true,
+                        "state": "off"
+                    }
+                },
+                "name": "1",
+                "part_number_cfg": "JL663A",
+                "type": "chassis"
+            },
+            "chassis/10": {
+                "name": "10",
+                "type": "chassis"
+            },
+            "chassis/2": {
+                "name": "2",
+                "type": "chassis"
+            },
+            "chassis/3": {
+                "name": "3",
+                "type": "chassis"
+            },
+            "chassis/4": {
+                "name": "4",
+                "type": "chassis"
+            },
+            "chassis/5": {
+                "name": "5",
+                "type": "chassis"
+            },
+            "chassis/6": {
+                "name": "6",
+                "type": "chassis"
+            },
+            "chassis/7": {
+                "name": "7",
+                "type": "chassis"
+            },
+            "chassis/8": {
+                "name": "8",
+                "type": "chassis"
+            },
+            "chassis/9": {
+                "name": "9",
+                "type": "chassis"
+            },
+            "fan_tray/1%2F1": {
+                "name": "1/1",
+                "type": "fan_tray"
+            },
+            "fan_tray/1%2F2": {
+                "name": "1/2",
+                "type": "fan_tray"
+            },
+            "fan_tray/10%2F1": {
+                "name": "10/1",
+                "type": "fan_tray"
+            },
+            "fan_tray/10%2F2": {
+                "name": "10/2",
+                "type": "fan_tray"
+            },
+            "fan_tray/2%2F1": {
+                "name": "2/1",
+                "type": "fan_tray"
+            },
+            "fan_tray/2%2F2": {
+                "name": "2/2",
+                "type": "fan_tray"
+            },
+            "fan_tray/3%2F1": {
+                "name": "3/1",
+                "type": "fan_tray"
+            },
+            "fan_tray/3%2F2": {
+                "name": "3/2",
+                "type": "fan_tray"
+            },
+            "fan_tray/4%2F1": {
+                "name": "4/1",
+                "type": "fan_tray"
+            },
+            "fan_tray/4%2F2": {
+                "name": "4/2",
+                "type": "fan_tray"
+            },
+            "fan_tray/5%2F1": {
+                "name": "5/1",
+                "type": "fan_tray"
+            },
+            "fan_tray/5%2F2": {
+                "name": "5/2",
+                "type": "fan_tray"
+            },
+            "fan_tray/6%2F1": {
+                "name": "6/1",
+                "type": "fan_tray"
+            },
+            "fan_tray/6%2F2": {
+                "name": "6/2",
+                "type": "fan_tray"
+            },
+            "fan_tray/7%2F1": {
+                "name": "7/1",
+                "type": "fan_tray"
+            },
+            "fan_tray/7%2F2": {
+                "name": "7/2",
+                "type": "fan_tray"
+            },
+            "fan_tray/8%2F1": {
+                "name": "8/1",
+                "type": "fan_tray"
+            },
+            "fan_tray/8%2F2": {
+                "name": "8/2",
+                "type": "fan_tray"
+            },
+            "fan_tray/9%2F1": {
+                "name": "9/1",
+                "type": "fan_tray"
+            },
+            "fan_tray/9%2F2": {
+                "name": "9/2",
+                "type": "fan_tray"
+            },
+            "line_card/1%2F1": {
+                "name": "1/1",
+                "part_number_cfg": "JL663A",
+                "type": "line_card"
+            },
+            "line_card/10%2F1": {
+                "name": "10/1",
+                "type": "line_card"
+            },
+            "line_card/2%2F1": {
+                "name": "2/1",
+                "type": "line_card"
+            },
+            "line_card/3%2F1": {
+                "name": "3/1",
+                "type": "line_card"
+            },
+            "line_card/4%2F1": {
+                "name": "4/1",
+                "type": "line_card"
+            },
+            "line_card/5%2F1": {
+                "name": "5/1",
+                "type": "line_card"
+            },
+            "line_card/6%2F1": {
+                "name": "6/1",
+                "type": "line_card"
+            },
+            "line_card/7%2F1": {
+                "name": "7/1",
+                "type": "line_card"
+            },
+            "line_card/8%2F1": {
+                "name": "8/1",
+                "type": "line_card"
+            },
+            "line_card/9%2F1": {
+                "name": "9/1",
+                "type": "line_card"
+            },
+            "management_module/1%2F1": {
+                "name": "1/1",
+                "type": "management_module"
+            },
+            "management_module/10%2F1": {
+                "name": "10/1",
+                "type": "management_module"
+            },
+            "management_module/2%2F1": {
+                "name": "2/1",
+                "type": "management_module"
+            },
+            "management_module/3%2F1": {
+                "name": "3/1",
+                "type": "management_module"
+            },
+            "management_module/4%2F1": {
+                "name": "4/1",
+                "type": "management_module"
+            },
+            "management_module/5%2F1": {
+                "name": "5/1",
+                "type": "management_module"
+            },
+            "management_module/6%2F1": {
+                "name": "6/1",
+                "type": "management_module"
+            },
+            "management_module/7%2F1": {
+                "name": "7/1",
+                "type": "management_module"
+            },
+            "management_module/8%2F1": {
+                "name": "8/1",
+                "type": "management_module"
+            },
+            "management_module/9%2F1": {
+                "name": "9/1",
+                "type": "management_module"
+            }
+        }
+    },
+    "User": {
+        "admin": {
+            "name": "admin",
+            "origin": "built-in",
+            "password": "AQBapYwQE/1mjEb8XcO9MIXZrN2fyLAI+bu7yz4MjFdCgvL9YgAAAIHGC/6Coi194TmSAK8oKiGFElZ6dRPXVA17Pzvbf+/zeQSqwgpDz7t1H8ft3XCu4emRXlVayJb0ujXt1JOrYxSIPmv+fHDr84Lro5fDWYd6zrHjL+EL7CeUMVxSQsfXkJCo"
+        }
+    },
+    "VLAN": {
+        "1770": {
+            "id": 1770,
+            "name": "cabinet_3000_nmn"
+        },
+        "2": {
+            "aclv4_in_cfg": "nmn-hmn/ipv4",
+            "aclv4_in_cfg_version": -771203170197790,
+            "aclv4_out_cfg": "nmn-hmn/ipv4",
+            "aclv4_out_cfg_version": -203215590864314,
+            "id": 2,
+            "name": "NMN"
+        },
+        "4": {
+            "aclv4_in_cfg": "nmn-hmn/ipv4",
+            "aclv4_in_cfg_version": 5422950774630363,
+            "aclv4_out_cfg": "nmn-hmn/ipv4",
+            "aclv4_out_cfg_version": -2732720337916831,
+            "id": 4,
+            "name": "HMN"
+        },
+        "4002": {
+            "description": "Black hole VLAN 4002",
+            "id": 4002,
+            "name": "NULL4002"
+        },
+        "4004": {
+            "description": "Black hole VLAN 4004",
+            "id": 4004,
+            "name": "NULL4004"
+        },
+        "7": {
+            "aclv4_in_cfg": "cmn-can/ipv4",
+            "aclv4_in_cfg_version": -2729832887388461,
+            "aclv4_out_cfg": "cmn-can/ipv4",
+            "aclv4_out_cfg_version": 359916137216480,
+            "id": 7,
+            "name": "CMN"
+        }
+    },
+    "VRF": {
+        "CSM": {
+            "dns_name_servers": {
+                "0": "10.92.100.225"
+            },
+            "https_server": {
+                "enable": "true"
+            },
+            "name": "CSM",
+            "ospf_routers": {
+                "2": {
+                    "admin_router_id": "10.2.0.4",
+                    "areas": {
+                        "0.0.0.0": {
+                            "ospf_interfaces": {
+                                "vlan1": {
+                                    "port": "vlan1"
+                                },
+                                "vlan2": {
+                                    "port": "vlan2"
+                                },
+                                "vlan4": {
+                                    "port": "vlan4"
+                                }
+                            }
+                        }
+                    },
+                    "passive_interfaces": [
+                        "vlan4",
+                        "vlan1"
+                    ]
+                }
+            },
+            "snmp_enable": true,
+            "ssh_enable": true
+        },
+        "default": {
+            "NTP_Association": {
+                "default/10.252.1.7": {
+                    "address": "10.252.1.7",
+                    "association_attributes": {
+                        "burst_mode": "none",
+                        "maxpoll": "10",
+                        "minpoll": "6",
+                        "ntp_version": "4",
+                        "prefer": "false",
+                        "ref_clock_id": "--"
+                    },
+                    "origin": "configuration"
+                },
+                "default/10.252.1.8": {
+                    "address": "10.252.1.8",
+                    "association_attributes": {
+                        "burst_mode": "none",
+                        "maxpoll": "10",
+                        "minpoll": "6",
+                        "ntp_version": "4",
+                        "prefer": "false",
+                        "ref_clock_id": "--"
+                    },
+                    "origin": "configuration"
+                },
+                "default/10.252.1.9": {
+                    "address": "10.252.1.9",
+                    "association_attributes": {
+                        "burst_mode": "none",
+                        "maxpoll": "10",
+                        "minpoll": "6",
+                        "ntp_version": "4",
+                        "prefer": "false",
+                        "ref_clock_id": "--"
+                    },
+                    "origin": "configuration"
+                }
+            },
+            "aclv4_control_plane_cfg": "mgmt/ipv4",
+            "aclv4_control_plane_cfg_version": 0,
+            "name": "default",
+            "ospf_routers": {
+                "1": {
+                    "admin_router_id": "10.2.0.4",
+                    "areas": {
+                        "0.0.0.0": {
+                            "ospf_interfaces": {
+                                "loopback0": {
+                                    "port": "loopback0"
+                                },
+                                "vlan7": {
+                                    "port": "vlan7"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "snmp_enable": true,
+            "ssh_enable": true
+        },
+        "mgmt": {
+            "name": "mgmt",
+            "ssh_enable": true
+        }
+    },
+    "schema_version": "10_11"
+}
