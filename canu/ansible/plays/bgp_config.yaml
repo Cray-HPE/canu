@@ -1,0 +1,82 @@
+---
+- name: Configure BGP
+  hosts: spine
+  collections:
+    - arubanetworks.aoscx
+  gather_facts: true
+
+  vars:
+    sls_json: "{{ lookup('file', 'sls_input_file.json') | from_json }}"
+    hostname: "{{ inventory_hostname }}"
+    bgp_max_paths: 32
+    bgp_keepalive_timer: 1
+    bgp_hold_timer: 3
+    ebgp_admin_distance: 20
+    ibgp_admin_distance: 70
+    bgp_config_file: "{{ playbook_dir }}/bgp_config_{{ inventory_hostname }}.cfg"
+    bgp_template: "{{ playbook_dir }}/bgp_ansible.j2"
+    backup_path: "{{ playbook_dir }}"
+    ansible_connection: network_cli
+
+  tasks:
+    - name: Set BGP ASNs
+      set_fact:
+        bgp_cmn: "{{ sls_json.Networks.CMN.ExtraProperties.MyASN | default(None) }}"
+        bgp_chn: "{{ sls_json.Networks.CHN.ExtraProperties.MyASN | default(None) }}"
+        bgp_nmn: "{{ sls_json.Networks.NMN.ExtraProperties.MyASN | default(None) }}"
+        bgp_switch: "{{ sls_json.Networks.NMN.ExtraProperties.PeerASN | default(None) }}"
+
+    - name: Set IP addresses
+      set_fact:
+        nmn_ips: "{{ sls_json.Networks.NMN.ExtraProperties.Subnets | json_query(jmesquery) | default(None) }}"
+        hmn_ips: "{{ sls_json.Networks.HMN.ExtraProperties.Subnets | json_query(jmesquery) | default(None) }}"
+        nmn_lb_ips: "{{ sls_json.Networks.NMN.ExtraProperties.Subnets | json_query(jmesquery) | default(None) }}"
+        hmn_lb_ips: "{{ sls_json.Networks.HMN.ExtraProperties.Subnets | json_query(jmesquery) | default(None) }}"
+        can_ips: "{{ sls_json.Networks.CAN.ExtraProperties.Subnets | json_query(jmesquery) | default(None) }}"
+        cmn_ips: "{{ sls_json.Networks.CMN.ExtraProperties.Subnets | json_query(jmesquery) | default(None) }}"
+        chn_ips: "{{ sls_json.Networks.CHN.ExtraProperties.Subnets | json_query(jmesquery) | default(None) }}"
+      vars:
+        jmesquery: "[].IPReservations[].{Name: Name, IPAddress: IPAddress}"
+
+    - name: Set Subnets
+      set_fact:
+        can_subnet: "{{ sls_json.Networks.CAN.ExtraProperties.CIDR | default(None) }}"
+        cmn_subnet: "{{ sls_json.Networks.CMN.ExtraProperties.CIDR | default(None) }}"
+        chn_subnet: "{{ sls_json.Networks.CHN.ExtraProperties.CIDR | default(None) }}"
+        hmnlb_subnet: "{{ sls_json.Networks.HMNLB.ExtraProperties.CIDR | default(None) }}"
+        nmnlb_subnet: "{{ sls_json.Networks.NMNLB.ExtraProperties.CIDR | default(None) }}"
+
+    - name: Set TFTP IPs
+      set_fact:
+        hmnlb_tftp_ip: "{{ sls_json.Networks.HMNLB.ExtraProperties.Subnets | json_query(jmesquery) | default(None) }}"
+        nmnlb_tftp_ip: "{{ sls_json.Networks.NMNLB.ExtraProperties.Subnets | json_query(jmesquery) | default(None) }}"
+      vars:
+        jmesquery: "[].IPReservations[?Name=='cray-tftp'].IPAddress[] | [0]"
+
+    - name: Generate BGP config
+      ansible.builtin.template:
+        src: "{{ bgp_template }}"
+        dest: "{{ bgp_config_file }}"
+        lstrip_blocks: yes
+
+    - name: Enable auto-confirm
+      aoscx_command:
+        commands:
+          - auto-confirm
+
+    - name: Configure BGP
+      aoscx_config:
+        backup: True
+        src: "{{ bgp_config_file }}"
+        save_when: changed
+        backup_options:
+          filename: "{{hostname}}_backup.cfg"
+          dir_path: "{{ backup_path }}"
+      register: bgp
+
+    - name: Clear BGP Sessions
+      aoscx_command:
+        commands:
+          - clear bgp vrf Customer *
+          - clear bgp *
+      when: bgp.changed
