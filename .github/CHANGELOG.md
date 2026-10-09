@@ -2,6 +2,7 @@
 
 ### [UNRELEASED]
 
+- Pin `scrapli` to 2025.1.30 to preserve the API required by `nornir-scrapli` and prevent CLI startup failures during RPM builds.
 - Pin `cryptography` to 46.0.7, whose wheels bundle OpenSSL 3.5.6, to address CVE-2025-15467. RPMs must be rebuilt to replace the libraries bundled in `canu` and `canu-inventory`.
 - CASMNET-2390 Fix wrong-VLAN rendering on CDU CMM/CEC ports when a Mountain cabinet is in the CCJ but missing from SLS
 
